@@ -23,6 +23,7 @@ import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const WebformTable = ({
   bigData,
+  onFieldUpdate,
   dataProviderId,
   dataflowId,
   datasetId,
@@ -34,6 +35,7 @@ export const WebformTable = ({
   isRefresh,
   isReporting,
   isViewMode,
+  updatingField,
   onTabChange,
   rootPkFieldId,
   rootTableName,
@@ -207,6 +209,7 @@ export const WebformTable = ({
 
     if (!isEmpty(newEmptyRecord)) {
       try {
+        bigData && onFieldUpdate(true);
         await DatasetService.createWebformTableRecord(datasetId, tableSchemaId, [newEmptyRecord]);
         onUpdateData();
       } catch (error) {
@@ -236,6 +239,8 @@ export const WebformTable = ({
           type: 'SET_IS_ADDING_MULTIPLE',
           payload: { addingOnTableSchemaId: null, isAddingMultiple: false }
         });
+      } finally {
+        bigData && onFieldUpdate(false);
       }
     }
   };
@@ -362,6 +367,7 @@ export const WebformTable = ({
       key={index}
       multipleRecords={webformData.multipleRecords}
       onAddMultipleWebform={onAddMultipleWebform}
+      onFieldUpdate={onFieldUpdate}
       onRefresh={onUpdateData}
       onTabChange={onTabChange}
       record={record}
@@ -369,6 +375,8 @@ export const WebformTable = ({
       rootTableName={rootTableName}
       tableId={webformData.tableSchemaId}
       tableName={webformData.title}
+      tableSchemaName={webformData.name}
+      updatingField={updatingField}
       webformType={webformType}
     />
   );
@@ -418,7 +426,7 @@ export const WebformTable = ({
           <h3 className={styles.title}>
             <Button
               className={styles.addRecordButton}
-              disabled={isViewMode}
+              disabled={isViewMode || updatingField.isUpdating}
               icon={webformTableState.isAddingMultiple ? 'spinnerAnimate' : 'add'}
               label={resourcesContext.messages['addRecord']}
               onClick={() => onAddMultipleWebform(webformData.tableSchemaId, null, true)}
@@ -453,7 +461,7 @@ export const WebformTable = ({
           style={
             bigData && (isLoadingIceberg || !allManualCheck)
               ? { opacity: 0.5, pointerEvents: 'none' }
-              : !bigData || isIcebergCreated || isViewMode
+              : !bigData || isIcebergCreated || isViewMode || updatingField.isUpdating
               ? { opacity: 1 }
               : { opacity: 0.5, pointerEvents: 'none' }
           }>

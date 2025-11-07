@@ -9,6 +9,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.dataset.service.model.ImportFileInDremioInfo;
+import org.eea.interfaces.vo.communication.UserNotificationVO;
 import org.eea.lock.redis.LockEnum;
 import org.eea.lock.redis.RedisLockService;
 import org.eea.utils.UtilityClass;
@@ -59,6 +60,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
@@ -174,6 +176,60 @@ public class DatasetControllerImpl implements DatasetController {
   private RedisLockService redisLockService;
 
   private static final long conversionLockExpirationInMillis = 900000L;
+
+  @Override
+  @GetMapping("/list-imported-files")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_CUSTODIAN','DATASET_STEWARD','DATASET_OBSERVER','DATASET_STEWARD_SUPPORT','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATACOLLECTION_CUSTODIAN','DATASCHEMA_CUSTODIAN','DATASCHEMA_STEWARD','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','DATASET_NATIONAL_COORDINATOR','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','EUDATASET_OBSERVER','EUDATASET_STEWARD_SUPPORT','DATACOLLECTION_OBSERVER','DATACOLLECTION_STEWARD_SUPPORT','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','DATACOLLECTION_STEWARD','REFERENCEDATASET_OBSERVER','REFERENCEDATASET_STEWARD_SUPPORT','REFERENCEDATASET_STEWARD','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD') OR hasAnyRole('ADMIN') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATASET',#datasetId))")
+  @ApiOperation(value = "Returns all imported files for a given dataset")
+  @ApiResponses({
+          @ApiResponse(code = 200, message = "List of imported files returned successfully"),
+          @ApiResponse(code = 400, message = "Invalid request parameters"),
+          @ApiResponse(code = 500, message = "Unexpected server error")}
+  )
+  public List<ImportedFilesDirectoriesVO> listImportedFiles(
+          @RequestParam("datasetId") Long datasetId) {
+    try {
+      return fileTreatmentHelper.listImportedFiles(datasetId);
+    } catch (EEAException e) {
+      // return new ArrayList so the front-end doesn't show an error message if there was no import at this dataset
+      return new ArrayList<>();
+    } catch (Exception e) {
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+              "Unable to complete request of listing files for dataset Id " + datasetId);
+    }
+  }
+
+  @Override
+  @GetMapping("/download-imported-file")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_CUSTODIAN','DATASET_STEWARD','DATASET_OBSERVER','DATASET_STEWARD_SUPPORT','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATACOLLECTION_CUSTODIAN','DATASCHEMA_CUSTODIAN','DATASCHEMA_STEWARD','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','DATASET_NATIONAL_COORDINATOR','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','EUDATASET_OBSERVER','EUDATASET_STEWARD_SUPPORT','DATACOLLECTION_OBSERVER','DATACOLLECTION_STEWARD_SUPPORT','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','DATACOLLECTION_STEWARD','REFERENCEDATASET_OBSERVER','REFERENCEDATASET_STEWARD_SUPPORT','REFERENCEDATASET_STEWARD','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD') OR hasAnyRole('ADMIN') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATASET',#datasetId))")
+  @ApiOperation(value = "Downloads a specific imported file for a given dataset and a given filename")
+  @ApiResponses({
+          @ApiResponse(code = 200, message = "File downloaded successfully"),
+          @ApiResponse(code = 404, message = "File not found"),
+          @ApiResponse(code = 500, message = "Unexpected server error")
+  })
+  public ResponseEntity<?> downloadImportedFile(
+          @RequestParam("dataflowId") Long dataflowId,
+          @RequestParam("datasetId") Long datasetId,
+          @RequestParam("fileName") String fileName) {
+    NotificationVO notificationVO = new NotificationVO();
+    notificationVO.setDataflowId(dataflowId);
+    notificationVO.setDatasetId(datasetId);
+    notificationVO.setUser(SecurityContextHolder.getContext().getAuthentication().getName());
+    notificationVO.setFileName(fileName);
+    EventType eventType = EventType.DOWNLOAD_IMPORTED_FILE_STARTED_EVENT;
+
+    try {
+      kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, null, notificationVO);
+
+      return fileTreatmentHelper.downloadImportedFile(dataflowId, datasetId, fileName);
+    } catch (EEAException e) {
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+    } catch (Exception e) {
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+              "Unable to complete file download for datasetId " + datasetId);
+    }
+  }
 
   /**
    * Gets the data tables values.
@@ -305,7 +361,7 @@ public class DatasetControllerImpl implements DatasetController {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
               EEAErrorMessage.OBTAINING_TABLE_DATA);
     } catch (Exception e) {
-      LOG.error("Unexpected error! Error retrieving datalake table values for datasetId {} and tableSchemaId {} Message: {}", datasetId, idTableSchema, e.getMessage());
+      LOG.error("Unexpected error! Error retrieving big data table values for datasetId {} and tableSchemaId {} Message: {}", datasetId, idTableSchema, e.getMessage());
       throw e;
     }
 
@@ -1052,6 +1108,10 @@ public class DatasetControllerImpl implements DatasetController {
       LOG.info("PaM/Entity group save: Inserting multiple records for datasetId {}", datasetId);
       DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
       if(dataFlowControllerZuul.isBigDataflow(dataSetMetabaseVO.getDataflowId())){
+        //send init event for frontend
+        UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
+        userNotificationContentVO.setDatasetId(datasetId);
+        notificationControllerZuul.createUserNotificationPrivate("INSERT_RECORDS_MULTI_TABLES_INIT", userNotificationContentVO);
         bigDataDatasetService.insertRecordsInMultipleTables(dataSetMetabaseVO, tableRecords);
       }
       else{
@@ -2013,7 +2073,9 @@ public class DatasetControllerImpl implements DatasetController {
                                       @ApiParam(type = "String", value = "Table schema id",
                                               example = "5cf0e9b3b793310e9ceca190") @RequestParam(value = "tableSchemaId",
                                               required = false) String tableSchemaId,
-                                      @ApiParam(type = "Boolean", value = "includeAttachments", example = "0") @RequestParam(value = "includeAttachments", required = false) Boolean includeAttachments){
+                                      @ApiParam(type = "String", value = "Data provider codes", example = "BE,DK") @RequestParam(
+                                              value = "dataProviderCodes", required = false) String dataProviderCodes,
+  @ApiParam(type = "Boolean", value = "includeAttachments", example = "0") @RequestParam(value = "includeAttachments", required = false) Boolean includeAttachments){
     if (!dataflowId.equals(datasetService.getDataFlowIdById(datasetId))) {
       String errorMessage =
               String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId);
@@ -2022,7 +2084,7 @@ public class DatasetControllerImpl implements DatasetController {
               String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId));
     }
     try {
-      Long jobId = jobControllerZuul.addFileExportJob(datasetId, dataflowId, providerId, tableSchemaId, null, null, null, null, null, true, false ,includeAttachments);
+      Long jobId = jobControllerZuul.addFileExportJob(datasetId, dataflowId, providerId, tableSchemaId, null, null, null, null, dataProviderCodes, true, false ,includeAttachments);
       Map<String, Object> result = new HashMap<>();
       String pollingUrl = "/orchestrator/jobs/pollForJobStatus/" + jobId + "?datasetId=" + datasetId + "&dataflowId=" + dataflowId;
       if(providerId != null){
@@ -2056,6 +2118,8 @@ public class DatasetControllerImpl implements DatasetController {
                                                  @ApiParam(type = "String", value = "Table schema id",
                                                      example = "5cf0e9b3b793310e9ceca190") @RequestParam(value = "tableSchemaId",
                                                      required = false) String tableSchemaId,
+                                                 @ApiParam(type = "String", value = "Data provider codes", example = "BE,DK") @RequestParam(
+                                                     value = "dataProviderCodes", required = false) String dataProviderCodes,
                                                  @ApiParam(type = "Boolean", value = "includeAttachments", example = "0") @RequestParam(value = "includeAttachments", required = false) Boolean includeAttachments) {
     if (!dataflowId.equals(datasetService.getDataFlowIdById(datasetId))) {
       String errorMessage =
@@ -2065,7 +2129,7 @@ public class DatasetControllerImpl implements DatasetController {
           String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId));
     }
     try {
-      Long jobId = jobControllerZuul.addFileExportJob(datasetId, dataflowId, providerId, tableSchemaId, null, null, null, null, null, false, true ,includeAttachments);
+      Long jobId = jobControllerZuul.addFileExportJob(datasetId, dataflowId, providerId, tableSchemaId, null, null, null, null, dataProviderCodes, false, true ,includeAttachments);
       Map<String, Object> result = new HashMap<>();
       String pollingUrl = "/orchestrator/jobs/pollForJobStatus/" + jobId + "?datasetId=" + datasetId + "&dataflowId=" + dataflowId;
       if(providerId != null){
@@ -3366,10 +3430,10 @@ public class DatasetControllerImpl implements DatasetController {
         try {
           if (BooleanUtils.isTrue(exportCsv)) {
             String processUUID = UUID.randomUUID().toString();
-            bigDataDatasetService.etlExportCsv(datasetId, dataflowId, tableSchemaId, jobId, user, processUUID, includeAttachments);
+            bigDataDatasetService.etlExportCsv(datasetId, dataflowId, tableSchemaId, jobId, user, processUUID, includeAttachments, dataProviderCodes);
           } else if (BooleanUtils.isTrue(exportParquet)) {
             String processUUID = UUID.randomUUID().toString();
-            bigDataDatasetService.etlExportParquet(datasetId, dataflowId, tableSchemaId, jobId, user, processUUID, includeAttachments);
+            bigDataDatasetService.etlExportParquet(datasetId, dataflowId, tableSchemaId, jobId, user, processUUID, includeAttachments, dataProviderCodes);
           } else {
             datasetService.createFileForEtlExport(datasetId, tableSchemaId, limit, offset, filterValue, columnName, dataProviderCodes, jobId, dataflowId, user, exportCsv, includeAttachments);
           }

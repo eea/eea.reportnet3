@@ -5,6 +5,18 @@ package org.eea.exception;
  */
 public final class EEAErrorMessage {
 
+  /** The Constant IMPORT_DIRECTORY_NOT_FOUND: {@value}. */
+  public static final String IMPORT_DIRECTORY_NOT_FOUND = "No import directory found for datasetId %s under path %s";
+
+  /** The Constant IMPORT_DIRECTORY_EMPTY: {@value}. */
+  public static final String IMPORT_DIRECTORY_EMPTY = "No imported files found for datasetId %s";
+
+  /** The Constant REQUESTED_IMPORT_FILE_NOT_FOUND: {@value}. */
+  public static final String REQUESTED_IMPORT_FILE_NOT_FOUND = "Requested import file not found for datasetId %s with name %s under path %s";
+
+  /** The Constant ERROR_STREAMING_IMPORTED_FILE: {@value}. */
+  public static final String ERROR_STREAMING_IMPORTED_FILE = "I/O error while streaming file '%s' for datasetId %s: %s";
+
   /** The Constant FILE_FORMAT: {@value}. */
   public static final String FILE_FORMAT = "Invalid file format";
 

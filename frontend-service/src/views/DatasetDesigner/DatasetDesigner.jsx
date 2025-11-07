@@ -30,6 +30,7 @@ import { MainLayout } from 'views/_components/Layout';
 import { ManageUniqueConstraint } from './_components/ManageUniqueConstraint';
 import { Menu } from 'views/_components/Menu';
 import { QCList } from 'views/_components/QCList';
+import { ImportedFilesDialog } from './_components/ImportedFilesDialog';
 import { QCGenericHistory } from './_components/QCGenericHistory';
 import { ShowValidationsList } from 'views/_components/ShowValidationsList';
 import { Snapshots } from 'views/_components/Snapshots';
@@ -1402,12 +1403,14 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
             label={resourcesContext.messages['createTableValidationBtn']}
             onClick={() => validationContext.onOpenModalFromOpener('dataset', 'validationsListDialog')}
           />
-          <Button
-            className="p-button-animated-blink"
-            icon="bars"
-            label={resourcesContext.messages['setSeverityBtn']}
-            onClick={() => setIsQcSeverityDialogVisible(true)}
-          />
+          {!isDataflowOpen && (
+            <Button
+              className="p-button-animated-blink"
+              icon="bars"
+              label={resourcesContext.messages['setSeverityBtn']}
+              onClick={() => setIsQcSeverityDialogVisible(true)}
+            />
+          )}
           <Button
             className={`p-button-secondary p-button-animated-blink ${styles.buttonAlignRight}`}
             disabled={allSqlValidationRunning}
@@ -1696,8 +1699,8 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
             isDataflowCustodian={isDataflowCustodian}
             isDataflowOpen={isDataflowOpen}
             isDatasetDesigner
-            setHasQCsHistory={setHasQCsHistory}
             setAutomaticQCsDefaultLevelError={setAutomaticQCsDefaultLevelError}
+            setHasQCsHistory={setHasQCsHistory}
           />
         </Dialog>
       );
@@ -2001,6 +2004,20 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
               </DatasetDeleteDataDialog>
             </div>
             <div className="p-toolbar-group-right">
+              <Button
+                className="p-button-rounded p-button-secondary-transparent p-button-animated-blink"
+                icon="openFolder"
+                label={resourcesContext.messages['importedFiles']}
+                onClick={() => designerDispatch({ type: 'TOGGLE_IMPORTED_FILES_VIEW', payload: true })}
+              />
+              {designerState.isImportedFilesVisible && (
+                <ImportedFilesDialog
+                  dataflowId={dataflowId}
+                  datasetId={datasetId}
+                  isDialogVisible={designerState.isImportedFilesVisible}
+                  onCloseDialog={() => designerDispatch({ type: 'TOGGLE_IMPORTED_FILES_VIEW', payload: false })}
+                />
+              )}
               <DatasetValidateDialog
                 disabled={isDesignDatasetEditorRead || isIcebergCreated || actionsContext.isInProgress}
                 icon={

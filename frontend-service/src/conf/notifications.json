@@ -174,6 +174,13 @@
           "key": "DOWNLOAD_TABLE_DEFINITIONS_ERROR"
         },
         {
+          "key": "DOWNLOAD_IMPORTED_FILE_ERROR_EVENT",
+          "navigateTo": {
+            "section": "DATASET",
+            "parameters": ["dataflowId", "datasetId", "filename"]
+          }
+        },
+        {
           "key": "EXTERNAL_EXPORT_EUDATASET_FAILED_EVENT",
           "navigateTo": {
             "section": "DATAFLOW",
@@ -1029,7 +1036,15 @@
           "key": "RELEASE_REFUSED_EVENT",
           "navigateTo": {
             "section": "DATAFLOW",
-            "parameters": ["dataflowId", "dataProvider"],
+            "parameters": ["dataflowId", "providerId"],
+            "hasQueryString": true
+          }
+        },
+        {
+          "key": "RELEASE_FAILED_ICEBERG_EXISTS_EVENT",
+          "navigateTo": {
+            "section": "DATAFLOW",
+            "parameters": ["dataflowId", "providerId"],
             "hasQueryString": true
           }
         },
@@ -1255,6 +1270,13 @@
           }
         },
         {
+          "key": "DOWNLOAD_IMPORTED_FILE_FINISHED_EVENT",
+          "navigateTo": {
+            "section": "DATAFLOW",
+            "parameters": ["dataflowId"]
+          }
+        },
+        {
           "key": "RESTORE_DATASET_SNAPSHOT_COMPLETED_EVENT",
           "navigateTo": {
             "section": "DATASET",
@@ -1453,8 +1475,8 @@
         {
           "key": "RELEASE_PROVIDER_COMPLETED_EVENT",
           "navigateTo": {
-            "section": "DATAFLOW_REPRESENTATIVE",
-            "parameters": ["dataflowId", "dataProvider", "representativeId"]
+            "section": "DATAFLOW",
+            "parameters": ["dataflowId"]
           }
         },
         { "key": "EXPORT_DATASET_FILE_AUTOMATICALLY_DOWNLOAD" },
@@ -1574,6 +1596,7 @@
         { "key": "IMPORT_TABLE_SCHEMA_INIT" },
         { "key": "DOWNLOAD_USERS_BY_COUNTRY_START" },
         { "key": "EXPORT_TABLE_DATA_START" },
+        { "key": "DOWNLOAD_IMPORTED_FILE_STARTED_EVENT" },
         { "key": "EXPORT_FILE_START_EVENT" },
         { "key": "DOWNLOAD_SCHEMAS_INFO_START" },
         { "key": "EXTERNAL_EXPORT_DESIGN_INIT" },
@@ -1712,6 +1735,9 @@
     }
   ],
   "hiddenNotifications": [
+    "INSERT_RECORDS_MULTI_TABLES_INIT",
+    "INSERT_RECORDS_MULTI_TABLES_COMPLETED",
+    "INSERT_RECORDS_MULTI_TABLES_FAILED",
     "EXPORT_TABLE_DATA_COMPLETED_EVENT",
     "EXPORT_DATASET_COMPLETED_EVENT",
     "EXPORT_DATASET_FAILED_EVENT",

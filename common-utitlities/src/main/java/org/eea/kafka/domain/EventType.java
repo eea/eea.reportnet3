@@ -35,6 +35,9 @@ public enum EventType {
   /** The release refused event. */
   RELEASE_REFUSED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "dataset_released_refused_key", true),
 
+  /** The release failed iceberg exists event. */
+  RELEASE_FAILED_ICEBERG_EXISTS_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "release_failed_iceberg_exists_key", true),
+
   /** The copyToEuDataset refused event. */
   COPY_DATA_TO_EUDATASET_REFUSED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "copy_to_eu_dataset_refused_key", true),
 
@@ -207,6 +210,14 @@ public enum EventType {
   /** The record created completed event. */
   RECORD_DELETED_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "created_record_completed_key", true),
+
+  /** The record in multi tables created completed event. */
+  INSERT_RECORDS_MULTI_TABLES_COMPLETED(LiteralConstants.DATA_REPORTING_TOPIC,
+          "insert_records_multi_tables_completed_key", true),
+
+  /** The record in multi tables created failed event. */
+  INSERT_RECORDS_MULTI_TABLES_FAILED(LiteralConstants.DATA_REPORTING_TOPIC,
+          "insert_records_multi_tables_failed_key", true),
 
   /** The delete table completed event. */
   DELETE_TABLE_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
@@ -551,6 +562,18 @@ public enum EventType {
   /** The download dataset validations failed event. */
   DOWNLOAD_VALIDATIONS_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "download_validations_failed_event", true),
+
+  /** The download imported file started event. */
+  DOWNLOAD_IMPORTED_FILE_STARTED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "download_imported_file_started_event", true),
+
+  /** The download imported file finished event. */
+  DOWNLOAD_IMPORTED_FILE_FINISHED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "download_imported_file_finished_event", true),
+
+  /** The download imported file error event. */
+  DOWNLOAD_IMPORTED_FILE_ERROR_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "download_imported_file_error_event", true),
 
   /** The export qc completed event. */
   EXPORT_QC_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "export_qc_completed_event",

@@ -190,21 +190,23 @@ export const NotificationsList = ({ isNotificationVisible, setIsNotificationVisi
         pageSize: nRows
       });
 
-      const parsedNotifications = unparsedNotifications.userNotifications.map(notification => {
-        return NotificationService.parse({
-          config: config.notifications.notificationSchema,
-          content: notification.content,
-          date: notification.date,
-          message: resourcesContext.messages[camelCase(notification.type)],
-          onClick:
-            notification.type === 'EXTERNAL_EXPORT_DESIGN_COMPLETED_EVENT' ||
-            notification.type === 'EXTERNAL_EXPORT_REPORTING_COMPLETED_EVENT'
-              ? () => downloadExportFMEFile(notification)
-              : null,
-          routes,
-          type: notification.type
-        });
-      });
+      const parsedNotifications = unparsedNotifications.userNotifications
+        .map(notification => {
+          return NotificationService.parse({
+            config: config.notifications.notificationSchema,
+            content: notification.content,
+            date: notification.date,
+            message: resourcesContext.messages[camelCase(notification.type)],
+            onClick:
+              notification.type === 'EXTERNAL_EXPORT_DESIGN_COMPLETED_EVENT' ||
+              notification.type === 'EXTERNAL_EXPORT_REPORTING_COMPLETED_EVENT'
+                ? () => downloadExportFMEFile(notification)
+                : null,
+            routes,
+            type: notification.type
+          });
+        })
+        .filter(parsedNotification => parsedNotification?.key);
 
       const notificationsArray = parsedNotifications.map((notification, i) => {
         const capitalizedLevelError = !isUndefined(notification.type)

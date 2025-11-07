@@ -1,6 +1,7 @@
 package org.eea.dataset.service.helper;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
@@ -9,14 +10,18 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.AbstractExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 import org.apache.commons.io.FileUtils;
@@ -77,6 +82,7 @@ import org.eea.interfaces.vo.dataset.ETLDatasetVO;
 import org.eea.interfaces.vo.dataset.ETLFieldVO;
 import org.eea.interfaces.vo.dataset.ETLRecordVO;
 import org.eea.interfaces.vo.dataset.ETLTableVO;
+import org.eea.interfaces.vo.dataset.ImportedFilesDirectoriesVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.FileTypeEnum;
@@ -87,6 +93,7 @@ import org.junit.*;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -232,6 +239,108 @@ public class FileTreatmentHelperTest {
     ReflectionTestUtils.setField(fileTreatmentHelper, "importExecutorService",
         new CurrentThreadExecutor());
   }
+
+  @Test
+  public void testListImportedFiles_success() throws Exception {
+    Long datasetId = 1L;
+
+    // resolve base path safely
+    String basePath =
+            Objects.requireNonNull(this.getClass().getClassLoader().getResource("")).getPath();
+
+    // create a dataset folder under import path
+    File datasetFolder = new File(basePath, datasetId.toString());
+    boolean dirCreated = datasetFolder.mkdir();
+    assertTrue("Failed to create dataset test folder", dirCreated || datasetFolder.exists());
+    File file1 = new File(datasetFolder, "file1.txt");
+    File file2 = new File(datasetFolder, "file2.txt");
+
+    FileUtils.writeStringToFile(file1, "test-content-1", "UTF-8");
+    Thread.sleep(10); // this is to ensure file2 is newer
+    FileUtils.writeStringToFile(file2, "test-content-2", "UTF-8");
+
+    List<ImportedFilesDirectoriesVO> result = fileTreatmentHelper.listImportedFiles(datasetId);
+
+    Assert.assertNotNull("Result list should not be null", result);
+    Assert.assertEquals("Should list exactly 2 files", 2, result.size());
+    Assert.assertEquals("Newest file should be first", "file2.txt", result.get(0).getFileName());
+    Assert.assertEquals("Oldest file should be second", "file1.txt", result.get(1).getFileName());
+    FileUtils.deleteDirectory(datasetFolder);
+  }
+
+  @Test(expected = EEAException.class)
+  public void testListImportedFiles_directoryNotFound() throws Exception {
+    Long datasetId = 99999L; // a dataset id that will never be used by a test (so the directory will never exists)
+
+    // ensure no directory exists for this dataset
+    String basePath =
+            Objects.requireNonNull(this.getClass().getClassLoader().getResource("")).getPath();
+    File datasetFolder = new File(basePath, datasetId.toString());
+    if (datasetFolder.exists()) {
+      FileUtils.deleteDirectory(datasetFolder);
+    }
+
+    try {
+      fileTreatmentHelper.listImportedFiles(datasetId);
+    } catch (EEAException e) {
+      Assert.assertTrue("Should mention 'No import directory found for datasetId' in message",
+              e.getMessage().contains("No import directory found for datasetId"));
+      throw e; // expected to throw from the test
+    }
+  }
+
+  @Test(expected = EEAException.class)
+  public void testListImportedFiles_emptyDirectory() throws Exception {
+    Long datasetId = 1L;
+
+    String basePath =
+            Objects.requireNonNull(this.getClass().getClassLoader().getResource("")).getPath();
+    File datasetFolder = new File(basePath, datasetId.toString());
+
+    // make sure that directory exists but is empty
+    if (datasetFolder.exists()) {
+      FileUtils.deleteDirectory(datasetFolder);
+    }
+    boolean created = datasetFolder.mkdir();
+    Assert.assertTrue("Failed to create test directory", created);
+
+    try {
+      fileTreatmentHelper.listImportedFiles(datasetId);
+    } catch (EEAException e) {
+      // Assert
+      Assert.assertTrue("Should mention 'No imported files found for datasetId' in message",
+              e.getMessage().contains("No imported files found for datasetId"));
+      throw e; // expected to throw from the test
+    }
+  }
+
+  @Test
+  public void testListImportedFiles_ioExceptionWhileListing() throws Exception {
+    Long datasetId = 1L;
+
+    String basePath = Objects.requireNonNull(
+            this.getClass().getClassLoader().getResource("")).getPath();
+    File datasetFolder = new File(basePath, datasetId.toString());
+    if (!datasetFolder.exists()) {
+      boolean created = datasetFolder.mkdir();
+      Assert.assertTrue("Failed to create test directory", created);
+    }
+
+    // mock Files.list() to throw IOException
+    try (MockedStatic<Files> mockedFiles = Mockito.mockStatic(Files.class)) {
+      mockedFiles.when(() -> Files.list(datasetFolder.toPath()))
+              .thenThrow(new IOException("Simulated IO failure"));
+
+      try {
+        fileTreatmentHelper.listImportedFiles(datasetId);
+        Assert.fail("Expected EEAException");
+      } catch (EEAException e) {
+        Assert.assertTrue("Message should mention 'No import directory found for datasetId'",
+                e.getMessage().contains("No import directory found for datasetId"));
+      }
+    }
+  }
+
 
   /**
    * Import file data csv test.

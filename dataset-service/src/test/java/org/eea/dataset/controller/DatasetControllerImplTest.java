@@ -42,6 +42,7 @@ import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.lock.LockVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
+import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.service.LockService;
 import org.eea.utils.LiteralConstants;
 import org.junit.Assert;
@@ -56,6 +57,7 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
@@ -127,6 +129,9 @@ public class DatasetControllerImplTest {
   @Mock
   private DataFlowControllerZuul dataFlowControllerZuul;
 
+  @Mock
+  private KafkaSenderUtils kafkaSenderUtils;
+
   /** The records. */
   private List<RecordVO> records;
 
@@ -160,6 +165,162 @@ public class DatasetControllerImplTest {
     SecurityContextHolder.setContext(securityContext);
     fileMock = new MockMultipartFile("file", "fileOriginal", "cvs", "content".getBytes());
     MockitoAnnotations.openMocks(this);
+  }
+
+  @Test
+  public void testListImportedFiles_Success() throws EEAException {
+    Long datasetId = 37L;
+    ImportedFilesDirectoriesVO file1 = new ImportedFilesDirectoriesVO();
+    file1.setFileName("file1.txt");
+    ImportedFilesDirectoriesVO file2 = new ImportedFilesDirectoriesVO();
+    file2.setFileName("file2.txt");
+    List<ImportedFilesDirectoriesVO> mockFiles = Arrays.asList(file1, file2);
+
+    // service mock
+    Mockito.when(fileTreatmentHelper.listImportedFiles(datasetId)).thenReturn(mockFiles);
+
+    // calling the actual controller
+    List<ImportedFilesDirectoriesVO> result = datasetControllerImpl.listImportedFiles(datasetId);
+
+    assertNotNull(result);
+    assertEquals(2, result.size());
+    assertEquals("file1.txt", result.get(0).getFileName());
+    assertEquals("file2.txt", result.get(1).getFileName());
+
+    Mockito.verify(fileTreatmentHelper, Mockito.times(1)).listImportedFiles(datasetId);
+  }
+
+  @Test
+  public void testListImportedFiles_EEAException() throws EEAException {
+    Long datasetId = 37L;
+
+    // throw EEAException
+    Mockito.when(fileTreatmentHelper.listImportedFiles(datasetId))
+            .thenThrow(new EEAException("Service failure"));
+
+    List<ImportedFilesDirectoriesVO> result = new ArrayList<>();
+    try {
+      assertEquals(result, datasetControllerImpl.listImportedFiles(datasetId));
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
+      assertEquals("Service failure", e.getReason());
+    }
+
+    Mockito.verify(fileTreatmentHelper, Mockito.times(1)).listImportedFiles(datasetId);
+  }
+
+  @Test
+  public void testListImportedFiles_GenericException() throws EEAException {
+    Long datasetId = 37L;
+
+    // throw a generic Exception
+    Mockito.when(fileTreatmentHelper.listImportedFiles(datasetId))
+            .thenThrow(new RuntimeException("Unexpected error"));
+
+    try {
+      datasetControllerImpl.listImportedFiles(datasetId);
+      Assert.fail("Expected ResponseStatusException was not thrown");
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
+      assertEquals(
+        "Unable to complete request of listing files for dataset Id " + datasetId, // exact controller message
+        e.getReason()
+      );
+    }
+
+    Mockito.verify(fileTreatmentHelper, Mockito.times(1)).listImportedFiles(datasetId);
+  }
+
+  // download imported file
+  @Test
+  public void testDownloadImportedFile_Success() throws EEAException {
+    Long dataflowId = 7L;
+    Long datasetId = 37L;
+    String fileName = "test.csv";
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
+
+    // Mock service response
+    Resource resource = Mockito.mock(Resource.class);
+    ResponseEntity<Resource> mockResponse =
+            ResponseEntity.ok(resource);
+
+    Mockito.<ResponseEntity<?>>when(fileTreatmentHelper.downloadImportedFile(dataflowId, datasetId, fileName))
+            .thenReturn(mockResponse);
+
+    // Mock Kafka event sender
+    Mockito.doNothing().when(kafkaSenderUtils)
+            .releaseNotificableKafkaEvent(Mockito.any(), Mockito.any(), Mockito.any());
+
+    // Execute controller
+    ResponseEntity<?> result =
+            datasetControllerImpl.downloadImportedFile(dataflowId, datasetId, fileName);
+
+    // Verify
+    assertNotNull(result);
+    assertEquals(200, result.getStatusCodeValue());
+    assertEquals(mockResponse, result);
+
+    Mockito.verify(fileTreatmentHelper, times(1))
+            .downloadImportedFile(dataflowId, datasetId, fileName);
+    Mockito.verify(kafkaSenderUtils, times(1))
+            .releaseNotificableKafkaEvent(any(), isNull(), any());
+  }
+
+
+  @Test
+  public void testDownloadImportedFile_EEAException() throws EEAException {
+    Long dataflowId = 7L;
+    Long datasetId = 37L;
+    String fileName = "broken.csv";
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
+
+    Mockito.doNothing().when(kafkaSenderUtils)
+            .releaseNotificableKafkaEvent(Mockito.any(), Mockito.any(), Mockito.any());
+    Mockito.when(fileTreatmentHelper.downloadImportedFile(dataflowId, datasetId, fileName))
+            .thenThrow(new EEAException("File cannot be downloaded"));
+
+    try {
+      datasetControllerImpl.downloadImportedFile(dataflowId, datasetId, fileName);
+      org.junit.Assert.fail("Expected ResponseStatusException was not thrown");
+    } catch (org.springframework.web.server.ResponseStatusException e) {
+      org.junit.Assert.assertEquals(org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
+      org.junit.Assert.assertEquals("File cannot be downloaded", e.getReason());
+    }
+
+    Mockito.verify(fileTreatmentHelper, Mockito.times(1)).downloadImportedFile(dataflowId, datasetId, fileName);
+    Mockito.verify(kafkaSenderUtils, Mockito.times(1))
+            .releaseNotificableKafkaEvent(Mockito.any(), Mockito.isNull(), Mockito.any());
+  }
+
+  @Test
+  public void testDownloadImportedFile_GenericException() throws EEAException {
+    Long dataflowId = 7L;
+    Long datasetId = 37L;
+    String fileName = "corrupted.zip";
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
+
+    Mockito.doNothing().when(kafkaSenderUtils)
+            .releaseNotificableKafkaEvent(Mockito.any(), Mockito.any(), Mockito.any());
+    Mockito.when(fileTreatmentHelper.downloadImportedFile(dataflowId, datasetId, fileName))
+            .thenThrow(new RuntimeException("Unexpected failure"));
+
+    try {
+      datasetControllerImpl.downloadImportedFile(dataflowId, datasetId, fileName);
+      org.junit.Assert.fail("Expected ResponseStatusException was not thrown");
+    } catch (org.springframework.web.server.ResponseStatusException e) {
+      org.junit.Assert.assertEquals(org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
+      org.junit.Assert.assertEquals(
+              "Unable to complete file download for datasetId " + datasetId,
+              e.getReason()
+      );
+    }
+
+    Mockito.verify(fileTreatmentHelper, Mockito.times(1)).downloadImportedFile(dataflowId, datasetId, fileName);
+    Mockito.verify(kafkaSenderUtils, Mockito.times(1))
+            .releaseNotificableKafkaEvent(Mockito.any(), Mockito.isNull(), Mockito.any());
   }
 
   /**

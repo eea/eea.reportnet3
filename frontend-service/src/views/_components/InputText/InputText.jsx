@@ -15,6 +15,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import Tooltip from 'primereact/tooltip';
 
 import { relative } from 'path';
+import { Spinner } from '../Spinner';
 
 export class InputText extends Component {
   static defaultProps = {
@@ -24,6 +25,7 @@ export class InputText extends Component {
     hasErrors: false,
     hasMaxCharCounter: false,
     id: null,
+    isLoadingData: false,
     keyfilter: null,
     maxLength: null,
     name: '',
@@ -43,6 +45,7 @@ export class InputText extends Component {
     hasErrors: PropTypes.bool,
     hasMaxCharCounter: PropTypes.bool,
     id: PropTypes.string,
+    isLoadingData: PropTypes.bool,
     keyfilter: PropTypes.any,
     maxLength: PropTypes.number,
     name: PropTypes.string,
@@ -142,6 +145,21 @@ export class InputText extends Component {
           onKeyPress={this.onKeyPress}
           value={this.props.value}
         />
+
+        {this.props.isLoadingData && (
+          <Spinner
+            style={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              width: '25px',
+              height: '25px',
+              pointerEvents: 'none'
+            }}
+          />
+        )}
+
         {this.props.required ? (
           <div style={{ position: relative, width: 0, height: 0 }}>
             <FontAwesomeIcon

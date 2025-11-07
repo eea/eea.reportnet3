@@ -65,6 +65,7 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
     private Integer validationParquetMaxFileSize;
     @Value("${validation.split.parquet}")
     private boolean validationSplitParquet;
+
     private JdbcTemplate dremioJdbcTemplate;
     private S3Service s3Service;
     private RulesService rulesService;

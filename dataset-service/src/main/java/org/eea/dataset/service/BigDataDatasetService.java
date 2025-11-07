@@ -149,6 +149,32 @@ public interface BigDataDatasetService {
     Boolean convertIcebergToParquetTable(Long datasetId, Long dataflowId, Long providerId, TableSchemaVO tableSchemaVO, String datasetSchemaId, String lockValue) throws Exception;
 
     /**
+     * Convert Parquet To Iceberg Tables
+     *
+     * @param datasetId the dataset id
+     * @param dataflowId the dataflow id
+     * @param providerId the provider id
+     * @param tableSchemaIds the list of table ids
+     * @param user the user
+     * @param lockValue the lock value
+     * @return
+     */
+    void convertParquetToIcebergTables(Long datasetId, Long dataflowId, Long providerId, List<String> tableSchemaIds, String user, String lockValue) throws Exception;
+
+    /**
+     * Convert Iceberg to Parquet Tables
+     *
+     * @param datasetId the dataset id
+     * @param dataflowId the dataflow id
+     * @param providerId the provider id
+     * @param tableSchemaIds the list of table ids
+     * @param user the user
+     * @param lockValue the lock value
+     * @return
+     */
+    void convertIcebergToParquetTables(Long datasetId, Long dataflowId, Long providerId, List<String> tableSchemaIds, String user, String lockValue) throws Exception;
+
+    /**
      * Convert Iceberg To Parquet Table
      *
      * @param datasetId the dataset id
@@ -268,7 +294,7 @@ public interface BigDataDatasetService {
      * @param includeAttachments include attachments boolean
      * @throws EEAException The exception
      */
-    void etlExportCsv(Long datasetId, Long dataflowId ,String tableSchemaId, Long jobId, String user, String processUUID, Boolean includeAttachments) throws EEAException;
+    void etlExportCsv(Long datasetId, Long dataflowId ,String tableSchemaId, Long jobId, String user, String processUUID, Boolean includeAttachments, String dataProviderCodes) throws EEAException;
 
     /**
      * ETL export for parquet
@@ -282,7 +308,7 @@ public interface BigDataDatasetService {
      * @param includeAttachments include attachments boolean
      * @throws EEAException The exception
      */
-    void etlExportParquet(Long datasetId, Long dataflowId, String tableSchemaId, Long jobId, String user, String processUUID, Boolean includeAttachments) throws EEAException;
+    void etlExportParquet(Long datasetId, Long dataflowId, String tableSchemaId, Long jobId, String user, String processUUID, Boolean includeAttachments, String dataProviderCodes) throws EEAException;
 
     /**
      * If an import job is added in the db retrieve it, else create a new one

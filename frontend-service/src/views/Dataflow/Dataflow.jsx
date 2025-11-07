@@ -987,7 +987,8 @@ export const Dataflow = () => {
         notification.key === 'RELEASE_FAILED_EVENT' ||
         notification.key === 'RELEASE_BLOCKED_EVENT' ||
         notification.key === 'RELEASE_BLOCKERS_FAILED_EVENT' ||
-        notification.key === 'ADD_DATASET_SNAPSHOT_FAILED_EVENT'
+        notification.key === 'ADD_DATASET_SNAPSHOT_FAILED_EVENT' ||
+        notification.key === 'RELEASE_FAILED_ICEBERG_EXISTS_EVENT'
     );
 
     dataflowState.data.datasets.forEach(dataset => {
@@ -1007,11 +1008,16 @@ export const Dataflow = () => {
       'RELEASE_FAILED_EVENT',
       'RELEASE_BLOCKED_EVENT',
       'RELEASE_BLOCKERS_FAILED_EVENT',
-      'ADD_DATASET_SNAPSHOT_FAILED_EVENT'
+      'ADD_DATASET_SNAPSHOT_FAILED_EVENT',
+      'RELEASE_FAILED_ICEBERG_EXISTS_EVENT'
     ],
     setIsReleasingDatasetsProviderId,
     false
   );
+
+  useCheckNotifications(['RELEASE_FAILED_ICEBERG_EXISTS_EVENT'], () => {
+    setIsReleaseable(false);
+  });
 
   const onLoadSchemasValidations = async () => {
     const validationResult = await DataflowService.getSchemasValidation(dataflowId);

@@ -81,6 +81,7 @@ export const DataViewer = ({
   isReferenceDataset,
   isReportingWebform,
   isTableDataRestorationInProgress,
+  isTableTop = false,
   onHideSelectGroupedValidation,
   onIsTableDataLoading,
   onLoadTableData,
@@ -1337,6 +1338,7 @@ export const DataViewer = ({
       {!bigData && <ContextMenu model={menu} ref={contextMenuRef} />}
       <div className={styles.Table}>
         <DataTable
+          className={(isTableTop && 'dataviewer')}
           contextMenuSelection={records.selectedRecord}
           editable={(hasWritePermissions && !tableReadOnly) || (hasWritePermissions && isReferenceDataset)}
           first={records.firstPageRecord}

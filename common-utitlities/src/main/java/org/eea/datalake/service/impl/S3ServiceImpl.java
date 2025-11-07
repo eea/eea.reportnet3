@@ -392,9 +392,7 @@ public class S3ServiceImpl implements S3Service {
     }
 
     private String formatSnapshotFolder(Long snapshotId) {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
-        String date = dateFormat.format(new Date());
-        return String.format(S3_SNAPSHOT_PATTERN, snapshotId, date);
+        return String.format(S3_SNAPSHOT_PATTERN, snapshotId);
     }
 
     @Override

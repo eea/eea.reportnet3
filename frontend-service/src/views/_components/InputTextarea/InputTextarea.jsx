@@ -5,6 +5,7 @@ import Tooltip from 'primereact/tooltip';
 import DomHandler from 'views/_functions/PrimeReact/DomHandler';
 import ObjectUtils from 'views/_functions/PrimeReact/ObjectUtils';
 import './InputTextarea.scss';
+import { Spinner } from '../Spinner';
 
 export class InputTextarea extends Component {
   static defaultProps = {
@@ -17,6 +18,7 @@ export class InputTextarea extends Component {
     expandableOnClick: false,
     expandableOnDoubleClick: false,
     hasErrors: false,
+    isLoadingData: false,
     maxLength: null,
     moveCaretToEnd: false,
     onInput: null,
@@ -31,6 +33,7 @@ export class InputTextarea extends Component {
     expandableOnClick: PropTypes.bool,
     expandableOnDoubleClick: PropTypes.bool,
     hasErrors: PropTypes.bool,
+    isLoadingData: PropTypes.bool,
     maxLength: PropTypes.number,
     moveCaretToEnd: PropTypes.bool,
     onInput: PropTypes.func,
@@ -249,6 +252,20 @@ export class InputTextarea extends Component {
           ref={input => (this.element = input)}
           rows={this.props.rows}
           value={this.props.value}></textarea>
+
+        {this.props.isLoadingData && (
+          <Spinner
+            style={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              width: '25px',
+              height: '25px',
+              pointerEvents: 'none'
+            }}
+          />
+        )}
         <label className="srOnly" htmlFor={this.props.id}>
           {this.props.placeholder || this.props.id}
         </label>
