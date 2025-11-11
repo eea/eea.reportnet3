@@ -1524,7 +1524,6 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
             <Button
               className="p-button-rounded p-button-secondary-transparent p-button-animated-blink"
               icon="openFolder"
-              iconClasses={datasetHasErrors ? 'warning' : ''}
               label={resourcesContext.messages['importedFiles']}
               onClick={() => setIsImportedFilesDialogVisible(true)}
             />

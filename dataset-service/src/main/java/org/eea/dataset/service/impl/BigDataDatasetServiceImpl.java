@@ -181,7 +181,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
     private static final String VALUE = "refValue";
     private static final String LABEL = "refLabel";
     private static final Pattern CSV_WITH_UUID_PATTERN = Pattern.compile(
-            "^[\\w\\-. ]+_[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\\.csv$"
+            "^.+?_[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\\.csv$"
     );
 
     private void deleteCsvFilesWithUuidSuffix(String datasetId) {
@@ -1565,7 +1565,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         }
 
         if (datasetMetabaseService.getDatasetType(datasetId).equals(DatasetTypeEnum.DESIGN)) {
-            s3HelperPrivate.deleteTableIfEmpty(tableSchemaName, s3IcebergTablePathResolver, dremioHelperService);
+            createEmptyTables.deleteTableIfEmpty(tableSchemaName, s3IcebergTablePathResolver);
         }
 
         //check if table exists and if not create it
@@ -2513,18 +2513,16 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
     List<DataProviderVO> givenProviders = new ArrayList<>();
     List<Long> providerIds = new ArrayList<>();
-
+    Long dataProviderGroupId = dataFlowControllerZuul.findDataProviderGroupIdById(dataflowId);
     // Get the providers that belong to the given codes.
     for (String code : codes) {
-      List<DataProviderVO> dataProviders = representativeControllerZuul.findDataProvidersByCode(code);
-
-      if (dataProviders.isEmpty()) {
+      DataProviderVO providerVO = representativeControllerZuul.findDataProviderByCodeAndGroupId(code, dataProviderGroupId);
+      if (providerVO == null) {
         LOG.error("The data provider {} does not exist", code);
         continue;
       }
-      DataProviderVO dataProviderVO = dataProviders.get(0);
-      givenProviders.add(dataProviderVO);
-      providerIds.add(dataProviderVO.getId());
+      givenProviders.add(providerVO);
+      providerIds.add(providerVO.getId());
     }
 
     if (givenProviders.isEmpty()) {

@@ -156,15 +156,6 @@ public interface S3Helper {
      */
     byte[] getBytesFromS3(String key);
 
-    /**
-     * Deletes parquet table if empty to cover the case that the user has added or removed columns (has changed the schema)
-     *
-     * @param tableSchemaName The table schema name
-     * @param tablePathResolver The table path
-     * @throws Exception exception
-     */
-    void deleteTableIfEmpty(String tableSchemaName, S3PathResolver tablePathResolver, DremioHelperService dremioHelperService) throws Exception;
-
     void getAttachmentsFromS3Locally(String attachmentsPathInS3, String parentFolderInDiskPath);
 
     /**

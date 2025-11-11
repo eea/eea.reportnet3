@@ -24,7 +24,9 @@ import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -42,6 +44,9 @@ public class CreateEmptyTablesImpl implements CreateEmptyTables {
   private final DremioHelperService dremioHelperService;
   private final SpatialDataHandling spatialDataHandling;
   private final SchemasRepository schemasRepository;
+
+  @Autowired
+  private JdbcTemplate dremioJdbcTemplate;
 
   private static final Logger LOG = LoggerFactory.getLogger(CreateEmptyTablesImpl.class);
 
@@ -81,7 +86,7 @@ public class CreateEmptyTablesImpl implements CreateEmptyTables {
 
     try {
       if (dataset.getDatasetTypeEnum().equals(DatasetTypeEnum.DESIGN)) {
-        s3Helper.deleteTableIfEmpty(tableSchema.getNameTableSchema(), s3TablePathResolver, dremioHelperService);
+        deleteTableIfEmpty(tableSchema.getNameTableSchema(), s3TablePathResolver);
       }
       boolean folderExists = s3Helper.checkFolderExist(s3TablePathResolver, getRightPath(dataset, false));
       if (!folderExists) {
@@ -156,6 +161,19 @@ public class CreateEmptyTablesImpl implements CreateEmptyTables {
       LOG.error(ex.getMessage());
     } finally {
       dremioHelperService.deleteFileFromR3IfExists(parquetFile);
+    }
+  }
+
+  @Override
+  public void deleteTableIfEmpty(String tableSchemaName, S3PathResolver tablePathResolver) throws Exception {
+    String tablePath = s3Helper.getS3Service().getTableAsFolderQueryPath(tablePathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
+    if (s3Helper.checkFolderExist(tablePathResolver, S3_TABLE_NAME_FOLDER_PATH) && !dremioHelperService.checkFolderPromoted(tablePathResolver, tablePathResolver.getTableName())) {
+      dremioHelperService.promoteFolderOrFile(tablePathResolver, tablePathResolver.getTableName());
+    }
+    String numberOfRecordsQuery = "SELECT COUNT (*) FROM " + tablePath;
+    if (s3Helper.checkFolderExist(tablePathResolver, S3_TABLE_NAME_FOLDER_PATH) && dremioJdbcTemplate.queryForObject(numberOfRecordsQuery, Long.class) == 0) {
+      dremioHelperService.demoteFolderOrFile(tablePathResolver, tableSchemaName);
+      s3Helper.deleteFolder(tablePathResolver, S3_TABLE_NAME_FOLDER_PATH);
     }
   }
 

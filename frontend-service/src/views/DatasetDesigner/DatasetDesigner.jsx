@@ -1403,12 +1403,14 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
             label={resourcesContext.messages['createTableValidationBtn']}
             onClick={() => validationContext.onOpenModalFromOpener('dataset', 'validationsListDialog')}
           />
-          <Button
-            className="p-button-animated-blink"
-            icon="bars"
-            label={resourcesContext.messages['setSeverityBtn']}
-            onClick={() => setIsQcSeverityDialogVisible(true)}
-          />
+          {!isDataflowOpen && (
+            <Button
+              className="p-button-animated-blink"
+              icon="bars"
+              label={resourcesContext.messages['setSeverityBtn']}
+              onClick={() => setIsQcSeverityDialogVisible(true)}
+            />
+          )}
           <Button
             className={`p-button-secondary p-button-animated-blink ${styles.buttonAlignRight}`}
             disabled={allSqlValidationRunning}
@@ -2005,7 +2007,6 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
               <Button
                 className="p-button-rounded p-button-secondary-transparent p-button-animated-blink"
                 icon="openFolder"
-                iconClasses={designerState.datasetStatistics.datasetErrors ? 'warning' : ''}
                 label={resourcesContext.messages['importedFiles']}
                 onClick={() => designerDispatch({ type: 'TOGGLE_IMPORTED_FILES_VIEW', payload: true })}
               />
