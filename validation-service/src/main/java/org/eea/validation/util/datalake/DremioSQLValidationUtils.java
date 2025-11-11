@@ -2,8 +2,8 @@ package org.eea.validation.util.datalake;
 
 import javax.annotation.PostConstruct;
 import org.apache.commons.lang3.BooleanUtils;
+import org.eea.s3configuration.DremioConfiguration;
 import org.eea.utils.UtilityClass;
-import org.eea.validation.configuration.DremioConfiguration;
 import org.eea.validation.persistence.schemas.FieldSchema;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Import;

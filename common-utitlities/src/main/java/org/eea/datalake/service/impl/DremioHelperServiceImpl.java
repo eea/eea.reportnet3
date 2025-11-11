@@ -16,9 +16,11 @@ import org.eea.interfaces.vo.dremio.*;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Primary;
 import org.springframework.http.*;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -65,15 +67,18 @@ public class DremioHelperServiceImpl implements DremioHelperService {
     private final S3Service s3Service;
     private final DremioApiController dremioApiController;
 
+    private JdbcTemplate dremioJdbcTemplate;
+
     private final String S3_DEFAULT_BUCKET_PATH;
 
     private final String S3_ICEBERG_BUCKET_PATH;
 
-    public DremioHelperServiceImpl(DremioApiController dremioApiController, S3Service s3Service) {
+    public DremioHelperServiceImpl(DremioApiController dremioApiController, S3Service s3Service, @Qualifier("dremioJdbcTemplate") JdbcTemplate dremioJdbcTemplate) {
         this.dremioApiController = dremioApiController;
         this.s3Service = s3Service;
         this.S3_DEFAULT_BUCKET_PATH = s3Service.getS3DefaultBucketPath();
         this.S3_ICEBERG_BUCKET_PATH = s3Service.getS3IcebergBucketPath();
+        this.dremioJdbcTemplate = dremioJdbcTemplate;
     }
 
     @Override
@@ -498,5 +503,10 @@ public class DremioHelperServiceImpl implements DremioHelperService {
         }
 
         return numberOfRecords.get();
+    }
+
+    @Override
+    public Long getNumberOfRecordsJdbcCall(String numberOfRecordsQuery){
+        return dremioJdbcTemplate.queryForObject(numberOfRecordsQuery, Long.class);
     }
 }

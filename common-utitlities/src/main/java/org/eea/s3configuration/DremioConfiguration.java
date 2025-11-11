@@ -1,4 +1,4 @@
-package org.eea.recordstore.configuration;
+package org.eea.s3configuration;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -49,28 +49,3 @@ public class DremioConfiguration {
         return new JdbcTemplate(dremioDatasource());
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

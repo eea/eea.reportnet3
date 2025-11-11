@@ -131,7 +131,8 @@ public class S3HelperImpl implements S3Helper {
         if (checkFolderExist(tablePathResolver, S3_TABLE_NAME_FOLDER_PATH) && !dremioHelperService.checkFolderPromoted(tablePathResolver, tablePathResolver.getTableName())) {
             dremioHelperService.promoteFolderOrFile(tablePathResolver, tablePathResolver.getTableName());
         }
-        if (checkFolderExist(tablePathResolver, S3_TABLE_NAME_FOLDER_PATH) && dremioHelperService.getRowCount(tablePath) == 0) {
+        String numberOfRecordsInParquetTableQuery = "SELECT COUNT (*) FROM " + tablePath;
+        if (checkFolderExist(tablePathResolver, S3_TABLE_NAME_FOLDER_PATH) && dremioHelperService.getNumberOfRecordsJdbcCall(numberOfRecordsInParquetTableQuery) == 0) {
             dremioHelperService.demoteFolderOrFile(tablePathResolver, tableSchemaName);
             deleteFolder(tablePathResolver, S3_TABLE_NAME_FOLDER_PATH);
         }

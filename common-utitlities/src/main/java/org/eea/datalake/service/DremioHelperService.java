@@ -38,4 +38,6 @@ public interface DremioHelperService {
 
     Long compareNumberOfRecords(String table1Path, String table2Path) throws Exception;
 
+    Long getNumberOfRecordsJdbcCall(String numberOfRecordsQuery);
+
 }

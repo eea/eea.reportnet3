@@ -21,6 +21,6 @@ public class S3DremioHelperServiceConfig {
   @Bean
   @Qualifier("publicS3DremioHelper")
   public DremioHelperService S3DremioHelperPublic(@Qualifier("publicS3Service") S3Service s3Service) {
-    return new DremioHelperServiceImpl(dremioApiController, s3Service);
+    return new DremioHelperServiceImpl(dremioApiController, s3Service, null);
   }
 }
