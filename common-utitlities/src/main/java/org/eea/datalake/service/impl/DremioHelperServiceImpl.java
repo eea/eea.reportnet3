@@ -447,6 +447,7 @@ public class DremioHelperServiceImpl implements DremioHelperService {
     @Override
     public void refreshTableMetadataAndPromote(Long jobId, String tablePath, S3PathResolver s3PathResolver, String tableName) throws Exception {
         String refreshTableAndPromoteQuery = "ALTER TABLE " + tablePath + " REFRESH METADATA AUTO PROMOTION";
+        String refreshTableAndDemoteQuery = "ALTER TABLE " + tablePath + " FORGET METADATA";
         Boolean folderWasPromoted = false;
         //we keep trying to promote the folder for a number of retries
         for(int i=0; i < numberOfRetriesForPromoting; i++) {
@@ -463,6 +464,11 @@ public class DremioHelperServiceImpl implements DremioHelperService {
         if(!folderWasPromoted) {
             throw new Exception("Could not promote folder " + tablePath);
         }
+        LOG.info("Failover demote promote - Started");
+        executeSqlStatement(refreshTableAndDemoteQuery);
+        Thread.sleep(2000);
+        executeSqlStatement(refreshTableAndPromoteQuery);
+        LOG.info("Failover demote promote - Ended");
     }
 
     /**
