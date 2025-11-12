@@ -102,7 +102,8 @@ public class JobForCancellingJobsWithoutProcess {
                 try {
                     List<String> processes = jobProcessService.findProcessesByJobId(id.longValue());
                     JobVO job = jobService.findById(id.longValue());
-                    if (processes.isEmpty() && !job.getJobType().equals(JobTypeEnum.ETL_IMPORT)) {
+                    //ignoring jobs that do not create processes
+                    if (processes.isEmpty() && !job.getJobType().equals(JobTypeEnum.ETL_IMPORT) && !job.getJobType().equals(JobTypeEnum.DELETE)) {
                         LOG.info("Setting job {} without process to canceled", id);
                         jobService.updateJobStatus(id.longValue(), JobStatusEnum.CANCELED);
                         Map<String, Object> value = new HashMap<>();
