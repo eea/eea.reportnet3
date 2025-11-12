@@ -30,6 +30,7 @@ import { Menu } from 'views/_components/Menu';
 import { QCList } from 'views/_components/QCList';
 import { QCGenericHistory } from './_components/QCGenericHistory';
 import { ShowValidationsList } from 'views/_components/ShowValidationsList';
+import { ImportedFilesDialog } from './_components/ImportedFilesDialog';
 import { Snapshots } from 'views/_components/Snapshots';
 import { Spinner } from 'views/_components/Spinner';
 import { TabsDesigner } from './_components/TabsDesigner';
@@ -1781,6 +1782,21 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
               </DatasetDeleteDataDialog>
             </div>
             <div className="p-toolbar-group-right">
+              <Button
+                className="p-button-rounded p-button-secondary-transparent p-button-animated-blink"
+                icon="import"
+                iconClasses={designerState.datasetStatistics.datasetErrors ? 'warning' : ''}
+                label={resourcesContext.messages['importedFiles']}
+                onClick={() => designerDispatch({ type: 'TOGGLE_IMPORTED_FILES_VIEW', payload: true })}
+              />
+              {designerState.isImportedFilesVisible && (
+                <ImportedFilesDialog
+                  dataflowId={dataflowId}
+                  datasetId={datasetId}
+                  isDialogVisible={designerState.isImportedFilesVisible}
+                  onCloseDialog={() => designerDispatch({ type: 'TOGGLE_IMPORTED_FILES_VIEW', payload: false })}
+                />
+              )}
               <DatasetValidateDialog
                 disabled={
                   isDesignDatasetEditorRead ||

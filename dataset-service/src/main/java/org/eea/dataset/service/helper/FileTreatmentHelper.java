@@ -89,6 +89,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Import;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.scheduling.annotation.Async;
@@ -97,10 +102,15 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 import software.amazon.awssdk.services.s3.model.S3Object;
 
 import javax.annotation.PostConstruct;
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
@@ -109,6 +119,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.zip.*;
 
 import static org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum.REFERENCE;
@@ -366,6 +377,145 @@ public class FileTreatmentHelper implements DisposableBean {
     public void destroy() throws Exception {
         if (null != importExecutorService) {
             this.importExecutorService.shutdown();
+        }
+    }
+
+    public List<ImportedFilesDirectoriesVO> listImportedFiles(Long datasetId) throws EEAException {
+        File datasetFolder = new File(importPath, datasetId.toString());
+        LOG.info("Listing files for datasetId: {} and dataset folder path: {}", datasetId, datasetFolder.getAbsolutePath());
+
+        if (!datasetFolder.exists() || !datasetFolder.isDirectory()) {
+            LOG.error("No import directory found for datasetId {} under path {}", datasetId, datasetFolder.getAbsolutePath());
+            throw new EEAException(String.format(EEAErrorMessage.IMPORT_DIRECTORY_NOT_FOUND, datasetId, datasetFolder.getAbsolutePath()));
+        }
+
+        List<ImportedFilesDirectoriesVO> importedFiles = new ArrayList<>();
+
+        try (Stream<Path> paths = Files.list(datasetFolder.toPath())) {
+            // convert Stream<Path> to List<Path> first to safely iterate
+            List<Path> pathList = paths.collect(Collectors.toList());
+
+            for (Path path : pathList) {
+                try {
+                    BasicFileAttributes attrs = Files.readAttributes(path, BasicFileAttributes.class);
+                    long javaSize = Files.size(path);
+
+                    // make sure its a file a not a directory or a symbolic link before putting it at the return list
+                    if (Files.isRegularFile(path)) {
+                        ImportedFilesDirectoriesVO fileInfo = new ImportedFilesDirectoriesVO();
+                        fileInfo.setFileName(path.getFileName().toString());
+                        fileInfo.setFileSize(formatFileSize(javaSize)); // make size human readable
+                        fileInfo.setCreationDate(formatDate(attrs.lastModifiedTime().toMillis())); // make date human readable
+                        fileInfo.setCreationDateTimestamp(attrs.creationTime().toMillis()); // this one can be used for sorting
+                        fileInfo.setLastModifiedTime(attrs.lastModifiedTime().toMillis()); // this one can be used for sorting
+                        importedFiles.add(fileInfo);
+                    }
+                } catch (IOException e) {
+                    LOG.warn("  Failed to read attributes for path {}", path, e);
+                }
+            }
+
+        } catch (IOException e) {
+            LOG.error("Error listing files in dataset folder {}", datasetFolder.getAbsolutePath(), e);
+            throw new EEAException(String.format(EEAErrorMessage.IMPORT_DIRECTORY_NOT_FOUND, datasetId, datasetFolder.getAbsolutePath()));
+        }
+
+        // sort based on creation time of the RN3 file system
+        importedFiles.sort(Comparator.comparingLong(ImportedFilesDirectoriesVO::getLastModifiedTime).reversed());
+
+        if (importedFiles.isEmpty()) {
+            LOG.warn("No imported files found after filtering for datasetId {}", datasetId);
+            throw new EEAException(String.format(EEAErrorMessage.IMPORT_DIRECTORY_EMPTY, datasetId));
+        }
+
+        LOG.info("Total imported files found for datasetId={} are: {}", datasetId, importedFiles.size());
+        return importedFiles;
+    }
+
+    /**
+     * Converts the file size from bytes to a human-readable string
+     * Example: 1,048,576 -> 1.0 MB
+     */
+    private String formatFileSize(long bytes) {
+        final String[] units = {"B", "KB", "MB", "GB", "TB"}; // supports up to TB although we're never going to use it (just so it doesn't come to errors)
+        int unitIndex = 0;
+        double size = bytes;
+
+        while (size >= 1024 && unitIndex < units.length - 1) {
+            size /= 1024;
+            unitIndex++;
+        }
+
+        return String.format("%.1f %s", size, units[unitIndex]);
+    }
+
+    private String formatDate(long timestamp) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm");
+        return dateFormat.format(new Date(timestamp));
+    }
+
+    public ResponseEntity<?> downloadImportedFile(Long dataflowId, Long datasetId, String fileName) throws EEAException {
+        LOG.info("Downloading file for datasetId: {} and fileName: {}", datasetId, fileName);
+        NotificationVO notificationVO = new NotificationVO();
+        notificationVO.setDatasetId(datasetId);
+        notificationVO.setDataflowId(dataflowId);
+        notificationVO.setUser(SecurityContextHolder.getContext().getAuthentication().getName());
+        notificationVO.setFileName(fileName);
+
+        try {
+            File datasetFolder = new File(importPath, datasetId.toString());
+            if (!datasetFolder.exists() || !datasetFolder.isDirectory()) {
+                LOG.error("No import directory found for datasetId {} under path {}", datasetId, datasetFolder.getAbsolutePath());
+                throw new EEAException(String.format(EEAErrorMessage.IMPORT_DIRECTORY_NOT_FOUND, datasetId, datasetFolder.getAbsolutePath()));
+            }
+
+            // make sure file exists
+            File targetFile = new File(datasetFolder, fileName);
+            if (!targetFile.exists() || !targetFile.isFile()) {
+                LOG.error("Requested file '{}' not found for datasetId {} under path {}", fileName, datasetId, targetFile.getAbsolutePath());
+                throw new EEAException(String.format(EEAErrorMessage.REQUESTED_IMPORT_FILE_NOT_FOUND, datasetId, fileName, datasetFolder.getAbsolutePath()));
+            }
+
+            LOG.info("Preparing to stream file '{}' ({} bytes)", fileName, targetFile.length());
+
+            InputStreamResource resource = new InputStreamResource(new BufferedInputStream(new FileInputStream(targetFile)));
+
+            // fetch MIME type like application/zip text/csv etc
+            String contentType = Files.probeContentType(targetFile.toPath());
+            if (contentType == null) {
+                contentType = "application/octet-stream";
+            }
+
+            // Build streaming response
+            HttpHeaders headers = new HttpHeaders();
+            headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + targetFile.getName() + "\"");
+
+            EventType eventType = EventType.DOWNLOAD_IMPORTED_FILE_FINISHED_EVENT;
+            kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, null, notificationVO);
+
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .contentType(MediaType.parseMediaType(contentType))
+                    .contentLength(targetFile.length())
+                    .body(resource);
+
+        } catch (IOException e) {
+            LOG.error("I/O error while streaming file '{}' for datasetId {}: {}", fileName, datasetId, e.getMessage(), e);
+            EventType eventType = EventType.DOWNLOAD_IMPORTED_FILE_ERROR_EVENT;
+            try { kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, null, notificationVO);
+            } catch (EEAException eeaException) { throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, eeaException.getMessage()); }
+            throw new EEAException(String.format(EEAErrorMessage.ERROR_STREAMING_IMPORTED_FILE, fileName, datasetId, e.getMessage()));
+        } catch (EEAException e) {
+            EventType eventType = EventType.DOWNLOAD_IMPORTED_FILE_ERROR_EVENT;
+            try { kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, null, notificationVO);
+            } catch (EEAException eeaException) { throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, eeaException.getMessage()); }
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        } catch (Exception e) {
+            LOG.error("Unexpected error while streaming file '{}' for datasetId {}: {}", fileName, datasetId, e.getMessage());
+            EventType eventType = EventType.DOWNLOAD_IMPORTED_FILE_ERROR_EVENT;
+            try { kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, null, notificationVO);
+            } catch (EEAException eeaException) { throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, eeaException.getMessage()); }
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 

@@ -376,6 +376,11 @@ export const DatasetService = {
   updateTableOrder: async (datasetId, position, tableSchemaId) =>
     await DatasetRepository.updateTableOrder(datasetId, position, tableSchemaId),
 
+  getImportedFiles: async datasetId => await DatasetRepository.getImportedFiles(datasetId),
+
+  downloadImportedFile: async (fileName, datasetId, dataflowId) =>
+    await DatasetRepository.downloadImportedFile(fileName, datasetId, dataflowId),
+
   getSchema: async (dataflowId, datasetId) => {
     const datasetSchemaDTO = await DatasetRepository.getSchema(datasetId);
     const rulesDTO = await ValidationRepository.getAll(dataflowId, datasetSchemaDTO.data.idDataSetSchema);

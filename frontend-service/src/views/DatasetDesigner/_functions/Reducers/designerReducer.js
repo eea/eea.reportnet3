@@ -192,6 +192,9 @@ export const designerReducer = (state, { type, payload }) => {
     case 'TOGGLE_VALIDATION_VIEWER_VISIBILITY':
       return { ...state, isValidationViewerVisible: payload };
 
+    case 'TOGGLE_IMPORTED_FILES_VIEW':
+      return { ...state, isImportedFilesVisible: payload };
+
     case 'ON_CHANGE_VIEW':
       return { ...state, viewType: payload.viewType };
 

@@ -54,6 +54,8 @@ import { CurrentPage, ExtensionUtils, MetadataUtils, QuerystringUtils } from 'vi
 import { DatasetUtils } from 'services/_utils/DatasetUtils';
 import { getUrl } from 'repositories/_utils/UrlUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
+import { ImportedFilesDialog } from 'views/DatasetDesigner/_components/ImportedFilesDialog';
+
 
 export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   const navigate = useNavigate();
@@ -64,6 +66,8 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
+  const [isImportedFilesDialogVisible, setIsImportedFilesDialogVisible] = useState(false);
+
 
   const [dataset, setDataset] = useState({});
   const [datasetProgressBarSteps, setDatasetProgressBarSteps] = useState({
@@ -1289,6 +1293,21 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
             />
           </div>
           <div className="p-toolbar-group-right">
+            <Button
+              className="p-button-rounded p-button-secondary-transparent p-button-animated-blink"
+              icon="openFolder"
+              iconClasses={datasetHasErrors ? 'warning' : ''}
+              label={resourcesContext.messages['importedFiles']}
+              onClick={() => setIsImportedFilesDialogVisible(true)}
+            />
+            {isImportedFilesDialogVisible && (
+              <ImportedFilesDialog
+                dataflowId={dataflowId}
+                datasetId={datasetId}
+                isDialogVisible={isImportedFilesDialogVisible}
+                onCloseDialog={() => setIsImportedFilesDialogVisible(false)}
+              />
+            )}
             <DatasetValidateDialog
               disabled={
                 !hasWritePermissions ||
