@@ -14,6 +14,7 @@ import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.DatasetService;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.TableVO;
@@ -100,7 +101,10 @@ public class UpdateRecordHelperTest {
     List<TableVO> tables = new ArrayList<>();
     tables.add(new TableVO());
     doNothing().when(kafkaSender).sendMessage(Mockito.any());
-    updateRecordHelper.executeMultiCreateProcess(1L, tables);
+    DataSetMetabaseVO dataSetMetabaseVO = new DataSetMetabaseVO();
+    dataSetMetabaseVO.setId(1L);
+    dataSetMetabaseVO.setDataflowId(1L);
+    updateRecordHelper.executeMultiCreateProcess(dataSetMetabaseVO, tables);
     Mockito.verify(kafkaSender, times(1)).sendMessage(Mockito.any());
   }
 

@@ -2221,6 +2221,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 insertRecords(dataSetMetabaseVO.getDataflowId(), dataSetMetabaseVO.getDataProviderId(), dataSetMetabaseVO.getId(),
                         tableSchemaVO.getNameTableSchema(), tableVO.getRecords());
             }
+            LOG.info("PaM/Entity group save: Successfully inserted multiple records for datasetId {}", dataSetMetabaseVO.getId());
             //sent completed event
             kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.INSERT_RECORDS_MULTI_TABLES_COMPLETED,
                     null,

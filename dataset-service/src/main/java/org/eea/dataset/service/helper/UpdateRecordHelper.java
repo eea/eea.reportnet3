@@ -12,11 +12,13 @@ import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.kafka.domain.EventType;
+import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 /**
@@ -118,22 +121,44 @@ public class UpdateRecordHelper extends KafkaSenderUtils {
   /**
    * Execute multi create process.
    *
-   * @param datasetId the dataset id
+   * @param dataSetMetabaseVO the dataset object
    * @param tableRecords the table records
    * @throws EEAException the EEA exception
    */
-  public void executeMultiCreateProcess(final Long datasetId, List<TableVO> tableRecords)
+  @Async
+  public void executeMultiCreateProcess(DataSetMetabaseVO dataSetMetabaseVO, List<TableVO> tableRecords)
       throws EEAException {
-    for (TableVO tableVO : tableRecords) {
-      datasetService.insertRecords(datasetId, tableVO.getRecords(), tableVO.getIdTableSchema());
+    Long datasetId = dataSetMetabaseVO.getId();
+    Long dataflowId = dataSetMetabaseVO.getDataflowId();
+    try {
+
+      for (TableVO tableVO : tableRecords) {
+        datasetService.insertRecords(datasetId, tableVO.getRecords(), tableVO.getIdTableSchema());
+      }
+      LOG.info("PaM group save: Records have been created for datasetId {}", datasetId);
+      // now the view is not updated, update the check to false
+      datasetService.updateCheckView(datasetId, false);
+      // delete the temporary table from etlExport
+      datasetService.deleteTempEtlExport(datasetId);
+      // after the records have been saved, an event is sent to notify it
+      releaseDatasetKafkaEvent(EventType.RECORD_CREATED_COMPLETED_EVENT, datasetId);
+      LOG.info("PaM/Entity group save: Successfully inserted multiple records for datasetId {}", datasetId);
+      releaseNotificableKafkaEvent(EventType.INSERT_RECORDS_MULTI_TABLES_COMPLETED,
+              null,
+              NotificationVO.builder()
+                      .user(SecurityContextHolder.getContext().getAuthentication().getName()).datasetId(datasetId)
+                      .dataflowId(dataSetMetabaseVO.getDataflowId()).build());
     }
-    LOG.info("PaM group save: Records have been created for datasetId {}", datasetId);
-    // now the view is not updated, update the check to false
-    datasetService.updateCheckView(datasetId, false);
-    // delete the temporary table from etlExport
-    datasetService.deleteTempEtlExport(datasetId);
-    // after the records have been saved, an event is sent to notify it
-    releaseDatasetKafkaEvent(EventType.RECORD_CREATED_COMPLETED_EVENT, datasetId);
+    catch (Exception e){
+      LOG.error("Could not insert records in multiple tables for datasetId {} Error {}", datasetId, e.getMessage());
+      //send failed event
+      releaseNotificableKafkaEvent(EventType.INSERT_RECORDS_MULTI_TABLES_FAILED,
+              null,
+              NotificationVO.builder()
+                      .user(SecurityContextHolder.getContext().getAuthentication().getName()).datasetId(datasetId)
+                      .dataflowId(dataflowId).error("Failed inserting records in multiple tables").build());
+      throw e;
+    }
   }
 
   /**
