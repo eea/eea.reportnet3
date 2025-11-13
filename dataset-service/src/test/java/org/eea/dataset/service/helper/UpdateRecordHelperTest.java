@@ -14,6 +14,7 @@ import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.DatasetService;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.communication.NotificationController;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
@@ -21,6 +22,8 @@ import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.kafka.io.KafkaSender;
 import org.eea.kafka.utils.KafkaSenderUtils;
+import org.eea.notification.event.NotificableEventHandler;
+import org.eea.notification.factory.NotificableEventFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -40,7 +43,13 @@ public class UpdateRecordHelperTest {
   private UpdateRecordHelper updateRecordHelper;
 
   @Mock
-  private KafkaSenderUtils kafkaSenderUtils;
+  private NotificationController.NotificationControllerZuul notificationControllerZuul;
+
+  @Mock
+  private NotificableEventFactory notificableEventFactory;
+
+  @Mock
+  private NotificableEventHandler notificableEventHandler;
 
   @Mock
   private DatasetService datasetService;
@@ -97,13 +106,14 @@ public class UpdateRecordHelperTest {
     List<TableVO> tables = new ArrayList<>();
     tables.add(new TableVO());
     doNothing().when(kafkaSender).sendMessage(Mockito.any());
-    doNothing().when(kafkaSenderUtils).releaseNotificableKafkaEvent(Mockito.any(), Mockito.any(), Mockito.any());
+    Mockito.when(notificableEventFactory.getNotificableEventHandler(Mockito.any())).thenReturn(notificableEventHandler);
+    Mockito.doNothing().when(notificationControllerZuul).createUserNotificationPrivate(Mockito.anyString(), Mockito.any());
     DataSetMetabaseVO dataSetMetabaseVO = new DataSetMetabaseVO();
     dataSetMetabaseVO.setId(1L);
     dataSetMetabaseVO.setDataflowId(1L);
     SecurityContextHolder.getContext().setAuthentication(authentication);
     updateRecordHelper.executeMultiCreateProcess(dataSetMetabaseVO, tables);
-    Mockito.verify(kafkaSender, times(1)).sendMessage(Mockito.any());
+    Mockito.verify(kafkaSender, times(2)).sendMessage(Mockito.any());
   }
 
   @Test
