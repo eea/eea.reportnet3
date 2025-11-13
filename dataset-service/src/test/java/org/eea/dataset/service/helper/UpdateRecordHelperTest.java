@@ -29,6 +29,8 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.util.ReflectionTestUtils;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -47,19 +49,13 @@ public class UpdateRecordHelperTest {
   private KafkaSender kafkaSender;
 
   @Mock
-  private DatasetSchemaService datasetSchemaService;
-
-  @Mock
-  private DataSchemaMapper dataSchemaMapper;
-
-  @Mock
   DatasetMetabaseService datasetMetabaseService;
 
   @Mock
   private SchemasRepository schemasRepository;
 
   @Mock
-  private FileTreatmentHelper fileTreatmentHelper;
+  private Authentication authentication;
 
   /** The records. */
   private List<RecordVO> records;
@@ -101,9 +97,11 @@ public class UpdateRecordHelperTest {
     List<TableVO> tables = new ArrayList<>();
     tables.add(new TableVO());
     doNothing().when(kafkaSender).sendMessage(Mockito.any());
+    doNothing().when(kafkaSenderUtils).releaseNotificableKafkaEvent(Mockito.any(), Mockito.any(), Mockito.any());
     DataSetMetabaseVO dataSetMetabaseVO = new DataSetMetabaseVO();
     dataSetMetabaseVO.setId(1L);
     dataSetMetabaseVO.setDataflowId(1L);
+    SecurityContextHolder.getContext().setAuthentication(authentication);
     updateRecordHelper.executeMultiCreateProcess(dataSetMetabaseVO, tables);
     Mockito.verify(kafkaSender, times(1)).sendMessage(Mockito.any());
   }
