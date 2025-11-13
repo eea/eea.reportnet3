@@ -100,7 +100,7 @@ public class JobControllerImpl implements JobController {
 
 
     @Override
-    @HystrixCommand
+    @HystrixCommand(commandProperties = {@HystrixProperty(name = "execution.isolation.thread.timeoutInMilliseconds", value = "300000")})
     @GetMapping
     @ApiOperation(value = "Gets the jobs", response = JobVO.class, responseContainer = "List", hidden = false)
     @PreAuthorize("isAuthenticated()")
