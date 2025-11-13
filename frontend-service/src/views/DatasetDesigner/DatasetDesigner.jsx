@@ -90,6 +90,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
     QuerystringUtils.getUrlParamValue('view') !== '' ? QuerystringUtils.getUrlParamValue('view') : 'design'
   );
   const [sqlValidationRunning, setSqlValidationRunning] = useState(false);
+  const [uploadingFileName, setUploadingFileName] = useState('');
 
   const [designerState, designerDispatch] = useReducer(designerReducer, {
     areLoadedSchemas: false,
@@ -1008,7 +1009,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
 
   const onUpload = async (e) => {
     const action = 'DATASET_IMPORT';
-    const fileName = e?.files?.[0]?.name || ' ';
+    const fileName = uploadingFileName || e?.files?.[0]?.name || ' ';
     actionsContext.testProcess(datasetId, action);
     manageDialogs('isImportDatasetDialogVisible', false);
     setSelectedCustomImportIntegration({ id: null, name: null });
@@ -2036,6 +2037,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
             dialogOnHide={() => {
               manageDialogs('isImportDatasetDialogVisible', false);
               setSelectedCustomImportIntegration({ id: null, name: null });
+              setUploadingFileName('');
             }}
             dialogVisible={designerState.isImportDatasetDialogVisible}
             infoTooltip={`${
@@ -2048,6 +2050,11 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
             isDialog={true}
             name="file"
             onError={onImportDatasetError}
+            onSelect={e => {
+              if (e?.files?.[0]?.name) {
+                setUploadingFileName(e.files[0].name);
+              }
+            }}
             onUpload={onUpload}
             replaceCheck={true}
             url={`${window.env.REACT_APP_BACKEND}${
