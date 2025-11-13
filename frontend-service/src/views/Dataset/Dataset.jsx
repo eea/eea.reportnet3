@@ -146,6 +146,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   const [validationsVisible, setValidationsVisible] = useState(false);
   const [webformData, setWebformData] = useState(null);
   const [webformOptions, setWebformOptions] = useState([]);
+  const [uploadingFileName, setUploadingFileName] = useState('');
 
   let exportMenuRef = useRef();
   let importMenuRef = useRef();
@@ -1015,7 +1016,8 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
 
   const onUpload = async (e) => {
     const action = 'DATASET_IMPORT';
-    const fileName = e?.files?.[0]?.name || ' ';
+    const fileName = uploadingFileName || e?.files?.[0]?.name || ' ';
+    actionsContext.testProcess(datasetId, action);
 
     actionsContext.testProcess(datasetId, action);
     setIsImportDatasetDialogVisible(false);
@@ -1420,6 +1422,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
           dialogOnHide={() => {
             setIsImportDatasetDialogVisible(false);
             setSelectedCustomImportIntegration({ id: null, name: null });
+            setUploadingFileName('');
           }}
           dialogVisible={isImportDatasetDialogVisible}
           infoTooltip={`${
@@ -1432,6 +1435,11 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
           isDialog={true}
           name="file"
           onError={onImportDatasetError}
+          onSelect={e => {
+            if (e?.files?.[0]?.name) {
+              setUploadingFileName(e.files[0].name);
+            }
+          }}
           onUpload={onUpload}
           replaceCheck={true}
           url={`${window.env.REACT_APP_BACKEND}${
