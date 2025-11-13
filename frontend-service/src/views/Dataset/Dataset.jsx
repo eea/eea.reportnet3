@@ -155,6 +155,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   const [editedTables, setEditedTables] = useState({});
   const [tableImportedMetadata, setTableImportedMetadata] = useState({});
   const [isImportedFilesDialogVisible, setIsImportedFilesDialogVisible] = useState(false);
+  const [uploadingFileName, setUploadingFileName] = useState('');
 
   const { resetFiltersState: resetDatasetInfoFiltersState } = useFilters('datasetInfo');
   const { resetFiltersState: resetUserListFiltersState } = useFilters('userList');
@@ -1203,7 +1204,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
     setSelectedCustomImportIntegration({ id: null, name: null });
 
     const action = 'DATASET_IMPORT';
-    const fileName = e?.files?.[0]?.name || ' ';
+    const fileName = uploadingFileName || e?.files?.[0]?.name || ' ';
     actionsContext.testProcess(datasetId, action);
 
     if (!metadata?.dataflow.bigData) {
@@ -1668,6 +1669,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
           dialogOnHide={() => {
             setIsImportDatasetDialogVisible(false);
             setSelectedCustomImportIntegration({ id: null, name: null });
+            setUploadingFileName('');
           }}
           dialogVisible={isImportDatasetDialogVisible}
           infoTooltip={`${
@@ -1682,6 +1684,11 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
           name="file"
           onChangeImportDialogVisibility={onChangeImportDialogVisibility}
           onError={onImportDatasetError}
+          onSelect={e => {
+            if (e?.files?.[0]?.name) {
+              setUploadingFileName(e.files[0].name);
+            }
+          }}
           onUpload={onUpload}
           providerId={metadata?.dataset.dataProviderId}
           replaceCheck={true}
