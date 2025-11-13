@@ -18,9 +18,12 @@ const useBigButtonListRepresentative = ({
   dataProviderId,
   getDataHistoricReleases,
   handleRedirect,
+  isAdmin,
+  isCustodian,
   isLeadReporterOfCountry,
   onLoadReceiptData,
   onOpenReleaseConfirmDialog,
+  onOpenSilentReleaseConfirmDialog,
   onShowHistoricReleases,
   representativeId,
   onShowReleaseSnapshots,
@@ -254,7 +257,33 @@ const useBigButtonListRepresentative = ({
     }
   ];
 
+  const onBuildSilentReleaseButton = () => [
+    {
+      buttonClass: 'schemaDataset',
+      buttonIcon: getIsReleasing() ? 'spinner' : 'released',
+      buttonIconClass: getIsReleasing() ? 'spinner' : 'released',
+      caption: resourcesContext.messages['releaseDataCollectionSilently'],
+      enabled: !dataflowState.hasIcebergTables && dataflowState.isReleasable && !getIsReleasing(),
+      handleRedirect:
+        !dataflowState.hasIcebergTables && dataflowState.isReleasable && !getIsReleasing()
+          ? () => onOpenSilentReleaseConfirmDialog()
+          : () => {},
+      helpClassName: 'dataflow-big-buttons-release-help-step',
+      infoStatus: isReleased,
+      infoStatusIcon: true,
+      layout: 'defaultBigButton',
+      restrictFromPublicAccess:
+        isLeadReporterOfCountry && !TextUtils.areEquals(dataflowState.status, 'business') && !getIsReleasing(),
+      restrictFromPublicInfo: dataflowState.data.showPublicInfo && isReleased,
+      restrictFromPublicIsUpdating: dataflowState.restrictFromPublicIsUpdating.value,
+      restrictFromPublicStatus: representative?.restrictFromPublic,
+      tooltip: dataflowState.isReleasable ? '' : resourcesContext.messages['releaseButtonTooltip'],
+      visibility: buttonsVisibility.release
+    }
+  ];
+
   const releaseBigButton = onBuildReleaseButton();
+  const silentReleaseButton = onBuildSilentReleaseButton();
 
   return [
     helpButton,
@@ -263,6 +292,9 @@ const useBigButtonListRepresentative = ({
     ...groupByRepresentativeModels,
     ...receiptBigButton,
     ...releaseBigButton,
+    ...(isAdmin || isCustodian
+      ? silentReleaseButton
+      : []),
     ...testDatasetsModels
   ];
 };
