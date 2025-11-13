@@ -157,7 +157,10 @@ export const ImportTableDataDialog = ({
           dataflowId={dataflowId}
           datasetId={datasetId}
           dialogHeader={`${resourcesContext.messages['uploadTable']}${tableName}`}
-          dialogOnHide={() => {setImportTableDialogVisible(false), setUploadingFileName('')}}
+          dialogOnHide={() => {
+            setImportTableDialogVisible(false);
+            setUploadingFileName('');
+          }}
           dialogVisible={importTableDialogVisible}
           infoTooltip={`${resourcesContext.messages['supportedFileExtensionsTooltip']} .csv`}
           invalidExtensionMessage={resourcesContext.messages['invalidExtensionFile']}
