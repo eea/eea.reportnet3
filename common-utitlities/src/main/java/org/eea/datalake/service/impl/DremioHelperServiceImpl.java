@@ -468,6 +468,7 @@ public class DremioHelperServiceImpl implements DremioHelperService {
         executeSqlStatement(refreshTableAndDemoteQuery);
         Thread.sleep(2000);
         executeSqlStatement(refreshTableAndPromoteQuery);
+        Thread.sleep(2000);
         LOG.info("Failover demote promote - Ended");
     }
 
