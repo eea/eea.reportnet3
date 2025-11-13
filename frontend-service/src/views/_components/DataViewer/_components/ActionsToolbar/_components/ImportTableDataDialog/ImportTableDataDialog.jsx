@@ -149,7 +149,10 @@ export const ImportTableDataDialog = ({
           bigData={bigData}
           chooseLabel={resourcesContext.messages['selectFile']}
           dialogHeader={`${resourcesContext.messages['uploadTable']}${tableName}`}
-          dialogOnHide={() => {setImportTableDialogVisible(false), setUploadingFileName('')}}
+          dialogOnHide={() => {
+            setImportTableDialogVisible(false);
+            setUploadingFileName('');
+          }}
           dialogVisible={importTableDialogVisible}
           infoTooltip={`${resourcesContext.messages['supportedFileExtensionsTooltip']} .csv`}
           invalidExtensionMessage={resourcesContext.messages['invalidExtensionFile']}
