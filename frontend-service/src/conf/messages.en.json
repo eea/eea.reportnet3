@@ -1813,6 +1813,7 @@
     "importRestartFailedEvent": "Import restart failed for <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>, {:error}",
     "importFailedEventIcebergExists": "Import failed for <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a> because there is a manually editable table in the dataflow",
     "importFieldSizeExceedsLimitWarningEvent": "For <strong title='{:tableName}'>{:tableName}</strong>, and field : <strong title='{:fieldName}'>{:fieldName}</strong>, those lines have not been imported due to size limitation of the geoSpatial data field : <strong title='{:recordLines}'>{:recordLines}</strong> ",
+    "importMultilineTextCharLimitWarningEvent": "The field: <strong title='{:fieldName}'>{:fieldName}</strong> on table: <strong title='{:tableName}'>{:tableName}</strong>, exceeded the limit of 10000 characters. The value was not imported.",
     "longRunningImportFailedEvent": "Long running import failed for <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
     "fmeImportJobFailedEvent": "Fme import failed for <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
     "fmeImportJobFailedEventNoFileReturned": "Fme import failed for <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>. FME did not returned a file.",
