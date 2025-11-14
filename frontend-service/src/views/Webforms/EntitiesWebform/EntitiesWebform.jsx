@@ -83,7 +83,6 @@ export const EntitiesWebform = ({
   useEffect(() => initialLoad(), [tables]);
 
   useEffect(() => {
-    if (bigData) {
       const matchedNotifications = notificationContext.hidden.filter(
         ({ key }) => key === 'INSERT_RECORDS_MULTI_TABLES_COMPLETED' || key === 'INSERT_RECORDS_MULTI_TABLES_FAILED'
       );
@@ -108,7 +107,6 @@ export const EntitiesWebform = ({
       } else if (matchedWithDatasetId?.key === 'INSERT_RECORDS_MULTI_TABLES_FAILED') {
         resetAddEntityState();
       }
-    }
   }, [notificationContext.hidden]);
 
   useEffect(() => {

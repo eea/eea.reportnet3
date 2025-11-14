@@ -1107,17 +1107,16 @@ public class DatasetControllerImpl implements DatasetController {
     try {
       LOG.info("PaM/Entity group save: Inserting multiple records for datasetId {}", datasetId);
       DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
+      //send init event for frontend
+      UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
+      userNotificationContentVO.setDatasetId(datasetId);
+      notificationControllerZuul.createUserNotificationPrivate("INSERT_RECORDS_MULTI_TABLES_INIT", userNotificationContentVO);
       if(dataFlowControllerZuul.isBigDataflow(dataSetMetabaseVO.getDataflowId())){
-        //send init event for frontend
-        UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
-        userNotificationContentVO.setDatasetId(datasetId);
-        notificationControllerZuul.createUserNotificationPrivate("INSERT_RECORDS_MULTI_TABLES_INIT", userNotificationContentVO);
         bigDataDatasetService.insertRecordsInMultipleTables(dataSetMetabaseVO, tableRecords);
       }
       else{
-        updateRecordHelper.executeMultiCreateProcess(datasetId, tableRecords);
+        updateRecordHelper.executeMultiCreateProcess(dataSetMetabaseVO, tableRecords);
       }
-      LOG.info("PaM/Entity group save: Successfully inserted multiple records for datasetId {}", datasetId);
     } catch (EEAException e) {
       LOG.error("Error inserting records for datasetId {} Message : {}", datasetId, e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
