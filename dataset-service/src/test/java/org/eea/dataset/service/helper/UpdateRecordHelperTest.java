@@ -32,7 +32,9 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -103,15 +105,20 @@ public class UpdateRecordHelperTest {
   @Test
   public void executeMultiCreateProcessTest()
       throws EEAException, IOException, InterruptedException {
+
     List<TableVO> tables = new ArrayList<>();
     tables.add(new TableVO());
     doNothing().when(kafkaSender).sendMessage(Mockito.any());
     Mockito.when(notificableEventFactory.getNotificableEventHandler(Mockito.any())).thenReturn(notificableEventHandler);
     Mockito.doNothing().when(notificationControllerZuul).createUserNotificationPrivate(Mockito.anyString(), Mockito.any());
+
+    SecurityContext context = SecurityContextHolder.createEmptyContext();
+    context.setAuthentication(new UsernamePasswordAuthenticationToken("testUser", "testPassword"));
+    SecurityContextHolder.setContext(context);
+
     DataSetMetabaseVO dataSetMetabaseVO = new DataSetMetabaseVO();
     dataSetMetabaseVO.setId(1L);
     dataSetMetabaseVO.setDataflowId(1L);
-    SecurityContextHolder.getContext().setAuthentication(authentication);
     updateRecordHelper.executeMultiCreateProcess(dataSetMetabaseVO, tables);
     Mockito.verify(kafkaSender, times(2)).sendMessage(Mockito.any());
   }
