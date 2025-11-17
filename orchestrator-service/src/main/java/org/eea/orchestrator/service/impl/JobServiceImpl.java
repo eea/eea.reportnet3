@@ -480,14 +480,22 @@ public class JobServiceImpl implements JobService {
     }
 
     @Override
-    public void releaseReleaseRefusedNotification(Long jobId, String user, Long dataflowId, Long providerId){
+    public void releaseReleaseRefusedNotification(Long jobId, String user, Long dataflowId, Long providerId, Boolean silentRelease){
         Map<String, Object> value = new HashMap<>();
         value.put(LiteralConstants.USER, user);
         value.put("release_job_id", jobId);
         try {
-            kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.RELEASE_REFUSED_EVENT, value,
-                    NotificationVO.builder().user(user).dataflowId(dataflowId).providerId(providerId)
-                            .error("There is another job with status QUEUED or IN_PROGRESS for dataflowId " + dataflowId + " and providerId " + providerId).build());
+            if(BooleanUtils.isTrue(silentRelease)) {
+                //this event will not produce any notifications to the user because frontend will never show it in the user notifications
+                kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.SILENT_RELEASE_FAILED_EVENT, value,
+                        NotificationVO.builder().user(user).dataflowId(dataflowId).providerId(providerId)
+                                .error("There is another job with status QUEUED or IN_PROGRESS for dataflowId " + dataflowId + " and providerId " + providerId).build());
+            }
+            else{
+                kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.RELEASE_REFUSED_EVENT, value,
+                        NotificationVO.builder().user(user).dataflowId(dataflowId).providerId(providerId)
+                                .error("There is another job with status QUEUED or IN_PROGRESS for dataflowId " + dataflowId + " and providerId " + providerId).build());
+            }
         } catch (EEAException e) {
             LOG.error("Could not release RELEASE_REFUSED_EVENT for jobId {} , dataflowId {} , providerId {} and user {}. Error Message: ", jobId, dataflowId, providerId, user, e);
         }

@@ -1,8 +1,8 @@
-package org.eea.dataset.io.notification.events;
+package org.eea.orchestrator.io.notification.events;
 
-import org.eea.dataset.service.DatasetService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.RepresentativeController;
+import org.eea.interfaces.controller.dataset.DatasetController;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
@@ -25,7 +25,7 @@ public class SilentReleaseCompletedEvent implements NotificableEventHandler {
 
     /** The dataset service. */
     @Autowired
-    private DatasetService datasetService;
+    private DatasetController datasetController;
 
     /** The representative controller zuul. */
     @Autowired
@@ -52,7 +52,7 @@ public class SilentReleaseCompletedEvent implements NotificableEventHandler {
     @Override
     public Map<String, Object> getMap(NotificationVO notificationVO) throws EEAException {
         Long dataflowId = notificationVO.getDataflowId() != null ? notificationVO.getDataflowId()
-                : datasetService.getDataFlowIdById(notificationVO.getDatasetId());
+                : datasetController.getDataFlowIdById(notificationVO.getDatasetId());
 
         String dataProviderLabel = "";
         if (null != notificationVO.getProviderId()) {

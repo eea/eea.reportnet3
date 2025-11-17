@@ -717,6 +717,10 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
         if(!silentRelease) {
           releaseEvent(EventType.RELEASE_FAILED_EVENT, idSnapshot, e.getMessage(), value);
         }
+        else{
+          //this event will not produce any notifications to the user because frontend will never show it in the user notifications
+          releaseEvent(EventType.SILENT_RELEASE_FAILED_EVENT, idSnapshot, e.getMessage(), value);
+        }
         removeLockRelatedToCopyDataToEUDataset(idDataflow);
         releaseLocksRelatedToRelease(idDataflow, idDataProvider);
       }
@@ -724,6 +728,10 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       LOG.error("Error in release snapshot {} of processId {}", idSnapshot, processId);
       if(!silentRelease) {
         releaseEvent(EventType.RELEASE_FAILED_EVENT, idSnapshot, "Error in release snapshot", value);
+      }
+      else{
+        //this event will not produce any notifications to the user because frontend will never show it in the user notifications
+        releaseEvent(EventType.SILENT_RELEASE_FAILED_EVENT, idSnapshot, "Error in release snapshot", value);
       }
       removeLockRelatedToCopyDataToEUDataset(idDataflow);
       releaseLocksRelatedToRelease(idDataflow, idDataProvider);

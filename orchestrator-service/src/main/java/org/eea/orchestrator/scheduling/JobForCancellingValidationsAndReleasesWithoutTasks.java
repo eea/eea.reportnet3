@@ -147,8 +147,16 @@ public class JobForCancellingValidationsAndReleasesWithoutTasks {
                                 kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.VALIDATION_CANCELED_EVENT, value,
                                         NotificationVO.builder().datasetId(jobVO.getDatasetId()).user(user).error("No tasks created").build());
                             } else {
-                                kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.RELEASE_CANCELED_EVENT, value,
-                                        NotificationVO.builder().dataflowId(jobVO.getDataflowId()).providerId(jobVO.getProviderId()).user(user).error("No tasks created").jobId(jobId).build());
+                                boolean isSilentRelease = Boolean.TRUE.equals(jobVO.getParameters().get("silentRelease"));
+                                if(!isSilentRelease) {
+                                    kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.RELEASE_CANCELED_EVENT, value,
+                                            NotificationVO.builder().dataflowId(jobVO.getDataflowId()).providerId(jobVO.getProviderId()).user(user).error("No tasks created").jobId(jobId).build());
+                                }
+                                else{
+                                    //this event will not produce any notifications to the user because frontend will never show it in the user notifications
+                                    kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.SILENT_RELEASE_FAILED_EVENT, value,
+                                            NotificationVO.builder().dataflowId(jobVO.getDataflowId()).providerId(jobVO.getProviderId()).user(user).error("No tasks created").jobId(jobId).build());
+                                }
                             }
                         }
                     } catch (Exception e) {

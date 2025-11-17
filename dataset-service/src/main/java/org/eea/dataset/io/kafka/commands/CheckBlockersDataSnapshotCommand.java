@@ -225,6 +225,16 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
                           .error("There is another job with status QUEUED or IN_PROGRESS for dataflowId " + dataset.getDataflowId() + " and providerId " + dataset.getDataProviderId()).build());
           return;
         }
+        else{
+          //this event will not produce any notifications to the user because frontend will never show it in the user notifications
+          Map<String, Object> value = new HashMap<>();
+          value.put(LiteralConstants.USER, user);
+          value.put("release_job_id", releaseJob.getId());
+          kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.SILENT_RELEASE_FAILED_EVENT, value,
+                  NotificationVO.builder().user(user).dataflowId(dataset.getDataflowId()).providerId(dataset.getDataProviderId())
+                          .error("There is another job with status QUEUED or IN_PROGRESS for dataflowId " + dataset.getDataflowId() + " and providerId " + dataset.getDataProviderId()).build());
+          return;
+        }
       }
       releaseJob = addReleaseJob(user, dataset, releaseJob, statusToInsert);
 

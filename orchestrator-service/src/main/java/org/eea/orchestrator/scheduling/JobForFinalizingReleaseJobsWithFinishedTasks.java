@@ -216,12 +216,13 @@ public class JobForFinalizingReleaseJobsWithFinishedTasks {
 
                     // Change Job status to FINISHED.
                     jobService.updateJobStatus(jobVO.getId(), JobStatusEnum.FINISHED);
+                    String dataflowName = dataflow.getName();
 
                     // Send emails and notifications only if not silent release.
                     if (!isSilentRelease) {
                         // Create feedback message for eash dataset.
                         String country = dataset.getDataSetName();
-                        String dataflowName = dataflow.getName();
+
                         MessageVO messageVO = new MessageVO();
                         messageVO.setProviderId(providerId);
                         messageVO.setContent(country + " released " + dataflowName + " successfully");
@@ -233,8 +234,16 @@ public class JobForFinalizingReleaseJobsWithFinishedTasks {
                         LOG.info("Automatic feedback message created of dataflow {}, datasetId {}, jobId {}, Message: {}, User: {}",
                                 dataflow.getId(), dataset.getId(), jobVO.getId(), messageVO.getContent(), jobVO.getCreatorUsername());
 
-                        // Notification send to reporting user for dataflow release jobe completion.
+                        // Notification send to reporting user for dataflow release job completion.
                         kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.RELEASE_COMPLETED_EVENT, null,
+                                NotificationVO.builder()
+                                        .user(jobVO.getCreatorUsername())
+                                        .dataflowId(dataflowId).dataflowName(dataflowName)
+                                        .providerId(providerId).build());
+                    }
+                    else{
+                        //this event will not produce any notifications to the user because frontend will never show it in the user notifications
+                        kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.SILENT_RELEASE_COMPLETED_EVENT, null,
                                 NotificationVO.builder()
                                         .user(jobVO.getCreatorUsername())
                                         .dataflowId(dataflowId).dataflowName(dataflowName)
@@ -256,7 +265,7 @@ public class JobForFinalizingReleaseJobsWithFinishedTasks {
      * @param processIds all process IDs linked to the job
      * @return true if the job was marked as FAILED (and should be skipped), false otherwise
      */
-    private boolean checkAndFailIncompleteReleaseJob(JobVO jobVO, List<Long> datasetIds, List<String> processIds, Boolean isSilentRelease) {
+    private boolean checkAndFailIncompleteReleaseJob(JobVO jobVO, List<Long> datasetIds, List<String> processIds, Boolean isSilentRelease) throws Exception {
         Long dataflowId = jobVO.getDataflowId();
         Long providerId = jobVO.getProviderId();
         String user = jobVO.getCreatorUsername();
@@ -307,21 +316,24 @@ public class JobForFinalizingReleaseJobsWithFinishedTasks {
 
             if(isSilentRelease){
                 datasetSnapshotController.rollBackSnapshotRecord(jobVO.getId(), dataflowId, providerId);
+                try {
+                    //this event will not produce any notifications to the user because frontend will never show it in the user notifications
+                    kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.SILENT_RELEASE_FAILED_EVENT, null, NotificationVO.builder().dataflowId(dataflowId).providerId(providerId).user(user)
+                                    .error("Incomplete release: Not all datasets were able to release").jobId(jobVO.getId()).build()
+                    );
+                } catch (Exception e) {
+                    LOG.error("Could not send kafka event SILENT_RELEASE_FAILED_EVENT for jobId {}", jobVO.getId());
+                    throw e;
+                }
+
             } else
                 try {
-                    kafkaSenderUtils.releaseNotificableKafkaEvent(
-                            EventType.RELEASE_CANCELED_EVENT,
-                            null,
-                            NotificationVO.builder()
-                                    .dataflowId(dataflowId)
-                                    .providerId(providerId)
-                                    .user(user)
-                                    .error("Incomplete release: Not all datasets were able to release")
-                                    .jobId(jobVO.getId())
-                                    .build()
+                    kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.RELEASE_CANCELED_EVENT, null, NotificationVO.builder().dataflowId(dataflowId).providerId(providerId)
+                                    .user(user).error("Incomplete release: Not all datasets were able to release").jobId(jobVO.getId()).build()
                     );
-                    } catch (EEAException e) {
-                    throw new RuntimeException(e);
+                } catch (Exception e) {
+                    LOG.error("Could not send kafka event RELEASE_CANCELED_EVENT for jobId {}", jobVO.getId());
+                    throw e;
                 }
             return true;
         }
