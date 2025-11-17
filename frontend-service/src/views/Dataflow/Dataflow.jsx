@@ -302,11 +302,17 @@ export const Dataflow = () => {
     }
   }, [userContext, dataflowState]);
 
-  useEffect(() => {
+  /*useEffect(() => {
     if (notificationContext.hidden.some(notification => notification.key === 'EXPORT_USERS_BY_COUNTRY_FAILED_EVENT')) {
       setIsDownloadingUsers(false);
     }
-  }, [notificationContext.hidden]);
+  }, [notificationContext.hidden]);*/
+
+  /*useEffect(() => {
+   if (notificationContext.hidden.some(notification => notification.key === 'EXPORT_USERS_BY_COUNTRY_FAILED_EVENT')) {
+     setIsDownloadingUsers(false);
+   }
+ }, [notificationContext.hidden]);*/
 
   const exportImportMenuItems = [
     {
@@ -1001,7 +1007,8 @@ export const Dataflow = () => {
 
   const goToDataflowsPage = () => navigate(getUrl(routes.DATAFLOWS));
 
-  useCheckNotifications(['RELEASE_COMPLETED_EVENT', 'RELEASE_PROVIDER_COMPLETED_EVENT'], onLoadReportingDataflow);
+  useCheckNotifications(['RELEASE_COMPLETED_EVENT', 'RELEASE_PROVIDER_COMPLETED_EVENT', 'SILENT_RELEASE_COMPLETED_EVENT'], onLoadReportingDataflow);
+  useCheckNotifications(['SILENT_RELEASE_COMPLETED_EVENT'], onLoadReportingDataflow);
   useCheckNotifications(['DELETE_DATAFLOW_COMPLETED_EVENT'], goToDataflowsPage);
 
   useCheckNotifications(
