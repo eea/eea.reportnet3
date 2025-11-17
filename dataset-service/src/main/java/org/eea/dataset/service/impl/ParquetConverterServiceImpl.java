@@ -57,6 +57,7 @@ import org.eea.utils.UtilityClass;
 import org.mozilla.universalchardet.UniversalDetector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -123,6 +124,8 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
 
   private DatasetTableService datasetTableService;
 
+  private CreateEmptyTables createEmptyTables;
+
   public ParquetConverterServiceImpl(FileCommonUtils fileCommonUtils,
                                      DremioHelperService dremioHelperService,
                                      S3ServiceImpl s3Service,
@@ -139,7 +142,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
                                      DataSetMetabaseMapper dataSetMetabaseMapper,
                                      StatisticsService statisticsService,
                                      ReleaseFieldLimitWarningComponentImpl releaseFieldLimitWarningComponent,
-                                     DatasetTableService datasetTableService) {
+                                     DatasetTableService datasetTableService, CreateEmptyTables createEmptyTables) {
     this.fileCommonUtils = fileCommonUtils;
     this.dremioHelperService = dremioHelperService;
     this.s3Service = s3Service;
@@ -157,6 +160,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
     this.statisticsService = statisticsService;
     this.releaseFieldLimitWarningComponent = releaseFieldLimitWarningComponent;
     this.datasetTableService = datasetTableService;
+    this.createEmptyTables = createEmptyTables;
   }
 
   @Override
@@ -352,7 +356,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
 
       boolean needToDemoteTable = true;
       if (datasetType.equals(DatasetTypeEnum.DESIGN)) {
-        s3Helper.deleteTableIfEmpty(tableSchemaName, s3TablePathResolver, dremioHelperService);
+        createEmptyTables.deleteTableIfEmpty(tableSchemaName, s3TablePathResolver);
       }
 
 
