@@ -105,6 +105,9 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
   @Value("${dremio.spatialdata.batch.size}")
   private Integer spatialDataBatchSize;
 
+  @Value("${dataset.fieldMaxLength}")
+  private int fieldMaxLength;
+
   private final FileCommonUtils fileCommonUtils;
   private final FileTreatmentHelper fileTreatmentHelper;
   private final DremioHelperService dremioHelperService;
@@ -833,7 +836,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
           }
         }
 
-        if (value != null && value.length() > 10000) {
+        if (value != null && value.length() > fieldMaxLength) {
           // Record warning info.
           if (textFieldLengthInfo.getFieldName() == null) {
             textFieldLengthInfo.setFieldName(expectedHeaderName);

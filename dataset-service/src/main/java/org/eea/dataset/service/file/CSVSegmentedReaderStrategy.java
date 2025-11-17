@@ -448,7 +448,7 @@ public class CSVSegmentedReaderStrategy {
                                 field.setValue("");
                                 break;
                             case TEXTAREA:
-                              if (value != null && value.length() > 10000) {
+                              if (value != null && value.length() > fieldMaxLength) {
                                 if (textFieldLengthInfo.getFieldName() == null) {
                                   textFieldLengthInfo.setFieldName(fieldSchema.getHeaderName());
                                 }
