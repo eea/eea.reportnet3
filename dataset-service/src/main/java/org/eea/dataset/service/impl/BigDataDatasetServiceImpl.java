@@ -1565,7 +1565,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         }
 
         if (datasetMetabaseService.getDatasetType(datasetId).equals(DatasetTypeEnum.DESIGN)) {
-            s3HelperPrivate.deleteTableIfEmpty(tableSchemaName, s3IcebergTablePathResolver, dremioHelperService);
+            createEmptyTables.deleteTableIfEmpty(tableSchemaName, s3IcebergTablePathResolver);
         }
 
         //check if table exists and if not create it
