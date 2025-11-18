@@ -302,17 +302,15 @@ export const Dataflow = () => {
     }
   }, [userContext, dataflowState]);
 
-  /*useEffect(() => {
+  useEffect(() => {
     if (notificationContext.hidden.some(notification => notification.key === 'EXPORT_USERS_BY_COUNTRY_FAILED_EVENT')) {
       setIsDownloadingUsers(false);
     }
-  }, [notificationContext.hidden]);*/
+  }, [notificationContext.hidden]);
 
-  /*useEffect(() => {
-   if (notificationContext.hidden.some(notification => notification.key === 'EXPORT_USERS_BY_COUNTRY_FAILED_EVENT')) {
-     setIsDownloadingUsers(false);
-   }
- }, [notificationContext.hidden]);*/
+  useEffect(() => {
+    console.log('🔔 Hidden notifications:', notificationContext.hidden);
+  }, [notificationContext])
 
   const exportImportMenuItems = [
     {
@@ -1011,6 +1009,11 @@ export const Dataflow = () => {
   useCheckNotifications(['SILENT_RELEASE_COMPLETED_EVENT'], onLoadReportingDataflow);
   useCheckNotifications(['DELETE_DATAFLOW_COMPLETED_EVENT'], goToDataflowsPage);
 
+  useEffect(() => {
+    const response = notificationContext.hidden.find(notification => notification.key === 'SILENT_RELEASE_COMPLETED_EVENT');
+    response && onLoadReportingDataflow();
+  }, [notificationContext]);
+
   useCheckNotifications(
     [
       'RELEASE_FAILED_EVENT',
@@ -1101,7 +1104,7 @@ export const Dataflow = () => {
   const onConfirmSilentRelease = async () => {
     console.log(dataflowState);
     try {
-      notificationContext.add({ type: 'RELEASE_START_EVENT' });
+      notificationContext.hidden.add({ type: 'RELEASE_START_EVENT' });
       await SnapshotService.silentRelease(dataflowId, dataProviderId, dataflowState.restrictFromPublic);
 
       dataflowState.data.datasets

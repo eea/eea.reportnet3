@@ -19,7 +19,6 @@ const useBigButtonListRepresentative = ({
   getDataHistoricReleases,
   handleRedirect,
   isAdmin,
-  isCustodian,
   isLeadReporterOfCountry,
   onLoadReceiptData,
   onOpenReleaseConfirmDialog,
@@ -292,7 +291,7 @@ const useBigButtonListRepresentative = ({
     ...groupByRepresentativeModels,
     ...receiptBigButton,
     ...releaseBigButton,
-    ...(isAdmin || isCustodian
+    ...(isAdmin
       ? silentReleaseButton
       : []),
     ...testDatasetsModels

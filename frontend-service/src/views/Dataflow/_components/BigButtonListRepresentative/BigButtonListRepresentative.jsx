@@ -139,7 +139,6 @@ export const BigButtonListRepresentative = ({
               getDataReleaseSnapshots,
               handleRedirect,
               isAdmin,
-              isCustodian,
               isLeadReporterOfCountry,
               onLoadReceiptData,
               onOpenReleaseConfirmDialog,
