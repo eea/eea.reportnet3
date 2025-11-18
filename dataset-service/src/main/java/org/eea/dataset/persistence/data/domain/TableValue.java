@@ -27,8 +27,7 @@ import org.hibernate.annotations.BatchSize;
 @Getter
 @Setter
 @ToString
-@Table(name = "table_value", schema = "dataset_0")
-@BatchSize(size = 1)
+@Table(name = "table_value")
 public class TableValue {
 
 

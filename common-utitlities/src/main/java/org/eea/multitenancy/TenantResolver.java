@@ -27,7 +27,7 @@ public final class TenantResolver extends ThreadPropertiesManager {
    */
   public static String getTenantName() {
     Map<String, Object> properties = thread.get();
-    String datasetName = "";
+    String datasetName = "dataset_0"; // default schema
     if (null != properties && !properties.isEmpty()) {
       Object value = properties.get(LiteralConstants.DATASET_NAME);
       if (null != value && StringUtils.isNotEmpty(value.toString())) {
