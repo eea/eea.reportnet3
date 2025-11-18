@@ -59,6 +59,7 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
   const isAdmin = userContext.hasPermission([permissions.roles.ADMIN.key]);
   const isCustodian = userContext.hasPermission([permissions.roles.CUSTODIAN.key, permissions.roles.STEWARD.key]);
   const isProvider = userContext.hasPermission([permissions.roles.LEAD_REPORTER.key]);
+  const shouldRestrictToProviderData = isProvider && !isAdmin && !isCustodian;
 
   const [activeIndex, setActiveIndex] = useState(0);
   const [expandedRows, setExpandedRows] = useState(null);
@@ -121,7 +122,7 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
         setRemainingJobs(data.remainingJobs);
       } else {
         const adminCustodianTabChange = index && page === undefined && (isCustodian || isAdmin);
-        const providerTabChange = index && !page && isProvider;
+        const providerTabChange = index && !page && shouldRestrictToProviderData;
 
         if (!adminCustodianTabChange) {
           if (providerTabChange || (!isEmpty(filterBy) && (index === undefined || page !== undefined))) {
@@ -157,13 +158,13 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
       }
 
       if (monitoringTab || (!isEmpty(filterBy) && !(index && !page))) {
-        if (isProvider && !providersTotalRecords) {
+        if (shouldRestrictToProviderData && !providersTotalRecords) {
           setProvidersTotalRecords(data.filteredRecords);
-        } else if (index !== undefined && !page && !(isCustodian || isAdmin)) {
+        } else if (index !== undefined && !page && shouldRestrictToProviderData) {
           setProvidersTotalRecords(data.filteredRecords);
         }
 
-        if (isProvider && Object.keys(filterBy).length === 1) {
+        if (shouldRestrictToProviderData && Object.keys(filterBy).length === 1) {
           setIsFiltered(FiltersUtils.getIsFiltered({}));
         } else {
           setIsFiltered(FiltersUtils.getIsFiltered(filterBy));
@@ -279,12 +280,12 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
       {
         key: 'ruleLevelError',
         header: resourcesContext.messages['ruleLevelError'],
-        template: rowData => <span>{rowData.ruleLevelError}</span>, 
+        template: rowData => <span>{rowData.ruleLevelError}</span>,
         className: styles.smallColumn,
         style: { width: '6rem' }
       }
     ];
-  
+
     return columns.map(column => (
       <Column
         body={column.template}
@@ -292,7 +293,7 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
         field={column.key}
         header={column.header}
         key={column.key}
-        sortable={column.key !== 'buttonsUniqueId' && column.key !== 'expanderColumn'} 
+        sortable={column.key !== 'buttonsUniqueId' && column.key !== 'expanderColumn'}
         style={column.style}
       />
     ));
@@ -493,12 +494,7 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
         className={config.jobRunningStatus[job.jobStatus].label}
         type={resourcesContext.messages[config.jobRunningStatus[job.jobStatus].label]}
       />
-      {job.jobInfo && (
-      <i
-      className="pi pi-info-circle" 
-    />
-    )
-    }
+      {job.jobInfo && <i className="pi pi-info-circle" />}
     </div>
   );
 
@@ -663,7 +659,7 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
       className="lineItems"
       isJobsStatuses={true}
       isLoading={loadingStatus === 'pending'}
-      isProvider={isProvider}
+      isProvider={shouldRestrictToProviderData}
       onFilter={() => setPagination({ firstRow: 0, numberRows: pagination.numberRows, pageNum: 0 })}
       onReset={() => {
         setPagination({ firstRow: 0, numberRows: pagination.numberRows, pageNum: 0 });
@@ -673,7 +669,7 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
         }
       }}
       options={filterOptions}
-      providerUsername={userContext.preferredUsername}
+      providerUsername={shouldRestrictToProviderData ? userContext.preferredUsername : undefined}
       recoilId="jobsStatuses"
     />
   );
@@ -822,7 +818,7 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
           visible={isStatusInfoDialogVisible}>
           {jobStatus.jobInfo ? jobStatus.jobInfo : resourcesContext.messages['noJobStatusInfo']}
           <br />
-          {((jobStatus?.jobType === 'VALIDATION' || jobStatus?.jobType === 'RELEASE') && jobStatus?.jobInfo !== null)  && (
+          {(jobStatus?.jobType === 'VALIDATION' || jobStatus?.jobType === 'RELEASE') && jobStatus?.jobInfo !== null && (
             <>
               <Button
                 className={`p-button-secondary ${styles.buttonPushDown}`}
@@ -839,38 +835,37 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
                   }
                 }}
               />
-              {showValidationTable && (
-                  isLoadingCancelledValidations ? (
-                    <div className={styles.noCancelledTasksContent}>
-                      <Spinner className={styles.spinnerPosition} />
-                    </div>
-                  ) : cancelledValidations.length > 0 ? (
-                    <DataTable
-                      autoLayout={true}
-                      className={styles.cancelledValidationsTable}
-                      first={paginationInfo.firstPageRecord}
-                      hasDefaultCurrentPage={true}
-                      lazy={true}
-                      loading={isLoadingCancelledValidations}
-                      onPage={onChangePage}
-                      onSort={onSortCancelledTasks}
-                      paginator={true}
-                      paginatorRight={
-                        <span>{`${resourcesContext.messages['totalRecords']} ${totalCancelledValidations}`}</span>
-                      }
-                      rowClassName={newCancelledTasksClassName}
-                      rows={paginationInfo.recordsPerPage}
-                      rowsPerPageOptions={[5, 10, 15]}
-                      sortField={sortCancelled.field}
-                      sortOrder={sortCancelled.order}
-                      totalRecords={totalCancelledValidations}
-                      value={cancelledValidations}>
-                      {getCancelledValidationsColumns()}
-                    </DataTable>
-                  ) : (
-                    <p className={styles.emptyArrayMessage}>{resourcesContext.messages['noCancelledTasks']}</p>
-                  )
-              )}
+              {showValidationTable &&
+                (isLoadingCancelledValidations ? (
+                  <div className={styles.noCancelledTasksContent}>
+                    <Spinner className={styles.spinnerPosition} />
+                  </div>
+                ) : cancelledValidations.length > 0 ? (
+                  <DataTable
+                    autoLayout={true}
+                    className={styles.cancelledValidationsTable}
+                    first={paginationInfo.firstPageRecord}
+                    hasDefaultCurrentPage={true}
+                    lazy={true}
+                    loading={isLoadingCancelledValidations}
+                    onPage={onChangePage}
+                    onSort={onSortCancelledTasks}
+                    paginator={true}
+                    paginatorRight={
+                      <span>{`${resourcesContext.messages['totalRecords']} ${totalCancelledValidations}`}</span>
+                    }
+                    rowClassName={newCancelledTasksClassName}
+                    rows={paginationInfo.recordsPerPage}
+                    rowsPerPageOptions={[5, 10, 15]}
+                    sortField={sortCancelled.field}
+                    sortOrder={sortCancelled.order}
+                    totalRecords={totalCancelledValidations}
+                    value={cancelledValidations}>
+                    {getCancelledValidationsColumns()}
+                  </DataTable>
+                ) : (
+                  <p className={styles.emptyArrayMessage}>{resourcesContext.messages['noCancelledTasks']}</p>
+                ))}
             </>
           )}
         </Dialog>
