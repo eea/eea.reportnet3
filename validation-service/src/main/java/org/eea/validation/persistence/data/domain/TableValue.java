@@ -26,7 +26,7 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-@Table(name = "table_value", schema = "dataset_0")
+@Table(name = "table_value")
 public class TableValue {
 
   /**

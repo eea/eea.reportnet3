@@ -29,7 +29,7 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-@Table(name = "field_value", schema = "dataset_0")
+@Table(name = "field_value")
 public class FieldValue {
 
   /** The id. */
