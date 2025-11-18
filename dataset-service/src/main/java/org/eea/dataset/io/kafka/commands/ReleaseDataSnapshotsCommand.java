@@ -283,6 +283,7 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
                   messageVO.getContent());
         }
         else{
+          LOG.info("Sending SILENT_RELEASE_COMPLETED_EVENT event for jobId {}", jobId);
           //this event will not produce any notifications to the user because frontend will never show it in the user notifications
           kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.SILENT_RELEASE_COMPLETED_EVENT, null,
                   NotificationVO.builder()

@@ -226,6 +226,7 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
           return;
         }
         else{
+          LOG.info("Sending SILENT_RELEASE_FAILED_EVENT event for jobId {}", releaseJob.getId());
           //this event will not produce any notifications to the user because frontend will never show it in the user notifications
           Map<String, Object> value = new HashMap<>();
           value.put(LiteralConstants.USER, user);

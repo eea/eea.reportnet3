@@ -80,7 +80,7 @@ public class JobForCancellingValidationsAndReleasesWithoutTasks {
     }
 
     /**
-     * The job runs every hour. It finds validation processes that have status=IN_PROGRESS for more than maxTimeInMinutesForInProgressValidationWithoutTasks
+     * The job runs every hour. It finds validation and release processes that have status=IN_PROGRESS for more than maxTimeInMinutesForInProgressValidationWithoutTasks
      * and have no tasks created and sets their status to CANCELED
      */
     public void cancelInProgressValidationsAndReleasesWithoutTasks() {
@@ -153,6 +153,7 @@ public class JobForCancellingValidationsAndReleasesWithoutTasks {
                                             NotificationVO.builder().dataflowId(jobVO.getDataflowId()).providerId(jobVO.getProviderId()).user(user).error("No tasks created").jobId(jobId).build());
                                 }
                                 else{
+                                    LOG.info("Sending SILENT_RELEASE_FAILED_EVENT event for jobId {}", jobId);
                                     //this event will not produce any notifications to the user because frontend will never show it in the user notifications
                                     kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.SILENT_RELEASE_FAILED_EVENT, value,
                                             NotificationVO.builder().dataflowId(jobVO.getDataflowId()).providerId(jobVO.getProviderId()).user(user).error("No tasks created").jobId(jobId).build());

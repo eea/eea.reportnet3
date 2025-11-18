@@ -486,6 +486,7 @@ public class JobServiceImpl implements JobService {
         value.put("release_job_id", jobId);
         try {
             if(BooleanUtils.isTrue(silentRelease)) {
+                LOG.info("Sending SILENT_RELEASE_FAILED_EVENT event for jobId {}", jobId);
                 //this event will not produce any notifications to the user because frontend will never show it in the user notifications
                 kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.SILENT_RELEASE_FAILED_EVENT, value,
                         NotificationVO.builder().user(user).dataflowId(dataflowId).providerId(providerId)
@@ -511,7 +512,7 @@ public class JobServiceImpl implements JobService {
                     NotificationVO.builder().user(user).dataflowId(dataflowId)
                             .error("There is another job with status QUEUED or IN_PROGRESS for dataflowId " + dataflowId).build());
         } catch (EEAException e) {
-            LOG.error("Could not release RELEASE_REFUSED_EVENT for jobId {} , dataflowId {} and user {}. Error Message: ", jobId, dataflowId, user, e);
+            LOG.error("Could not release COPY_DATA_TO_EUDATASET_REFUSED_EVENT for jobId {} , dataflowId {} and user {}. Error Message: ", jobId, dataflowId, user, e);
         }
     }
 

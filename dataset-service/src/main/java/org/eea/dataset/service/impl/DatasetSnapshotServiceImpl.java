@@ -660,8 +660,9 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     Boolean silentRelease = false;
     ProcessVO processVO = null;
     Long idDataflow = datasetMetabaseService.findDatasetMetabase(idDataset).getDataflowId();
+    Long jobId = null;
     if (processId!=null) {
-      Long jobId = jobProcessControllerZuul.findJobIdByProcessId(processId);
+      jobId = jobProcessControllerZuul.findJobIdByProcessId(processId);
       processVO = processControllerZuul.findById(processId);
       value.put(LiteralConstants.USER, processVO.getUser());
       value.put(LiteralConstants.JOB_ID, jobId);
@@ -718,6 +719,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
           releaseEvent(EventType.RELEASE_FAILED_EVENT, idSnapshot, e.getMessage(), value);
         }
         else{
+          LOG.info("Sending SILENT_RELEASE_FAILED_EVENT event for jobId {}", jobId);
           //this event will not produce any notifications to the user because frontend will never show it in the user notifications
           releaseEvent(EventType.SILENT_RELEASE_FAILED_EVENT, idSnapshot, e.getMessage(), value);
         }
@@ -730,6 +732,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
         releaseEvent(EventType.RELEASE_FAILED_EVENT, idSnapshot, "Error in release snapshot", value);
       }
       else{
+        LOG.info("Sending SILENT_RELEASE_FAILED_EVENT event for jobId {}", jobId);
         //this event will not produce any notifications to the user because frontend will never show it in the user notifications
         releaseEvent(EventType.SILENT_RELEASE_FAILED_EVENT, idSnapshot, "Error in release snapshot", value);
       }
