@@ -23,7 +23,7 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-@Table(name = "ATTACHMENT_VALUE")
+@Table(name = "attachment_value", schema = "dataset_0")
 public class AttachmentValue {
 
 

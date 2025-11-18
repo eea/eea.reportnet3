@@ -16,6 +16,7 @@ import javax.persistence.Transient;
 
 import org.eea.interfaces.vo.dataset.CsvLineAndRecordFieldsHolder;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
+import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.GenericGenerator;
 import lombok.Getter;
 import lombok.Setter;
@@ -28,7 +29,8 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-@Table(name = "RECORD_VALUE")
+@Table(name = "record_value", schema = "dataset_0")
+@BatchSize(size = 1)
 public class RecordValue {
 
 
@@ -36,10 +38,12 @@ public class RecordValue {
    * The id.
    */
   @Id
-  @GenericGenerator(name = "record_sequence_generator",
-      strategy = "org.eea.dataset.persistence.data.sequence.RecordValueIdGenerator")
-  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "record_sequence_generator")
-  @Column(name = "ID", columnDefinition = "serial")
+  @GenericGenerator(
+          name = "record_sequence_generator",
+          strategy = "org.eea.dataset.persistence.data.sequence.RecordValueIdGenerator"
+  )
+  @GeneratedValue(generator = "record_sequence_generator")
+  @Column(name = "ID")
   private String id;
 
   /**
