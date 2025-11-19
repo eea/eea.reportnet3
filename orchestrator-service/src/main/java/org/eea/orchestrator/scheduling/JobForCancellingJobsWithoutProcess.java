@@ -93,7 +93,7 @@ public class JobForCancellingJobsWithoutProcess {
     public void cancelInProgressJobsWithoutProcess() {
         try {
             LOG.info("Running scheduled job cancelInProgressJobsWithoutProcess");
-            List<BigInteger> jobs = jobService.listJobsThatExceedTimeWithSpecificStatus(ProcessStatusEnum.IN_PROGRESS.toString(), maxTimeInMinutesForInProgressJobsWithoutProcess);
+            List<BigInteger> jobs = jobService.listJobsThatExceedTimeWithSpecificStatus(JobStatusEnum.IN_PROGRESS.toString(), maxTimeInMinutesForInProgressJobsWithoutProcess);
             TokenVO tokenVo = userManagementControllerZull.generateToken(adminUser, adminPass);
             UsernamePasswordAuthenticationToken authentication =
                     new UsernamePasswordAuthenticationToken(adminUser, BEARER + tokenVo.getAccessToken(), null);
@@ -111,8 +111,17 @@ public class JobForCancellingJobsWithoutProcess {
                         value.put(LiteralConstants.USER, user);
                         if ((job.getJobType().equals(JobTypeEnum.VALIDATION) && job.isRelease()) || job.getJobType().equals(JobTypeEnum.RELEASE)) {
                             dataSetSnapshotControllerZuul.releaseLocksFromReleaseDatasets(job.getDataflowId(), job.getProviderId());
-                            kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.RELEASE_CANCELED_EVENT, value,
-                                    NotificationVO.builder().dataflowId(job.getDataflowId()).providerId(job.getProviderId()).user(user).error("No processes created").jobId(id.longValue()).build());
+                            boolean isSilentRelease = Boolean.TRUE.equals(job.getParameters().get("silentRelease"));
+                            if(!isSilentRelease) {
+                                kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.RELEASE_CANCELED_EVENT, value,
+                                        NotificationVO.builder().dataflowId(job.getDataflowId()).providerId(job.getProviderId()).user(user).error("No processes created").jobId(id.longValue()).build());
+                            }
+                            else{
+                                LOG.info("Sending SILENT_RELEASE_FAILED_EVENT event for jobId {}", job.getId());
+                                //this event will not produce any notifications to the user because frontend will never show it in the user notifications
+                                kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.SILENT_RELEASE_FAILED_EVENT, value,
+                                        NotificationVO.builder().dataflowId(job.getDataflowId()).providerId(job.getProviderId()).user(user).error("No processes created").jobId(id.longValue()).build());
+                            }
                         } else if (job.getJobType().equals(JobTypeEnum.VALIDATION) && !job.isRelease()) {
                             validationControllerZuul.deleteLocksToReleaseProcess(job.getDatasetId());
                             kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.VALIDATION_CANCELED_EVENT, value,

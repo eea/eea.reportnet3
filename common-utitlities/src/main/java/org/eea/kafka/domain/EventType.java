@@ -38,6 +38,9 @@ public enum EventType {
   /** The release failed iceberg exists event. */
   RELEASE_FAILED_ICEBERG_EXISTS_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "release_failed_iceberg_exists_key", true),
 
+  /** The silent release failed event. */
+  SILENT_RELEASE_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "silent_release_failed_key", true),
+
   /** The copyToEuDataset refused event. */
   COPY_DATA_TO_EUDATASET_REFUSED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "copy_to_eu_dataset_refused_key", true),
 
