@@ -308,9 +308,6 @@ export const Dataflow = () => {
     }
   }, [notificationContext.hidden]);
 
-  useEffect(() => {
-    console.log('🔔 Hidden notifications:', notificationContext.hidden);
-  }, [notificationContext])
 
   const exportImportMenuItems = [
     {
@@ -1005,14 +1002,17 @@ export const Dataflow = () => {
 
   const goToDataflowsPage = () => navigate(getUrl(routes.DATAFLOWS));
 
-  useCheckNotifications(['RELEASE_COMPLETED_EVENT', 'RELEASE_PROVIDER_COMPLETED_EVENT', 'SILENT_RELEASE_COMPLETED_EVENT'], onLoadReportingDataflow);
-  useCheckNotifications(['SILENT_RELEASE_COMPLETED_EVENT'], onLoadReportingDataflow);
+  useCheckNotifications(['RELEASE_COMPLETED_EVENT', 'RELEASE_PROVIDER_COMPLETED_EVENT'], onLoadReportingDataflow);
   useCheckNotifications(['DELETE_DATAFLOW_COMPLETED_EVENT'], goToDataflowsPage);
 
   useEffect(() => {
-    const response = notificationContext.hidden.find(notification => notification.key === 'SILENT_RELEASE_COMPLETED_EVENT');
-    response && onLoadReportingDataflow();
-  }, [notificationContext]);
+    const matchedNotifications = notificationContext.hidden.filter(
+      ({ key }) => key === 'SILENT_RELEASE_COMPLETED_EVENT' || key === 'SILENT_RELEASE_FAILED_EVENT'
+    );
+    if (isEmpty(matchedNotifications)) return;
+    matchedNotifications && onLoadReportingDataflow()
+  }, [notificationContext.hidden]);
+
 
   useCheckNotifications(
     [
@@ -1102,9 +1102,8 @@ export const Dataflow = () => {
   };
 
   const onConfirmSilentRelease = async () => {
-    console.log(dataflowState);
     try {
-      notificationContext.hidden.add({ type: 'RELEASE_START_EVENT' });
+      notificationContext.add({ type: 'SILENT_RELEASE_START_EVENT'});
       await SnapshotService.silentRelease(dataflowId, dataProviderId, dataflowState.restrictFromPublic);
 
       dataflowState.data.datasets
@@ -1112,12 +1111,8 @@ export const Dataflow = () => {
         .forEach(dataset => (dataset.isReleasing = true));
 
     } catch (error) {
-      if (error.response.status === 423) {
-        notificationContext.add({ type: 'RELEASE_BLOCKED_EVENT' }, true);
-      } else {
         console.error('Dataflow - onConfirmSilentRelease.', error);
-        notificationContext.add({ type: 'RELEASE_FAILED_EVENT', content: {} }, true);
-      }
+        notificationContext.add({ type: 'SILENT_RELEASE_FAILED_EVENT', content: {} }, true);
     } finally {
       manageDialogs('isReleaseSilentDialogVisible', false);
     }

@@ -39,6 +39,7 @@ const useBigButtonListRepresentative = ({
     }
   }, [userContext, dataflowState.data.datasets]);
 
+
   const getButtonsVisibility = () => {
     const isManualAcceptance = dataflowState.data.manualAcceptance;
     const isTestDataset = parseInt(representativeId) === 0;
