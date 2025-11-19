@@ -6,8 +6,8 @@ export const useCheckNotifications = (keys, fnUseState, fnValue) => {
   const notificationContext = useContext(NotificationContext);
 
   useEffect(() => {
-    console.log(notificationContext);
-    console.log('🔔 Hidden notifications:', notificationContext.hidden);
+/*    console.log(notificationContext);
+    console.log('🔔 Hidden notifications:', notificationContext.hidden);*/
     keys.forEach(key => {
       if (notificationContext.toShow.find(notification => notification.key === key)) {
         fnUseState(fnValue);
