@@ -1103,7 +1103,6 @@ export const Dataflow = () => {
 
   const onConfirmSilentRelease = async () => {
     try {
-      notificationContext.add({ type: 'SILENT_RELEASE_START_EVENT'});
       await SnapshotService.silentRelease(dataflowId, dataProviderId, dataflowState.restrictFromPublic);
 
       dataflowState.data.datasets
