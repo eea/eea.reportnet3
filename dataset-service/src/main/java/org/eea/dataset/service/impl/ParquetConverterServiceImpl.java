@@ -23,6 +23,7 @@ import org.eea.datalake.service.SpatialDataHandling;
 import org.eea.datalake.service.annotation.ImportDataLakeCommons;
 import org.eea.datalake.service.impl.S3ServiceImpl;
 import org.eea.datalake.service.model.S3PathResolver;
+import org.eea.datalake.service.model.TextFieldLengthInfo;
 import org.eea.dataset.configuration.util.CsvHeaderMapping;
 import org.eea.dataset.exception.InvalidFileException;
 import org.eea.dataset.mapper.DataSetMetabaseMapper;
@@ -57,6 +58,7 @@ import org.eea.utils.UtilityClass;
 import org.mozilla.universalchardet.UniversalDetector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -104,6 +106,9 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
   @Value("${dremio.spatialdata.batch.size}")
   private Integer spatialDataBatchSize;
 
+  @Value("${dataset.fieldMaxLength}")
+  private int fieldMaxLength;
+
   private final FileCommonUtils fileCommonUtils;
   private final FileTreatmentHelper fileTreatmentHelper;
   private final DremioHelperService dremioHelperService;
@@ -123,6 +128,8 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
 
   private DatasetTableService datasetTableService;
 
+  private CreateEmptyTables createEmptyTables;
+
   public ParquetConverterServiceImpl(FileCommonUtils fileCommonUtils,
                                      DremioHelperService dremioHelperService,
                                      S3ServiceImpl s3Service,
@@ -139,7 +146,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
                                      DataSetMetabaseMapper dataSetMetabaseMapper,
                                      StatisticsService statisticsService,
                                      ReleaseFieldLimitWarningComponentImpl releaseFieldLimitWarningComponent,
-                                     DatasetTableService datasetTableService) {
+                                     DatasetTableService datasetTableService, CreateEmptyTables createEmptyTables) {
     this.fileCommonUtils = fileCommonUtils;
     this.dremioHelperService = dremioHelperService;
     this.s3Service = s3Service;
@@ -157,6 +164,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
     this.statisticsService = statisticsService;
     this.releaseFieldLimitWarningComponent = releaseFieldLimitWarningComponent;
     this.datasetTableService = datasetTableService;
+    this.createEmptyTables = createEmptyTables;
   }
 
   @Override
@@ -352,7 +360,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
 
       boolean needToDemoteTable = true;
       if (datasetType.equals(DatasetTypeEnum.DESIGN)) {
-        s3Helper.deleteTableIfEmpty(tableSchemaName, s3TablePathResolver, dremioHelperService);
+        createEmptyTables.deleteTableIfEmpty(tableSchemaName, s3TablePathResolver);
       }
 
 
@@ -558,6 +566,8 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
 
         SpatialFieldInfo spatialFieldInfo = new SpatialFieldInfo();
         spatialFieldInfo.setTableName(tableName);
+        TextFieldLengthInfo textFieldLengthInfo = new TextFieldLengthInfo();
+        textFieldLengthInfo.setTableName(tableName);
         for (CSVRecord csvRecord : csvParser) {
           checkForEmptyValues(csvRecord, "Empty first line in CSV file {}. {}", csvFile, importFileInDremioInfo);
           recordCounter++;
@@ -571,12 +581,12 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
             importFileInDremioInfo.getWarningMessages().add(JobInfoEnum.WARNING_SOME_IMPORT_MISMATCH_OF_DATA.getValue(null));
           }
 
-          List<String> row = generateRow(csvRecord, typeMapping.getExpectedHeaders(), typeMapping.getFieldNameAndTypeMap(), importFileInDremioInfo, datasetType, recordCounter, spatialFieldInfo);
+          List<String> row = generateRow(csvRecord, typeMapping.getExpectedHeaders(), typeMapping.getFieldNameAndTypeMap(), importFileInDremioInfo, datasetType, recordCounter, spatialFieldInfo, textFieldLengthInfo);
           String[] rowArray = row.toArray(new String[0]);
           csvWriter.writeNext(rowArray);
         }
         releaseFieldLimitWarningComponent.releaseFieldSizeNotification(spatialFieldInfo, importFileInDremioInfo.getDataflowId(), importFileInDremioInfo.getDatasetId());
-
+        releaseFieldLimitWarningComponent.releaseMultilineTextCharLimitWarning(textFieldLengthInfo, importFileInDremioInfo.getDataflowId(), importFileInDremioInfo.getDatasetId());
         csvWriter.flush();
         modifiedCsvFiles.add(new FileWithRecordNum(csvFileWithAddedColumns, recordCounter));
       } catch (IOException | UncheckedIOException e) {
@@ -683,6 +693,8 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
 
         SpatialFieldInfo spatialFieldInfo = new SpatialFieldInfo();
         spatialFieldInfo.setTableName(tableName);
+        TextFieldLengthInfo textFieldLengthInfo = new TextFieldLengthInfo();
+        textFieldLengthInfo.setTableName(tableName);
         for (CSVRecord csvRecord : csvParser) {
           fileIsEmpty = false;
           checkForEmptyValues(csvRecord, "Empty first line in csv file {}. {}", csvFile, importFileInDremioInfo);
@@ -700,7 +712,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
             importFileInDremioInfo.getWarningMessages().add(JobInfoEnum.WARNING_SOME_IMPORT_MISMATCH_OF_DATA.getValue(null));
           }
 
-          List<String> row = generateRow(csvRecord, typeMapping.getExpectedHeaders(), typeMapping.getFieldNameAndTypeMap(), importFileInDremioInfo, datasetType, recordCounter, spatialFieldInfo);
+          List<String> row = generateRow(csvRecord, typeMapping.getExpectedHeaders(), typeMapping.getFieldNameAndTypeMap(), importFileInDremioInfo, datasetType, recordCounter, spatialFieldInfo, textFieldLengthInfo);
           String[] rowArray = row.toArray(new String[0]);
           csvWriter.writeNext(rowArray);
           row.clear();
@@ -722,6 +734,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
         }
 
         releaseFieldLimitWarningComponent.releaseFieldSizeNotification(spatialFieldInfo, importFileInDremioInfo.getDataflowId(), importFileInDremioInfo.getDatasetId());
+        releaseFieldLimitWarningComponent.releaseMultilineTextCharLimitWarning(textFieldLengthInfo, importFileInDremioInfo.getDataflowId(), importFileInDremioInfo.getDatasetId());
 
         if (fileIsEmpty) {
           LOG.info("For job {} file {} contains only headers", importFileInDremioInfo, csvFile.getName());
@@ -804,7 +817,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
   }
 
   private List<String> generateRow(CSVRecord csvRecord, List<FieldSchema> expectedHeaders, Map<String, DataType> fieldNameAndTypeMap,
-                                   ImportFileInDremioInfo importFileInDremioInfo, DatasetTypeEnum datasetType, long lineNumber, SpatialFieldInfo spatialFieldInfo) {
+                                   ImportFileInDremioInfo importFileInDremioInfo, DatasetTypeEnum datasetType, long lineNumber, SpatialFieldInfo spatialFieldInfo, TextFieldLengthInfo textFieldLengthInfo) {
     List<String> row = new ArrayList<>();
     String recordIdValue = UUID.randomUUID().toString();
 
@@ -815,6 +828,35 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
               (!DatasetTypeEnum.DESIGN.equals(datasetType) && BooleanUtils.isTrue(expectedHeader.getReadOnly()) && !BooleanUtils.isTrue(importFileInDremioInfo.getReplaceData()))) {
         //if the field is attachment or replace data is not selected and the field is read only, no value should be inserted
         row.add("");
+      } else if (fieldType == DataType.TEXTAREA){
+        // Resolve the value safely for normal header and then BOM header.
+        String value = null;
+        if (csvRecord.isMapped(expectedHeaderName)) {
+          value = csvRecord.get(expectedHeaderName);
+        } else {
+          String headerWithBom = "\uFEFF" + expectedHeaderName;
+          if (csvRecord.isMapped(headerWithBom)) {
+            value = csvRecord.get(headerWithBom);
+          }
+        }
+
+        if (value != null && value.length() > fieldMaxLength) {
+          // Record warning info.
+          if (textFieldLengthInfo.getFieldName() == null) {
+            textFieldLengthInfo.setFieldName(expectedHeaderName);
+          }
+
+          List<Long> rl = textFieldLengthInfo.getRecordLines();
+          if (rl == null) {
+            rl = new ArrayList<>();
+          }
+
+          rl.add(lineNumber);
+          textFieldLengthInfo.setRecordLines(rl);
+          row.add("");
+        } else {
+          row.add(value != null ? value : "");
+        }
       } else if (expectedHeaderName.equals(LiteralConstants.PARQUET_RECORD_ID_COLUMN_HEADER)) {
         row.add(recordIdValue);
       } else if (expectedHeaderName.equals(LiteralConstants.PARQUET_PROVIDER_CODE_COLUMN_HEADER)) {

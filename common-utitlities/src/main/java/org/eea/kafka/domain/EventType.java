@@ -38,6 +38,9 @@ public enum EventType {
   /** The release failed iceberg exists event. */
   RELEASE_FAILED_ICEBERG_EXISTS_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "release_failed_iceberg_exists_key", true),
 
+  /** The silent release failed event. */
+  SILENT_RELEASE_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "silent_release_failed_key", true),
+
   /** The copyToEuDataset refused event. */
   COPY_DATA_TO_EUDATASET_REFUSED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "copy_to_eu_dataset_refused_key", true),
 
@@ -104,6 +107,10 @@ public enum EventType {
   /** The import with read only tables warning event. */
   IMPORT_MISMATCH_OF_DATA_WARNING_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "import_mismatch_of_data_warning_event", true),
+
+  /** The import with read only tables warning event. */
+  IMPORT_MULTILINE_TEXT_CHAR_LIMIT_WARNING_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "import_multiline_text_char_limit_warning_event", true),
 
   /** The import reporting failed no headers matching event. */
   IMPORT_REPORTING_FAILED_NO_HEADERS_MATCHING_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,

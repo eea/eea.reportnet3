@@ -869,13 +869,16 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
 
     String user = jobVO!=null ? jobVO.getCreatorUsername() : SecurityContextHolder.getContext().getAuthentication().getName();
 
+    UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
+    userNotificationContentVO.setDataflowId(dataflowId);
+    userNotificationContentVO.setProviderId(dataProviderId);
+    userNotificationContentVO.setUserId(user);
     if(!silentRelease) {
-      UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
-      userNotificationContentVO.setDataflowId(dataflowId);
-      userNotificationContentVO.setProviderId(dataProviderId);
-      userNotificationContentVO.setUserId(user);
-      notificationControllerZuul.createUserNotificationPrivate("RELEASE_START_EVENT",
-              userNotificationContentVO);
+      notificationControllerZuul.createUserNotificationPrivate("RELEASE_START_EVENT", userNotificationContentVO);
+    }
+    else{
+      //the following will not produce any notifications to the user because frontend will never show it in the user notifications
+      notificationControllerZuul.createUserNotificationPrivate("SILENT_RELEASE_START_EVENT", userNotificationContentVO);
     }
 
     ThreadPropertiesManager.setVariable("user", user);
@@ -902,6 +905,16 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
               value.put(LiteralConstants.USER, user);
               value.put("release_job_id", jobId);
               kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.RELEASE_FAILED_ICEBERG_EXISTS_EVENT, value,
+                      NotificationVO.builder().user(user).dataflowId(dataflowId).providerId(dataset.getDataProviderId())
+                              .error("There is an iceberg table for dataflowId " + dataflowId + " and providerId " + dataset.getDataProviderId()).build());
+            }
+            else{
+              LOG.info("Sending SILENT_RELEASE_FAILED_EVENT event for jobId {}", jobId);
+              //this event will not produce any notifications to the user because frontend will never show it in the user notifications
+              Map<String, Object> value = new HashMap<>();
+              value.put(LiteralConstants.USER, user);
+              value.put("release_job_id", jobId);
+              kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.SILENT_RELEASE_FAILED_EVENT, value,
                       NotificationVO.builder().user(user).dataflowId(dataflowId).providerId(dataset.getDataProviderId())
                               .error("There is an iceberg table for dataflowId " + dataflowId + " and providerId " + dataset.getDataProviderId()).build());
             }

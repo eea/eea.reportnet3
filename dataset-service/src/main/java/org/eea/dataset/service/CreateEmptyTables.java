@@ -1,5 +1,7 @@
 package org.eea.dataset.service;
 
+import org.eea.datalake.service.DremioHelperService;
+import org.eea.datalake.service.model.S3PathResolver;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 
@@ -21,4 +23,13 @@ public interface CreateEmptyTables {
    * @throws EEAException Eea exception
    */
   void runCreationForSpecificTableSchema(DataSetMetabaseVO dataset, String tableSchemaId) throws EEAException;
+
+  /**
+   * Deletes parquet table if empty to cover the case that the user has added or removed columns (has changed the schema)
+   *
+   * @param tableSchemaName The table schema name
+   * @param tablePathResolver The table path
+   * @throws Exception exception
+   */
+  void deleteTableIfEmpty(String tableSchemaName, S3PathResolver tablePathResolver) throws Exception;
 }

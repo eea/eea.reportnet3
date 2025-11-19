@@ -122,7 +122,8 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
                 path = S3_TABLE_AS_FOLDER_QUERY_PATH;
             }
             String tablePath = s3Service.getTableAsFolderQueryPath(dataTableResolver, path);
-            long rowCount = dremioHelperService.getRowCount(tablePath);
+            String numberOfRecordsQuery = "SELECT COUNT (*) FROM " + tablePath;
+            Long rowCount = dremioJdbcTemplate.queryForObject(numberOfRecordsQuery, Long.class);
             if (rowCount == 0) {
                 return;
             }
