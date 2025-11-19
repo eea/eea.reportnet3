@@ -13,13 +13,11 @@ import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.DatasetSnapshotService;
 import org.eea.dataset.service.DatasetTableService;
 import org.eea.dataset.service.ResolveSnapshotTable;
-import org.eea.dataset.service.impl.DatasetSnapshotServiceImpl;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.communication.NotificationController.NotificationControllerZuul;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
-import org.eea.interfaces.controller.dataset.DatasetSchemaController;
 import org.eea.interfaces.controller.dataset.DatasetSnapshotController;
 import org.eea.interfaces.controller.orchestrator.JobController.JobControllerZuul;
 import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
@@ -721,6 +719,54 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
   }
 
   /**
+   * Update the release date of a historic release entry.
+   *
+   * @param datasetId the dataset id
+   * @param idSnapshot the snapshot id
+   * @param newReleaseDate the new release date
+   */
+  @Override
+  @HystrixCommand
+  @PutMapping(value = "/v1/{snapshotId}/dataset/{datasetId}/updateReleaseDate", produces = MediaType.APPLICATION_JSON_VALUE)
+  @PreAuthorize("secondLevelAuthorizeWithApiKey(#datasetId,'DATASET_CUSTODIAN','DATASET_STEWARD','EUDATASET_CUSTODIAN','TESTDATASET_CUSTODIAN','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_STEWARD') OR hasAnyRole('ADMIN')")
+  @ApiOperation(value = "Update release date of a historic release entry", hidden = true,
+      notes = "Allowed roles: \n\n Reporting dataset: CUSTODIAN, STEWARD"
+          + "\n\n Data collection: CUSTODIAN, STEWARD"
+          + "\n\n EU dataset: CUSTODIAN, STEWARD")
+  @ApiResponses(value = {
+      @ApiResponse(code = 200, message = "Successfully updated release date"),
+      @ApiResponse(code = 400, message = "Dataset id incorrect or user request not found")})
+  public void updateHistoricReleaseDate(
+      @ApiParam(type = "Long", value = "Dataset id", example = "0")
+      @PathVariable("datasetId") Long datasetId,
+      @ApiParam(type = "Long", value = "Snapshot id", example = "0")
+      @PathVariable("snapshotId") Long idSnapshot,
+      @ApiParam(type = "String",
+          value = "New Release Date") @RequestParam("newReleaseDate") String newReleaseDate) {
+
+    if (datasetId == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.DATASET_INCORRECT_ID);
+    }
+
+    try {
+      LOG.info("Updating historic release date for snapshotId {} and datasetId {} to {}",
+          idSnapshot, datasetId, newReleaseDate);
+      datasetSnapshotService.updateHistoricReleaseDate(datasetId, idSnapshot, newReleaseDate);
+      LOG.info("Successfully updated historic release date for snapshotId {} and datasetId {}",
+          idSnapshot, datasetId);
+    } catch (EEAException e) {
+      LOG.error("Error updating historic release date for snapshotId {} and datasetId {}. Error: {}",
+          idSnapshot, datasetId, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.EXECUTION_ERROR);
+    } catch (Exception e) {
+      LOG.error("Unexpected error! Error updating historic release date for snapshotId {} and datasetId {}. Message: {}",
+          idSnapshot, datasetId, e.getMessage());
+      throw e;
+    }
+  }
+
+  /**
    * Historic releases legacy.
    *
    * @param datasetId the dataset id
@@ -1160,4 +1206,5 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
   public void rollBackSnapshotRecord(@PathVariable Long jobId, @RequestParam("dataflowId") Long dataflowId, @RequestParam("providerId") Long providerId) {
     resolveSnapshotTable.rollBackSnapshotTableValues(jobId, dataflowId, providerId);
   }
+
 }
