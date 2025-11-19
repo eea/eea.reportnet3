@@ -331,4 +331,13 @@ public interface DatasetSnapshotService {
    * @throws IOException Signals that an I/O exception has occurred.
    */
   File downloadHistoricReleasesCSV(Long datasetId, String fileName) throws IOException;
+
+  /**
+   * Update historic release date.
+   *
+   * @param datasetId the dataset id
+   * @param snapshotId the snapshot id
+   * @throws EEAException the EEA exception
+   */
+  void updateHistoricReleaseDate(Long datasetId, Long snapshotId, String newReleaseDate) throws EEAException;
 }

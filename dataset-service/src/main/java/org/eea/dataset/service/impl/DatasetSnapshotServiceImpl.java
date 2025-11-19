@@ -104,14 +104,7 @@ import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.eea.utils.LiteralConstants.*;
@@ -1730,5 +1723,77 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     }
 
     return file;
+  }
+
+  @Override
+  public void updateHistoricReleaseDate(Long datasetId, Long snapshotId, String newReleaseDate) throws EEAException {
+    if (datasetId == null || snapshotId == null || newReleaseDate == null) {
+      throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
+    }
+
+    Snapshot snapshot = snapshotRepository.findById(snapshotId).orElse(null);
+    if (snapshot == null) {
+      throw new EEAException(EEAErrorMessage.SNAPSHOT_NOTFOUND);
+    }
+
+    // figure out the dataset type we are editing for
+    DataSetMetabaseVO datasetMetabase = datasetMetabaseService.findDatasetMetabase(datasetId);
+    if (datasetMetabase == null) {
+      throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
+    }
+
+    DatasetTypeEnum datasetType = datasetMetabase.getDatasetTypeEnum();
+    boolean belongsToDataset = false;
+
+    switch (datasetType) {
+      case REPORTING:
+        belongsToDataset =snapshot.getReportingDataset() != null && Objects.equals(snapshot.getReportingDataset().getId(), datasetId);
+        break;
+      case COLLECTION:
+        belongsToDataset = Objects.equals(snapshot.getDataCollectionId(), datasetId);
+        break;
+      case EUDATASET:
+        EUDataset eudataset = eUDatasetRepository.findById(datasetId).orElse(null);
+        if (eudataset == null) {
+          throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
+        }
+        // Get data collection from eu dataset to change the snapshot.
+        DataCollection dataCollection =dataCollectionRepository.findFirstByDatasetSchema(eudataset.getDatasetSchema()).orElse(null);
+        if (dataCollection == null) {
+          throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
+        }
+        belongsToDataset = Objects.equals(snapshot.getDataCollectionId(), dataCollection.getId());
+        break;
+      default:
+        throw new EEAException("Unsupported dataset type: " + datasetType);
+    }
+
+    if (!belongsToDataset) {
+      // Protect against someone editing a snapshot of another dataset by mistake
+      throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
+    }
+
+    Date dateReleasing = null;
+    // Update date_released field.
+    if (StringUtils.isNotBlank(newReleaseDate)) {
+      try {
+        dateReleasing = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX").parse(newReleaseDate);
+      } catch (ParseException e) {
+        LOG.error("Error parsing the date of the release of snapshot with id {} for datasetId {}. Message: {}", snapshotId, datasetId, e.getMessage());
+        throw new EEAException(EEAErrorMessage.UPDATING_SNAPSHOT);
+      }
+    }
+
+    snapshot.setDateReleased(dateReleasing);
+      // Update description of Releases.
+    if (dateReleasing != null) {
+      SimpleDateFormat descFmt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+      String formatted = descFmt.format(dateReleasing);
+      snapshot.setDescription("Release " + formatted);
+    }
+
+    snapshotRepository.save(snapshot);
+
+    LOG.info("Updated dateReleased and description for snapshotId {} and datasetId {} to {}", snapshotId, datasetId, newReleaseDate);
   }
 }
