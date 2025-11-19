@@ -65,6 +65,7 @@ const useBigButtonListRepresentative = ({
       help: true,
       receipt: isLeadReporterOfThisCountry && isReleased,
       release: isLeadReporterOfThisCountry && !isTestDataset,
+      silentRelease: isAdmin,
       testDatasets: isTestDataset || (isStewardSupport && isTestDataset)
     };
   };
@@ -278,7 +279,7 @@ const useBigButtonListRepresentative = ({
       restrictFromPublicIsUpdating: dataflowState.restrictFromPublicIsUpdating.value,
       restrictFromPublicStatus: representative?.restrictFromPublic,
       tooltip: dataflowState.isReleasable ? '' : resourcesContext.messages['releaseButtonTooltip'],
-      visibility: buttonsVisibility.release
+      visibility: buttonsVisibility.silentRelease
     }
   ];
 
