@@ -76,6 +76,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -2811,13 +2812,12 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         //check if table exists
         if (s3HelperPrivate.checkFolderExist(s3IcebergTablePathResolver, S3_TABLE_NAME_FOLDER_PATH) && dremioHelperService.checkFolderPromoted(s3IcebergTablePathResolver, tableName)){
             String getRecordIdOfDuplicate =  "SELECT " + PARQUET_RECORD_ID_COLUMN_HEADER + " FROM " + icebergTablePath + " WHERE " + UtilityClass.addQuotesToFieldNames(fieldVO.getName()) + " = '" + fieldVO.getValue() + "' LIMIT 1";
-            String recordId = dremioJdbcTemplate.queryForObject(getRecordIdOfDuplicate, String.class);
-            if(StringUtils.isBlank(recordId)){
-                return false;
-            }
-            else{
-                LOG.info("Found duplicate value in table {} for field {} and value {}", icebergTablePath, fieldVO.getName(), fieldVO.getValue());
+            try {
+                String recordId = dremioJdbcTemplate.queryForObject(getRecordIdOfDuplicate, String.class);
+                LOG.info("Found duplicate value in table {} for field {} and value {} in recordId {}", icebergTablePath, fieldVO.getName(), fieldVO.getValue(), recordId);
                 return true;
+            } catch (EmptyResultDataAccessException e) { //no duplicate
+                return false;
             }
         }
         else{

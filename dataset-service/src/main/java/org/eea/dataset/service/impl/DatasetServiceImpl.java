@@ -3901,6 +3901,7 @@ public class DatasetServiceImpl implements DatasetService {
    */
   @Override
   public Boolean duplicateFieldValueExists(Long datasetId, FieldVO fieldVO){
+    TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, datasetId));
     FieldValue fieldValue = fieldRepository.findFirstByIdFieldSchemaAndValue(fieldVO.getIdFieldSchema(), fieldVO.getValue());
     if(fieldValue == null){
       return false;
