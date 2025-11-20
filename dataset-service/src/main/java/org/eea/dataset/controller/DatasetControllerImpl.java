@@ -1387,7 +1387,7 @@ public class DatasetControllerImpl implements DatasetController {
       Boolean isBigDataflow = dataFlowControllerZuul.isBigDataflow(dataflowId);
       if(Boolean.TRUE.equals(isBigDataflow)){
         LOG.info("Deleting table data for big data dataflowId {}, datasetId {} and tableSchemaId {}", dataflowId, datasetId, tableSchemaId);
-        bigDataDatasetService.deleteTableData(datasetId, dataflowId, providerId, tableSchemaId, jobId);
+        bigDataDatasetService.deleteTableData(datasetId, dataflowId, providerId, tableSchemaId, jobId, true);
       }
       else {
         LOG.info("Deleting table data for dataflowId {}, datasetId {} and tableSchemaId {}", dataflowId, datasetId, tableSchemaId);

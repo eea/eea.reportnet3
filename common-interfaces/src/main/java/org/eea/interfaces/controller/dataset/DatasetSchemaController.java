@@ -149,7 +149,7 @@ public interface DatasetSchemaController {
    */
   @DeleteMapping("/{datasetId}/tableSchema/{tableSchemaId}")
   void deleteTableSchema(@PathVariable("datasetId") Long datasetId,
-      @PathVariable("tableSchemaId") String tableSchemaId);
+      @PathVariable("tableSchemaId") String tableSchemaId) throws Exception;
 
   /**
    * Order table schema.
