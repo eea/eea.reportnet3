@@ -3,6 +3,7 @@ package org.eea.dataset.controller;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
@@ -17,6 +18,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
+
+import lombok.SneakyThrows;
 import org.bson.types.ObjectId;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.FieldSchema;
@@ -37,6 +40,7 @@ import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordSto
 import org.eea.interfaces.controller.validation.RulesController.RulesControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
+import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.OrderVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
@@ -738,6 +742,7 @@ public class DatasetSchemaControllerImplTest {
     }
   }
 
+  @SneakyThrows
   @Test(expected = ResponseStatusException.class)
   public void deleteTableSchemaForbiddenTest() {
     DataFlowVO dataflowVO = new DataFlowVO();
@@ -757,11 +762,13 @@ public class DatasetSchemaControllerImplTest {
    *
    * @throws EEAException the EEA exception
    */
+  @SneakyThrows
   @Test
   public void deleteTableSchemaTest1() throws EEAException {
     DataFlowVO dataflowVO = new DataFlowVO();
     dataflowVO.setStatus(TypeStatusEnum.DESIGN);
     Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
+    Mockito.when(datasetMetabaseService.findDatasetMetabase(anyLong())).thenReturn(new DataSetMetabaseVO());
     Mockito.when(datasetService.getDataFlowIdById(Mockito.anyLong())).thenReturn(1L);
     Mockito.doNothing().when(dataschemaService).deleteTableSchema(Mockito.any(), Mockito.any(),
         Mockito.any());
@@ -776,12 +783,14 @@ public class DatasetSchemaControllerImplTest {
    *
    * @throws EEAException the EEA exception
    */
+  @SneakyThrows
   @Test
   public void deleteTableSchemaTest2() throws EEAException {
     DataFlowVO dataflowVO = new DataFlowVO();
     dataflowVO.setStatus(TypeStatusEnum.DESIGN);
     Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
     Mockito.when(datasetService.getDataFlowIdById(Mockito.anyLong())).thenReturn(1L);
+    Mockito.when(datasetMetabaseService.findDatasetMetabase(anyLong())).thenReturn(new DataSetMetabaseVO());
     Mockito.doThrow(EEAException.class).when(dataschemaService).deleteTableSchema(Mockito.any(),
         Mockito.any(), Mockito.any());
     try {

@@ -885,7 +885,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
     }
 
     @Override
-    public void deleteTableData(Long datasetId, Long dataflowId, Long providerId, String tableSchemaId, Long jobId) throws Exception {
+    public void deleteTableData(Long datasetId, Long dataflowId, Long providerId, String tableSchemaId, Long jobId, Boolean createEmptyTablesBool) throws Exception {
         try {
             String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
             TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, datasetSchemaId);
@@ -933,8 +933,10 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                     s3HelperPrivate.deleteFolder(s3ReferenceTablePathResolver, S3_DATAFLOW_REFERENCE_FOLDER_PATH);
                 }
             }
-            DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
-            createEmptyTables.runCreationForSpecificTableSchema(dataSetMetabaseVO, tableSchemaId);
+            if(BooleanUtils.isTrue(createEmptyTablesBool)) {
+                DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
+                createEmptyTables.runCreationForSpecificTableSchema(dataSetMetabaseVO, tableSchemaId);
+            }
 
             if (jobId != null) {
                 jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FINISHED);
@@ -999,7 +1001,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                     }
                 }
                 //we do not pass a job id because there is a job for the whole dataset data deletion
-                deleteTableData(datasetId, dataflowId, providerId, tableSchemaIdNameVO.getIdTableSchema(), null);
+                deleteTableData(datasetId, dataflowId, providerId, tableSchemaIdNameVO.getIdTableSchema(), null, true);
             }
 
             if (jobId != null) {
@@ -2794,4 +2796,5 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             FileUtils.deleteDirectory(unZippedFile);
         }
     }
+
 }
