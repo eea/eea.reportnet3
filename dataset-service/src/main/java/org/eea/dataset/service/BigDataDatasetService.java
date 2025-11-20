@@ -321,4 +321,15 @@ public interface BigDataDatasetService {
      * @throws Exception The exception
      */
     JobVO retrieveOrAddImportJob(ImportFileInDremioInfo importFileInDremioInfo, String fmeJobId, Long jobId) throws Exception;
+
+    /**
+     * Checks for duplicate value in field
+     *
+     * @param datasetId The dataset id
+     * @param dataflowId The dataflow id
+     * @param providerId The provider id
+     * @param tableName The table name
+     * @param fieldVO The field object
+     */
+    Boolean duplicateFieldValueExists(Long datasetId, Long dataflowId, Long providerId, String tableName, FieldVO fieldVO);
 }

@@ -3813,4 +3813,26 @@ public class DatasetControllerImpl implements DatasetController {
   public int clearOldLocks() {
     return lockService.deletePreviousDayLocks();
   }
+
+  @Override
+  @PreAuthorize("isAuthenticated()")
+  @GetMapping("/duplicateFieldValueExists/{datasetId}")
+  public Boolean duplicateFieldValueExists(@PathVariable("datasetId") Long datasetId, @RequestParam(value = "tableSchemaId") String tableSchemaId, @RequestBody FieldVO fieldVO) throws Exception{
+    try{
+      DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
+      Boolean isBigData = dataFlowControllerZuul.isBigDataflow(dataSetMetabaseVO.getDataflowId());
+      if(BooleanUtils.isTrue(isBigData)){
+        Long providerId = (dataSetMetabaseVO.getDataProviderId() != null) ? dataSetMetabaseVO.getDataProviderId() : 0L;
+        String tableName = datasetSchemaService.getTableSchemaName(dataSetMetabaseVO.getDatasetSchema(), tableSchemaId);
+        return bigDataDatasetService.duplicateFieldValueExists(datasetId, dataSetMetabaseVO.getDataflowId(), providerId, tableName, fieldVO);
+      }
+      else{
+        return datasetService.duplicateFieldValueExists(datasetId, fieldVO);
+      }
+    }
+    catch (Exception e){
+      LOG.error("Could not check for duplicate entity for datasetId {} tableSchemaId {} and field name {} and value {}", datasetId, tableSchemaId, fieldVO.getName(), fieldVO.getValue());
+      throw e;
+    }
+  }
 }

@@ -76,6 +76,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -2797,4 +2798,32 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         }
     }
 
+    /**
+     * Checks for duplicate value in field
+     *
+     * @param datasetId The dataset id
+     * @param dataflowId The dataflow id
+     * @param providerId The provider id
+     * @param tableName The table schema id
+     * @param fieldVO The field object
+     */
+    public Boolean duplicateFieldValueExists(Long datasetId, Long dataflowId, Long providerId, String tableName, FieldVO fieldVO){
+        S3PathResolver s3IcebergTablePathResolver = new S3PathResolver(dataflowId, providerId, datasetId, tableName, tableName, S3_TABLE_AS_FOLDER_QUERY_PATH);
+        s3IcebergTablePathResolver.setIsIcebergTable(true);
+        String icebergTablePath = s3ServicePrivate.getTableAsFolderQueryPath(s3IcebergTablePathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
+        //check if table exists
+        if (s3HelperPrivate.checkFolderExist(s3IcebergTablePathResolver, S3_TABLE_NAME_FOLDER_PATH) && dremioHelperService.checkFolderPromoted(s3IcebergTablePathResolver, tableName)){
+            String getRecordIdOfDuplicate =  "SELECT " + PARQUET_RECORD_ID_COLUMN_HEADER + " FROM " + icebergTablePath + " WHERE " + UtilityClass.addQuotesToFieldNames(fieldVO.getName()) + " = '" + fieldVO.getValue() + "' LIMIT 1";
+            try {
+                String recordId = dremioJdbcTemplate.queryForObject(getRecordIdOfDuplicate, String.class);
+                LOG.info("Found duplicate value in table {} for field {} and value {} in recordId {}", icebergTablePath, fieldVO.getName(), fieldVO.getValue(), recordId);
+                return true;
+            } catch (EmptyResultDataAccessException e) { //no duplicate
+                return false;
+            }
+        }
+        else{
+            return false;
+        }
+    }
 }
