@@ -1,4 +1,4 @@
-import { Fragment, useContext, useEffect, useReducer, useRef, useCallback } from 'react';
+import { Fragment, useContext, useEffect, useReducer, useRef, useCallback, useState } from 'react';
 import { useQueryClient } from 'react-query';
 
 import isNil from 'lodash/isNil';
@@ -10,6 +10,7 @@ import styles from './WebformField.module.scss';
 
 import { Button } from 'views/_components/Button';
 import { Calendar } from 'views/_components/Calendar';
+import { TimezoneCalendar } from 'views/_components/TimezoneCalendar';
 import { CharacterCounter } from 'views/_components/CharacterCounter';
 import { ConfirmDialog } from 'views/_components/ConfirmDialog';
 import { CustomFileUpload } from 'views/_components/CustomFileUpload';
@@ -65,6 +66,7 @@ export const WebformField = ({
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
   const queryClient = useQueryClient();
+  const [isTimezoneCalendarVisible, setIsTimezoneCalendarVisible] = useState(false);
 
   const inputRef = useRef(null);
   const isMountedRef = useRef(true);
@@ -104,7 +106,7 @@ export const WebformField = ({
     selectedFileName
   } = webformFieldState;
 
-  const { formatDate, formatDateTime, getMultiselectValues } = WebformRecordUtils;
+  const { formatDate, getMultiselectValues } = WebformRecordUtils;
 
   useEffect(() => {
     return () => {
@@ -494,37 +496,51 @@ export const WebformField = ({
         );
       case 'DATETIME':
         return (
-          <Calendar
-            appendTo={document.body}
-            dateFormat="yy-mm-dd"
-            disabled={field?.readOnly || isViewMode || updatingField.isUpdating}
-            id={field.fieldId || field.fieldSchemaId}
-            isLoadingData={
-              !isEmpty(field.value) &&
-              updatingField.isUpdating &&
-              field.recordId === updatingField.field?.recordId &&
-              [field.fieldSchemaId, field.fieldSchema, field.fieldId].includes(
-                updatingField.field?.fieldSchemaId ?? updatingField.field?.fieldSchema ?? updatingField.field?.fieldId
-              )
-            }
-            monthNavigator={true}
-            onBlur={e => {
-              if (isNil(field.recordId)) onSaveField(option, formatDate(e.value, isNil(e.value)));
-            }}
-            onChange={e => {
-              onFillField(field, option, formatDateTime(e.value, isNil(e.value)));
-            }}
-            onSelect={e => {
-              onFillField(field, option, formatDateTime(e.value, isNil(e.value)));
-              onEditorSubmitValue(field, option, formatDateTime(e.value, isNil(e.value)));
-            }}
-            readOnlyInput={true}
-            selectableYears={100}
-            showSeconds={true}
-            showTime={true}
-            value={!isEmpty(field.value) ? new Date(field.value) : null}
-            yearNavigator={true}
-          />
+          <div className={styles.datetimeWrapper}>
+            {isTimezoneCalendarVisible ? (
+              <TimezoneCalendar
+                isDisabled={field?.readOnly || isViewMode || updatingField.isUpdating}
+                isLoadingData={
+                  !isEmpty(field.value) &&
+                  updatingField.isUpdating &&
+                  field.recordId === updatingField.field?.recordId &&
+                  [field.fieldSchemaId, field.fieldSchema, field.fieldId].includes(
+                    updatingField.field?.fieldSchemaId ??
+                      updatingField.field?.fieldSchema ??
+                      updatingField.field?.fieldId
+                  )
+                }
+                onClickOutside={() => setIsTimezoneCalendarVisible(false)}
+                onSaveDate={dateTime => {
+                  const formattedDateTime = dateTime === '' ? '' : dateTime.format('YYYY-MM-DDTHH:mm:ss[Z]');
+                  onFillField(field, option, formattedDateTime);
+                  onEditorSubmitValue(field, option, formattedDateTime);
+                  setIsTimezoneCalendarVisible(false);
+                }}
+                value={!isEmpty(field.value) ? field.value : ''}
+              />
+            ) : (
+              <div className={styles.inputWrapper}>
+                <InputText
+                  disabled={field?.readOnly || isViewMode || (updatingField.isUpdating && !isEmpty(field.value))}
+                  onFocus={e => {
+                    setIsTimezoneCalendarVisible(true);
+                  }}
+                  value={field.value}
+                />
+                {!isEmpty(field.value) && !field?.readOnly && !isViewMode && !updatingField.isUpdating && (
+                  <Button
+                    className={`p-button-secondary-transparent ${styles.clearButton}`}
+                    icon="cancel"
+                    onClick={() => {
+                      onFillField(field, option, '');
+                      onEditorSubmitValue(field, option, '');
+                    }}
+                  />
+                )}
+              </div>
+            )}
+          </div>
         );
       case 'EXTERNAL_LINK':
       case 'LINK':
