@@ -157,6 +157,7 @@ public class S3ServiceImpl implements S3Service {
             case S3_TABLE_NAME_ROOT_DC_FOLDER_PATH:
                 path = String.format(path, dataflowFolder, dataCollectionFolder);
                 break;
+            case S3_ATTACHMENTS_DC_PROVIDER_PATH:
             case S3_TABLE_NAME_DC_PROVIDER_FOLDER_PATH:
                 path = String.format(path, dataflowFolder, dataCollectionFolder, tableName,
                     dataProviderFolder);
