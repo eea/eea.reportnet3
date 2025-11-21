@@ -499,7 +499,7 @@ export const WebformField = ({
           <div className={styles.datetimeWrapper}>
             {isTimezoneCalendarVisible ? (
               <TimezoneCalendar
-                isDisabled={field?.readOnly || isViewMode || updatingField.isUpdating}
+                isDisabled={field?.readOnly || isViewMode || isLoadingData || (updatingField.isUpdating && !isEmpty(field.value))}
                 isLoadingData={
                   !isEmpty(field.value) &&
                   updatingField.isUpdating &&
