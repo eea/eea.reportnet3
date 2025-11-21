@@ -4,6 +4,7 @@ import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.dataset.*;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
+import org.eea.interfaces.vo.dataset.schemas.DatasetEditingStatusVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaIdNameVO;
 import org.eea.interfaces.vo.orchestrator.JobPresignedUrlInfo;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
@@ -1090,4 +1091,18 @@ public interface DatasetController {
 
   @PostMapping("/private/clearOldLocks")
   int clearOldLocks();
+
+
+
+
+  @PutMapping("/{id}/enableEditing")
+  void enableEditing(@PathVariable("id") Long datasetId,
+  @RequestParam(value = "tableSchemaIds", required = false) List<String> tableSchemaIds);
+
+  @PutMapping("/{id}/disableEditing")
+  void disableEditing(@PathVariable("id") Long datasetId);
+
+  @GetMapping("/{id}/editingStatus")
+  DatasetEditingStatusVO getEditingStatus(
+          @PathVariable("id") Long datasetId);
 }

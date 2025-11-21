@@ -30,13 +30,19 @@ public class DatasetTable {
     @Column(name = "IS_ICEBERG_TABLE_CREATED")
     private Boolean isIcebergTableCreated;
 
+    @Column(name = "EDITING_USERNAME")
+    private String editingUsername;
+
     @Transient
     private String tableName;
 
-    public DatasetTable(Long datasetId, String datasetSchemaId, String tableSchemaId, Boolean isIcebergTableCreated) {
+    public DatasetTable(Long datasetId, String datasetSchemaId, String tableSchemaId, Boolean isIcebergTableCreated, String editingUsername) {
         this.datasetId = datasetId;
         this.datasetSchemaId = datasetSchemaId;
         this.tableSchemaId = tableSchemaId;
         this.isIcebergTableCreated = isIcebergTableCreated;
+        this.editingUsername = editingUsername;
+
+
     }
 }

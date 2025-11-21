@@ -1222,7 +1222,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
             //iceberg enabled should be updated to true at the end of the conversion to ensure that all available tables were converted.
             for (TableSchemaVO table : availableForConversionTables) {
-                DatasetTable datasetTableEntry = new DatasetTable(datasetId, datasetSchemaId, table.getIdTableSchema(), true);
+                DatasetTable datasetTableEntry = new DatasetTable(datasetId, datasetSchemaId, table.getIdTableSchema(), true, user);
                 datasetTableService.saveOrUpdateDatasetTableEntry(datasetTableEntry);
             }
 
@@ -1382,7 +1382,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                     s3HelperPrivate.deleteFolder(s3IcebergTablePathResolver, S3_TABLE_NAME_FOLDER_PATH_FOR_VALID_PREFIX);
                 }
 
-                DatasetTable datasetTableEntry = new DatasetTable(datasetId, datasetSchemaId, table.getIdTableSchema(), false);
+                DatasetTable datasetTableEntry = new DatasetTable(datasetId, datasetSchemaId, table.getIdTableSchema(), false, null);
                 datasetTableService.saveOrUpdateDatasetTableEntry(datasetTableEntry);
             }
 

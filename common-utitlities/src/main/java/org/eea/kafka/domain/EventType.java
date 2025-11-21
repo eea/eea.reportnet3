@@ -814,7 +814,19 @@ public enum EventType {
           "import_wrongHeaders_warning_event", true),
 
   IMPORT_FIELD_SIZE_EXCEEDS_LIMIT_WARNING_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
-         "import_field_size_exceeds_limit_warning_event", true );
+         "import_field_size_exceeds_limit_warning_event", true ),
+
+  PARQUET_TO_ICEBERG_FAILED_ACTIVE_EDITING_BY_OTHER_USER(LiteralConstants.DATA_REPORTING_TOPIC,
+          "parquet_to_iceberg_failed_active_editing_by_other_user", true ),
+
+  ICEBERG_TO_PARQUET_FAILED_ACTIVE_EDITING_BY_OTHER_USER(LiteralConstants.DATA_REPORTING_TOPIC,
+          "iceberg_to_parquet_failed_active_editing_by_other_user", true ),
+
+  DATASET_EDITING_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+          "dataset_editing_completed_event", true),
+
+  DATASET_EDITING_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+          "dataset_editing_failed_event", true);
 
   /** The topic. */
   private String topic;

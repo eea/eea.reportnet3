@@ -60,6 +60,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.services.s3.model.ObjectIdentifier;
 import software.amazon.awssdk.services.s3.model.S3Object;
@@ -266,6 +267,8 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
     LOG.info("For job {} converting csv file {} to parquet file", importFileInDremioInfo, csvFile.getPath());
     Long numberOfRecordsToBeInserted = 0L;
     try {
+      String user =  SecurityContextHolder.getContext().getAuthentication().getName();
+
       DatasetTypeEnum datasetType = datasetMetabaseService.getDatasetType(importFileInDremioInfo.getDatasetId());
       //create a new csv file that contains records ids and data provider code as extra information
       List<FileWithRecordNum> csvFilesWithAddedColumns;
@@ -293,7 +296,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
         //convert old table to iceberg
         Long providerId = (importFileInDremioInfo.getProviderId() != null) ? importFileInDremioInfo.getProviderId() : 0L;
         bigDataDatasetService.convertParquetToIcebergTable(importFileInDremioInfo.getDatasetId(), importFileInDremioInfo.getDataflowId(), providerId, tableSchemaVO, dataSetSchema.getIdDataSetSchema().toString(), null);
-        DatasetTable datasetTableEntry = new DatasetTable(importFileInDremioInfo.getDatasetId(), dataSetSchema.getIdDataSetSchema().toString(), tableSchemaVO.getIdTableSchema(), true);
+        DatasetTable datasetTableEntry = new DatasetTable(importFileInDremioInfo.getDatasetId(), dataSetSchema.getIdDataSetSchema().toString(), tableSchemaVO.getIdTableSchema(), true, user);
         datasetTableService.saveOrUpdateDatasetTableEntry(datasetTableEntry);
         S3PathResolver s3IcebergTablePathResolver = new S3PathResolver(importFileInDremioInfo.getDataflowId(), providerId, importFileInDremioInfo.getDatasetId(), tableSchemaVO.getNameTableSchema(), tableSchemaVO.getNameTableSchema(), S3_TABLE_AS_FOLDER_QUERY_PATH);
         s3IcebergTablePathResolver.setIsIcebergTable(true);
