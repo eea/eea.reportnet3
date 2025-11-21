@@ -13,6 +13,7 @@ import { Dropdown } from 'views/_components/Dropdown';
 import { InputMask } from 'views/_components/InputMask';
 import { Portal } from 'views/_components/Portal';
 import { TooltipButton } from 'views/_components/TooltipButton';
+import { Spinner } from 'views/_components/Spinner';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
@@ -62,6 +63,7 @@ const offsetOptions = [
 export const TimezoneCalendar = ({
   isDisabled,
   isInModal,
+  isLoadingData = false,
   onClickOutside = () => {},
   onSaveDate = () => {},
   value
@@ -246,6 +248,20 @@ export const TimezoneCalendar = ({
             {renderLabel()}
             {renderButtons()}
           </div>
+          {isLoadingData && (
+            <Spinner
+              style={{
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                width: '25px',
+                height: '25px',
+                pointerEvents: 'none',
+                zIndex: 2
+              }}
+            />
+          )}
         </div>
       </Portal>
     </Fragment>

@@ -44,14 +44,11 @@
   position: relative;
   width: 100%;
 
-  input {
-    padding-right: 2.5rem;
-  }
 }
 
 .clearButton {
-  position: absolute;
-  right: 0.25rem;
+  position: absolute !important;
+  right: 0.5rem;
   top: 50%;
   transform: translateY(-50%);
   padding: 0.25rem;
