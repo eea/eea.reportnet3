@@ -39,3 +39,18 @@
   font-weight: bold;
   height: 75%;
 }
+
+.actionsWrapper {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  justify-content: center;
+}
+
+.calendarConfirm {
+  :global(.p-dialog-content) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}

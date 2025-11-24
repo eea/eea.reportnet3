@@ -1,4 +1,4 @@
-import { useContext, useEffect, useReducer, useState} from 'react';
+import { useContext, useEffect, useReducer, useState } from 'react';
 
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -32,9 +32,17 @@ import { useFilters } from 'views/_functions/Hooks/useFilters';
 import { ColumnTemplateUtils } from 'views/_functions/Utils/ColumnTemplateUtils';
 import { PaginatorRecordsCount } from 'views/_components/DataTable/_functions/Utils/PaginatorRecordsCount';
 import { TextByDataflowTypeUtils } from 'views/_functions/Utils/TextByDataflowTypeUtils';
-import {Button} from "../../../_components/Button";
-import {ValidationService} from "../../../../services/ValidationService";
-import {useCheckNotifications} from "../../../_functions/Hooks/useCheckNotifications";
+import { Button } from '../../../_components/Button';
+import { ValidationService } from '../../../../services/ValidationService';
+import { useCheckNotifications } from '../../../_functions/Hooks/useCheckNotifications';
+import { Calendar } from 'views/_components/Calendar';
+import { ConfirmDialog } from 'views/_components/ConfirmDialog';
+import { SnapshotService } from 'services/SnapshotService';
+
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+
+dayjs.extend(utc);
 
 export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, datasetId, historicReleasesView }) => {
   const notificationContext = useContext(NotificationContext);
@@ -50,13 +58,21 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
 
   const { filteredData, isFiltered } = useFilters('historicReleases');
   const [isDownloadingHistoricData, setIsDownloadingHistoricData] = useState(false);
+  const [isCalendarDialogVisible, setIsCalendarDialogVisible] = useState(false);
+  const [selectedReleaseForCalendar, setSelectedReleaseForCalendar] = useState(null);
+  const [selectedReleaseDate, setSelectedReleaseDate] = useState(null);
+  const [isUpdatingReleaseDate, setIsUpdatingReleaseDate] = useState(false);
 
   useEffect(() => {
     onLoadHistoricReleases();
   }, []);
 
   useCheckNotifications(
-    ['AUTOMATICALLY_DOWNLOAD_HISTORIC_RELEASES_FILE', 'DOWNLOAD_HISTORIC_RELEASES_FILE_ERROR', 'DOWNLOAD_FILE_BAD_REQUEST_ERROR'],
+    [
+      'AUTOMATICALLY_DOWNLOAD_HISTORIC_RELEASES_FILE',
+      'DOWNLOAD_HISTORIC_RELEASES_FILE_ERROR',
+      'DOWNLOAD_FILE_BAD_REQUEST_ERROR'
+    ],
     setIsDownloadingHistoricData,
     false
   );
@@ -74,6 +90,11 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
             key: 'releaseDate',
             header: resourcesContext.messages['releaseDate'],
             template: renderReleaseDateTemplate
+          },
+          {
+            key: 'actions',
+            header: resourcesContext.messages['actions'],
+            template: renderActionsTemplate
           }
         ];
       } else {
@@ -117,6 +138,11 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
             header: resourcesContext.messages['isPublic'],
             template: (rowData, column) =>
               ColumnTemplateUtils.getCheckTemplate(rowData, column, styles.checkedValueColumn, styles.icon)
+          },
+          {
+            key: 'actions',
+            header: resourcesContext.messages['actions'],
+            template: renderActionsTemplate
           }
         );
 
@@ -134,6 +160,58 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
         sortable={true}
       />
     ));
+  };
+
+  const renderActionsTemplate = rowData => (
+    <div className={styles.actionsWrapper}>
+      <Button
+        className="p-button-rounded p-button-secondary-transparent"
+        icon="calendar"
+        onClick={() => {
+          setSelectedReleaseForCalendar(rowData);
+          setSelectedReleaseDate(rowData.releaseDate ? new Date(rowData.releaseDate) : new Date());
+          setIsCalendarDialogVisible(true);
+        }}
+        tooltip={resourcesContext.messages['changeReleaseDate']}
+        tooltipOptions={{ position: 'top' }}
+      />
+    </div>
+  );
+
+  const onConfirmUpdateReleaseDate = async () => {
+    setIsUpdatingReleaseDate(true);
+    try {
+      // Format date
+      const formattedDate = dayjs(selectedReleaseDate).utc().format('YYYY-MM-DDTHH:mm:ss[Z]');
+
+      await SnapshotService.updateReleaseDate(
+        selectedReleaseForCalendar.id,
+        selectedReleaseForCalendar.datasetId,
+        formattedDate
+      );
+
+      notificationContext.add(
+        {
+          type: 'UPDATE_RELEASE_DATE_SUCCESS'
+        },
+        true
+      );
+      onLoadHistoricReleases();
+    } catch (error) {
+      console.error('HistoricReleases - onConfirmUpdateReleaseDate.', error);
+      notificationContext.add({ type: 'UPDATE_RELEASE_DATE_ERROR' }, true);
+    } finally {
+      setIsUpdatingReleaseDate(false);
+      setIsCalendarDialogVisible(false);
+      setSelectedReleaseForCalendar(null);
+      setSelectedReleaseDate(null);
+    }
+  };
+
+  const onHideCalendarDialog = () => {
+    setIsCalendarDialogVisible(false);
+    setSelectedReleaseForCalendar(null);
+    setSelectedReleaseDate(null);
   };
 
   const isLoading = value => historicReleasesDispatch({ type: 'IS_LOADING', payload: { value } });
@@ -173,14 +251,14 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
   };
 
   const onDownloadHistoricData = async () => {
-    let firstDatasetId = datasetId
+    let firstDatasetId = datasetId;
     if (isNil(datasetId)) {
       const data = await HistoricReleaseService.getAllRepresentative(dataflowId, dataProviderId);
       firstDatasetId = data[0]?.datasetId; // assign here
     }
     setIsDownloadingHistoricData(true);
     try {
-      await ValidationService.generateHistoricDataFile(firstDatasetId,dataflowId);
+      await ValidationService.generateHistoricDataFile(firstDatasetId, dataflowId);
       notificationContext.add({ type: 'DOWNLOAD_HISTORIC_RELEASES_START' });
     } catch (error) {
       if (error.response?.status === 400) {
@@ -191,7 +269,6 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
       setIsDownloadingHistoricData(false);
     }
   };
-
 
   const renderReleaseDateTemplate = rowData => {
     return <div className={styles.checkedValueColumn}>{getDateTimeFormatByUserPreferences(rowData.releaseDate)}</div>;
@@ -356,11 +433,40 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
           disabled={isDownloadingHistoricData}
           icon={isDownloadingHistoricData ? 'spinnerAnimate' : 'export'}
           label={resourcesContext.messages['downloadHistoricDataButtonLabel']}
-          onClick={() => onDownloadHistoricData(datasetId,dataflowId)}
+          onClick={() => onDownloadHistoricData(datasetId, dataflowId)}
         />
       </div>
     );
   };
 
-  return renderHistoricReleasesContent();
+  return (
+    <>
+      {renderHistoricReleasesContent()}
+
+      {isCalendarDialogVisible && (
+        <ConfirmDialog
+          className={styles.calendarConfirm}
+          disabledConfirm={isNil(selectedReleaseDate) || isUpdatingReleaseDate}
+          header={resourcesContext.messages['changeReleaseDate']}
+          iconConfirm={isUpdatingReleaseDate ? 'spinnerAnimate' : 'check'}
+          labelCancel={resourcesContext.messages['cancel']}
+          labelConfirm={resourcesContext.messages['save']}
+          onConfirm={onConfirmUpdateReleaseDate}
+          onHide={onHideCalendarDialog}
+          visible={isCalendarDialogVisible}>
+          <Calendar
+            className={styles.calendar}
+            dateFormat="yy-mm-dd"
+            inline={true}
+            monthNavigator={true}
+            onChange={event => setSelectedReleaseDate(event.target.value)}
+            showTime={true}
+            value={selectedReleaseDate}
+            yearNavigator={true}
+            yearRange="2000:2050"
+          />
+        </ConfirmDialog>
+      )}
+    </>
+  );
 };
