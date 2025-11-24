@@ -1,8 +1,0 @@
-CREATE SEQUENCE IF NOT EXISTS dataset_table_id_seq
-    START 1
-    INCREMENT 1;
-
-SELECT setval('dataset_table_id_seq', (SELECT COALESCE(MAX(id), 1) FROM dataset_table));
-
-ALTER TABLE dataset_table
-    ALTER COLUMN id SET DEFAULT nextval('dataset_table_id_seq');
