@@ -438,6 +438,13 @@ export const DatasetRepository = {
       })
     });
   },
+  checkDuplicateValues: async (datasetId, tableSchemaId, fieldVO) =>
+
+    // When sending an object( like fieldVO ), a POST call must be sent to the backend.
+    await HTTPRequester.post({
+      url: getUrl(DatasetConfig.checkDuplicateValues, { datasetId, tableSchemaId }),
+      data: fieldVO,
+    }),
 
   importTableFileWithS3: async ({
     datasetId,
