@@ -2163,33 +2163,39 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
                     tableNameFilenames.stream().forEach(file -> {
                       String key = file.key();
                       String filename = new File(key).getName();
-                      if (!key.contains("/attachments/")) {
-                        dataCollectionPath.setFilename(filename);
-                        dataCollectionPath.setPath(S3_TABLE_NAME_DC_PATH);
-                        dataCollectionPath.setTableName(key.split("/")[4]);
-                        dataCollectionPath.setParquetFolder(key.split("/")[5]);
-                        try {
-                          String tableNameDCPath = s3Service.getS3Path(dataCollectionPath);
+                      dataCollectionPath.setFilename(filename);
+                      dataCollectionPath.setPath(S3_TABLE_NAME_DC_PATH);
+                      dataCollectionPath.setTableName(key.split("/")[4]);
+                      dataCollectionPath.setParquetFolder(key.split("/")[5]);
+                      try {
+                        String tableNameDCPath = s3Service.getS3Path(dataCollectionPath);
 
-                          // Ticket #287184 instead of storing the file to the disk, uploading it to s3 and removing it we replaced this code with copying the file to another destination using the s3Client
-                          s3Helper.copyFileToAnotherDestination(key, tableNameDCPath);
-                          LOG.info("Copied file from source {} to destination {}", key, tableNameDCPath);
-                          //promote folder
-                          checkAndPromoteFolder(dataCollectionPath, S3_TABLE_NAME_DC_QUERY_PATH);
-                        } catch (Exception e) {
-                          LOG.error("Error in getFileFromS3 process for reportingDatasetId {}, dataflowId {}",
-                                  reportingDatasetId, dataflowId, e);
-                        }
-                      }
-                      else{
-                        //copy attachments to data collection
-                        String extractedValue = key.replaceFirst(".*?/attachments/", "");
-                        String tableName = extractedValue.replaceFirst("/.*", "");;
-                        S3PathResolver s3AttachmentDCFolderPathResolver = new S3PathResolver(dataflowId, providerId, datasetId, tableName, filename, S3_ATTACHMENTS_DC_PATH);
-                        String attachmentDCPathInS3 = s3Service.getS3Path(s3AttachmentDCFolderPathResolver);
-                        s3Helper.copyFileToAnotherDestination(key, attachmentDCPathInS3);
+                        // Ticket #287184 instead of storing the file to the disk, uploading it to s3 and removing it we replaced this code with copying the file to another destination using the s3Client
+                        s3Helper.copyFileToAnotherDestination(key, tableNameDCPath);
+                        LOG.info("Copied file from source {} to destination {}", key, tableNameDCPath);
+                        //promote folder
+                        checkAndPromoteFolder(dataCollectionPath, S3_TABLE_NAME_DC_QUERY_PATH);
+                      } catch (Exception e) {
+                        LOG.error("Error in getFileFromS3 process for reportingDatasetId {}, dataflowId {}",
+                                reportingDatasetId, dataflowId, e);
                       }
                     });
+
+                    //copy attachments to data collection
+                    S3PathResolver providerAttachmentPath = new S3PathResolver(dataflowId, providerId, reportingDatasetId, nameTableSchema);
+                    providerAttachmentPath.setPath(S3_ATTACHMENTS_TABLE_PATH);
+                    LOG.info("Getting attachmentsFilenames for provider path resolver {}", providerAttachmentPath);
+                    List<S3Object> attachmentsFilenames = s3Helper.getFilenamesFromTableNames(providerAttachmentPath);
+                    attachmentsFilenames.stream().forEach(file -> {
+                      String key = file.key();
+                      String filename = new File(key).getName();
+                      String extractedValue = key.replaceFirst(".*?/attachments/", "");
+                      String tableName = extractedValue.replaceFirst("/.*", "");;
+                      S3PathResolver s3AttachmentDCFolderPathResolver = new S3PathResolver(dataflowId, providerId, datasetId, tableName, filename, S3_ATTACHMENTS_DC_PATH);
+                      String attachmentDCPathInS3 = s3Service.getS3Path(s3AttachmentDCFolderPathResolver);
+                      s3Helper.copyFileToAnotherDestination(key, attachmentDCPathInS3);
+                    });
+
                   } else if (DatasetTypeEnum.REPORTING.equals(datasetType)
                           && (RESTORE_DATASET_SCHEMA_SNAPSHOT_COMPLETED_EVENT.equals(successEventType)
                           || RESTORE_DATASET_SNAPSHOT_COMPLETED_EVENT.equals(successEventType) )) {  // restore snapshot
