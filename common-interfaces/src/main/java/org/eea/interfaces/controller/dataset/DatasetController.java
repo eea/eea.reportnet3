@@ -1091,6 +1091,6 @@ public interface DatasetController {
   @PostMapping("/private/clearOldLocks")
   int clearOldLocks();
 
-  @GetMapping("/duplicateFieldValueExists/{datasetId}")
+  @PostMapping("/duplicateFieldValueExists/{datasetId}")
   Boolean duplicateFieldValueExists(@PathVariable("datasetId") Long datasetId, @RequestParam(value = "tableSchemaId") String tableSchemaId, @RequestBody FieldVO fieldVO) throws Exception;
 }
