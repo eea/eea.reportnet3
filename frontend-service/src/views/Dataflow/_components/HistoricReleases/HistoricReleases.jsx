@@ -38,6 +38,8 @@ import { useCheckNotifications } from '../../../_functions/Hooks/useCheckNotific
 import { Calendar } from 'views/_components/Calendar';
 import { ConfirmDialog } from 'views/_components/ConfirmDialog';
 import { SnapshotService } from 'services/SnapshotService';
+import { config } from 'conf';
+import { UserContext } from 'views/_functions/Contexts/UserContext';
 
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
@@ -62,6 +64,10 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
   const [selectedReleaseForCalendar, setSelectedReleaseForCalendar] = useState(null);
   const [selectedReleaseDate, setSelectedReleaseDate] = useState(null);
   const [isUpdatingReleaseDate, setIsUpdatingReleaseDate] = useState(false);
+
+  const userContext = useContext(UserContext);
+  const isAdmin = userContext.hasPermission([config.permissions.roles.ADMIN.key]);
+  const isCustodian = userContext.hasPermission([config.permissions.roles.CUSTODIAN.key]);
 
   useEffect(() => {
     onLoadHistoricReleases();
@@ -162,26 +168,32 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
     ));
   };
 
-  const renderActionsTemplate = rowData => (
-    <div className={styles.actionsWrapper}>
-      <Button
-        className="p-button-rounded p-button-secondary-transparent"
-        icon="calendar"
-        onClick={() => {
-          setSelectedReleaseForCalendar(rowData);
-          setSelectedReleaseDate(rowData.releaseDate ? new Date(rowData.releaseDate) : new Date());
-          setIsCalendarDialogVisible(true);
-        }}
-        tooltip={resourcesContext.messages['changeReleaseDate']}
-        tooltipOptions={{ position: 'top' }}
-      />
-    </div>
-  );
+  const renderActionsTemplate = rowData => {
+    return (
+      <div className={styles.actionsWrapper}>
+        <Button
+          className="p-button-rounded p-button-secondary-transparent"
+          disabled={!(isAdmin || isCustodian)}
+          icon="calendar"
+          onClick={() => {
+            setSelectedReleaseForCalendar(rowData);
+            setSelectedReleaseDate(rowData.releaseDate ? new Date(rowData.releaseDate) : new Date());
+            setIsCalendarDialogVisible(true);
+          }}
+          tooltip={
+            isAdmin || isCustodian
+              ? resourcesContext.messages['changeReleaseDate']
+              : resourcesContext.messages['changeReleaseDateAdmin']
+          }
+          tooltipOptions={{ position: 'top' }}
+        />
+      </div>
+    );
+  };
 
   const onConfirmUpdateReleaseDate = async () => {
     setIsUpdatingReleaseDate(true);
     try {
-      // Format date
       const formattedDate = dayjs(selectedReleaseDate).utc().format('YYYY-MM-DDTHH:mm:ss[Z]');
 
       await SnapshotService.updateReleaseDate(
@@ -224,6 +236,8 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
         const data = await HistoricReleaseService.getAllRepresentative(dataflowId, dataProviderId);
         historicReleases = uniqBy(
           data.map(historic => ({
+            id: historic.id,
+            datasetId: historic.datasetId,
             releaseDate: historic.releaseDate,
             dataProviderCode: historic.dataProviderCode
           })),
@@ -443,11 +457,12 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
     <>
       {renderHistoricReleasesContent()}
 
-      {isCalendarDialogVisible && (
+      {isCalendarDialogVisible && (isAdmin || isCustodian) && (
         <ConfirmDialog
           className={styles.calendarConfirm}
+          dialogStyle={{ minWidth: 'auto' }}
           disabledConfirm={isNil(selectedReleaseDate) || isUpdatingReleaseDate}
-          header={resourcesContext.messages['changeReleaseDate']}
+          header={resourcesContext.messages['changeReleaseDateHeader'] + selectedReleaseForCalendar.dataProviderCode}
           iconConfirm={isUpdatingReleaseDate ? 'spinnerAnimate' : 'check'}
           labelCancel={resourcesContext.messages['cancel']}
           labelConfirm={resourcesContext.messages['save']}
