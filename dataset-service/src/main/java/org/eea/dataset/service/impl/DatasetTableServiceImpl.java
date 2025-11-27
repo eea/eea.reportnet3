@@ -128,14 +128,6 @@ public class DatasetTableServiceImpl implements DatasetTableService {
             Boolean isBigdata,
             List<String> tableSchemaIds) {
 
-        // Acquire lock
-        int locked = datasetTableRepository.lockEditingForDatasetUser(datasetId, username);
-
-        // If lock == 0, another user already holds editing lock, fail
-        if (locked == 0) {
-            return false;
-        }
-
         String datasetSchemaId = datasetMetabaseService
                 .findDatasetMetabase(datasetId)
                 .getDatasetSchema();
@@ -146,7 +138,7 @@ public class DatasetTableServiceImpl implements DatasetTableService {
             // Load all table schema IDs if none provided from endpoint call
             if (tableSchemaIds == null || tableSchemaIds.isEmpty()) {
                 List<TableSchemaIdNameVO> allTables;
-                    allTables = datasetSchemaService.getTableSchemasIds(datasetId);
+                allTables = datasetSchemaService.getTableSchemasIds(datasetId);
 
                 tableSchemaIds = allTables.stream()
                         .map(TableSchemaIdNameVO::getIdTableSchema)
@@ -154,6 +146,14 @@ public class DatasetTableServiceImpl implements DatasetTableService {
             }
 
             createMissingDatasetTableEntries(datasetId, datasetSchemaId, username, tableSchemaIds);
+        }
+
+        // Acquire lock
+        int locked = datasetTableRepository.lockEditingForDatasetUser(datasetId, username);
+
+        // If lock == 0, another user already holds editing lock, fail
+        if (locked == 0) {
+            return false;
         }
 
         return true;
