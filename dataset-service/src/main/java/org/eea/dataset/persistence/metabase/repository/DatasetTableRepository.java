@@ -77,7 +77,7 @@ public interface DatasetTableRepository extends JpaRepository<DatasetTable, Long
             nativeQuery = true,
             value =
                     "INSERT INTO dataset_table (dataset_id, dataset_schema_id, table_schema_id, editing_username) " +
-                            "SELECT :datasetId, :datasetSchemaId, table_id, :username " +
+                            "SELECT :datasetId, :datasetSchemaId, table_id, NULL " +
                             "FROM unnest(CAST(:tableSchemaIds AS varchar[])) AS table_id " +
                             "WHERE NOT EXISTS ( " +
                             "    SELECT 1 FROM dataset_table x " +
@@ -88,7 +88,6 @@ public interface DatasetTableRepository extends JpaRepository<DatasetTable, Long
     void insertMissingDatasetTableEntries(
             @Param("datasetId") Long datasetId,
             @Param("datasetSchemaId") String datasetSchemaId,
-            @Param("username") String username,
             @Param("tableSchemaIds") String tableSchemaIds   // must be a Postgres array literal
     );
 

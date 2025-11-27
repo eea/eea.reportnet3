@@ -145,7 +145,7 @@ public class DatasetTableServiceImpl implements DatasetTableService {
                         .collect(Collectors.toList());
             }
 
-            createMissingDatasetTableEntries(datasetId, datasetSchemaId, username, tableSchemaIds);
+            createMissingDatasetTableEntries(datasetId, datasetSchemaId, tableSchemaIds);
         }
 
         // Acquire lock
@@ -176,9 +176,9 @@ public class DatasetTableServiceImpl implements DatasetTableService {
         return true; // success
     }
 
-    private void createMissingDatasetTableEntries(Long datasetId, String datasetSchemaId, String username, List<String> tableSchemaIds) {
+    private void createMissingDatasetTableEntries(Long datasetId, String datasetSchemaId, List<String> tableSchemaIds) {
         String arrayLiteral = "{" + String.join(",", tableSchemaIds) + "}";
         datasetTableRepository.insertMissingDatasetTableEntries(
-                datasetId, datasetSchemaId, username, arrayLiteral);
+                datasetId, datasetSchemaId, arrayLiteral);
     }
 }
