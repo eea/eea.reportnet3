@@ -28,7 +28,7 @@ public class DremioAutoPromotionService {
   private final JobControllerZuul jobControllerZuul;
   private final DremioHelperService dremioHelperService;
 
-  public DremioAutoPromotionService(RedisLockControllerZuul redisLockControllerZuul, RedisLockService redisLockService,
+  public DremioAutoPromotionService(RedisLockService redisLockService,
                                     JobControllerZuul jobControllerZuul,
                                     DremioHelperService dremioHelperService) {
     this.redisLockService = redisLockService;
