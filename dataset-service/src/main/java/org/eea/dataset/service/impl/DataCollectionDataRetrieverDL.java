@@ -5,6 +5,7 @@ import org.eea.datalake.service.S3Helper;
 import org.eea.datalake.service.S3Service;
 import org.eea.datalake.service.model.S3PathResolver;
 import org.eea.dataset.service.DataLakeDataRetriever;
+import org.eea.dataset.service.DremioAutoPromotionService;
 import org.eea.dataset.util.DataLakeDataRetrieverUtils;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
@@ -33,63 +34,124 @@ import static org.eea.utils.LiteralConstants.S3_TABLE_NAME_DC_QUERY_PATH;
 @Service
 public class DataCollectionDataRetrieverDL implements DataLakeDataRetriever {
 
-    private static final Logger LOG = LoggerFactory.getLogger(DataCollectionDataRetrieverDL.class);
-    private S3Service s3Service;
-    private S3Helper s3Helper;
-    private JdbcTemplate dremioJdbcTemplate;
-    private DremioHelperService dremioHelperService;
+  private static final Logger LOG = LoggerFactory.getLogger(DataCollectionDataRetrieverDL.class);
+  private S3Service s3Service;
+  private S3Helper s3Helper;
+  private JdbcTemplate dremioJdbcTemplate;
+  private DremioHelperService dremioHelperService;
+  private DremioAutoPromotionService dremioAutoPromotionService;
 
-    @Autowired
-    public DataCollectionDataRetrieverDL(S3Service s3Service, S3Helper s3Helper, @Qualifier("dremioJdbcTemplate") JdbcTemplate dremioJdbcTemplate, DremioHelperService dremioHelperService) {
-        this.s3Service = s3Service;
-        this.s3Helper = s3Helper;
-        this.dremioJdbcTemplate = dremioJdbcTemplate;
-        this.dremioHelperService = dremioHelperService;
+  @Autowired
+  public DataCollectionDataRetrieverDL(S3Service s3Service, S3Helper s3Helper, @Qualifier("dremioJdbcTemplate") JdbcTemplate dremioJdbcTemplate, DremioHelperService dremioHelperService, DremioAutoPromotionService dremioAutoPromotionService) {
+    this.s3Service = s3Service;
+    this.s3Helper = s3Helper;
+    this.dremioJdbcTemplate = dremioJdbcTemplate;
+    this.dremioHelperService = dremioHelperService;
+    this.dremioAutoPromotionService = dremioAutoPromotionService;
+  }
+
+  @Override
+  public TableVO getTableResult(DataSetMetabaseVO dataset, TableSchemaVO tableSchemaVO, Pageable pageable, String fields, String fieldSchemaId,
+                                String fieldValue, ErrorTypeEnum[] levelError, String[] qcCodes) throws EEAException {
+    Long datasetId = dataset.getId();
+    TableVO result = new TableVO();
+
+    // ROOT resolver for demoting/promoting.
+    S3PathResolver s3RootResolver = s3Service.getS3PathResolverByDatasetType(dataset, tableSchemaVO.getNameTableSchema(), false);
+    s3RootResolver.setIsIcebergTable(false);
+
+    boolean folderExist = s3Helper.checkTableNameDCFolderExist(s3RootResolver);
+
+    if (folderExist) {
+      // Try to auto promote if it’s safe and not already promoted.
+      dremioAutoPromotionService.ensureSafeFolderPromotion(dataset, s3RootResolver);
     }
 
-    @Override
-    public TableVO getTableResult(DataSetMetabaseVO dataset, TableSchemaVO tableSchemaVO, Pageable pageable, String fields, String fieldSchemaId, String fieldValue, ErrorTypeEnum[] levelError,
-                                  String[] qcCodes) throws EEAException {
-        Long totalRecords = 0L;
-        Long datasetId = dataset.getId();
-        TableVO result = new TableVO();
-        S3PathResolver s3PathResolver = s3Service.getS3PathResolverByDatasetType(dataset, tableSchemaVO.getNameTableSchema(), false);
-        boolean folderExist = s3Helper.checkTableNameDCFolderExist(s3PathResolver);
-        if (folderExist && dremioHelperService.checkFolderPromoted(s3PathResolver,s3PathResolver.getTableName())) {
-            s3PathResolver.setPath(S3_TABLE_NAME_DC_FOLDER_PATH);
-            totalRecords = dremioJdbcTemplate.queryForObject(s3Helper.buildRecordsCountQueryDC(s3PathResolver), Long.class);
-            result.setTotalRecords(totalRecords);
-            pageable = DataLakeDataRetrieverUtils.calculatePageable(pageable, totalRecords);
-            Map<String, FieldSchemaVO> fieldIdMap = tableSchemaVO.getRecordSchema().getFieldSchema().stream().collect(Collectors.toMap(FieldSchemaVO::getId, Function.identity()));
-            FieldSchemaVO fieldSchemaProviderCode = new FieldSchemaVO();
-            fieldSchemaProviderCode.setName("data_provider_code");
-            fieldIdMap.put("data_provider_code", fieldSchemaProviderCode);
-            StringBuilder filteredQuery = DataLakeDataRetrieverUtils.buildFilteredQuery(dataset, fields, fieldSchemaId, fieldValue, fieldIdMap, levelError, qcCodes, null);
-            StringBuilder recordsCountQuery = new StringBuilder();
-            recordsCountQuery.append("select count(record_id) from " + s3Service.getTableDCAsFolderQueryPath(s3PathResolver, S3_TABLE_NAME_DC_QUERY_PATH) + " t ").append(filteredQuery);
-            Long totalFilteredRecords = dremioJdbcTemplate.queryForObject(recordsCountQuery.toString(), Long.class);
-            result.setTotalFilteredRecords(totalFilteredRecords);
+    if (dremioHelperService.checkFolderPromoted(s3RootResolver, s3RootResolver.getTableName())) {
+      // Path resolver for dremio sql.
+      S3PathResolver s3QueryResolver = new S3PathResolver(dataset.getDataflowId(), datasetId, tableSchemaVO.getNameTableSchema(), S3_TABLE_NAME_DC_FOLDER_PATH);
+      s3QueryResolver.setIsIcebergTable(false);
 
-            pageable = DataLakeDataRetrieverUtils.calculatePageable(pageable, totalFilteredRecords);
-            //pagination
-            if (pageable !=null) {
-                DataLakeDataRetrieverUtils.buildPaginationQuery(pageable, filteredQuery);
-            }
+      loadTableWithRetry(dataset, tableSchemaVO, pageable, result, s3RootResolver, s3QueryResolver, fields,
+          fieldSchemaId, fieldValue, levelError, qcCodes);
+    } else {
+      setEmptyResults(result);
+    }
+    return result;
+  }
 
-            StringBuilder dataQuery = new StringBuilder();
-            dataQuery.append("select * from " + s3Service.getTableDCAsFolderQueryPath(s3PathResolver, S3_TABLE_NAME_DC_QUERY_PATH) + " t ");
-            dataQuery.append(filteredQuery);
-            List<RecordVO> recordVOS = DataLakeDataRetrieverUtils.getRecordVOS(dataset.getDatasetSchema(), tableSchemaVO, dataQuery);
-            result.setIdTableSchema(tableSchemaVO.getIdTableSchema());
-            result.setRecords(recordVOS);
-        } else {
-            setEmptyResults(result);
-        }
-        return result;
+  /**
+   * Helper that makes a second try to fetch the table data if it fails the first time.
+   */
+  private void loadTableWithRetry(DataSetMetabaseVO dataset, TableSchemaVO tableSchemaVO, Pageable pageable, TableVO result, S3PathResolver s3RootResolver,
+                                  S3PathResolver s3QueryResolver, String fields, String fieldSchemaId, String fieldValue, ErrorTypeEnum[] levelError, String[] qcCodes) {
+    String tablePathForRefresh = s3Service.getTableDCAsFolderQueryPath(s3QueryResolver, S3_TABLE_NAME_DC_QUERY_PATH);
+
+    try {
+      // First attempt to get the table results.
+      executeDataCollectionQuery(dataset, tableSchemaVO, pageable, result, s3QueryResolver, fields, fieldSchemaId, fieldValue, levelError, qcCodes);
+    } catch (Exception e) {
+      LOG.warn("First attempt to retrieve table data failed for datasetId {} table {}. Error: {}", dataset.getId(), tableSchemaVO.getNameTableSchema(), e.getMessage(), e);
+      LOG.info("Trying to demote, refresh metadata, promote and retry retrieve table data once more.");
+      dremioAutoPromotionService.demoteAndRefreshMetadataAndPromote(dataset, tablePathForRefresh, s3RootResolver);
+      // Second and last try to get the table results.
+      executeDataCollectionQuery(dataset, tableSchemaVO, pageable, result, s3QueryResolver, fields, fieldSchemaId, fieldValue, levelError, qcCodes);
+    }
+  }
+
+  /**
+   * Dremio queries filtered count + pagination + data retrieval.
+   */
+  private void executeDataCollectionQuery(DataSetMetabaseVO dataset, TableSchemaVO tableSchemaVO, Pageable pageable, TableVO result, S3PathResolver s3QueryResolver,
+                                          String fields, String fieldSchemaId, String fieldValue, ErrorTypeEnum[] levelError, String[] qcCodes) {
+    Long totalRecords;
+    // DC table path.
+    s3QueryResolver.setPath(S3_TABLE_NAME_DC_FOLDER_PATH);
+
+    // Total records
+    totalRecords = dremioJdbcTemplate.queryForObject(s3Helper.buildRecordsCountQueryDC(s3QueryResolver), Long.class);
+    result.setTotalRecords(totalRecords);
+
+    pageable = DataLakeDataRetrieverUtils.calculatePageable(pageable, totalRecords);
+
+    Map<String, FieldSchemaVO> fieldIdMap = tableSchemaVO.getRecordSchema().getFieldSchema().stream()
+        .collect(Collectors.toMap(FieldSchemaVO::getId, Function.identity()));
+    FieldSchemaVO fieldSchemaProviderCode = new FieldSchemaVO();
+    fieldSchemaProviderCode.setName("data_provider_code");
+    fieldIdMap.put("data_provider_code", fieldSchemaProviderCode);
+
+    StringBuilder filteredQuery = DataLakeDataRetrieverUtils.buildFilteredQuery(
+        dataset, fields, fieldSchemaId, fieldValue, fieldIdMap, levelError, qcCodes, null);
+
+    StringBuilder recordsCountQuery = new StringBuilder();
+    recordsCountQuery
+        .append("select count(record_id) from ")
+        .append(s3Service.getTableDCAsFolderQueryPath(s3QueryResolver, S3_TABLE_NAME_DC_QUERY_PATH))
+        .append(" t ")
+        .append(filteredQuery);
+
+    Long totalFilteredRecords = dremioJdbcTemplate.queryForObject(recordsCountQuery.toString(), Long.class);
+    result.setTotalFilteredRecords(totalFilteredRecords);
+
+    pageable = DataLakeDataRetrieverUtils.calculatePageable(pageable, totalFilteredRecords);
+    if (pageable != null) {
+      DataLakeDataRetrieverUtils.buildPaginationQuery(pageable, filteredQuery);
     }
 
-    @Override
-    public boolean isApplicable(String datasetType) {
-        return DatasetTypeEnum.COLLECTION.getValue().equals(datasetType);
-    }
+    StringBuilder dataQuery = new StringBuilder();
+    dataQuery
+        .append("select * from ")
+        .append(s3Service.getTableDCAsFolderQueryPath(s3QueryResolver, S3_TABLE_NAME_DC_QUERY_PATH))
+        .append(" t ")
+        .append(filteredQuery);
+
+    List<RecordVO> recordVOS = DataLakeDataRetrieverUtils.getRecordVOS(dataset.getDatasetSchema(), tableSchemaVO, dataQuery);
+    result.setIdTableSchema(tableSchemaVO.getIdTableSchema());
+    result.setRecords(recordVOS);
+  }
+
+  @Override
+  public boolean isApplicable(String datasetType) {
+    return DatasetTypeEnum.COLLECTION.getValue().equals(datasetType);
+  }
 }
