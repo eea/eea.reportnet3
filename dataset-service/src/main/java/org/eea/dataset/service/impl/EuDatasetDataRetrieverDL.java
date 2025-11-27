@@ -65,15 +65,17 @@ public class EuDatasetDataRetrieverDL implements DataLakeDataRetriever {
     if (folderExist) {
       // Try to auto promote if it’s safe and not already promoted.
       dremioAutoPromotionService.ensureSafeFolderPromotion(dataset, s3RootResolver);
-    }
 
-    if (dremioHelperService.checkFolderPromoted(s3RootResolver, s3RootResolver.getTableName())) {
-      // Path resolver for dremio sql.
-      S3PathResolver s3QueryResolver = new S3PathResolver(dataset.getDataflowId(), datasetId, tableSchemaVO.getNameTableSchema(), S3_TABLE_NAME_EU_QUERY_PATH);
-      s3QueryResolver.setIsIcebergTable(false);
+      if (dremioHelperService.checkFolderPromoted(s3RootResolver, s3RootResolver.getTableName())) {
+        // Path resolver for dremio sql.
+        S3PathResolver s3QueryResolver = new S3PathResolver(dataset.getDataflowId(), datasetId, tableSchemaVO.getNameTableSchema(), S3_TABLE_NAME_EU_QUERY_PATH);
+        s3QueryResolver.setIsIcebergTable(false);
 
-      loadTableWithRetry(dataset, tableSchemaVO, pageable, result, s3RootResolver, s3QueryResolver, fields,
-          fieldSchemaId, fieldValue, levelError, qcCodes);
+        loadTableWithRetry(dataset, tableSchemaVO, pageable, result, s3RootResolver, s3QueryResolver, fields,
+            fieldSchemaId, fieldValue, levelError, qcCodes);
+      } else {
+        setEmptyResults(result);
+      }
     } else {
       setEmptyResults(result);
     }
@@ -89,20 +91,20 @@ public class EuDatasetDataRetrieverDL implements DataLakeDataRetriever {
 
     try {
       // First attempt to get the table results.
-      executeDataCollectionQuery(dataset, tableSchemaVO, pageable, result, s3QueryResolver, fields, fieldSchemaId, fieldValue, levelError, qcCodes);
+      executeEuDatasetQuery(dataset, tableSchemaVO, pageable, result, s3QueryResolver, fields, fieldSchemaId, fieldValue, levelError, qcCodes);
     } catch (Exception e) {
       LOG.warn("First attempt to retrieve table data failed for datasetId {} table {}. Error: {}", dataset.getId(), tableSchemaVO.getNameTableSchema(), e.getMessage(), e);
       LOG.info("Trying to demote, refresh metadata, promote and retry retrieve table data once more.");
       dremioAutoPromotionService.demoteAndRefreshMetadataAndPromote(dataset, tablePathForRefresh, s3RootResolver);
       // Second and last try to get the table results.
-      executeDataCollectionQuery(dataset, tableSchemaVO, pageable, result, s3QueryResolver, fields, fieldSchemaId, fieldValue, levelError, qcCodes);
+      executeEuDatasetQuery(dataset, tableSchemaVO, pageable, result, s3QueryResolver, fields, fieldSchemaId, fieldValue, levelError, qcCodes);
     }
   }
 
   /**
    * Core Dremio queries: filtered count + pagination + data retrieval.
    */
-  private void executeDataCollectionQuery(DataSetMetabaseVO dataset, TableSchemaVO tableSchemaVO, Pageable pageable, TableVO result, S3PathResolver s3QueryResolver,
+  private void executeEuDatasetQuery(DataSetMetabaseVO dataset, TableSchemaVO tableSchemaVO, Pageable pageable, TableVO result, S3PathResolver s3QueryResolver,
                                           String fields, String fieldSchemaId, String fieldValue, ErrorTypeEnum[] levelError, String[] qcCodes) {
     Long totalRecords;
 

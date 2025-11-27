@@ -65,15 +65,17 @@ public class DataCollectionDataRetrieverDL implements DataLakeDataRetriever {
     if (folderExist) {
       // Try to auto promote if it’s safe and not already promoted.
       dremioAutoPromotionService.ensureSafeFolderPromotion(dataset, s3RootResolver);
-    }
 
-    if (dremioHelperService.checkFolderPromoted(s3RootResolver, s3RootResolver.getTableName())) {
-      // Path resolver for dremio sql.
-      S3PathResolver s3QueryResolver = new S3PathResolver(dataset.getDataflowId(), datasetId, tableSchemaVO.getNameTableSchema(), S3_TABLE_NAME_DC_FOLDER_PATH);
-      s3QueryResolver.setIsIcebergTable(false);
+      if (dremioHelperService.checkFolderPromoted(s3RootResolver, s3RootResolver.getTableName())) {
+        // Path resolver for dremio sql.
+        S3PathResolver s3QueryResolver = new S3PathResolver(dataset.getDataflowId(), datasetId, tableSchemaVO.getNameTableSchema(), S3_TABLE_NAME_DC_FOLDER_PATH);
+        s3QueryResolver.setIsIcebergTable(false);
 
-      loadTableWithRetry(dataset, tableSchemaVO, pageable, result, s3RootResolver, s3QueryResolver, fields,
-          fieldSchemaId, fieldValue, levelError, qcCodes);
+        loadTableWithRetry(dataset, tableSchemaVO, pageable, result, s3RootResolver, s3QueryResolver, fields,
+            fieldSchemaId, fieldValue, levelError, qcCodes);
+      } else {
+        setEmptyResults(result);
+      }
     } else {
       setEmptyResults(result);
     }
