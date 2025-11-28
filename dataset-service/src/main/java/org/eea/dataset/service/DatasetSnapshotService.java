@@ -335,9 +335,10 @@ public interface DatasetSnapshotService {
   /**
    * Update historic release date.
    *
-   * @param datasetId the dataset id
    * @param snapshotId the snapshot id
+   * @param dataflowId the dataflow id
+   * @param providerId the  id
    * @throws EEAException the EEA exception
    */
-  void updateHistoricReleaseDate(Long datasetId, Long snapshotId, String newReleaseDate) throws EEAException;
+  void updateHistoricReleaseDate(Long snapshotId, Long dataflowId, Long providerId, String newReleaseDate) throws EEAException;
 }
