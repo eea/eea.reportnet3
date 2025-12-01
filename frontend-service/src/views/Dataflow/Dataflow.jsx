@@ -1006,11 +1006,12 @@ export const Dataflow = () => {
   useCheckNotifications(['DELETE_DATAFLOW_COMPLETED_EVENT'], goToDataflowsPage);
 
   useEffect(() => {
-    const matchedNotifications = notificationContext.hidden.filter(
+    const hasSilentReleaseEvent = notificationContext.hidden.some(
       ({ key }) => key === 'SILENT_RELEASE_COMPLETED_EVENT' || key === 'SILENT_RELEASE_FAILED_EVENT'
     );
-    if (isEmpty(matchedNotifications)) return;
-    matchedNotifications && onLoadReportingDataflow()
+    if (hasSilentReleaseEvent) {
+      onLoadReportingDataflow();
+    }
   }, [notificationContext.hidden]);
 
 
@@ -1081,39 +1082,46 @@ export const Dataflow = () => {
     }
   };
 
-  const onConfirmRelease = async () => {
+  const onConfirmRelease = async (isSilent = false) => {
     try {
-      notificationContext.add({ type: 'RELEASE_START_EVENT' });
-      await SnapshotService.release(dataflowId, dataProviderId, dataflowState.restrictFromPublic);
+      if (!isSilent) {
+        notificationContext.add({ type: 'RELEASE_START_EVENT' });
+      }
 
+      if (isSilent) {
+        await SnapshotService.silentRelease(
+          dataflowId,
+          dataProviderId,
+          dataflowState.restrictFromPublic
+        );
+      } else {
+        await SnapshotService.release(
+          dataflowId,
+          dataProviderId,
+          dataflowState.restrictFromPublic
+        );
+      }
       dataflowState.data.datasets
         .filter(dataset => dataset.dataProviderId === dataProviderId)
         .forEach(dataset => (dataset.isReleasing = true));
     } catch (error) {
-      if (error.response.status === 423) {
+      if (!isSilent && error.response && error.response.status === 423) {
         notificationContext.add({ type: 'RELEASE_BLOCKED_EVENT' }, true);
       } else {
-        console.error('Dataflow - onConfirmRelease.', error);
-        notificationContext.add({ type: 'RELEASE_FAILED_EVENT', content: {} }, true);
+        console.error(
+          `Dataflow - onConfirm${isSilent ? 'Silent' : ''}Release.`,
+          error
+        );
+        const errorType = isSilent
+          ? 'SILENT_RELEASE_FAILED_EVENT'
+          : 'RELEASE_FAILED_EVENT';
+        notificationContext.add({ type: errorType, content: {} }, true);
       }
     } finally {
-      manageDialogs('isReleaseDialogVisible', false);
-    }
-  };
-
-  const onConfirmSilentRelease = async () => {
-    try {
-      await SnapshotService.silentRelease(dataflowId, dataProviderId, dataflowState.restrictFromPublic);
-
-      dataflowState.data.datasets
-        .filter(dataset => dataset.dataProviderId === dataProviderId)
-        .forEach(dataset => (dataset.isReleasing = true));
-
-    } catch (error) {
-        console.error('Dataflow - onConfirmSilentRelease.', error);
-        notificationContext.add({ type: 'SILENT_RELEASE_FAILED_EVENT', content: {} }, true);
-    } finally {
-      manageDialogs('isReleaseSilentDialogVisible', false);
+      const dialogKey = isSilent
+        ? 'isReleaseSilentDialogVisible'
+        : 'isReleaseDialogVisible';
+      manageDialogs(dialogKey, false);
     }
   };
 
@@ -1449,7 +1457,7 @@ export const Dataflow = () => {
             header={resourcesContext.messages['confirmReleaseHeader']}
             labelCancel={resourcesContext.messages['no']}
             labelConfirm={resourcesContext.messages['yes']}
-            onConfirm={onConfirmRelease}
+            onConfirm={() => onConfirmRelease(false)}
             onHide={() => {
               manageDialogs('isReleaseDialogVisible', false);
               if (dataflowState.representative.restrictFromPublic !== dataflowState.restrictFromPublic) {
@@ -1467,7 +1475,7 @@ export const Dataflow = () => {
             header={resourcesContext.messages['confirmReleaseHeader']}
             labelCancel={resourcesContext.messages['no']}
             labelConfirm={resourcesContext.messages['yes']}
-            onConfirm={onConfirmSilentRelease}
+            onConfirm={() => onConfirmRelease(true)}
             onHide={() => {
               manageDialogs('isReleaseSilentDialogVisible', false);
               if (dataflowState.representative.restrictFromPublic !== dataflowState.restrictFromPublic) {
