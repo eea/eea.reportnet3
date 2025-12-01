@@ -21,6 +21,8 @@ public class DatasetEditingStatusVO {
 
     /** The username of the editor (null if not being edited). */
     private String editor;
+    /** Whether the dataset is locked for user */
+    private Boolean isLockedForUser;
 
     /**
      * Equals.
