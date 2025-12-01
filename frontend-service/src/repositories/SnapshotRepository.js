@@ -49,8 +49,8 @@ export const SnapshotRepository = {
       url: getUrl(SnapshotConfig.silentRelease, { dataflowId, dataProviderId, restrictFromPublic })
     }),
 
-  updateReleaseDate: async (snapshotId, datasetId, newReleaseDate) =>
+  updateReleaseDate: async (snapshotId, dataflowId, providerId, newReleaseDate) =>
     await HTTPRequester.update({
-      url: getUrl(SnapshotConfig.updateReleaseDate, { snapshotId, datasetId, newReleaseDate })
+      url: getUrl(SnapshotConfig.updateReleaseDate, { snapshotId, dataflowId, providerId, newReleaseDate })
     })
 };
