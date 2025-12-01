@@ -3925,7 +3925,7 @@ public class DatasetControllerImpl implements DatasetController {
               username, datasetId, currentEditor);
 
       kafkaSenderUtils.releaseNotificableKafkaEvent(
-              EventType.DATASET_EDITING_FAILED_EVENT,
+              EventType.DATASET_ENABLE_EDITING_FAILED_ACTIVE_EDITING_BY_OTHER_USER_EVENT,
               null,
               NotificationVO.builder()
                       .user(username)
@@ -3951,7 +3951,7 @@ public class DatasetControllerImpl implements DatasetController {
 
       if (!isEnableEditing) {
         kafkaSenderUtils.releaseNotificableKafkaEvent(
-                EventType.DATASET_EDITING_FAILED_EVENT,
+                EventType.DATASET_ENABLE_EDITING_FAILED_ACTIVE_EDITING_BY_OTHER_USER_EVENT,
                 null,
                 NotificationVO.builder()
                         .user(username)
@@ -3970,7 +3970,7 @@ public class DatasetControllerImpl implements DatasetController {
 
       // SUCCESS
       kafkaSenderUtils.releaseNotificableKafkaEvent(
-              EventType.DATASET_EDITING_COMPLETED_EVENT,
+              EventType.DATASET_DISABLE_EDITING_FAILED_ACTIVE_EDITING_BY_OTHER_USER_EVENT,
               null,
               NotificationVO.builder()
                       .user(username)
@@ -3989,7 +3989,7 @@ public class DatasetControllerImpl implements DatasetController {
               datasetId, dataflowId, username, eeaException.getMessage());
 
       kafkaSenderUtils.releaseNotificableKafkaEvent(
-              EventType.DATASET_EDITING_FAILED_EVENT,
+              EventType.DATASET_ENABLE_EDITING_FAILED_ACTIVE_EDITING_BY_OTHER_USER_EVENT,
               null,
               NotificationVO.builder()
                       .user(username)
@@ -4006,7 +4006,7 @@ public class DatasetControllerImpl implements DatasetController {
               datasetId, username, e.getMessage());
 
       kafkaSenderUtils.releaseNotificableKafkaEvent(
-              EventType.DATASET_EDITING_FAILED_EVENT,
+              EventType.DATASET_ENABLE_EDITING_FAILED_ACTIVE_EDITING_BY_OTHER_USER_EVENT,
               null,
               NotificationVO.builder()
                       .user(username)
@@ -4083,13 +4083,13 @@ public class DatasetControllerImpl implements DatasetController {
               username, datasetId);
 
       kafkaSenderUtils.releaseNotificableKafkaEvent(
-              EventType.DATASET_EDITING_FAILED_EVENT,
+              EventType.DATASET_DISABLE_EDITING_FAILED_EVENT,
               null,
               NotificationVO.builder()
                       .user(username)
                       .datasetId(datasetId)
                       .dataflowId(dataflowId)
-                      .error("Dataset is not currently being edited")
+                      .error("Dataset is not currently being edited to be disabled")
                       .build()
       );
 
@@ -4104,7 +4104,7 @@ public class DatasetControllerImpl implements DatasetController {
               username, datasetId, currentEditor);
 
       kafkaSenderUtils.releaseNotificableKafkaEvent(
-              EventType.DATASET_EDITING_FAILED_EVENT,
+              EventType.DATASET_DISABLE_EDITING_FAILED_ACTIVE_EDITING_BY_OTHER_USER_EVENT,
               null,
               NotificationVO.builder()
                       .user(username)
@@ -4124,7 +4124,7 @@ public class DatasetControllerImpl implements DatasetController {
 
       if (!isDisabledEditing) {
         kafkaSenderUtils.releaseNotificableKafkaEvent(
-                EventType.DATASET_EDITING_FAILED_EVENT,
+                EventType.DATASET_DISABLE_EDITING_FAILED_EVENT,
                 null,
                 NotificationVO.builder()
                         .user(username)
@@ -4142,7 +4142,7 @@ public class DatasetControllerImpl implements DatasetController {
 
       // SUCCESS
       kafkaSenderUtils.releaseNotificableKafkaEvent(
-              EventType.DATASET_EDITING_COMPLETED_EVENT,
+              EventType.DATASET_DISABLE_EDITING_COMPLETED_EVENT,
               null,
               NotificationVO.builder()
                       .user(username)
@@ -4189,14 +4189,10 @@ public class DatasetControllerImpl implements DatasetController {
           @ApiParam(type = "Long", value = "Dataset Id", example = "0")
           @PathVariable("id") Long datasetId) {
 
-    String editor = datasetTableService.getDatasetEditingUsername(datasetId);
+    String username = SecurityContextHolder.getContext().getAuthentication().getName();
 
-    DatasetEditingStatusVO datasetEditingStatusVO = new DatasetEditingStatusVO();
-    datasetEditingStatusVO.setDatasetId(datasetId);
-    datasetEditingStatusVO.setIsEditing(editor != null);
-    datasetEditingStatusVO.setEditor(editor);
+    return datasetTableService.getEditingStatus(datasetId, username);
 
-    return datasetEditingStatusVO;
   }
 
 }

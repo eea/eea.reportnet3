@@ -14,7 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Component
-public class DatasetEditingCompletedEvent implements NotificableEventHandler {
+public class DatasetEnableEditingCompletedEvent implements NotificableEventHandler {
 
     @Autowired
     private DatasetMetabaseService datasetMetabaseService;
@@ -24,7 +24,7 @@ public class DatasetEditingCompletedEvent implements NotificableEventHandler {
 
     @Override
     public EventType getEventType() {
-        return EventType.DATASET_EDITING_COMPLETED_EVENT;
+        return EventType.DATASET_ENABLE_EDITING_COMPLETED_EVENT;
     }
 
     @Override
@@ -41,7 +41,7 @@ public class DatasetEditingCompletedEvent implements NotificableEventHandler {
         map.put("datasetId", vo.getDatasetId());
         map.put("dataflowId", vo.getDataflowId());
         map.put("datasetName", datasetName);
-        map.put("message", "Dataset editing has been successful");
+        map.put("message", "Dataset enable editing has been successful");
         return map;
     }
 }
