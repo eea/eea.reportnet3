@@ -161,4 +161,12 @@ public interface SnapshotRepository extends CrudRepository<Snapshot, Long> {
   @Transactional
   @Query(value = "UPDATE snapshot SET dc_released = true WHERE id = :id", nativeQuery = true)
   int markAsReleased(@Param("id") Long id);
+
+  /**
+   * Find snapshots by job id.
+   *
+   * @param jobId the job id
+   */
+  List<Snapshot> findByJobId(@Param("jobId") Long jobId);
+
 }
