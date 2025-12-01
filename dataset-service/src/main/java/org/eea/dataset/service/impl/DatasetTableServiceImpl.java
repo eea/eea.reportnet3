@@ -10,6 +10,7 @@ import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.DatasetTableService;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.DatasetTableVO;
+import org.eea.interfaces.vo.dataset.schemas.DatasetEditingStatusVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaIdNameVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -181,4 +182,30 @@ public class DatasetTableServiceImpl implements DatasetTableService {
         datasetTableRepository.insertMissingDatasetTableEntries(
                 datasetId, datasetSchemaId, arrayLiteral);
     }
+
+    @Override
+    public DatasetEditingStatusVO getEditingStatus(Long datasetId, String username) {
+        String editor = getDatasetEditingUsername(datasetId);
+
+        DatasetEditingStatusVO vo = new DatasetEditingStatusVO();
+        vo.setDatasetId(datasetId);
+        vo.setIsEditing(editor != null);
+        vo.setEditor(editor);
+        vo.setIsLockedForUser(editor != null && !editor.equals(username));
+
+        return vo;
+    }
+
+    @Override
+    public boolean isAnyDatasetBeingEdited(List<Long> datasetIds) {
+        for (Long datasetId : datasetIds) {
+            String editor = getDatasetEditingUsername(datasetId);
+            if (editor != null ) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+
 }

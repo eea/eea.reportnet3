@@ -2,6 +2,7 @@ package org.eea.dataset.service;
 
 import org.eea.dataset.persistence.metabase.domain.DatasetTable;
 import org.eea.interfaces.vo.dataset.DatasetTableVO;
+import org.eea.interfaces.vo.dataset.schemas.DatasetEditingStatusVO;
 
 import java.util.List;
 
@@ -21,4 +22,8 @@ public interface DatasetTableService {
     Boolean enableEditingForDatasetTableWithUser(Long datasetId, String username,Boolean isBigData, List<String> tableSchemaIds);
 
     Boolean disableEditingForDatasetTableWithUser(Long datasetId, String username);
+
+    DatasetEditingStatusVO getEditingStatus(Long datasetId, String username);
+
+    boolean isAnyDatasetBeingEdited(List<Long> datasetIds);
 }
