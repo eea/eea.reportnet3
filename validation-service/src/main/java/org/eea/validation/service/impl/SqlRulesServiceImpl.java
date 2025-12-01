@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -29,6 +28,7 @@ import org.eea.interfaces.controller.dataset.EUDatasetController.EUDatasetContro
 import org.eea.interfaces.controller.dataset.ReferenceDatasetController.ReferenceDatasetControllerZuul;
 import org.eea.interfaces.controller.dataset.TestDatasetController.TestDatasetControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
+import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.PaginatedDataflowVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataset.*;
@@ -71,12 +71,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.transaction.Transactional;
-import java.util.*;
-import java.util.stream.Collectors;
 
 import static org.eea.utils.LiteralConstants.*;
 
@@ -158,6 +152,8 @@ public class SqlRulesServiceImpl implements SqlRulesService {
   @Autowired
   private S3Helper s3Helper;
 
+  @Autowired
+  private RepresentativeControllerZuul representativeControllerZuul;
 
   /** The Constant DATASET_: {@value}. */
   private static final String DATASET = "dataset_";
@@ -415,6 +411,37 @@ public class SqlRulesServiceImpl implements SqlRulesService {
   }
 
   /**
+   * Check if the message error contains one of the 3 codes
+   *
+   * @param sqlCode The sql sentence to be validated
+   * @return True if contains
+   */
+  private boolean sqlCodeContainCodes(String sqlCode) {
+    return sqlCode.contains("{%R3_COUNTRY_CODE%}")
+            || sqlCode.contains("{%R3_COMPANY_CODE%}")
+            || sqlCode.contains("{%R3_ORGANIZATION_CODE%}");
+  }
+
+  /**
+   * If the error message contains the 3 codes just replace them with the real provider code
+   *
+   * @param datasetId
+   * @param sqlCode The sql sentence to be validated
+   */
+  private String replaceCodes(Long datasetId, String sqlCode) {
+    DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseController.findDatasetMetabaseById(datasetId);
+    String providerCode = "XX";
+    if (dataSetMetabaseVO.getDataProviderId()!=null && dataSetMetabaseVO.getDataProviderId()!=0) {
+      DataProviderVO provider = representativeControllerZuul.findDataProviderById(dataSetMetabaseVO.getDataProviderId());
+      providerCode = provider.getCode();
+    }
+    return sqlCode
+            .replace("{%R3_COUNTRY_CODE%}", providerCode)
+            .replace("{%R3_COMPANY_CODE%}", providerCode)
+            .replace("{%R3_ORGANIZATION_CODE%}", providerCode);
+  }
+
+  /**
    * Run SQL rule with limited results.
    *
    * @param datasetId the dataset id
@@ -466,6 +493,10 @@ public class SqlRulesServiceImpl implements SqlRulesService {
         if (dataFlowVO!=null && dataFlowVO.getBigData()!=null && dataFlowVO.getBigData()) {
           String sqlCode = this.replaceTableNamesWithS3Path(sb.toString());
           sqlCode = sqlCode.replace("OFFSET 0 LIMIT 10", "LIMIT 10 OFFSET 0");
+          // replace provider code with {%R3_COUNTRY_CODE%} or {%R3_COMPANY_CODE%} or {%R3_ORGANIZATION_CODE%}
+          if (sqlCodeContainCodes(sqlCode)) {
+            sqlCode = replaceCodes(datasetId, sqlCode);
+          }
           result = dremioJdbcTemplate.query(sqlCode, (resultSet, i) -> {
             ++i;
             List<ValueVO> valueVOList = new ArrayList<>();
