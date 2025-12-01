@@ -1751,7 +1751,8 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
     }
 
-    boolean belongsToDataset = Objects.equals(datasetMetabase.getDataflowId(), dataflowId) && Objects.equals(datasetMetabase.getDataProviderId(), providerId);
+    boolean belongsToDataset = Objects.equals(datasetMetabase.getDataflowId(), dataflowId)
+        && Objects.equals(datasetMetabase.getDataProviderId(), providerId);
 
     if (!belongsToDataset) {
       LOG.error("Snapshot {} does not belong to dataflowId {} / providerId {}. Real dataflowId={}, providerId={}",
@@ -1765,21 +1766,56 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       try {
         dateReleasing = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX").parse(newReleaseDate);
       } catch (ParseException e) {
-        LOG.error("Error parsing the date of the release of snapshot with id {} and providerId {} of dataflowId {}. Message: {}", snapshotId,  dataflowId, providerId, e.getMessage());
+        LOG.error("Error parsing the date of the release of snapshot with id {} and providerId {} of dataflowId {}. Message: {}",
+            snapshotId,  dataflowId, providerId, e.getMessage());
         throw new EEAException(EEAErrorMessage.UPDATING_SNAPSHOT);
       }
     }
 
-    snapshot.setDateReleased(dateReleasing);
+    List<Snapshot> snapshotsToUpdate = new ArrayList<>();
+    Long jobId = snapshot.getJobId();
 
-      // Update description of Releases.
-    if (dateReleasing != null) {
-      SimpleDateFormat descFmt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-      String formatted = descFmt.format(dateReleasing);
-      snapshot.setDescription("Release " + formatted);
+    // Get all snapshots with the same jobId.
+    if (jobId != null) {
+      List<Snapshot> sameJobSnapshots = snapshotRepository.findByJobId(jobId);
+
+      for (Snapshot sn : sameJobSnapshots) {
+        Long snapshotDatasetId;
+
+        if (sn.getReportingDataset() != null) {
+          snapshotDatasetId = sn.getReportingDataset().getId();
+        } else {
+          snapshotDatasetId = sn.getDataCollectionId();
+        }
+
+        if (snapshotDatasetId == null) {
+          continue;
+        }
+
+        DataSetMetabaseVO sMetabase = datasetMetabaseService.findDatasetMetabase(snapshotDatasetId);
+        if (sMetabase == null) {
+          continue;
+        }
+
+        // Verify that the dataset belongs to the current dataflow and provider.
+        if (Objects.equals(sMetabase.getDataflowId(), dataflowId) && Objects.equals(sMetabase.getDataProviderId(), providerId)) {
+          snapshotsToUpdate.add(sn);
+        }
+      }
     }
 
-    snapshotRepository.save(snapshot);
+    SimpleDateFormat descFmt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+    for (Snapshot sn : snapshotsToUpdate) {
+      sn.setDateReleased(dateReleasing);
+
+      if (dateReleasing != null) {
+        String formatted = descFmt.format(dateReleasing);
+        sn.setDescription("Release " + formatted);
+      }
+    }
+
+    snapshotRepository.saveAll(snapshotsToUpdate);
 
     LOG.info("Updated dateReleased and description for snapshotId {} and providerId {} of dataflowId {} to {}", snapshotId, dataflowId, providerId, newReleaseDate);
   }
