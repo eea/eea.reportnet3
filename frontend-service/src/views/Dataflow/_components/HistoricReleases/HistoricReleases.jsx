@@ -97,11 +97,15 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
             header: resourcesContext.messages['releaseDate'],
             template: renderReleaseDateTemplate
           },
-          {
-            key: 'actions',
-            header: resourcesContext.messages['actions'],
-            template: renderActionsTemplate
-          }
+          ...(isNil(datasetId) && (isAdmin || isCustodian)
+            ? [
+                {
+                  key: 'actions',
+                  header: resourcesContext.messages['actions'],
+                  template: renderActionsTemplate
+                }
+              ]
+            : [])
         ];
       } else {
         const columns = [
@@ -144,11 +148,6 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
             header: resourcesContext.messages['isPublic'],
             template: (rowData, column) =>
               ColumnTemplateUtils.getCheckTemplate(rowData, column, styles.checkedValueColumn, styles.icon)
-          },
-          {
-            key: 'actions',
-            header: resourcesContext.messages['actions'],
-            template: renderActionsTemplate
           }
         );
 
@@ -196,12 +195,7 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
     try {
       const formattedDate = dayjs(selectedReleaseDate).utc().format('YYYY-MM-DDTHH:mm:ss[Z]');
 
-      await SnapshotService.updateReleaseDate(
-        selectedReleaseForCalendar.id,
-        selectedReleaseForCalendar.datasetId,
-        formattedDate
-      );
-
+      await SnapshotService.updateReleaseDate(selectedReleaseForCalendar.id, dataflowId, dataProviderId, formattedDate);
       notificationContext.add(
         {
           type: 'UPDATE_RELEASE_DATE_SUCCESS'

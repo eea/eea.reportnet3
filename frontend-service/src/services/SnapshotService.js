@@ -36,6 +36,6 @@ export const SnapshotService = {
   silentRelease: async (dataflowId, dataProviderId, restrictFromPublic) =>
     await SnapshotRepository.silentRelease(dataflowId, dataProviderId, restrictFromPublic),
 
-  updateReleaseDate: async (snapshotId, datasetId, newReleaseDate) =>
-    await SnapshotRepository.updateReleaseDate(snapshotId, datasetId, newReleaseDate)
+  updateReleaseDate: async (snapshotId, dataflowId, providerId, newReleaseDate) =>
+    await SnapshotRepository.updateReleaseDate(snapshotId, dataflowId, providerId, newReleaseDate)
 };

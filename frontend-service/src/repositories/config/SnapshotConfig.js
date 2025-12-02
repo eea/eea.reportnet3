@@ -12,5 +12,5 @@ export const SnapshotConfig = {
   restoreDesigner: '/snapshot/{:snapshotId}/dataschema/{:datasetSchemaId}/restore',
   restoreReporter: '/snapshot/{:snapshotId}/dataset/{:datasetId}/restore',
   updateReleaseDate:
-    '/snapshot/v1/{:snapshotId}/dataset/{:datasetId}/updateReleaseDate?newReleaseDate={:newReleaseDate}'
+    '/snapshot/v1/{:snapshotId}/updateReleaseDate?dataflowId={:dataflowId}&providerId={:providerId}&newReleaseDate={:newReleaseDate}'
 };
