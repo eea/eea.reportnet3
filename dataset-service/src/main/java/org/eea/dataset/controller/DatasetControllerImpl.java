@@ -3970,7 +3970,7 @@ public class DatasetControllerImpl implements DatasetController {
 
       // SUCCESS
       kafkaSenderUtils.releaseNotificableKafkaEvent(
-              EventType.DATASET_DISABLE_EDITING_FAILED_ACTIVE_EDITING_BY_OTHER_USER_EVENT,
+              EventType.DATASET_ENABLE_EDITING_COMPLETED_EVENT,
               null,
               NotificationVO.builder()
                       .user(username)
