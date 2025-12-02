@@ -65,7 +65,7 @@ const useBigButtonListRepresentative = ({
       help: true,
       receipt: isLeadReporterOfThisCountry && isReleased,
       release: isLeadReporterOfThisCountry && !isTestDataset,
-      silentRelease: isAdmin,
+      silentRelease: !isTestDataset && isAdmin,
       testDatasets: isTestDataset || (isStewardSupport && isTestDataset)
     };
   };
