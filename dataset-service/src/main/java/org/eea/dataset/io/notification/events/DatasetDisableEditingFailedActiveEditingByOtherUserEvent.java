@@ -36,7 +36,7 @@ public class DatasetDisableEditingFailedActiveEditingByOtherUserEvent implements
             datasetName = ds.getDataSetName();
         }
         String currentEditor = datasetTableService.getDatasetEditingUsername(vo.getDatasetId());
-        String message= "Dataset was not edited successfully.";
+        String message= "Dataset disable editing failed.";
 
         if (!(currentEditor == null)) {
             message= message + "Dataset is locked for editing by " + currentEditor;
