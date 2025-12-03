@@ -1108,4 +1108,9 @@ public interface DatasetController {
   @GetMapping("/{id}/editingStatus")
   DatasetEditingStatusVO getEditingStatus(
           @PathVariable("id") Long datasetId);
-}
+
+  @GetMapping("/hasEnabledEditingDatasets")
+  Boolean hasEnabledEditingDatasets(@RequestParam(value = "dataflowId") Long dataflowId,
+                                           @RequestParam(value = "providerId") Long providerId);
+
+  }
