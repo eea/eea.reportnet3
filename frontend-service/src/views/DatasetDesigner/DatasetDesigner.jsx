@@ -97,7 +97,10 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
     QuerystringUtils.getUrlParamValue('view') !== '' ? QuerystringUtils.getUrlParamValue('view') : 'design'
   );
   const [sqlValidationRunning, setSqlValidationRunning] = useState(false);
-
+  const [editingStatus, setEditingStatus] = useState({
+    editor: null,
+    isEditing: false
+  });
   const [isIcebergCreated, setIsIcebergCreated] = useState(false);
   const [isLoadingIceberg, setIsLoadingIceberg] = useState(false);
   const [noEditableCheck, setNoEditableCheck] = useState(false);
@@ -235,6 +238,8 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
   const isDataflowCustodian = userContext.hasContextAccessPermission(config.permissions.prefixes.DATAFLOW, dataflowId, [
     config.permissions.roles.CUSTODIAN.key
   ]);
+  const userName = userContext.name;
+
   const exportMenuRef = useRef();
   const importMenuRef = useRef();
 
@@ -259,6 +264,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
 
   useEffect(() => {
     leftSideBarContext.removeModels();
+    getEditingStatus();
     onGetIcebergTables();
     onLoadSchema();
     callSetMetaData();
@@ -418,6 +424,19 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
           }${`&view=${view}`}`
         : `?tab=${QuerystringUtils.getUrlParamValue('tab')}${`&view=${view}`}`
     );
+  };
+
+  const getEditingStatus = async () => {
+    try {
+      const editingStatusData = await DatasetService.getEditingStatus({ datasetId });
+
+      setEditingStatus({
+        editor: editingStatusData?.data?.editor,
+        isEditing: editingStatusData?.data?.isEditing
+      });
+    } catch (error) {
+      console.error('DatasetDesigner - getEditingStatus.', error);
+    }
   };
 
   const getExportList = () => {
@@ -900,7 +919,9 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
         'PARQUET_TO_ICEBERG_CONVERSION_FAILED_EVENT',
         'PARQUET_TO_ICEBERG_FAILED_ACTIVE_JOBS_EVENT',
         'ICEBERG_TO_PARQUET_FAILED_ACTIVE_JOBS_EVENT',
-        'ANOTHER_CONVERSION_IS_RUNNING_FAILED_EVENT'
+        'ANOTHER_CONVERSION_IS_RUNNING_FAILED_EVENT',
+        'PARQUET_TO_ICEBERG_FAILED_ACTIVE_EDITING_BY_OTHER_USER',
+        'ICEBERG_TO_PARQUET_FAILED_ACTIVE_EDITING_BY_OTHER_USER'
       ].includes(notification.key)
     );
 
@@ -1223,6 +1244,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
   const onChangeImportDialogVisibility = isVisible => manageDialogs('isImportDatasetDialogVisible', isVisible);
 
   function handleRefresh() {
+    getEditingStatus();
     onLoadSchema();
     getTableImportedMetadata();
   }
@@ -1310,6 +1332,26 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
 
   const onCloseHistoryDialog = () => {
     setIsHistoryDialogVisible(false);
+  };
+
+  const toggleEditMode = async () => {
+    if (editingStatus?.isEditing) {
+      try {
+        await DatasetService.disableEditing({ datasetId });
+      } catch (error) {
+        console.error('Dataset - toggleEditMode.', error);
+      } finally {
+        handleRefresh();
+      }
+    } else {
+      try {
+        await DatasetService.enableEditing({ datasetId });
+      } catch (error) {
+        console.error('Dataset - toggleEditMode.', error);
+      } finally {
+        handleRefresh();
+      }
+    }
   };
 
   const convertHelper = async () => {
@@ -1777,6 +1819,23 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
       </div>
     );
 
+  const renderEditorMessage = () => {
+    if (editingStatus?.isEditing) {
+      return (
+        <div className={styles.editorMessage} role="alert">
+          <i className={`pi pi-info-circle ${styles.infoIcon}`} />
+          <span
+            dangerouslySetInnerHTML={{
+              __html: TextUtils.parseText(resourcesContext.messages['editorMessage'], {
+                editor: editingStatus?.editor
+              })
+            }}></span>
+        </div>
+      );
+    }
+    return null;
+  };
+
   return layout(
     <SnapshotContext.Provider
       value={{
@@ -1796,6 +1855,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
         <h4 className={styles.descriptionLabel}>
           {resourcesContext.messages['newDatasetSchemaDescriptionPlaceHolder']}
         </h4>
+        <div className={styles.editorMessageWrapper}>{renderEditorMessage()}</div>
         <div className={styles.ButtonsBar}>
           <div className={styles.datasetDescriptionRow}>
             <InputTextarea
@@ -1909,27 +1969,26 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
                   onClick={() => manageDialogs('isShowWebformConfigurationDialogVisible', true)}
                 />
               )}
-              {designerState?.bigData && (
-                <Button
-                  className={styles.openWebformButton}
-                  disabled={
-                    (isAdmin && (!isCustodian || !isDataflowCustodian)) ||
-                    isDataflowOpen ||
-                    isLoadingIceberg ||
-                    noEditableCheck
-                  }
-                  helpClassName={!isIcebergCreated ? 'p-button-reverse' : 'p-button-copy'}
-                  icon={!isIcebergCreated ? 'lock' : 'unlock'}
-                  isLoading={isLoadingIceberg}
-                  key={isIcebergCreated}
-                  label={
-                    !isIcebergCreated
-                      ? resourcesContext.messages['enableEdit']
-                      : resourcesContext.messages['disableEdit']
-                  }
-                  onClick={() => convertHelper()}
-                />
-              )}
+              <Button
+                className={styles.openWebformButton}
+                disabled={
+                  (editingStatus?.isEditing && editingStatus?.editor !== userName) ||
+                  (isAdmin && (!isCustodian || !isDataflowCustodian)) ||
+                  isDataflowOpen ||
+                  isLoadingIceberg ||
+                  noEditableCheck
+                }
+                helpClassName={!editingStatus?.isEditing ? 'p-button-reverse' : 'p-button-copy'}
+                icon={!editingStatus?.isEditing ? 'lock' : 'unlock'}
+                isLoading={isLoadingIceberg}
+                key={isIcebergCreated}
+                label={
+                  !editingStatus?.isEditing
+                    ? resourcesContext.messages['enableEdit']
+                    : resourcesContext.messages['disableEdit']
+                }
+                onClick={() => (designerState?.bigData ? convertHelper() : toggleEditMode())}
+              />
             </div>
           </div>
           <Toolbar>
@@ -1942,7 +2001,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
                   (isAdmin && (!isCustodian || !isDataflowCustodian)) ||
                   isDataflowOpen ||
                   isDesignDatasetEditorRead ||
-                  isIcebergCreated ||
+                  editingStatus?.isEditing ||
                   actionsContext.isInProgress
                 }
                 icon={
@@ -1967,7 +2026,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
                   !isDataflowOpen && !isDesignDatasetEditorRead ? 'p-button-animated-blink' : null
                 }`}
                 disabled={
-                  isDataflowOpen || isDesignDatasetEditorRead || isIcebergCreated || actionsContext.isInProgress
+                  isDataflowOpen || isDesignDatasetEditorRead || editingStatus?.isEditing || actionsContext.isInProgress
                 }
                 icon={
                   actionsContext.isInProgress && actionsContext.exportDatasetProcessing ? 'spinnerAnimate' : 'export'
@@ -1989,7 +2048,9 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
               />
               <DatasetDeleteDataDialog
                 disabled={
-                  (isAdmin && (!isCustodian || !isDataflowCustodian)) || isIcebergCreated || actionsContext.isInProgress
+                  (isAdmin && (!isCustodian || !isDataflowCustodian)) ||
+                  editingStatus?.isEditing ||
+                  actionsContext.isInProgress
                 }
                 icon={
                   actionsContext.isInProgress && actionsContext.deleteDatasetProcessing ? 'spinnerAnimate' : 'trash'
@@ -2020,7 +2081,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
                 />
               )}
               <DatasetValidateDialog
-                disabled={isDesignDatasetEditorRead || isIcebergCreated || actionsContext.isInProgress}
+                disabled={isDesignDatasetEditorRead || editingStatus?.isEditing || actionsContext.isInProgress}
                 icon={
                   actionsContext.isInProgress && actionsContext.validateDatasetProcessing
                     ? 'spinnerAnimate'
@@ -2110,6 +2171,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
             bigData={designerState.bigData}
             dataflowId={dataflowId}
             datasetId={datasetId}
+            isEditor={editingStatus?.isEditing && editingStatus?.editor === userName}
             isIcebergCreated={isIcebergCreated}
             isLoadingIceberg={isLoadingIceberg}
             options={webformOptions}
@@ -2132,6 +2194,8 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
             isDataflowCustodian={isDataflowCustodian}
             isDataflowOpen={isDataflowOpen}
             isDesignDatasetEditorRead={isDesignDatasetEditorRead}
+            isEditingEnabled={editingStatus?.isEditing}
+            isEditor={editingStatus?.isEditing && editingStatus?.editor === userName}
             isGroupedValidationDeleted={dataViewerOptions.isGroupedValidationDeleted}
             isGroupedValidationSelected={dataViewerOptions.isGroupedValidationSelected}
             isIcebergCreated={isIcebergCreated}

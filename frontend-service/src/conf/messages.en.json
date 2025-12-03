@@ -583,6 +583,7 @@
     "editFieldConstraint": "Edit field constraint",
     "editFieldQC": "Edit field QC",
     "editItem": "Edit item",
+    "editorMessage": "{:editor} is editing",
     "editorsAccountColumn": "Editor account",
     "editorsRightsDialogConfirmDeleteHeader": "Delete editor",
     "editorsRightsDialogConfirmDeleteQuestion": "Do you really want to delete this editor?",

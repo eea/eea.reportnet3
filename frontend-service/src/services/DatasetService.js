@@ -22,6 +22,14 @@ import { CoreUtils } from 'repositories/_utils/CoreUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const DatasetService = {
+  enableEditing: async ({ datasetId }) => {
+    await DatasetRepository.enableEditing({ datasetId });
+  },
+
+  disableEditing: async ({ datasetId }) => {
+    await DatasetRepository.disableEditing({ datasetId });
+  },
+
   convertParquetsToIcebergs: async ({ datasetId, dataflowId, providerId }) => {
     await DatasetRepository.convertParquetsToIcebergs({ datasetId, dataflowId, providerId });
   },
@@ -303,6 +311,10 @@ export const DatasetService = {
 
   exportTableSchema: async (datasetId, datasetSchemaId, tableSchemaId, fileType) =>
     await DatasetRepository.exportTableSchema(datasetId, datasetSchemaId, tableSchemaId, fileType),
+
+  getEditingStatus: async ({ datasetId }) => {
+    return await DatasetRepository.getEditingStatus({ datasetId });
+  },
 
   getIsIcebergTableCreated: async ({ datasetId, tableSchemaId }) => {
     return await DatasetRepository.getIsIcebergTableCreated({ datasetId, tableSchemaId });

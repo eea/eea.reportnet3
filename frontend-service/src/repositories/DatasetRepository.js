@@ -8,6 +8,16 @@ export const DatasetRepository = {
       url: getUrl(DatasetConfig.testImportProcess, { datasetId })
     }),
 
+  enableEditing: async ({ datasetId }) =>
+    await HTTPRequester.update({
+      url: getUrl(DatasetConfig.enableEditing, { datasetId })
+    }),
+
+  disableEditing: async ({ datasetId }) =>
+    await HTTPRequester.update({
+      url: getUrl(DatasetConfig.disableEditing, { datasetId })
+    }),
+
   convertParquetsToIcebergs: async ({ dataflowId, datasetId, providerId }) =>
     await HTTPRequester.post({
       url: getUrl(DatasetConfig.convertParquetsToIcebergs, { dataflowId, datasetId, providerId })
@@ -244,6 +254,9 @@ export const DatasetRepository = {
       headers: { 'Content-Type': 'application/octet-stream' }
     }),
 
+  getEditingStatus: async ({ datasetId }) =>
+    await HTTPRequester.get({ url: getUrl(DatasetConfig.getEditingStatus, { datasetId }) }),
+
   getMetadata: async datasetId => await HTTPRequester.get({ url: getUrl(DatasetConfig.getMetadata, { datasetId }) }),
 
   getIsIcebergTableCreated: async ({ datasetId, tableSchemaId }) =>
@@ -439,11 +452,10 @@ export const DatasetRepository = {
     });
   },
   checkDuplicateValues: async (datasetId, tableSchemaId, fieldVO) =>
-
     // When sending an object( like fieldVO ), a POST call must be sent to the backend.
     await HTTPRequester.post({
       url: getUrl(DatasetConfig.checkDuplicateValues, { datasetId, tableSchemaId }),
-      data: fieldVO,
+      data: fieldVO
     }),
 
   importTableFileWithS3: async ({

@@ -37,7 +37,7 @@ const NotificationProvider = ({ children }) => {
               config: config.notifications.notificationSchema,
               content,
               date: new Date(),
-              message: resourcesContext.messages[camelCase(type)],
+              message: resourcesContext?.messages[camelCase(type)] || content?.message,
               onClick,
               routes,
               type

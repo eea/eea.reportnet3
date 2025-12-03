@@ -3,6 +3,8 @@ export const DatasetConfig = {
     '/dataset/v1/{:datasetId}/field/{:fieldId}/attachment?dataflowId={:dataflowId}&tableSchemaName={:tableSchemaName}&fieldName={:fieldName}&recordId={:recordId}&previousFileName={:previousFileName}',
   uploadAttachmentWithProviderId:
     '/dataset/v1/{:datasetId}/field/{:fieldId}/attachment?dataflowId={:dataflowId}&providerId={:providerId}&tableSchemaName={:tableSchemaName}&fieldName={:fieldName}&recordId={:recordId}&previousFileName={:previousFileName}',
+  enableEditing: '/dataset/{:datasetId}/enableEditing',
+  disableEditing: '/dataset/{:datasetId}/disableEditing',
   convertIcebergsToParquets:
     '/dataset/convertIcebergToParquetTables/{:datasetId}?dataflowId={:dataflowId}&providerId={:providerId}',
   convertParquetsToIcebergs:
@@ -14,6 +16,7 @@ export const DatasetConfig = {
   getAlignmentBetween:
     '/dataset/getReleasedDatasetDataInfo?collectionDatasetId={:datasetId}&providerCode={:selectedRepresentativesCode}&tableSchemaId={:selectedTable}',
   getIsAvailableForManualEditing: '/dataset/getAvailableForManualEditingTables/{:datasetId}',
+  getEditingStatus: '/dataset/{:datasetId}/editingStatus',
   getIsEdited: '/dataset/tablesUpdated/?datasetId={:datasetId}',
   getSchema: '/dataschema/v1/datasetId/{:datasetId}',
   getTableImportedMetadata: '/dataset/getImportRelatedStatistics/{:datasetId}',
@@ -49,7 +52,8 @@ export const DatasetConfig = {
   downloadPublicReferenceDatasetFileData: '/dataset/exportPublicFile/dataflow/{:dataflowId}?fileName={:fileName}',
   downloadTableData: '/dataset/{:datasetId}/downloadFile?fileName={:fileName}',
   downloadTableDataDL: '/dataset/{:datasetId}/downloadFileDL?fileName={:fileName}',
-  downloadImportedFile: '/dataset/download-imported-file?fileName={:fileName}&datasetId={:datasetId}&dataflowId={:dataflowId}',
+  downloadImportedFile:
+    '/dataset/download-imported-file?fileName={:fileName}&datasetId={:datasetId}&dataflowId={:dataflowId}',
   exportDatasetData: '/dataset/{:datasetId}/exportDatasetFile?mimeType={:fileType}',
   exportDatasetDataDL: '/dataset/{:datasetId}/exportDatasetFileDL?mimeType={:fileType}',
   exportDatasetDataExternal:
@@ -100,5 +104,5 @@ export const DatasetConfig = {
   validateSql: '/rules/validateSqlRules?datasetId={:datasetId}&datasetSchemaId={:datasetSchemaId}',
   validationViewer: '/dataset/findPositionFromAnyObject/{:objectId}?datasetId={:datasetId}&type={:entityType}',
   testImportProcess: '/dataset/checkImportProcess/{:datasetId}',
-  checkDuplicateValues: '/dataset/duplicateFieldValueExists/{:datasetId}?tableSchemaId={:tableSchemaId}',
+  checkDuplicateValues: '/dataset/duplicateFieldValueExists/{:datasetId}?tableSchemaId={:tableSchemaId}'
 };
