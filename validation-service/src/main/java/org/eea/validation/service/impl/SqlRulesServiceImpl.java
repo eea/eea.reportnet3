@@ -617,6 +617,9 @@ public class SqlRulesServiceImpl implements SqlRulesService {
     // validate query
     if (!StringUtils.isBlank(query)) {
       // validate query sintax
+      if (sqlCodeContainCodes(query)) {
+        query = replaceCodes(dataSetMetabaseVO.getId(), query);
+      }
       if (checkQuerySyntax(query)) {
         List<String> ids = getListOfDatasetsOnQuery(query);
         checkDatasetFromSameDataflow(dataSetMetabaseVO, ids);
