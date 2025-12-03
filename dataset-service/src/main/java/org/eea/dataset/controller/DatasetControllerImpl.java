@@ -464,6 +464,23 @@ public class DatasetControllerImpl implements DatasetController {
     String originalFilename = (file != null) ? file.getOriginalFilename() : null;
     LOG.info("Import endpoint was called for datasetId {} dataflowId {} providerId {} integrationId {} delimiter {} replace {} jobId {} fmeJobId {} and file {}", datasetId, dataflowId, providerId, integrationId, delimiter, replace, jobId, fmeJobId, originalFilename);
     Map<String, Object> result = new HashMap<>();
+
+    String username = SecurityContextHolder.getContext().getAuthentication().getName();
+
+    // --- EDITING LOCK CHECK ---
+    DatasetEditingStatusVO status = datasetTableService.getEditingStatus(datasetId, username);
+
+    if (status.getIsEditing()) {
+      LOG.error("Can not private import for datasetId {} because the table is locked for username {} from   {} ", datasetId, username, status.getEditor());
+      datasetService.failImportJob(jobId, datasetId, EventType.DATASET_ENABLE_EDITING_FAILED_ACTIVE_EDITING_BY_OTHER_USER_EVENT, JobInfoEnum.ERROR_DATASET_IS_LOCKED_FOR_EDITING);
+
+      throw new ResponseStatusException(
+              HttpStatus.CONFLICT,
+              EEAErrorMessage.DATASET_IS_LOCKED_FOR_EDITING + status.getEditor()
+      );
+    }
+    // --- END LOCK CHECK ---
+
     if (dataflowId == null){
       dataflowId = datasetService.getDataFlowIdById(datasetId);
     }
