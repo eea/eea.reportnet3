@@ -77,7 +77,9 @@ public enum JobInfoEnum {
 
     ERROR_ILLEGAL_HEADER_CHARACTER("Validation failed due to an illegal character found in a field name of the table."),
 
-    ERROR_RELEASE_PARTIALLY_COMPLETED("Not all datasets were able to release. Please try again or contact the Service Desk");
+    ERROR_RELEASE_PARTIALLY_COMPLETED("Not all datasets were able to release. Please try again or contact the Service Desk"),
+
+    ERROR_DATASET_IS_LOCKED_FOR_EDITING("Dataset is locked for editing");
 
 
     /** The value. */
