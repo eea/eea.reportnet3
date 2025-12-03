@@ -42,6 +42,8 @@ export const TabsDesigner = ({
   isDataflowCustodian,
   isDataflowOpen,
   isDesignDatasetEditorRead,
+  isEditingEnabled,
+  isEditor,
   isGroupedValidationDeleted,
   isGroupedValidationSelected,
   isIcebergCreated,
@@ -177,7 +179,7 @@ export const TabsDesigner = ({
       tabsArray.forEach(a => checkTabs.push(a));
 
       // If iceberg is created, filter out the "+" tab completely
-      if (isIcebergCreated) {
+      if (isEditingEnabled) {
         tabsArray = tabsArray.filter(tab => !tab.addTab);
       }
 
@@ -470,6 +472,7 @@ export const TabsDesigner = ({
         isDataflowCustodian={isDataflowCustodian}
         isDataflowOpen={isDataflowOpen}
         isDesignDatasetEditorRead={isDesignDatasetEditorRead}
+        isEditingEnabled={isEditingEnabled}
         isErrorDialogVisible={isErrorDialogVisible}
         isIcebergCreated={isIcebergCreated}
         isWarningDialogVisible={isWarningDialogVisible}
@@ -515,7 +518,7 @@ export const TabsDesigner = ({
                   rightIconTooltip={getRightIconTooltip(tab)}
                   tableSchemaId={tab.tableSchemaId}
                   toPrefill={tab.toPrefill}>
-                  {(tabs.length > 0 && (isDataflowOpen || isDesignDatasetEditorRead || isIcebergCreated)) ||
+                  {(tabs.length > 0 && (isDataflowOpen || isDesignDatasetEditorRead || isEditingEnabled)) ||
                   tabs.length > 1 ? (
                     <FieldsDesigner
                       autoFocus={false}
@@ -531,6 +534,8 @@ export const TabsDesigner = ({
                       isDataflowCustodian={isDataflowCustodian}
                       isDataflowOpen={isDataflowOpen}
                       isDesignDatasetEditorRead={isDesignDatasetEditorRead}
+                      isEditingEnabled={isEditingEnabled}
+                      isEditor={isEditor}
                       isGroupedValidationDeleted={isGroupedValidationDeleted}
                       isGroupedValidationSelected={isGroupedValidationSelected}
                       isIcebergCreated={isIcebergCreated}

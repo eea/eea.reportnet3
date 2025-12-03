@@ -73,6 +73,8 @@ export const DataViewer = ({
   isDataflowOpen = false,
   isDesignDataset = false,
   isDesignDatasetEditorRead,
+  isEditingEnabled,
+  isEditor,
   isExportable,
   isFilterable,
   isGroupedValidationDeleted,
@@ -205,7 +207,7 @@ export const DataViewer = ({
   const mapEditingEnabled =
     hasWritePermissions && !isDesignDatasetEditorRead && !isDataflowOpen && !records.geometryReadOnly;
 
-  const mapVisibilityEnabled = bigData && !isIcebergCreated;
+  const mapVisibilityEnabled = bigData && !isEditingEnabled;
 
   const cellDataEditor = (cells, record) => {
     return (
@@ -325,6 +327,8 @@ export const DataViewer = ({
     validationsTemplate,
     reporting,
     dataAreManuallyEditable,
+    isEditor,
+    isEditingEnabled,
     isIcebergCreated,
     mapVisibilityEnabled
   );
@@ -1300,6 +1304,7 @@ export const DataViewer = ({
         isDataflowOpen={isDataflowOpen}
         isDesignDataset={isDesignDataset}
         isDesignDatasetEditorRead={isDesignDatasetEditorRead}
+        isEditingEnabled={isEditingEnabled}
         isExportable={isExportable}
         isFilterable={isFilterable}
         isFilterValidationsActive={isFilterValidationsActive}
@@ -1338,7 +1343,7 @@ export const DataViewer = ({
       {!bigData && <ContextMenu model={menu} ref={contextMenuRef} />}
       <div className={styles.Table}>
         <DataTable
-          className={(isTableTop && 'dataviewer')}
+          className={isTableTop && 'dataviewer'}
           contextMenuSelection={records.selectedRecord}
           editable={(hasWritePermissions && !tableReadOnly) || (hasWritePermissions && isReferenceDataset)}
           first={records.firstPageRecord}
@@ -1353,6 +1358,8 @@ export const DataViewer = ({
                 }
                 isDataflowOpen={isDataflowOpen}
                 isDesignDatasetEditorRead={isDesignDatasetEditorRead}
+                isEditingEnabled={isEditingEnabled}
+                isEditor={isEditor}
                 isIcebergCreated={isIcebergCreated}
                 onAddClick={() => {
                   setIsNewRecord(true);

@@ -10,6 +10,7 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 export const ActionsColumn = ({
   bigData,
+  isEditor,
   isIcebergCreated,
   disabledButtons,
   hideDeletion = false,
@@ -30,7 +31,7 @@ export const ActionsColumn = ({
   const resourcesContext = useContext(ResourcesContext);
   return (
     <div className={styles.actionTemplate}>
-      {!isNil(onViewClick) && !hideEdition && !isIcebergCreated && (
+      {!isNil(onViewClick) && !hideEdition && !isEditor && (
         <Button
           className={`${`p-button-rounded p-button-secondary-transparent ${styles.editRowButton}`} ${
             (rowDeletingId === rowDataId && isDeletingDocument) ||
@@ -100,7 +101,7 @@ export const ActionsColumn = ({
               : 'p-button-animated-blink'
           }`}
           disabled={
-            (isWebform && bigData && !isIcebergCreated) ||
+            (isWebform && !isEditor) ||
             isDeletingDocument ||
             isDeletingDatasetData ||
             (rowUpdatingId === rowDataId && isUpdating) ||

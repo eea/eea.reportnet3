@@ -27,6 +27,7 @@ export const WebformView = ({
   datasetSchemaId,
   getFieldSchemaId,
   isAddingRootTableId = false,
+  isEditor,
   isIcebergCreated,
   isRefresh,
   isReporting,
@@ -114,6 +115,7 @@ export const WebformView = ({
         datasetSchema={datasetSchema}
         datasetSchemaId={datasetSchemaId}
         getFieldSchemaId={getFieldSchemaId}
+        isEditor={isEditor}
         isIcebergCreated={isIcebergCreated}
         isRefresh={isRefresh}
         isReporting={isReporting}

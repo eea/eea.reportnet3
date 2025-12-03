@@ -1220,6 +1220,33 @@
             "section": "DATASET",
             "parameters": ["dataflowId", "datasetId"]
           }
+        },
+        {
+          "key": "DATASET_ENABLE_EDITING_FAILED_EVENT"
+        },
+        {
+          "key": "DATASET_DISABLE_EDITING_FAILED_EVENT"
+        },
+        {
+          "key": "DATASET_DISABLE_EDITING_FAILED_ACTIVE_EDITING_BY_OTHER_USER_EVENT"
+        },
+        {
+          "key": "DATASET_ENABLE_EDITING_FAILED_ACTIVE_EDITING_BY_OTHER_USER_EVENT"
+        },
+        {
+          "key": "PARQUET_TO_ICEBERG_FAILED_ACTIVE_EDITING_BY_OTHER_USER"
+        },
+        {
+          "key": "ICEBERG_TO_PARQUET_FAILED_ACTIVE_EDITING_BY_OTHER_USER"
+        },
+        {
+          "key": "VALIDATION_FAILED_DATASET_LOCKED_FOR_EDITING_EXISTS_EVENT"
+        },
+        {
+          "key": "RELEASE_FAILED_DATASET_LOCKED_FOR_EDITING_EXISTS_EVENT"
+        },
+        {
+          "key": "ADD_DATACOLLECTION_FAILED_EVENT_DATASET_LOCKED_FOR_EDITING_EXISTS"
         }
       ]
     },
@@ -1531,6 +1558,12 @@
             "section": "DATASET",
             "parameters": ["dataflowId", "datasetId"]
           }
+        },
+        {
+          "key": "DATASET_ENABLE_EDITING_COMPLETED_EVENT"
+        },
+        {
+          "key": "DATASET_DISABLE_EDITING_COMPLETED_EVENT"
         }
       ]
     },
@@ -1756,7 +1789,6 @@
     "SILENT_RELEASE_COMPLETED_EVENT",
     "SILENT_RELEASE_START_EVENT",
     "SILENT_RELEASE_FAILED_EVENT",
-    "INSERT_RECORDS_MULTI_TABLES_INIT",
     "INSERT_RECORDS_MULTI_TABLES_COMPLETED",
     "INSERT_RECORDS_MULTI_TABLES_FAILED",
     "EXPORT_TABLE_DATA_COMPLETED_EVENT",

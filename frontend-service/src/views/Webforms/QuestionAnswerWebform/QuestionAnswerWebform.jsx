@@ -15,6 +15,7 @@ export const QuestionAnswerWebform = ({
   dataflowId,
   dataProviderId,
   datasetId,
+  isEditor,
   isIcebergCreated,
   isLoadingIceberg,
   state,
@@ -75,6 +76,7 @@ export const QuestionAnswerWebform = ({
               dataProviderId={dataProviderId}
               datasetId={datasetId}
               errorMessages={getErrorMessages}
+              isEditor={isEditor}
               isIcebergCreated={isIcebergCreated}
               isLoadingIceberg={isLoadingIceberg}
               schemaTables={schemaTable}
