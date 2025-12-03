@@ -9,6 +9,8 @@ export const Footer = ({
   hasWritePermissions,
   isDataflowOpen,
   isDesignDatasetEditorRead,
+  isEditingEnabled,
+  isEditor,
   isIcebergCreated,
   onAddClick,
   onPasteClick
@@ -16,7 +18,7 @@ export const Footer = ({
   const resourcesContext = useContext(ResourcesContext);
   return (
     <div className="p-clearfix datasetSchema-addRecordsBar-help-step" style={{ width: '100%' }}>
-      {(!bigData || (bigData && isIcebergCreated && dataAreManuallyEditable)) && (
+      {((!bigData && isEditor) || (bigData && isEditor && dataAreManuallyEditable)) && (
         <Button
           className={`${isDataflowOpen ? '' : 'p-button-animated-blink'}`}
           disabled={!hasWritePermissions || isDataflowOpen || isDesignDatasetEditorRead}
@@ -26,7 +28,7 @@ export const Footer = ({
           style={{ float: 'left' }}
         />
       )}
-      {(!bigData || (bigData && isIcebergCreated && dataAreManuallyEditable)) && (
+      {((!bigData && isEditor) || (bigData && isEditor && dataAreManuallyEditable)) && (
         <Button
           className={`p-button-secondary ${
             isDataflowOpen || isDesignDatasetEditorRead ? null : 'p-button-animated-blink'

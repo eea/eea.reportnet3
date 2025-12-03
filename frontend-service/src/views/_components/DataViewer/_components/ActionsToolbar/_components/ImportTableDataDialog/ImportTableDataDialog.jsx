@@ -26,6 +26,7 @@ export const ImportTableDataDialog = ({
   isDataflowOpen,
   isDesignDataset,
   isDesignDatasetEditorRead,
+  isEditingEnabled,
   isIcebergCreated,
   isTableDataRestorationInProgress,
   isTableFixedNumber,
@@ -128,7 +129,7 @@ export const ImportTableDataDialog = ({
           }`}
           disabled={
             (isAdmin && (!isCustodian || !isDataflowCustodian)) ||
-            isIcebergCreated ||
+            isEditingEnabled ||
             !hasWritePermissions ||
             isDataflowOpen ||
             isDesignDatasetEditorRead ||
@@ -157,7 +158,9 @@ export const ImportTableDataDialog = ({
           dataflowId={dataflowId}
           datasetId={datasetId}
           dialogHeader={`${resourcesContext.messages['uploadTable']}${tableName}`}
-          dialogOnHide={() => {setImportTableDialogVisible(false), setUploadingFileName('')}}
+          dialogOnHide={() => {
+            setImportTableDialogVisible(false), setUploadingFileName('');
+          }}
           dialogVisible={importTableDialogVisible}
           infoTooltip={`${resourcesContext.messages['supportedFileExtensionsTooltip']} .csv`}
           invalidExtensionMessage={resourcesContext.messages['invalidExtensionFile']}

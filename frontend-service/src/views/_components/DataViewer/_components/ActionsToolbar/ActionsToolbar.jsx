@@ -51,6 +51,7 @@ export const ActionsToolbar = ({
   isDataflowOpen,
   isDesignDataset,
   isDesignDatasetEditorRead,
+  isEditingEnabled,
   isExportable,
   isFilterable = true,
   isFilterValidationsActive,
@@ -278,7 +279,7 @@ export const ActionsToolbar = ({
             isDataflowOpen || isDesignDatasetEditorRead ? null : 'p-button-animated-blink'
           }`}
           disabled={
-            (isIcebergCreated && dataAreManuallyEditable && hasWritePermissions) ||
+            (isEditingEnabled && dataAreManuallyEditable && hasWritePermissions) ||
             isDataflowOpen ||
             isDesignDatasetEditorRead ||
             isTableDataRestorationInProgress ||
@@ -370,7 +371,7 @@ export const ActionsToolbar = ({
           !toPrefill ||
           !hasWritePermissions ||
           isTableDataRestorationInProgress ||
-          (isIcebergCreated && dataAreManuallyEditable) ||
+          (isEditingEnabled && dataAreManuallyEditable) ||
           actionsContext.isInProgress
         }
         icon="undo"
@@ -418,6 +419,7 @@ export const ActionsToolbar = ({
       isDataflowOpen={isDataflowOpen}
       isDesignDataset={isDesignDataset}
       isDesignDatasetEditorRead={isDesignDatasetEditorRead}
+      isEditingEnabled={isEditingEnabled}
       isIcebergCreated={isIcebergCreated && dataAreManuallyEditable}
       isTableDataRestorationInProgress={isTableDataRestorationInProgress}
       isTableFixedNumber={isTableFixedNumber}
@@ -456,7 +458,7 @@ export const ActionsToolbar = ({
         <DeleteDialog
           disabled={
             (isAdmin && (!isCustodian || !isDataflowCustodian)) ||
-            (isIcebergCreated && dataAreManuallyEditable) ||
+            isEditingEnabled ||
             !hasWritePermissions ||
             isUndefined(records.totalRecords) ||
             isDataflowOpen ||

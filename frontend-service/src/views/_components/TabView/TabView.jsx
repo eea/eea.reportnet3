@@ -32,6 +32,7 @@ export const TabView = ({
   initialTabIndexDrag,
   isIcebergCreated,
   isDatasetReleased,
+  isEditingEnabled,
   isErrorDialogVisible,
   isDataflowOpen,
   isDesignDatasetEditorRead,
@@ -240,6 +241,7 @@ export const TabView = ({
           initialTabIndexDrag={initialTabIndexDrag}
           isDataflowOpen={isDataflowOpen}
           isDesignDatasetEditorRead={isDesignDatasetEditorRead}
+          isEditingEnabled={isEditingEnabled}
           isIcebergCreated={isIcebergCreated}
           isNavigationHidden={isNavigationHidden}
           key={id}
@@ -251,7 +253,7 @@ export const TabView = ({
           numberOfFields={tab.props.numberOfFields}
           onTabAddCancel={onTabAddCancel}
           onTabBlur={onTabBlur}
-          onTabDeleteClick={!isIcebergCreated ? onTabDeleteClicked : undefined}
+          onTabDeleteClick={!isEditingEnabled ? onTabDeleteClicked : undefined}
           onTabDragAndDrop={onTabDragAndDrop}
           onTabDragAndDropStart={onTabDragAndDropStart}
           onTabEditingHeader={onTabEditingHeader}

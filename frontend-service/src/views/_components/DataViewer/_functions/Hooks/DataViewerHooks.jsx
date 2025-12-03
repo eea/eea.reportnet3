@@ -108,6 +108,8 @@ export const useSetColumns = (
   validationsTemplate,
   isReporting,
   dataAreManuallyEditable,
+  isEditor,
+  isEditingEnabled,
   isIcebergCreated,
   mapVisibilityEnabled
 ) => {
@@ -146,7 +148,7 @@ export const useSetColumns = (
           (!colSchema.readOnly || !isReporting) && (
             <Button
               className="p-button-animated-blink p-button-secondary-transparent"
-              disabled={bigData && !isIcebergCreated}
+              disabled={!isEditor}
               icon="import"
               onClick={() => {
                 setIsAttachFileVisible(true);
@@ -162,7 +164,7 @@ export const useSetColumns = (
               }}
             />
           )}
-        {(!bigData || (bigData && isIcebergCreated && dataAreManuallyEditable)) &&
+        {((!bigData && isEditor) || (bigData && isEditor && dataAreManuallyEditable)) &&
           hasWritePermissions &&
           !isDataflowOpen &&
           !isDesignDatasetEditorRead &&
@@ -431,8 +433,8 @@ export const useSetColumns = (
             (['POINT', 'LINESTRING', 'POLYGON', 'MULTILINESTRING', 'MULTIPOLYGON', 'MULTIPOINT'].includes(
               column.type
             ) &&
-              (isIcebergCreated || mapVisibilityEnabled)) ||
-            ((!bigData || (bigData && dataAreManuallyEditable && isIcebergCreated)) &&
+              (isEditor || mapVisibilityEnabled)) ||
+            (((!bigData && isEditor) || (bigData && dataAreManuallyEditable && isEditor)) &&
               hasWebformWritePermissions &&
               hasWritePermissions &&
               column.type !== 'ATTACHMENT' &&
@@ -515,7 +517,7 @@ export const useSetColumns = (
     );
 
     if (!hasCountryCode) {
-      (!bigData || (bigData && isIcebergCreated && dataAreManuallyEditable)) && hasWritePermissions
+      ((!bigData && isEditor) || (bigData && isEditor && dataAreManuallyEditable)) && hasWritePermissions
         ? columnsArr.unshift(editCol, validationCol)
         : columnsArr.unshift(validationCol);
     }
@@ -540,6 +542,8 @@ export const useSetColumns = (
     records.selectedRecord.recordId,
     dataAreManuallyEditable,
     isIcebergCreated,
+    isEditingEnabled,
+    isEditor,
     mapVisibilityEnabled
   ]);
 

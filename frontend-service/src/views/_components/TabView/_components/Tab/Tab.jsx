@@ -50,6 +50,7 @@ export const Tab = ({
   id,
   isDataflowOpen,
   isDesignDatasetEditorRead,
+  isEditingEnabled,
   isIcebergCreated,
   index,
   initialTabIndexDrag,
@@ -101,7 +102,7 @@ export const Tab = ({
   const tabRef = useRef();
 
   useEffect(() => {
-    if (!isIcebergCreated) {
+    if (!isEditingEnabled) {
       setMenu([
         {
           label: resourcesContext.messages['edit'],
@@ -124,7 +125,7 @@ export const Tab = ({
     } else {
       setMenu(undefined);
     }
-  }, [tableSchemaId, hasPKReferenced, isIcebergCreated]);
+  }, [tableSchemaId, hasPKReferenced, isEditingEnabled]);
 
   useEffect(() => {
     if (!editingHeader) {
@@ -407,7 +408,7 @@ export const Tab = ({
   };
 
   const onTabDoubleClick = () => {
-    if (editable && !isIcebergCreated) {
+    if (editable && !isEditingEnabled) {
       if (!isUndefined(onTabEditingHeader)) {
         setEditingHeader(true);
         onTabEditingHeader(true);
@@ -705,7 +706,7 @@ export const Tab = ({
             />
           )}
           {designMode && !hasPKReferenced && !isDataflowOpen && !isDesignDatasetEditorRead && !addTab && !newTab ? (
-            isIcebergCreated ? null : (
+            isEditingEnabled ? null : (
               <div
                 onClick={e => {
                   e.preventDefault();
