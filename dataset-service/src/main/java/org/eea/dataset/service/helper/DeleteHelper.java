@@ -4,14 +4,17 @@ import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.repository.RecordRepository;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetService;
+import org.eea.dataset.service.DatasetTableService;
 import org.eea.dataset.service.ParquetConverterService;
 import org.eea.dataset.service.model.ImportFileInDremioInfo;
+import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.orchestrator.JobController;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
+import org.eea.interfaces.vo.dataset.schemas.DatasetEditingStatusVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.kafka.domain.EventType;
@@ -25,13 +28,16 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+import org.springframework.web.server.ResponseStatusException;
 
 import javax.transaction.Transactional;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -99,6 +105,9 @@ public class DeleteHelper {
   @Autowired
   private ParquetConverterService parquetConverterService;
 
+  /** The dataset service. */
+  @Autowired
+  private DatasetTableService datasetTableService;
 
   /**
    * Instantiates a new file loader helper.
@@ -179,6 +188,16 @@ public class DeleteHelper {
                                           boolean technicallyAccepted, Long jobId) {
     try {
       LOG.info("Deleting data from dataset {}", datasetId);
+
+      // --- EDITING LOCK CHECK ---
+     String currentEditor =  (datasetTableService.getDatasetEditingUsername(datasetId));
+      if (currentEditor != null) {
+        LOG.error("Cannot delete for datasetId {} because it is locked for editing by user {})",
+                datasetId,currentEditor);
+
+        throw new RuntimeException("Cannot delete dataset data because it is currently being edited by user " + currentEditor);
+      }
+
       datasetService.deleteImportData(datasetId, deletePrefilledTables);
       // now the view is not updated, update the check to false
       datasetService.updateCheckView(datasetId, false);
