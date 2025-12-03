@@ -177,6 +177,9 @@ public class DatasetControllerImpl implements DatasetController {
 
   private static final long conversionLockExpirationInMillis = 900000L;
 
+  @Autowired
+  private DatasetMetabaseControllerImpl datasetMetabaseControllerImpl;
+
   @Override
   @GetMapping("/list-imported-files")
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_CUSTODIAN','DATASET_STEWARD','DATASET_OBSERVER','DATASET_STEWARD_SUPPORT','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATACOLLECTION_CUSTODIAN','DATASCHEMA_CUSTODIAN','DATASCHEMA_STEWARD','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','DATASET_NATIONAL_COORDINATOR','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','EUDATASET_OBSERVER','EUDATASET_STEWARD_SUPPORT','DATACOLLECTION_OBSERVER','DATACOLLECTION_STEWARD_SUPPORT','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','DATACOLLECTION_STEWARD','REFERENCEDATASET_OBSERVER','REFERENCEDATASET_STEWARD_SUPPORT','REFERENCEDATASET_STEWARD','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD') OR hasAnyRole('ADMIN') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATASET',#datasetId))")
@@ -4174,4 +4177,38 @@ public class DatasetControllerImpl implements DatasetController {
 
   }
 
+  /**
+   * Check if there is at least one reporting dataset for the given
+   * dataflow / provider that is currently enabled for editing.
+   *
+   * <p>This is intended to be used by front end mainly
+   * (e.g. release, data collection, validation) to decide whether
+   * to block an operation when a user is editing data in at least
+   * one dataset.</p>
+   *
+   * @param dataflowId the dataflow id
+   * @param providerId the data provider id;
+   *
+   * @return {@code true} if any dataset is currently being edited,
+   *         {@code false} otherwise
+   */
+  @Override
+  @GetMapping("/hasEnabledEditingDatasets")
+  @HystrixCommand
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_CUSTODIAN','DATASET_STEWARD','DATASET_OBSERVER','DATASET_STEWARD_SUPPORT','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATACOLLECTION_CUSTODIAN','DATASCHEMA_CUSTODIAN','DATASCHEMA_STEWARD','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','DATASET_NATIONAL_COORDINATOR','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','EUDATASET_OBSERVER','EUDATASET_STEWARD_SUPPORT','DATACOLLECTION_OBSERVER','DATACOLLECTION_STEWARD_SUPPORT','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','DATACOLLECTION_STEWARD','REFERENCEDATASET_OBSERVER','REFERENCEDATASET_STEWARD_SUPPORT','REFERENCEDATASET_STEWARD','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD') OR hasAnyRole('ADMIN') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATASET',#datasetId))")
+  @ApiOperation(value = "Get dataset editing status", hidden = true)
+  public Boolean hasEnabledEditingDatasets(@RequestParam(value = "dataflowId") Long dataflowId,
+                                               @RequestParam(value = "providerId") Long providerId){
+    try{
+      List<ReportingDatasetVO> datasets = datasetMetabaseControllerImpl.findReportingDataSetIdByDataflowIdAndProviderId(dataflowId, providerId);
+      List<Long> datasetIds = datasets.stream()
+              .map(ReportingDatasetVO::getId)
+              .collect(Collectors.toList());
+      return datasetTableService.isAnyDatasetBeingEdited(datasetIds);
+    }
+    catch (Exception e){
+      LOG.error("Could not retrieve locked for editing datasets for dataflowId {}, providerId {}", dataflowId, providerId);
+      throw e;
+    }
+  }
 }
