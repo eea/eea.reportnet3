@@ -1846,6 +1846,7 @@
     "changeReleaseDate": "Change release date",
     "changeReleaseDateHeader": "Change release date for ",
     "changeReleaseDateAdmin": "Change release date. (This action requires Admin/Custodian rights)",
-    "updateReleaseDateError": "Error updating release date."
+    "updateReleaseDateError": "Error updating release date.",
+    "currentReleaseDate": "Current release date:"
   }
 }

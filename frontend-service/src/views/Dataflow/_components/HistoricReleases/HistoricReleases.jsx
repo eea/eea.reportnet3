@@ -176,7 +176,7 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
           icon="calendar"
           onClick={() => {
             setSelectedReleaseForCalendar(rowData);
-            setSelectedReleaseDate(rowData.releaseDate ? new Date(rowData.releaseDate) : new Date());
+            setSelectedReleaseDate(null);
             setIsCalendarDialogVisible(true);
           }}
           tooltip={
@@ -463,17 +463,26 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
           onConfirm={onConfirmUpdateReleaseDate}
           onHide={onHideCalendarDialog}
           visible={isCalendarDialogVisible}>
-          <Calendar
-            className={styles.calendar}
-            dateFormat="yy-mm-dd"
-            inline={true}
-            monthNavigator={true}
-            onChange={event => setSelectedReleaseDate(event.target.value)}
-            showTime={true}
-            value={selectedReleaseDate}
-            yearNavigator={true}
-            yearRange="2000:2050"
-          />
+          <div className={styles.calendarContent}>
+            {selectedReleaseForCalendar?.releaseDate && (
+              <div className={styles.currentDateInfo}>
+                <strong>{resourcesContext.messages['currentReleaseDate']}</strong>{' '}
+                {getDateTimeFormatByUserPreferences(selectedReleaseForCalendar.releaseDate)}
+              </div>
+            )}
+            <Calendar
+              className={styles.calendar}
+              dateFormat="yy-mm-dd"
+              inline={true}
+              monthNavigator={true}
+              onChange={event => setSelectedReleaseDate(event.target.value)}
+              placeholder={resourcesContext.messages['selectNewReleaseDate']}
+              showTime={true}
+              value={selectedReleaseDate}
+              yearNavigator={true}
+              yearRange="2000:2050"
+            />
+          </div>
         </ConfirmDialog>
       )}
     </>
