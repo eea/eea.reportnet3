@@ -47,7 +47,8 @@
     position: fixed;
     top: 64px;
     z-index: 100;
-    background-color: rgba(255, 255, 255, 1);
+    // background-color: rgba(255, 255, 255, 1);
+    background-color: var(--bg);
     width:90vw;
   }
 
