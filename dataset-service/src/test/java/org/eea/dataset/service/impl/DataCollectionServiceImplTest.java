@@ -32,6 +32,7 @@ import org.eea.dataset.persistence.schemas.domain.ReferencedFieldSchema;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.DesignDatasetService;
+import org.eea.dataset.service.DatasetTableService;
 import org.eea.dataset.service.model.FKDataCollection;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
@@ -166,6 +167,9 @@ public class DataCollectionServiceImplTest {
   private DataSetMetabaseRepository dataSetMetabaseRepository;
 
   @Mock
+  private DatasetTableService datasetTableService;
+
+  @Mock
   private EUDatasetRepository euDatasetRepository;
 
   @Mock
@@ -196,6 +200,8 @@ public class DataCollectionServiceImplTest {
     leadReportersVO = new ArrayList<>();
     leadReportersVO.add(new LeadReporterVO());
     MockitoAnnotations.openMocks(this);
+    Mockito.when(datasetTableService.isAnyDatasetBeingEdited(Mockito.anyList()))
+            .thenReturn(false);
   }
 
   /**
