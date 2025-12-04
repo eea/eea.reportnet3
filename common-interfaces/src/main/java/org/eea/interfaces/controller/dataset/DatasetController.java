@@ -877,6 +877,16 @@ public interface DatasetController {
   void deleteLocksToImportProcess(@PathVariable("datasetId") Long datasetId);
 
   /**
+   * Deletes the locks related to delete
+   * @param datasetId
+   * @param tableSchemaId
+   * @return
+   */
+  @DeleteMapping(value = "/private/deleteLocksToDeleteProcess/{datasetId}")
+  void deleteLocksToDeleteProcess(@PathVariable("datasetId") Long datasetId, @RequestParam(value="tableSchemaId", required = false) String tableSchemaId);
+
+
+  /**
    * Finds tasks by processId and status
    * @param processId
    * @param status

@@ -466,10 +466,6 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
           (!isAdmin && !isDataflowCustodian && userContext.preferredUsername !== job.creatorUsername) ||
           !(
             job.jobStatus === 'IN_PROGRESS' &&
-            (job.jobType === 'IMPORT' ||
-              job.jobType === 'VALIDATION' ||
-              job.jobType === 'RELEASE' ||
-              job.jobType === 'FILE_EXPORT') &&
             getDateDifferenceInMinutes(job.dateStatusChanged) > 9
           )
         }

@@ -1219,11 +1219,7 @@ public class DatasetControllerImpl implements DatasetController {
     }
     finally {
       // Release the lock manually
-      Map<String, Object> deleteDatasetValues = new HashMap<>();
-      deleteDatasetValues.put(LiteralConstants.SIGNATURE,
-              LockSignature.DELETE_DATASET_VALUES.getValue());
-      deleteDatasetValues.put(LiteralConstants.DATASETID, datasetId);
-      lockService.removeLockByCriteria(deleteDatasetValues);
+      deleteLocksToDeleteProcess(datasetId, null);
     }
   }
 
@@ -1280,11 +1276,7 @@ public class DatasetControllerImpl implements DatasetController {
     }
     finally {
       // Release the lock manually
-      Map<String, Object> deleteDatasetValues = new HashMap<>();
-      deleteDatasetValues.put(LiteralConstants.SIGNATURE,
-              LockSignature.DELETE_DATASET_VALUES.getValue());
-      deleteDatasetValues.put(LiteralConstants.DATASETID, datasetId);
-      lockService.removeLockByCriteria(deleteDatasetValues);
+      deleteLocksToDeleteProcess(datasetId, null);
     }
   }
 
@@ -1411,11 +1403,7 @@ public class DatasetControllerImpl implements DatasetController {
     }
     finally {
       // Release the lock manually
-      Map<String, Object> deleteImportTable = new HashMap<>();
-      deleteImportTable.put(LiteralConstants.SIGNATURE, LockSignature.DELETE_IMPORT_TABLE.getValue());
-      deleteImportTable.put(LiteralConstants.DATASETID, datasetId);
-      deleteImportTable.put(LiteralConstants.TABLESCHEMAID, tableSchemaId);
-      lockService.removeLockByCriteria(deleteImportTable);
+      deleteLocksToDeleteProcess(datasetId, tableSchemaId);
     }
   }
 
@@ -3254,6 +3242,36 @@ public class DatasetControllerImpl implements DatasetController {
     }
     catch (Exception e) {
       LOG.error("Unexpected error! Error deleting locks related to import process for datasetId {} Message: {}",  datasetId, e.getMessage());
+      throw e;
+    }
+  }
+
+  /**
+   * Deletes the locks related to delete
+   * @param datasetId
+   * @return
+   */
+  @Override
+  @DeleteMapping(value = "/private/deleteLocksToDeleteProcess/{datasetId}")
+  public void deleteLocksToDeleteProcess(@PathVariable("datasetId") Long datasetId, @RequestParam(value="tableSchemaId", required = false) String tableSchemaId){
+    try {
+      if(StringUtils.isNotBlank(tableSchemaId)){
+        Map<String, Object> deleteImportTable = new HashMap<>();
+        deleteImportTable.put(LiteralConstants.SIGNATURE, LockSignature.DELETE_IMPORT_TABLE.getValue());
+        deleteImportTable.put(LiteralConstants.DATASETID, datasetId);
+        deleteImportTable.put(LiteralConstants.TABLESCHEMAID, tableSchemaId);
+        lockService.removeLockByCriteria(deleteImportTable);
+      }
+      else{
+        Map<String, Object> deleteDatasetValues = new HashMap<>();
+        deleteDatasetValues.put(LiteralConstants.SIGNATURE,
+                LockSignature.DELETE_DATASET_VALUES.getValue());
+        deleteDatasetValues.put(LiteralConstants.DATASETID, datasetId);
+        lockService.removeLockByCriteria(deleteDatasetValues);
+      }
+    }
+    catch (Exception e) {
+      LOG.error("Unexpected error! Error deleting locks related to delete process for datasetId {} Message: {}",  datasetId, e.getMessage());
       throw e;
     }
   }
