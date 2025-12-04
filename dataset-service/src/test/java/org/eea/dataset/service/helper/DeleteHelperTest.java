@@ -4,6 +4,7 @@ import static org.mockito.Mockito.times;
 import java.io.IOException;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetService;
+import org.eea.dataset.service.DatasetTableService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
@@ -42,6 +43,9 @@ public class DeleteHelperTest {
   @Mock
   private DatasetMetabaseService datasetMetabaseService;
 
+  @Mock
+  private DatasetTableService datasetTableService;
+
   /** The dataflow controller zuul. */
   @Mock
   private DataFlowControllerZuul dataflowControllerZuul;
@@ -58,6 +62,9 @@ public class DeleteHelperTest {
         .setAuthentication(new UsernamePasswordAuthenticationToken("user", "password"));
     ThreadPropertiesManager.setVariable("user", "user");
     MockitoAnnotations.openMocks(this);
+    Mockito.when(datasetTableService.getDatasetEditingUsername(Mockito.anyLong()))
+            .thenReturn(null);
+
   }
 
   @Test
@@ -82,23 +89,29 @@ public class DeleteHelperTest {
 
   @Test
   public void executeDeleteDatasetProcessTest()
-      throws EEAException, IOException, InterruptedException {
-    Mockito.when(lockService.removeLockByCriteria(Mockito.any())).thenReturn(true);
+          throws EEAException, IOException, InterruptedException {
 
+    Long datasetId = 1L;
+    // 🔹 NEW: no editing lock for this dataset
+    Mockito.when(datasetTableService.getDatasetEditingUsername(datasetId))
+            .thenReturn(null);
+    Mockito.when(lockService.removeLockByCriteria(Mockito.any())).thenReturn(true);
     Mockito.doNothing().when(kafkaSenderUtils).releaseNotificableKafkaEvent(Mockito.any(),
-        Mockito.any(), Mockito.any());
+            Mockito.any(), Mockito.any());
     DataSetMetabaseVO dsmbVO = new DataSetMetabaseVO();
     dsmbVO.setDataSetName("dsName");
     dsmbVO.setDataflowId(1L);
-    Mockito.when(datasetMetabaseService.findDatasetMetabase(Mockito.anyLong())).thenReturn(dsmbVO);
+    Mockito.when(datasetMetabaseService.findDatasetMetabase(Mockito.anyLong()))
+            .thenReturn(dsmbVO);
     DataFlowVO dfVO = new DataFlowVO();
     dfVO.setName("dfName");
-    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dfVO);
-
-    deleteHelper.executeDeleteDatasetProcess(1L, false, false, null);
-    Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
-        Mockito.any(), Mockito.any());
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong()))
+            .thenReturn(dfVO);
+    deleteHelper.executeDeleteDatasetProcess(datasetId, false, false, null);
+    Mockito.verify(kafkaSenderUtils, times(1))
+            .releaseNotificableKafkaEvent(Mockito.any(), Mockito.any(), Mockito.any());
   }
+
 
   @Test
   public void executeDeleteImportDataAsyncBeforeReplacingTest()
