@@ -64,6 +64,7 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
   const [selectedReleaseForCalendar, setSelectedReleaseForCalendar] = useState(null);
   const [selectedReleaseDate, setSelectedReleaseDate] = useState(null);
   const [isUpdatingReleaseDate, setIsUpdatingReleaseDate] = useState(false);
+  const [hasSelectedDay, setHasSelectedDay] = useState(false);
 
   const userContext = useContext(UserContext);
   const isAdmin = userContext.hasPermission([config.permissions.roles.ADMIN.key]);
@@ -177,6 +178,7 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
           onClick={() => {
             setSelectedReleaseForCalendar(rowData);
             setSelectedReleaseDate(null);
+            setHasSelectedDay(false);
             setIsCalendarDialogVisible(true);
           }}
           tooltip={
@@ -217,7 +219,17 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
   const onHideCalendarDialog = () => {
     setIsCalendarDialogVisible(false);
     setSelectedReleaseForCalendar(null);
+    setHasSelectedDay(false);
     setSelectedReleaseDate(null);
+  };
+
+  const handleCalendarChange = event => {
+    const newDate = event.target.value;
+    
+    if (newDate && dayjs(newDate).isValid()) {
+      setSelectedReleaseDate(newDate);
+      setHasSelectedDay(true);
+    }
   };
 
   const isLoading = value => historicReleasesDispatch({ type: 'IS_LOADING', payload: { value } });
@@ -455,7 +467,7 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
         <ConfirmDialog
           className={styles.calendarConfirm}
           dialogStyle={{ minWidth: 'auto' }}
-          disabledConfirm={isNil(selectedReleaseDate) || isUpdatingReleaseDate}
+          disabledConfirm={!hasSelectedDay || isNil(selectedReleaseDate) || isUpdatingReleaseDate}
           header={resourcesContext.messages['changeReleaseDateHeader'] + selectedReleaseForCalendar.dataProviderCode}
           iconConfirm={isUpdatingReleaseDate ? 'spinnerAnimate' : 'check'}
           labelCancel={resourcesContext.messages['cancel']}
@@ -475,9 +487,9 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
               dateFormat="yy-mm-dd"
               inline={true}
               monthNavigator={true}
-              onChange={event => setSelectedReleaseDate(event.target.value)}
+              onChange={handleCalendarChange}
               placeholder={resourcesContext.messages['selectNewReleaseDate']}
-              showTime={true}
+              showTime={hasSelectedDay}
               value={selectedReleaseDate}
               yearNavigator={true}
               yearRange="2000:2050"
