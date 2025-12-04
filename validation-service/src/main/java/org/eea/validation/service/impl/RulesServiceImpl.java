@@ -6,6 +6,8 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.client.result.UpdateResult;
 import com.opencsv.CSVWriter;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.Document;
 import org.bson.types.ObjectId;
@@ -2540,7 +2542,10 @@ public class RulesServiceImpl implements RulesService {
     boolean queryContainsKeyword = true;
     String[] queryKeywords = KEYWORDS.split(",");
     for (String word : queryKeywords) {
-      if (query.toLowerCase().contains(word.toLowerCase())) {
+      String regex = "\\b" + word + "\\b";
+      Pattern pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
+      Matcher matcher = pattern.matcher(query);
+      if (matcher.find()) {
         queryContainsKeyword = false;
         break;
       }
