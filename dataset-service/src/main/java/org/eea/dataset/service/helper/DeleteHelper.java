@@ -127,6 +127,16 @@ public class DeleteHelper {
   public void executeDeleteTableProcess(final Long datasetId, String tableSchemaId, Long jobId) {
     try {
       LOG.info("Deleting table {} from dataset {}", tableSchemaId, datasetId);
+
+      // --- EDITING LOCK CHECK ---
+      String currentEditor =  (datasetTableService.getDatasetEditingUsername(datasetId));
+      if (currentEditor != null) {
+        LOG.error("Cannot delete for datasetId {} job id {} because it is locked for editing by user {}",
+                datasetId, jobId, currentEditor);
+
+        throw new RuntimeException("Cannot delete table data because it is currently being edited by user " + currentEditor);
+      }
+
       datasetService.deleteTableBySchema(tableSchemaId, datasetId, false);
       // now the view is not updated, update the check to false
       datasetService.updateCheckView(datasetId, false);
@@ -192,7 +202,7 @@ public class DeleteHelper {
       // --- EDITING LOCK CHECK ---
      String currentEditor =  (datasetTableService.getDatasetEditingUsername(datasetId));
       if (currentEditor != null) {
-        LOG.error("Cannot delete for datasetId {} because it is locked for editing by user {})",
+        LOG.error("Cannot delete for datasetId {} because it is locked for editing by user {}",
                 datasetId,currentEditor);
 
         throw new RuntimeException("Cannot delete dataset data because it is currently being edited by user " + currentEditor);
