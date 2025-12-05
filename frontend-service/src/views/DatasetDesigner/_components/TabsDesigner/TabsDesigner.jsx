@@ -187,9 +187,11 @@ export const TabsDesigner = ({
 
       let length = checkTabs.length;
 
-      checkTabs?.forEach(item => {
-        if (!item?.dataAreManuallyEditable) length -= 1;
-      });
+      if (bigData) {
+        checkTabs?.forEach(item => {
+          if (!item?.dataAreManuallyEditable) length -= 1;
+        });
+      }
 
       if (length === 0) {
         setNoEditableCheck(true);
