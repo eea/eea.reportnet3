@@ -271,6 +271,8 @@ public class DesignDatasetServiceImpl implements DesignDatasetService {
         // dataset schema created and the process will fail. By default 3000ms
         Thread.sleep(timeToWaitBeforeContinueCopy);
       }
+
+      final Boolean isBigDataFlow = dataflowControllerZuul.isBigDataflow(idDataflowOrigin);
       // After creating the datasets schemas on the DB, fill them and create the permissions
       for (Map.Entry<Long, DataSetSchemaVO> itemNewDatasetAndSchema : mapDatasetsDestinyAndSchemasOrigin
           .entrySet()) {
@@ -280,7 +282,8 @@ public class DesignDatasetServiceImpl implements DesignDatasetService {
             dictionaryOriginTargetObjectId
                 .get(itemNewDatasetAndSchema.getValue().getIdDataSetSchema()),
             dictionaryOriginTargetObjectId, itemNewDatasetAndSchema.getKey(),
-            mapDatasetIdFKRelations);
+            mapDatasetIdFKRelations,
+                isBigDataFlow);
 
       }
 
@@ -373,7 +376,7 @@ public class DesignDatasetServiceImpl implements DesignDatasetService {
    */
   private Map<String, String> fillAndUpdateDesignDatasetCopied(DataSetSchemaVO schemaOrigin,
       String newIdDatasetSchema, Map<String, String> dictionaryOriginTargetObjectId, Long datasetId,
-      Map<Long, List<FieldSchemaVO>> mapDatasetIdFKRelations) throws EEAException {
+      Map<Long, List<FieldSchemaVO>> mapDatasetIdFKRelations, Boolean isBigDataFlow) throws EEAException {
 
     // We've got the new schema created during the copy process. Now using the dictionary we'll
     // replace the objectIds of the schema, because at this moment the new schema has the origin
@@ -435,7 +438,9 @@ public class DesignDatasetServiceImpl implements DesignDatasetService {
       } catch (InterruptedException e) {
         LOG.info("Propagate Error");
       }
-      datasetService.saveTablePropagation(datasetId, tableSchemaMapper.entityToClass(table));
+      if (Boolean.FALSE.equals(isBigDataFlow)) {
+          datasetService.saveTablePropagation(datasetId, tableSchemaMapper.entityToClass(table));
+      }
     }
     // save the schema with the new values
     schemasRepository.updateSchemaDocument(schema);
