@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -71,6 +72,12 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.transaction.Transactional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.eea.utils.LiteralConstants.*;
 
@@ -423,7 +430,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
   }
 
   /**
-   * If the error message contains the 3 codes just replace them with the real provider code
+   * If the error message contains the 3 codes, replace them with the real provider code
    *
    * @param datasetId
    * @param sqlCode The sql sentence to be validated
