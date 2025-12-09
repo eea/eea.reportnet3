@@ -693,7 +693,7 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
   @Override
   @HystrixCommand
   @GetMapping(value = "/v1/historicReleases", produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_NATIONAL_COORDINATOR','DATASET_CUSTODIAN','DATASET_STEWARD','DATASET_OBSERVER','DATASET_STEWARD_SUPPORT','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','EUDATASET_OBSERVER','EUDATASET_STEWARD_SUPPORT','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD','DATACOLLECTION_OBSERVER','DATACOLLECTION_STEWARD_SUPPORT') OR checkApiKey(#dataflowId,null,#datasetId,'DATASET_STEWARD','DATASET_CUSTODIAN','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_NATIONAL_COORDINATOR','DATASET_CUSTODIAN','DATASET_STEWARD','DATASET_OBSERVER','DATASET_STEWARD_SUPPORT','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','EUDATASET_OBSERVER','EUDATASET_STEWARD_SUPPORT','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD','DATACOLLECTION_OBSERVER','DATACOLLECTION_STEWARD_SUPPORT') OR checkApiKey(#dataflowId,null,#datasetId,'DATASET_STEWARD','DATASET_CUSTODIAN','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD') OR hasAnyRole('ADMIN')")
   @ApiOperation(value = "Get dataset historic releases by dataset id",
           notes = "Allowed roles: \n\n Reporting dataset: CUSTODIAN, STEWARD \n\n Data collection: CUSTODIAN, STEWARD \n\n EU dataset: CUSTODIAN, STEWARD")
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully get data"),
@@ -721,47 +721,48 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
   /**
    * Update the release date of a historic release entry.
    *
-   * @param datasetId the dataset id
    * @param idSnapshot the snapshot id
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
    * @param newReleaseDate the new release date
    */
   @Override
   @HystrixCommand
-  @PutMapping(value = "/v1/{snapshotId}/dataset/{datasetId}/updateReleaseDate", produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("secondLevelAuthorizeWithApiKey(#datasetId,'DATASET_CUSTODIAN','DATASET_STEWARD','EUDATASET_CUSTODIAN','TESTDATASET_CUSTODIAN','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_STEWARD') OR hasAnyRole('ADMIN')")
+  @PutMapping(value = "/v1/{snapshotId}/updateReleaseDate", produces = MediaType.APPLICATION_JSON_VALUE)
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN','DATAFLOW_STEWARD') OR hasAnyRole('ADMIN')")
   @ApiOperation(value = "Update release date of a historic release entry", hidden = true,
-      notes = "Allowed roles: \n\n Reporting dataset: CUSTODIAN, STEWARD"
-          + "\n\n Data collection: CUSTODIAN, STEWARD"
-          + "\n\n EU dataset: CUSTODIAN, STEWARD")
+      notes = "Allowed roles: \n\n Dataflow: CUSTODIAN, STEWARD, ADMIN")
   @ApiResponses(value = {
       @ApiResponse(code = 200, message = "Successfully updated release date"),
       @ApiResponse(code = 400, message = "Dataset id incorrect or user request not found")})
   public void updateHistoricReleaseDate(
-      @ApiParam(type = "Long", value = "Dataset id", example = "0")
-      @PathVariable("datasetId") Long datasetId,
       @ApiParam(type = "Long", value = "Snapshot id", example = "0")
       @PathVariable("snapshotId") Long idSnapshot,
+      @ApiParam(type = "Long", value = "Dataflow id", example = "0")
+      @RequestParam("dataflowId") Long dataflowId,
+      @ApiParam(type = "Long", value = "Provider id", example = "0")
+      @RequestParam("providerId") Long providerId,
       @ApiParam(type = "String",
           value = "New Release Date") @RequestParam("newReleaseDate") String newReleaseDate) {
 
-    if (datasetId == null) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.DATASET_INCORRECT_ID);
+    if (dataflowId == null || providerId == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.DATAFLOW_INCORRECT_ID + " or " + EEAErrorMessage.PROVIDER_INCORRECT_ID);
     }
 
     try {
-      LOG.info("Updating historic release date for snapshotId {} and datasetId {} to {}",
-          idSnapshot, datasetId, newReleaseDate);
-      datasetSnapshotService.updateHistoricReleaseDate(datasetId, idSnapshot, newReleaseDate);
-      LOG.info("Successfully updated historic release date for snapshotId {} and datasetId {}",
-          idSnapshot, datasetId);
+      LOG.info("Updating historic release date for snapshotId {} and providerId {} of dataflowId {} to {}",
+          idSnapshot, providerId, dataflowId, newReleaseDate);
+      datasetSnapshotService.updateHistoricReleaseDate(idSnapshot, dataflowId, providerId, newReleaseDate);
+      LOG.info("Successfully updated historic release date for snapshotId {} and providerId {} of dataflowId {}",
+          idSnapshot, providerId, dataflowId);
     } catch (EEAException e) {
-      LOG.error("Error updating historic release date for snapshotId {} and datasetId {}. Error: {}",
-          idSnapshot, datasetId, e.getMessage(), e);
+      LOG.error("Error updating historic release date for snapshotId {} and providerId {} of dataflowId {}. Error: {}",
+          idSnapshot, providerId, dataflowId, e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.EXECUTION_ERROR);
     } catch (Exception e) {
-      LOG.error("Unexpected error! Error updating historic release date for snapshotId {} and datasetId {}. Message: {}",
-          idSnapshot, datasetId, e.getMessage());
+      LOG.error("Unexpected error! Error updating historic release date for snapshotId {} and providerId {} of dataflowId {}. Message: {}",
+          idSnapshot, providerId, dataflowId, e.getMessage());
       throw e;
     }
   }
@@ -830,7 +831,7 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
   @GetMapping(value = "/historicReleasesRepresentative",
           produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Get historic releases by representative", hidden = true)
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN','DATAFLOW_STEWARD','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_READ','DATAFLOW_REPORTER_WRITE','DATAFLOW_NATIONAL_COORDINATOR','DATAFLOW_OBSERVER','DATAFLOW_STEWARD_SUPPORT')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN','DATAFLOW_STEWARD','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_READ','DATAFLOW_REPORTER_WRITE','DATAFLOW_NATIONAL_COORDINATOR','DATAFLOW_OBSERVER','DATAFLOW_STEWARD_SUPPORT') OR hasAnyRole('ADMIN')")
   public List<ReleaseVO> historicReleasesByRepresentative(
           @ApiParam(type = "Long", value = "Dataflow Id",
                   example = "0") @RequestParam("dataflowId") Long dataflowId,

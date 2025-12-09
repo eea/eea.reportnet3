@@ -535,6 +535,9 @@ public final class EEAErrorMessage {
   public static final String EMPTY_PROVIDER_DETAILS =
       "Label, code, and groupId must not be empty or null";
 
+  /** The Constant PROVIDER_INCORRECT_ID: {@value}. */
+  public static final String PROVIDER_INCORRECT_ID = "Provider id is incorrect.";
+
   /** The Constant EXPORT_LEAD_REPORTERS: {@value}. */
   public static final String EXPORT_LEAD_REPORTERS =
       "An unknown error happenned while exporting the lead reporters.";

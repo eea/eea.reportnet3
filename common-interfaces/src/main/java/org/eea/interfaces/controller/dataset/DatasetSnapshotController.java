@@ -80,12 +80,13 @@ public interface DatasetSnapshotController {
   /**
    * Update the release date of a historic release entry.
    *
-   * @param datasetId the dataset id
    * @param idSnapshot the snapshot id
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
    * @param newReleaseDate the new release date
    */
-  @PutMapping(value = "/private/{snapshotId}/dataset/{datasetId}/updateReleaseDate", produces = MediaType.APPLICATION_JSON_VALUE)
-  void updateHistoricReleaseDate(@PathVariable("datasetId") Long datasetId,@PathVariable("snapshotId") Long idSnapshot, @RequestParam("newReleaseDate") String newReleaseDate);
+  @PutMapping(value = "/private/{snapshotId}/updateReleaseDate", produces = MediaType.APPLICATION_JSON_VALUE)
+  void updateHistoricReleaseDate(@PathVariable("snapshotId") Long idSnapshot, @RequestParam("dataflowId") Long dataflowId,@RequestParam("providerId") Long providerId, @RequestParam("newReleaseDate") String newReleaseDate);
 
   /**
    * Delete snapshot legacy.

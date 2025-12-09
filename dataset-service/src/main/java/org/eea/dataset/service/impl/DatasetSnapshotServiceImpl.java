@@ -1726,9 +1726,9 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   }
 
   @Override
-  public void updateHistoricReleaseDate(Long datasetId, Long snapshotId, String newReleaseDate) throws EEAException {
-    if (datasetId == null || snapshotId == null || newReleaseDate == null) {
-      throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
+  public void updateHistoricReleaseDate(Long snapshotId, Long dataflowId, Long providerId, String newReleaseDate) throws EEAException {
+    if (dataflowId == null || providerId == null || snapshotId == null || newReleaseDate == null) {
+      throw new EEAException("One or more required parameters were not provided with the request.");
     }
 
     Snapshot snapshot = snapshotRepository.findById(snapshotId).orElse(null);
@@ -1736,64 +1736,87 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       throw new EEAException(EEAErrorMessage.SNAPSHOT_NOTFOUND);
     }
 
-    // figure out the dataset type we are editing for
+    Long datasetId;
+    if (snapshot.getReportingDataset() != null) {
+      datasetId = snapshot.getReportingDataset().getId();
+    } else if (snapshot.getDataCollectionId() != null) {
+      datasetId = snapshot.getDataCollectionId();
+    } else {
+      throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
+    }
+
+    // Load dataset to check if it matches dataflow and provider.
     DataSetMetabaseVO datasetMetabase = datasetMetabaseService.findDatasetMetabase(datasetId);
     if (datasetMetabase == null) {
       throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
     }
 
-    DatasetTypeEnum datasetType = datasetMetabase.getDatasetTypeEnum();
-    boolean belongsToDataset = false;
-
-    switch (datasetType) {
-      case REPORTING:
-        belongsToDataset =snapshot.getReportingDataset() != null && Objects.equals(snapshot.getReportingDataset().getId(), datasetId);
-        break;
-      case COLLECTION:
-        belongsToDataset = Objects.equals(snapshot.getDataCollectionId(), datasetId);
-        break;
-      case EUDATASET:
-        EUDataset eudataset = eUDatasetRepository.findById(datasetId).orElse(null);
-        if (eudataset == null) {
-          throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
-        }
-        // Get data collection from eu dataset to change the snapshot.
-        DataCollection dataCollection =dataCollectionRepository.findFirstByDatasetSchema(eudataset.getDatasetSchema()).orElse(null);
-        if (dataCollection == null) {
-          throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
-        }
-        belongsToDataset = Objects.equals(snapshot.getDataCollectionId(), dataCollection.getId());
-        break;
-      default:
-        throw new EEAException("Unsupported dataset type: " + datasetType);
-    }
+    boolean belongsToDataset = Objects.equals(datasetMetabase.getDataflowId(), dataflowId)
+        && Objects.equals(datasetMetabase.getDataProviderId(), providerId);
 
     if (!belongsToDataset) {
-      // Protect against someone editing a snapshot of another dataset by mistake
+      LOG.error("Snapshot {} does not belong to dataflowId {} / providerId {}. Real dataflowId={}, providerId={}",
+          snapshotId, dataflowId, providerId, datasetMetabase.getDataflowId(), datasetMetabase.getDataProviderId());
       throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
     }
 
-    Date dateReleasing = null;
     // Update date_released field.
+    Date dateReleasing = null;
     if (StringUtils.isNotBlank(newReleaseDate)) {
       try {
         dateReleasing = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX").parse(newReleaseDate);
       } catch (ParseException e) {
-        LOG.error("Error parsing the date of the release of snapshot with id {} for datasetId {}. Message: {}", snapshotId, datasetId, e.getMessage());
+        LOG.error("Error parsing the date of the release of snapshot with id {} and providerId {} of dataflowId {}. Message: {}",
+            snapshotId,  dataflowId, providerId, e.getMessage());
         throw new EEAException(EEAErrorMessage.UPDATING_SNAPSHOT);
       }
     }
 
-    snapshot.setDateReleased(dateReleasing);
-      // Update description of Releases.
-    if (dateReleasing != null) {
-      SimpleDateFormat descFmt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-      String formatted = descFmt.format(dateReleasing);
-      snapshot.setDescription("Release " + formatted);
+    List<Snapshot> snapshotsToUpdate = new ArrayList<>();
+    Long jobId = snapshot.getJobId();
+
+    // Get all snapshots with the same jobId.
+    if (jobId != null) {
+      List<Snapshot> sameJobSnapshots = snapshotRepository.findByJobId(jobId);
+
+      for (Snapshot sn : sameJobSnapshots) {
+        Long snapshotDatasetId;
+
+        if (sn.getReportingDataset() != null) {
+          snapshotDatasetId = sn.getReportingDataset().getId();
+        } else {
+          snapshotDatasetId = sn.getDataCollectionId();
+        }
+
+        if (snapshotDatasetId == null) {
+          continue;
+        }
+
+        DataSetMetabaseVO sMetabase = datasetMetabaseService.findDatasetMetabase(snapshotDatasetId);
+        if (sMetabase == null) {
+          continue;
+        }
+
+        // Verify that the dataset belongs to the current dataflow and provider.
+        if (Objects.equals(sMetabase.getDataflowId(), dataflowId) && Objects.equals(sMetabase.getDataProviderId(), providerId)) {
+          snapshotsToUpdate.add(sn);
+        }
+      }
     }
 
-    snapshotRepository.save(snapshot);
+    SimpleDateFormat descFmt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
-    LOG.info("Updated dateReleased and description for snapshotId {} and datasetId {} to {}", snapshotId, datasetId, newReleaseDate);
+    for (Snapshot sn : snapshotsToUpdate) {
+      sn.setDateReleased(dateReleasing);
+
+      if (dateReleasing != null) {
+        String formatted = descFmt.format(dateReleasing);
+        sn.setDescription("Release " + formatted);
+      }
+    }
+
+    snapshotRepository.saveAll(snapshotsToUpdate);
+
+    LOG.info("Updated dateReleased and description for snapshotId {} and providerId {} of dataflowId {} to {}", snapshotId, dataflowId, providerId, newReleaseDate);
   }
 }
