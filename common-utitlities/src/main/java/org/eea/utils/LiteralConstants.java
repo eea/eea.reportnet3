@@ -239,6 +239,9 @@ public final class LiteralConstants {
   /** The Constant S3_ATTACHMENTS_DC_PATH: {@value}. */
   public static final String S3_ATTACHMENTS_DC_PATH = "%s/collections/%s/current/attachments/%s/%s/%s";
 
+  /** The Constant S3_ATTACHMENTS_DC_PROVIDER_PATH: {@value}. */
+  public static final String S3_ATTACHMENTS_DC_PROVIDER_PATH = "%s/collections/%s/current/attachments/%s/%s";
+
   /** The Constant S3_ATTACHMENTS_EU_PATH: {@value}. */
   public static final String S3_ATTACHMENTS_EU_TABLE_PATH = "%s/collections/%s/attachments/%s";
 
