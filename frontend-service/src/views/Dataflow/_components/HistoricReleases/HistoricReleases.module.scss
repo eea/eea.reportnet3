@@ -39,3 +39,29 @@
   font-weight: bold;
   height: 75%;
 }
+
+.actionsWrapper {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  justify-content: center;
+}
+
+.calendarContent {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.5rem;
+}
+
+.currentDateInfo {
+  text-align: center;
+  padding: 0.5rem;
+  background-color: var(--secondary-color-lighter);
+  border-radius: 4px;
+  color: var(--main-text-color);
+
+  strong {
+    font-weight: 600;
+  }
+}
