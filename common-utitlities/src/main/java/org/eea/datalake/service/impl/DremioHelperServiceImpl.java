@@ -156,6 +156,8 @@ public class DremioHelperServiceImpl implements DremioHelperService {
                 itemPosition = 8;
             } else if (S3_DATAFLOW_REFERENCE_FOLDER_PATH.equals(s3PathResolver.getPath())) {
                 itemPosition = 4;
+            } else if (S3_EU_SNAPSHOT_ROOT_PATH.equals(s3PathResolver.getPath())) {
+                itemPosition = 5;
             } else {
                 itemPosition = 6;
             }
@@ -193,14 +195,14 @@ public class DremioHelperServiceImpl implements DremioHelperService {
 
         folderId = getFolderId(s3PathResolver, folderName);
         if (folderId == null) {
-          try {
-              LOG.info("Folder id was null, so I am trying again");
-              Thread.sleep(2000);
-              folderId = getFolderId(s3PathResolver, folderName);
-              LOG.info("Folder id {} after second try", folderId);
-          } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-          }
+            try {
+                LOG.info("Folder id was null, so I am trying again");
+                Thread.sleep(2000);
+                folderId = getFolderId(s3PathResolver, folderName);
+                LOG.info("Folder id {} after second try", folderId);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
         }
 
         try {
@@ -489,9 +491,9 @@ public class DremioHelperServiceImpl implements DremioHelperService {
         List<LinkedHashMap<String,Object>> rows =  (List<LinkedHashMap<String,Object>>) queryResults.get("rows");
 
         Optional<Long> numberOfRecords = rows.stream()
-                .filter(Objects::nonNull)
-                .map(linkedHashMap -> Long.valueOf((Integer) linkedHashMap.get(recordCountAlias)))
-                .findFirst();
+            .filter(Objects::nonNull)
+            .map(linkedHashMap -> Long.valueOf((Integer) linkedHashMap.get(recordCountAlias)))
+            .findFirst();
 
         if(numberOfRecords.isEmpty()){
             throw new Exception("Could not find " + recordCountAlias + " in query " + compareRecordsQuery);
