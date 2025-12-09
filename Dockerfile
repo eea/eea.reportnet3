@@ -4,5 +4,5 @@ ARG JAR_FILE
 ARG MS_PORT
 COPY ${JAR_FILE} app.jar
 RUN apk update && apk add --no-cache fontconfig ttf-dejavu
-ENTRYPOINT ["java","-jar","/app.jar"]
+ENTRYPOINT ["java","-Xmx4G","-jar","/app.jar"]
 EXPOSE ${MS_PORT}
