@@ -920,7 +920,7 @@ public class ValidationServiceImpl implements ValidationService {
     }
 
     DataSetSchemaVO schema = datasetSchemaController.findDataSchemaByDatasetId(dataSetMetabaseVO.getId());
-    //setRuleMessageDL(schema.getIdDataSetSchema(), errors);
+    setRuleMessageDL(schema.getIdDataSetSchema(), errors);
     validations.setErrors(errors);
 
     validations.setTotalRecords((long) errors.size());
@@ -969,7 +969,9 @@ public class ValidationServiceImpl implements ValidationService {
           if ((EntityTypeEnum.FIELD == validation.getTypeEntity()
               || EntityTypeEnum.RECORD == validation.getTypeEntity())
               && validation.getShortCode().equals(rule.getShortCode())) {
-            validation.setMessage(replacePlaceHolders(rule.getThenCondition().get(0)));
+            if (rule.getThenCondition().get(0).contains("{%reason%}")){
+              validation.setMessage(replacePlaceHolders(rule.getThenCondition().get(0)));
+            }
           }
         }
       }
