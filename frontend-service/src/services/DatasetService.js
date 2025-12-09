@@ -950,5 +950,14 @@ export const DatasetService = {
   validateSqlRules: async (datasetId, datasetSchemaId) =>
     await DatasetRepository.validateSqlRules(datasetId, datasetSchemaId),
 
-  testImportProcess: async datasetId => await DatasetRepository.testImportProcess(datasetId)
+  testImportProcess: async datasetId => await DatasetRepository.testImportProcess(datasetId),
+
+  checkDuplicateValues: async ({ datasetId, tableSchemaId, fieldName, value, fieldSchemaId }) => {
+    const fieldVO = {
+      idFieldSchema: fieldSchemaId,
+      name: fieldName,
+      value: value
+    };
+    return await DatasetRepository.checkDuplicateValues(datasetId, tableSchemaId, fieldVO);
+  }
 };

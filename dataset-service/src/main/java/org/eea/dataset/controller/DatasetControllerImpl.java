@@ -3816,7 +3816,7 @@ public class DatasetControllerImpl implements DatasetController {
 
   @Override
   @PreAuthorize("isAuthenticated()")
-  @GetMapping("/duplicateFieldValueExists/{datasetId}")
+  @PostMapping("/duplicateFieldValueExists/{datasetId}")
   public Boolean duplicateFieldValueExists(@PathVariable("datasetId") Long datasetId, @RequestParam(value = "tableSchemaId") String tableSchemaId, @RequestBody FieldVO fieldVO) throws Exception{
     try{
       DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);

@@ -83,30 +83,30 @@ export const EntitiesWebform = ({
   useEffect(() => initialLoad(), [tables]);
 
   useEffect(() => {
-      const matchedNotifications = notificationContext.hidden.filter(
-        ({ key }) => key === 'INSERT_RECORDS_MULTI_TABLES_COMPLETED' || key === 'INSERT_RECORDS_MULTI_TABLES_FAILED'
-      );
+    const matchedNotifications = notificationContext.hidden.filter(
+      ({ key }) => key === 'INSERT_RECORDS_MULTI_TABLES_COMPLETED' || key === 'INSERT_RECORDS_MULTI_TABLES_FAILED'
+    );
 
-      if (isEmpty(matchedNotifications)) return;
+    if (isEmpty(matchedNotifications)) return;
 
-      const matchedWithDatasetId = matchedNotifications.find(
-        matchedNotification => String(matchedNotification.content?.datasetId) === String(datasetId)
-      );
+    const matchedWithDatasetId = matchedNotifications.find(
+      matchedNotification => String(matchedNotification.content?.datasetId) === String(datasetId)
+    );
 
-      if (!matchedWithDatasetId) return;
+    if (!matchedWithDatasetId) return;
 
-      const resetAddEntityState = () => {
-        setIsAddingEntityRecord(false);
-        manageDialogs('isAddEntityIdDialogVisible', false);
-        setRefreshTableTrigger(prev => prev + 1);
-      };
+    const resetAddEntityState = () => {
+      setIsAddingEntityRecord(false);
+      manageDialogs('isAddEntityIdDialogVisible', false);
+      setRefreshTableTrigger(prev => prev + 1);
+    };
 
-      if (matchedWithDatasetId?.key === 'INSERT_RECORDS_MULTI_TABLES_COMPLETED') {
-        onUpdateData();
-        resetAddEntityState();
-      } else if (matchedWithDatasetId?.key === 'INSERT_RECORDS_MULTI_TABLES_FAILED') {
-        resetAddEntityState();
-      }
+    if (matchedWithDatasetId?.key === 'INSERT_RECORDS_MULTI_TABLES_COMPLETED') {
+      onUpdateData();
+      resetAddEntityState();
+    } else if (matchedWithDatasetId?.key === 'INSERT_RECORDS_MULTI_TABLES_FAILED') {
+      resetAddEntityState();
+    }
   }, [notificationContext.hidden]);
 
   useEffect(() => {
@@ -150,63 +150,46 @@ export const EntitiesWebform = ({
     return isEmpty(entitiesWebformState.rootPkInput) ? true : invalidCharsRegex.test(entitiesWebformState.rootPkInput);
   };
 
-  // const checkDuplicatePk = () => {
-  //   const entityPkValuesList = entitiesWebformState.entitiesRecords
-  //     .map(entityRecord =>
-  //       entityRecord.elements
-  //         .filter(element => element.fieldSchema === rootPkFieldId || element.fieldSchemaId === rootPkFieldId)
-  //         .map(element => element.value)
-  //     )
-  //     .filter(entityRecord => !isEmpty(entityRecord))
-  //     .flat();
-
-  //   return entityPkValuesList.some(entityPk => entityPk === entitiesWebformState.rootPkInput);
-  // };
-
   const checkDuplicatePk = async rawValue => {
-    if (!rawValue) return false;
+    if (isEmpty(rawValue)) return false;
 
-    const pageSize = 300;
-    const [rootTable] = entitiesWebformState.data.filter(table => table.tableSchemaId);
-    if (!rootTable) return false;
+    // Find the root table
+    const rootTable = entitiesWebformState.data.find(table => String(table.tableSchemaId) === String(rootTableId));
 
-    let pageNum = 0;
+    if (!rootTable) {
+      console.error('EntitiesWebform - checkDuplicatePk: Root table not found');
+      return false;
+    }
 
-    while (true) {
-      try {
-        const response = bigData
-          ? await DatasetService.getTableDataDL({
-              datasetId,
-              tableSchemaId: rootTable.tableSchemaId,
-              pageNum,
-              pageSize,
-              levelError: ['CORRECT', 'INFO', 'WARNING', 'ERROR', 'BLOCKER']
-            })
-          : await DatasetService.getTableData({
-              datasetId,
-              tableSchemaId: rootTable.tableSchemaId,
-              pageNum,
-              pageSize,
-              levelError: ['CORRECT', 'INFO', 'WARNING', 'ERROR', 'BLOCKER']
-            });
+    // Find the root PK field name from datasetSchema
+    const schemaRootTable = datasetSchema.tables.find(table => String(table.tableSchemaId) === String(rootTableId));
 
-        const records = response.records ?? [];
-        if (!records.length) return false;
+    if (!schemaRootTable?.records?.[0]?.fields) {
+      console.error('EntitiesWebform - checkDuplicatePk: Schema root table records not found');
+      return false;
+    }
 
-        const found = records.some(record =>
-          (record.fields ?? []).some(
-            field => (field.fieldSchemaId ?? field.fieldSchema) === rootPkFieldId && field.value === rawValue
-          )
-        );
+    const rootPkField = schemaRootTable.records[0].fields.find(
+      field => String(field.fieldId ?? field.fieldSchemaId) === String(rootPkFieldId)
+    );
 
-        if (found) return true;
-        if (records.length < pageSize) return false;
+    if (!rootPkField?.name) {
+      console.error('EntitiesWebform - checkDuplicatePk: Root PK field name not found');
+      return false;
+    }
 
-        pageNum++;
-      } catch (error) {
-        console.error('EntitiesWebform - checkDuplicatePk.', error);
-        return false;
-      }
+    try {
+      const exists = await DatasetService.checkDuplicateValues({
+        datasetId,
+        tableSchemaId: rootTable.tableSchemaId,
+        fieldName: rootPkField.name,
+        value: rawValue,
+        fieldSchemaId: rootPkFieldId
+      });
+      return Boolean(exists.data);
+    } catch (error) {
+      console.error('EntitiesWebform - checkDuplicatePk.', error);
+      return true;
     }
   };
 
@@ -591,10 +574,22 @@ export const EntitiesWebform = ({
       {entitiesWebformState.isAddEntityIdDialogVisible && (
         <ConfirmDialog
           classNameConfirm={'p-button-primary'}
-          disabledConfirm={checkInvalidCharacters() || entitiesWebformState.isAddingEntityRecord || entitiesWebformState.isCheckingDuplicate}
+          disabledConfirm={
+            checkInvalidCharacters() ||
+            entitiesWebformState.isAddingEntityRecord ||
+            entitiesWebformState.isCheckingDuplicate
+          }
           header={resourcesContext.messages['addEntityId']}
-          iconConfirm={entitiesWebformState.isAddingEntityRecord || entitiesWebformState.isCheckingDuplicate ? 'spinnerAnimate' : 'add' }
-          labelConfirm={entitiesWebformState.isCheckingDuplicate ? resourcesContext.messages['checkingDuplicate'] : resourcesContext.messages['addEntity'] }
+          iconConfirm={
+            entitiesWebformState.isAddingEntityRecord || entitiesWebformState.isCheckingDuplicate
+              ? 'spinnerAnimate'
+              : 'add'
+          }
+          labelConfirm={
+            entitiesWebformState.isCheckingDuplicate
+              ? resourcesContext.messages['checkingDuplicate']
+              : resourcesContext.messages['addEntity']
+          }
           onConfirm={handleAddEntity}
           onHide={() => manageDialogs('isAddEntityIdDialogVisible', false)}
           showCancelButton={false}
