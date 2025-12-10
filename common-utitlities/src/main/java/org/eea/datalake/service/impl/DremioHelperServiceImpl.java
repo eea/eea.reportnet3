@@ -177,12 +177,19 @@ public class DremioHelperServiceImpl implements DremioHelperService {
         String directoryPath;
         String folderId;
         DremioPromotionRequestBody requestBody;
-        if(S3_IMPORT_FILE_PATH.equals(s3PathResolver.getPath())) {
+        if (S3_IMPORT_FILE_PATH.equals(s3PathResolver.getPath())) {
             directoryPath = S3_DEFAULT_BUCKET_PATH + "/" + s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_IMPORT_FILE_PATH);
             String[] path = directoryPath.split("/");
             requestBody = new DremioCSVPromotionRequestBody(ENTITY_TYPE, DREMIO_CONSTANT + directoryPath, path, DATASET_TYPE, new DremioCSVPromotionRequestBody.Format(CSV_FORMAT_TYPE, true));
-        }
-        else{
+        } else if (S3_TABLE_NAME_ROOT_DC_FOLDER_PATH.equals(s3PathResolver.getPath()) || S3_EU_SNAPSHOT_ROOT_PATH.equals(s3PathResolver.getPath())) {
+            directoryPath = S3_DEFAULT_BUCKET_PATH + "/" + s3Service.getS3Path(s3PathResolver) + "/" + folderName;
+            String[] path = directoryPath.split("/");
+            requestBody = new DremioParquetPromotionRequestBody(ENTITY_TYPE, DREMIO_CONSTANT + directoryPath, path, DATASET_TYPE, new DremioParquetPromotionRequestBody.Format(PARQUET_FORMAT_TYPE));
+        } else if (S3_TABLE_NAME_EU_QUERY_PATH.equals(s3PathResolver.getPath())) {
+            directoryPath = S3_DEFAULT_BUCKET_PATH + "/" + s3Service.getS3Path(s3PathResolver) + "/" + folderName;
+            String[] path = directoryPath.split("/");
+            requestBody = new DremioParquetPromotionRequestBody(ENTITY_TYPE, DREMIO_CONSTANT + directoryPath, path, DATASET_TYPE, new DremioParquetPromotionRequestBody.Format(PARQUET_FORMAT_TYPE));
+        } else {
             directoryPath = S3_DEFAULT_BUCKET_PATH + "/" +  s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_TABLE_NAME_FOLDER_PATH);
             String[] path = directoryPath.split("/");
             requestBody = new DremioParquetPromotionRequestBody(ENTITY_TYPE, DREMIO_CONSTANT + directoryPath, path, DATASET_TYPE, new DremioParquetPromotionRequestBody.Format(PARQUET_FORMAT_TYPE));
