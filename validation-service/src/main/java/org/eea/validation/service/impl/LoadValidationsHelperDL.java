@@ -68,52 +68,52 @@ public class LoadValidationsHelperDL {
 
     public FailedValidationsDatasetVO getListGroupValidationsDL(Long datasetId, Pageable pageable, List<ErrorTypeEnum> levelErrorsFilter, List<EntityTypeEnum> typeEntitiesFilter,
                                                                 String tableFilter, String fieldValueFilter, String shortCode, String headerField, Boolean asc) throws EEAException {
-      DataSetMetabaseVO dataset = dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
-      FailedValidationsDatasetVO validation = new FailedValidationsDatasetVO();
-      validation.setErrors(new ArrayList<>());
-      validation.setIdDatasetSchema(dataset.getDatasetSchema());
-      validation.setIdDataset(datasetId);
+        DataSetMetabaseVO dataset = dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
+        FailedValidationsDatasetVO validation = new FailedValidationsDatasetVO();
+        validation.setErrors(new ArrayList<>());
+        validation.setIdDatasetSchema(dataset.getDatasetSchema());
+        validation.setIdDataset(datasetId);
 
-      // Resolver pointing to the validation dataset.
-      S3PathResolver s3PathResolver = new S3PathResolver(
-          dataset.getDataflowId(),
-          dataset.getDataProviderId() != null ? dataset.getDataProviderId() : 0,
-          dataset.getId(),
-          S3_VALIDATION);
+        // Resolver pointing to the validation dataset.
+        S3PathResolver s3PathResolver = new S3PathResolver(
+            dataset.getDataflowId(),
+            dataset.getDataProviderId() != null ? dataset.getDataProviderId() : 0,
+            dataset.getId(),
+            S3_VALIDATION);
 
-      boolean validationFolderExists = s3Helper.checkFolderExist(s3PathResolver, S3_VALIDATION_TABLE_PATH);
-      // First folder check.
-      if (validationFolderExists && dremioHelperService.checkFolderPromoted(s3PathResolver, s3PathResolver.getTableName())) {
-        // Load schema once
-        DataSetSchemaVO schema = datasetSchemaControllerZuul.findDataSchemaByDatasetId(datasetId);
+        boolean validationFolderExists = s3Helper.checkFolderExist(s3PathResolver, S3_VALIDATION_TABLE_PATH);
+        // First folder check.
+        if (validationFolderExists && dremioHelperService.checkFolderPromoted(s3PathResolver, s3PathResolver.getTableName())) {
+            // Load schema once
+            DataSetSchemaVO schema = datasetSchemaControllerZuul.findDataSchemaByDatasetId(datasetId);
 
-        // Ensure that sibling data tables are promoted.
-        promoteSiblingDataTables(dataset, schema);
+            // Ensure that sibling data tables are promoted.
+            promoteSiblingDataTables(dataset, schema);
 
-        // Main grouped validations.
-        List<GroupValidationVO> errors = dataLakeValidationService.findGroupRecordsByFilter(s3PathResolver, levelErrorsFilter, typeEntitiesFilter, tableFilter,
-            fieldValueFilter, shortCode, pageable, headerField, asc, true);
-        // validationService.setRuleMessageDL(schema.getIdDataSetSchema(), errors);
-        validation.setErrors(errors);
-        validation.setTotalErrors(dremioJdbcTemplate.queryForObject(s3Helper.buildRecordsCountQuery(s3PathResolver), Long.class));
-        validation.setTotalFilteredRecords(Long.valueOf(dataLakeValidationService.findGroupRecordsByFilter(s3PathResolver, levelErrorsFilter,
-            typeEntitiesFilter, tableFilter, fieldValueFilter, shortCode, pageable, headerField, asc, false).size()));
-        List<String> tableNames = schema.getTableSchemas().stream().map(TableSchemaVO::getNameTableSchema).collect(Collectors.toList());
-        AtomicReference<Long> totalRecords = new AtomicReference<>(0L);
-        tableNames.forEach(name -> {
-          s3PathResolver.setTableName(name);
-          if (s3Helper.checkFolderExist(s3PathResolver, S3_TABLE_NAME_FOLDER_PATH)) {
-            Long tableRecords = dremioJdbcTemplate.queryForObject(s3Helper.buildRecordsCountQuery(s3PathResolver), Long.class);
-            totalRecords.set(Long.sum(totalRecords.get(),tableRecords));
-          }
-        });
-        validation.setTotalRecords(totalRecords.get());
-      }
+            // Main grouped validations.
+            List<GroupValidationVO> errors = dataLakeValidationService.findGroupRecordsByFilter(s3PathResolver, levelErrorsFilter, typeEntitiesFilter, tableFilter,
+                fieldValueFilter, shortCode, pageable, headerField, asc, true);
+            // validationService.setRuleMessageDL(schema.getIdDataSetSchema(), errors);
+            validation.setErrors(errors);
+            validation.setTotalErrors(dremioJdbcTemplate.queryForObject(s3Helper.buildRecordsCountQuery(s3PathResolver), Long.class));
+            validation.setTotalFilteredRecords(Long.valueOf(dataLakeValidationService.findGroupRecordsByFilter(s3PathResolver, levelErrorsFilter,
+                typeEntitiesFilter, tableFilter, fieldValueFilter, shortCode, pageable, headerField, asc, false).size()));
+            List<String> tableNames = schema.getTableSchemas().stream().map(TableSchemaVO::getNameTableSchema).collect(Collectors.toList());
+            AtomicReference<Long> totalRecords = new AtomicReference<>(0L);
+            tableNames.forEach(name -> {
+                s3PathResolver.setTableName(name);
+                if (s3Helper.checkFolderExist(s3PathResolver, S3_TABLE_NAME_FOLDER_PATH)) {
+                    Long tableRecords = dremioJdbcTemplate.queryForObject(s3Helper.buildRecordsCountQuery(s3PathResolver), Long.class);
+                    totalRecords.set(Long.sum(totalRecords.get(),tableRecords));
+                }
+            });
+            validation.setTotalRecords(totalRecords.get());
+        }
 
-      LOG.info("Total validations founded in datasetId {}: {}. Now in page {}, {} validation errors by page",
-          datasetId, validation.getErrors().size(), pageable.getPageNumber(), pageable.getPageSize());
+        LOG.info("Total validations founded in datasetId {}: {}. Now in page {}, {} validation errors by page",
+            datasetId, validation.getErrors().size(), pageable.getPageNumber(), pageable.getPageSize());
 
-      return validation;
+        return validation;
     }
 
     /**
@@ -121,94 +121,94 @@ public class LoadValidationsHelperDL {
      * are promoted in Dremio, so that validations referencing them can work.
      */
     private void promoteSiblingDataTables(DataSetMetabaseVO dataset, DataSetSchemaVO schema) {
-      // Prerequisites check.
-      if (!canAutoPromoteSiblingTables(dataset)) {
-        return;
-      }
-
-      Long datasetId = dataset.getId();
-      Long dataflowId = dataset.getDataflowId();
-      Long providerId = dataset.getDataProviderId() != null ? dataset.getDataProviderId() : 0L;
-      schema.getTableSchemas().forEach(tableSchema -> {
-        String tableName = tableSchema.getNameTableSchema();
-        try {
-          S3PathResolver tableResolver = new S3PathResolver(dataflowId, providerId, datasetId, tableName);
-          tableResolver.setIsIcebergTable(false);
-          tableResolver.setPath(S3_TABLE_NAME_FOLDER_PATH);
-          boolean folderExists = s3Helper.checkFolderExist(tableResolver, S3_TABLE_NAME_FOLDER_PATH);
-          // Second folder check.
-          if (!folderExists) {
-            LOG.warn("Table folder does not exist for datasetId {} table {} – skipping promotion", datasetId, tableName);
+        // Prerequisites check.
+        if (!canAutoPromoteSiblingTables(dataset)) {
             return;
-          }
-
-          if (dremioHelperService.checkFolderPromoted(tableResolver, tableName)) {
-            return;
-          }
-
-          LOG.info("Auto promoting data table {} for datasetId {} (sibling of validation folder)", tableName, datasetId);
-          dremioHelperService.promoteFolderOrFile(tableResolver, tableName);
-        } catch (Exception e) {
-          LOG.error("Error auto-promoting sibling data table {} for datasetId {}: {}", tableName, datasetId, e.getMessage(), e);
         }
-      });
+
+        Long datasetId = dataset.getId();
+        Long dataflowId = dataset.getDataflowId();
+        Long providerId = dataset.getDataProviderId() != null ? dataset.getDataProviderId() : 0L;
+        schema.getTableSchemas().forEach(tableSchema -> {
+            String tableName = tableSchema.getNameTableSchema();
+            try {
+                S3PathResolver tableResolver = new S3PathResolver(dataflowId, providerId, datasetId, tableName);
+                tableResolver.setIsIcebergTable(false);
+                tableResolver.setPath(S3_TABLE_NAME_FOLDER_PATH);
+                boolean folderExists = s3Helper.checkFolderExist(tableResolver, S3_TABLE_NAME_FOLDER_PATH);
+                // Second folder check.
+                if (!folderExists) {
+                    LOG.warn("Table folder does not exist for datasetId {} table {} – skipping promotion", datasetId, tableName);
+                    return;
+                }
+
+                if (dremioHelperService.checkFolderPromoted(tableResolver, tableName)) {
+                    return;
+                }
+
+                LOG.info("Auto promoting data table {} for datasetId {} (sibling of validation folder)", tableName, datasetId);
+                dremioHelperService.promoteFolderOrFile(tableResolver, tableName);
+            } catch (Exception e) {
+                LOG.error("Error auto-promoting sibling data table {} for datasetId {}: {}", tableName, datasetId, e.getMessage(), e);
+            }
+        });
     }
 
     private boolean canAutoPromoteSiblingTables(DataSetMetabaseVO dataset) {
-      if (hasParquetConversionLock(dataset)) {
-        LOG.info("Skipping sibling table auto promotion for datasetId {} due to PARQUET_CONVERSION lock", dataset.getId());
-        return false;
-      }
-      if (hasBlockingJobs(dataset)) {
-        LOG.info("Skipping sibling table auto promotion for datasetId {} due to active jobs", dataset.getId());
-        return false;
-      }
-      return true;
+        if (hasParquetConversionLock(dataset)) {
+            LOG.info("Skipping sibling table auto promotion for datasetId {} due to PARQUET_CONVERSION lock", dataset.getId());
+            return false;
+        }
+        if (hasBlockingJobs(dataset)) {
+            LOG.info("Skipping sibling table auto promotion for datasetId {} due to active jobs", dataset.getId());
+            return false;
+        }
+        return true;
     }
 
     private boolean hasParquetConversionLock(DataSetMetabaseVO dataset) {
-      Long datasetId = dataset.getId();
-      try {
-        String lockKey = LockEnum.PARQUET_CONVERSION.getValue() + "_" + datasetId;
-        Map<String, String> activeLocks = redisLockService.listActiveLocks(lockKey);
-        boolean locked = activeLocks != null && !activeLocks.isEmpty();
-        if (locked) {
-          LOG.info("Found redis locks for datasetId {}: {}", datasetId, activeLocks);
+        Long datasetId = dataset.getId();
+        try {
+            String lockKey = LockEnum.PARQUET_CONVERSION.getValue() + "_" + datasetId;
+            Map<String, String> activeLocks = redisLockService.listActiveLocks(lockKey);
+            boolean locked = activeLocks != null && !activeLocks.isEmpty();
+            if (locked) {
+                LOG.info("Found redis locks for datasetId {}: {}", datasetId, activeLocks);
+            }
+            return locked;
+        } catch (Exception e) {
+            LOG.error("Error checking redis locks for datasetId {}", datasetId, e);
+            return false;
         }
-        return locked;
-      } catch (Exception e) {
-        LOG.error("Error checking redis locks for datasetId {}", datasetId, e);
-        return false;
-      }
     }
 
     private boolean hasBlockingJobs(DataSetMetabaseVO dataset) {
-      try {
-        Long datasetId = dataset.getId();
-        Long dataflowId = dataset.getDataflowId();
-        Long providerId = dataset.getDataProviderId();
+        try {
+            Long datasetId = dataset.getId();
+            Long dataflowId = dataset.getDataflowId();
+            Long providerId = dataset.getDataProviderId();
 
-        List<JobVO> activeJobs = jobControllerZuul.findActiveJobsRelatedToADatasetId(datasetId, dataflowId, providerId);
+            List<JobVO> activeJobs = jobControllerZuul.findActiveJobsRelatedToADatasetId(datasetId, dataflowId, providerId);
 
-        if (activeJobs == null || activeJobs.isEmpty()) {
-          return false;
+            if (activeJobs == null || activeJobs.isEmpty()) {
+                return false;
+            }
+
+            boolean blocked = activeJobs.stream().anyMatch(job ->
+                job.getJobType() == JobTypeEnum.IMPORT ||
+                    job.getJobType() == JobTypeEnum.DELETE ||
+                    job.getJobType() == JobTypeEnum.VALIDATION ||
+                    job.getJobType() == JobTypeEnum.ETL_IMPORT
+            );
+
+            if (blocked) {
+                LOG.info("Blocking jobs for datasetId {}", datasetId);
+            }
+            return blocked;
+        } catch (Exception e) {
+            LOG.error("Error checking active jobs for datasetId {}: {}", dataset.getId(), e.getMessage(), e);
+            return false;
         }
-
-        boolean blocked = activeJobs.stream().anyMatch(job ->
-            job.getJobType() == JobTypeEnum.IMPORT ||
-                job.getJobType() == JobTypeEnum.DELETE ||
-                job.getJobType() == JobTypeEnum.VALIDATION ||
-                job.getJobType() == JobTypeEnum.ETL_IMPORT
-        );
-
-        if (blocked) {
-          LOG.info("Blocking jobs for datasetId {}", datasetId);
-        }
-        return blocked;
-      } catch (Exception e) {
-        LOG.error("Error checking active jobs for datasetId {}: {}", dataset.getId(), e.getMessage(), e);
-        return false;
-      }
     }
 
 }

@@ -76,61 +76,61 @@ public class DatasetDataRetrieverDL implements DataLakeDataRetriever {
         boolean folderExist = s3Helper.checkFolderExist(s3PathResolver);
 
         if (folderExist) {
-          // Try to auto promote if it’s safe and not already promoted.
-          dremioAutoPromotionService.ensureSafeFolderPromotion(dataset, s3PathResolver);
+            // Try to auto promote if it’s safe and not already promoted.
+            dremioAutoPromotionService.ensureSafeFolderPromotion(dataset, s3PathResolver);
 
-          // Check for promotion again.
-          if (dremioHelperService.checkFolderPromoted(s3PathResolver, s3PathResolver.getTableName())) {
-            StringBuilder dataQuery = new StringBuilder();
-            StringBuilder recordsCountQuery = new StringBuilder();
+            // Check for promotion again.
+            if (dremioHelperService.checkFolderPromoted(s3PathResolver, s3PathResolver.getTableName())) {
+                StringBuilder dataQuery = new StringBuilder();
+                StringBuilder recordsCountQuery = new StringBuilder();
 
-            if (REFERENCE.equals(dataset.getDatasetTypeEnum()) && s3PathResolver.getIsIcebergTable() == false) {
-              s3PathResolver.setPath(S3_DATAFLOW_REFERENCE_QUERY_PATH);
-              totalRecords = dremioJdbcTemplate.queryForObject(s3Helper.getRecordsCountQuery(s3PathResolver), Long.class);
-              dataQuery.append("select * from " + s3Service.getTableAsFolderQueryPath(s3PathResolver) + " t ");
-              recordsCountQuery.append("select count(record_id) from " + s3Service.getTableAsFolderQueryPath(s3PathResolver) + " t ");
+                if (REFERENCE.equals(dataset.getDatasetTypeEnum()) && s3PathResolver.getIsIcebergTable() == false) {
+                    s3PathResolver.setPath(S3_DATAFLOW_REFERENCE_QUERY_PATH);
+                    totalRecords = dremioJdbcTemplate.queryForObject(s3Helper.getRecordsCountQuery(s3PathResolver), Long.class);
+                    dataQuery.append("select * from " + s3Service.getTableAsFolderQueryPath(s3PathResolver) + " t ");
+                    recordsCountQuery.append("select count(record_id) from " + s3Service.getTableAsFolderQueryPath(s3PathResolver) + " t ");
+                } else {
+                    totalRecords = dremioJdbcTemplate.queryForObject(s3Helper.buildRecordsCountQuery(s3PathResolver), Long.class);
+                    dataQuery.append("select * from " + s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH) + " t ");
+                    recordsCountQuery.append("select count(record_id) from " + s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH) + " t ");
+                }
+                result.setTotalRecords(totalRecords);
+
+                Map<String, FieldSchemaVO> fieldIdMap = tableSchemaVO.getRecordSchema().getFieldSchema().stream().collect(Collectors.toMap(FieldSchemaVO::getId, Function.identity()));
+                S3PathResolver validationS3PathResolver = new S3PathResolver(
+                    dataset.getDataflowId(),
+                    dataset.getDataProviderId() != null ? dataset.getDataProviderId() : 0,
+                    dataset.getId(),
+                    S3_VALIDATION
+                );
+                validationS3PathResolver.setIsIcebergTable(false);
+                validationS3PathResolver.setPath(S3_TABLE_AS_FOLDER_QUERY_PATH);
+
+                String validationTablePath = s3Service.getTableAsFolderQueryPath(validationS3PathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
+                StringBuilder filteredQuery = DataLakeDataRetrieverUtils.buildFilteredQuery(dataset, fields, fieldSchemaId, fieldValue, fieldIdMap, levelError, qcCodes, validationTablePath);
+
+                if (filteredQuery.toString().isEmpty() && levelError != null && levelError.length == 0) {
+                    result.setTotalFilteredRecords(0L);
+                    result.setTotalRecords(totalRecords);
+                    result.setRecords(new ArrayList<>());
+                } else {
+                    recordsCountQuery.append(filteredQuery);
+                    // Table path for metadata refresh and promotion.
+                    String tablePathForRefresh;
+                    if (REFERENCE.equals(dataset.getDatasetTypeEnum()) && !Boolean.TRUE.equals(s3PathResolver.getIsIcebergTable())) {
+                        tablePathForRefresh = s3Service.getTableAsFolderQueryPath(s3PathResolver);
+                    } else {
+                        tablePathForRefresh = s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
+                    }
+
+                    loadTableWithRetry(dataset, tableSchemaVO, pageable, result, s3PathResolver, validationS3PathResolver,
+                        dataQuery, recordsCountQuery, validationTablePath, filteredQuery, tablePathForRefresh);
+                }
             } else {
-              totalRecords = dremioJdbcTemplate.queryForObject(s3Helper.buildRecordsCountQuery(s3PathResolver), Long.class);
-              dataQuery.append("select * from " + s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH) + " t ");
-              recordsCountQuery.append("select count(record_id) from " + s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH) + " t ");
+                setEmptyResults(result);
             }
-            result.setTotalRecords(totalRecords);
-
-            Map<String, FieldSchemaVO> fieldIdMap = tableSchemaVO.getRecordSchema().getFieldSchema().stream().collect(Collectors.toMap(FieldSchemaVO::getId, Function.identity()));
-            S3PathResolver validationS3PathResolver = new S3PathResolver(
-                dataset.getDataflowId(),
-                dataset.getDataProviderId() != null ? dataset.getDataProviderId() : 0,
-                dataset.getId(),
-                S3_VALIDATION
-            );
-            validationS3PathResolver.setIsIcebergTable(false);
-            validationS3PathResolver.setPath(S3_TABLE_AS_FOLDER_QUERY_PATH);
-
-            String validationTablePath = s3Service.getTableAsFolderQueryPath(validationS3PathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
-            StringBuilder filteredQuery = DataLakeDataRetrieverUtils.buildFilteredQuery(dataset, fields, fieldSchemaId, fieldValue, fieldIdMap, levelError, qcCodes, validationTablePath);
-
-            if (filteredQuery.toString().isEmpty() && levelError != null && levelError.length == 0) {
-              result.setTotalFilteredRecords(0L);
-              result.setTotalRecords(totalRecords);
-              result.setRecords(new ArrayList<>());
-            } else {
-              recordsCountQuery.append(filteredQuery);
-              // Table path for metadata refresh and promotion.
-              String tablePathForRefresh;
-              if (REFERENCE.equals(dataset.getDatasetTypeEnum()) && !Boolean.TRUE.equals(s3PathResolver.getIsIcebergTable())) {
-                tablePathForRefresh = s3Service.getTableAsFolderQueryPath(s3PathResolver);
-              } else {
-                tablePathForRefresh = s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
-              }
-
-              loadTableWithRetry(dataset, tableSchemaVO, pageable, result, s3PathResolver, validationS3PathResolver,
-                  dataQuery, recordsCountQuery, validationTablePath, filteredQuery, tablePathForRefresh);
-            }
-          } else {
-            setEmptyResults(result);
-          }
         } else {
-          setEmptyResults(result);
+            setEmptyResults(result);
         }
         return result;
     }
@@ -141,16 +141,16 @@ public class DatasetDataRetrieverDL implements DataLakeDataRetriever {
     private void loadTableWithRetry(DataSetMetabaseVO dataset, TableSchemaVO tableSchemaVO, Pageable pageable, TableVO result,
                                     S3PathResolver dataS3PathResolver, S3PathResolver validationS3PathResolver, StringBuilder dataQuery, StringBuilder recordsCountQuery,
                                     String validationTablePath, StringBuilder filteredQuery, String tablePathForRefresh) {
-      try {
-        // First attempt to get the table results.
-        getTableResultsAndValidations(dataset, tableSchemaVO, pageable, result, dataS3PathResolver, validationS3PathResolver, dataQuery, recordsCountQuery, validationTablePath, filteredQuery);
-      } catch (Exception e) {
-        LOG.warn("First attempt to retrieve table data failed for datasetId {} table {}. Error: {}", dataset.getId(), tableSchemaVO.getNameTableSchema(), e.getMessage(), e);
-        LOG.info("Trying to demote, refresh metadata, promote and retry retrieve table data once more.");
-        dremioAutoPromotionService.demoteAndRefreshMetadataAndPromote(dataset, tablePathForRefresh, dataS3PathResolver);
-        // Second and last try to get the table results.
-        getTableResultsAndValidations(dataset, tableSchemaVO, pageable, result, dataS3PathResolver, validationS3PathResolver, dataQuery, recordsCountQuery, validationTablePath, filteredQuery);
-      }
+        try {
+            // First attempt to get the table results.
+            getTableResultsAndValidations(dataset, tableSchemaVO, pageable, result, dataS3PathResolver, validationS3PathResolver, dataQuery, recordsCountQuery, validationTablePath, filteredQuery);
+        } catch (Exception e) {
+            LOG.warn("First attempt to retrieve table data failed for datasetId {} table {}. Error: {}", dataset.getId(), tableSchemaVO.getNameTableSchema(), e.getMessage(), e);
+            LOG.info("Trying to demote, refresh metadata, promote and retry retrieve table data once more.");
+            dremioAutoPromotionService.demoteAndRefreshMetadataAndPromote(dataset, tablePathForRefresh, dataS3PathResolver);
+            // Second and last try to get the table results.
+            getTableResultsAndValidations(dataset, tableSchemaVO, pageable, result, dataS3PathResolver, validationS3PathResolver, dataQuery, recordsCountQuery, validationTablePath, filteredQuery);
+        }
     }
 
     /**
@@ -189,12 +189,12 @@ public class DatasetDataRetrieverDL implements DataLakeDataRetriever {
         //validations only exist in the parquet bucket
         dataS3PathResolver.setIsIcebergTable(false);
         if (s3Helper.checkFolderExist(validationS3PathResolver, S3_VALIDATION_TABLE_PATH)) {
-          if (!dremioHelperService.checkFolderPromoted(validationS3PathResolver, S3_VALIDATION)) {
-            dremioHelperService.promoteFolderOrFile(validationS3PathResolver, S3_VALIDATION);
-          }
-          if (!recordVOS.isEmpty()) {
-            retrieveValidations(recordVOS, tableSchemaVO.getNameTableSchema(), validationTablePath);
-          }
+            if (!dremioHelperService.checkFolderPromoted(validationS3PathResolver, S3_VALIDATION)) {
+                dremioHelperService.promoteFolderOrFile(validationS3PathResolver, S3_VALIDATION);
+            }
+            if (!recordVOS.isEmpty()) {
+                retrieveValidations(recordVOS, tableSchemaVO.getNameTableSchema(), validationTablePath);
+            }
         }
     }
 
@@ -286,7 +286,7 @@ public class DatasetDataRetrieverDL implements DataLakeDataRetriever {
     @Override
     public boolean isApplicable(String datasetType) {
         List<String> acceptedTypes = List.of(DatasetTypeEnum.DESIGN.getValue(), DatasetTypeEnum.REPORTING.getValue(), DatasetTypeEnum.REFERENCE.getValue(),
-                DatasetTypeEnum.TEST.getValue());
+            DatasetTypeEnum.TEST.getValue());
         return acceptedTypes.stream().anyMatch(datasetType::equals);
     }
 }

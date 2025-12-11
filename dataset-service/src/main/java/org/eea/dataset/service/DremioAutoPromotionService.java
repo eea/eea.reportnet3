@@ -103,9 +103,9 @@ public class DremioAutoPromotionService {
 
       return activeJobs.stream().anyMatch(job ->
           job.getJobType() == JobTypeEnum.IMPORT ||
-          job.getJobType() == JobTypeEnum.DELETE ||
-          job.getJobType() == JobTypeEnum.VALIDATION ||
-          job.getJobType() == JobTypeEnum.ETL_IMPORT
+              job.getJobType() == JobTypeEnum.DELETE ||
+              job.getJobType() == JobTypeEnum.VALIDATION ||
+              job.getJobType() == JobTypeEnum.ETL_IMPORT
       );
 
     } catch (Exception e) {
