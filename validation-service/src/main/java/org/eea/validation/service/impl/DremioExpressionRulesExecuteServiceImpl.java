@@ -62,6 +62,10 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
     private Integer validationParquetMaxFileSize;
     @Value("${validation.split.parquet}")
     private boolean validationSplitParquet;
+
+    /** The max errors. */
+    @Value(value = "${validation.maximumErrors}")
+    private int maxErrors;
     private JdbcTemplate dremioJdbcTemplate;
     private S3Service s3Service;
     private RulesService rulesService;
@@ -275,6 +279,7 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
                 }
                 if (!isValid) {
                     recordIds.add(rs.getString(PARQUET_RECORD_ID_COLUMN_HEADER));
+                    if (recordIds.size() == maxErrors) break;
                 }
             }
         }
