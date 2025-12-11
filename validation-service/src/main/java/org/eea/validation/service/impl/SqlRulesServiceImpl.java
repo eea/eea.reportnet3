@@ -59,6 +59,7 @@ import org.eea.validation.persistence.schemas.TableSchema;
 import org.eea.validation.persistence.schemas.rule.Rule;
 import org.eea.validation.persistence.schemas.rule.RulesSchema;
 import org.eea.validation.service.SqlRulesService;
+import org.eea.validation.util.SQLCountryCompanyOrganizationCodeUtils;
 import org.eea.validation.util.model.QueryVO;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -161,6 +162,9 @@ public class SqlRulesServiceImpl implements SqlRulesService {
 
   @Autowired
   private RepresentativeControllerZuul representativeControllerZuul;
+
+  @Autowired
+  private SQLCountryCompanyOrganizationCodeUtils sqlCountryCompanyOrganizationCodeUtils;
 
   /** The Constant DATASET_: {@value}. */
   private static final String DATASET = "dataset_";
@@ -418,37 +422,6 @@ public class SqlRulesServiceImpl implements SqlRulesService {
   }
 
   /**
-   * Check if the message error contains one of the 3 codes
-   *
-   * @param sqlCode The sql sentence to be validated
-   * @return True if contains
-   */
-  private boolean sqlCodeContainCodes(String sqlCode) {
-    return sqlCode.contains("{%R3_COUNTRY_CODE%}")
-            || sqlCode.contains("{%R3_COMPANY_CODE%}")
-            || sqlCode.contains("{%R3_ORGANIZATION_CODE%}");
-  }
-
-  /**
-   * If the error message contains the 3 codes, replace them with the real provider code
-   *
-   * @param datasetId
-   * @param sqlCode The sql sentence to be validated
-   */
-  private String replaceCodes(Long datasetId, String sqlCode) {
-    DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseController.findDatasetMetabaseById(datasetId);
-    String providerCode = "XX";
-    if (dataSetMetabaseVO.getDataProviderId()!=null && dataSetMetabaseVO.getDataProviderId()!=0) {
-      DataProviderVO provider = representativeControllerZuul.findDataProviderById(dataSetMetabaseVO.getDataProviderId());
-      providerCode = provider.getCode();
-    }
-    return sqlCode
-            .replace("{%R3_COUNTRY_CODE%}", providerCode)
-            .replace("{%R3_COMPANY_CODE%}", providerCode)
-            .replace("{%R3_ORGANIZATION_CODE%}", providerCode);
-  }
-
-  /**
    * Run SQL rule with limited results.
    *
    * @param datasetId the dataset id
@@ -501,9 +474,8 @@ public class SqlRulesServiceImpl implements SqlRulesService {
           String sqlCode = this.replaceTableNamesWithS3Path(sb.toString());
           sqlCode = sqlCode.replace("OFFSET 0 LIMIT 10", "LIMIT 10 OFFSET 0");
           // replace provider code with {%R3_COUNTRY_CODE%} or {%R3_COMPANY_CODE%} or {%R3_ORGANIZATION_CODE%}
-          if (sqlCodeContainCodes(sqlCode)) {
-            sqlCode = replaceCodes(datasetId, sqlCode);
-          }
+          sqlCode = sqlCountryCompanyOrganizationCodeUtils.replaceCodesIfNeeded(datasetId, sqlCode);
+
           result = dremioJdbcTemplate.query(sqlCode, (resultSet, i) -> {
             ++i;
             List<ValueVO> valueVOList = new ArrayList<>();
@@ -624,9 +596,10 @@ public class SqlRulesServiceImpl implements SqlRulesService {
     // validate query
     if (!StringUtils.isBlank(query)) {
       // validate query sintax
-      if (sqlCodeContainCodes(query)) {
-        query = replaceCodes(dataSetMetabaseVO.getId(), query);
-      }
+
+      // replace provider code with {%R3_COUNTRY_CODE%} or {%R3_COMPANY_CODE%} or {%R3_ORGANIZATION_CODE%}
+      query = sqlCountryCompanyOrganizationCodeUtils.replaceCodesIfNeeded(dataSetMetabaseVO.getId(), query);
+
       if (checkQuerySyntax(query)) {
         List<String> ids = getListOfDatasetsOnQuery(query);
         checkDatasetFromSameDataflow(dataSetMetabaseVO, ids);
