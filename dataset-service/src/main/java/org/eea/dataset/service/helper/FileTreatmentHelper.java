@@ -101,6 +101,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Import;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.scheduling.annotation.Async;
@@ -109,11 +115,16 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 import software.amazon.awssdk.services.s3.model.S3Object;
 
 import javax.annotation.PostConstruct;
 import java.io.*;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
@@ -123,6 +134,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.zip.*;
 
 import static org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum.REFERENCE;
@@ -397,6 +409,145 @@ public class FileTreatmentHelper implements DisposableBean {
     public void destroy() throws Exception {
         if (null != importExecutorService) {
             this.importExecutorService.shutdown();
+        }
+    }
+
+    public List<ImportedFilesDirectoriesVO> listImportedFiles(Long datasetId) throws EEAException {
+        File datasetFolder = new File(importPath, datasetId.toString());
+        LOG.info("Listing files for datasetId: {} and dataset folder path: {}", datasetId, datasetFolder.getAbsolutePath());
+
+        if (!datasetFolder.exists() || !datasetFolder.isDirectory()) {
+            LOG.error("No import directory found for datasetId {} under path {}", datasetId, datasetFolder.getAbsolutePath());
+            throw new EEAException(String.format(EEAErrorMessage.IMPORT_DIRECTORY_NOT_FOUND, datasetId, datasetFolder.getAbsolutePath()));
+        }
+
+        List<ImportedFilesDirectoriesVO> importedFiles = new ArrayList<>();
+
+        try (Stream<Path> paths = Files.list(datasetFolder.toPath())) {
+            // convert Stream<Path> to List<Path> first to safely iterate
+            List<Path> pathList = paths.collect(Collectors.toList());
+
+            for (Path path : pathList) {
+                try {
+                    BasicFileAttributes attrs = Files.readAttributes(path, BasicFileAttributes.class);
+                    long javaSize = Files.size(path);
+
+                    // make sure its a file a not a directory or a symbolic link before putting it at the return list
+                    if (Files.isRegularFile(path)) {
+                        ImportedFilesDirectoriesVO fileInfo = new ImportedFilesDirectoriesVO();
+                        fileInfo.setFileName(path.getFileName().toString());
+                        fileInfo.setFileSize(formatFileSize(javaSize)); // make size human readable
+                        fileInfo.setCreationDate(formatDate(attrs.lastModifiedTime().toMillis())); // make date human readable
+                        fileInfo.setCreationDateTimestamp(attrs.creationTime().toMillis()); // this one can be used for sorting
+                        fileInfo.setLastModifiedTime(attrs.lastModifiedTime().toMillis()); // this one can be used for sorting
+                        importedFiles.add(fileInfo);
+                    }
+                } catch (IOException e) {
+                    LOG.warn("  Failed to read attributes for path {}", path, e);
+                }
+            }
+
+        } catch (IOException e) {
+            LOG.error("Error listing files in dataset folder {}", datasetFolder.getAbsolutePath(), e);
+            throw new EEAException(String.format(EEAErrorMessage.IMPORT_DIRECTORY_NOT_FOUND, datasetId, datasetFolder.getAbsolutePath()));
+        }
+
+        // sort based on creation time of the RN3 file system
+        importedFiles.sort(Comparator.comparingLong(ImportedFilesDirectoriesVO::getLastModifiedTime).reversed());
+
+        if (importedFiles.isEmpty()) {
+            LOG.warn("No imported files found after filtering for datasetId {}", datasetId);
+            throw new EEAException(String.format(EEAErrorMessage.IMPORT_DIRECTORY_EMPTY, datasetId));
+        }
+
+        LOG.info("Total imported files found for datasetId={} are: {}", datasetId, importedFiles.size());
+        return importedFiles;
+    }
+
+    /**
+     * Converts the file size from bytes to a human-readable string
+     * Example: 1048576 -> 1.0 MB
+     */
+    private String formatFileSize(long bytes) {
+        final String[] units = {"B", "KB", "MB", "GB", "TB"}; // supports up to TB although we're never going to use it (just so it doesn't come to errors)
+        int unitIndex = 0;
+        double size = bytes;
+
+        while (size >= 1024 && unitIndex < units.length - 1) {
+            size /= 1024;
+            unitIndex++;
+        }
+
+        return String.format("%.1f %s", size, units[unitIndex]);
+    }
+
+    private String formatDate(long timestamp) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm");
+        return dateFormat.format(new Date(timestamp));
+    }
+
+    public ResponseEntity<?> downloadImportedFile(Long dataflowId, Long datasetId, String fileName) throws EEAException {
+        LOG.info("Downloading file for datasetId: {} and fileName: {}", datasetId, fileName);
+        NotificationVO notificationVO = new NotificationVO();
+        notificationVO.setDataflowId(dataflowId);
+        notificationVO.setDatasetId(datasetId);
+        notificationVO.setUser(SecurityContextHolder.getContext().getAuthentication().getName());
+        notificationVO.setFileName(fileName);
+
+        try {
+            File datasetFolder = new File(importPath, datasetId.toString());
+            if (!datasetFolder.exists() || !datasetFolder.isDirectory()) {
+                LOG.error("No import directory found for datasetId {} under path {}", datasetId, datasetFolder.getAbsolutePath());
+                throw new EEAException(String.format(EEAErrorMessage.IMPORT_DIRECTORY_NOT_FOUND, datasetId, datasetFolder.getAbsolutePath()));
+            }
+
+            // make sure file exists
+            File targetFile = new File(datasetFolder, fileName);
+            if (!targetFile.exists() || !targetFile.isFile()) {
+                LOG.error("Requested file '{}' not found for datasetId {} under path {}", fileName, datasetId, targetFile.getAbsolutePath());
+                throw new EEAException(String.format(EEAErrorMessage.REQUESTED_IMPORT_FILE_NOT_FOUND, datasetId, fileName, datasetFolder.getAbsolutePath()));
+            }
+
+            LOG.info("Preparing to stream file '{}' ({} bytes)", fileName, targetFile.length());
+
+            InputStreamResource resource = new InputStreamResource(new BufferedInputStream(new FileInputStream(targetFile)));
+
+            // fetch MIME type like application/zip text/csv etc
+            String contentType = Files.probeContentType(targetFile.toPath());
+            if (contentType == null) {
+                contentType = "application/octet-stream";
+            }
+
+            // Build streaming response
+            HttpHeaders headers = new HttpHeaders();
+            headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + targetFile.getName() + "\"");
+
+            EventType eventType = EventType.DOWNLOAD_IMPORTED_FILE_FINISHED_EVENT;
+            kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, null, notificationVO);
+
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .contentType(MediaType.parseMediaType(contentType))
+                    .contentLength(targetFile.length())
+                    .body(resource);
+
+        } catch (IOException e) {
+            LOG.error("I/O error while streaming file '{}' for datasetId {}: {}", fileName, datasetId, e.getMessage(), e);
+            EventType eventType = EventType.DOWNLOAD_IMPORTED_FILE_ERROR_EVENT;
+            try { kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, null, notificationVO);
+            } catch (EEAException eeaException) { throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, eeaException.getMessage()); }
+            throw new EEAException(String.format(EEAErrorMessage.ERROR_STREAMING_IMPORTED_FILE, fileName, datasetId, e.getMessage()));
+        } catch (EEAException e) {
+            EventType eventType = EventType.DOWNLOAD_IMPORTED_FILE_ERROR_EVENT;
+            try { kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, null, notificationVO);
+            } catch (EEAException eeaException) { throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, eeaException.getMessage()); }
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        } catch (Exception e) {
+            LOG.error("Unexpected error while streaming file '{}' for datasetId {}: {}", fileName, datasetId, e.getMessage());
+            EventType eventType = EventType.DOWNLOAD_IMPORTED_FILE_ERROR_EVENT;
+            try { kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, null, notificationVO);
+            } catch (EEAException eeaException) { throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, eeaException.getMessage()); }
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
@@ -1469,31 +1620,34 @@ public class FileTreatmentHelper implements DisposableBean {
                 }
             }
 
-            try (InputStream input = multipartFile.getInputStream()) {
-
+            try {
                 // Prepare the folder where files will be stored
                 File root = new File(importPath);
                 File folder = new File(root, datasetId.toString());
                 String saveLocationPath = folder.getCanonicalPath();
 
-                if(!folder.exists()) {
+                if (!folder.exists()) {
                     folder.mkdir();
                 }
 
                 List<File> files = new ArrayList<>();
                 if (null == integrationVO && "zip".equalsIgnoreCase(multipartFileMimeType)) {
-
-                    try (ZipInputStream zip = new ZipInputStream(input)) {
-                        files = unzipAndStore(folder, saveLocationPath, zip);
+                    try (InputStream input = multipartFile.getInputStream()) {
+                        try (ZipInputStream zip = new ZipInputStream(input)) {
+                            files = unzipAndStore(folder, saveLocationPath, zip);
+                        } catch (Exception e) {
+                            LOG.error("Unexpected error! Error in unzipAndStore for datasetId {} and tableSchemaId {}. Message: {}", datasetId, tableSchemaId, e.getMessage());
+                            throw e;
+                        }
                     } catch (Exception e) {
-                        LOG.error("Unexpected error! Error in unzipAndStore for datasetId {} and tableSchemaId {}. Message: {}", datasetId, tableSchemaId, e.getMessage());
+                        LOG.error("Unexpected error! Error in copyLarge for input for datasetId {} and tableSchemaId {}. Message: {}", datasetId, tableSchemaId, e.getMessage());
                         throw e;
                     }
 
                     // Queue import tasks for stored files
                     if (!files.isEmpty()) {
-                        queueImportProcess(datasetId,processId, null, schema, files, originalFileName, integrationVO,
-                                replace, delimiter, multipartFileMimeType,jobId);
+                        queueImportProcess(datasetId, processId, null, schema, files, originalFileName, integrationVO,
+                                replace, delimiter, multipartFileMimeType, jobId);
                     } else {
                         releaseLockAndDeleteImportFileDirectory(datasetId);
                         datasetMetabaseService.updateDatasetRunningStatus(datasetId,
@@ -1509,12 +1663,17 @@ public class FileTreatmentHelper implements DisposableBean {
                     File file = new File(folder, originalFileName);
 
                     // Store the file in the persistence volume
-                    try (FileOutputStream output = new FileOutputStream(file)) {
-                        IOUtils.copyLarge(input, output);
-                        files.add(file);
-                        LOG.info("Stored file {} in fileManagement. For datasetId {} and tableSchemaId {}", file.getPath(), datasetId, tableSchemaId);
+                    try (InputStream input = multipartFile.getInputStream()) {
+                        try (FileOutputStream output = new FileOutputStream(file)) {
+                            IOUtils.copyLarge(input, output);
+                            files.add(file);
+                            LOG.info("Stored file {} in fileManagement. For datasetId {} and tableSchemaId {}", file.getPath(), datasetId, tableSchemaId);
+                        } catch (Exception e) {
+                            LOG.error("Unexpected error! Error in copyLarge for fileName {} datasetId {} and tableSchemaId {}. Message: {}", originalFileName, datasetId, tableSchemaId, e.getMessage());
+                            throw e;
+                        }
                     } catch (Exception e) {
-                        LOG.error("Unexpected error! Error in copyLarge for fileName {} datasetId {} and tableSchemaId {}. Message: {}", originalFileName, datasetId, tableSchemaId, e.getMessage());
+                        LOG.error("Unexpected error! Error in copyLarge for input for datasetId {} and tableSchemaId {}. Message: {}", datasetId, tableSchemaId, e.getMessage());
                         throw e;
                     }
 
@@ -1537,27 +1696,29 @@ public class FileTreatmentHelper implements DisposableBean {
                     }
 
                     // Queue import task for the stored file
-                    queueImportProcess(datasetId,processId, tableSchemaId, schema, files, originalFileName, integrationVO,
-                            replace, delimiter, multipartFileMimeType,jobId);
+                    queueImportProcess(datasetId, processId, tableSchemaId, schema, files, originalFileName, integrationVO,
+                            replace, delimiter, multipartFileMimeType, jobId);
 
                     LOG.info("Queued import process for datasetId {} and tableSchemaId {}", datasetId, tableSchemaId);
                 }
-
-            } catch (EEAException | FeignException | IOException e) {
+            }
+            catch (EEAException | FeignException | IOException e) {
                 LOG.error(
-                        "Unexpected exception importing file data: datasetId={}, file={}. Message: {}", datasetId,
+                        "Unexpected exception importing file data in fileManagement: datasetId={}, file={}. Message: {}", datasetId,
                         multipartFile.getName(), e.getMessage(), e);
                 releaseLockAndDeleteImportFileDirectory(datasetId);
                 datasetMetabaseService.updateDatasetRunningStatus(datasetId,
                         DatasetRunningStatusEnum.ERROR_IN_IMPORT);
                 throw new EEAException(e);
-            } catch (Exception e) {
-                LOG.error("Unexpected error! Error in fileManagement for datasetId {} and tableSchemaId {}. Message: {}", datasetId, tableSchemaId, e.getMessage());
+            }
+            catch (Exception e){
+                LOG.error("Unexpected error! Error in fileManagement for fileName {} datasetId {} and tableSchemaId {}. Message: {}", originalFileName, datasetId, tableSchemaId, e.getMessage());
                 throw e;
             }
-        }
 
+        }
     }
+
 
         /**
          * Unzip and store.
@@ -1654,8 +1815,9 @@ public class FileTreatmentHelper implements DisposableBean {
                 prepareFmeFileProcess(datasetId, files.get(0), integrationVO, mimeType, tableSchemaId,
                         replace,jobId);
             } else {
-                List<File> validatedList = validateFileHeaders(tableSchemaId, schema,originalFileName, files, delimiter, processId, datasetId, jobId);
-                List<File> finalFiles = validatedList;
+                List<File> validatedNamesList = validateFileNames(tableSchemaId, schema, files, processId, datasetId, jobId, originalFileName);
+                List<File> validatedHeadersList = !validatedNamesList.isEmpty() ? validateFileHeaders(tableSchemaId, schema,originalFileName, validatedNamesList, delimiter, processId, datasetId, jobId) : new ArrayList<>();
+                List<File> finalFiles = validatedHeadersList;
                 importExecutorService.submit(() -> {
                     try {
                         if(this.enableTaskBasedAsynchronousImport){
@@ -1779,6 +1941,78 @@ public class FileTreatmentHelper implements DisposableBean {
 
     }
 
+  /**
+   * Validates files by checking that their filename maps to a tableSchemaId.
+   * Removes any invalid files from the list and emits notifications.
+   *
+   * @param tableSchemaId the table schema id
+   * @param schema the dataset schema
+   * @param originalFileName the original file name
+   * @param files the list of files to validate; invalid files will be removed from this list
+   * @param processId the process id
+   * @param datasetId the dataset id
+   * @param jobId the job id
+   * @return The filtered list with only files whose name matches a table
+   * @throws EEAException If all files are invalid
+   */
+  private List<File> validateFileNames(String tableSchemaId, DataSetSchema schema, List<File> files, String processId, Long datasetId, Long jobId, String originalFileName) throws EEAException {
+
+    String error = null;
+    List<String> warningList = new ArrayList<>();
+    int filesCount = files.size();
+
+    Iterator<File> fileIterator = files.iterator();
+    while (fileIterator.hasNext()) {
+      File file = fileIterator.next();
+      String fileName = file.getName();
+      boolean remove = false;
+      String fileType = datasetService.getMimetype(fileName);
+
+      if (!fileType.equalsIgnoreCase("csv")) {
+        continue;
+      }
+
+      try {
+        String findTableSchemaId = tableSchemaId == null ? getTableSchemaIdFromFileName(schema, fileName, true) : tableSchemaId;
+        if (StringUtils.isBlank(findTableSchemaId)) {
+          // Remove file if name doesn't match any table.
+          remove = true;
+          if (filesCount > 1) {
+            warningList.add(JobInfoEnum.WARNING_SOME_FILENAMES_DO_NOT_MATCH_TABLES.getValue(null));
+          } else {
+            error = EEAErrorMessage.ERROR_FILE_NAME_MATCHING;
+          }
+          LOG.info("Wrong file name for Job ID:{} Dataset ID:{} File:{} - no table name was found that matches the file name.",
+              jobId, datasetId, fileName);
+        }
+      } catch (Exception ex) {
+        remove = true;
+        if (filesCount > 1) {
+          warningList.add(JobInfoEnum.WARNING_SOME_FILENAMES_DO_NOT_MATCH_TABLES.getValue(null));
+        } else {
+          error = EEAErrorMessage.ERROR_FILE_NAME_MATCHING;
+        }
+        LOG.error("Error inferring table from file name {}. Job ID:{} Dataset ID:{} Msg:{}",
+            fileName, jobId, datasetId, ex.getMessage(), ex);
+      }
+
+      if (remove) {
+        fileIterator.remove();
+      }
+    }
+
+    if (filesCount == warningList.size()) {
+      error = EEAErrorMessage.ERROR_FILE_NAME_MATCHING;
+      warningList.clear();
+    }
+
+    if (error != null || !warningList.isEmpty()) {
+      assignJobNotifications(tableSchemaId, originalFileName, processId, datasetId, jobId, error, warningList);
+    }
+
+    return files;
+  }
+
     private void assignJobNotifications(String tableSchemaId,String originalFileName, String processId, Long datasetId, Long jobId, String error, List<String> warningList) {
         try {
             Long dataflowId = datasetService.getDataFlowIdById(datasetId);
@@ -1799,6 +2033,11 @@ public class FileTreatmentHelper implements DisposableBean {
                 if (EEAErrorMessage.ERROR_IMPORT_FILES_CONTAIN_WRONG_HEADERS.equals(error)) {
                     jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.ERROR_IMPORT_FILES_CONTAIN_WRONG_HEADERS, null);
                     eventType = EventType.IMPORT_WRONG_HEADERS_ERROR_EVENT;
+                } else if (EEAErrorMessage.ERROR_FILE_NAME_MATCHING.equals(error)) {
+                  jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.ERROR_WRONG_FILE_NAME, null);
+                  eventType = DatasetTypeEnum.REPORTING.equals(type) || DatasetTypeEnum.TEST.equals(type)
+                      ? EventType.IMPORT_REPORTING_FAILED_NAMEFILE_EVENT
+                      : EventType.IMPORT_DESIGN_FAILED_NAMEFILE_EVENT;
                 } else {
                     eventType = REPORTING.equals(type) || DatasetTypeEnum.TEST.equals(type)
                             ? EventType.IMPORT_REPORTING_FAILED_EVENT
@@ -1825,6 +2064,14 @@ public class FileTreatmentHelper implements DisposableBean {
                             .datasetId(datasetId).fileName(originalFileName).build();
                     kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.IMPORT_WRONG_HEADERS_WARNING_EVENT,
                             value, notificationWarning);
+                }
+                if(warningList.contains(JobInfoEnum.WARNING_SOME_FILENAMES_DO_NOT_MATCH_TABLES.getValue(null))) {
+                  jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.WARNING_SOME_FILENAMES_DO_NOT_MATCH_TABLES, null);
+                  NotificationVO notificationWarning = NotificationVO.builder()
+                      .user(SecurityContextHolder.getContext().getAuthentication().getName())
+                      .datasetId(datasetId).fileName(originalFileName).build();
+                  kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.IMPORT_NAMEFILE_WARNING_EVENT,
+                      value, notificationWarning);
                 }
             }
 
@@ -3205,6 +3452,47 @@ public class FileTreatmentHelper implements DisposableBean {
             }
             return isProcessStarted;
         }
+
+    public void convertParquetFileForProvider(Long datasetId, Long providerId, String tableSchemaId, String tableName, DatasetTypeEnum datasetType, Boolean etlExportV4, Long jobId, String providerOutDir) throws EEAException {
+
+      DataSetMetabaseVO dataset = datasetMetabaseService.findDatasetMetabase(datasetId);
+
+      try {
+        S3PathResolver s3PathResolver = new S3PathResolver(dataset.getDataflowId(), providerId, datasetId, tableName);
+        List<S3Object> exportFilenames;
+
+        if (DatasetTypeEnum.COLLECTION.equals(datasetType)) {
+          s3PathResolver.setPath(S3_TABLE_NAME_DC_PROVIDER_FOLDER_PATH);
+          exportFilenames = s3Helper.getFilenamesFromTableNames(s3PathResolver);
+        } else if (DatasetTypeEnum.EUDATASET.equals(datasetType)) {
+          s3PathResolver.setPath(S3_EU_SNAPSHOT_TABLE_PATH);
+          exportFilenames = s3Helper.getFilenamesFromTableNames(s3PathResolver);
+
+          String dpFolder = s3Service.formatFolderName(providerId, S3_DATA_PROVIDER_PATTERN);
+
+          exportFilenames = exportFilenames.stream()
+              .filter(o -> {String k = o.key();
+                return k != null && (k.contains("/" + dpFolder + "/"));
+              }).collect(Collectors.toList());
+        } else {
+          throw new EEAException("Data provider codes are not supported by any Data Collection or EU datasets");
+        }
+
+        // No files for this provider then skip.
+        if (exportFilenames == null || exportFilenames.isEmpty()) {
+          return;
+        }
+
+        // Convert to CSV under the provider's folder.
+        new File(providerOutDir).mkdirs();
+        List<String> headers = getFieldsFromSchema(datasetId, tableSchemaId);
+        s3ConvertService.createCSVFileWithProviders(exportFilenames, tableName, datasetId, datasetType, headers, etlExportV4, jobId, providerOutDir);
+
+      } catch (Exception e) {
+        LOG.error("Error exporting table {} for dataset {} and provider {}", tableName, datasetId, providerId, e);
+        throw new EEAException(e);
+      }
+    }
 
         private void convertParquetToCSVinZIP(List<S3Object> exportFilenames, String tableName, Long datasetId, String tableSchemaId, ZipOutputStream out, DatasetTypeEnum datasetTypeEnum, Boolean etlExportV4) {
             try {

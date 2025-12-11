@@ -5,6 +5,10 @@ body .p-datatable table {
   word-wrap: break-word;
 }
 
+.dataviewer td{
+  vertical-align: top;
+}
+
 body .p-datatable .p-datatable-header,
 body .p-datatable .p-datatable-footer {
   background-color: var(--datatable-header-footer-bg);

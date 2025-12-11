@@ -1005,7 +1005,7 @@ public class ValidationServiceTest {
     error.setShortCode("FML");
     error.setLevelError(ErrorTypeEnum.WARNING);
     error.setMessage("Mensaje de error");
-    error.setNumberOfRecords(4);
+    error.setNumberOfRecords("4");
 
     errorList.add(error);
     validations.setErrors(errorList);

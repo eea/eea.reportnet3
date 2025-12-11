@@ -9,6 +9,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import software.amazon.awssdk.transfer.s3.config.DownloadFilter;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
 import static org.eea.utils.LiteralConstants.*;
 
 @Component
@@ -17,27 +21,50 @@ public class EtlExportV5ServiceImpl implements EtlExportV5Service {
   private static final Logger LOG = LoggerFactory.getLogger(EtlExportV5ServiceImpl.class);
 
   @Override
-  public DownloadFilter buildParquetFilters(String s3Path, boolean includeAttachments, String tableName) {
+  public DownloadFilter buildParquetFilters(String s3Path, boolean includeAttachments, String tableName, Collection<Long> providerIds, S3Service s3Service) {
+
+    // Precompute provider folter to be filtered.
+    final List<String> dpFolders = new ArrayList<>();
+    if (providerIds != null && !providerIds.isEmpty()) {
+      for (Long pid : providerIds) {
+        if (pid != null) {
+          String dpFolder = s3Service.formatFolderName(pid, S3_DATA_PROVIDER_PATTERN);
+          dpFolders.add("/" + dpFolder + "/");
+        }
+      }
+    }
+
     return s3Object -> {
       String key = s3Object.key();
+      if (key == null) {
+        return false;
+      }
 
-      //exclude those folders
-      boolean baseCondition = key.startsWith(s3Path)
-          && !key.contains("/validation/")
-          && !key.contains("/snapshots/")
-          && !key.contains("/import/");
+      // Exclude key for validation, snapshot and import directories.
+      if (key.contains("/validation/") || key.contains("/snapshots/") || key.contains("/import/")) {
+        return false;
+      }
 
-      //include or not attachments folder
       if (!includeAttachments && key.contains("/attachments/")) {
         return false;
       }
 
-      // If tableName is provided, only include keys that contain the table name (as folder or file name)
       if (tableName != null && !key.contains("/" + tableName + "/")) {
         return false;
       }
 
-      return baseCondition;
+      // For provider data that are inside other folders.
+      if (!dpFolders.isEmpty()) {
+        for (String dp : dpFolders) {
+          if (key.contains(dp)) {
+            return true;
+          }
+        }
+        return false;
+      }
+
+      // No provider given.
+      return true;
     };
   }
 

@@ -31,6 +31,7 @@ import org.eea.validation.util.model.QueryVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Component;
 
@@ -79,6 +80,11 @@ public class SQLValidationUtils {
   @Autowired
   private RepresentativeControllerZuul representativeControllerZuul;
 
+  /** The max errors. */
+  @Value(value = "${validation.maximumErrors}")
+  private int maxErrors;
+
+
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(SQLValidationUtils.class);
 
@@ -116,10 +122,18 @@ public class SQLValidationUtils {
                 tableSchema.getRecordSchema().getFieldSchema().stream().collect(Collectors.counting());
       }
     }
+
+    //For junit tests purposes
+    if (maxErrors == 0) maxErrors = 1000;
     int batchSize = 100000L / nHeaders < 30000 ? (int) (100000L / nHeaders) : 30000;
-    for (int i = 0; i < totalRecords; i += batchSize) {
+
+    for (int i = 0; i < maxErrors; i += batchSize) {
+
+      //Avoid exceeding max errors value
+      int currentBatchSize = Math.min(batchSize, maxErrors - i);
+
       tableToEvaluate = sqlRulesService
-              .queryTable(queryVO.getNewQuery() + " OFFSET " + i + " LIMIT " + batchSize, queryVO);
+              .queryTable(queryVO.getNewQuery() + " OFFSET " + i + " LIMIT " + currentBatchSize, queryVO);
       if (null != tableToEvaluate && null != tableToEvaluate.getId()
               && CollectionUtils.isNotEmpty(tableToEvaluate.getRecords())) {
         String tableName = "";

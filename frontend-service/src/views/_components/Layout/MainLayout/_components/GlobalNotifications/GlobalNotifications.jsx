@@ -85,7 +85,6 @@ export const GlobalNotifications = ({ bigData }) => {
         notification.content.fileName
       );
 
-      console.log(data);
       notificationContext.add({ type: 'AUTOMATICALLY_DOWNLOAD_QC_RULES_FILE' });
 
       if (data.size !== 0) {
@@ -104,17 +103,11 @@ export const GlobalNotifications = ({ bigData }) => {
   };
 
   const downloadHistoricDataFile = async () => {
-
     const notification = findHiddenNotification('EXPORT_HISTORIC_RELEASES_COMPLETED_EVENT');
     if (isNil(notification)) {
       return;
     }
-    console.log(notification);
     try {
-      console.log(notification.content.datasetId);
-      console.log(notification.content.dataflowId);
-      console.log(notification.content.nameFile);
-      console.log(notification.content.processId);
       const { data } = await ValidationService.downloadHistoricReleaseFile(
         notification.content.datasetId,
         notification.content.dataflowId,
@@ -122,8 +115,6 @@ export const GlobalNotifications = ({ bigData }) => {
         notification.content.processId
       );
 
-
-      console.log(data);
       if (data.size !== 0) {
         DownloadFile(data, notification.content.nameFile);
         notificationContext.add({ type: 'AUTOMATICALLY_DOWNLOAD_HISTORIC_RELEASES_FILE' });
@@ -264,13 +255,13 @@ export const GlobalNotifications = ({ bigData }) => {
 
         const { data } = bigData
           ? await DatasetService.downloadExportDatasetFileDL(
-            notification.content.datasetId,
-            encodeURIComponent(downloadFileName)
-          )
+              notification.content.datasetId,
+              encodeURIComponent(downloadFileName)
+            )
           : await DatasetService.downloadExportDatasetFile(
-            notification.content.datasetId,
-            encodeURIComponent(downloadFileName)
-          );
+              notification.content.datasetId,
+              encodeURIComponent(downloadFileName)
+            );
 
         if (data.size !== 0) {
           DownloadFile(data, downloadFileName);

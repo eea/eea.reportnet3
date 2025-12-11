@@ -21,6 +21,7 @@ export const ActionsColumn = ({
   onCloneClick,
   onDeleteClick,
   onEditClick,
+  onViewClick,
   rowDataId,
   rowDeletingId,
   rowUpdatingId,
@@ -29,6 +30,22 @@ export const ActionsColumn = ({
   const resourcesContext = useContext(ResourcesContext);
   return (
     <div className={styles.actionTemplate}>
+      {!isNil(onViewClick) && !hideEdition && !isIcebergCreated && (
+        <Button
+          className={`${`p-button-rounded p-button-secondary-transparent ${styles.editRowButton}`} ${
+            (rowDeletingId === rowDataId && isDeletingDocument) ||
+            (rowUpdatingId === rowDataId && isUpdating) ||
+            disabledButtons
+              ? null
+              : 'p-button-animated-blink'
+          }`}
+          icon={rowUpdatingId !== rowDataId || !isUpdating ? 'eye' : 'spinnerAnimate'}
+          onClick={onViewClick}
+          tooltip={resourcesContext.messages['view']}
+          tooltipOptions={{ position: 'top' }}
+          type="button"
+        />
+      )}
       {!isNil(onEditClick) && !hideEdition && (
         <Button
           className={`${`p-button-rounded p-button-secondary-transparent ${styles.editRowButton}`} ${

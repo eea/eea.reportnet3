@@ -12,6 +12,7 @@ import org.eea.validation.mapper.DremioGroupValidationMapperWithoutRuleId;
 import org.eea.validation.service.DataLakeValidationService;
 import org.eea.validation.util.ValidationHelper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
@@ -30,6 +31,10 @@ public class DataLakeValidationServiceImpl implements DataLakeValidationService 
     private ValidationHelper validationHelper;
     private static final String TABLE = "table";
     private static final String FIELD = "field";
+
+    /** The max errors. */
+    @Value(value = "${validation.maximumErrors}")
+    private int maxErrors;
 
     @Autowired
     public DataLakeValidationServiceImpl(JdbcTemplate dremioJdbcTemplate, S3Service s3Service, ValidationHelper validationHelper) {
@@ -100,7 +105,7 @@ public class DataLakeValidationServiceImpl implements DataLakeValidationService 
         if (count != null && count > 0) {
             groupValidationVOS = dremioJdbcTemplate.query(validationQuery.toString(), new DremioGroupValidationMapper());
         } else {
-            groupValidationVOS = dremioJdbcTemplate.query(validationQuery.toString(), new DremioGroupValidationMapperWithoutRuleId());
+            groupValidationVOS = dremioJdbcTemplate.query(validationQuery.toString(), new DremioGroupValidationMapperWithoutRuleId(maxErrors));
         }
         return groupValidationVOS;
     }

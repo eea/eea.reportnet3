@@ -176,6 +176,16 @@ export const DatasetRepository = {
       headers: { 'Content-Type': 'application/octet-stream' }
     }),
 
+  getImportedFiles: async datasetId =>
+    await HTTPRequester.get({
+      url: getUrl(DatasetConfig.getImportedFiles, { datasetId })
+    }),
+
+  downloadImportedFile: async (fileName, datasetId, dataflowId) =>
+    await HTTPRequester.download({
+      url: getUrl(DatasetConfig.downloadImportedFile, { fileName, datasetId, dataflowId })
+    }),
+
   exportDatasetDataDL: async (datasetId, fileType) =>
     await HTTPRequester.download({
       url: getUrl(DatasetConfig.exportDatasetDataDL, { datasetId, fileType }),
@@ -428,6 +438,13 @@ export const DatasetRepository = {
       })
     });
   },
+  checkDuplicateValues: async (datasetId, tableSchemaId, fieldVO) =>
+
+    // When sending an object( like fieldVO ), a POST call must be sent to the backend.
+    await HTTPRequester.post({
+      url: getUrl(DatasetConfig.checkDuplicateValues, { datasetId, tableSchemaId }),
+      data: fieldVO,
+    }),
 
   importTableFileWithS3: async ({
     datasetId,

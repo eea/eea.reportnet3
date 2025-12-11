@@ -16,7 +16,7 @@ public class DremioGroupValidationMapper implements RowMapper<GroupValidationVO>
         GroupValidationVO groupValidationVO = new GroupValidationVO();
         groupValidationVO.setLevelError(ErrorTypeEnum.valueOf(resultSet.getString("levelError")));
         groupValidationVO.setTypeEntity(EntityTypeEnum.valueOf(resultSet.getString("typeEntity")));
-        groupValidationVO.setNumberOfRecords(resultSet.getInt("numberOfRecords"));
+        groupValidationVO.setNumberOfRecords(resultSet.getString("numberOfRecords"));
         groupValidationVO.setNameTableSchema(resultSet.getString("tableName"));
         groupValidationVO.setShortCode(resultSet.getString("shortCode"));
         groupValidationVO.setNameFieldSchema(resultSet.getString("fieldName"));

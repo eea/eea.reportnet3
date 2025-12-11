@@ -98,6 +98,7 @@ export const TabsSchema = ({
                   isReferenceDataset={isReferenceDataset}
                   isReportingWebform={isReportingWebform}
                   isTableDataRestorationInProgress={isTableDataRestorationInProgress}
+                  isTableTop={true}
                   key={table.id}
                   levelErrorTypes={levelErrorTypes}
                   onHideSelectGroupedValidation={onHideSelectGroupedValidation}

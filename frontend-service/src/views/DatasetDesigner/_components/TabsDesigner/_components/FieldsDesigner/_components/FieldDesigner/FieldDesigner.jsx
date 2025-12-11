@@ -299,7 +299,9 @@ export const FieldDesigner = ({
             if (checkInvalidCharacters(name)) {
               fieldTypeRef.current.hide();
               onShowDialogError(
-                bigData ? resourcesContext.messages['invalidCharactersFieldMessageDL'] : resourcesContext.messages['invalidCharactersFieldMessage'],
+                bigData
+                  ? resourcesContext.messages['invalidCharactersFieldMessageDL']
+                  : resourcesContext.messages['invalidCharactersFieldMessage'],
                 resourcesContext.messages['invalidCharactersFieldTitle'],
                 inputRef?.current?.element
               );
@@ -803,7 +805,18 @@ export const FieldDesigner = ({
     validExtensions = fieldDesignerState.fieldFileProperties.validExtensions
   }) => {
     try {
-      await DatasetService.updateFieldDesign(datasetId, {
+      const isLinkType = areEquals(type, 'LINK') || areEquals(type, 'EXTERNAL_LINK');
+      let finalReferencedField;
+
+      if (isLinkType) {
+        finalReferencedField = !isNil(referencedField)
+          ? parseReferenceField(referencedField)
+          : parseReferenceField(fieldDesignerState.fieldLinkValue);
+      } else {
+        finalReferencedField = null;
+      }
+
+      const payload = {
         codelistItems,
         description,
         fieldSchemaId,
@@ -815,16 +828,16 @@ export const FieldDesigner = ({
         name,
         readOnly,
         recordId,
-        referencedField:
-          areEquals(type, 'LINK') || areEquals(type, 'EXTERNAL_LINK')
-            ? !isNil(referencedField)
-              ? parseReferenceField(referencedField)
-              : fieldDesignerState.fieldLinkValue
-            : null,
         required,
         type,
         validExtensions
-      });
+      };
+
+      if (isLinkType && finalReferencedField) {
+        payload.referencedField = finalReferencedField;
+      }
+
+      await DatasetService.updateFieldDesign(datasetId, payload);
 
       onFieldUpdate({
         codelistItems,
@@ -839,12 +852,7 @@ export const FieldDesigner = ({
         name,
         readOnly,
         recordId,
-        referencedField:
-          areEquals(type, 'LINK') || areEquals(type, 'EXTERNAL_LINK')
-            ? !isNil(referencedField)
-              ? parseReferenceField(referencedField)
-              : fieldDesignerState.fieldLinkValue
-            : null,
+        referencedField: finalReferencedField,
         required,
         type,
         validExtensions
@@ -866,15 +874,21 @@ export const FieldDesigner = ({
   };
 
   const parseReferenceField = completeReferencedField => {
+    // Get the original field data to preserve missing properties
+    const originalField = fields?.find(f => f.fieldId === fieldId);
+    const originalRef = originalField?.referencedField || {};
+
+    const currentRef = completeReferencedField.referencedField;
+
     return {
-      dataflowId: completeReferencedField.referencedField.dataflowId,
-      fieldSchemaName: completeReferencedField.referencedField.fieldSchemaName,
-      idDatasetSchema: completeReferencedField.referencedField.datasetSchemaId,
-      idPk: completeReferencedField.referencedField.fieldSchemaId,
-      labelId: completeReferencedField.referencedField.linkedTableLabel,
-      linkedConditionalFieldId: completeReferencedField.referencedField.linkedTableConditional,
-      masterConditionalFieldId: completeReferencedField.referencedField.masterTableConditional,
-      tableSchemaName: completeReferencedField.referencedField.tableSchemaName
+      dataflowId: currentRef.dataflowId,
+      fieldSchemaName: currentRef.fieldSchemaName,
+      idDatasetSchema: currentRef.datasetSchemaId,
+      idPk: currentRef.fieldSchemaId,
+      labelId: currentRef.linkedTableLabel || originalRef.labelId,
+      linkedConditionalFieldId: currentRef.linkedTableConditional || originalRef.linkedConditionalFieldId,
+      masterConditionalFieldId: currentRef.masterTableConditional || originalRef.masterConditionalFieldId,
+      tableSchemaName: currentRef.tableSchemaName
     };
   };
 
@@ -1056,11 +1070,9 @@ export const FieldDesigner = ({
                 isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
               }`}
               disabled={
-                isDataflowOpen ||
-                isDesignDatasetEditorRead ||
-                (!isNil(fieldDesignerState.fieldLinkValue) &&
-                  !isEmpty(fieldDesignerState.fieldLinkValue) &&
-                  isNil(fieldDesignerState.fieldLinkValue.name))
+                !isNil(fieldDesignerState.fieldLinkValue) &&
+                !isEmpty(fieldDesignerState.fieldLinkValue) &&
+                isNil(fieldDesignerState.fieldLinkValue.name)
               }
               icon={
                 isNil(fieldDesignerState.fieldLinkValue) || isEmpty(fieldDesignerState.fieldLinkValue)
@@ -1333,7 +1345,6 @@ export const FieldDesigner = ({
                   }
                 : e => dispatchFieldDesigner({ type: 'SET_NAME', payload: e.target.value })
             }
-            
             onFocus={e => {
               if (
                 e.target.value.trim() !== '' &&
@@ -1439,7 +1450,10 @@ export const FieldDesigner = ({
               fieldId={fieldId}
               fields={fields}
               hasMultipleValues={fieldDesignerState.fieldPkHasMultipleValues}
+              isDataflowOpen={isDataflowOpen}
+              isDesignDatasetEditorRead={isDesignDatasetEditorRead}
               isExternalLink={areEquals(fieldDesignerState.fieldTypeValue.fieldType, 'external_link') ? true : false}
+              isIcebergCreated={isIcebergCreated}
               isLinkSelectorVisible={fieldDesignerState.isLinkSelectorVisible}
               isReferenceDataset={isReferenceDataset}
               linkedTableConditional={fieldLinkedTableConditional}

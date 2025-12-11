@@ -43,11 +43,10 @@ public class S3PrivateConfiguration implements S3Configuration {
   @Value("${s3.iceberg.bucket.path}")
   private String S3_ICEBERG_BUCKET_PATH;
 
-
+  @Value("${s3.private.region}")
+  private String S3_PRIVATE_REGION;
 
   private AwsBasicCredentials awsCredentials;
-
-  private static final Region s3Region = Region.US_EAST_1;
 
   @PostConstruct
   public void getCredentials() {
@@ -62,7 +61,7 @@ public class S3PrivateConfiguration implements S3Configuration {
             .build());
     return S3Client.builder().endpointOverride(URI.create(s3Endpoint))
         .httpClient(httpClient)
-        .region(s3Region)
+        .region(Region.of(S3_PRIVATE_REGION))
         .credentialsProvider(StaticCredentialsProvider.create(awsCredentials)).build();
   }
 
@@ -74,7 +73,7 @@ public class S3PrivateConfiguration implements S3Configuration {
             .maxConcurrency(64)
             .build())
         .endpointOverride(URI.create(s3Endpoint))
-        .region(s3Region)
+        .region(Region.of(S3_PRIVATE_REGION))
         .credentialsProvider(StaticCredentialsProvider.create(awsCredentials))
         .build();
   }
@@ -82,7 +81,7 @@ public class S3PrivateConfiguration implements S3Configuration {
   @Override
   public S3Presigner getS3Presigner() {
     return S3Presigner.builder().endpointOverride(URI.create(s3Endpoint))
-        .region(s3Region)
+        .region(Region.of(S3_PRIVATE_REGION))
         .credentialsProvider(StaticCredentialsProvider.create(awsCredentials)).build();
   }
 
@@ -116,5 +115,6 @@ public class S3PrivateConfiguration implements S3Configuration {
     return S3_ICEBERG_BUCKET_PATH;
   }
 
-
+  @Override
+  public Region getS3Region() { return Region.of(S3_PRIVATE_REGION); }
 }

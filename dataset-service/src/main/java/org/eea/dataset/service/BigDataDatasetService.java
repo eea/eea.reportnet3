@@ -59,8 +59,9 @@ public interface BigDataDatasetService {
      * @param providerId the provider id
      * @param tableSchemaId the table schema id
      * @param jobId the job id
+     * @param createEmptyTablesBool
      */
-    void deleteTableData(Long datasetId, Long dataflowId, Long providerId, String tableSchemaId, Long jobId) throws Exception;
+    void deleteTableData(Long datasetId, Long dataflowId, Long providerId, String tableSchemaId, Long jobId, Boolean createEmptyTablesBool) throws Exception;
 
     /**
      * Delete dataset data
@@ -147,6 +148,32 @@ public interface BigDataDatasetService {
      * @return true if table can be converted
      */
     Boolean convertIcebergToParquetTable(Long datasetId, Long dataflowId, Long providerId, TableSchemaVO tableSchemaVO, String datasetSchemaId, String lockValue) throws Exception;
+
+    /**
+     * Convert Parquet To Iceberg Tables
+     *
+     * @param datasetId the dataset id
+     * @param dataflowId the dataflow id
+     * @param providerId the provider id
+     * @param tableSchemaIds the list of table ids
+     * @param user the user
+     * @param lockValue the lock value
+     * @return
+     */
+    void convertParquetToIcebergTables(Long datasetId, Long dataflowId, Long providerId, List<String> tableSchemaIds, String user, String lockValue) throws Exception;
+
+    /**
+     * Convert Iceberg to Parquet Tables
+     *
+     * @param datasetId the dataset id
+     * @param dataflowId the dataflow id
+     * @param providerId the provider id
+     * @param tableSchemaIds the list of table ids
+     * @param user the user
+     * @param lockValue the lock value
+     * @return
+     */
+    void convertIcebergToParquetTables(Long datasetId, Long dataflowId, Long providerId, List<String> tableSchemaIds, String user, String lockValue) throws Exception;
 
     /**
      * Convert Iceberg To Parquet Table
@@ -268,7 +295,7 @@ public interface BigDataDatasetService {
      * @param includeAttachments include attachments boolean
      * @throws EEAException The exception
      */
-    void etlExportCsv(Long datasetId, Long dataflowId ,String tableSchemaId, Long jobId, String user, String processUUID, Boolean includeAttachments) throws EEAException;
+    void etlExportCsv(Long datasetId, Long dataflowId ,String tableSchemaId, Long jobId, String user, String processUUID, Boolean includeAttachments, String dataProviderCodes) throws EEAException;
 
     /**
      * ETL export for parquet
@@ -282,7 +309,7 @@ public interface BigDataDatasetService {
      * @param includeAttachments include attachments boolean
      * @throws EEAException The exception
      */
-    void etlExportParquet(Long datasetId, Long dataflowId, String tableSchemaId, Long jobId, String user, String processUUID, Boolean includeAttachments) throws EEAException;
+    void etlExportParquet(Long datasetId, Long dataflowId, String tableSchemaId, Long jobId, String user, String processUUID, Boolean includeAttachments, String dataProviderCodes) throws EEAException;
 
     /**
      * If an import job is added in the db retrieve it, else create a new one
@@ -294,4 +321,15 @@ public interface BigDataDatasetService {
      * @throws Exception The exception
      */
     JobVO retrieveOrAddImportJob(ImportFileInDremioInfo importFileInDremioInfo, String fmeJobId, Long jobId) throws Exception;
+
+    /**
+     * Checks for duplicate value in field
+     *
+     * @param datasetId The dataset id
+     * @param dataflowId The dataflow id
+     * @param providerId The provider id
+     * @param tableName The table name
+     * @param fieldVO The field object
+     */
+    Boolean duplicateFieldValueExists(Long datasetId, Long dataflowId, Long providerId, String tableName, FieldVO fieldVO);
 }

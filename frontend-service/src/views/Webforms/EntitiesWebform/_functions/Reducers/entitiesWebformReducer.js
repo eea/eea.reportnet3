@@ -30,7 +30,6 @@ export const entitiesWebformReducer = (state, { type, payload }) => {
     case 'ON_SELECT_RECORD':
       return {
         ...state,
-        selectedTableName: null,
         selectedTable: {
           ...state.selectedTable,
           rootTableId: payload.rootTableId,
@@ -42,7 +41,6 @@ export const entitiesWebformReducer = (state, { type, payload }) => {
     case 'ON_SELECT_TABLE':
       return {
         ...state,
-        selectedTableName: payload.name,
         selectedTable: { ...state.selectedTable, tableName: payload.name }
       };
 
@@ -54,6 +52,21 @@ export const entitiesWebformReducer = (state, { type, payload }) => {
 
     case 'SET_IS_ADD_ENTITY_ID_DIALOG_VISIBLE':
       return { ...state, isAddEntityIdDialogVisible: payload.value };
+      
+    case 'SET_IS_CHECKING_DUPLICATE':
+      return { ...state, isCheckingDuplicate: payload.value };
+
+    case 'SET_IS_VIEW_MODE':
+      return { ...state, isViewMode: payload.value };
+
+    case 'SET_IS_UPDATING_FIELD':
+      return {
+        ...state,
+        updatingField: {
+          field: payload.field,
+          isUpdating: payload.value
+        }
+      };
 
     case 'ON_REFRESH':
       return { ...state, isRefresh: payload.value };

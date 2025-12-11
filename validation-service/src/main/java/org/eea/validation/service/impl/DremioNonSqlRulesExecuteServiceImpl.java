@@ -55,6 +55,10 @@ public class DremioNonSqlRulesExecuteServiceImpl implements DremioRulesExecuteSe
     private Integer validationParquetMaxFileSize;
     @Value("${validation.split.parquet}")
     private boolean validationSplitParquet;
+
+    /** The max errors. */
+    @Value(value = "${validation.maximumErrors}")
+    private int maxErrors;
     private final JdbcTemplate dremioJdbcTemplate;
     private final S3Service s3Service;
     private final RulesService rulesService;
@@ -112,7 +116,8 @@ public class DremioNonSqlRulesExecuteServiceImpl implements DremioRulesExecuteSe
             }
             String tablePath = s3Service.getTableAsFolderQueryPath(dataTableResolver, path);
 
-            long rowCount = dremioHelperService.getRowCount(tablePath);
+            String numberOfRecordsQuery = "SELECT COUNT (*) FROM " + tablePath;
+            Long rowCount = dremioJdbcTemplate.queryForObject(numberOfRecordsQuery, Long.class);
             if (rowCount == 0) {
                 return;
             }
@@ -266,6 +271,9 @@ public class DremioNonSqlRulesExecuteServiceImpl implements DremioRulesExecuteSe
             boolean isValid = isRecordValid(parameters, fieldName, rs, method, object);
             if (!isValid) {
                 recordIds.add(rs.getString(PARQUET_RECORD_ID_COLUMN_HEADER));
+            }
+            if (recordIds.size() == maxErrors) {
+                break;
             }
         }
         int count = 1;

@@ -225,6 +225,17 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
                           .error("There is another job with status QUEUED or IN_PROGRESS for dataflowId " + dataset.getDataflowId() + " and providerId " + dataset.getDataProviderId()).build());
           return;
         }
+        else{
+          LOG.info("Sending SILENT_RELEASE_FAILED_EVENT event for jobId {}", releaseJob.getId());
+          //this event will not produce any notifications to the user because frontend will never show it in the user notifications
+          Map<String, Object> value = new HashMap<>();
+          value.put(LiteralConstants.USER, user);
+          value.put("release_job_id", releaseJob.getId());
+          kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.SILENT_RELEASE_FAILED_EVENT, value,
+                  NotificationVO.builder().user(user).dataflowId(dataset.getDataflowId()).providerId(dataset.getDataProviderId())
+                          .error("There is another job with status QUEUED or IN_PROGRESS for dataflowId " + dataset.getDataflowId() + " and providerId " + dataset.getDataProviderId()).build());
+          return;
+        }
       }
       releaseJob = addReleaseJob(user, dataset, releaseJob, statusToInsert);
 
@@ -284,11 +295,11 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
                 "Releasing datasets process continues. At this point, the datasets from the dataflowId {}, dataProviderId {} and jobId {} have no blockers",
                 dataset.getDataflowId(), dataset.getDataProviderId(), releaseJob.getId());
 
-        LOG.info("Creating release process for dataflowId {}, dataProviderId {}, jobId {}", dataset.getDataflowId(), dataset.getDataProviderId(), releaseJob.getId());
+        LOG.info("Creating the first release process for dataflowId {}, dataProviderId {}, jobId {}", dataset.getDataflowId(), dataset.getDataProviderId(), releaseJob.getId());
         String processId = UUID.randomUUID().toString();
         Boolean isProcessCreated = processControllerZuul.updateProcess(datasets.get(0), dataset.getDataflowId(),
                 ProcessStatusEnum.IN_PROGRESS, ProcessTypeEnum.RELEASE, processId, user, defaultReleaseProcessPriority, true);
-        LOG.info("Created release process for dataflowId {}, dataProviderId {}, jobId {} and processId {} dataset id {} success: {}", dataset.getDataflowId(), dataset.getDataProviderId(), releaseJob.getId(), processId, datasetId, isProcessCreated);
+        LOG.info("Created the first release process for dataflowId {}, dataProviderId {}, jobId {} and processId {} dataset id {} success: {}", dataset.getDataflowId(), dataset.getDataProviderId(), releaseJob.getId(), processId, datasetId, isProcessCreated);
 
         CreateSnapshotVO createSnapshotVO = new CreateSnapshotVO();
         createSnapshotVO.setReleased(true);

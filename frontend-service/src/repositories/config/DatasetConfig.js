@@ -22,6 +22,7 @@ export const DatasetConfig = {
     '/dataset/TableValueDataset/{:datasetId}?fieldSchemaId={:fieldSchemaId}&fieldValue={:value}&idTableSchema={:tableSchemaId}&pageNum={:pageNum}&pageSize={:pageSize}&fields={:fields}&levelError={:levelError}&idRules={:idRules}',
   getTableDataDL:
     '/dataset/TableValueDatasetDL/{:datasetId}?fieldSchemaId={:fieldSchemaId}&fieldValue={:value}&idTableSchema={:tableSchemaId}&pageNum={:pageNum}&pageSize={:pageSize}&fields={:fields}&levelError={:levelError}&qcCodes={:qcCodes}',
+  getImportedFiles: '/dataset/list-imported-files?datasetId={:datasetId}',
   downloadTableDefinitions: '/dataschema/v1/dataset/{:datasetSchemaId}/exportFieldSchemas',
   deleteSchema: '/dataschema/dataset/{:datasetId}',
   deleteAttachment:
@@ -48,6 +49,7 @@ export const DatasetConfig = {
   downloadPublicReferenceDatasetFileData: '/dataset/exportPublicFile/dataflow/{:dataflowId}?fileName={:fileName}',
   downloadTableData: '/dataset/{:datasetId}/downloadFile?fileName={:fileName}',
   downloadTableDataDL: '/dataset/{:datasetId}/downloadFileDL?fileName={:fileName}',
+  downloadImportedFile: '/dataset/download-imported-file?fileName={:fileName}&datasetId={:datasetId}&dataflowId={:dataflowId}',
   exportDatasetData: '/dataset/{:datasetId}/exportDatasetFile?mimeType={:fileType}',
   exportDatasetDataDL: '/dataset/{:datasetId}/exportDatasetFileDL?mimeType={:fileType}',
   exportDatasetDataExternal:
@@ -97,5 +99,6 @@ export const DatasetConfig = {
   validateAllSql: '/rules/validateAllRules?datasetId={:datasetId}',
   validateSql: '/rules/validateSqlRules?datasetId={:datasetId}&datasetSchemaId={:datasetSchemaId}',
   validationViewer: '/dataset/findPositionFromAnyObject/{:objectId}?datasetId={:datasetId}&type={:entityType}',
-  testImportProcess: '/dataset/checkImportProcess/{:datasetId}'
+  testImportProcess: '/dataset/checkImportProcess/{:datasetId}',
+  checkDuplicateValues: '/dataset/duplicateFieldValueExists/{:datasetId}?tableSchemaId={:tableSchemaId}',
 };

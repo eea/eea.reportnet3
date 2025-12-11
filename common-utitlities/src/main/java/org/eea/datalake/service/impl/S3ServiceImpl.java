@@ -113,6 +113,7 @@ public class S3ServiceImpl implements S3Service {
                     s3PathResolver.getValidationId(), fileName);
                 break;
             case S3_TABLE_NAME_FOLDER_PATH:
+            case S3_ATTACHMENTS_TABLE_PATH:
             case S3_TABLE_NAME_FOLDER_PATH_FOR_VALID_PREFIX:
                 path = String.format(path, dataflowFolder, dataProviderFolder, datasetFolder,
                     tableName);
@@ -157,6 +158,7 @@ public class S3ServiceImpl implements S3Service {
             case S3_TABLE_NAME_ROOT_DC_FOLDER_PATH:
                 path = String.format(path, dataflowFolder, dataCollectionFolder);
                 break;
+            case S3_ATTACHMENTS_DC_PROVIDER_PATH:
             case S3_TABLE_NAME_DC_PROVIDER_FOLDER_PATH:
                 path = String.format(path, dataflowFolder, dataCollectionFolder, tableName,
                     dataProviderFolder);
@@ -392,9 +394,7 @@ public class S3ServiceImpl implements S3Service {
     }
 
     private String formatSnapshotFolder(Long snapshotId) {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
-        String date = dateFormat.format(new Date());
-        return String.format(S3_SNAPSHOT_PATTERN, snapshotId, date);
+        return String.format(S3_SNAPSHOT_PATTERN, snapshotId);
     }
 
     @Override

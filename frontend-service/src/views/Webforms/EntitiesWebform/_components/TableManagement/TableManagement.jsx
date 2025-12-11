@@ -1,4 +1,4 @@
-import { Fragment, useContext, useEffect, useReducer, useRef } from 'react';
+import { Fragment, useContext, useEffect, useReducer } from 'react';
 
 import isArray from 'lodash/isArray';
 import isEmpty from 'lodash/isEmpty';
@@ -42,22 +42,20 @@ export const TableManagement = ({
   loading,
   onRefresh,
   onSelectEditTable,
+  onSelectViewTable,
   overview,
   refreshTrigger,
   rootPkFieldId,
   rootTableId,
   rootTableName,
   schemaTables,
-  tables
+  tables,
+  view
 }) => {
   const { getFieldSchemaColumnIdByHeader, parseEntitiesRecordsWithParentData, parseTableSchemaColumns } =
     TableManagementUtils;
 
   const { getWebformTabs } = WebformsUtils;
-  const didInitialParentFetch = useRef({
-    hasLoaded: false,
-    initialTableName: null
-  });
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
 
@@ -128,6 +126,21 @@ export const TableManagement = ({
     inmRecords[recordIndex] = initialSelectedRecord;
     tableManagementDispatch({ type: 'RESET_SELECTED_RECORD', payload: { records: inmRecords } });
   };
+
+  useEffect(() => {
+    const checkBodyScrollInterval = setInterval(() => {
+      const bodySelector = document.querySelector('body');
+      const openDialogs = document.querySelectorAll('.p-dialog:not([style*="display: none"])');
+      const openOverlays = document.querySelectorAll('.p-component-overlay:not([style*="display: none"])');
+
+      // If no visible dialogs/overlays but body scroll is disabled, restore it
+      if (openDialogs.length === 0 && openOverlays.length === 0 && bodySelector.style.overflow === 'hidden') {
+        bodySelector.style.overflow = 'hidden auto';
+      }
+    }, 1000);
+
+    return () => clearInterval(checkBodyScrollInterval);
+  }, []);
 
   const editRowDialogFooter = (
     <div className="ui-dialog-buttonpane p-clearfix">
@@ -245,7 +258,15 @@ export const TableManagement = ({
       );
     });
 
-    const parentTablesDataPromises = parentTables.map(async parentTable => {
+    let tablesToLoad;
+    // If overview, load only root table
+    if (view === 'overview') {
+      tablesToLoad = parentTables.filter(t => t.tableSchemaId === rootTableId);
+    } else {
+      tablesToLoad = parentTables;
+    }
+
+    const parentTablesDataPromises = tablesToLoad.map(async parentTable => {
       const sortFieldSchemaId = sort.sortField
         ? getFieldSchemaColumnIdByHeader(tableSchemaColumns, sort.sortField)
         : undefined;
@@ -303,7 +324,6 @@ export const TableManagement = ({
         }
       })
       .finally(() => {
-        didInitialParentFetch.current.hasLoaded = true;
         setIsLoading(false);
       });
   };
@@ -377,24 +397,7 @@ export const TableManagement = ({
     const entitiesFieldSchemaValue =
       rowData && rowData.dataRow ? RecordUtils.getCellValue({ rowData }, entitiesIdFieldSchemaId) : undefined;
 
-    let tableName;
-
-    if (rowData && rowData.dataRow) {
-      rowData.dataRow.forEach(row =>
-        row.fieldData.tableSchemas?.forEach((tableSchema, index) => {
-          if (index === 0) {
-            tableName = tableSchema.tableSchemaName;
-            if (!didInitialParentFetch.current.hasLoaded) {
-              didInitialParentFetch.current.initialTableName = tableSchema.tableSchemaName;
-            }
-          }
-        })
-      );
-    }
-
-    if (isUndefined(tableName)) {
-      tableName = didInitialParentFetch.current.initialTableName || rootTableName;
-    }
+    const tableName = rootTableName;
 
     return (
       <ActionsColumn
@@ -408,6 +411,10 @@ export const TableManagement = ({
         onEditClick={() => {
           tableManagementDispatch({ type: 'SET_SELECTED_RECORD', payload: rowData });
           onSelectEditTable(entitiesFieldSchemaValue, tableName, rowData.recordId);
+        }}
+        onViewClick={() => {
+          tableManagementDispatch({ type: 'SET_SELECTED_RECORD', payload: rowData });
+          onSelectViewTable(entitiesFieldSchemaValue, tableName, rowData.recordId, true);
         }}
       />
     );

@@ -20,7 +20,7 @@ export const CharacterCounter = ({ currentLength, inputRef, maxLength, style }) 
   };
 
   return (
-    <p className={`${styles.characterCount} ${getCounterClassName()}`} ref={inputRef} style={style}>
+    <p className={`${styles.characterCount} ${getCounterClassName()} webformCharacterCount`} ref={inputRef} style={style}>
       {isNil(maxLength) ? `${currentLength}` : `${currentLength}/${maxLength}`}
     </p>
   );

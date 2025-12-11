@@ -18,9 +18,11 @@ const useBigButtonListRepresentative = ({
   dataProviderId,
   getDataHistoricReleases,
   handleRedirect,
+  isAdmin,
   isLeadReporterOfCountry,
   onLoadReceiptData,
   onOpenReleaseConfirmDialog,
+  onOpenSilentReleaseConfirmDialog,
   onShowHistoricReleases,
   representativeId,
   onShowReleaseSnapshots,
@@ -36,6 +38,7 @@ const useBigButtonListRepresentative = ({
       setButtonsVisibility(getButtonsVisibility());
     }
   }, [userContext, dataflowState.data.datasets]);
+
 
   const getButtonsVisibility = () => {
     const isManualAcceptance = dataflowState.data.manualAcceptance;
@@ -62,6 +65,7 @@ const useBigButtonListRepresentative = ({
       help: true,
       receipt: isLeadReporterOfThisCountry && isReleased,
       release: isLeadReporterOfThisCountry && !isTestDataset,
+      silentRelease: !isTestDataset && isAdmin,
       testDatasets: isTestDataset || (isStewardSupport && isTestDataset)
     };
   };
@@ -229,16 +233,20 @@ const useBigButtonListRepresentative = ({
     representative => representative.dataProviderId === dataProviderId
   );
 
-  const onBuildReleaseButton = () => [
+  const onBuildReleaseButton = (isSilent) => [
     {
       buttonClass: 'schemaDataset',
       buttonIcon: getIsReleasing() ? 'spinner' : 'released',
       buttonIconClass: getIsReleasing() ? 'spinner' : 'released',
-      caption: resourcesContext.messages['releaseDataCollection'],
+      caption: resourcesContext.messages[
+        isSilent ? 'releaseDataCollectionSilently' : 'releaseDataCollection'
+        ],
       enabled: !dataflowState.hasIcebergTables && dataflowState.isReleasable && !getIsReleasing(),
       handleRedirect:
         !dataflowState.hasIcebergTables && dataflowState.isReleasable && !getIsReleasing()
-          ? () => onOpenReleaseConfirmDialog()
+          ? isSilent
+            ? () => onOpenSilentReleaseConfirmDialog()
+            : () => onOpenReleaseConfirmDialog()
           : () => {},
       helpClassName: 'dataflow-big-buttons-release-help-step',
       infoStatus: isReleased,
@@ -250,11 +258,12 @@ const useBigButtonListRepresentative = ({
       restrictFromPublicIsUpdating: dataflowState.restrictFromPublicIsUpdating.value,
       restrictFromPublicStatus: representative?.restrictFromPublic,
       tooltip: dataflowState.isReleasable ? '' : resourcesContext.messages['releaseButtonTooltip'],
-      visibility: buttonsVisibility.release
+      visibility: isSilent ? buttonsVisibility.silentRelease : buttonsVisibility.release
     }
   ];
 
-  const releaseBigButton = onBuildReleaseButton();
+  const releaseBigButton = onBuildReleaseButton(false);
+  const silentReleaseButton = onBuildReleaseButton(true);
 
   return [
     helpButton,
@@ -263,6 +272,9 @@ const useBigButtonListRepresentative = ({
     ...groupByRepresentativeModels,
     ...receiptBigButton,
     ...releaseBigButton,
+    ...(isAdmin
+      ? silentReleaseButton
+      : []),
     ...testDatasetsModels
   ];
 };

@@ -1,4 +1,4 @@
-import {Fragment, useContext, useEffect, useReducer, useRef, useState} from 'react';
+import { Fragment, useContext, useEffect, useReducer, useRef } from 'react';
 
 import isNil from 'lodash/isNil';
 
@@ -20,7 +20,6 @@ import { bigButtonListRepresentativeReducer } from './_functions/Reducers/bigBut
 
 import { useBigButtonListRepresentative } from './_functions/Hooks/useBigButtonListRepresentative';
 import { useFilters } from 'views/_functions/Hooks/useFilters';
-import {ValidationService} from "../../../../services/ValidationService";
 
 export const BigButtonListRepresentative = ({
   dataflowState,
@@ -32,6 +31,7 @@ export const BigButtonListRepresentative = ({
   manageDialogs,
   onCleanUpReceipt,
   onOpenReleaseConfirmDialog,
+  onOpenSilentReleaseConfirmDialog,
   representativeId,
   setIsReceiptLoading,
   uniqRepresentatives
@@ -52,8 +52,6 @@ export const BigButtonListRepresentative = ({
       isReleaseSnapshotsDialogVisible: false
     }
   );
-
-  const [isDownloadingHistoricData, setIsDownloadingHistoricData] = useState(false);
 
   const receiptBtnRef = useRef(null);
 
@@ -140,9 +138,11 @@ export const BigButtonListRepresentative = ({
               getDataHistoricReleases,
               getDataReleaseSnapshots,
               handleRedirect,
+              isAdmin,
               isLeadReporterOfCountry,
               onLoadReceiptData,
               onOpenReleaseConfirmDialog,
+              onOpenSilentReleaseConfirmDialog,
               onShowHistoricReleases,
               onShowReleaseSnapshots,
               uniqRepresentatives,
@@ -169,9 +169,9 @@ export const BigButtonListRepresentative = ({
           }}
           visible={bigButtonListRepresentativeState.isHistoricReleasesDialogVisible}>
           <HistoricReleases
+            dataflowId={dataflowState.id}
             dataProviderId={bigButtonListRepresentativeState.dataProviderId}
             datasetId={bigButtonListRepresentativeState.datasetId}
-            dataflowId={dataflowState.id}
             historicReleasesView={bigButtonListRepresentativeState.historicReleasesView}
           />
         </Dialog>

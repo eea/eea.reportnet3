@@ -85,6 +85,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.Future;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * The Class DataschemaServiceImpl.
@@ -2428,9 +2429,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
 
       validateNames(importClasses);
 
-      if (dataFlowControllerZuul.isBigDataflow(dataflowId)) {
-        validateTableFieldNamesHaveNoWhitespace(dataflowId, importClasses);
-      }
+      validateTableFieldNamesHaveNoWhitespace(dataflowId, importClasses);
 
       for (DataSetSchema schema : importClasses.getSchemas()) {
         String newIdDatasetSchema = createEmptyDataSetSchema(dataflowId).toString();
@@ -2633,6 +2632,20 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     setHeaderFields(csvWriter);
     setFieldLines(tableSchemaId, datasetSchema, csvWriter);
 
+    Long dataflowId = datasetService.getDataFlowIdById(datasetId);
+    TableSchemaVO tableSchemaVO = getTableSchemaVO(tableSchemaId, datasetSchemaId);
+    String tableSchemaName = tableSchemaVO.getNameTableSchema();
+
+    EventType eventType = EventType.EXPORT_DEFINITION_COMPLETED_EVENT;
+    NotificationVO notificationVO = NotificationVO.builder()
+            .user(SecurityContextHolder.getContext().getAuthentication().getName())
+            .dataflowId(dataflowId)
+            .datasetId(datasetId)
+            .tableSchemaId(tableSchemaId)
+            .tableSchemaName(tableSchemaName)
+            .build();
+    kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, null, notificationVO);
+
     // Once read we convert it to string
     return writer.toString().getBytes();
   }
@@ -2800,9 +2813,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         final List<String> values = Arrays.asList(line);
         FieldSchemaVO fieldSchemaVO = sanitizeAndFillFieldSchema(values, recordSchemaId);
         // if there's not a pk present, continue inserting/updating the field
-        if (dataFlowControllerZuul.isBigDataflow(datasetService.getDataFlowIdById(datasetId))) {
-          validateTableFieldNameHasNoWhitespace(fieldSchemaVO.getName());
-        }
+        validateTableFieldNameHasNoWhitespace(fieldSchemaVO.getName());
       }
     }
     try (Reader buf =

@@ -4,6 +4,7 @@ import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixProperty;
 import io.netty.util.internal.StringUtil;
 import io.swagger.annotations.*;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.dataset.service.*;
 import org.eea.exception.EEAErrorMessage;
@@ -16,8 +17,10 @@ import org.eea.interfaces.controller.dataset.DatasetSchemaController;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
 import org.eea.interfaces.controller.validation.RulesController.RulesControllerZuul;
 import org.eea.interfaces.vo.communication.UserNotificationContentVO;
+import org.eea.interfaces.vo.communication.UserNotificationVO;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
+import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.OrderVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
@@ -26,6 +29,9 @@ import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.*;
 import org.eea.interfaces.vo.dataset.schemas.uniqueContraintVO.UniqueConstraintVO;
 import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
+import org.eea.kafka.domain.EventType;
+import org.eea.kafka.domain.NotificationVO;
+import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
 import org.eea.thread.ThreadPropertiesManager;
@@ -33,6 +39,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -46,6 +53,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -114,6 +122,9 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @Autowired
   private NotificationControllerZuul notificationControllerZuul;
 
+  @Lazy
+  @Autowired
+  private BigDataDatasetService bigDataDatasetService;
 
   /**
    * Creates the empty dataset schema.
@@ -605,7 +616,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
           @ApiParam(type = "Long", value = "Dataset Id",
                   example = "0") @PathVariable("datasetId") Long datasetId,
           @ApiParam(type = "String", value = "table Schema Id",
-                  example = "5cf0e9b3b793310e9ceca190") @PathVariable("tableSchemaId") String tableSchemaId) {
+                  example = "5cf0e9b3b793310e9ceca190") @PathVariable("tableSchemaId") String tableSchemaId) throws Exception {
 
     if (!TypeStatusEnum.DESIGN.equals(dataflowControllerZuul
             .getMetabaseById(datasetService.getDataFlowIdById(datasetId)).getStatus())) {
@@ -614,8 +625,16 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
 
     try {
       final String datasetSchemaId = dataschemaService.getDatasetSchemaId(datasetId);
+      DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
+      Boolean isBigData = dataflowControllerZuul.isBigDataflow(dataSetMetabaseVO.getDataflowId());
 
       LOG.info("Deleting table schema with id {} for datasetId {}",tableSchemaId, datasetId);
+
+      //if table is big data remove first data from s3
+      if(BooleanUtils.isTrue(isBigData)){
+        bigDataDatasetService.deleteTableData(datasetId, dataSetMetabaseVO.getDataflowId(), dataSetMetabaseVO.getDataProviderId(), tableSchemaId, null, false);
+      }
+
       // Delete the Pk if needed from the catalogue, for all the fields of the table
       dataschemaService.deleteFromPkCatalogue(datasetSchemaId, tableSchemaId, datasetId);
 
@@ -627,9 +646,12 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
       // we delete the rules associate to the table
       rulesControllerZuul.deleteRuleByReferenceId(datasetSchemaId, tableSchemaId);
 
-      datasetService.deleteTableValue(datasetId, tableSchemaId);
+      //if table is not big data remove citus values and update materialized views
+      if(!BooleanUtils.isTrue(isBigData)){
+        datasetService.deleteTableValue(datasetId, tableSchemaId);
+        recordStoreControllerZuul.createUpdateQueryView(datasetId, false);
+      }
 
-      recordStoreControllerZuul.createUpdateQueryView(datasetId, false);
       LOG.info("Successfully deleted table schema with id {} for datasetId {}",tableSchemaId, datasetId);
     } catch (EEAException e) {
       LOG.error("Error deleting table schema with id {} for datasetId {} Message: {}", tableSchemaId, datasetId, e.getMessage(), e);
@@ -713,10 +735,8 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FIELD_NAME_NULL);
     }
 
-    if (dataflowControllerZuul.isBigDataflow(datasetService.getDataFlowIdById(datasetId))) {
-      if (fieldSchemaVO.getName().chars().anyMatch(Character::isWhitespace)) {
-        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FIELD_NAME_WHITESPACES);
-      }
+    if (fieldSchemaVO.getName().chars().anyMatch(Character::isWhitespace)) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FIELD_NAME_WHITESPACES);
     }
 
     String nameTrimmed = fieldSchemaVO.getName().trim();
@@ -790,10 +810,8 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
 
 
     if (null != fieldSchemaVO.getName()) {
-      if (dataflowControllerZuul.isBigDataflow(datasetService.getDataFlowIdById(datasetId))) {
-        if (fieldSchemaVO.getName().chars().anyMatch(Character::isWhitespace)) {
-          throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FIELD_NAME_WHITESPACES);
-        }
+      if (fieldSchemaVO.getName().chars().anyMatch(Character::isWhitespace)) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FIELD_NAME_WHITESPACES);
       }
       String nameTrimmed = fieldSchemaVO.getName().trim();
       boolean isSchema = false;
@@ -1605,6 +1623,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
       LOG.info("Successfully exported field schemas for datasetId {} and tableSchemaId {}", datasetId, tableSchemaId);
       HttpHeaders httpHeaders = new HttpHeaders();
       httpHeaders.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
+
       return new ResponseEntity<>(file, httpHeaders, HttpStatus.OK);
     } catch (EEAException e) {
       LOG.error("Error exporting field schemas for datasetId {} and tableSchemaId {}", datasetId, tableSchemaId, e);

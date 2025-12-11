@@ -93,6 +93,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -2454,7 +2455,6 @@ public class DatasetSchemaServiceTest {
     when(datasetMetabaseService.findDatasetMetabase(Mockito.any()))
         .thenReturn(new DataSetMetabaseVO());
     when(lockService.removeLockByCriteria(Mockito.any())).thenReturn(true);
-    when(dataFlowControllerZuul.isBigDataflow(Mockito.any())).thenReturn(false);
     dataSchemaServiceImpl.importSchemas(1L, multipartFile.getInputStream(), "file.zip");
     Mockito.verify(datasetMetabaseService, times(1)).createEmptyDataset(Mockito.any(),
         Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
@@ -2544,18 +2544,40 @@ public class DatasetSchemaServiceTest {
 
   @Test
   public void testExportFieldSchemas() throws IOException, EEAException {
+    ObjectId tableSchemaId = new ObjectId("5ce524fad31fc52540abae73");
+    ObjectId datasetSchemaId = new ObjectId("5ce524fad31fc52540abae75");
+    TableSchema tableSchema = new TableSchema();
+    tableSchema.setIdTableSchema(tableSchemaId);
+    tableSchema.setNameTableSchema("Tabla1");
+    TableSchemaVO tableSchemaVO1 = new TableSchemaVO();
+    tableSchemaVO1.setIdTableSchema(tableSchemaId.toString());
+    tableSchemaVO1.setNameTableSchema("Tabla1");
+    DataSetSchema datasetSchema = new DataSetSchema();
+    datasetSchema.setIdDataFlow(1L);
+    datasetSchema.setIdDataSetSchema(datasetSchemaId);
+    datasetSchema.setTableSchemas(List.of(tableSchema));
+    DataSetSchemaVO datasetSchemaVO = new DataSetSchemaVO();
+    datasetSchemaVO.setIdDataSetSchema(datasetSchemaId.toString());
+    datasetSchemaVO.setTableSchemas(List.of(tableSchemaVO));
+    Mockito.when(schemasRepository.findById(Mockito.any())).thenReturn(Optional.of(datasetSchema));
+    Mockito.when(tableSchemaMapper.entityToClass(tableSchema))
+            .thenReturn(tableSchemaVO1);
+    Mockito.doReturn(datasetSchemaVO).when(dataSchemaMapper).entityToClass(datasetSchema);
+
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
 
     FieldSchemaVO fieldVO = new FieldSchemaVO();
     fieldVO.setDescription("");
     fieldVO.setType(DataType.TEXT);
     Mockito
-        .when(fileCommon.getFieldSchemas(Mockito.anyString(), Mockito.any(DataSetSchemaVO.class)))
+        .when(fileCommon.getFieldSchemas(tableSchemaId.toString(), datasetSchemaVO))
         .thenReturn(Arrays.asList(fieldVO));
 
-    dataSchemaServiceImpl.exportFieldsSchema(1L, new ObjectId().toString(),
-        new ObjectId().toString());
-    Mockito.verify(fileCommon, times(1)).getFieldSchemas(Mockito.anyString(),
-        Mockito.any(DataSetSchemaVO.class));
+    dataSchemaServiceImpl.exportFieldsSchema(1L, datasetSchemaId.toString(),
+            tableSchemaId.toString());
+    Mockito.verify(fileCommon, times(1)).getFieldSchemas(tableSchemaId.toString(),
+            datasetSchemaVO);
   }
 
   @Test
@@ -2568,7 +2590,6 @@ public class DatasetSchemaServiceTest {
         new MockMultipartFile("file", "tableSchemaName.csv", "text/csv", csv.getBytes());
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("name");
-    Mockito.when(datasetService.getDataFlowIdById(any())).thenReturn(1L);
 
     DataSetSchema datasetSchema = new DataSetSchema();
     datasetSchema.setIdDataFlow(1L);
@@ -2593,7 +2614,6 @@ public class DatasetSchemaServiceTest {
     dataflow.setId(1L);
     dataflow.setStatus(TypeStatusEnum.DESIGN);
     Mockito.when(dataFlowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflow);
-    Mockito.when(dataFlowControllerZuul.isBigDataflow(Mockito.any())).thenReturn(false);
 
     List<FieldSchema> fields = new ArrayList<>();
     fields.add(fieldSchema2);
@@ -2628,8 +2648,6 @@ public class DatasetSchemaServiceTest {
         new MockMultipartFile("file", "tableSchemaName.csv", "text/csv", csv.getBytes());
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("name");
-    Mockito.when(dataFlowControllerZuul.isBigDataflow(Mockito.any())).thenReturn(false);
-    Mockito.when(datasetService.getDataFlowIdById(any())).thenReturn(1L);
 
     DataSetSchema datasetSchema = new DataSetSchema();
     datasetSchema.setIdDataFlow(1L);
@@ -2767,8 +2785,6 @@ public class DatasetSchemaServiceTest {
         new MockMultipartFile("file", "tableSchemaName.csv", "text/csv", csv.getBytes());
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("name");
-    Mockito.when(dataFlowControllerZuul.isBigDataflow(Mockito.any())).thenReturn(false);
-    Mockito.when(datasetService.getDataFlowIdById(any())).thenReturn(1L);
 
     DataSetSchema datasetSchema = new DataSetSchema();
     datasetSchema.setIdDataFlow(1L);
@@ -2821,18 +2837,40 @@ public class DatasetSchemaServiceTest {
 
   @Test
   public void testExportZipFieldSchemas() throws IOException, EEAException {
+    ObjectId tableSchemaId = new ObjectId("5ce524fad31fc52540abae73");
+    ObjectId datasetSchemaId = new ObjectId("5ce524fad31fc52540abae75");
+    TableSchema tableSchema = new TableSchema();
+    tableSchema.setIdTableSchema(tableSchemaId);
+    tableSchema.setNameTableSchema("Tabla1");
+    TableSchemaVO tableSchemaVO1 = new TableSchemaVO();
+    tableSchemaVO1.setIdTableSchema(tableSchemaId.toString());
+    tableSchemaVO1.setNameTableSchema("Tabla1");
+    DataSetSchema datasetSchema = new DataSetSchema();
+    datasetSchema.setIdDataFlow(1L);
+    datasetSchema.setIdDataSetSchema(datasetSchemaId);
+    datasetSchema.setTableSchemas(List.of(tableSchema));
+    DataSetSchemaVO datasetSchemaVO = new DataSetSchemaVO();
+    datasetSchemaVO.setIdDataSetSchema(datasetSchemaId.toString());
+    datasetSchemaVO.setTableSchemas(List.of(tableSchemaVO));
+    Mockito.when(schemasRepository.findById(Mockito.any())).thenReturn(Optional.of(datasetSchema));
+    Mockito.when(tableSchemaMapper.entityToClass(tableSchema))
+            .thenReturn(tableSchemaVO1);
+    Mockito.doReturn(datasetSchemaVO).when(dataSchemaMapper).entityToClass(datasetSchema);
+
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
 
     DesignDataset design = new DesignDataset();
     design.setId(1L);
     design.setDataSetName("DS");
-    design.setDatasetSchema(new ObjectId().toString());
+    design.setDatasetSchema(datasetSchemaId.toString());
     Mockito.when(dataSetMetabaseRepository.findById(Mockito.anyLong()))
         .thenReturn(Optional.of(design));
 
     DataSetSchema schema = new DataSetSchema();
-    schema.setIdDataSetSchema(new ObjectId());
+    schema.setIdDataSetSchema(datasetSchemaId);
     TableSchema table = new TableSchema();
-    table.setIdTableSchema(new ObjectId());
+    table.setIdTableSchema(tableSchemaId);
     table.setNameTableSchema("table");
     RecordSchema record = new RecordSchema();
     record.setIdRecordSchema(new ObjectId());
@@ -2842,7 +2880,7 @@ public class DatasetSchemaServiceTest {
     record.setFieldSchema(Arrays.asList(field));
     table.setRecordSchema(record);
     schema.setTableSchemas(Arrays.asList(table));
-    Mockito.when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(schema);
+    Mockito.when(schemasRepository.findByIdDataSetSchema(datasetSchemaId)).thenReturn(schema);
 
     dataSchemaServiceImpl.exportZipFieldSchemas(1L);
     Mockito.verify(dataSetMetabaseRepository, times(1)).findById(Mockito.anyLong());

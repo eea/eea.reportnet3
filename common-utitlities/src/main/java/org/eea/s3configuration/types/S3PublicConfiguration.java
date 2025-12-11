@@ -41,7 +41,8 @@ public class S3PublicConfiguration implements S3Configuration {
   @Value("${s3.default.public.bucket.path}")
   private String S3_DEFAULT_BUCKET_PATH;
 
-  private static final Region s3Region = Region.EU_WEST_1;
+  @Value("${s3.public.region}")
+  private String S3_PUBLIC_REGION;
 
   private AwsBasicCredentials awsCredentials;
 
@@ -60,7 +61,7 @@ public class S3PublicConfiguration implements S3Configuration {
     S3Client s3Client = S3Client.builder()
         .endpointOverride(URI.create(s3Endpoint))
         .httpClient(httpClient)
-        .region(s3Region)
+        .region(Region.of(S3_PUBLIC_REGION))
         .credentialsProvider(StaticCredentialsProvider.create(awsCredentials))
         .build();
 
@@ -87,7 +88,7 @@ public class S3PublicConfiguration implements S3Configuration {
   @Override
   public S3Presigner getS3Presigner() {
     return S3Presigner.builder().endpointOverride(URI.create(s3Endpoint))
-        .region(s3Region)
+        .region(Region.of(S3_PUBLIC_REGION))
         .credentialsProvider(StaticCredentialsProvider.create(awsCredentials)).build();
   }
 
@@ -120,6 +121,9 @@ public class S3PublicConfiguration implements S3Configuration {
   public String getS3IcebergBucketPath() {
     return null;
   }
+
+  @Override
+  public Region getS3Region() { return Region.of(S3_PUBLIC_REGION); }
 
   private ServerSideEncryptionByDefault applyServerSideEncryptionByDefault() {
     return ServerSideEncryptionByDefault.builder()

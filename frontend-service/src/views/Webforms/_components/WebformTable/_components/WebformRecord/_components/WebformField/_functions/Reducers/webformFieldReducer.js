@@ -3,6 +3,9 @@ export const webformFieldReducer = (state, { type, payload }) => {
     case 'SET_IS_SUBMITING':
       return { ...state, isSubmiting: payload };
 
+    case 'SET_IS_DELETING_ATTACHMENT':
+      return { ...state, isDeletingAttachment: payload };
+
     case 'ON_FILE_DELETE_OPENED':
       return {
         ...state,
@@ -34,9 +37,6 @@ export const webformFieldReducer = (state, { type, payload }) => {
 
     case 'SET_LINK_ITEMS':
       return { ...state, linkItemsOptions: payload };
-
-    case 'SET_SECTOR_AFFECTED':
-      return { ...state, sectorAffectedValue: payload.value };
 
     case 'SET_INITIAL_FIELD_VALUE':
       return { ...state, initialFieldValue: payload };

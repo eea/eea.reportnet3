@@ -7,7 +7,7 @@ import { QuerystringUtils } from 'views/_functions/Utils/QuerystringUtils';
 
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
-const getWebformTabs = (allTables = [], schemaTables, configTables = {}, selectedValue) => {
+const getWebformTabs = (allTables = [], schemaTables, configTables = {}) => {
   const initialValues = {};
 
   let tableIdx = 0;
@@ -35,7 +35,7 @@ const getWebformTabs = (allTables = [], schemaTables, configTables = {}, selecte
 
   compact(allTables).forEach(table => {
     initialValues[table] = false;
-    initialValues[selectedValue ? selectedValue : value] = true;
+    initialValues[value] = true;
   });
 
   return initialValues;

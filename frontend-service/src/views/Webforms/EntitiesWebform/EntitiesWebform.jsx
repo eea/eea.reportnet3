@@ -49,12 +49,12 @@ export const EntitiesWebform = ({
 }) => {
   const { checkErrors, getFieldSchemaId, getTypeList, hasErrors } = EntitiesWebformUtils;
   const { datasetSchema, datasetStatistics } = state;
-  const { onParseWebformData, onParseWebformRecords, parseNewEntitiesTableRecord, parseEntitiesRecords } =
-    WebformsUtils;
+  const { onParseWebformData, onParseWebformRecords, parseNewEntitiesTableRecord } = WebformsUtils;
 
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
   const [refreshTableTrigger, setRefreshTableTrigger] = useState(0);
+  const [hasLoadedEntities, setHasLoadedEntities] = useState(false);
 
   const [entitiesWebformState, entitiesWebformDispatch] = useReducer(entitiesWebformReducer, {
     data: [],
@@ -62,34 +62,65 @@ export const EntitiesWebform = ({
     isAddEntityIdDialogVisible: false,
     isAddingGroupRecord: false,
     isAddingEntityRecord: false,
+    isCheckingDuplicate: false,
     isDataUpdated: false,
     isDuplicatePkDialogVisible: false,
     isLoading: true,
     isRefresh: false,
+    updatingField: { field: null, isUpdating: false },
+    isViewMode: false,
     entitiesRecords: [],
     selectedTable: { fieldSchemaId: null, rootTableId: null, recordId: null, tableName: null },
     rootPkInput: '',
-    selectedTableName: null,
     selectedTableSchemaId: null,
     entitiesList: [],
     view: 'overview'
   });
-  const { isDataUpdated, isLoading, entitiesRecords, selectedTable, selectedTableName, entitiesList, view } =
-    entitiesWebformState;
+  const { isDataUpdated, isLoading, entitiesRecords, selectedTable, entitiesList, view } = entitiesWebformState;
 
   const addEntityInputRef = useRef(null);
 
   useEffect(() => initialLoad(), [tables]);
 
   useEffect(() => {
-    if (!isEmpty(entitiesWebformState.data)) {
-      onLoadEntitiesData();
+    const matchedNotifications = notificationContext.hidden.filter(
+      ({ key }) => key === 'INSERT_RECORDS_MULTI_TABLES_COMPLETED' || key === 'INSERT_RECORDS_MULTI_TABLES_FAILED'
+    );
+
+    if (isEmpty(matchedNotifications)) return;
+
+    const matchedWithDatasetId = matchedNotifications.find(
+      matchedNotification => String(matchedNotification.content?.datasetId) === String(datasetId)
+    );
+
+    if (!matchedWithDatasetId) return;
+
+    const resetAddEntityState = () => {
+      setIsAddingEntityRecord(false);
+      manageDialogs('isAddEntityIdDialogVisible', false);
+      setRefreshTableTrigger(prev => prev + 1);
+    };
+
+    if (matchedWithDatasetId?.key === 'INSERT_RECORDS_MULTI_TABLES_COMPLETED') {
+      onUpdateData();
+      resetAddEntityState();
+    } else if (matchedWithDatasetId?.key === 'INSERT_RECORDS_MULTI_TABLES_FAILED') {
+      resetAddEntityState();
+    }
+  }, [notificationContext.hidden]);
+
+  useEffect(() => {
+    if (!isEmpty(entitiesWebformState.data) && !hasLoadedEntities) {
+      if (!hideEntities) {
+        onLoadEntitiesData();
+        setHasLoadedEntities(true);
+      }
       entitiesWebformDispatch({
         type: 'HAS_ERRORS',
         payload: { value: hasErrors(entitiesWebformState.data, rootPkFieldId) }
       });
     }
-  }, [entitiesWebformState.data, isDataUpdated]);
+  }, [entitiesWebformState.data, isDataUpdated, hasLoadedEntities]);
 
   useEffect(() => {
     setIsAddingEntityRecord(false);
@@ -119,17 +150,47 @@ export const EntitiesWebform = ({
     return isEmpty(entitiesWebformState.rootPkInput) ? true : invalidCharsRegex.test(entitiesWebformState.rootPkInput);
   };
 
-  const checkDuplicatePk = () => {
-    const entityPkValuesList = entitiesWebformState.entitiesRecords
-      .map(entityRecord =>
-        entityRecord.elements
-          .filter(element => element.fieldSchema === rootPkFieldId || element.fieldSchemaId === rootPkFieldId)
-          .map(element => element.value)
-      )
-      .filter(entityRecord => !isEmpty(entityRecord))
-      .flat();
+  const checkDuplicatePk = async rawValue => {
+    if (isEmpty(rawValue)) return false;
 
-    return entityPkValuesList.some(entityPk => entityPk === entitiesWebformState.rootPkInput);
+    // Find the root table
+    const rootTable = entitiesWebformState.data.find(table => String(table.tableSchemaId) === String(rootTableId));
+
+    if (!rootTable) {
+      console.error('EntitiesWebform - checkDuplicatePk: Root table not found');
+      return false;
+    }
+
+    // Find the root PK field name from datasetSchema
+    const schemaRootTable = datasetSchema.tables.find(table => String(table.tableSchemaId) === String(rootTableId));
+
+    if (!schemaRootTable?.records?.[0]?.fields) {
+      console.error('EntitiesWebform - checkDuplicatePk: Schema root table records not found');
+      return false;
+    }
+
+    const rootPkField = schemaRootTable.records[0].fields.find(
+      field => String(field.fieldId ?? field.fieldSchemaId) === String(rootPkFieldId)
+    );
+
+    if (!rootPkField?.name) {
+      console.error('EntitiesWebform - checkDuplicatePk: Root PK field name not found');
+      return false;
+    }
+
+    try {
+      const exists = await DatasetService.checkDuplicateValues({
+        datasetId,
+        tableSchemaId: rootTable.tableSchemaId,
+        fieldName: rootPkField.name,
+        value: rawValue,
+        fieldSchemaId: rootPkFieldId
+      });
+      return Boolean(exists.data);
+    } catch (error) {
+      console.error('EntitiesWebform - checkDuplicatePk.', error);
+      return true;
+    }
   };
 
   const initialLoad = () => {
@@ -148,53 +209,47 @@ export const EntitiesWebform = ({
 
   const setIsLoading = value => entitiesWebformDispatch({ type: 'IS_LOADING', payload: { value } });
 
-  const generateEntityId = entitiesTableRecords => {
-    if (isEmpty(entitiesTableRecords)) return 1;
-
-    const recordIds = parseEntitiesRecords(entitiesTableRecords)
-      .map(record => parseInt(record.Id) || parseInt(record.id))
-      .filter(id => !Number.isNaN(id));
-
-    return Math.max(...recordIds) + 1;
-  };
-
   const setTableSchemaId = tableSchemaId => {
     entitiesWebformDispatch({ type: 'GET_TABLE_SCHEMA_ID', payload: { tableSchemaId } });
-  };
-
-  const getEntitiesTableRecords = async tableSchemaId => {
-    let data;
-    if (!isNil(tableSchemaId[0])) {
-      if (bigData) {
-        data = await DatasetService.getTableDataDL({
-          datasetId,
-          tableSchemaId: tableSchemaId[0],
-          // pageSize: 300,
-          levelError: ['CORRECT', 'INFO', 'WARNING', 'ERROR', 'BLOCKER']
-        });
-      } else {
-        data = await DatasetService.getTableData({
-          datasetId,
-          tableSchemaId: tableSchemaId[0],
-          // pageSize: 300,
-          levelError: ['CORRECT', 'INFO', 'WARNING', 'ERROR', 'BLOCKER']
-        });
-      }
-      return onParseWebformRecords(data.records, entitiesWebformState.data[0], {}, data.totalRecords) || [];
-    }
-
-    return [];
   };
 
   const onAddEntitiesRecord = async manualRootPk => {
     setIsAddingEntityRecord(true);
 
-    const autoIncrementFields = tables
-      .map(table => table.elements.filter(element => element.autoIncrement).map(element => element.name))
-      .filter(table => !isEmpty(table))
-      .flat();
-
     /*Filters the webform main tables that are not optional and leaves out the subtables*/
+    const autoIncrementFields = [];
+
+    // Add fields from table elements that have autoIncrement = true
+    tables.forEach(table => {
+      if (table.elements) {
+        const incrementFields = table.elements.filter(element => element.autoIncrement).map(element => element.name);
+        autoIncrementFields.push(...incrementFields);
+      }
+
+      // Add root table primary key
+      if (table.isRootTable) {
+        autoIncrementFields.push('Id');
+      }
+    });
+
+    // Add foreign key fields that reference the root table
+    const rootTableFKFields = [];
+
+    // Find FK fields in datasetSchema that reference the root table
+    datasetSchema.tables.forEach(table => {
+      if (table.records && table.records[0] && table.records[0].fields) {
+        table.records[0].fields.forEach(field => {
+          // Check if this field references the root table's primary key
+          if (field.referencedField && field.referencedField.idPk === rootPkFieldId) {
+            rootTableFKFields.push(field.name);
+          }
+        });
+      }
+    });
+    // Add FK field names to autoIncrementFields
+    autoIncrementFields.push(...rootTableFKFields);
+    // Remove duplicates
+    const uniqueAutoIncrementFields = [...new Set(autoIncrementFields)];
 
     const filteredMainTables = datasetSchema.tables.filter(
       table =>
@@ -202,42 +257,49 @@ export const EntitiesWebform = ({
         tables.some(webformTable => webformTable?.name === table?.tableSchemaName && !webformTable?.isOptional)
     );
 
-    const tableSchemaId = entitiesWebformState.data.map(table => table.tableSchemaId).filter(table => !isNil(table));
-
     try {
-      const entitiesTableRecords = await getEntitiesTableRecords(tableSchemaId);
       await WebformService.addEntityRecord(
         datasetId,
         filteredMainTables,
-        manualRootPk ? entitiesWebformState.rootPkInput : generateEntityId(entitiesTableRecords),
+        manualRootPk ? entitiesWebformState.rootPkInput : undefined,
         rootPkFieldId,
-        !isEmpty(autoIncrementFields) ? autoIncrementFields : undefined
+        !isEmpty(uniqueAutoIncrementFields) ? uniqueAutoIncrementFields : undefined
       );
 
-      onUpdateData();
-      setIsAddingEntityRecord(false);
-      setIsAddEntityIdDialogVisible(false);
-      setRefreshTableTrigger(prev => prev + 1);
-    } catch (error) {
-      if (error?.response?.status === 423) {
-        notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' }, true);
-      } else {
-        console.error('EntitiesWebform - onAddEntitiesRecord.', error);
-        const {
-          dataflow: { name: dataflowName },
-          dataset: { name: datasetName }
-        } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
-        notificationContext.add(
-          {
-            type: 'ADD_RECORDS_ERROR',
-            content: { dataflowId, dataflowName, datasetId, datasetName, customContent: { tableName: '' } }
-          },
-          true
-        );
+      if (!bigData) {
+        onUpdateData();
       }
-      setIsAddingEntityRecord(false);
-      setIsAddEntityIdDialogVisible(false);
-      setRefreshTableTrigger(prev => prev + 1);
+    } catch (error) {
+      if (!bigData) {
+        if (error?.response?.status === 423) {
+          notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' }, true);
+        } else {
+          console.error('EntitiesWebform - onAddEntitiesRecord.', error);
+          const {
+            dataflow: { name: dataflowName },
+            dataset: { name: datasetName }
+          } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
+          notificationContext.add(
+            {
+              type: 'ADD_RECORDS_ERROR',
+              content: {
+                dataflowId,
+                dataflowName,
+                datasetId,
+                datasetName,
+                customContent: { tableName: '' }
+              }
+            },
+            true
+          );
+        }
+      }
+    } finally {
+      if (!bigData) {
+        setIsAddingEntityRecord(false);
+        manageDialogs('isAddEntityIdDialogVisible', false);
+        setRefreshTableTrigger(prev => prev + 1);
+      }
     }
   };
 
@@ -286,14 +348,14 @@ export const EntitiesWebform = ({
           data = await DatasetService.getTableDataDL({
             datasetId,
             tableSchemaId: tableSchemaId[0],
-            // pageSize: 300,
+            pageSize: 300,
             levelError: ['CORRECT', 'INFO', 'WARNING', 'ERROR', 'BLOCKER']
           });
         } else {
           data = await DatasetService.getTableData({
             datasetId,
             tableSchemaId: tableSchemaId[0],
-            // pageSize: 300,
+            pageSize: 300,
             levelError: ['CORRECT', 'INFO', 'WARNING', 'ERROR', 'BLOCKER']
           });
         }
@@ -322,13 +384,45 @@ export const EntitiesWebform = ({
     }
   };
 
-  const onSelectEditTable = (entityNumberId, tableName, recordId) => {
-    const filteredTable = entitiesWebformState.data.filter(table => TextUtils.areEquals(table.name, tableName))[0];
+  const getFirstVisibleTable = () => {
+    const visibleTables = entitiesWebformState.data.filter(table =>
+      tables.some(webformTable => webformTable.name === table.name && webformTable.isVisible)
+    );
+    return visibleTables[0] || null;
+  };
 
+  const changeViewMode = isViewMode => {
+    entitiesWebformDispatch({ type: 'SET_IS_VIEW_MODE', payload: { value: isViewMode } });
+  };
+
+  const onFieldUpdate = (isFieldUpdating, field) => {
+    entitiesWebformDispatch({
+      type: 'SET_IS_UPDATING_FIELD',
+      payload: {
+        value: isFieldUpdating,
+        field
+      }
+    });
+  };
+
+  const onSelectEditTable = (entityNumberId, tableName, recordId, isViewMode = false) => {
+    // const filteredTable = entitiesWebformState.data.filter(table => TextUtils.areEquals(table.name, tableName))[0];
+
+    const filteredTable = getFirstVisibleTable();
+
+    if (!filteredTable) {
+      console.error('No visible tables found for editing');
+      return;
+    }
     setTableSchemaId(filteredTable.tableSchemaId);
     onSelectRecord(recordId, entityNumberId);
-    onSelectTableName(tableName);
+    onSelectTableName(filteredTable.name);
     onToggleView('details');
+    changeViewMode(isViewMode);
+  };
+
+  const onSelectViewTable = (entityNumberId, tableName, recordId) => {
+    onSelectEditTable(entityNumberId, tableName, recordId, true);
   };
 
   const onSelectFieldSchemaId = fieldSchemaId => {
@@ -343,13 +437,32 @@ export const EntitiesWebform = ({
 
   const onToggleView = view => entitiesWebformDispatch({ type: 'ON_TOGGLE_VIEW', payload: { view } });
 
-  const onUpdateData = () => entitiesWebformDispatch({ type: 'ON_UPDATE_DATA', payload: { value: !isDataUpdated } });
-
+  const onUpdateData = () => {
+    setHasLoadedEntities(false);
+    entitiesWebformDispatch({ type: 'ON_UPDATE_DATA', payload: { value: !isDataUpdated } });
+  };
   const setIsAddingEntityRecord = value =>
     entitiesWebformDispatch({ type: 'SET_IS_ADDING_ENTITY_RECORD', payload: { value } });
 
-  const setIsAddEntityIdDialogVisible = value =>
-    entitiesWebformDispatch({ type: 'SET_IS_ADD_ENTITY_ID_DIALOG_VISIBLE', payload: { value } });
+  const handleAddEntity = async () => {
+    entitiesWebformDispatch({
+      type: 'SET_IS_CHECKING_DUPLICATE',
+      payload: { value: true }
+    });
+
+    const exists = await checkDuplicatePk(entitiesWebformState.rootPkInput);
+
+    entitiesWebformDispatch({
+      type: 'SET_IS_CHECKING_DUPLICATE',
+      payload: { value: false }
+    });
+
+    if (exists) {
+      manageDialogs('isDuplicatePkDialogVisible', true);
+    } else if (!checkInvalidCharacters()) {
+      onAddEntitiesRecord(true);
+    }
+  };
 
   const renderOverviewButton = () => {
     if (view !== 'details') {
@@ -363,6 +476,7 @@ export const EntitiesWebform = ({
           onClick={() => {
             onToggleView('overview');
             onSelectRecord(null, null);
+            changeViewMode(false);
           }}
         />
       </div>
@@ -385,13 +499,15 @@ export const EntitiesWebform = ({
           isIcebergCreated={isIcebergCreated}
           isRefresh={entitiesWebformState.isRefresh}
           isReporting={isReporting}
+          isViewMode={entitiesWebformState.isViewMode}
+          onFieldUpdate={onFieldUpdate}
           rootPkFieldId={rootPkFieldId}
           rootTableName={rootTableName}
           selectedTable={selectedTable}
-          selectedTableName={selectedTableName}
           setTableSchemaId={setTableSchemaId}
           state={state}
           tables={tables.filter(table => table.isVisible)}
+          updatingField={entitiesWebformState.updatingField}
         />
       );
     }
@@ -408,6 +524,7 @@ export const EntitiesWebform = ({
         onAddTableRecord={onAddTableRecord}
         onRefresh={onUpdateData}
         onSelectEditTable={onSelectEditTable}
+        onSelectViewTable={onSelectViewTable}
         overview={overview}
         records={entitiesRecords}
         refreshTrigger={refreshTableTrigger}
@@ -416,6 +533,7 @@ export const EntitiesWebform = ({
         rootTableName={rootTableName}
         schemaTables={datasetSchema.tables}
         tables={tables}
+        view={view}
       />
     );
   };
@@ -456,15 +574,23 @@ export const EntitiesWebform = ({
       {entitiesWebformState.isAddEntityIdDialogVisible && (
         <ConfirmDialog
           classNameConfirm={'p-button-primary'}
-          disabledConfirm={checkInvalidCharacters() || entitiesWebformState.isAddingEntityRecord}
-          header={resourcesContext.messages['addEntityId']}
-          iconConfirm={entitiesWebformState.isAddingEntityRecord ? 'spinnerAnimate' : 'add'}
-          labelConfirm={resourcesContext.messages['addEntity']}
-          onConfirm={() =>
-            checkDuplicatePk()
-              ? manageDialogs('isDuplicatePkDialogVisible', true)
-              : !checkInvalidCharacters() && onAddEntitiesRecord(true)
+          disabledConfirm={
+            checkInvalidCharacters() ||
+            entitiesWebformState.isAddingEntityRecord ||
+            entitiesWebformState.isCheckingDuplicate
           }
+          header={resourcesContext.messages['addEntityId']}
+          iconConfirm={
+            entitiesWebformState.isAddingEntityRecord || entitiesWebformState.isCheckingDuplicate
+              ? 'spinnerAnimate'
+              : 'add'
+          }
+          labelConfirm={
+            entitiesWebformState.isCheckingDuplicate
+              ? resourcesContext.messages['checkingDuplicate']
+              : resourcesContext.messages['addEntity']
+          }
+          onConfirm={handleAddEntity}
           onHide={() => manageDialogs('isAddEntityIdDialogVisible', false)}
           showCancelButton={false}
           visible={entitiesWebformState.isAddEntityIdDialogVisible}>
@@ -475,6 +601,7 @@ export const EntitiesWebform = ({
           <InputText
             autoFocus={true}
             className={styles.inputText}
+            disabled={entitiesWebformState.isViewMode}
             id={'addEntity'}
             maxLength={config.INPUT_MAX_LENGTH}
             onChange={event => onAddEntityInputChange(event.target.value)}
@@ -512,7 +639,11 @@ export const EntitiesWebform = ({
         <div className={styles.hiddenEntitiesAddButton}>
           <Button
             className={styles.addButton}
-            disabled={(bigData && !isIcebergCreated) + entitiesWebformState.isAddingEntityRecord || isReleasing}
+            disabled={
+              (bigData && !isIcebergCreated) + entitiesWebformState.isAddingEntityRecord ||
+              isReleasing ||
+              entitiesWebformState.isViewMode
+            }
             icon={entitiesWebformState.isAddingEntityRecord ? 'spinnerAnimate' : 'add'}
             label={resourcesContext.messages['addEntity']}
             onClick={() => {
@@ -550,6 +681,14 @@ export const EntitiesWebform = ({
                         });
                         onSelectRecord(items.recordId, items.id);
                         onToggleView('details');
+                      } else if (bigData && !isIcebergCreated) {
+                        entitiesWebformDispatch({
+                          type: 'ON_REFRESH',
+                          payload: { value: !entitiesWebformState.isRefresh }
+                        });
+                        onSelectRecord(items.recordId, items.id);
+                        onToggleView('details');
+                        changeViewMode(true);
                       }
                     }}>
                     {items.id || '-'}
@@ -559,7 +698,11 @@ export const EntitiesWebform = ({
               <div className={styles.addButtonWrapper}>
                 <Button
                   className={styles.addButton}
-                  disabled={(bigData && !isIcebergCreated) + entitiesWebformState.isAddingEntityRecord || isReleasing}
+                  disabled={
+                    (bigData && !isIcebergCreated) + entitiesWebformState.isAddingEntityRecord ||
+                    isReleasing ||
+                    entitiesWebformState.isViewMode
+                  }
                   icon={entitiesWebformState.isAddingEntityRecord ? 'spinnerAnimate' : 'add'}
                   label={resourcesContext.messages['addEntity']}
                   onClick={() => {

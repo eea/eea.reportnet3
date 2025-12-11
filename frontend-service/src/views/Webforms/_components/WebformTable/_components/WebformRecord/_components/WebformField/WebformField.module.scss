@@ -34,3 +34,29 @@
     margin-right: 0.5rem;
   }
 }
+
+.datetimeWrapper {
+  position: relative;
+  width: 100%;
+}
+
+.inputWrapper {
+  position: relative;
+  width: 100%;
+
+}
+
+.clearButton {
+  position: absolute !important;
+  right: 0.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 0.25rem;
+  min-width: auto;
+  height: 2rem;
+  width: 2rem;
+
+  &:hover {
+    background-color: var(--errors);
+  }
+}

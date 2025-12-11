@@ -1,5 +1,6 @@
 package org.eea.orchestrator.scheduling;
 
+import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.collaboration.CollaborationController;
 import org.eea.interfaces.controller.dataflow.DataFlowController;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController;
@@ -12,6 +13,7 @@ import org.eea.interfaces.vo.dataflow.MessageVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
 import org.eea.interfaces.vo.metabase.SnapshotVO;
 import org.eea.interfaces.vo.orchestrator.JobVO;
+import org.eea.interfaces.vo.orchestrator.enums.JobInfoEnum;
 import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.interfaces.vo.orchestrator.enums.JobTypeEnum;
 import org.eea.interfaces.vo.recordstore.ProcessVO;
@@ -94,9 +96,14 @@ public class JobForFinalizingReleaseJobsWithFinishedTasks {
     }
 
     /**
-     * The job runs every thirty minutes. It finds in_progress release jobs that have all their processes and tasks finished
-     * and the latest finished process is in finished status for more than
-     * maxTimeInMinutesForFinishedTasksOfInProgressValidationJobs minutes
+     * Finalizes in-progress release jobs.
+     *
+     * If all processes and tasks finish, and the most recently finished process
+     * has remained in FINISHED state longer than the configured wait time,
+     * the job is marked as FINISHED.
+     *
+     * If the number of created processes never reaches the expected dataset count
+     * after the wait time has passed, the job is marked as FAILED.
      */
     public void finalizeInProgressReleaseJobsWithFinishedTasks() {
         try {
@@ -116,6 +123,17 @@ public class JobForFinalizingReleaseJobsWithFinishedTasks {
                 List<String> processIds = jobProcessService.findProcessesByJobId(jobVO.getId());
 
                 boolean allFinished = true;
+
+                List<Long> datasetIds = datasetMetabaseControllerZull
+                        .getDatasetIdsByDataflowIdAndDataProviderId(dataflowId, providerId);
+
+                if (checkAndFailIncompleteReleaseJob(jobVO, datasetIds, processIds, isSilentRelease)) {
+                    continue; // fail job and exit
+                }
+
+                if (!(processIds.size() == datasetIds.size())){
+                    continue; // not all processes created for each dataset Release cannot finish
+                }
 
                 for (String processId : processIds) {
                     ProcessVO process = processControllerZuul.findById(processId);
@@ -198,12 +216,13 @@ public class JobForFinalizingReleaseJobsWithFinishedTasks {
 
                     // Change Job status to FINISHED.
                     jobService.updateJobStatus(jobVO.getId(), JobStatusEnum.FINISHED);
+                    String dataflowName = dataflow.getName();
 
                     // Send emails and notifications only if not silent release.
                     if (!isSilentRelease) {
                         // Create feedback message for eash dataset.
                         String country = dataset.getDataSetName();
-                        String dataflowName = dataflow.getName();
+
                         MessageVO messageVO = new MessageVO();
                         messageVO.setProviderId(providerId);
                         messageVO.setContent(country + " released " + dataflowName + " successfully");
@@ -215,8 +234,17 @@ public class JobForFinalizingReleaseJobsWithFinishedTasks {
                         LOG.info("Automatic feedback message created of dataflow {}, datasetId {}, jobId {}, Message: {}, User: {}",
                                 dataflow.getId(), dataset.getId(), jobVO.getId(), messageVO.getContent(), jobVO.getCreatorUsername());
 
-                        // Notification send to reporting user for dataflow release jobe completion.
+                        // Notification send to reporting user for dataflow release job completion.
                         kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.RELEASE_COMPLETED_EVENT, null,
+                                NotificationVO.builder()
+                                        .user(jobVO.getCreatorUsername())
+                                        .dataflowId(dataflowId).dataflowName(dataflowName)
+                                        .providerId(providerId).build());
+                    }
+                    else{
+                        LOG.info("Sending SILENT_RELEASE_COMPLETED_EVENT event for jobId {}", jobVO.getId());
+                        //this event will not produce any notifications to the user because frontend will never show it in the user notifications
+                        kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.SILENT_RELEASE_COMPLETED_EVENT, null,
                                 NotificationVO.builder()
                                         .user(jobVO.getCreatorUsername())
                                         .dataflowId(dataflowId).dataflowName(dataflowName)
@@ -227,5 +255,78 @@ public class JobForFinalizingReleaseJobsWithFinishedTasks {
         } catch (Exception e) {
             LOG.error("Error while running scheduled job finalizeInProgressReleaseJobsWithFinishedProcessesAndTasks ", e);
         }
+    }
+
+    /**
+     * Checks whether a release job has missing or failed processes.
+     * If inconsistency is found, the job is marked as FAILED and locks are released.
+     *
+     * @param jobVO the release job to check
+     * @param datasetIds all dataset IDs for this provider/dataflow
+     * @param processIds all process IDs linked to the job
+     * @return true if the job was marked as FAILED (and should be skipped), false otherwise
+     */
+    private boolean checkAndFailIncompleteReleaseJob(JobVO jobVO, List<Long> datasetIds, List<String> processIds, Boolean isSilentRelease) throws Exception {
+        Long dataflowId = jobVO.getDataflowId();
+        Long providerId = jobVO.getProviderId();
+        String user = jobVO.getCreatorUsername();
+
+        if (!(processIds.size() == datasetIds.size())) {
+            // 1) Find latest FINISHED process finishing date
+            Optional<Date> latestFinished = processIds.stream()
+                    .map(pid -> processControllerZuul.findById(pid))
+                    .filter(p -> p.getProcessFinishingDate() != null)
+                    .map(ProcessVO::getProcessFinishingDate)
+                    .max(Date::compareTo);
+
+            long minutesSinceReferenceTime = 0;
+
+            if (latestFinished.isPresent()) {
+                minutesSinceReferenceTime = Duration.between(
+                        latestFinished.get().toInstant(),
+                        Instant.now()
+                ).toMinutes();
+            } else {
+                // 2) No FINISHED processes fallback to earliest process START date
+                Optional<Date> earliestStart = processIds.stream()
+                        .map(pid -> processControllerZuul.findById(pid))
+                        .filter(p -> p.getProcessStartingDate() != null)
+                        .map(ProcessVO::getProcessStartingDate)
+                        .min(Date::compareTo);
+
+                if (earliestStart.isPresent()) {
+                    minutesSinceReferenceTime = Duration.between(
+                            earliestStart.get().toInstant(),
+                            Instant.now()
+                    ).toMinutes();
+                }
+            }
+
+            if (minutesSinceReferenceTime < maxTimeInMinutesForFinishedProcessesOfInProgressReleaseJobs) {
+                return false;  // still waiting
+            }
+
+            LOG.error("Release job {} for dataflowId {} and providerId {} is missing processes. Expected {}, found {}. Marking job as FAILED.",
+                    jobVO.getId(), dataflowId, providerId,
+                    datasetIds.size(),
+                    processIds.size());
+
+            datasetSnapshotController.releaseLocksFromReleaseDatasets(dataflowId, providerId);
+            jobService.updateJobStatus(jobVO.getId(), JobStatusEnum.FAILED);
+            jobService.updateJobInfo(jobVO.getId(), JobInfoEnum.ERROR_RELEASE_PARTIALLY_COMPLETED, null, true);
+            datasetSnapshotController.rollBackSnapshotRecord(jobVO.getId(), dataflowId, providerId);
+
+            if(isSilentRelease){
+                LOG.info("Sending SILENT_RELEASE_FAILED_EVENT event for jobId {}", jobVO.getId());
+                //this event will not produce any notifications to the user because frontend will never show it in the user notifications
+                kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.SILENT_RELEASE_FAILED_EVENT, null, NotificationVO.builder().dataflowId(dataflowId).providerId(providerId).user(user)
+                                .error("Incomplete release: Not all datasets were able to release").jobId(jobVO.getId()).build());
+            } else
+                kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.RELEASE_CANCELED_EVENT, null, NotificationVO.builder().dataflowId(dataflowId).providerId(providerId)
+                                .user(user).error("Incomplete release: Not all datasets were able to release").jobId(jobVO.getId()).build());
+
+            return true;
+        }
+        return false;
     }
 }

@@ -203,7 +203,7 @@ public final class LiteralConstants {
   public static final String S3_DATA_COLLECTION_PATTERN = "dc-%s";
 
   /** The Constant S3_SNAPSHOT_PATTERN: {@value}. */
-  public static final String S3_SNAPSHOT_PATTERN = "snap-%s-%s";
+  public static final String S3_SNAPSHOT_PATTERN = "snap-%s";
 
   /** The Constant S3_EU_DATASET_PATTERN: {@value}. */
   public static final String S3_EU_DATASET_PATTERN = "eu-%s";
@@ -238,6 +238,9 @@ public final class LiteralConstants {
 
   /** The Constant S3_ATTACHMENTS_DC_PATH: {@value}. */
   public static final String S3_ATTACHMENTS_DC_PATH = "%s/collections/%s/current/attachments/%s/%s/%s";
+
+  /** The Constant S3_ATTACHMENTS_DC_PROVIDER_PATH: {@value}. */
+  public static final String S3_ATTACHMENTS_DC_PROVIDER_PATH = "%s/collections/%s/current/attachments/%s/%s";
 
   /** The Constant S3_ATTACHMENTS_EU_PATH: {@value}. */
   public static final String S3_ATTACHMENTS_EU_TABLE_PATH = "%s/collections/%s/attachments/%s";

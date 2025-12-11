@@ -17,13 +17,16 @@ import org.eea.dataset.persistence.schemas.domain.FieldSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.CreateEmptyTables;
+import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -42,7 +45,12 @@ public class CreateEmptyTablesImpl implements CreateEmptyTables {
   private final SpatialDataHandling spatialDataHandling;
   private final SchemasRepository schemasRepository;
 
+  @Autowired
+  private JdbcTemplate dremioJdbcTemplate;
+
   private static final Logger LOG = LoggerFactory.getLogger(CreateEmptyTablesImpl.class);
+
+  final String ILLEGAL_CHAR_MARKER = "Illegal character in";
 
   @Value("${parquet.file.path}")
   private String parquetFilePath;
@@ -78,7 +86,7 @@ public class CreateEmptyTablesImpl implements CreateEmptyTables {
 
     try {
       if (dataset.getDatasetTypeEnum().equals(DatasetTypeEnum.DESIGN)) {
-        s3Helper.deleteTableIfEmpty(tableSchema.getNameTableSchema(), s3TablePathResolver, dremioHelperService);
+        deleteTableIfEmpty(tableSchema.getNameTableSchema(), s3TablePathResolver);
       }
       boolean folderExists = s3Helper.checkFolderExist(s3TablePathResolver, getRightPath(dataset, false));
       if (!folderExists) {
@@ -96,27 +104,34 @@ public class CreateEmptyTablesImpl implements CreateEmptyTables {
         fieldSchemas.add(0, providerCodeSchema);
         fieldSchemas.add(0, recordIdSchema);
 
+        String currentField = "";
         try {
           List<Schema.Field> fields = new ArrayList<>();
-          fieldSchemas.forEach(field -> {
+          for (FieldSchema field : fieldSchemas) {
+            currentField = field.getHeaderName();
             if (spatialDataHandling.getGeoJsonEnums().contains(field.getType())) {
               fields.add(new Schema.Field(field.getHeaderName(), Schema.create(Schema.Type.BYTES)));
             } else {
               fields.add(new Schema.Field(field.getHeaderName(), Schema.create(Schema.Type.STRING)));
             }
-          });
+          }
 
           regenerateTables(dataset, tableSchema, fields);
         } catch (Exception e) {
-          throw new EEAException(e.getMessage());
+          String msg = e.getMessage();
+          if (msg != null && msg.contains(ILLEGAL_CHAR_MARKER)) {
+            throw new EEAException(EEAErrorMessage.ERROR_ILLEGAL_HEADER_CHARACTER + currentField);
+          }
+          throw e;
         }
       }
+    } catch (EEAException eea) {
+      throw eea;
     } catch (Exception e) {
       LOG.error("Something went wrong, trying to create empty tables for dataflowId {} and datasetId {} , with exception message: {}", dataset.getDataflowId(), dataset.getId(), e.getMessage());
       throw new EEAException("Something went wrong, trying to create empty tables with message: " + e.getMessage());
     }
   }
-
 
   private void regenerateTables(DataSetMetabaseVO dataset, TableSchema tableSchema, List<Schema.Field> fields) throws Exception {
     Schema schema1 = Schema.createRecord("Data", null, null, false, fields);
@@ -146,6 +161,19 @@ public class CreateEmptyTablesImpl implements CreateEmptyTables {
       LOG.error(ex.getMessage());
     } finally {
       dremioHelperService.deleteFileFromR3IfExists(parquetFile);
+    }
+  }
+
+  @Override
+  public void deleteTableIfEmpty(String tableSchemaName, S3PathResolver tablePathResolver) throws Exception {
+    String tablePath = s3Helper.getS3Service().getTableAsFolderQueryPath(tablePathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
+    if (s3Helper.checkFolderExist(tablePathResolver, S3_TABLE_NAME_FOLDER_PATH) && !dremioHelperService.checkFolderPromoted(tablePathResolver, tablePathResolver.getTableName())) {
+      dremioHelperService.promoteFolderOrFile(tablePathResolver, tablePathResolver.getTableName());
+    }
+    String numberOfRecordsQuery = "SELECT COUNT (*) FROM " + tablePath;
+    if (s3Helper.checkFolderExist(tablePathResolver, S3_TABLE_NAME_FOLDER_PATH) && dremioJdbcTemplate.queryForObject(numberOfRecordsQuery, Long.class) == 0) {
+      dremioHelperService.demoteFolderOrFile(tablePathResolver, tableSchemaName);
+      s3Helper.deleteFolder(tablePathResolver, S3_TABLE_NAME_FOLDER_PATH);
     }
   }
 

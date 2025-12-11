@@ -79,15 +79,7 @@ const DropdownWebform = props => {
   const nativeSelectRef = useRef(null);
   const itemsWrapperRef = useRef(null);
 
-  let currentSearchChar,
-    documentClickListener,
-    editableInputClick,
-    expeditableInputClick,
-    hideTimeout,
-    overlayClick,
-    searchValue,
-    selectedOptionUpdated,
-    selfClick;
+  let currentSearchChar, documentClickListener, editableInputClick, hideTimeout, overlayClick, searchValue, selfClick;
 
   useEffect(() => {
     if (initialValue === null || value === null) {
@@ -130,10 +122,6 @@ const DropdownWebform = props => {
           }, 200);
         }
       }
-    }
-
-    if (editableInputClick) {
-      expeditableInputClick = false;
     }
   };
 
@@ -255,7 +243,6 @@ const DropdownWebform = props => {
         originalEvent: event,
         option: newOption
       });
-      selectedOptionUpdated = true;
     }
 
     setSearchTimeout(
@@ -682,12 +669,13 @@ const DropdownWebform = props => {
     }
 
     if (items) {
-      return items.map(option => {
+      return items.map((option, index) => {
+        const key = `${getOptionKey(option)}-${index}`;
         let optionLabel = getOptionLabel(option);
         return (
           <DropdownItem
             disabled={option.disabled}
-            key={getOptionKey(option)}
+            key={key}
             label={optionLabel}
             onClick={onOptionClick}
             option={option}
@@ -810,20 +798,31 @@ const DropdownWebform = props => {
 
   let hiddenSelect = renderHiddenSelect(selectedOption);
   let keyboardHelper = renderKeyboardHelper(labelProp);
-  let labelElement = isLoadingData ? (
-    <Spinner style={{ top: 0, width: '25px', height: '25px' }} />
-  ) : (
-    renderLabel(label, selectedOption)
+
+  let labelElement = (
+    <span>
+      {renderLabel(label, selectedOption)}
+      {isLoadingData && (
+        <Spinner
+          style={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: '25px',
+            height: '25px',
+            pointerEvents: 'none'
+          }}
+        />
+      )}
+    </span>
   );
   let dropdownIcon = renderDropdownIcon();
   let items = renderItems(selectedOption);
   let filterElement = renderFilter();
   let clearIcon = renderClearIcon();
 
-  if (editable && editableInputRef.current) {
-    let value = labelProp || value || '';
-    editableInputRef.value = value;
-  }
+  if (editable && editableInputRef.current) editableInputRef.current.value = labelProp ?? value ?? '';
 
   return (
     <div

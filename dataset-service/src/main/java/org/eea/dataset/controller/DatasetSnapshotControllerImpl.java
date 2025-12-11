@@ -13,13 +13,11 @@ import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.DatasetSnapshotService;
 import org.eea.dataset.service.DatasetTableService;
 import org.eea.dataset.service.ResolveSnapshotTable;
-import org.eea.dataset.service.impl.DatasetSnapshotServiceImpl;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.communication.NotificationController.NotificationControllerZuul;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
-import org.eea.interfaces.controller.dataset.DatasetSchemaController;
 import org.eea.interfaces.controller.dataset.DatasetSnapshotController;
 import org.eea.interfaces.controller.orchestrator.JobController.JobControllerZuul;
 import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
@@ -36,10 +34,14 @@ import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.metabase.ReleaseVO;
 import org.eea.interfaces.vo.metabase.SnapshotVO;
 import org.eea.interfaces.vo.orchestrator.JobVO;
+import org.eea.interfaces.vo.orchestrator.enums.JobInfoEnum;
 import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.interfaces.vo.recordstore.ProcessVO;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
+import org.eea.kafka.domain.EventType;
+import org.eea.kafka.domain.NotificationVO;
+import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
 import org.eea.lock.service.LockService;
@@ -122,6 +124,11 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
 
   @Autowired
   private ResolveSnapshotTable resolveSnapshotTable;
+
+  /** The kafka sender utils. */
+  @Autowired
+  private KafkaSenderUtils kafkaSenderUtils;
+
 
   @Value("${eea.authorization.key}")
   private String eeaAuthorizationKey;
@@ -686,7 +693,7 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
   @Override
   @HystrixCommand
   @GetMapping(value = "/v1/historicReleases", produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_NATIONAL_COORDINATOR','DATASET_CUSTODIAN','DATASET_STEWARD','DATASET_OBSERVER','DATASET_STEWARD_SUPPORT','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','EUDATASET_OBSERVER','EUDATASET_STEWARD_SUPPORT','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD','DATACOLLECTION_OBSERVER','DATACOLLECTION_STEWARD_SUPPORT') OR checkApiKey(#dataflowId,null,#datasetId,'DATASET_STEWARD','DATASET_CUSTODIAN','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_NATIONAL_COORDINATOR','DATASET_CUSTODIAN','DATASET_STEWARD','DATASET_OBSERVER','DATASET_STEWARD_SUPPORT','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','EUDATASET_OBSERVER','EUDATASET_STEWARD_SUPPORT','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD','DATACOLLECTION_OBSERVER','DATACOLLECTION_STEWARD_SUPPORT') OR checkApiKey(#dataflowId,null,#datasetId,'DATASET_STEWARD','DATASET_CUSTODIAN','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD') OR hasAnyRole('ADMIN')")
   @ApiOperation(value = "Get dataset historic releases by dataset id",
           notes = "Allowed roles: \n\n Reporting dataset: CUSTODIAN, STEWARD \n\n Data collection: CUSTODIAN, STEWARD \n\n EU dataset: CUSTODIAN, STEWARD")
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully get data"),
@@ -709,6 +716,55 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
     }
 
     return releases;
+  }
+
+  /**
+   * Update the release date of a historic release entry.
+   *
+   * @param idSnapshot the snapshot id
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
+   * @param newReleaseDate the new release date
+   */
+  @Override
+  @HystrixCommand
+  @PutMapping(value = "/v1/{snapshotId}/updateReleaseDate", produces = MediaType.APPLICATION_JSON_VALUE)
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN','DATAFLOW_STEWARD') OR hasAnyRole('ADMIN')")
+  @ApiOperation(value = "Update release date of a historic release entry", hidden = true,
+      notes = "Allowed roles: \n\n Dataflow: CUSTODIAN, STEWARD, ADMIN")
+  @ApiResponses(value = {
+      @ApiResponse(code = 200, message = "Successfully updated release date"),
+      @ApiResponse(code = 400, message = "Dataset id incorrect or user request not found")})
+  public void updateHistoricReleaseDate(
+      @ApiParam(type = "Long", value = "Snapshot id", example = "0")
+      @PathVariable("snapshotId") Long idSnapshot,
+      @ApiParam(type = "Long", value = "Dataflow id", example = "0")
+      @RequestParam("dataflowId") Long dataflowId,
+      @ApiParam(type = "Long", value = "Provider id", example = "0")
+      @RequestParam("providerId") Long providerId,
+      @ApiParam(type = "String",
+          value = "New Release Date") @RequestParam("newReleaseDate") String newReleaseDate) {
+
+    if (dataflowId == null || providerId == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.DATAFLOW_INCORRECT_ID + " or " + EEAErrorMessage.PROVIDER_INCORRECT_ID);
+    }
+
+    try {
+      LOG.info("Updating historic release date for snapshotId {} and providerId {} of dataflowId {} to {}",
+          idSnapshot, providerId, dataflowId, newReleaseDate);
+      datasetSnapshotService.updateHistoricReleaseDate(idSnapshot, dataflowId, providerId, newReleaseDate);
+      LOG.info("Successfully updated historic release date for snapshotId {} and providerId {} of dataflowId {}",
+          idSnapshot, providerId, dataflowId);
+    } catch (EEAException e) {
+      LOG.error("Error updating historic release date for snapshotId {} and providerId {} of dataflowId {}. Error: {}",
+          idSnapshot, providerId, dataflowId, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.EXECUTION_ERROR);
+    } catch (Exception e) {
+      LOG.error("Unexpected error! Error updating historic release date for snapshotId {} and providerId {} of dataflowId {}. Message: {}",
+          idSnapshot, providerId, dataflowId, e.getMessage());
+      throw e;
+    }
   }
 
   /**
@@ -775,7 +831,7 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
   @GetMapping(value = "/historicReleasesRepresentative",
           produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Get historic releases by representative", hidden = true)
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN','DATAFLOW_STEWARD','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_READ','DATAFLOW_REPORTER_WRITE','DATAFLOW_NATIONAL_COORDINATOR','DATAFLOW_OBSERVER','DATAFLOW_STEWARD_SUPPORT')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN','DATAFLOW_STEWARD','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_READ','DATAFLOW_REPORTER_WRITE','DATAFLOW_NATIONAL_COORDINATOR','DATAFLOW_OBSERVER','DATAFLOW_STEWARD_SUPPORT') OR hasAnyRole('ADMIN')")
   public List<ReleaseVO> historicReleasesByRepresentative(
           @ApiParam(type = "Long", value = "Dataflow Id",
                   example = "0") @RequestParam("dataflowId") Long dataflowId,
@@ -860,13 +916,16 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
 
     String user = jobVO!=null ? jobVO.getCreatorUsername() : SecurityContextHolder.getContext().getAuthentication().getName();
 
+    UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
+    userNotificationContentVO.setDataflowId(dataflowId);
+    userNotificationContentVO.setProviderId(dataProviderId);
+    userNotificationContentVO.setUserId(user);
     if(!silentRelease) {
-      UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
-      userNotificationContentVO.setDataflowId(dataflowId);
-      userNotificationContentVO.setProviderId(dataProviderId);
-      userNotificationContentVO.setUserId(user);
-      notificationControllerZuul.createUserNotificationPrivate("RELEASE_START_EVENT",
-              userNotificationContentVO);
+      notificationControllerZuul.createUserNotificationPrivate("RELEASE_START_EVENT", userNotificationContentVO);
+    }
+    else{
+      //the following will not produce any notifications to the user because frontend will never show it in the user notifications
+      notificationControllerZuul.createUserNotificationPrivate("SILENT_RELEASE_START_EVENT", userNotificationContentVO);
     }
 
     ThreadPropertiesManager.setVariable("user", user);
@@ -882,6 +941,31 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
         TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(table.getIdTableSchema(), datasetSchemaId);
         if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable())
                 && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(dataset.getId(), tableSchemaVO.getIdTableSchema()))) {
+          if(jobId != null) {
+            LOG.info("Can not release for jobId {} because an iceberg table exists", jobId);
+            jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.ERROR_ICEBERG_TABLE_EXISTS, null);
+            jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FAILED);
+            datasetSnapshotService.releaseLocksRelatedToRelease(dataflowId, dataProviderId);
+            if(!silentRelease) {
+              //send failed notification
+              Map<String, Object> value = new HashMap<>();
+              value.put(LiteralConstants.USER, user);
+              value.put("release_job_id", jobId);
+              kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.RELEASE_FAILED_ICEBERG_EXISTS_EVENT, value,
+                      NotificationVO.builder().user(user).dataflowId(dataflowId).providerId(dataset.getDataProviderId())
+                              .error("There is an iceberg table for dataflowId " + dataflowId + " and providerId " + dataset.getDataProviderId()).build());
+            }
+            else{
+              LOG.info("Sending SILENT_RELEASE_FAILED_EVENT event for jobId {}", jobId);
+              //this event will not produce any notifications to the user because frontend will never show it in the user notifications
+              Map<String, Object> value = new HashMap<>();
+              value.put(LiteralConstants.USER, user);
+              value.put("release_job_id", jobId);
+              kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.SILENT_RELEASE_FAILED_EVENT, value,
+                      NotificationVO.builder().user(user).dataflowId(dataflowId).providerId(dataset.getDataProviderId())
+                              .error("There is an iceberg table for dataflowId " + dataflowId + " and providerId " + dataset.getDataProviderId()).build());
+            }
+          }
           throw new Exception("Can not release for jobId " + jobId + " because there is an iceberg table");
         }
       }
@@ -1123,4 +1207,5 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
   public void rollBackSnapshotRecord(@PathVariable Long jobId, @RequestParam("dataflowId") Long dataflowId, @RequestParam("providerId") Long providerId) {
     resolveSnapshotTable.rollBackSnapshotTableValues(jobId, dataflowId, providerId);
   }
+
 }

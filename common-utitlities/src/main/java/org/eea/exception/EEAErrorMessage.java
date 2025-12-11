@@ -5,6 +5,18 @@ package org.eea.exception;
  */
 public final class EEAErrorMessage {
 
+  /** The Constant IMPORT_DIRECTORY_NOT_FOUND: {@value}. */
+  public static final String IMPORT_DIRECTORY_NOT_FOUND = "No import directory found for datasetId %s under path %s";
+
+  /** The Constant IMPORT_DIRECTORY_EMPTY: {@value}. */
+  public static final String IMPORT_DIRECTORY_EMPTY = "No imported files found for datasetId %s";
+
+  /** The Constant REQUESTED_IMPORT_FILE_NOT_FOUND: {@value}. */
+  public static final String REQUESTED_IMPORT_FILE_NOT_FOUND = "Requested import file not found for datasetId %s with name %s under path %s";
+
+  /** The Constant ERROR_STREAMING_IMPORTED_FILE: {@value}. */
+  public static final String ERROR_STREAMING_IMPORTED_FILE = "I/O error while streaming file '%s' for datasetId %s: %s";
+
   /** The Constant FILE_FORMAT: {@value}. */
   public static final String FILE_FORMAT = "Invalid file format";
 
@@ -523,6 +535,9 @@ public final class EEAErrorMessage {
   public static final String EMPTY_PROVIDER_DETAILS =
       "Label, code, and groupId must not be empty or null";
 
+  /** The Constant PROVIDER_INCORRECT_ID: {@value}. */
+  public static final String PROVIDER_INCORRECT_ID = "Provider id is incorrect.";
+
   /** The Constant EXPORT_LEAD_REPORTERS: {@value}. */
   public static final String EXPORT_LEAD_REPORTERS =
       "An unknown error happenned while exporting the lead reporters.";
@@ -700,6 +715,9 @@ public final class EEAErrorMessage {
   public static final String DELETING_SNAPSHOT_DOCUMENT =
       "An unknown error happenned while deleting the snapshot document.";
 
+  /** The Constant SNAPSHOT_NOTFOUND: {@value}. */
+  public static final String SNAPSHOT_NOTFOUND = "Snapshot not found.";
+
   /** The Constant UPDATING_COLLABORATION_DOCUMENT: {@value}. */
   public static final String UPDATING_COLLABORATION_DOCUMENT =
       "An unknown error happenned while uploading a collaboration document.";
@@ -723,6 +741,10 @@ public final class EEAErrorMessage {
   /** The Constant RESTORING_SNAPSHOT: {@value}. */
   public static final String RESTORING_SNAPSHOT =
       "An unknown error happenned while restoring a snapshot.";
+
+  /** The Constant RESTORING_SNAPSHOT: {@value}. */
+  public static final String UPDATING_SNAPSHOT =
+      "An unknown error happenned while attempting to update a snapshot.";
 
   /** The Constant CREATING_USERS_THROUGH_FILE: {@value}. */
   public static final String CREATING_USERS_THROUGH_FILE =
@@ -867,6 +889,9 @@ public final class EEAErrorMessage {
 
   /** The Constant ERROR_IMPORT_FILES_CONTAIN_WRONG_HEADERS */
   public static final String ERROR_IMPORT_FILES_CONTAIN_WRONG_HEADERS = "Import files contain wrong headers.";
+
+  /** The Constant ERROR_ILLEGAL_HEADER_CHARACTER */
+  public static final String ERROR_ILLEGAL_HEADER_CHARACTER = "There's an Illegal character in field header ";
 
   /**
    * Instantiates a new EEA error message.

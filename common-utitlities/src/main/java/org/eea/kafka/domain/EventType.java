@@ -35,6 +35,12 @@ public enum EventType {
   /** The release refused event. */
   RELEASE_REFUSED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "dataset_released_refused_key", true),
 
+  /** The release failed iceberg exists event. */
+  RELEASE_FAILED_ICEBERG_EXISTS_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "release_failed_iceberg_exists_key", true),
+
+  /** The silent release failed event. */
+  SILENT_RELEASE_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "silent_release_failed_key", true),
+
   /** The copyToEuDataset refused event. */
   COPY_DATA_TO_EUDATASET_REFUSED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "copy_to_eu_dataset_refused_key", true),
 
@@ -101,6 +107,10 @@ public enum EventType {
   /** The import with read only tables warning event. */
   IMPORT_MISMATCH_OF_DATA_WARNING_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "import_mismatch_of_data_warning_event", true),
+
+  /** The import with read only tables warning event. */
+  IMPORT_MULTILINE_TEXT_CHAR_LIMIT_WARNING_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "import_multiline_text_char_limit_warning_event", true),
 
   /** The import reporting failed no headers matching event. */
   IMPORT_REPORTING_FAILED_NO_HEADERS_MATCHING_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
@@ -207,6 +217,14 @@ public enum EventType {
   /** The record created completed event. */
   RECORD_DELETED_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "created_record_completed_key", true),
+
+  /** The record in multi tables created completed event. */
+  INSERT_RECORDS_MULTI_TABLES_COMPLETED(LiteralConstants.DATA_REPORTING_TOPIC,
+          "insert_records_multi_tables_completed_key", true),
+
+  /** The record in multi tables created failed event. */
+  INSERT_RECORDS_MULTI_TABLES_FAILED(LiteralConstants.DATA_REPORTING_TOPIC,
+          "insert_records_multi_tables_failed_key", true),
 
   /** The delete table completed event. */
   DELETE_TABLE_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
@@ -368,6 +386,10 @@ public enum EventType {
   /** The release snapshot completed event. */
   RELEASE_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "dataset_released_completed_key",
       true),
+
+  /** The silent release snapshot completed event. */
+  SILENT_RELEASE_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "silent_release_completed_key",
+          true),
 
   /** The release provider completed event. */
   RELEASE_PROVIDER_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
@@ -552,6 +574,18 @@ public enum EventType {
   DOWNLOAD_VALIDATIONS_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "download_validations_failed_event", true),
 
+  /** The download imported file started event. */
+  DOWNLOAD_IMPORTED_FILE_STARTED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "download_imported_file_started_event", true),
+
+  /** The download imported file finished event. */
+  DOWNLOAD_IMPORTED_FILE_FINISHED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "download_imported_file_finished_event", true),
+
+  /** The download imported file error event. */
+  DOWNLOAD_IMPORTED_FILE_ERROR_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "download_imported_file_error_event", true),
+
   /** The export qc completed event. */
   EXPORT_QC_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "export_qc_completed_event",
       true),
@@ -626,6 +660,10 @@ public enum EventType {
   EXPORT_SCHEMA_INFORMATION_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "export_schema_information_failed_event", true),
 
+  /** The export schema information failed event. */
+  EXPORT_DEFINITION_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "export_definition_completed_event", true),
+
   /** The no enabled system notifications. */
   NO_ENABLED_SYSTEM_NOTIFICATIONS(LiteralConstants.DATA_REPORTING_TOPIC,
       "no_enabled_system_notifications", true),
@@ -670,7 +708,10 @@ public enum EventType {
 
   /** Validation failure due to system error */
   VALIDATION_FAILED_SYSTEM_ERROR_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "validation_failed_system_error_event", true),
-  
+
+  /** Validation failure due to an illegal character in field header error */
+  VALIDATION_FAILED_ILLEGAL_CHARACTER_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "validation_failed_illegal_character_event", true),
+
   /** Validation finished with canceled tasks event */
   FINISHED_VALIDATION_WITH_CANCELED_TASKS(LiteralConstants.DATA_REPORTING_TOPIC, "finished_validation_with_canceled_tasks_event", true),
 

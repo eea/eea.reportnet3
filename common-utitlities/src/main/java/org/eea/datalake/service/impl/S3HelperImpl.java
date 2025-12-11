@@ -125,18 +125,6 @@ public class S3HelperImpl implements S3Helper {
         return s3Client.listObjects(b -> b.bucket(bucketName).prefix(finalKey)).contents().size() > 0;
     }
 
-    @Override
-    public void deleteTableIfEmpty(String tableSchemaName, S3PathResolver tablePathResolver, DremioHelperService dremioHelperService) throws Exception {
-        String tablePath = getS3Service().getTableAsFolderQueryPath(tablePathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
-        if (checkFolderExist(tablePathResolver, S3_TABLE_NAME_FOLDER_PATH) && !dremioHelperService.checkFolderPromoted(tablePathResolver, tablePathResolver.getTableName())) {
-            dremioHelperService.promoteFolderOrFile(tablePathResolver, tablePathResolver.getTableName());
-        }
-        if (checkFolderExist(tablePathResolver, S3_TABLE_NAME_FOLDER_PATH) && dremioHelperService.getRowCount(tablePath) == 0) {
-            dremioHelperService.demoteFolderOrFile(tablePathResolver, tableSchemaName);
-            deleteFolder(tablePathResolver, S3_TABLE_NAME_FOLDER_PATH);
-        }
-    }
-
     /**
      * checks if folder validation is created in the s3 storage for the specific dataset
      * @param s3PathResolver
@@ -481,20 +469,24 @@ public class S3HelperImpl implements S3Helper {
     @Override
     public File downloadFileFromS3Locally(String s3Path, String localPath, DownloadFilter filter) {
         DirectoryDownload directoryDownload;
-        try (S3TransferManager transferManager = S3TransferManager.builder()
-            .s3Client(s3AsyncClient)
-            .build()) {
-            directoryDownload = transferManager.downloadDirectory(DownloadDirectoryRequest.builder()
-                .destination(Paths.get(localPath))
-                .bucket(S3_DEFAULT_BUCKET_NAME)
-                .filter(filter)
-                .build());
-            CompletedDirectoryDownload completedDirectoryDownload = directoryDownload.completionFuture().join();
-            completedDirectoryDownload.failedTransfers().forEach(failedFileDownload -> LOG.error(failedFileDownload.exception().getMessage()));
-            return new File(localPath);
-        } catch (Exception e) {
-            LOG.error("Error while trying to download file from S3 to local NFS", e);
-            throw new RuntimeException(e);
-        }
+      try (S3TransferManager transferManager = S3TransferManager.builder()
+          .s3Client(s3AsyncClient)
+          .build()) {
+
+        DownloadDirectoryRequest req = DownloadDirectoryRequest.builder()
+            .destination(Paths.get(localPath))
+            .bucket(S3_DEFAULT_BUCKET_NAME)
+            .listObjectsV2RequestTransformer(b -> b.prefix(s3Path.endsWith("/") ? s3Path : (s3Path + "/")))
+            .filter(filter)
+            .build();
+
+        directoryDownload = transferManager.downloadDirectory(req);
+        CompletedDirectoryDownload completed = directoryDownload.completionFuture().join();
+        completed.failedTransfers().forEach(f -> LOG.error(f.exception().getMessage()));
+        return new File(localPath);
+      } catch (Exception e) {
+        LOG.error("Error while trying to download file from S3 to local NFS", e);
+        throw new RuntimeException(e);
+      }
     }
 }

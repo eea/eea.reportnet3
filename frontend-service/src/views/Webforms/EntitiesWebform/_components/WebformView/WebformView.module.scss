@@ -8,16 +8,29 @@
 
     .headerButton {
       border-radius: 5px;
-      margin: 0.3rem ;
+      margin: 0.3rem;
       padding: 0.1rem;
       font-size: 1.2rem !important;
-      text-align: center; 
+      text-align: center;
       display: inline-block;
-
     }
   }
 }
 
 .spinner {
   top: 0;
+}
+
+.viewModeWarning {
+  background: #e6f4fa;
+  // color: var(--dialog-header-icon-color-hover);
+  color: #31708f;
+  border: 1px solid #bce8f1;
+  margin-right: 0.4rem;
+  margin: 0.8rem 0.4rem 0 0;
+  padding: 4px;
+  text-align: center;
+}
+.infoIcon {
+  margin-right: 0.5rem;
 }
