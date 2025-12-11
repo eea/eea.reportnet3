@@ -535,6 +535,9 @@ public final class EEAErrorMessage {
   public static final String EMPTY_PROVIDER_DETAILS =
       "Label, code, and groupId must not be empty or null";
 
+  /** The Constant PROVIDER_INCORRECT_ID: {@value}. */
+  public static final String PROVIDER_INCORRECT_ID = "Provider id is incorrect.";
+
   /** The Constant EXPORT_LEAD_REPORTERS: {@value}. */
   public static final String EXPORT_LEAD_REPORTERS =
       "An unknown error happenned while exporting the lead reporters.";
@@ -712,6 +715,9 @@ public final class EEAErrorMessage {
   public static final String DELETING_SNAPSHOT_DOCUMENT =
       "An unknown error happenned while deleting the snapshot document.";
 
+  /** The Constant SNAPSHOT_NOTFOUND: {@value}. */
+  public static final String SNAPSHOT_NOTFOUND = "Snapshot not found.";
+
   /** The Constant UPDATING_COLLABORATION_DOCUMENT: {@value}. */
   public static final String UPDATING_COLLABORATION_DOCUMENT =
       "An unknown error happenned while uploading a collaboration document.";
@@ -735,6 +741,10 @@ public final class EEAErrorMessage {
   /** The Constant RESTORING_SNAPSHOT: {@value}. */
   public static final String RESTORING_SNAPSHOT =
       "An unknown error happenned while restoring a snapshot.";
+
+  /** The Constant RESTORING_SNAPSHOT: {@value}. */
+  public static final String UPDATING_SNAPSHOT =
+      "An unknown error happenned while attempting to update a snapshot.";
 
   /** The Constant CREATING_USERS_THROUGH_FILE: {@value}. */
   public static final String CREATING_USERS_THROUGH_FILE =

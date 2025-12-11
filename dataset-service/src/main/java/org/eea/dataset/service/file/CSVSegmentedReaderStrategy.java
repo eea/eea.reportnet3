@@ -7,6 +7,7 @@ import com.opencsv.CSVReaderBuilder;
 import lombok.NoArgsConstructor;
 import org.apache.commons.io.input.BOMInputStream;
 import org.bson.types.ObjectId;
+import org.eea.datalake.service.model.TextFieldLengthInfo;
 import org.eea.dataset.exception.InvalidFileException;
 import org.eea.dataset.persistence.data.domain.DatasetValue;
 import org.eea.dataset.persistence.data.domain.FieldValue;
@@ -200,13 +201,18 @@ public class CSVSegmentedReaderStrategy {
             SpatialFieldInfo spatialFieldInfo = new SpatialFieldInfo();
             spatialFieldInfo.setTableName(tableName);
 
+            // Collect multiline-text for >10k violations.
+            TextFieldLengthInfo textFieldLengthInfo = new TextFieldLengthInfo();
+            textFieldLengthInfo.setTableName(tableName);
+
             while ((line = reader.readNext()) != null && numLines < endLine) {
                 final List<String> values = Arrays.asList(line);
                 sanitizeAndCreateDataSet(partitionId, table, tables, values, headers, idTableSchema,
-                        idRecordSchema, fieldSchemas, isDesignDataset, isFixedNumberOfRecords,numLines, spatialFieldInfo);
+                        idRecordSchema, fieldSchemas, isDesignDataset, isFixedNumberOfRecords,numLines, spatialFieldInfo, textFieldLengthInfo);
                 numLines++;
             }
             releaseFieldLimitWarningComponent.releaseFieldSizeNotification(spatialFieldInfo, dataSetSchema.getIdDataFlow(), datasetId);
+            releaseFieldLimitWarningComponent.releaseMultilineTextCharLimitWarning(textFieldLengthInfo, dataSetSchema.getIdDataFlow(), datasetId);
             dataset.setTableValues(tables);
             // Set the dataSetSchemaId of MongoDB
             dataset.setIdDatasetSchema(dataSetSchema.getIdDataSetSchema().toString());
@@ -253,11 +259,11 @@ public class CSVSegmentedReaderStrategy {
     private void sanitizeAndCreateDataSet(final Long partitionId, TableValue table,
                                           final List<TableValue> tables, final List<String> values, List<FieldSchema> headers,
                                           final String idTableSchema, final String idRecordSchema, final List<FieldSchema> fieldSchemas,
-                                          boolean isDesignDataset, boolean isFixedNumberOfRecords,int currentCsvLine,  SpatialFieldInfo spatialFieldInfo) {
+                                          boolean isDesignDataset, boolean isFixedNumberOfRecords,int currentCsvLine,  SpatialFieldInfo spatialFieldInfo, TextFieldLengthInfo textFieldLengthInfo) {
         // if the line is white then skip it
         if (null != values && !values.isEmpty() && !(values.size() == 1 && "".equals(values.get(0)))) {
             addRecordToTable(table, tables, values, partitionId, headers, idTableSchema, idRecordSchema,
-                    fieldSchemas, isDesignDataset, isFixedNumberOfRecords,currentCsvLine,spatialFieldInfo);
+                    fieldSchemas, isDesignDataset, isFixedNumberOfRecords,currentCsvLine,spatialFieldInfo,textFieldLengthInfo);
         }
     }
 
@@ -357,18 +363,18 @@ public class CSVSegmentedReaderStrategy {
     private void addRecordToTable(TableValue table, final List<TableValue> tables,
                                   final List<String> values, final Long partitionId, List<FieldSchema> headers,
                                   final String idTableSchema, final String idRecordSchema, List<FieldSchema> fieldSchemas,
-                                  boolean isDesignDataset, boolean isFixedNumberOfRecords,int currentCsvLine, SpatialFieldInfo spatialFieldInfo) {
+                                  boolean isDesignDataset, boolean isFixedNumberOfRecords,int currentCsvLine, SpatialFieldInfo spatialFieldInfo, TextFieldLengthInfo textFieldLengthInfo) {
         // Create object Table and set the attributes
         if (null == table.getIdTableSchema()) {
             table.setIdTableSchema(idTableSchema);
 
             table.setRecords(createRecords(values, partitionId, table.getIdTableSchema(), headers,
-                    idRecordSchema, fieldSchemas, isDesignDataset, isFixedNumberOfRecords, table,currentCsvLine,spatialFieldInfo));
+                    idRecordSchema, fieldSchemas, isDesignDataset, isFixedNumberOfRecords, table,currentCsvLine,spatialFieldInfo,textFieldLengthInfo));
             tables.add(table);
 
         } else {
             table.getRecords().addAll(createRecords(values, partitionId, table.getIdTableSchema(),
-                    headers, idRecordSchema, fieldSchemas, isDesignDataset, isFixedNumberOfRecords, table,currentCsvLine,spatialFieldInfo));
+                    headers, idRecordSchema, fieldSchemas, isDesignDataset, isFixedNumberOfRecords, table,currentCsvLine,spatialFieldInfo,textFieldLengthInfo));
         }
     }
 
@@ -389,14 +395,14 @@ public class CSVSegmentedReaderStrategy {
     private List<RecordValue> createRecords(final List<String> values, final Long partitionId,
                                             final String idTableSchema, List<FieldSchema> headers, final String idRecordSchema,
                                             List<FieldSchema> fieldSchemas, boolean isDesignDataset, boolean isFixedNumberOfRecords,
-                                            TableValue tableValue,int currentCsvLine, SpatialFieldInfo spatialFieldInfo) {
+                                            TableValue tableValue,int currentCsvLine, SpatialFieldInfo spatialFieldInfo, TextFieldLengthInfo textFieldLengthInfo) {
         final List<RecordValue> records = new ArrayList<>();
         final RecordValue record = new RecordValue();
         if (null != idTableSchema) {
             record.setIdRecordSchema(idRecordSchema);
         }
         record.setFields(createFields(values, headers, fieldSchemas, isDesignDataset,
-                isFixedNumberOfRecords, record,spatialFieldInfo,currentCsvLine));
+                isFixedNumberOfRecords, record,spatialFieldInfo,textFieldLengthInfo,currentCsvLine));
         record.setDatasetPartitionId(partitionId);
         record.setDataProviderCode(this.providerCode);
         record.setTableValue(tableValue);
@@ -418,7 +424,7 @@ public class CSVSegmentedReaderStrategy {
      */
     private List<FieldValue> createFields(final List<String> values, List<FieldSchema> headers,
                                           List<FieldSchema> headersSchema, boolean isDesignDataset, boolean isFixedNumberOfRecords,
-                                          RecordValue record, SpatialFieldInfo spatialFieldInfo, int currentCsvLine) {
+                                          RecordValue record, SpatialFieldInfo spatialFieldInfo, TextFieldLengthInfo textFieldLengthInfo, int currentCsvLine) {
         final List<FieldValue> fields = new ArrayList<>();
         List<String> idSchema = new ArrayList<>();
         int contAux = 0;
@@ -441,6 +447,22 @@ public class CSVSegmentedReaderStrategy {
                             case ATTACHMENT:
                                 field.setValue("");
                                 break;
+                            case TEXTAREA:
+                              if (value != null && value.length() > fieldMaxLength) {
+                                if (textFieldLengthInfo.getFieldName() == null) {
+                                  textFieldLengthInfo.setFieldName(fieldSchema.getHeaderName());
+                                }
+                                List<Long> rl = textFieldLengthInfo.getRecordLines();
+                                if (rl == null) {
+                                  rl = new ArrayList<>();
+                                }
+                                rl.add((long) (currentCsvLine + 1));
+                                textFieldLengthInfo.setRecordLines(rl);
+
+                                // Sets value to avoid passing incomplete text.
+                                field.setValue("");
+                              }
+                              break;
                             case POINT:
                             case LINESTRING:
                             case POLYGON:

@@ -36,6 +36,7 @@ export const ImportTableDataDialog = ({
   const actionsContext = useContext(ActionsContext);
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
+  const [uploadingFileName, setUploadingFileName] = useState('');
 
   const [importTableDialogVisible, setImportTableDialogVisible] = useState(false);
 
@@ -71,7 +72,7 @@ export const ImportTableDataDialog = ({
 
   const onUpload = async e => {
     const action = 'TABLE_IMPORT';
-    const fileName = e?.files?.[0]?.name || ' ';
+    const fileName = uploadingFileName || e?.files?.[0]?.name || ' ';
     actionsContext.testProcess(datasetId, action);
     setImportTableDialogVisible(false);
     const {
@@ -156,7 +157,7 @@ export const ImportTableDataDialog = ({
           dataflowId={dataflowId}
           datasetId={datasetId}
           dialogHeader={`${resourcesContext.messages['uploadTable']}${tableName}`}
-          dialogOnHide={() => setImportTableDialogVisible(false)}
+          dialogOnHide={() => {setImportTableDialogVisible(false), setUploadingFileName('')}}
           dialogVisible={importTableDialogVisible}
           infoTooltip={`${resourcesContext.messages['supportedFileExtensionsTooltip']} .csv`}
           invalidExtensionMessage={resourcesContext.messages['invalidExtensionFile']}
@@ -165,6 +166,11 @@ export const ImportTableDataDialog = ({
           name="file"
           onChangeImportDialogVisibility={onChangeImportDialogVisibility}
           onError={onImportTableError}
+          onSelect={e => {
+            if (e?.files?.[0].name) {
+              setUploadingFileName(e.files[0].name);
+            }
+          }}
           onUpload={onUpload}
           onValidateFile={onValidateFile}
           replaceCheck={true}

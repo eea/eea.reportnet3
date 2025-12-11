@@ -126,6 +126,7 @@ export const Dataflow = () => {
     isReleasable: false,
     isReleaseableDialogVisible: false,
     isReleaseDialogVisible: false,
+    isReleaseSilentDialogVisible: false,
     isReportingDataflowDialogVisible: false,
     isRightPermissionsChanged: false,
     isSameExpirationDate: false,
@@ -306,6 +307,7 @@ export const Dataflow = () => {
       setIsDownloadingUsers(false);
     }
   }, [notificationContext.hidden]);
+
 
   const exportImportMenuItems = [
     {
@@ -1003,6 +1005,16 @@ export const Dataflow = () => {
   useCheckNotifications(['RELEASE_COMPLETED_EVENT', 'RELEASE_PROVIDER_COMPLETED_EVENT'], onLoadReportingDataflow);
   useCheckNotifications(['DELETE_DATAFLOW_COMPLETED_EVENT'], goToDataflowsPage);
 
+  useEffect(() => {
+    const hasSilentReleaseEvent = notificationContext.hidden.some(
+      ({ key }) => key === 'SILENT_RELEASE_COMPLETED_EVENT' || key === 'SILENT_RELEASE_FAILED_EVENT'
+    );
+    if (hasSilentReleaseEvent) {
+      onLoadReportingDataflow();
+    }
+  }, [notificationContext.hidden]);
+
+
   useCheckNotifications(
     [
       'RELEASE_FAILED_EVENT',
@@ -1046,7 +1058,13 @@ export const Dataflow = () => {
 
   const onShowManageReportersDialog = () => manageDialogs('isManageRolesDialogVisible', true);
 
-  const onOpenReleaseConfirmDialog = () => manageDialogs('isReleaseDialogVisible', true);
+  const onOpenReleaseConfirmDialog = () => {
+    manageDialogs('isReleaseDialogVisible', true);
+  };
+
+  const onOpenSilentReleaseConfirmDialog = () => {
+    manageDialogs('isReleaseSilentDialogVisible', true);
+  };
 
   const onConfirmExport = async () => {
     try {
@@ -1064,23 +1082,46 @@ export const Dataflow = () => {
     }
   };
 
-  const onConfirmRelease = async () => {
+  const onConfirmRelease = async (isSilent = false) => {
     try {
-      notificationContext.add({ type: 'RELEASE_START_EVENT' });
-      await SnapshotService.release(dataflowId, dataProviderId, dataflowState.restrictFromPublic);
+      if (!isSilent) {
+        notificationContext.add({ type: 'RELEASE_START_EVENT' });
+      }
 
+      if (isSilent) {
+        await SnapshotService.silentRelease(
+          dataflowId,
+          dataProviderId,
+          dataflowState.restrictFromPublic
+        );
+      } else {
+        await SnapshotService.release(
+          dataflowId,
+          dataProviderId,
+          dataflowState.restrictFromPublic
+        );
+      }
       dataflowState.data.datasets
         .filter(dataset => dataset.dataProviderId === dataProviderId)
         .forEach(dataset => (dataset.isReleasing = true));
     } catch (error) {
-      if (error.response.status === 423) {
+      if (!isSilent && error.response && error.response.status === 423) {
         notificationContext.add({ type: 'RELEASE_BLOCKED_EVENT' }, true);
       } else {
-        console.error('Dataflow - onConfirmRelease.', error);
-        notificationContext.add({ type: 'RELEASE_FAILED_EVENT', content: {} }, true);
+        console.error(
+          `Dataflow - onConfirm${isSilent ? 'Silent' : ''}Release.`,
+          error
+        );
+        const errorType = isSilent
+          ? 'SILENT_RELEASE_FAILED_EVENT'
+          : 'RELEASE_FAILED_EVENT';
+        notificationContext.add({ type: errorType, content: {} }, true);
       }
     } finally {
-      manageDialogs('isReleaseDialogVisible', false);
+      const dialogKey = isSilent
+        ? 'isReleaseSilentDialogVisible'
+        : 'isReleaseDialogVisible';
+      manageDialogs(dialogKey, false);
     }
   };
 
@@ -1351,6 +1392,7 @@ export const Dataflow = () => {
           manageDialogs={manageDialogs}
           onCleanUpReceipt={onCleanUpReceipt}
           onOpenReleaseConfirmDialog={onOpenReleaseConfirmDialog}
+          onOpenSilentReleaseConfirmDialog={onOpenSilentReleaseConfirmDialog}
           representativeId={representativeId}
           setIsReceiptLoading={setIsReceiptLoading}
         />
@@ -1415,7 +1457,7 @@ export const Dataflow = () => {
             header={resourcesContext.messages['confirmReleaseHeader']}
             labelCancel={resourcesContext.messages['no']}
             labelConfirm={resourcesContext.messages['yes']}
-            onConfirm={onConfirmRelease}
+            onConfirm={() => onConfirmRelease(false)}
             onHide={() => {
               manageDialogs('isReleaseDialogVisible', false);
               if (dataflowState.representative.restrictFromPublic !== dataflowState.restrictFromPublic) {
@@ -1424,6 +1466,24 @@ export const Dataflow = () => {
             }}
             visible={dataflowState.isReleaseDialogVisible}>
             {resourcesContext.messages['confirmReleaseQuestion']}
+          </ConfirmDialog>
+        )}
+
+        {dataflowState.isReleaseSilentDialogVisible && (
+          <ConfirmDialog
+            footerAddon={dataflowState.anySchemaAvailableInPublic && !isBusinessDataflow && checkRestrictFromPublic}
+            header={resourcesContext.messages['confirmReleaseHeader']}
+            labelCancel={resourcesContext.messages['no']}
+            labelConfirm={resourcesContext.messages['yes']}
+            onConfirm={() => onConfirmRelease(true)}
+            onHide={() => {
+              manageDialogs('isReleaseSilentDialogVisible', false);
+              if (dataflowState.representative.restrictFromPublic !== dataflowState.restrictFromPublic) {
+                setRestrictFromPublic(dataflowState.representative.restrictFromPublic);
+              }
+            }}
+            visible={dataflowState.isReleaseSilentDialogVisible}>
+            {resourcesContext.messages['confirmSilentReleaseQuestion']}
           </ConfirmDialog>
         )}
 

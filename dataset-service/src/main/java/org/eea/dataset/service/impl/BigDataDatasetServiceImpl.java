@@ -76,6 +76,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -885,7 +886,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
     }
 
     @Override
-    public void deleteTableData(Long datasetId, Long dataflowId, Long providerId, String tableSchemaId, Long jobId) throws Exception {
+    public void deleteTableData(Long datasetId, Long dataflowId, Long providerId, String tableSchemaId, Long jobId, Boolean createEmptyTablesBool) throws Exception {
         try {
             String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
             TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, datasetSchemaId);
@@ -933,8 +934,10 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                     s3HelperPrivate.deleteFolder(s3ReferenceTablePathResolver, S3_DATAFLOW_REFERENCE_FOLDER_PATH);
                 }
             }
-            DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
-            createEmptyTables.runCreationForSpecificTableSchema(dataSetMetabaseVO, tableSchemaId);
+            if(BooleanUtils.isTrue(createEmptyTablesBool)) {
+                DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
+                createEmptyTables.runCreationForSpecificTableSchema(dataSetMetabaseVO, tableSchemaId);
+            }
 
             if (jobId != null) {
                 jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FINISHED);
@@ -999,7 +1002,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                     }
                 }
                 //we do not pass a job id because there is a job for the whole dataset data deletion
-                deleteTableData(datasetId, dataflowId, providerId, tableSchemaIdNameVO.getIdTableSchema(), null);
+                deleteTableData(datasetId, dataflowId, providerId, tableSchemaIdNameVO.getIdTableSchema(), null, true);
             }
 
             if (jobId != null) {
@@ -1565,7 +1568,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         }
 
         if (datasetMetabaseService.getDatasetType(datasetId).equals(DatasetTypeEnum.DESIGN)) {
-            s3HelperPrivate.deleteTableIfEmpty(tableSchemaName, s3IcebergTablePathResolver, dremioHelperService);
+            createEmptyTables.deleteTableIfEmpty(tableSchemaName, s3IcebergTablePathResolver);
         }
 
         //check if table exists and if not create it
@@ -2221,6 +2224,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 insertRecords(dataSetMetabaseVO.getDataflowId(), dataSetMetabaseVO.getDataProviderId(), dataSetMetabaseVO.getId(),
                         tableSchemaVO.getNameTableSchema(), tableVO.getRecords());
             }
+            LOG.info("PaM/Entity group save: Successfully inserted multiple records for datasetId {}", dataSetMetabaseVO.getId());
             //sent completed event
             kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.INSERT_RECORDS_MULTI_TABLES_COMPLETED,
                     null,
@@ -2791,6 +2795,35 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             throw e;
         } finally {
             FileUtils.deleteDirectory(unZippedFile);
+        }
+    }
+
+    /**
+     * Checks for duplicate value in field
+     *
+     * @param datasetId The dataset id
+     * @param dataflowId The dataflow id
+     * @param providerId The provider id
+     * @param tableName The table schema id
+     * @param fieldVO The field object
+     */
+    public Boolean duplicateFieldValueExists(Long datasetId, Long dataflowId, Long providerId, String tableName, FieldVO fieldVO){
+        S3PathResolver s3IcebergTablePathResolver = new S3PathResolver(dataflowId, providerId, datasetId, tableName, tableName, S3_TABLE_AS_FOLDER_QUERY_PATH);
+        s3IcebergTablePathResolver.setIsIcebergTable(true);
+        String icebergTablePath = s3ServicePrivate.getTableAsFolderQueryPath(s3IcebergTablePathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
+        //check if table exists
+        if (s3HelperPrivate.checkFolderExist(s3IcebergTablePathResolver, S3_TABLE_NAME_FOLDER_PATH) && dremioHelperService.checkFolderPromoted(s3IcebergTablePathResolver, tableName)){
+            String getRecordIdOfDuplicate =  "SELECT " + PARQUET_RECORD_ID_COLUMN_HEADER + " FROM " + icebergTablePath + " WHERE " + UtilityClass.addQuotesToFieldNames(fieldVO.getName()) + " = '" + fieldVO.getValue() + "' LIMIT 1";
+            try {
+                String recordId = dremioJdbcTemplate.queryForObject(getRecordIdOfDuplicate, String.class);
+                LOG.info("Found duplicate value in table {} for field {} and value {} in recordId {}", icebergTablePath, fieldVO.getName(), fieldVO.getValue(), recordId);
+                return true;
+            } catch (EmptyResultDataAccessException e) { //no duplicate
+                return false;
+            }
+        }
+        else{
+            return false;
         }
     }
 }

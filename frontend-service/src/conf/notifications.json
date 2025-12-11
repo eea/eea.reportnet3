@@ -1119,6 +1119,7 @@
         { "key": "DELETE_PROVIDER_DATASET_DATA_ERROR" },
         { "key": "CONVERT_TABLE_ERROR" },
         { "key": "RESTORE_TABLE_DATA_ERROR" },
+        { "key": "UPDATE_RELEASE_DATE_ERROR" },
         {
           "key": "PARQUET_TO_ICEBERG_CONVERSION_FAILED_EVENT",
           "navigateTo": {
@@ -1233,6 +1234,9 @@
             "section": "DATASET",
             "parameters": ["dataflowId", "datasetId"]
           }
+        },
+        {
+          "key": "UPDATE_RELEASE_DATE_SUCCESS"
         },
         {
           "key": "IMPORT_REPORTING_COMPLETED_EVENT",
@@ -1732,9 +1736,26 @@
           }
         }
       ]
+    },
+    {
+      "key": "warn",
+      "lifeTime": 20000,
+      "fixed": false,
+      "types": [
+        {
+          "key": "IMPORT_MULTILINE_TEXT_CHAR_LIMIT_WARNING_EVENT",
+          "navigateTo": {
+            "section": "DATASET",
+            "parameters": ["dataflowId", "datasetId"]
+          }
+        }
+      ]
     }
   ],
   "hiddenNotifications": [
+    "SILENT_RELEASE_COMPLETED_EVENT",
+    "SILENT_RELEASE_START_EVENT",
+    "SILENT_RELEASE_FAILED_EVENT",
     "INSERT_RECORDS_MULTI_TABLES_INIT",
     "INSERT_RECORDS_MULTI_TABLES_COMPLETED",
     "INSERT_RECORDS_MULTI_TABLES_FAILED",

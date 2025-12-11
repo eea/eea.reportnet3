@@ -282,6 +282,15 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
           LOG.info("Automatic feedback message created of dataflow {}, datasetId {} and jobId {}. Message: {}", dataflowVO.getId(), datasetId, jobId,
                   messageVO.getContent());
         }
+        else{
+          LOG.info("Sending SILENT_RELEASE_COMPLETED_EVENT event for jobId {}", jobId);
+          //this event will not produce any notifications to the user because frontend will never show it in the user notifications
+          kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.SILENT_RELEASE_COMPLETED_EVENT, null,
+                  NotificationVO.builder()
+                          .user(user)
+                          .dataflowId(dataset.getDataflowId()).dataflowName(dataflowVO.getName())
+                          .providerId(dataset.getDataProviderId()).build());
+        }
       }
     } catch (Exception e) {
       LOG.error("Unexpected error! Error executing event {}. Message: {}", eeaEventVO, e.getMessage());

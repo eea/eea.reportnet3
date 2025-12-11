@@ -1107,17 +1107,16 @@ public class DatasetControllerImpl implements DatasetController {
     try {
       LOG.info("PaM/Entity group save: Inserting multiple records for datasetId {}", datasetId);
       DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
+      //send init event for frontend
+      UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
+      userNotificationContentVO.setDatasetId(datasetId);
+      notificationControllerZuul.createUserNotificationPrivate("INSERT_RECORDS_MULTI_TABLES_INIT", userNotificationContentVO);
       if(dataFlowControllerZuul.isBigDataflow(dataSetMetabaseVO.getDataflowId())){
-        //send init event for frontend
-        UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
-        userNotificationContentVO.setDatasetId(datasetId);
-        notificationControllerZuul.createUserNotificationPrivate("INSERT_RECORDS_MULTI_TABLES_INIT", userNotificationContentVO);
         bigDataDatasetService.insertRecordsInMultipleTables(dataSetMetabaseVO, tableRecords);
       }
       else{
-        updateRecordHelper.executeMultiCreateProcess(datasetId, tableRecords);
+        updateRecordHelper.executeMultiCreateProcess(dataSetMetabaseVO, tableRecords);
       }
-      LOG.info("PaM/Entity group save: Successfully inserted multiple records for datasetId {}", datasetId);
     } catch (EEAException e) {
       LOG.error("Error inserting records for datasetId {} Message : {}", datasetId, e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -1388,7 +1387,7 @@ public class DatasetControllerImpl implements DatasetController {
       Boolean isBigDataflow = dataFlowControllerZuul.isBigDataflow(dataflowId);
       if(Boolean.TRUE.equals(isBigDataflow)){
         LOG.info("Deleting table data for big data dataflowId {}, datasetId {} and tableSchemaId {}", dataflowId, datasetId, tableSchemaId);
-        bigDataDatasetService.deleteTableData(datasetId, dataflowId, providerId, tableSchemaId, jobId);
+        bigDataDatasetService.deleteTableData(datasetId, dataflowId, providerId, tableSchemaId, jobId, true);
       }
       else {
         LOG.info("Deleting table data for dataflowId {}, datasetId {} and tableSchemaId {}", dataflowId, datasetId, tableSchemaId);
@@ -3813,5 +3812,27 @@ public class DatasetControllerImpl implements DatasetController {
   @PostMapping("/private/clearOldLocks")
   public int clearOldLocks() {
     return lockService.deletePreviousDayLocks();
+  }
+
+  @Override
+  @PreAuthorize("isAuthenticated()")
+  @PostMapping("/duplicateFieldValueExists/{datasetId}")
+  public Boolean duplicateFieldValueExists(@PathVariable("datasetId") Long datasetId, @RequestParam(value = "tableSchemaId") String tableSchemaId, @RequestBody FieldVO fieldVO) throws Exception{
+    try{
+      DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
+      Boolean isBigData = dataFlowControllerZuul.isBigDataflow(dataSetMetabaseVO.getDataflowId());
+      if(BooleanUtils.isTrue(isBigData)){
+        Long providerId = (dataSetMetabaseVO.getDataProviderId() != null) ? dataSetMetabaseVO.getDataProviderId() : 0L;
+        String tableName = datasetSchemaService.getTableSchemaName(dataSetMetabaseVO.getDatasetSchema(), tableSchemaId);
+        return bigDataDatasetService.duplicateFieldValueExists(datasetId, dataSetMetabaseVO.getDataflowId(), providerId, tableName, fieldVO);
+      }
+      else{
+        return datasetService.duplicateFieldValueExists(datasetId, fieldVO);
+      }
+    }
+    catch (Exception e){
+      LOG.error("Could not check for duplicate entity for datasetId {} tableSchemaId {} and field name {} and value {}", datasetId, tableSchemaId, fieldVO.getName(), fieldVO.getValue());
+      throw e;
+    }
   }
 }

@@ -99,5 +99,6 @@ export const DatasetConfig = {
   validateAllSql: '/rules/validateAllRules?datasetId={:datasetId}',
   validateSql: '/rules/validateSqlRules?datasetId={:datasetId}&datasetSchemaId={:datasetSchemaId}',
   validationViewer: '/dataset/findPositionFromAnyObject/{:objectId}?datasetId={:datasetId}&type={:entityType}',
-  testImportProcess: '/dataset/checkImportProcess/{:datasetId}'
+  testImportProcess: '/dataset/checkImportProcess/{:datasetId}',
+  checkDuplicateValues: '/dataset/duplicateFieldValueExists/{:datasetId}?tableSchemaId={:tableSchemaId}',
 };

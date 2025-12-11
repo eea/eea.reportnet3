@@ -1,5 +1,6 @@
 package org.eea.s3configuration.types;
 
+import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3AsyncClient;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
@@ -14,4 +15,5 @@ public interface S3Configuration {
   String getIcebergBucket();
   String getS3IcebergBucketName();
   String getS3IcebergBucketPath();
+  Region getS3Region();
 }

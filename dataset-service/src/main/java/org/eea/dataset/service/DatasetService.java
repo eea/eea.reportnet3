@@ -739,4 +739,12 @@ public interface DatasetService {
    *
    */
   ReleasedDatasetDataInfoVO getReleasedDatasetDataInfo(Long collectionDatasetId, Long reportingDatasetId, Long dataflowId, DataProviderVO dataProviderVO, String tableSchemaId, DatasetTypeEnum datasetType) throws Exception;
+
+  /**
+   * Checks for duplicate value in field
+   *
+   * @param datasetId The dataset id
+   * @param fieldVO The field object
+   */
+  Boolean duplicateFieldValueExists(Long datasetId, FieldVO fieldVO);
 }

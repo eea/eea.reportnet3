@@ -104,14 +104,7 @@ import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.eea.utils.LiteralConstants.*;
@@ -660,8 +653,9 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     Boolean silentRelease = false;
     ProcessVO processVO = null;
     Long idDataflow = datasetMetabaseService.findDatasetMetabase(idDataset).getDataflowId();
+    Long jobId = null;
     if (processId!=null) {
-      Long jobId = jobProcessControllerZuul.findJobIdByProcessId(processId);
+      jobId = jobProcessControllerZuul.findJobIdByProcessId(processId);
       processVO = processControllerZuul.findById(processId);
       value.put(LiteralConstants.USER, processVO.getUser());
       value.put(LiteralConstants.JOB_ID, jobId);
@@ -717,6 +711,11 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
         if(!silentRelease) {
           releaseEvent(EventType.RELEASE_FAILED_EVENT, idSnapshot, e.getMessage(), value);
         }
+        else{
+          LOG.info("Sending SILENT_RELEASE_FAILED_EVENT event for jobId {}", jobId);
+          //this event will not produce any notifications to the user because frontend will never show it in the user notifications
+          releaseEvent(EventType.SILENT_RELEASE_FAILED_EVENT, idSnapshot, e.getMessage(), value);
+        }
         removeLockRelatedToCopyDataToEUDataset(idDataflow);
         releaseLocksRelatedToRelease(idDataflow, idDataProvider);
       }
@@ -724,6 +723,11 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       LOG.error("Error in release snapshot {} of processId {}", idSnapshot, processId);
       if(!silentRelease) {
         releaseEvent(EventType.RELEASE_FAILED_EVENT, idSnapshot, "Error in release snapshot", value);
+      }
+      else{
+        LOG.info("Sending SILENT_RELEASE_FAILED_EVENT event for jobId {}", jobId);
+        //this event will not produce any notifications to the user because frontend will never show it in the user notifications
+        releaseEvent(EventType.SILENT_RELEASE_FAILED_EVENT, idSnapshot, "Error in release snapshot", value);
       }
       removeLockRelatedToCopyDataToEUDataset(idDataflow);
       releaseLocksRelatedToRelease(idDataflow, idDataProvider);
@@ -1719,5 +1723,100 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     }
 
     return file;
+  }
+
+  @Override
+  public void updateHistoricReleaseDate(Long snapshotId, Long dataflowId, Long providerId, String newReleaseDate) throws EEAException {
+    if (dataflowId == null || providerId == null || snapshotId == null || newReleaseDate == null) {
+      throw new EEAException("One or more required parameters were not provided with the request.");
+    }
+
+    Snapshot snapshot = snapshotRepository.findById(snapshotId).orElse(null);
+    if (snapshot == null) {
+      throw new EEAException(EEAErrorMessage.SNAPSHOT_NOTFOUND);
+    }
+
+    Long datasetId;
+    if (snapshot.getReportingDataset() != null) {
+      datasetId = snapshot.getReportingDataset().getId();
+    } else if (snapshot.getDataCollectionId() != null) {
+      datasetId = snapshot.getDataCollectionId();
+    } else {
+      throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
+    }
+
+    // Load dataset to check if it matches dataflow and provider.
+    DataSetMetabaseVO datasetMetabase = datasetMetabaseService.findDatasetMetabase(datasetId);
+    if (datasetMetabase == null) {
+      throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
+    }
+
+    boolean belongsToDataset = Objects.equals(datasetMetabase.getDataflowId(), dataflowId)
+        && Objects.equals(datasetMetabase.getDataProviderId(), providerId);
+
+    if (!belongsToDataset) {
+      LOG.error("Snapshot {} does not belong to dataflowId {} / providerId {}. Real dataflowId={}, providerId={}",
+          snapshotId, dataflowId, providerId, datasetMetabase.getDataflowId(), datasetMetabase.getDataProviderId());
+      throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
+    }
+
+    // Update date_released field.
+    Date dateReleasing = null;
+    if (StringUtils.isNotBlank(newReleaseDate)) {
+      try {
+        dateReleasing = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX").parse(newReleaseDate);
+      } catch (ParseException e) {
+        LOG.error("Error parsing the date of the release of snapshot with id {} and providerId {} of dataflowId {}. Message: {}",
+            snapshotId,  dataflowId, providerId, e.getMessage());
+        throw new EEAException(EEAErrorMessage.UPDATING_SNAPSHOT);
+      }
+    }
+
+    List<Snapshot> snapshotsToUpdate = new ArrayList<>();
+    Long jobId = snapshot.getJobId();
+
+    // Get all snapshots with the same jobId.
+    if (jobId != null) {
+      List<Snapshot> sameJobSnapshots = snapshotRepository.findByJobId(jobId);
+
+      for (Snapshot sn : sameJobSnapshots) {
+        Long snapshotDatasetId;
+
+        if (sn.getReportingDataset() != null) {
+          snapshotDatasetId = sn.getReportingDataset().getId();
+        } else {
+          snapshotDatasetId = sn.getDataCollectionId();
+        }
+
+        if (snapshotDatasetId == null) {
+          continue;
+        }
+
+        DataSetMetabaseVO sMetabase = datasetMetabaseService.findDatasetMetabase(snapshotDatasetId);
+        if (sMetabase == null) {
+          continue;
+        }
+
+        // Verify that the dataset belongs to the current dataflow and provider.
+        if (Objects.equals(sMetabase.getDataflowId(), dataflowId) && Objects.equals(sMetabase.getDataProviderId(), providerId)) {
+          snapshotsToUpdate.add(sn);
+        }
+      }
+    }
+
+    SimpleDateFormat descFmt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+    for (Snapshot sn : snapshotsToUpdate) {
+      sn.setDateReleased(dateReleasing);
+
+      if (dateReleasing != null) {
+        String formatted = descFmt.format(dateReleasing);
+        sn.setDescription("Release " + formatted);
+      }
+    }
+
+    snapshotRepository.saveAll(snapshotsToUpdate);
+
+    LOG.info("Updated dateReleased and description for snapshotId {} and providerId {} of dataflowId {} to {}", snapshotId, dataflowId, providerId, newReleaseDate);
   }
 }

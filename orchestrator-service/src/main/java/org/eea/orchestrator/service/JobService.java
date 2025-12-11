@@ -8,6 +8,7 @@ import org.eea.interfaces.vo.orchestrator.enums.JobInfoEnum;
 import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.interfaces.vo.orchestrator.enums.JobTypeEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
+import org.eea.kafka.domain.EventType;
 import org.eea.orchestrator.persistence.domain.Job;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -62,7 +63,7 @@ public interface JobService {
 
     void releaseValidationRefusedNotification(Long jobId, String user, Long datasetId);
 
-    void releaseReleaseRefusedNotification(Long jobId, String user, Long dataflowId, Long providerId);
+    void releaseReleaseRefusedNotification(Long jobId, String user, Long dataflowId, Long providerId, Boolean silentRelease);
 
     void releaseCopyToEuDatasetRefusedNotification(Long jobId, String user, Long dataflowId);
 

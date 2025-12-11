@@ -7,6 +7,10 @@ export const SnapshotConfig = {
   getAllReporter: '/snapshot/dataset/{:datasetId}/listSnapshots',
   release:
     '/orchestrator/jobs/addRelease/dataflow/{:dataflowId}/dataProvider/{:dataProviderId}/release?restrictFromPublic={:restrictFromPublic}',
+  silentRelease:
+    '/orchestrator/jobs/addRelease/dataflow/{:dataflowId}/dataProvider/{:dataProviderId}/release?validate=true&restrictFromPublic={:restrictFromPublic}&silentRelease=true',
   restoreDesigner: '/snapshot/{:snapshotId}/dataschema/{:datasetSchemaId}/restore',
-  restoreReporter: '/snapshot/{:snapshotId}/dataset/{:datasetId}/restore'
+  restoreReporter: '/snapshot/{:snapshotId}/dataset/{:datasetId}/restore',
+  updateReleaseDate:
+    '/snapshot/v1/{:snapshotId}/updateReleaseDate?dataflowId={:dataflowId}&providerId={:providerId}&newReleaseDate={:newReleaseDate}'
 };

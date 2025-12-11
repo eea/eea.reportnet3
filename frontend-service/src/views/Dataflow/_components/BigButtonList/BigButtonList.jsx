@@ -388,12 +388,12 @@ export const BigButtonList = ({
       setIsQCsNotValidWarningVisible(true);
       changeIsActiveButtonState(true);
       setIsActiveButton(true);
-    } else if (notificationContext.hidden.find(notification => notification.key === 'EMPTY_TABLE_EVENT')) {
+    } else if (notificationContext.hidden.find(notification => notification.key === 'EMPTY_TABLE_EVENT' && notification.content.dataflowId === Number(dataflowId))) {
       setEmptyTable(true);
       setIsQCsNotValidWarningVisible(false);
       setIsActiveButton(true);
     }
-  }, [notificationContext]);
+  }, [dataflowId, notificationContext]);
 
   const onShowHistoricReleases = typeView => {
     setIsHistoricReleasesDialogVisible(true);

@@ -1,6 +1,7 @@
 package org.eea.dataset.service.impl;
 
 import org.eea.datalake.service.model.SpatialFieldInfo;
+import org.eea.datalake.service.model.TextFieldLengthInfo;
 import org.eea.dataset.service.ReleaseFieldLimitWarningComponent;
 import org.eea.exception.EEAException;
 import org.eea.kafka.domain.EventType;
@@ -35,6 +36,25 @@ public class ReleaseFieldLimitWarningComponentImpl implements ReleaseFieldLimitW
       notificationVO.setRecordLines(recordLines);
 
       kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.IMPORT_FIELD_SIZE_EXCEEDS_LIMIT_WARNING_EVENT, null, notificationVO);
+    }
+  }
+
+  @Override
+  public void releaseMultilineTextCharLimitWarning(TextFieldLengthInfo textFieldLengthInfo, Long dataflowId, Long datasetId) throws EEAException {
+    if (textFieldLengthInfo != null && !textFieldLengthInfo.getRecordLines().isEmpty()) {
+      NotificationVO notificationVO = NotificationVO.builder()
+          .dataflowId(dataflowId)
+          .datasetId(datasetId)
+          .build();
+      String recordLines = textFieldLengthInfo.getRecordLines().stream()
+          .map(String::valueOf)
+          .collect(Collectors.joining(","));
+
+      notificationVO.setTableName(textFieldLengthInfo.getTableName());
+      notificationVO.setFieldName(textFieldLengthInfo.getFieldName());
+      notificationVO.setRecordLines(recordLines);
+
+      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.IMPORT_MULTILINE_TEXT_CHAR_LIMIT_WARNING_EVENT, null, notificationVO);
     }
   }
 }

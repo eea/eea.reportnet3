@@ -3893,4 +3893,23 @@ public class DatasetServiceImpl implements DatasetService {
     return releasedDatasetDataInfoVO;
   }
 
+  /**
+   * Checks for duplicate value in field
+   *
+   * @param datasetId The dataset id
+   * @param fieldVO The field object
+   */
+  @Override
+  public Boolean duplicateFieldValueExists(Long datasetId, FieldVO fieldVO){
+    TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, datasetId));
+    FieldValue fieldValue = fieldRepository.findFirstByIdFieldSchemaAndValue(fieldVO.getIdFieldSchema(), fieldVO.getValue());
+    if(fieldValue == null){
+      return false;
+    }
+    else{
+      LOG.info("Found duplicate value in datasetId {} for field {} and value {}", datasetId, fieldVO.getName(), fieldVO.getValue());
+      return true;
+    }
+  }
+
 }
