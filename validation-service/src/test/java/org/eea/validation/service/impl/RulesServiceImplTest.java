@@ -39,7 +39,6 @@ import org.eea.validation.persistence.schemas.audit.Audit;
 import org.eea.validation.persistence.schemas.audit.RuleHistoricInfo;
 import org.eea.validation.persistence.schemas.rule.Rule;
 import org.eea.validation.persistence.schemas.rule.RulesSchema;
-import org.eea.validation.util.SQLCountryCompanyOrganizationCodeUtils;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -65,9 +64,6 @@ import static org.mockito.Mockito.when;
 /** The Class RulesServiceImplTest. */
 @RunWith(MockitoJUnitRunner.class)
 public class RulesServiceImplTest {
-
-  @Mock
-  private SQLCountryCompanyOrganizationCodeUtils sqlCountryCompanyOrganizationCodeUtils;
 
   /** The rules repository. */
   @Mock
@@ -474,8 +470,6 @@ public class RulesServiceImplTest {
     Mockito.when(datasetSchemaController.findDataSchemaByDatasetId(Mockito.any()))
             .thenReturn(schemaVO);
     Mockito.when(datasetRepository.getTableId(Mockito.any(), Mockito.any())).thenReturn(1L);
-    Mockito.when(sqlCountryCompanyOrganizationCodeUtils.replaceCodesIfNeeded(Mockito.anyLong(), Mockito.anyString()))
-            .thenReturn(Mockito.anyString());
 
     rulesServiceImpl.validateAllRules(1L, false, "user");
     Mockito.verify(kafkaSenderUtils, Mockito.times(1)).releaseNotificableKafkaEvent(Mockito.any(),
@@ -561,8 +555,6 @@ public class RulesServiceImplTest {
     Mockito.when(datasetSchemaController.findDataSchemaByDatasetId(Mockito.any()))
             .thenReturn(schemaVO);
     Mockito.when(datasetRepository.getTableId(Mockito.any(), Mockito.any())).thenReturn(1L);
-    Mockito.when(sqlCountryCompanyOrganizationCodeUtils.replaceCodesIfNeeded(Mockito.anyLong(), Mockito.anyString()))
-                    .thenReturn(Mockito.anyString());
 
     rulesServiceImpl.validateAllRules(1L, false, "user");
     Mockito.verify(kafkaSenderUtils, Mockito.times(1)).releaseNotificableKafkaEvent(Mockito.any(),
@@ -649,8 +641,6 @@ public class RulesServiceImplTest {
     Mockito.when(datasetSchemaController.findDataSchemaByDatasetId(Mockito.any()))
             .thenReturn(schemaVO);
     Mockito.when(datasetRepository.getTableId(Mockito.any(), Mockito.any())).thenReturn(1L);
-    Mockito.when(sqlCountryCompanyOrganizationCodeUtils.replaceCodesIfNeeded(Mockito.anyLong(), Mockito.anyString()))
-            .thenReturn(Mockito.anyString());
 
     rulesServiceImpl.validateAllRules(1L, false, "user");
     Mockito.verify(kafkaSenderUtils, Mockito.times(1)).releaseNotificableKafkaEvent(Mockito.any(),
@@ -733,13 +723,8 @@ public class RulesServiceImplTest {
     Mockito.when(rulesRepository.findByIdDatasetSchema(Mockito.any())).thenReturn(ruleSchema);
     Mockito.when(rulesRepository.findSqlRules(Mockito.any())).thenReturn(rulesSQL);
 
-    Mockito.when(sqlCountryCompanyOrganizationCodeUtils.replaceCodesIfNeeded(
-                    Mockito.anyLong(),
-                    Mockito.anyString()))
-            .thenReturn("mocked-sql");
-
-    Mockito.when(datasetSchemaController.findDataSchemaByDatasetId(Mockito.anyLong()))
-            .thenReturn(schemaVO);
+    Mockito.when(rulesRepository.getAllDisabledRules(Mockito.any())).thenReturn(ruleSchema);
+    Mockito.when(rulesRepository.getAllUncheckedRules(Mockito.any())).thenReturn(ruleSchema);
 
     rulesServiceImpl.validateAllRules(1L, false, "user");
     Mockito.verify(kafkaSenderUtils, Mockito.times(1)).releaseNotificableKafkaEvent(Mockito.any(),
