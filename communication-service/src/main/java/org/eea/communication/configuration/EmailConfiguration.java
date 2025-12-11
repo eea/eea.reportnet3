@@ -28,7 +28,7 @@ public class EmailConfiguration {
   private String mailServerUsername;
 
   /** The mail server password. */
-  @Value("${spring.mail.password:}")
+  @Value("${spring.mail.password}")
   private String mailServerPassword;
 
   /** The mail server auth. */
@@ -50,10 +50,8 @@ public class EmailConfiguration {
 
     mailSender.setHost(mailServerHost);
     mailSender.setPort(mailServerPort);
-
-    // these lines are commented by the server configuration.
-    // mailSender.setUsername(mailServerUsername);
-    // mailSender.setPassword(mailServerPassword);
+    mailSender.setUsername(mailServerUsername);
+    mailSender.setPassword(mailServerPassword);
 
     Properties props = mailSender.getJavaMailProperties();
     props.put("mail.transport.protocol", "smtp");
