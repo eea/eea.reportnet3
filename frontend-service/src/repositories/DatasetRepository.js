@@ -176,6 +176,16 @@ export const DatasetRepository = {
 
   getMetadata: async datasetId => await HTTPRequester.get({ url: getUrl(DatasetConfig.getMetadata, { datasetId }) }),
 
+  getImportedFiles: async datasetId =>
+      await HTTPRequester.get({
+          url: getUrl(DatasetConfig.getImportedFiles, { datasetId })
+      }),
+
+  downloadImportedFile: async (fileName, datasetId, dataflowId) =>
+      await HTTPRequester.download({
+          url: getUrl(DatasetConfig.downloadImportedFile, { fileName, datasetId, dataflowId })
+      }),
+
   getReferencedFieldValues: async (
     datasetId,
     fieldSchemaId,

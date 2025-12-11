@@ -9,7 +9,7 @@
 		<relativePath>../parent-poms/microservice</relativePath>
 	</parent>
 	<properties>
-		<droolsVersion>7.20.0.Final</droolsVersion>
+		<droolsVersion>8.29.0.Final</droolsVersion>
 		<sonar.moduleKey>org.eea:reportnet:validation-service:${sonar.jenkins.branch}</sonar.moduleKey>
 	</properties>
 	<artifactId>validation-service</artifactId>
@@ -57,7 +57,7 @@
 		<dependency>
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
-            <version>42.6.0</version>
+            <version>42.6.1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.mongodb</groupId>

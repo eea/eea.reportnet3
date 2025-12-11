@@ -152,7 +152,7 @@ public class JwtTokenProvider {
       tokenDataVO.setRoles(token.getRealmAccess().getRoles());
     }
     Date tokenTime =
-        new Date(TimeUnit.MILLISECONDS.convert(token.getExpiration(), TimeUnit.SECONDS));
+        new Date(TimeUnit.MILLISECONDS.convert(token.getExp(), TimeUnit.SECONDS));
     Date timeNow = new Date();
     Long diff = tokenTime.getTime() - timeNow.getTime();// it should be 5 minutes as initial time
     tokenDataVO.setExpiration(diff.intValue());

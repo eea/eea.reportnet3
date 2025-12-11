@@ -37,6 +37,9 @@ import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.interfaces.vo.orchestrator.enums.JobTypeEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.interfaces.vo.validation.TaskVO;
+import org.eea.kafka.domain.EventType;
+import org.eea.kafka.domain.NotificationVO;
+import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
 import org.eea.lock.service.LockService;
@@ -134,6 +137,9 @@ public class DatasetControllerImpl implements DatasetController {
 
   @Autowired
   private DremioHelperService dremioHelperService;
+
+  @Autowired
+  private KafkaSenderUtils kafkaSenderUtils;
 
   /**
    * Gets the data tables values.
@@ -270,6 +276,60 @@ public class DatasetControllerImpl implements DatasetController {
     }
 
     return result;
+  }
+
+  @Override
+  @GetMapping("/list-imported-files")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_CUSTODIAN','DATASET_STEWARD','DATASET_OBSERVER','DATASET_STEWARD_SUPPORT','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATACOLLECTION_CUSTODIAN','DATASCHEMA_CUSTODIAN','DATASCHEMA_STEWARD','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','DATASET_NATIONAL_COORDINATOR','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','EUDATASET_OBSERVER','EUDATASET_STEWARD_SUPPORT','DATACOLLECTION_OBSERVER','DATACOLLECTION_STEWARD_SUPPORT','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','DATACOLLECTION_STEWARD','REFERENCEDATASET_OBSERVER','REFERENCEDATASET_STEWARD_SUPPORT','REFERENCEDATASET_STEWARD','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD') OR hasAnyRole('ADMIN') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATASET',#datasetId))")
+  @ApiOperation(value = "Returns all imported files for a given dataset")
+  @ApiResponses({
+          @ApiResponse(code = 200, message = "List of imported files returned successfully"),
+          @ApiResponse(code = 400, message = "Invalid request parameters"),
+          @ApiResponse(code = 500, message = "Unexpected server error")}
+  )
+  public List<ImportedFilesDirectoriesVO> listImportedFiles(
+          @RequestParam("datasetId") Long datasetId) {
+    try {
+      return fileTreatmentHelper.listImportedFiles(datasetId);
+    } catch (EEAException e) {
+      // return new ArrayList so the front-end doesn't show an error message if there was no import at this dataset
+      return new ArrayList<>();
+    } catch (Exception e) {
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+              "Unable to complete request of listing files for dataset Id " + datasetId);
+    }
+  }
+
+  @Override
+  @GetMapping("/download-imported-file")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_CUSTODIAN','DATASET_STEWARD','DATASET_OBSERVER','DATASET_STEWARD_SUPPORT','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATACOLLECTION_CUSTODIAN','DATASCHEMA_CUSTODIAN','DATASCHEMA_STEWARD','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','DATASET_NATIONAL_COORDINATOR','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','EUDATASET_OBSERVER','EUDATASET_STEWARD_SUPPORT','DATACOLLECTION_OBSERVER','DATACOLLECTION_STEWARD_SUPPORT','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','DATACOLLECTION_STEWARD','REFERENCEDATASET_OBSERVER','REFERENCEDATASET_STEWARD_SUPPORT','REFERENCEDATASET_STEWARD','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD') OR hasAnyRole('ADMIN') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATASET',#datasetId))")
+  @ApiOperation(value = "Downloads a specific imported file for a given dataset and a given filename")
+  @ApiResponses({
+          @ApiResponse(code = 200, message = "File downloaded successfully"),
+          @ApiResponse(code = 404, message = "File not found"),
+          @ApiResponse(code = 500, message = "Unexpected server error")
+  })
+  public ResponseEntity<?> downloadImportedFile(
+          @RequestParam("dataflowId") Long dataflowId,
+          @RequestParam("datasetId") Long datasetId,
+          @RequestParam("fileName") String fileName) {
+    NotificationVO notificationVO = new NotificationVO();
+    notificationVO.setDataflowId(dataflowId);
+    notificationVO.setDatasetId(datasetId);
+    notificationVO.setUser(SecurityContextHolder.getContext().getAuthentication().getName());
+    notificationVO.setFileName(fileName);
+    EventType eventType = EventType.DOWNLOAD_IMPORTED_FILE_STARTED_EVENT;
+
+    try {
+      kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, null, notificationVO);
+
+      return fileTreatmentHelper.downloadImportedFile(dataflowId, datasetId, fileName);
+    } catch (EEAException e) {
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+    } catch (Exception e) {
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+              "Unable to complete file download for datasetId " + datasetId);
+    }
   }
 
   /**

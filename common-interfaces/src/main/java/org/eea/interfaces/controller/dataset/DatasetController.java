@@ -31,6 +31,16 @@ public interface DatasetController {
   interface DataSetControllerZuul extends DatasetController {
   }
 
+  @GetMapping("/list-imported-files")
+  List<ImportedFilesDirectoriesVO> listImportedFiles(
+          @RequestParam("datasetId") Long datasetId);
+
+  @GetMapping("/download-imported-file")
+  ResponseEntity<?> downloadImportedFile(
+          @RequestParam("dataflowId") Long dataflowId,
+          @RequestParam("datasetId") Long datasetId,
+          @RequestParam("fileName") String fileName);
+
   /**
    * Gets the data tables values.
    *

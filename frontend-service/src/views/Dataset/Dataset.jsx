@@ -54,6 +54,8 @@ import { CurrentPage, ExtensionUtils, MetadataUtils, QuerystringUtils } from 'vi
 import { DatasetUtils } from 'services/_utils/DatasetUtils';
 import { getUrl } from 'repositories/_utils/UrlUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
+import { ImportedFilesDialog } from 'views/DatasetDesigner/_components/ImportedFilesDialog';
+
 
 export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   const navigate = useNavigate();
@@ -64,6 +66,8 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
+  const [isImportedFilesDialogVisible, setIsImportedFilesDialogVisible] = useState(false);
+
 
   const [dataset, setDataset] = useState({});
   const [datasetProgressBarSteps, setDatasetProgressBarSteps] = useState({
@@ -142,6 +146,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   const [validationsVisible, setValidationsVisible] = useState(false);
   const [webformData, setWebformData] = useState(null);
   const [webformOptions, setWebformOptions] = useState([]);
+  const [uploadingFileName, setUploadingFileName] = useState('');
 
   let exportMenuRef = useRef();
   let importMenuRef = useRef();
@@ -1011,7 +1016,8 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
 
   const onUpload = async (e) => {
     const action = 'DATASET_IMPORT';
-    const fileName = e?.files?.[0]?.name || ' ';
+    const fileName = uploadingFileName || e?.files?.[0]?.name || ' ';
+    actionsContext.testProcess(datasetId, action);
 
     actionsContext.testProcess(datasetId, action);
     setIsImportDatasetDialogVisible(false);
@@ -1289,6 +1295,21 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
             />
           </div>
           <div className="p-toolbar-group-right">
+            <Button
+              className="p-button-rounded p-button-secondary-transparent p-button-animated-blink"
+              icon="openFolder"
+              iconClasses={datasetHasErrors ? 'warning' : ''}
+              label={resourcesContext.messages['importedFiles']}
+              onClick={() => setIsImportedFilesDialogVisible(true)}
+            />
+            {isImportedFilesDialogVisible && (
+              <ImportedFilesDialog
+                dataflowId={dataflowId}
+                datasetId={datasetId}
+                isDialogVisible={isImportedFilesDialogVisible}
+                onCloseDialog={() => setIsImportedFilesDialogVisible(false)}
+              />
+            )}
             <DatasetValidateDialog
               disabled={
                 !hasWritePermissions ||
@@ -1401,6 +1422,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
           dialogOnHide={() => {
             setIsImportDatasetDialogVisible(false);
             setSelectedCustomImportIntegration({ id: null, name: null });
+            setUploadingFileName('');
           }}
           dialogVisible={isImportDatasetDialogVisible}
           infoTooltip={`${
@@ -1413,6 +1435,11 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
           isDialog={true}
           name="file"
           onError={onImportDatasetError}
+          onSelect={e => {
+            if (e?.files?.[0]?.name) {
+              setUploadingFileName(e.files[0].name);
+            }
+          }}
           onUpload={onUpload}
           replaceCheck={true}
           url={`${window.env.REACT_APP_BACKEND}${
