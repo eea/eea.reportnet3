@@ -748,7 +748,7 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
           paginator={true}
           paginatorRight={
             <PaginatorRecordsCount
-              dataLength={isProvider && !isAdmin ? providersTotalRecords : totalRecords}
+              dataLength={shouldRestrictToProviderData && !isAdmin ? providersTotalRecords : totalRecords}
               filteredDataLength={filteredRecords}
               filteredJobsLength={filteredJobs}
               isFiltered={isFiltered}
@@ -762,7 +762,7 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
           rowsPerPageOptions={[5, 10, 15]}
           sortField={sort.field}
           sortOrder={sort.order}
-          totalRecords={isFiltered ? filteredRecords : isProvider ? providersTotalRecords : totalRecords}
+          totalRecords={isFiltered ? filteredRecords : shouldRestrictToProviderData ? providersTotalRecords : totalRecords}
           value={jobsStatuses}>
           {getTableColumns()}
         </DataTable>
