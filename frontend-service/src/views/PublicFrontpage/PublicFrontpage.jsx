@@ -115,61 +115,17 @@ export const PublicFrontpage = () => {
                       <FontAwesomeIcon
                         aria-hidden={false}
                         className={styles.emailIcon}
-                        icon={AwesomeIcons('lightPdf')}
+                        icon={AwesomeIcons('questionCircle')}
                         role="presentation"
                       />
                     </div>
-                    <h4>Supporting documents:</h4>
-                    <ul>
-                      <li>
-                        <a
-                          href={`https://www.eionet.europa.eu/reportnet/docs/${window.env.DOCUMENTATION_FOLDER}/howto_login_reportnet3`}
-                          rel="noopener noreferrer"
-                          target="_blank">
-                          Login
-                        </a>
-                      </li>
-                      <li>
-                        <a
-                          href={`https://www.eionet.europa.eu/reportnet/docs/${window.env.DOCUMENTATION_FOLDER}/mfa-for-eu-login.pdf`}
-                          rel="noopener noreferrer"
-                          target="_blank">
-                          Authentication
-                        </a>
-                      </li>
-                      <li>
-                        <a
-                          href={`https://www.eionet.europa.eu/reportnet/docs/${window.env.DOCUMENTATION_FOLDER}/reporter_howto_reportnet3`}
-                          rel="noopener noreferrer"
-                          target="_blank">
-                          Reporter
-                        </a>
-                      </li>
-                      <li>
-                        <a
-                          href={`https://www.eionet.europa.eu/reportnet/docs/${window.env.DOCUMENTATION_FOLDER}/requester_howto_reportnet3`}
-                          rel="noopener noreferrer"
-                          target="_blank">
-                          Requester
-                        </a>
-                      </li>
-                      <li>
-                        <a
-                          href={`https://www.eionet.europa.eu/reportnet/docs/${window.env.DOCUMENTATION_FOLDER}/webforms_howto_reportnet3`}
-                          rel="noopener noreferrer"
-                          target="_blank">
-                          Webforms
-                        </a>
-                      </li>
-                      <li>
-                        <a
-                          href={`https://www.eionet.europa.eu/reportnet/docs/${window.env.DOCUMENTATION_FOLDER}/api_howto_reportnet3`}
-                          rel="noopener noreferrer"
-                          target="_blank">
-                          API
-                        </a>
-                      </li>
-                    </ul>
+                    <h4>
+                      <a href={`https://help.reportnet.europa.eu/`}
+                         rel="noopener noreferrer"
+                         target="_blank">
+                        Help Pages
+                      </a>
+                    </h4>
                   </div>
                 </div>
               </div>
