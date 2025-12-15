@@ -36,6 +36,12 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
   /** The Constant DATE_RELEASED. */
   private static final String DATE_RELEASED = "date_released";
 
+  /** The Constant DATE_RELEASED. */
+  private static final String FIRST_DATE_RELEASED = "first_date_released";
+
+  /** The Constant DATE_RELEASED. */
+  private static final String DATE_STATUS_CHANGED = "date_status_changed";
+
   /** The Constant DELIVERY_STATUS. */
   private static final String DELIVERY_STATUS = "delivery_status";
 
@@ -88,12 +94,12 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
       + "(docaux ->> 'client' ) as client,\r\n" + "(docaux ->> 'countries' ) as countries,\r\n"
       + "(docaux ->> 'issues' ) as issues,\r\n" + "(docaux ->> 'reportFreq' ) as reportFreq,\r\n"
       + "(docaux ->> 'reportFreqDetail' ) as reportFreqDetail\r\n" + "from doc),\r\n"
-      + "   table_aux as ( select d.id as datasetid, d.dataflowid, d.status, dp.code, s.date_released from dataset d\r\n"
+      + "   table_aux as ( select d.id as datasetid, d.dataflowid, d.status, dp.code, s.date_released, d.date_status_changed from dataset d\r\n"
       + "inner join reporting_dataset rd \r\n" + "    on rd.id = d.id \r\n"
       + "inner join data_provider dp \r\n" + "    on dp.id = d.data_provider_id \r\n"
       + "left join \"snapshot\" s\r\n" + "    on d.id = s.reporting_dataset_id \r\n"
       + "where dp.code = :countryCode),\r\n"
-      + "table_aux2 as (select dataflowid ,jsonb_agg(json_build_object('delivery_status',\"status\",'code',\"code\",'date_released',\"date_released\")) datasets from table_aux group by dataflowid),\r\n"
+      + "table_aux2 as (select dataflowid ,jsonb_agg(json_build_object('delivery_status',\"status\",'code',\"code\",'date_released',\"date_released\",'date_status_changed',\"date_status_changed\")) datasets from table_aux group by dataflowid),\r\n"
       + "pending_aux as(select dataflowid, count(status) totalpendings from table_aux where status = 'PENDING' group by dataflowid), \r\n"
       + "released_aux as(select dataflowid, count(status) totalreleased from table_aux where status = 'RELEASED' group by dataflowid),\r\n"
       + "technically_aux as(select dataflowid, count(status) totaltec from table_aux where status = 'TECHNICALLY_ACCEPTED' group by dataflowid),\r\n"
@@ -108,15 +114,26 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
       + "left join technically_aux on t2.dataflowid = technically_aux.dataflowid\r\n"
       + "left join correction_aux on t2.dataflowid = correction_aux.dataflowid\r\n"
       + "left join final_aux on t2.dataflowid = final_aux.dataflowid),\r\n"
-      + "dataset_aux as (select dataflowid,delivery_status,max(date_released) date_released from (select dataflowid,\r\n"
+      + "dataset_aux as (select dataflowid,delivery_status,\r\n"
+      + "max(date_released) date_released,\r\n"
+      + "min(date_released) first_date_released,\r\n"
+      + "max(case\r\n"
+      + "    when delivery_status = 'TECHNICALLY_ACCEPTED' and dataset_status = 'TECHNICALLY_ACCEPTED' then date_status_changed\r\n"
+      + "    when delivery_status = 'CORRECTION_REQUESTED' and dataset_status = 'CORRECTION_REQUESTED' then date_status_changed\r\n"
+      + "    else null\r\n"
+      + "end) date_status_changed\r\n"
+      + "from (select dataflowid,\r\n"
       + "(case when pending > 0  then 'PENDING'\r\n"
       + "when released = totaldatasets then 'RELEASED'\r\n"
       + "when technically = totaldatasets then 'TECHNICALLY_ACCEPTED'\r\n"
       + "when correction > 0 then 'CORRECTION_REQUESTED'\r\n"
-      + "when finalfeedback > 0 then 'FINAL_FEEDBACK'\r\n" + "end) as delivery_status\r\n"
+      + "when finalfeedback > 0 then 'FINAL_FEEDBACK'\r\n"
+      + "end) as delivery_status\r\n"
       + ",jsonb_array_elements(datasets) ->> 'date_released' date_released\r\n"
+      + ",jsonb_array_elements(datasets) ->> 'date_status_changed' date_status_changed\r\n"
+      + ",jsonb_array_elements(datasets) ->> 'delivery_status' dataset_status\r\n"
       + "from table_aux3) table_aux4 group by dataflowid,delivery_status)\r\n"
-      + "    select d.*,ot.legal_Instrument, ot.obligation, dataset_aux.delivery_status, dataset_aux.date_released from obligationtable ot RIGHT join dataflow d \r\n"
+      + "    select d.*,ot.legal_Instrument, ot.obligation, dataset_aux.delivery_status, dataset_aux.date_released, dataset_aux.first_date_released, dataset_aux.date_status_changed from obligationtable ot RIGHT join dataflow d \r\n"
       + "    on d.obligation_id = cast(ot.obligationId as integer)\r\n"
       + "left join representative r on d.id = r.dataflow_id\r\n"
       + "right join data_provider dp on r.data_provider_id = dp.id\r\n"
@@ -165,6 +182,7 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
           + "when correction > 0 then 'CORRECTION_REQUESTED'\r\n"
           + "when finalfeedback > 0 then 'FINAL_FEEDBACK'\r\n" + "end) as delivery_status\r\n"
           + ",jsonb_array_elements(datasets) ->> 'date_released' date_released\r\n"
+          + ",jsonb_array_elements(datasets) ->> 'date_status_changed' date_status_changed\r\n"
           + "from table_aux3) table_aux4 group by dataflowid,delivery_status)\r\n"
           + ",\n" +
           "dataflow_filtered AS (\n" +
@@ -695,6 +713,18 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
       case "delivery_date_to":
         stringQuery.append(String.format(DATE_TO, DATE_RELEASED, key));
         break;
+      case "first_delivery_date_from":
+        stringQuery.append(String.format(DATE_FROM, FIRST_DATE_RELEASED, key));
+        break;
+      case "first_delivery_date_to":
+        stringQuery.append(String.format(DATE_TO, FIRST_DATE_RELEASED, key));
+        break;
+      case "date_status_changed_from":
+        stringQuery.append(String.format(DATE_FROM, DATE_STATUS_CHANGED, key));
+        break;
+      case "date_status_changed_to":
+        stringQuery.append(String.format(DATE_TO, DATE_STATUS_CHANGED, key));
+        break;
       case DELIVERY_STATUS:
         stringQuery.append(String.format(DELIVERY_STATUS_IN, DELIVERY_STATUS, key));
         break;
@@ -734,6 +764,10 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
       case "deadline_date_to":
       case "delivery_date_from":
       case "delivery_date_to":
+      case "first_delivery_date_from":
+      case "first_delivery_date_to":
+      case "date_status_changed_from":
+      case "date_status_changed_to":
         query.setParameter(key,
             LocalDateTime.ofInstant(Instant.ofEpochMilli(Long.valueOf(value)), ZoneOffset.UTC));
         break;
@@ -839,7 +873,13 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
       if ("status".equals(orderHeader)) {
         sb.append(String.format(ORDER_BY, orderHeader + (asc ? ASC : DESC), " ,releasable "));
       } else {
-        orderHeader = orderHeader.equals("delivery_date") ? DATE_RELEASED : orderHeader;
+        if ("delivery_date".equals(orderHeader)) {
+          orderHeader = DATE_RELEASED;
+        } else if ("first_date_released".equals(orderHeader)) {
+          orderHeader = FIRST_DATE_RELEASED;
+        } else if ("date_status_changed".equals(orderHeader)) {
+          orderHeader = DATE_STATUS_CHANGED;
+        }
         sb.append(String.format(ORDER_BY, orderHeader, asc ? ASC : DESC));
       }
     } else {
