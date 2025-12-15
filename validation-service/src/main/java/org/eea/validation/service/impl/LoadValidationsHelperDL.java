@@ -50,10 +50,18 @@ public class LoadValidationsHelperDL {
     private final DremioHelperService dremioHelperService;
     private final JobControllerZuul jobControllerZuul;
     private final RedisLockService redisLockService;
+    private final ValidationService validationService;
 
     @Autowired
-    public LoadValidationsHelperDL(DataLakeValidationService dataLakeValidationService, DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul, S3Helper s3Helper, @Qualifier("dremioJdbcTemplate") JdbcTemplate dremioJdbcTemplate,
-                                   DatasetSchemaControllerZuul datasetSchemaControllerZuul, DremioHelperService dremioHelperService, @Qualifier("proxyValidationService") ValidationService validationService, JobControllerZuul jobControllerZuul, RedisLockControllerZuul redisLockControllerZuul, JobControllerZuul jobControllerZuul1, RedisLockControllerZuul redisLockControllerZuul1, RedisLockService redisLockService) {
+    public LoadValidationsHelperDL(DataLakeValidationService dataLakeValidationService,
+                                   DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul,
+                                   S3Helper s3Helper,
+                                   @Qualifier("dremioJdbcTemplate") JdbcTemplate dremioJdbcTemplate,
+                                   DatasetSchemaControllerZuul datasetSchemaControllerZuul,
+                                   DremioHelperService dremioHelperService,
+                                   JobControllerZuul jobControllerZuul1,
+                                   RedisLockService redisLockService,
+                                   @Qualifier("proxyValidationService") ValidationService validationService) {
         this.dataLakeValidationService = dataLakeValidationService;
         this.dataSetMetabaseControllerZuul = dataSetMetabaseControllerZuul;
         this.s3Helper = s3Helper;
@@ -62,6 +70,7 @@ public class LoadValidationsHelperDL {
         this.dremioHelperService = dremioHelperService;
         this.jobControllerZuul = jobControllerZuul1;
         this.redisLockService = redisLockService;
+        this.validationService = validationService;
     }
 
     private static final Logger LOG = LoggerFactory.getLogger(LoadValidationsHelperDL.class);
@@ -93,7 +102,7 @@ public class LoadValidationsHelperDL {
             // Main grouped validations.
             List<GroupValidationVO> errors = dataLakeValidationService.findGroupRecordsByFilter(s3PathResolver, levelErrorsFilter, typeEntitiesFilter, tableFilter,
                 fieldValueFilter, shortCode, pageable, headerField, asc, true);
-            // validationService.setRuleMessageDL(schema.getIdDataSetSchema(), errors);
+            validationService.setRuleMessageDL(schema.getIdDataSetSchema(), errors);
             validation.setErrors(errors);
             validation.setTotalErrors(dremioJdbcTemplate.queryForObject(s3Helper.buildRecordsCountQuery(s3PathResolver), Long.class));
             validation.setTotalFilteredRecords(Long.valueOf(dataLakeValidationService.findGroupRecordsByFilter(s3PathResolver, levelErrorsFilter,
