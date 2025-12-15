@@ -876,6 +876,18 @@ public interface DatasetController {
   @DeleteMapping(value = "/deleteLocksToImportProcess/{datasetId}")
   void deleteLocksToImportProcess(@PathVariable("datasetId") Long datasetId);
 
+
+  /**
+   * Deletes the locks related to delete
+   * @param datasetId
+   * @param tableSchemaId
+   * @return
+   */
+  @DeleteMapping(value = "/private/deleteLocksToDeleteProcess/{datasetId}")
+  void deleteLocksToDeleteProcess(@PathVariable("datasetId") Long datasetId, @RequestParam(value="tableSchemaId", required = false) String tableSchemaId);
+
+
+
   /**
    * Finds tasks by processId and status
    * @param processId
@@ -1095,9 +1107,6 @@ public interface DatasetController {
   @PostMapping("/duplicateFieldValueExists/{datasetId}")
   Boolean duplicateFieldValueExists(@PathVariable("datasetId") Long datasetId, @RequestParam(value = "tableSchemaId") String tableSchemaId, @RequestBody FieldVO fieldVO) throws Exception;
 
-
-
-
   @PutMapping("/{id}/enableEditing")
   void enableEditing(@PathVariable("id") Long datasetId,
   @RequestParam(value = "tableSchemaIds", required = false) List<String> tableSchemaIds);
@@ -1112,5 +1121,4 @@ public interface DatasetController {
   @GetMapping("/hasEnabledEditingDatasets")
   Boolean hasEnabledEditingDatasets(@RequestParam(value = "dataflowId") Long dataflowId,
                                            @RequestParam(value = "providerId") Long providerId);
-
   }

@@ -1237,11 +1237,7 @@ public class DatasetControllerImpl implements DatasetController {
     }
     finally {
       // Release the lock manually
-      Map<String, Object> deleteDatasetValues = new HashMap<>();
-      deleteDatasetValues.put(LiteralConstants.SIGNATURE,
-              LockSignature.DELETE_DATASET_VALUES.getValue());
-      deleteDatasetValues.put(LiteralConstants.DATASETID, datasetId);
-      lockService.removeLockByCriteria(deleteDatasetValues);
+      deleteLocksToDeleteProcess(datasetId, null);
     }
   }
 
@@ -1298,11 +1294,7 @@ public class DatasetControllerImpl implements DatasetController {
     }
     finally {
       // Release the lock manually
-      Map<String, Object> deleteDatasetValues = new HashMap<>();
-      deleteDatasetValues.put(LiteralConstants.SIGNATURE,
-              LockSignature.DELETE_DATASET_VALUES.getValue());
-      deleteDatasetValues.put(LiteralConstants.DATASETID, datasetId);
-      lockService.removeLockByCriteria(deleteDatasetValues);
+      deleteLocksToDeleteProcess(datasetId, null);
     }
   }
 
@@ -1429,11 +1421,7 @@ public class DatasetControllerImpl implements DatasetController {
     }
     finally {
       // Release the lock manually
-      Map<String, Object> deleteImportTable = new HashMap<>();
-      deleteImportTable.put(LiteralConstants.SIGNATURE, LockSignature.DELETE_IMPORT_TABLE.getValue());
-      deleteImportTable.put(LiteralConstants.DATASETID, datasetId);
-      deleteImportTable.put(LiteralConstants.TABLESCHEMAID, tableSchemaId);
-      lockService.removeLockByCriteria(deleteImportTable);
+      deleteLocksToDeleteProcess(datasetId, null);
     }
   }
 
@@ -3277,6 +3265,37 @@ public class DatasetControllerImpl implements DatasetController {
   }
 
   /**
+   * Deletes the locks related to delete
+   * @param datasetId
+   * @return
+   */
+  @Override
+  @DeleteMapping(value = "/private/deleteLocksToDeleteProcess/{datasetId}")
+  public void deleteLocksToDeleteProcess(@PathVariable("datasetId") Long datasetId, @RequestParam(value="tableSchemaId", required = false) String tableSchemaId){
+    try {
+      if(StringUtils.isNotBlank(tableSchemaId)){
+        Map<String, Object> deleteImportTable = new HashMap<>();
+        deleteImportTable.put(LiteralConstants.SIGNATURE, LockSignature.DELETE_IMPORT_TABLE.getValue());
+        deleteImportTable.put(LiteralConstants.DATASETID, datasetId);
+        deleteImportTable.put(LiteralConstants.TABLESCHEMAID, tableSchemaId);
+        lockService.removeLockByCriteria(deleteImportTable);
+      }
+      else{
+        Map<String, Object> deleteDatasetValues = new HashMap<>();
+        deleteDatasetValues.put(LiteralConstants.SIGNATURE,
+                LockSignature.DELETE_DATASET_VALUES.getValue());
+        deleteDatasetValues.put(LiteralConstants.DATASETID, datasetId);
+        lockService.removeLockByCriteria(deleteDatasetValues);
+      }
+    }
+    catch (Exception e) {
+      LOG.error("Unexpected error! Error deleting locks related to delete process for datasetId {} Message: {}",  datasetId, e.getMessage());
+      throw e;
+    }
+  }
+
+
+  /**
    * Finds tasks by processId and status
    * @param processId
    * @param status
@@ -3871,28 +3890,6 @@ public class DatasetControllerImpl implements DatasetController {
     return lockService.deletePreviousDayLocks();
   }
 
-  @Override
-  @PreAuthorize("isAuthenticated()")
-  @PostMapping("/duplicateFieldValueExists/{datasetId}")
-  public Boolean duplicateFieldValueExists(@PathVariable("datasetId") Long datasetId, @RequestParam(value = "tableSchemaId") String tableSchemaId, @RequestBody FieldVO fieldVO) throws Exception{
-    try{
-      DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
-      Boolean isBigData = dataFlowControllerZuul.isBigDataflow(dataSetMetabaseVO.getDataflowId());
-      if(BooleanUtils.isTrue(isBigData)){
-        Long providerId = (dataSetMetabaseVO.getDataProviderId() != null) ? dataSetMetabaseVO.getDataProviderId() : 0L;
-        String tableName = datasetSchemaService.getTableSchemaName(dataSetMetabaseVO.getDatasetSchema(), tableSchemaId);
-        return bigDataDatasetService.duplicateFieldValueExists(datasetId, dataSetMetabaseVO.getDataflowId(), providerId, tableName, fieldVO);
-      }
-      else{
-        return datasetService.duplicateFieldValueExists(datasetId, fieldVO);
-      }
-    }
-    catch (Exception e){
-      LOG.error("Could not check for duplicate entity for datasetId {} tableSchemaId {} and field name {} and value {}", datasetId, tableSchemaId, fieldVO.getName(), fieldVO.getValue());
-      throw e;
-    }
-  }
-
   /**
    * Enable editing for a dataset.
    *
@@ -4244,6 +4241,28 @@ public class DatasetControllerImpl implements DatasetController {
     }
     catch (Exception e){
       LOG.error("Could not retrieve locked for editing datasets for dataflowId {}, providerId {}", dataflowId, providerId);
+      throw e;
+    }
+  }
+
+  @Override
+  @PreAuthorize("isAuthenticated()")
+  @PostMapping("/duplicateFieldValueExists/{datasetId}")
+  public Boolean duplicateFieldValueExists(@PathVariable("datasetId") Long datasetId, @RequestParam(value = "tableSchemaId") String tableSchemaId, @RequestBody FieldVO fieldVO) throws Exception{
+    try{
+      DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
+      Boolean isBigData = dataFlowControllerZuul.isBigDataflow(dataSetMetabaseVO.getDataflowId());
+      if(BooleanUtils.isTrue(isBigData)){
+        Long providerId = (dataSetMetabaseVO.getDataProviderId() != null) ? dataSetMetabaseVO.getDataProviderId() : 0L;
+        String tableName = datasetSchemaService.getTableSchemaName(dataSetMetabaseVO.getDatasetSchema(), tableSchemaId);
+        return bigDataDatasetService.duplicateFieldValueExists(datasetId, dataSetMetabaseVO.getDataflowId(), providerId, tableName, fieldVO);
+      }
+      else{
+        return datasetService.duplicateFieldValueExists(datasetId, fieldVO);
+      }
+    }
+    catch (Exception e){
+      LOG.error("Could not check for duplicate entity for datasetId {} tableSchemaId {} and field name {} and value {}", datasetId, tableSchemaId, fieldVO.getName(), fieldVO.getValue());
       throw e;
     }
   }
