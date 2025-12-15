@@ -2196,12 +2196,12 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
                       s3Helper.copyFileToAnotherDestination(key, attachmentDCPathInS3);
                     });
 
-                  } else if (DatasetTypeEnum.REPORTING.equals(datasetType)
+                  } else if ((DatasetTypeEnum.REPORTING.equals(datasetType) || DatasetTypeEnum.TEST.equals(datasetType) || DatasetTypeEnum.DESIGN.equals((datasetType)))
                           && (RESTORE_DATASET_SCHEMA_SNAPSHOT_COMPLETED_EVENT.equals(successEventType)
                           || RESTORE_DATASET_SNAPSHOT_COMPLETED_EVENT.equals(successEventType) )) {  // restore snapshot
 
                     LOG.info("Restore data snapshot dataset {}", datasetId);
-                    Long providerId = dataset.getDataProviderId();
+                    Long providerId = (dataset.getDataProviderId() != null) ? dataset.getDataProviderId() : 0L;
                     //Delete table name DC folder if exists
                     String nameTableSchema = table.getNameTableSchema();
                     S3PathResolver providerPath = new S3PathResolver(dataflowId, providerId, datasetId, nameTableSchema);
@@ -2215,7 +2215,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
                     providerPath.setPath(S3_SNAPSHOT_FOLDER_PATH);
 
                     //Get table name file from S3 snapshots folder based on snapshotid, save it locally and then upload to Provider table name path
-                    S3PathResolver snapshotPath = new S3PathResolver(dataflowId, dataset.getDataProviderId(), datasetId);
+                    S3PathResolver snapshotPath = new S3PathResolver(dataflowId, providerId, datasetId);
                     LOG.info("Getting tableNameFilenames for path resolver {}", providerPath);
                     List<S3Object> tableNameFilenames = s3Helper.getFilenamesFromTableNames(providerPath);
                     LOG.info("Getting tableNameFilenames for path result {}", tableNameFilenames);
