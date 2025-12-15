@@ -659,7 +659,6 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
                   fillDataset(dataset, datasetName, dataflowId, datasetSchemaId);
                   designDatasetRepository.save((DesignDataset) dataset);
                   if (!isBigData) {
-                      LOG.info("APO: Big Dataflow not detected. Creating citus empty dataset");
                       recordStoreControllerZuul.createEmptyDataset(
                               LiteralConstants.DATASET_PREFIX + dataset.getId(), datasetSchemaId);
                   }
@@ -672,7 +671,6 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
                   ((DataCollection) dataset).setDueDate(dueDate);
                   dataCollectionRepository.save((DataCollection) dataset);
                   if (!isBigData) {
-                      LOG.info("APO: Big Dataflow not detected. Creating citus empty dataset");
                       recordStoreControllerZuul.createEmptyDataset(
                               LiteralConstants.DATASET_PREFIX + dataset.getId(), datasetSchemaId);
                   }
@@ -685,7 +683,6 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
                   fillDataset(dataset, datasetName, dataflowId, datasetSchemaId);
                   testDatasetRepository.save((TestDataset) dataset);
                   if (!isBigData) {
-                      LOG.info("APO: Big Dataflow not detected. Creating citus empty dataset");
                       recordStoreControllerZuul.createEmptyDataset(
                               LiteralConstants.DATASET_PREFIX + dataset.getId(), datasetSchemaId);
                   }
@@ -771,7 +768,6 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
           datasetIdsEmail.put(idDataset, email);
       }
       if (!isBigData) {
-          LOG.info("APO: Big Dataflow not detected. Creating citus empty dataset");
           recordStoreControllerZuul.createEmptyDataset(LiteralConstants.DATASET_PREFIX + idDataset,
                   datasetSchemaId);
       }

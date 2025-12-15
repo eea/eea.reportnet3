@@ -936,7 +936,8 @@ public class DataCollectionServiceImpl implements DataCollectionService {
       LOG.info("Metabase changes completed on DataCollection creation");
 
       // 10. Create schemas for each dataset
-      // This method will release the lock
+      // If this is not a big dataflow create schemas as normally
+      // otherwise skip schema creation and release locks
       if (Boolean.FALSE.equals(isBigData)) {
           recordStoreControllerZuul.createSchemas(datasetIdsAndSchemaIds, dataflowId, isCreation, true);
       }

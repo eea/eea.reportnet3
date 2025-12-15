@@ -282,9 +282,7 @@ public class DesignDatasetServiceImpl implements DesignDatasetService {
             dictionaryOriginTargetObjectId
                 .get(itemNewDatasetAndSchema.getValue().getIdDataSetSchema()),
             dictionaryOriginTargetObjectId, itemNewDatasetAndSchema.getKey(),
-            mapDatasetIdFKRelations,
-                isBigDataFlow);
-
+            mapDatasetIdFKRelations, isBigDataFlow);
       }
 
       // Modify the FK, if the schemas copied have fields of type Link, to update the relations to
