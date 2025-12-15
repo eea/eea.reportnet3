@@ -357,7 +357,12 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
                 sqlCode = sqlCode.replace("{%R3_COUNTRY_CODE%}", providerCode);
                 sqlCode = sqlCode.replace("{%R3_COMPANY_CODE%}", providerCode);
                 sqlCode = sqlCode.replace("{%R3_ORGANIZATION_CODE%}", providerCode);
-                recordIds = (List<String>) method.invoke(object, sqlCode);    //isSQLSentenceWithCode
+                try {
+                    recordIds = (List<String>) method.invoke(object, sqlCode);    //isSQLSentenceWithCode
+                } catch (Exception e){
+                    LOG.info("[CHRIS] exception: e: {}", e.getMessage());
+                    LOG.error(String.valueOf(e));
+                }
                 break;
             case 2:
                 recordIds = (List<String>) method.invoke(object, UtilityClass.addQuotesToFieldNames(fieldName), tablePath);  //isUniqueConstraint

@@ -44,7 +44,7 @@ public class DremioSQLValidationUtils {
     public List<String> isSQLSentenceWithCode(String sql) {
         StringBuilder query = new StringBuilder();
         sql = sql.concat(" limit " + maxErrors);
-        query.append("select record_id from(").append(sql).append(")");
+        query.append("select record_id from(").append(sql).append(") as t");
         return dremioJdbcTemplate.queryForList(query.toString(), String.class);
     }
 

@@ -2452,15 +2452,20 @@ public class RulesServiceImpl implements RulesService {
       // replace provider code with {%R3_COUNTRY_CODE%} or {%R3_COMPANY_CODE%} or {%R3_ORGANIZATION_CODE%}
       query = sqlCountryCompanyOrganizationCodeUtils.replaceCodesIfNeeded(datasetId, query);
 
+      LOG.info("[CHRIS] validateSQLRule | query: \n{}", query);
+      LOG.info("[CHRIS] validateSQLRule | checkQuerySyntax(query): {}", checkQuerySyntax(query));
       if (checkQuerySyntax(query)) {
         try {
           String preparedquery = query.contains(";") ? query.replace(";", "") + " limit 5" : query + " limit 5";
+          LOG.info("[CHRIS] validateSQLRule | bigData: {}", bigData);
           if (bigData) {
             DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseController.findDatasetMetabaseById(datasetId);
             String tableName = sqlRulesService.getTableNameByRule(rule, dataSetMetabaseVO.getDatasetSchema());
             S3PathResolver dataTableResolver = new S3PathResolver(dataSetMetabaseVO.getDataflowId(), dataSetMetabaseVO.getDataProviderId() != null ? dataSetMetabaseVO.getDataProviderId() : 0, dataSetMetabaseVO.getId(), tableName);
+            LOG.info("[CHRIS] validateSQLRule | s3Helper.checkFolderExist(dataTableResolver, S3_TABLE_NAME_FOLDER_PATH): {}", s3Helper.checkFolderExist(dataTableResolver, S3_TABLE_NAME_FOLDER_PATH));
             if (s3Helper.checkFolderExist(dataTableResolver, S3_TABLE_NAME_FOLDER_PATH)) {
               String sqlCode = sqlRulesService.replaceTableNamesWithS3Path(preparedquery);
+              LOG.info("[CHRIS] validateSQLRule | sqlCode: /n{}", sqlCode);
               dremioJdbcTemplate.execute(sqlCode);
             }
           } else {
@@ -2468,13 +2473,16 @@ public class RulesServiceImpl implements RulesService {
           }
         } catch (Exception e) {
           LOG.info("SQL is not correct: {}, {}", e.getMessage(), e);
+          LOG.info("[CHRIS] validateSQLRule | isSQLCorrect: {}", isSQLCorrect);
           isSQLCorrect = false;
           rule.setSqlError(e.getCause().getCause().getMessage());
         }
       } else {
+        LOG.info("[CHRIS] validateSQLRule | isSQLCorrect: {}", isSQLCorrect);
         isSQLCorrect = false;
       }
     } else {
+      LOG.info("[CHRIS] validateSQLRule | isSQLCorrect: {}", isSQLCorrect);
       isSQLCorrect = false;
     }
     if (!isSQLCorrect) {
