@@ -301,7 +301,8 @@ const parseRequestPublicCountryFilterBy = filterBy => {
     deadline: 'deadline_date',
     status: 'status',
     deliveryDate: 'delivery_date',
-    deliveryStatus: 'delivery_status'
+    deliveryStatus: 'delivery_status',
+    firstReleaseDate: 'firstReleaseDate'
   };
 
   if (!isNil(filterBy['deliveryStatus']) && isEmpty(filterBy['deliveryStatus'])) {

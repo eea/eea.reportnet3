@@ -38,6 +38,7 @@ import { CurrentPage } from 'views/_functions/Utils';
 import { DataflowUtils } from 'services/_utils/DataflowUtils';
 import { getUrl } from 'repositories/_utils/UrlUtils';
 import { PaginatorRecordsCount } from 'views/_components/DataTable/_functions/Utils/PaginatorRecordsCount';
+import dayjs from "dayjs";
 
 export const PublicCountryInformation = () => {
   const { countryCode } = useParams();
@@ -149,7 +150,7 @@ export const PublicCountryInformation = () => {
         sortField,
         filterBy
       });
-
+     // console.log(data);
       setTotalRecords(data.totalRecords);
       setPublicInformation(data.dataflows);
       setFilteredRecords(data.filteredRecords);
@@ -170,6 +171,7 @@ export const PublicCountryInformation = () => {
 
   const setPublicInformation = dataflows => {
     if (isNil(dataflows)) return [];
+    console.log(dataflows);
 
     const publicDataflows = dataflows
       .filter(dataflow => !isNil(dataflow.datasets))
@@ -198,9 +200,12 @@ export const PublicCountryInformation = () => {
           deliveryDate: !isNil(dataset) ? dataset?.releaseDate : '-',
           deliveryStatus: getDeliveryStatus(dataflow, dataset).toUpperCase(),
           restrictFromPublic: dataflow.datasets ? dataflow.datasets[0]?.restrictFromPublic : false,
-          status: resourcesContext.messages[dataflow.status].toUpperCase()
+          status: resourcesContext.messages[dataflow.status].toUpperCase(),
+          firstReleaseDate:dataset?.firstReleaseDate || '-',
+          latestDeliveryDate:dataflow.datasets?.[0]?.dateStatusChanged || '-'
         };
       });
+    console.log(publicDataflows);
     setDataflows(publicDataflows);
     setData(publicDataflows);
   };
@@ -218,6 +223,14 @@ export const PublicCountryInformation = () => {
       { key: 'status', header: resourcesContext.messages['status'], template: renderStatusBodyColumn },
       { key: 'deliveryDate', header: resourcesContext.messages['deliveryDate'] },
       {
+        key: 'firstReleaseDate',
+        header: resourcesContext.messages['firstDeliveryDate']
+      },
+      {
+        key: 'latestDeliveryDate',
+        header: resourcesContext.messages['latestDeliveryDate']
+      },
+      {
         key: 'deliveryStatus',
         header: resourcesContext.messages['deliveryStatus'],
         template: renderDeliveryStatusBodyColumn
@@ -227,6 +240,7 @@ export const PublicCountryInformation = () => {
         header: resourcesContext.messages['referenceDatasets'],
         template: renderDownloadReferenceFileBodyColumn
       },
+
       {
         key: 'publicFilesNames',
         header: resourcesContext.messages['files'],
@@ -412,7 +426,36 @@ export const PublicCountryInformation = () => {
     </div>
   );
 
-  const renderDeliveryStatusBodyColumn = rowData => <div>{capitalize(rowData.deliveryStatus)}</div>;
+  //const renderDeliveryStatusBodyColumn = rowData => <div>{capitalize(rowData.deliveryStatus)}</div>;
+
+  const renderDeliveryStatusBodyColumn = rowData => {
+    // Convert both comparison strings to a consistent case (e.g., lowercase)
+    const deliveryStatusLower = rowData.deliveryStatus.toLowerCase();
+
+    const correctionTextLower = resourcesContext.messages[config.datasetStatus.CORRECTION_REQUESTED.label].toLowerCase();
+    const techAcceptedTextLower = resourcesContext.messages[config.datasetStatus.TECHNICALLY_ACCEPTED.label].toLowerCase();
+
+    // The condition now compares the lowercased strings
+    const showDate = deliveryStatusLower === correctionTextLower || deliveryStatusLower === techAcceptedTextLower;
+
+    return (
+      <span className={styles.cellWrapper}>
+      {rowData.deliveryStatus}
+        {showDate && rowData.latestDeliveryDate && (
+          <span className={styles.statusDate} >{dayjs(rowData.latestDeliveryDate).format('YYYY-MM-DD HH:mm')}</span>
+        )}
+    </span>
+    );
+  };
+
+
+  /* const renderFirstReleaseDateColumn = (rowData) => (
+     <span className={styles.cellWrapper}>
+         <span className={styles.statusDate}>
+           {dayjs(rowData.firstReleaseDate).format('YYYY-MM-DD HH:mm')}
+       </span>
+   </span>
+   );*/
 
   const renderLegalInstrumentBodyColumn = rowData => (
     <div onClick={e => e.stopPropagation()}>
