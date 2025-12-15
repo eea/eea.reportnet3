@@ -177,6 +177,9 @@ public class DatasetControllerImpl implements DatasetController {
 
   private static final long conversionLockExpirationInMillis = 900000L;
 
+  @Autowired
+  private DatasetMetabaseControllerImpl datasetMetabaseControllerImpl;
+
   @Override
   @GetMapping("/list-imported-files")
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_CUSTODIAN','DATASET_STEWARD','DATASET_OBSERVER','DATASET_STEWARD_SUPPORT','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATACOLLECTION_CUSTODIAN','DATASCHEMA_CUSTODIAN','DATASCHEMA_STEWARD','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','DATASET_NATIONAL_COORDINATOR','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','EUDATASET_OBSERVER','EUDATASET_STEWARD_SUPPORT','DATACOLLECTION_OBSERVER','DATACOLLECTION_STEWARD_SUPPORT','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','DATACOLLECTION_STEWARD','REFERENCEDATASET_OBSERVER','REFERENCEDATASET_STEWARD_SUPPORT','REFERENCEDATASET_STEWARD','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD') OR hasAnyRole('ADMIN') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATASET',#datasetId))")
@@ -461,6 +464,21 @@ public class DatasetControllerImpl implements DatasetController {
     String originalFilename = (file != null) ? file.getOriginalFilename() : null;
     LOG.info("Import endpoint was called for datasetId {} dataflowId {} providerId {} integrationId {} delimiter {} replace {} jobId {} fmeJobId {} and file {}", datasetId, dataflowId, providerId, integrationId, delimiter, replace, jobId, fmeJobId, originalFilename);
     Map<String, Object> result = new HashMap<>();
+
+    // --- EDITING LOCK CHECK ---
+    String userEditingDataset = datasetTableService.getDatasetEditingUsername(datasetId);
+
+    if (userEditingDataset!=null) {
+      LOG.error("Can not private import for datasetId {} because the table is locked for username {} from   {} ", datasetId, userEditingDataset, userEditingDataset);
+      datasetService.failImportJob(jobId, datasetId, EventType.DATASET_ENABLE_EDITING_FAILED_ACTIVE_EDITING_BY_OTHER_USER_EVENT, JobInfoEnum.ERROR_DATASET_IS_LOCKED_FOR_EDITING);
+
+      throw new ResponseStatusException(
+              HttpStatus.CONFLICT,
+              EEAErrorMessage.DATASET_IS_LOCKED_FOR_EDITING + userEditingDataset
+      );
+    }
+    // --- END LOCK CHECK ---
+
     if (dataflowId == null){
       dataflowId = datasetService.getDataFlowIdById(datasetId);
     }
@@ -3545,6 +3563,26 @@ public class DatasetControllerImpl implements DatasetController {
     DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
     String datasetName = dataSetMetabaseVO.getDataSetName();
 
+    String currentEditor = datasetTableService.getDatasetEditingUsername(datasetId);
+    if (currentEditor != null && !currentEditor.equals(username)) {
+      LOG.warn("User {} attempted Parquet to Iceberg conversion for dataset {} but {} is editing.",
+              username, datasetId, currentEditor);
+
+      kafkaSenderUtils.releaseNotificableKafkaEvent(
+              EventType.PARQUET_TO_ICEBERG_FAILED_ACTIVE_EDITING_BY_OTHER_USER,
+              null,
+              NotificationVO.builder()
+                      .user(username)
+                      .dataflowId(dataflowId)
+                      .datasetId(datasetId)
+                      .datasetName(datasetName)
+                      .error("Dataset is currently being edited by user " + currentEditor)
+                      .build()
+      );
+      return;
+    }
+
+
     if(providerId == null){
       providerId = dataSetMetabaseVO.getDataProviderId();
     }
@@ -3596,6 +3634,25 @@ public class DatasetControllerImpl implements DatasetController {
     if(providerId == null){
       providerId = dataSetMetabaseVO.getDataProviderId();
 
+    }
+
+    String currentEditor = datasetTableService.getDatasetEditingUsername(datasetId);
+    if (currentEditor != null && !currentEditor.equals(username)) {
+      LOG.warn("User {} attempted Iceberg to Parquet Iceberg conversion for dataset {} but {} is editing.",
+              username, datasetId, currentEditor);
+
+      kafkaSenderUtils.releaseNotificableKafkaEvent(
+              EventType.ICEBERG_TO_PARQUET_FAILED_ACTIVE_EDITING_BY_OTHER_USER,
+              null,
+              NotificationVO.builder()
+                      .user(username)
+                      .dataflowId(dataflowId)
+                      .datasetId(datasetId)
+                      .datasetName(datasetName)
+                      .error("Dataset is currently being edited by user " + currentEditor)
+                      .build()
+      );
+      return;
     }
 
     List<JobVO> activeJobsForDatasetId = jobControllerZuul.findActiveJobsRelatedToADatasetId(datasetId, dataflowId, providerId);
@@ -3812,6 +3869,361 @@ public class DatasetControllerImpl implements DatasetController {
   @PostMapping("/private/clearOldLocks")
   public int clearOldLocks() {
     return lockService.deletePreviousDayLocks();
+  }
+
+  /**
+   * Enable editing for a dataset.
+   *
+   * <p>If no one else is currently editing the dataset, the current user becomes the editor.
+   * Otherwise, a 409 Conflict is returned with the current editor username in the error message.</p>
+   *
+   * @param datasetId the dataset id
+   */
+  @SneakyThrows
+  @PutMapping("/{datasetId}/enableEditing")
+  @Override
+  @HystrixCommand
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_CUSTODIAN','DATASET_STEWARD','DATASET_OBSERVER','DATASET_STEWARD_SUPPORT','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATACOLLECTION_CUSTODIAN','DATASCHEMA_CUSTODIAN','DATASCHEMA_STEWARD','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','DATASET_NATIONAL_COORDINATOR','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','EUDATASET_OBSERVER','EUDATASET_STEWARD_SUPPORT','DATACOLLECTION_OBSERVER','DATACOLLECTION_STEWARD_SUPPORT','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','DATACOLLECTION_STEWARD','REFERENCEDATASET_OBSERVER','REFERENCEDATASET_STEWARD_SUPPORT','REFERENCEDATASET_STEWARD','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD') OR hasAnyRole('ADMIN') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATASET',#datasetId))")
+  @ApiOperation(value = "Enable dataset editing", hidden = true)
+  @ApiResponses(value = {
+          @ApiResponse(code = 200, message = "Editing enabled successfully"),
+          @ApiResponse(code = 403, message = "User not authorized to enable editing"),
+          @ApiResponse(code = 409, message = "Another user is already editing this dataset"),
+          @ApiResponse(code = 500, message = "Unexpected error enabling editing")
+  })
+  public void enableEditing(
+          @ApiParam(type = "Long", value = "Dataset Id", example = "0")
+          @PathVariable("datasetId") Long datasetId,
+          @RequestParam(value = "tableSchemaIds", required = false) List<String> tableSchemaIds) {
+
+    String username = SecurityContextHolder.getContext().getAuthentication().getName();
+    if (username == null || username.isBlank()) {
+      throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not authenticated");
+    }
+
+    DataSetMetabaseVO datasetVO = datasetMetabaseService.findDatasetMetabase(datasetId);
+    Long dataflowId = datasetVO.getDataflowId();
+    String datasetName = datasetVO.getDataSetName();
+
+    // BigData cannot use this feature
+    if (Boolean.TRUE.equals(dataFlowControllerZuul.isBigDataflow(dataflowId))) {
+      throw new ResponseStatusException(
+              HttpStatus.BAD_REQUEST,
+              "Enable editing is not supported for Big Data dataflows"
+      );
+    }
+
+    // Check if another user is editing
+    String currentEditor = datasetTableService.getDatasetEditingUsername(datasetId);
+
+    if (currentEditor != null && !currentEditor.equals(username)) {
+      LOG.warn("User {} attempted to enable editing for dataset {}, but {} is already editing.",
+              username, datasetId, currentEditor);
+
+      kafkaSenderUtils.releaseNotificableKafkaEvent(
+              EventType.DATASET_ENABLE_EDITING_FAILED_ACTIVE_EDITING_BY_OTHER_USER_EVENT,
+              null,
+              NotificationVO.builder()
+                      .user(username)
+                      .datasetId(datasetId)
+                      .dataflowId(dataflowId)
+                      .datasetName(datasetName)
+                      .error("Dataset is being edited by user " + currentEditor)
+                      .build()
+      );
+
+      throw new ResponseStatusException(
+              HttpStatus.CONFLICT,
+              "Dataset is currently being edited by user " + currentEditor
+      );
+    }
+
+    // Enable editing
+    try {
+
+      boolean isEnableEditing = datasetTableService.enableEditingForDatasetTableWithUser(
+              datasetId, username, false, tableSchemaIds
+      );
+
+      if (!isEnableEditing) {
+        kafkaSenderUtils.releaseNotificableKafkaEvent(
+                EventType.DATASET_ENABLE_EDITING_FAILED_ACTIVE_EDITING_BY_OTHER_USER_EVENT,
+                null,
+                NotificationVO.builder()
+                        .user(username)
+                        .datasetId(datasetId)
+                        .dataflowId(dataflowId)
+                        .datasetName(datasetName)
+                        .error("Editing could not be enabled.")
+                        .build()
+        );
+
+        throw new ResponseStatusException(
+                HttpStatus.CONFLICT,
+                "Editing could not be enabled."
+        );
+      }
+
+      // SUCCESS
+      kafkaSenderUtils.releaseNotificableKafkaEvent(
+              EventType.DATASET_ENABLE_EDITING_COMPLETED_EVENT,
+              null,
+              NotificationVO.builder()
+                      .user(username)
+                      .datasetId(datasetId)
+                      .dataflowId(dataflowId)
+                      .datasetName(datasetName)
+                      .build()
+      );
+
+      LOG.info("User {} successfully enabled editing for dataset {} (dataflow {}).",
+              username, datasetId, dataflowId);
+
+    } catch (EEAException eeaException) {
+
+      LOG.error("Error enabling editing for dataset {} dataflow {} by user {}: {}",
+              datasetId, dataflowId, username, eeaException.getMessage());
+
+      kafkaSenderUtils.releaseNotificableKafkaEvent(
+              EventType.DATASET_ENABLE_EDITING_FAILED_ACTIVE_EDITING_BY_OTHER_USER_EVENT,
+              null,
+              NotificationVO.builder()
+                      .user(username)
+                      .datasetId(datasetId)
+                      .dataflowId(dataflowId)
+                      .datasetName(datasetName)
+                      .error(eeaException.getMessage())
+                      .build()
+      );
+      throw eeaException;
+    } catch (Exception e) {
+
+      LOG.error("Unexpected error enabling editing for dataset {} by user {}: {}",
+              datasetId, username, e.getMessage());
+
+      kafkaSenderUtils.releaseNotificableKafkaEvent(
+              EventType.DATASET_ENABLE_EDITING_FAILED_ACTIVE_EDITING_BY_OTHER_USER_EVENT,
+              null,
+              NotificationVO.builder()
+                      .user(username)
+                      .datasetId(datasetId)
+                      .dataflowId(dataflowId)
+                      .datasetName(datasetName)
+                      .error("Unexpected error enabling editing")
+                      .build()
+      );
+      throw e;
+    }
+  }
+
+  /**
+   * Disable editing for a dataset.
+   *
+   * <p>This endpoint clears the editing lock for the dataset, but only if:
+   * <ul>
+   *   <li>The dataset is currently being edited.</li>
+   *   <li>The requesting user is the current editor (or has ADMIN role).</li>
+   *   <li>The dataset does not belong to a BigDataflow.</li>
+   * </ul>
+   *
+   * <p>If no editing session exists, or if another user is the editor, a 409 Conflict
+   * is returned and a DATASET_EDITING_FAILED_EVENT is emitted. On success, a
+   * DATASET_EDITING_COMPLETED_EVENT is emitted and all editing_username fields
+   * for the dataset are cleared.</p>
+   *
+   * @param datasetId the dataset identifier
+   * @throws ResponseStatusException 409 if user is not the editor
+   * @throws ResponseStatusException 409 if dataset is not currently being edited
+   * @throws ResponseStatusException 400 if editing is not supported for Big Data dataflows
+   * @throws ResponseStatusException 401 if the user is not authenticated
+   */
+
+  @SneakyThrows
+  @Override
+  @PutMapping("/{datasetId}/disableEditing")
+  @HystrixCommand
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_CUSTODIAN','DATASET_STEWARD','DATASET_OBSERVER','DATASET_STEWARD_SUPPORT','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATACOLLECTION_CUSTODIAN','DATASCHEMA_CUSTODIAN','DATASCHEMA_STEWARD','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','DATASET_NATIONAL_COORDINATOR','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','EUDATASET_OBSERVER','EUDATASET_STEWARD_SUPPORT','DATACOLLECTION_OBSERVER','DATACOLLECTION_STEWARD_SUPPORT','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','DATACOLLECTION_STEWARD','REFERENCEDATASET_OBSERVER','REFERENCEDATASET_STEWARD_SUPPORT','REFERENCEDATASET_STEWARD','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD') OR hasAnyRole('ADMIN') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATASET',#datasetId))")
+  @ApiOperation(value = "Disable dataset editing", hidden = true)
+  @ApiResponses(value = {
+          @ApiResponse(code = 200, message = "Editing disabled successfully"),
+          @ApiResponse(code = 403, message = "User not authorized to disable editing"),
+          @ApiResponse(code = 409, message = "Dataset is currently being edited by another user"),
+          @ApiResponse(code = 500, message = "Unexpected error disabling editing")
+  })
+  public void disableEditing(
+          @ApiParam(type = "Long", value = "Dataset Id", example = "0")
+          @PathVariable("datasetId") Long datasetId) {
+
+    String username = SecurityContextHolder.getContext().getAuthentication().getName();
+    if (username == null || username.isBlank()) {
+      throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not authenticated");
+    }
+
+    Long dataflowId = datasetMetabaseService
+            .findDatasetMetabase(datasetId)
+            .getDataflowId();
+
+    // Big Data check
+    if (Boolean.TRUE.equals(dataFlowControllerZuul.isBigDataflow(dataflowId))) {
+      throw new ResponseStatusException(
+              HttpStatus.BAD_REQUEST,
+              "Disable editing is not supported from this endpoint"
+      );
+    }
+
+    String currentEditor = datasetTableService.getDatasetEditingUsername(datasetId);
+
+    // If no one is editing, nothing to disable
+    if (currentEditor == null) {
+      LOG.warn("User {} attempted to disable editing for dataset {}, but no editor exists.",
+              username, datasetId);
+
+      kafkaSenderUtils.releaseNotificableKafkaEvent(
+              EventType.DATASET_DISABLE_EDITING_FAILED_EVENT,
+              null,
+              NotificationVO.builder()
+                      .user(username)
+                      .datasetId(datasetId)
+                      .dataflowId(dataflowId)
+                      .error("Dataset is not currently being edited to be disabled")
+                      .build()
+      );
+
+      throw new ResponseStatusException(HttpStatus.CONFLICT,
+              "Dataset is not currently being edited.");
+    }
+
+    // Only the editing user can disable it
+    if (!currentEditor.equals(username)) {
+
+      LOG.warn("User {} attempted to disable editing for dataset {}, but {} is the editor.",
+              username, datasetId, currentEditor);
+
+      kafkaSenderUtils.releaseNotificableKafkaEvent(
+              EventType.DATASET_DISABLE_EDITING_FAILED_ACTIVE_EDITING_BY_OTHER_USER_EVENT,
+              null,
+              NotificationVO.builder()
+                      .user(username)
+                      .datasetId(datasetId)
+                      .dataflowId(dataflowId)
+                      .error("Current editing user (" + currentEditor + ") can disable editing.")
+                      .build()
+      );
+
+      throw new ResponseStatusException(HttpStatus.CONFLICT,
+              "Only the editing user (" + currentEditor + ") can disable editing.");
+    }
+
+    try {
+
+      boolean isDisabledEditing = datasetTableService.disableEditingForDatasetTableWithUser(datasetId, username);
+
+      if (!isDisabledEditing) {
+        kafkaSenderUtils.releaseNotificableKafkaEvent(
+                EventType.DATASET_DISABLE_EDITING_FAILED_EVENT,
+                null,
+                NotificationVO.builder()
+                        .user(username)
+                        .datasetId(datasetId)
+                        .dataflowId(dataflowId)
+                        .error("Cannot disable editing")
+                        .build()
+        );
+
+        throw new ResponseStatusException(
+                HttpStatus.CONFLICT,
+                "Cannot disable editing"
+        );
+      }
+
+      // SUCCESS
+      kafkaSenderUtils.releaseNotificableKafkaEvent(
+              EventType.DATASET_DISABLE_EDITING_COMPLETED_EVENT,
+              null,
+              NotificationVO.builder()
+                      .user(username)
+                      .datasetId(datasetId)
+                      .dataflowId(dataflowId)
+                      .build()
+      );
+
+      LOG.info("User {} disabled editing for dataset {}", username, datasetId);
+
+    } catch (EEAException eeaException) {
+      LOG.error("Unexpected error disabling editing for dataset {} dataflow {} by user {}: {}",
+              datasetId, dataflowId, username, eeaException.getMessage());
+      throw eeaException;
+    } catch (Exception e) {
+      LOG.error("Unexpected error disabling editing for dataset {} by user {}: {}",
+              datasetId, username, e.getMessage());
+      throw e;
+    }
+  }
+
+  /**
+   * Retrieve the editing status of a dataset.
+   *
+   * <p>Returns whether the dataset is currently locked for editing, and if so,
+   * which user holds the lock. This endpoint does not modify any state and is used
+   * primarily by clients to determine whether editing actions are allowed.</p>
+   *
+   * @param datasetId the dataset identifier
+   * @return a DatasetEditingStatusVO containing:
+   *         <ul>
+   *           <li>datasetId – the dataset identifier</li>
+   *           <li>isEditing – true if an editor exists</li>
+   *           <li>editor – username of the current editor or null</li>
+   *         </ul>
+   */
+
+  @Override
+  @GetMapping("/{id}/editingStatus")
+  @HystrixCommand
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_CUSTODIAN','DATASET_STEWARD','DATASET_OBSERVER','DATASET_STEWARD_SUPPORT','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATACOLLECTION_CUSTODIAN','DATASCHEMA_CUSTODIAN','DATASCHEMA_STEWARD','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','DATASET_NATIONAL_COORDINATOR','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','EUDATASET_OBSERVER','EUDATASET_STEWARD_SUPPORT','DATACOLLECTION_OBSERVER','DATACOLLECTION_STEWARD_SUPPORT','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','DATACOLLECTION_STEWARD','REFERENCEDATASET_OBSERVER','REFERENCEDATASET_STEWARD_SUPPORT','REFERENCEDATASET_STEWARD','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD') OR hasAnyRole('ADMIN') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATASET',#datasetId))")
+  @ApiOperation(value = "Get dataset editing status", hidden = true)
+  public DatasetEditingStatusVO getEditingStatus(
+          @ApiParam(type = "Long", value = "Dataset Id", example = "0")
+          @PathVariable("id") Long datasetId) {
+
+    String username = SecurityContextHolder.getContext().getAuthentication().getName();
+
+    return datasetTableService.getEditingStatus(datasetId, username);
+
+  }
+
+  /**
+   * Check if there is at least one reporting dataset for the given
+   * dataflow / provider that is currently enabled for editing.
+   *
+   * <p>This is intended to be used by front end mainly
+   * (e.g. release, data collection, validation) to decide whether
+   * to block an operation when a user is editing data in at least
+   * one dataset.</p>
+   *
+   * @param dataflowId the dataflow id
+   * @param providerId the data provider id;
+   *
+   * @return {@code true} if any dataset is currently being edited,
+   *         {@code false} otherwise
+   */
+  @Override
+  @GetMapping("/hasEnabledEditingDatasets")
+  @HystrixCommand
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_CUSTODIAN','DATASET_STEWARD','DATASET_OBSERVER','DATASET_STEWARD_SUPPORT','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATACOLLECTION_CUSTODIAN','DATASCHEMA_CUSTODIAN','DATASCHEMA_STEWARD','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','DATASET_NATIONAL_COORDINATOR','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','EUDATASET_OBSERVER','EUDATASET_STEWARD_SUPPORT','DATACOLLECTION_OBSERVER','DATACOLLECTION_STEWARD_SUPPORT','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','DATACOLLECTION_STEWARD','REFERENCEDATASET_OBSERVER','REFERENCEDATASET_STEWARD_SUPPORT','REFERENCEDATASET_STEWARD','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD') OR hasAnyRole('ADMIN') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATASET',#datasetId))")
+  @ApiOperation(value = "Get dataset editing status", hidden = true)
+  public Boolean hasEnabledEditingDatasets(@RequestParam(value = "dataflowId") Long dataflowId,
+                                               @RequestParam(value = "providerId") Long providerId){
+    try{
+      List<ReportingDatasetVO> datasets = datasetMetabaseControllerImpl.findReportingDataSetIdByDataflowIdAndProviderId(dataflowId, providerId);
+      List<Long> datasetIds = datasets.stream()
+              .map(ReportingDatasetVO::getId)
+              .collect(Collectors.toList());
+      return datasetTableService.isAnyDatasetBeingEdited(datasetIds);
+    }
+    catch (Exception e){
+      LOG.error("Could not retrieve locked for editing datasets for dataflowId {}, providerId {}", dataflowId, providerId);
+      throw e;
+    }
   }
 
   @Override

@@ -1,7 +1,11 @@
 package org.eea.dataset.persistence.metabase.repository;
 
+import feign.Param;
 import org.eea.dataset.persistence.metabase.domain.DatasetTable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -9,23 +13,85 @@ import java.util.Optional;
 public interface DatasetTableRepository extends JpaRepository<DatasetTable, Long> {
 
     /**
-     *
      * Retrieves an entry based on datasetId and tableSchemaId
      *
-     * @param datasetId the dataset id
+     * @param datasetId     the dataset id
      * @param tableSchemaId the table schema id
      * @return optional entry
      */
     Optional<DatasetTable> findByDatasetIdAndTableSchemaId(Long datasetId, String tableSchemaId);
 
     /**
-     *
      * Retrieves entries by datasetId
      *
-     * @param datasetId the dataset id
+     * @param datasetId             the dataset id
      * @param isIcebergTableCreated
      * @return list of entries
      */
     List<DatasetTable> findByDatasetIdAndIsIcebergTableCreated(Long datasetId, Boolean isIcebergTableCreated);
+
+    List<DatasetTable> findByDatasetId(Long datasetId);
+
+    @Query(
+            "SELECT DISTINCT t.editingUsername " +
+                    "FROM DatasetTable t " +
+                    "WHERE t.datasetId = :datasetId " +
+                    "AND t.editingUsername IS NOT NULL"
+    )
+    List<String> findEditors(@Param("datasetId") Long datasetId);
+
+
+    @Transactional
+    @Modifying
+    @Query(
+            nativeQuery = true,
+            value =
+                    "UPDATE dataset_table t " +
+                            "SET editing_username = :username " +
+                            "WHERE t.dataset_id = :datasetId " +
+                            "AND NOT EXISTS ( " +
+                            "   SELECT 1 FROM dataset_table x " +
+                            "   WHERE x.dataset_id = :datasetId " +
+                            "     AND x.editing_username IS NOT NULL " +
+                            "     AND x.editing_username <> :username " +
+                            ")"
+    )
+    int lockEditingForDatasetUser(
+            @Param("datasetId") Long datasetId,
+            @Param("username") String username);
+
+    @Transactional
+    @Modifying
+    @Query(
+            nativeQuery = true,
+            value =
+                    "UPDATE dataset_table " +
+                            "SET editing_username = NULL " +
+                            "WHERE dataset_id = :datasetId"
+    )
+    void unlockEditingForDatasetUser(@Param("datasetId") Long datasetId);
+
+    @Transactional
+    @Modifying
+    @Query(
+            nativeQuery = true,
+            value =
+                    "INSERT INTO dataset_table (dataset_id, dataset_schema_id, table_schema_id, editing_username) " +
+                            "SELECT :datasetId, :datasetSchemaId, table_id, NULL " +
+                            "FROM unnest(CAST(:tableSchemaIds AS varchar[])) AS table_id " +
+                            "WHERE NOT EXISTS ( " +
+                            "    SELECT 1 FROM dataset_table x " +
+                            "    WHERE x.dataset_id = :datasetId " +
+                            "      AND x.table_schema_id = table_id " +
+                            ")"
+    )
+    void insertMissingDatasetTableEntries(
+            @Param("datasetId") Long datasetId,
+            @Param("datasetSchemaId") String datasetSchemaId,
+            @Param("tableSchemaIds") String tableSchemaIds   // must be a Postgres array literal
+    );
+
+
+
 
 }

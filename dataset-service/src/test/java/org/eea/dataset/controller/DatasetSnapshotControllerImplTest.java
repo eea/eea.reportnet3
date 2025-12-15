@@ -2,9 +2,7 @@ package org.eea.dataset.controller;
 
 import org.eea.dataset.persistence.metabase.domain.ReportingDataset;
 import org.eea.dataset.persistence.metabase.repository.ReportingDatasetRepository;
-import org.eea.dataset.service.DataCollectionService;
-import org.eea.dataset.service.DatasetService;
-import org.eea.dataset.service.DatasetSnapshotService;
+import org.eea.dataset.service.*;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.communication.NotificationController.NotificationControllerZuul;
@@ -14,6 +12,7 @@ import org.eea.interfaces.controller.recordstore.ProcessController.ProcessContro
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataset.CreateSnapshotVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
+import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
 import org.eea.interfaces.vo.lock.LockVO;
 import org.eea.interfaces.vo.metabase.SnapshotVO;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
@@ -35,6 +34,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -60,6 +60,13 @@ public class DatasetSnapshotControllerImplTest {
   /** The dataset service. */
   @Mock
   private DatasetService datasetService;
+
+  @Mock
+  private DatasetTableService datasetTableService;
+
+  @Mock
+  private DatasetSchemaService datasetSchemaService;
+
 
   /** The data collection service. */
   @Mock
@@ -715,6 +722,16 @@ public class DatasetSnapshotControllerImplTest {
 
     DataFlowVO dataflow = new DataFlowVO();
     dataflow.setReleasable(true);
+    ReportingDatasetVO ds1 = new ReportingDatasetVO();
+    ds1.setId(1L);
+    Mockito.when(
+            dataSetMetabaseControllerZuul.findReportingDataSetIdByDataflowIdAndProviderId(
+                    anyLong(), anyLong())
+    ).thenReturn(List.of(ds1));
+    Mockito.when(datasetSchemaService.getTableSchemasIds(Mockito.anyLong()))
+            .thenReturn(new ArrayList<>());
+    Mockito.when(datasetTableService.isAnyDatasetBeingEdited(Mockito.anyList()))
+            .thenReturn(false);
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(dataflowControllerZull.getMetabaseById(Mockito.any())).thenReturn(dataflow);
     Mockito.when(authentication.getName()).thenReturn("user");
@@ -737,6 +754,17 @@ public class DatasetSnapshotControllerImplTest {
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(dataflowControllerZull.getMetabaseById(Mockito.any())).thenReturn(dataflow);
     Mockito.when(authentication.getName()).thenReturn("user");
+    ReportingDatasetVO ds1 = new ReportingDatasetVO();
+    ds1.setId(1L);
+    Mockito.when(
+            dataSetMetabaseControllerZuul.findReportingDataSetIdByDataflowIdAndProviderId(
+                    anyLong(), anyLong())
+    ).thenReturn(List.of(ds1));
+    Mockito.when(datasetSchemaService.getTableSchemasIds(Mockito.anyLong()))
+            .thenReturn(new ArrayList<>());
+    Mockito.when(datasetTableService.isAnyDatasetBeingEdited(Mockito.anyList()))
+            .thenReturn(false);
+
     doThrow(new EEAException()).when(datasetSnapshotService).createReleaseSnapshots(1L, 1L, true,
         true, null);
     try {
@@ -760,6 +788,14 @@ public class DatasetSnapshotControllerImplTest {
 
     DataFlowVO dataflow = new DataFlowVO();
     dataflow.setReleasable(true);
+    ReportingDatasetVO ds1 = new ReportingDatasetVO();
+    ds1.setId(1L);
+    Mockito.when(
+            dataSetMetabaseControllerZuul.findReportingDataSetIdByDataflowIdAndProviderId(
+                    anyLong(), anyLong())
+    ).thenReturn(List.of(ds1));
+    Mockito.when(datasetSchemaService.getTableSchemasIds(Mockito.anyLong()))
+            .thenReturn(new ArrayList<>()); // or Collections.emptyList()
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(dataflowControllerZull.getMetabaseById(Mockito.any())).thenReturn(dataflow);
     Mockito.when(authentication.getName()).thenReturn("user");

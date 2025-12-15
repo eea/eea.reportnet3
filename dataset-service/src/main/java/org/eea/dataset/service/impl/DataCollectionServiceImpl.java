@@ -356,6 +356,10 @@ public class DataCollectionServiceImpl implements DataCollectionService {
       failEvent = EventType.ADD_DATACOLLECTION_FAILED_EVENT_ICEBERG_EXISTS;
     }
 
+    if(errorMessage.equals(EEAErrorMessage.DATA_COLLECTION_FAILED_DATASET_LOCKED_FOR_EDITING_EXISTS)){
+      failEvent = EventType.ADD_DATACOLLECTION_FAILED_EVENT_DATASET_LOCKED_FOR_EDITING_EXISTS;
+    }
+
     // Release the lock
     Map<String, Object> lockCriteria = new HashMap<>();
     lockCriteria.put(LiteralConstants.SIGNATURE, methodSignature);
@@ -405,9 +409,10 @@ public class DataCollectionServiceImpl implements DataCollectionService {
       boolean referenceDataflow, boolean stopAndNotifyPKError) {
 
     Boolean isBigDataflow = dataflowControllerZuul.isBigDataflow(dataflowId);
+    List<DataSetMetabaseVO> datasets = datasetMetabaseService.findDataSetByDataflowIds(Collections.singletonList(dataflowId));
+
     if(Boolean.TRUE.equals(isBigDataflow)){
       //check if there are tables converted to Iceberg and convert them back to Parquet
-      List<DataSetMetabaseVO> datasets = datasetMetabaseService.findDataSetByDataflowIds(Collections.singletonList(dataflowId));
       for (DataSetMetabaseVO dataset : datasets) {
         List<TableSchemaIdNameVO> tables = datasetSchemaService.getTableSchemasIds(dataset.getId());
         String datasetSchemaId = dataset.getDatasetSchema();
@@ -419,6 +424,16 @@ public class DataCollectionServiceImpl implements DataCollectionService {
             throw new Exception("Can not create data collection for dataflowId " + dataflowId + " because there is an iceberg table");
           }
         }
+      }
+    }
+    //check locks for Citus
+    if(Boolean.FALSE.equals(isBigDataflow)) {
+      List<Long> datasetIds = datasets.stream()
+              .map(DataSetMetabaseVO::getId)
+              .collect(Collectors.toList());
+      if (datasetTableService.isAnyDatasetBeingEdited(datasetIds)) {
+        releaseLockAndNotification(dataflowId, EEAErrorMessage.DATA_COLLECTION_FAILED_DATASET_LOCKED_FOR_EDITING_EXISTS, true, false);
+        throw new Exception("Can not create data collection for dataflowId " + dataflowId + " because there is in editing Dataset");
       }
     }
 
@@ -1874,5 +1889,16 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     }
     return null;
   }
+
+  public boolean isAnyDatasetBeingEdited(List<Long> datasetIds, String username) {
+    for (Long datasetId : datasetIds) {
+      String editor = datasetTableService.getDatasetEditingUsername(datasetId);
+      if (editor != null && !editor.equals(username)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
 
 }

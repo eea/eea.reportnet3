@@ -257,7 +257,24 @@ public class ValidationControllerImpl implements ValidationController {
           }
         }
         validationHelper.executeValidationDL(datasetId, uuid, released, s3PathResolver, createParquetWithSQL);
-      } else {
+      } else {    //check locks for Citus
+
+          if (dataSetControllerZuul.getEditingStatus(datasetId).getIsEditing()) {
+            if (jobId != null) {
+              jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.ERROR_DATASET_IS_LOCKED_FOR_EDITING, null);
+              jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FAILED);
+              processControllerZuul.updateProcess(datasetId, dataset.getDataflowId(),
+                      ProcessStatusEnum.CANCELED, ProcessTypeEnum.VALIDATION, uuid, user, priority, released);
+              validationHelper.deleteLockToReleaseProcess(datasetId);
+              kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.VALIDATION_FAILED_DATASET_LOCKED_FOR_EDITING_EXISTS_EVENT, null,
+                      NotificationVO.builder()
+                              .user(jobVO.getCreatorUsername())
+                              .datasetId(datasetId)
+                              .dataflowId(dataset.getDataflowId())
+                              .build());
+            }
+            throw new Exception("Can not validate for jobId " + jobId + " because dataset " +datasetId + " is locked for editing");
+          }
         validationHelper.executeValidation(datasetId, uuid, released, true);
       }
 

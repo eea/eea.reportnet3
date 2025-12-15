@@ -18,6 +18,7 @@ import lombok.SneakyThrows;
 import org.eea.dataset.persistence.data.domain.AttachmentValue;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSchemaService;
+import org.eea.dataset.service.DatasetTableService;
 import org.eea.dataset.service.helper.DeleteHelper;
 import org.eea.dataset.service.helper.FileTreatmentHelper;
 import org.eea.dataset.service.helper.UpdateRecordHelper;
@@ -41,7 +42,9 @@ import org.eea.interfaces.vo.dataset.schemas.RecordSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.lock.LockVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
+import org.eea.interfaces.vo.orchestrator.enums.JobInfoEnum;
 import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
+import org.eea.kafka.domain.EventType;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.service.LockService;
 import org.eea.utils.LiteralConstants;
@@ -120,6 +123,9 @@ public class DatasetControllerImplTest {
   @Mock
   private DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul;
 
+  @Mock
+  private DatasetTableService datasetTableService; // use the same type/package as in the controller
+
   /** The job controller zuul. */
   @Mock
   private JobControllerZuul jobControllerZuul;
@@ -165,6 +171,9 @@ public class DatasetControllerImplTest {
     SecurityContextHolder.setContext(securityContext);
     fileMock = new MockMultipartFile("file", "fileOriginal", "cvs", "content".getBytes());
     MockitoAnnotations.openMocks(this);
+    Mockito.when(datasetTableService.getDatasetEditingUsername(Mockito.anyLong()))
+            .thenReturn(null);
+
   }
 
   @Test

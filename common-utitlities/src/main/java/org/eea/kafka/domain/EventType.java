@@ -825,7 +825,43 @@ public enum EventType {
           "import_wrongHeaders_warning_event", true),
 
   IMPORT_FIELD_SIZE_EXCEEDS_LIMIT_WARNING_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
-         "import_field_size_exceeds_limit_warning_event", true );
+         "import_field_size_exceeds_limit_warning_event", true),
+
+  PARQUET_TO_ICEBERG_FAILED_ACTIVE_EDITING_BY_OTHER_USER(LiteralConstants.DATA_REPORTING_TOPIC,
+          "parquet_to_iceberg_failed_active_editing_by_other_user", true),
+
+  ICEBERG_TO_PARQUET_FAILED_ACTIVE_EDITING_BY_OTHER_USER(LiteralConstants.DATA_REPORTING_TOPIC,
+          "iceberg_to_parquet_failed_active_editing_by_other_user", true),
+
+  DATASET_DISABLE_EDITING_FAILED_ACTIVE_EDITING_BY_OTHER_USER_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+          "dataset_disable_editing_failed_active_editing_by_other_user_event", true),
+
+  DATASET_ENABLE_EDITING_FAILED_ACTIVE_EDITING_BY_OTHER_USER_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+          "dataset_enable_editing_failed_active_editing_by_other_user_event", true),
+
+  /** Validation with Dataset locked failed event */
+  VALIDATION_FAILED_DATASET_LOCKED_FOR_EDITING_EXISTS_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+          "validation_failed_dataset_locked_for_editing_exists_event", true),
+
+  /** Release with Dataset locked failed event */
+  RELEASE_FAILED_DATASET_LOCKED_FOR_EDITING_EXISTS_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+          "release_failed_dataset_locked_for_editing_exists_event", true),
+
+  /** Datacollection with Dataset locked failed event */
+  ADD_DATACOLLECTION_FAILED_EVENT_DATASET_LOCKED_FOR_EDITING_EXISTS(LiteralConstants.DATA_REPORTING_TOPIC,
+          "add_datacollection_failed_event_dataset_locked_for_editing_exists", true),
+
+  DATASET_ENABLE_EDITING_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+          "dataset_enable_editing_completed_event", true),
+
+  DATASET_DISABLE_EDITING_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+          "dataset_disable_editing_completed_event", true),
+
+  DATASET_ENABLE_EDITING_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+          "dataset_enable_editing_failed_event", true),
+
+  DATASET_DISABLE_EDITING_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+          "dataset_disable_editing_failed_event", true);
 
   /** The topic. */
   private String topic;
