@@ -25,7 +25,6 @@ import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.FileTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
-import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
@@ -71,7 +70,6 @@ import javax.transaction.Transactional;
 import java.io.*;
 import java.util.*;
 import java.util.concurrent.Future;
-import java.util.stream.Collectors;
 
 import static org.eea.utils.LiteralConstants.S3_VALIDATION;
 import static org.eea.utils.LiteralConstants.S3_VALIDATION_TABLE_PATH;
@@ -104,7 +102,7 @@ public class ValidationServiceImpl implements ValidationService {
   private static final String CODEDESC = "QC Description";
 
   /** The Constant LEVELERROR: {@value}. */
-  private static final String LEVELERROR = "Level error";
+  private static final String SEVERITY_LEVEL = "Severity Level";
 
   /** The Constant MESSAGE: {@value}. */
   private static final String MESSAGE = "Message";
@@ -783,7 +781,7 @@ public class ValidationServiceImpl implements ValidationService {
 
       // Creates an array list containing all the column names from the CSV defined as constants
       List<String> headers = new ArrayList<>(Arrays.asList(ENTITY, TABLE, FIELD, CODE, CODENAME,
-          CODEDESC, LEVELERROR, MESSAGE, NUMBEROFRECORDS));
+          CODEDESC, SEVERITY_LEVEL, MESSAGE, NUMBEROFRECORDS));
 
       // Writes the column names into the CSV Writer and sets the array String to headers size so it
       // only writes at most the number of columns as variables per row
@@ -920,7 +918,7 @@ public class ValidationServiceImpl implements ValidationService {
     }
 
     DataSetSchemaVO schema = datasetSchemaController.findDataSchemaByDatasetId(dataSetMetabaseVO.getId());
-    //setRuleMessageDL(schema.getIdDataSetSchema(), errors);
+    setRuleMessageDL(schema.getIdDataSetSchema(), errors);
     validations.setErrors(errors);
 
     validations.setTotalRecords((long) errors.size());
@@ -969,7 +967,9 @@ public class ValidationServiceImpl implements ValidationService {
           if ((EntityTypeEnum.FIELD == validation.getTypeEntity()
               || EntityTypeEnum.RECORD == validation.getTypeEntity())
               && validation.getShortCode().equals(rule.getShortCode())) {
-            validation.setMessage(replacePlaceHolders(rule.getThenCondition().get(0)));
+            if (rule.getThenCondition().get(0).contains("{%reason%}")){
+              validation.setMessage(replacePlaceHolders(rule.getThenCondition().get(0)));
+            }
           }
         }
       }

@@ -402,7 +402,7 @@ export const useSetColumns = (
           alignItems: 'center',
           justifyContent:
             field && field.fieldData && field.fieldData.type === 'ATTACHMENT' ? 'flex-end' : 'space-between',
-          whiteSpace: field && field.fieldData && field.fieldData.type === 'TEXTAREA' ? 'pre-wrap' : 'none'
+          whiteSpace: 'pre-wrap'
         }}>
         {renderField()}
         {renderFieldValidations()}

@@ -254,7 +254,7 @@ public class RulesServiceImpl implements RulesService {
   private static final String TYPE_OF_QC = "Type of QC";
 
   /** The Constant LEVEL_ERROR: {@value}. */
-  private static final String LEVEL_ERROR = "Level Error";
+  private static final String SEVERITY_LEVEL = "Severity Level";
 
   /** The Constant CREATION_MODE: {@value}. */
   private static final String CREATION_MODE = "Creation Mode";
@@ -1834,7 +1834,7 @@ public class RulesServiceImpl implements RulesService {
 
       // Creates an array list containing all the column names from the CSV defined as constants
       List<String> headers = new ArrayList<>(Arrays.asList(TABLE, FIELD, CODE, QCNAME, QCDESC,
-              MESSAGE, EXPRESSION, TYPE_OF_QC, LEVEL_ERROR, CREATION_MODE, STATUS, VALID));
+              MESSAGE, EXPRESSION, TYPE_OF_QC, SEVERITY_LEVEL, CREATION_MODE, STATUS, VALID));
 
       // Writes the column names into the CSV Writer and sets the array String to headers size so it
       // only writes at most the number of columns as variables per row
