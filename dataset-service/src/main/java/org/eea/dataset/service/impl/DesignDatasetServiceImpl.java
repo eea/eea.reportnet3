@@ -272,7 +272,7 @@ public class DesignDatasetServiceImpl implements DesignDatasetService {
         Thread.sleep(timeToWaitBeforeContinueCopy);
       }
 
-      final Boolean isBigDataFlow = dataflowControllerZuul.isBigDataflow(idDataflowOrigin);
+      final Boolean isBigDataFlow = dataflowControllerZuul.isBigDataflow(idDataflowDestination);
       // After creating the datasets schemas on the DB, fill them and create the permissions
       for (Map.Entry<Long, DataSetSchemaVO> itemNewDatasetAndSchema : mapDatasetsDestinyAndSchemasOrigin
           .entrySet()) {

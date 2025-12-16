@@ -3302,7 +3302,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       }
 
       TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, datasetId));
-      if (Boolean.FALSE.equals(dataFlowControllerZuul.isBigDataflow(schemaOrigin.getIdDataFlow()))) {
+      if (Boolean.FALSE.equals(dataFlowControllerZuul.isBigDataflow(schema.getIdDataFlow()))) {
           datasetService.saveTablePropagation(datasetId, tableSchemaMapper.entityToClass(table));
       }
     }
