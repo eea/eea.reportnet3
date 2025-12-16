@@ -61,6 +61,7 @@ import org.eea.validation.service.RulesService;
 import org.eea.validation.service.SqlRulesService;
 import org.eea.validation.util.AutomaticRules;
 import org.eea.validation.util.KieBaseManager;
+import org.eea.validation.util.SQLCountryCompanyOrganizationCodeUtils;
 import org.eea.validation.util.drools.compose.ConditionsDrools;
 import org.eea.validation.util.drools.compose.SchemasDrools;
 import org.eea.validation.util.drools.compose.TypeValidation;
@@ -202,6 +203,9 @@ public class RulesServiceImpl implements RulesService {
 
   @Autowired
   private MongoTemplate mongoTemplate;
+
+  @Autowired
+  private SQLCountryCompanyOrganizationCodeUtils sqlCountryCompanyOrganizationCodeUtils;
 
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(RulesServiceImpl.class);
@@ -2444,6 +2448,10 @@ public class RulesServiceImpl implements RulesService {
     // validate query
     if (!org.codehaus.plexus.util.StringUtils.isBlank(query)) {
       // validate query sintax
+
+      // replace provider code with {%R3_COUNTRY_CODE%} or {%R3_COMPANY_CODE%} or {%R3_ORGANIZATION_CODE%}
+      query = sqlCountryCompanyOrganizationCodeUtils.replaceCodesIfNeeded(datasetId, query);
+
       if (checkQuerySyntax(query)) {
         try {
           String preparedquery = query.contains(";") ? query.replace(";", "") + " limit 5" : query + " limit 5";
