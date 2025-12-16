@@ -150,7 +150,6 @@ export const PublicCountryInformation = () => {
         sortField,
         filterBy
       });
-     // console.log(data);
       setTotalRecords(data.totalRecords);
       setPublicInformation(data.dataflows);
       setFilteredRecords(data.filteredRecords);
@@ -171,7 +170,12 @@ export const PublicCountryInformation = () => {
 
   const setPublicInformation = dataflows => {
     if (isNil(dataflows)) return [];
-    console.log(dataflows);
+
+    const CORRECTION_REQUESTED = resourcesContext.messages[config.datasetStatus.CORRECTION_REQUESTED.label].trim().toUpperCase();
+    const TECHNICALLY_ACCEPTED = resourcesContext.messages[config.datasetStatus.TECHNICALLY_ACCEPTED.label].trim().toUpperCase();
+
+
+
 
     const publicDataflows = dataflows
       .filter(dataflow => !isNil(dataflow.datasets))
@@ -185,6 +189,39 @@ export const PublicCountryInformation = () => {
         const referencePublicFileNames = dataflow.referenceDatasets
           ?.filter(referenceDataset => !isNil(referenceDataset.publicFileName))
           .map(referenceDataset => ({ fileName: referenceDataset.publicFileName }));
+
+        let latestDate = null;
+        const allDatasets = dataflow.datasets || [];
+
+        const correctDatasets = allDatasets
+          .filter(ds => !isNil(ds.dateStatusChanged))
+          .map(ds => ({
+            date: dayjs(ds.dateStatusChanged),
+            status: ds.status.replace(/_/g, ' ').trim().toUpperCase(),
+            originalDate: ds.dateStatusChanged
+          }));
+
+
+        const correctionDates = correctDatasets
+          .filter(ds => ds.status === CORRECTION_REQUESTED);
+
+        let finalDatesToCompare = correctionDates;
+
+        if (correctionDates.length === 0) {
+          finalDatesToCompare = correctDatasets
+            .filter(ds => ds.status === TECHNICALLY_ACCEPTED);
+        }
+
+        if (finalDatesToCompare.length > 0) {
+          const latestDataset = finalDatesToCompare.reduce(
+            (max, current) => (current.date.isAfter(max.date) ? current : max)
+          );
+          latestDate = latestDataset.originalDate;
+        }
+
+
+        const latestDeliveryDate = latestDate || '-';
+
 
         return {
           deadline: dataflow.expirationDate,
@@ -202,10 +239,9 @@ export const PublicCountryInformation = () => {
           restrictFromPublic: dataflow.datasets ? dataflow.datasets[0]?.restrictFromPublic : false,
           status: resourcesContext.messages[dataflow.status].toUpperCase(),
           firstReleaseDate:dataset?.firstReleaseDate || '-',
-          latestDeliveryDate:dataflow.datasets?.[0]?.dateStatusChanged || '-'
+          latestDeliveryDate: latestDeliveryDate
         };
       });
-    console.log(publicDataflows);
     setDataflows(publicDataflows);
     setData(publicDataflows);
   };
@@ -221,15 +257,11 @@ export const PublicCountryInformation = () => {
       },
       { key: 'deadline', header: resourcesContext.messages['deadline'] },
       { key: 'status', header: resourcesContext.messages['status'], template: renderStatusBodyColumn },
-      { key: 'deliveryDate', header: resourcesContext.messages['deliveryDate'] },
       {
         key: 'firstReleaseDate',
         header: resourcesContext.messages['firstDeliveryDate']
       },
-      {
-        key: 'latestDeliveryDate',
-        header: resourcesContext.messages['latestDeliveryDate']
-      },
+      { key: 'deliveryDate', header: resourcesContext.messages['latestDeliveryDate'] },
       {
         key: 'deliveryStatus',
         header: resourcesContext.messages['deliveryStatus'],
@@ -365,7 +397,7 @@ export const PublicCountryInformation = () => {
       ],
       type: 'DROPDOWN'
     },
-    { type: 'DATE', key: 'deliveryDate', label: resourcesContext.messages['deliveryDate'] },
+    { type: 'DATE', key: 'deliveryDate', label: resourcesContext.messages['latestDeliveryDate'] },
     {
       type: 'MULTI_SELECT',
       key: 'deliveryStatus',
@@ -426,16 +458,11 @@ export const PublicCountryInformation = () => {
     </div>
   );
 
-  //const renderDeliveryStatusBodyColumn = rowData => <div>{capitalize(rowData.deliveryStatus)}</div>;
 
   const renderDeliveryStatusBodyColumn = rowData => {
-    // Convert both comparison strings to a consistent case (e.g., lowercase)
     const deliveryStatusLower = rowData.deliveryStatus.toLowerCase();
-
     const correctionTextLower = resourcesContext.messages[config.datasetStatus.CORRECTION_REQUESTED.label].toLowerCase();
     const techAcceptedTextLower = resourcesContext.messages[config.datasetStatus.TECHNICALLY_ACCEPTED.label].toLowerCase();
-
-    // The condition now compares the lowercased strings
     const showDate = deliveryStatusLower === correctionTextLower || deliveryStatusLower === techAcceptedTextLower;
 
     return (
@@ -448,14 +475,6 @@ export const PublicCountryInformation = () => {
     );
   };
 
-
-  /* const renderFirstReleaseDateColumn = (rowData) => (
-     <span className={styles.cellWrapper}>
-         <span className={styles.statusDate}>
-           {dayjs(rowData.firstReleaseDate).format('YYYY-MM-DD HH:mm')}
-       </span>
-   </span>
-   );*/
 
   const renderLegalInstrumentBodyColumn = rowData => (
     <div onClick={e => e.stopPropagation()}>

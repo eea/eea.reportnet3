@@ -281,7 +281,9 @@ const parseRequestPublicCountrySortField = sortField => {
     legalInstrument: 'legal_instrument',
     deadline: 'deadline_date',
     deliveryDate: 'delivery_date',
-    deliveryStatus: 'delivery_status'
+    deliveryStatus: 'delivery_status',
+    firstReleaseDate: 'first_date_released',
+    latestDeliveryDate: 'date_status_changed',
   };
 
   return replacements[sortField] || sortField;
@@ -301,8 +303,7 @@ const parseRequestPublicCountryFilterBy = filterBy => {
     deadline: 'deadline_date',
     status: 'status',
     deliveryDate: 'delivery_date',
-    deliveryStatus: 'delivery_status',
-    firstReleaseDate: 'firstReleaseDate'
+    deliveryStatus: 'delivery_status'
   };
 
   if (!isNil(filterBy['deliveryStatus']) && isEmpty(filterBy['deliveryStatus'])) {
