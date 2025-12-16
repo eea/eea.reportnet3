@@ -174,9 +174,6 @@ export const PublicCountryInformation = () => {
     const CORRECTION_REQUESTED = resourcesContext.messages[config.datasetStatus.CORRECTION_REQUESTED.label].trim().toUpperCase();
     const TECHNICALLY_ACCEPTED = resourcesContext.messages[config.datasetStatus.TECHNICALLY_ACCEPTED.label].trim().toUpperCase();
 
-
-
-
     const publicDataflows = dataflows
       .filter(dataflow => !isNil(dataflow.datasets))
       .map(dataflow => {
@@ -272,7 +269,6 @@ export const PublicCountryInformation = () => {
         header: resourcesContext.messages['referenceDatasets'],
         template: renderDownloadReferenceFileBodyColumn
       },
-
       {
         key: 'publicFilesNames',
         header: resourcesContext.messages['files'],

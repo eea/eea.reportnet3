@@ -282,8 +282,7 @@ const parseRequestPublicCountrySortField = sortField => {
     deadline: 'deadline_date',
     deliveryDate: 'delivery_date',
     deliveryStatus: 'delivery_status',
-    firstReleaseDate: 'first_date_released',
-    latestDeliveryDate: 'date_status_changed',
+    firstReleaseDate: 'first_date_released'
   };
 
   return replacements[sortField] || sortField;
