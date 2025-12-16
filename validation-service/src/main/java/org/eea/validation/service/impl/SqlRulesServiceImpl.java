@@ -654,7 +654,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
     String[] queryKeywords = KEYWORDS.split(",");
     for (String word : queryKeywords) {
       String regex = "\\b" + word + "\\b";
-      Pattern pattern = Pattern.compile(regex);
+      Pattern pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
       Matcher matcher = pattern.matcher(query);
       if (matcher.find()) {
         queryContainsKeyword = false;
