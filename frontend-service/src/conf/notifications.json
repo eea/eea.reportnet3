@@ -1240,13 +1240,27 @@
           "key": "ICEBERG_TO_PARQUET_FAILED_ACTIVE_EDITING_BY_OTHER_USER"
         },
         {
-          "key": "VALIDATION_FAILED_DATASET_LOCKED_FOR_EDITING_EXISTS_EVENT"
+          "key": "VALIDATION_FAILED_DATASET_LOCKED_FOR_EDITING_EXISTS_EVENT",
+          "navigateTo": {
+            "section": "DATASET",
+            "parameters": ["dataflowId", "datasetId"],
+            "hasQueryString": true
+          }
         },
         {
-          "key": "RELEASE_FAILED_DATASET_LOCKED_FOR_EDITING_EXISTS_EVENT"
+          "key": "RELEASE_FAILED_DATASET_LOCKED_FOR_EDITING_EXISTS_EVENT",
+          "navigateTo": {
+            "section": "DATAFLOW",
+            "parameters": ["dataflowId", "providerId"],
+            "hasQueryString": true
+          }
         },
         {
-          "key": "ADD_DATACOLLECTION_FAILED_EVENT_DATASET_LOCKED_FOR_EDITING_EXISTS"
+          "key": "ADD_DATACOLLECTION_FAILED_EVENT_DATASET_LOCKED_FOR_EDITING_EXISTS",
+          "navigateTo": {
+            "section": "DATAFLOW",
+            "parameters": ["dataflowId"]
+          }
         }
       ]
     },
