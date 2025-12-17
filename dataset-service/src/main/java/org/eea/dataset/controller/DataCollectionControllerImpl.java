@@ -149,6 +149,8 @@ public class DataCollectionControllerImpl implements DataCollectionController {
     boolean referenceDataflow = false;
     if (null != dataflow && TypeDataflowEnum.REFERENCE.equals(dataflow.getType())) {
       referenceDataflow = true;
+      // temporary logs until ticket 294280 has a root cause
+      LOG.info("[294280] createEmptyDataCollection | dataflowId={} | showPublicInfo is {} but it will be set automatically to false because dataflow type is REFERENCE", dataCollectionVO.getIdDataflow(), showPublicInfo);
       showPublicInfo = false;
       manualCheck = false;
       stopAndNotifySQLErrors = false;
