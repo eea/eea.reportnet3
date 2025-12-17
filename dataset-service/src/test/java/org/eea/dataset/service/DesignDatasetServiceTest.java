@@ -228,6 +228,7 @@ public class DesignDatasetServiceTest {
     when(designDatasetMapper.entityListToClass(Mockito.any())).thenReturn(Arrays.asList(dataset));
     Mockito.doNothing().when(recordStoreControllerZuul).createUpdateQueryView(Mockito.any(),
         Mockito.anyBoolean());
+    Mockito.when(dataFlowControllerZuul.isBigDataflow(1L)).thenReturn(false);
 
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("name");
