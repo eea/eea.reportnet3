@@ -1343,7 +1343,7 @@ export const DataViewer = ({
       {!bigData && <ContextMenu model={menu} ref={contextMenuRef} />}
       <div className={styles.Table}>
         <DataTable
-          className={isTableTop && 'dataviewer'}
+          className={isTableTop ? 'dataviewer' : ''}
           contextMenuSelection={records.selectedRecord}
           editable={(hasWritePermissions && !tableReadOnly) || (hasWritePermissions && isReferenceDataset)}
           first={records.firstPageRecord}

@@ -695,7 +695,7 @@ export const FieldEditor = ({
                 setLinkItemsValue(e.value);
                 onEditorValueChange(cells, e.value);
               }}
-              onFilterInputChangeBackend={onFilter}
+              // onFilterInputChangeBackend={onFilter}
               onFocus={e => {
                 e.preventDefault();
                 if (!isUndefined(codelistItemValue)) {
