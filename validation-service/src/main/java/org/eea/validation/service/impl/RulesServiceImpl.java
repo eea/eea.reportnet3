@@ -6,6 +6,8 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.client.result.UpdateResult;
 import com.opencsv.CSVWriter;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.Document;
 import org.bson.types.ObjectId;
@@ -1988,7 +1990,7 @@ public class RulesServiceImpl implements RulesService {
                                          String newDatasetSchemaId, Rule rule, List<IntegritySchema> integrities, Long datasetId, DataFlowVO dataFlowVO) throws EEAException {
 
     // Here we change the fields of the rule involved with the help of the dictionary
-    fillRuleImport(rule, dictionaryOriginTargetObjectId, datasetId, dataFlowVO);
+    fillRuleImport(rule, dictionaryOriginTargetObjectId, newDatasetSchemaId, datasetId, dataFlowVO);
 
     // If the rule is a Dataset type, we need to do the same process with the
     // IntegritySchema
@@ -2014,7 +2016,7 @@ public class RulesServiceImpl implements RulesService {
    * @param dictionaryOriginTargetObjectId the dictionary origin target object id
    */
   private void fillRuleImport(Rule rule,
-                                             Map<String, String> dictionaryOriginTargetObjectId, Long datasetId, DataFlowVO dataFlowVO) {
+                                             Map<String, String> dictionaryOriginTargetObjectId,String newDatasetSchemaId, Long datasetId, DataFlowVO dataFlowVO) {
 
     String newRuleId = new ObjectId().toString();
     dictionaryOriginTargetObjectId.put(rule.getRuleId().toString(), newRuleId);
@@ -2061,7 +2063,7 @@ public class RulesServiceImpl implements RulesService {
         rule.setSqlSentence(newSqlSentence);
         if(BooleanUtils.isTrue(dataFlowVO.getBigData())) {
           try {
-            fixSqlSentence(rule, newObjectId, datasetId);
+            fixSqlSentence(rule, newDatasetSchemaId, datasetId);
           } catch (Exception exception) {
             LOG.error("Error updating isSQLSentence information while importing dataset for rule {}", rule.getRuleId());
           }
@@ -2548,7 +2550,10 @@ public class RulesServiceImpl implements RulesService {
     boolean queryContainsKeyword = true;
     String[] queryKeywords = KEYWORDS.split(",");
     for (String word : queryKeywords) {
-      if (query.toLowerCase().contains(word.toLowerCase())) {
+      String regex = "\\b" + word + "\\b";
+      Pattern pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
+      Matcher matcher = pattern.matcher(query);
+      if (matcher.find()) {
         queryContainsKeyword = false;
         break;
       }
@@ -2722,7 +2727,8 @@ public class RulesServiceImpl implements RulesService {
   private String getModifiedSql(Rule rule, String tableName, Long datasetId) {
     if (rule.getSqlSentence().startsWith(SPATIAL_DATA_OLD_AUTOMATIC_QC_RULE_1)) {
       String fromClause = String.format(FROM_CLAUSE_STATEMENT, datasetId, tableName);
-      String fieldName = getFieldName(rule);
+      String fieldName = getFieldNameFromOriginalSql(rule);
+
       return String.format(SPATIAL_DATA_NEW_AUTOMATIC_QC_RULE_SENTENCE, fieldName, fromClause, fieldName ,fieldName);
     }
     return "";
@@ -2744,9 +2750,35 @@ public class RulesServiceImpl implements RulesService {
     }
   }
 
-  private String getFieldName(Rule rule) {
-    int startInd = rule.getSqlSentence().indexOf("\"") +1;
-    int endInd = rule.getSqlSentence().indexOf("_id\"", startInd);
-    return rule.getSqlSentence().substring(startInd, endInd);
+  private String getFieldNameFromOriginalSql(Rule rule) {
+
+    String sql = rule.getSqlSentence();
+    if (sql == null) {
+      return null;
+    }
+
+    // Look for pattern: "fv.id as FIELD_NAME_id"
+    String marker = "fv.id as ";
+    int start = sql.indexOf(marker);
+
+    if (start == -1) {
+      // maybe uppercase
+      marker = "FV.ID AS ";
+      start = sql.indexOf(marker);
+      if (start == -1) {
+        return null; // cannot parse
+      }
+    }
+
+    start += marker.length();
+
+    // find the "_id" ending
+    int end = sql.indexOf("_id", start);
+    if (end == -1) {
+      return null;
+    }
+
+    // Extract: Field name
+    return sql.substring(start, end);
   }
 }

@@ -279,7 +279,7 @@ export const ActionsToolbar = ({
             isDataflowOpen || isDesignDatasetEditorRead ? null : 'p-button-animated-blink'
           }`}
           disabled={
-            (isEditingEnabled && dataAreManuallyEditable && hasWritePermissions) ||
+            (isEditingEnabled && hasWritePermissions && (!bigData || dataAreManuallyEditable)) ||
             isDataflowOpen ||
             isDesignDatasetEditorRead ||
             isTableDataRestorationInProgress ||

@@ -545,6 +545,8 @@ public class DataflowServiceImpl implements DataflowService {
     dataflowVO.setCreationDate(new Date());
     dataflowVO.setStatus(TypeStatusEnum.DESIGN);
     dataflowVO.setReleasable(true);
+    // temporary logs until ticket 294280 has a root cause
+    LOG.info("[294280] createDataflow | dataflowId={} | showPublicInfo is {}", dataflowVO.getId(), dataflowVO.isShowPublicInfo());
     dataFlowSaved = dataflowRepository.save(dataflowMapper.classToEntity(dataflowVO));
     LOG.info("The dataflow {} has been created.", dataFlowSaved.getName());
 
@@ -585,6 +587,12 @@ public class DataflowServiceImpl implements DataflowService {
     } else {
       Optional<Dataflow> dataflowSave = dataflowRepository.findById(dataflowVO.getId());
       if (dataflowSave.isPresent()) {
+        // temporary logs until ticket 294280 has a root cause
+        boolean previous = dataflowSave.get().isShowPublicInfo();
+        boolean incoming = dataflowVO.isShowPublicInfo();
+        if (previous != incoming) {
+          LOG.info("[294280] updateDataFlow | dataflowId={} | showPublicInfo was {} and changed to {}", dataflowVO.getId(), previous, incoming);
+        }
         dataflowSave.get().setName(dataflowVO.getName());
         if (!StringUtils.isBlank(dataflowVO.getDescription())) {
           dataflowSave.get().setDescription(dataflowVO.getDescription());
@@ -1165,6 +1173,8 @@ public class DataflowServiceImpl implements DataflowService {
    */
   @Override
   public void updateDataFlowPublicStatus(Long dataflowId, boolean showPublicInfo) {
+    // temporary logs until ticket 294280 has a root cause
+    LOG.info("[294280] updateDataFlowPublicStatus | dataflowId={} | showPublicInfo is being updated to {}", dataflowId, showPublicInfo);
     dataflowRepository.updatePublicStatus(dataflowId, showPublicInfo);
   }
 

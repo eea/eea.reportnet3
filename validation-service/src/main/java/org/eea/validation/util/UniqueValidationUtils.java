@@ -30,6 +30,7 @@ import org.eea.validation.service.RulesService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /**
@@ -64,6 +65,10 @@ public class UniqueValidationUtils {
 
   /** The data set metabase controller zuul. */
   private static DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul;
+
+  /** The max errors. */
+  @Value(value = "${validation.maximumErrors}")
+  private static int maxErrors;
 
   /*
    * we need to put synchronized void because drools need a static method to call in a java file, so
@@ -279,7 +284,7 @@ public class UniqueValidationUtils {
         stringQuery.append(",");
       }
     }
-    stringQuery.append(") as N from table_1 where column_1 is not null) as t where n>1);");
+    stringQuery.append(") as N from table_1 where column_1 is not null) as t where n>1) limit " + maxErrors + ";");
     LOG.debug("Drools, Duplicated records query: " + stringQuery.toString());
     return stringQuery.toString();
 
@@ -335,7 +340,7 @@ public class UniqueValidationUtils {
       stringQuery.append(" and t1.column_" + i + " = t2.column_" + i);
       i++;
     }
-    stringQuery.append(" where t1.column_1 is null and t2.column_1 is not null ;");
+    stringQuery.append(" where t1.column_1 is null and t2.column_1 is not null limit " + maxErrors + ";");
     return stringQuery.toString();
 
   }

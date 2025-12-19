@@ -615,7 +615,6 @@ export const TableManagement = ({
           scrollable={true}
           sortField={sort.sortField}
           sortOrder={sort.sortOrder}
-          summary={resourcesContext.messages['webformEntitiesTitle']}
           totalRecords={
             valueFilter && valueFilter !== ''
               ? tableManagementState.totalFilteredRecords

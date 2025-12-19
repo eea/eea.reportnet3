@@ -519,7 +519,7 @@ export const DataFormFieldEditor = ({
           isLoadingData={isLoadingData}
           maxSelectedLabels={10}
           onChange={e => onChangeForm(field, e.value, isConditional)}
-          onFilterInputChangeBackend={onFilter}
+          // onFilterInputChangeBackend={onFilter}
           onFocus={() => {
             if (isEmpty(columnWithLinks.linkItems)) {
               onLoadColsSchema('');

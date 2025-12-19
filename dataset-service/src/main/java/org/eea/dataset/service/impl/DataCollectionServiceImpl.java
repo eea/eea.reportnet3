@@ -386,8 +386,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
   @Override
   @Async
   public void updateDataCollection(Long dataflowId, boolean referenceDataflow) {
-    final Boolean isBigDataflow = dataflowControllerZuul.isBigDataflow(dataflowId);
-    manageDataCollection(dataflowId, null, false, false, false, referenceDataflow, false, isBigDataflow);
+    manageDataCollection(dataflowId, null, false, false, false, referenceDataflow, false);
     LOG.info("Successfully updated data collection for dataflowId {}", dataflowId);
   }
 
@@ -439,7 +438,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     }
 
     manageDataCollection(dataflowId, dueDate, true, stopAndNotifySQLErrors, manualCheck,
-        referenceDataflow, stopAndNotifyPKError, isBigDataflow);
+        referenceDataflow, stopAndNotifyPKError);
     LOG.info("Managed creating data collection for dataflowId {}", dataflowId);
 
     updateReportingDatasetsVisibility(dataflowId, showPublicInfo);
@@ -493,7 +492,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
    */
   private void manageDataCollection(Long dataflowId, LocalDateTime dueDate, boolean isCreation,
       boolean stopAndNotifySQLErrors, boolean manualCheck, boolean referenceDataflow,
-      boolean stopAndNotifyPKError, Boolean isBigDataflow) {
+      boolean stopAndNotifyPKError) {
     String time = Timestamp.valueOf(LocalDateTime.now()).toString();
 
     boolean rulesOk = true;
@@ -636,7 +635,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         processDataCollectionAndRoles(dataflowId, dueDate, isCreation, manualCheck, time, designs,
             referenceDatasets, representatives, map, dataCollectionIds, datasetIdsEmails,
             referenceDatasetIdsEmails, datasetIdsAndSchemaIds, euDatasetIds, connection, statement,
-            referenceDataflow, isBigDataflow);
+            referenceDataflow);
 
       } catch (SQLException e) {
         LOG.error("Error rolling back manageDataCollection for dataflowId {}. Message: {}", dataflowId, e.getMessage(), e);
@@ -782,7 +781,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
       Map<Long, String> map, List<Long> dataCollectionIds, Map<Long, List<String>> datasetIdsEmails,
       Map<Long, List<String>> referenceDatasetIdsEmails, Map<Long, String> datasetIdsAndSchemaIds,
       List<Long> euDatasetIds, Connection connection, Statement statement,
-      boolean referenceDataflow, Boolean isBigData) throws SQLException {
+      boolean referenceDataflow) throws SQLException {
     try {
       connection.setAutoCommit(false);
 
@@ -936,20 +935,8 @@ public class DataCollectionServiceImpl implements DataCollectionService {
       LOG.info("Metabase changes completed on DataCollection creation");
 
       // 10. Create schemas for each dataset
-      // If this is not a big dataflow create schemas as normally
-      // otherwise skip schema creation and release locks
-      if (Boolean.FALSE.equals(isBigData)) {
-          recordStoreControllerZuul.createSchemas(datasetIdsAndSchemaIds, dataflowId, isCreation, true);
-      }
-      else {
-          // Release the lock
-          final String methodSignature = isCreation ? LockSignature.CREATE_DATA_COLLECTION.getValue()
-                  : LockSignature.UPDATE_DATA_COLLECTION.getValue();
-          final Map<String, Object> lockCriteria = new HashMap<>();
-          lockCriteria.put(LiteralConstants.SIGNATURE, methodSignature);
-          lockCriteria.put(LiteralConstants.DATAFLOWID, dataflowId);
-          lockService.removeLockByCriteria(lockCriteria);
-      }
+      // This method will release the lock
+      recordStoreControllerZuul.createSchemas(datasetIdsAndSchemaIds, dataflowId, isCreation, true);
     } catch (SQLException e) {
       LOG.error("Error persisting changes. Rolling back...", e);
       releaseLockAndRollback(connection, dataflowId, isCreation);

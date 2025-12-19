@@ -234,17 +234,15 @@ const useBigButtonListRepresentative = ({
     representative => representative.dataProviderId === dataProviderId
   );
 
-  const onBuildReleaseButton = (isSilent) => [
+  const onBuildReleaseButton = isSilent => [
     {
       buttonClass: 'schemaDataset',
       buttonIcon: getIsReleasing() ? 'spinner' : 'released',
       buttonIconClass: getIsReleasing() ? 'spinner' : 'released',
-      caption: resourcesContext.messages[
-        isSilent ? 'releaseDataCollectionSilently' : 'releaseDataCollection'
-        ],
-      enabled: !dataflowState.hasIcebergTables && dataflowState.isReleasable && !getIsReleasing(),
+      caption: resourcesContext.messages[isSilent ? 'releaseDataCollectionSilently' : 'releaseDataCollection'],
+      enabled: !dataflowState.hasEnableEditingDatasets && dataflowState.isReleasable && !getIsReleasing(),
       handleRedirect:
-        !dataflowState.hasIcebergTables && dataflowState.isReleasable && !getIsReleasing()
+        !dataflowState.hasEnableEditingDatasets && dataflowState.isReleasable && !getIsReleasing()
           ? isSilent
             ? () => onOpenSilentReleaseConfirmDialog()
             : () => onOpenReleaseConfirmDialog()

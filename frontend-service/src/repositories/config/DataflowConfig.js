@@ -29,7 +29,9 @@ export const DataflowConfig = {
   getDetails: '/dataflow/v1/{:dataflowId}/getmetabase',
   getIcebergTables:
     '/dataset/getIcebergTables?dataflowId={:dataflowId}&providerId={:providerId}&datasetId={:datasetId}',
-  getPublicObligations: '/dataflow/getPublicDataflowsByObligation?asc={:isAsc}&pageNum={:pageNum}&orderHeader={:sortBy}&pageSize={:numberRows}',
+  getEditStatus: '/dataset/hasEnabledEditingDatasets?dataflowId={:dataflowId}&providerId={:providerId}',
+  getPublicObligations:
+    '/dataflow/getPublicDataflowsByObligation?asc={:isAsc}&pageNum={:pageNum}&orderHeader={:sortBy}&pageSize={:numberRows}',
   getPublicData:
     '/dataflow/getPublicDataflows?asc={:isAsc}&pageNum={:pageNum}&orderHeader={:sortBy}&pageSize={:numberRows}',
   getPublicDataflowData: '/dataflow/getPublicDataflow/{:dataflowId}',
@@ -43,7 +45,6 @@ export const DataflowConfig = {
   importSchema: '/dataschema/import?dataflowId={:dataflowId}',
   updateAutomaticDelete:
     '/dataflow/{:dataflowId}/updateAutomaticDelete?automaticDelete={:isAutomaticReportingDeletion}',
-  updateGroupId:
-    '/dataflow/updateDataProviderGroupIdById/{:dataflowId}?dataProviderGroupId={:dataProviderGroupId}',
+  updateGroupId: '/dataflow/updateDataProviderGroupIdById/{:dataflowId}?dataProviderGroupId={:dataProviderGroupId}',
   validateAllDataflowsUsers: '/dataflow/validateAllReporters'
 };

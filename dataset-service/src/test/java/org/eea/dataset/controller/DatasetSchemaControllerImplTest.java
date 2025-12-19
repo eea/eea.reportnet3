@@ -1315,7 +1315,6 @@ public class DatasetSchemaControllerImplTest {
 
     DataFlowVO dataflowVO = new DataFlowVO();
     dataflowVO.setStatus(TypeStatusEnum.DESIGN);
-    dataflowVO.setBigData(false);
     Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
     Mockito.when(datasetService.getDataFlowIdById(Mockito.anyLong())).thenReturn(1L);
 
@@ -1406,7 +1405,6 @@ public class DatasetSchemaControllerImplTest {
 
     DataFlowVO dataflowVO = new DataFlowVO();
     dataflowVO.setStatus(TypeStatusEnum.DESIGN);
-    dataflowVO.setBigData(false);
     Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
     Mockito.when(datasetService.getDataFlowIdById(Mockito.anyLong())).thenReturn(1L);
 
@@ -1431,7 +1429,6 @@ public class DatasetSchemaControllerImplTest {
 
     DataFlowVO dataflowVO = new DataFlowVO();
     dataflowVO.setStatus(TypeStatusEnum.DESIGN);
-    dataflowVO.setBigData(false);
     Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
     Mockito.when(datasetService.getDataFlowIdById(Mockito.anyLong())).thenReturn(1L);
 
@@ -1456,7 +1453,6 @@ public class DatasetSchemaControllerImplTest {
 
     DataFlowVO dataflowVO = new DataFlowVO();
     dataflowVO.setStatus(TypeStatusEnum.DESIGN);
-    dataflowVO.setBigData(false);
     Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
     Mockito.when(datasetService.getDataFlowIdById(Mockito.anyLong())).thenReturn(1L);
 
@@ -1556,7 +1552,6 @@ public class DatasetSchemaControllerImplTest {
 
     DataFlowVO dataflowVO = new DataFlowVO();
     dataflowVO.setStatus(TypeStatusEnum.DESIGN);
-    dataflowVO.setBigData(false);
     Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
     Mockito.when(datasetService.getDataFlowIdById(Mockito.anyLong())).thenReturn(1L);
 
@@ -1581,7 +1576,6 @@ public class DatasetSchemaControllerImplTest {
 
     DataFlowVO dataflowVO = new DataFlowVO();
     dataflowVO.setStatus(TypeStatusEnum.DESIGN);
-    dataflowVO.setBigData(false);
     Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
     Mockito.when(datasetService.getDataFlowIdById(Mockito.anyLong())).thenReturn(1L);
 

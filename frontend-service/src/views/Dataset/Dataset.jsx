@@ -1009,7 +1009,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   const getDataSchema = async () => {
     try {
       const datasetSchema = await DatasetService.getSchema(dataflowId, datasetId);
-      filterManualEdit(datasetSchema.tables);
+      metadata?.dataflow?.bigData && filterManualEdit(datasetSchema.tables);
       setDatasetSchemaAllTables(datasetSchema.tables);
       setDatasetSchemaName(datasetSchema.datasetSchemaName);
       setLevelErrorTypes(datasetSchema.levelErrorTypes);
