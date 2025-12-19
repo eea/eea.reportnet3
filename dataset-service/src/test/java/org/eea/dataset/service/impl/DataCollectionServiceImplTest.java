@@ -347,8 +347,7 @@ public class DataCollectionServiceImplTest {
             .thenReturn(new ArrayList<>());
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("name");
-    Mockito.when(datasetSchemaService.getDataSchemaById(Mockito.anyString()))
-            .thenReturn(new DataSetSchemaVO());
+
     dataCollectionService.updateDataCollection(1L, false);
     Mockito.verify(connection, times(1)).rollback();
   }
@@ -424,8 +423,6 @@ public class DataCollectionServiceImplTest {
         Mockito.anyBoolean(), Mockito.anyBoolean());
     Mockito.when(datasetSchemaService.getReferencedFieldsBySchema(any()))
         .thenReturn(new ArrayList<>());
-    Mockito.when(datasetSchemaService.getDataSchemaById(Mockito.anyString()))
-        .thenReturn(new DataSetSchemaVO());
     Mockito.when(datasetMetabaseService.getDatasetType(any()))
         .thenReturn(DatasetTypeEnum.REPORTING).thenReturn(DatasetTypeEnum.COLLECTION)
         .thenReturn(DatasetTypeEnum.EUDATASET).thenReturn(DatasetTypeEnum.TEST);
@@ -441,7 +438,7 @@ public class DataCollectionServiceImplTest {
     Mockito.when(authentication.getName()).thenReturn("name");
 
     dataCollectionService.createEmptyDataCollection(1L, LocalDateTime.now(), true, false, false,
-        false, true);
+        false, true, false);
     Mockito.verify(recordStoreControllerZuul, times(1)).createSchemas(any(), any(),
         Mockito.anyBoolean(), Mockito.anyBoolean());
   }
@@ -528,13 +525,11 @@ public class DataCollectionServiceImplTest {
     tableSchema.setRecordSchema(recordSchema);
     schema.setTableSchemas(Arrays.asList(tableSchema));
     schema2.setTableSchemas(Arrays.asList(tableSchema));
-    Mockito.when(datasetSchemaService.getDataSchemaById(Mockito.anyString())).thenReturn(schema)
-        .thenReturn(schema2);
 
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("name");
     dataCollectionService.createEmptyDataCollection(1L, LocalDateTime.now(), false, false, false,
-        false, true);
+        false, true, false);
     Mockito.verify(recordStoreControllerZuul, times(1)).createSchemas(any(), any(),
         Mockito.anyBoolean(), Mockito.anyBoolean());
   }
@@ -555,10 +550,9 @@ public class DataCollectionServiceImplTest {
         .thenReturn(designs);
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("name");
-    Mockito.when(datasetSchemaService.getDataSchemaById(Mockito.anyString()))
-        .thenReturn(new DataSetSchemaVO());
+
     dataCollectionService.createEmptyDataCollection(1L, LocalDateTime.now(), true, false, false,
-        false, true);
+        false, true, false);
     Mockito.verify(lockService, times(1)).removeLockByCriteria(any());
   }
 
@@ -574,7 +568,7 @@ public class DataCollectionServiceImplTest {
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("name");
     dataCollectionService.createEmptyDataCollection(1L, LocalDateTime.now(), true, false, false,
-        false, true);
+        false, true, false);
     Mockito.verify(lockService, times(1)).removeLockByCriteria(any());
   }
 
@@ -611,10 +605,8 @@ public class DataCollectionServiceImplTest {
     Mockito.doNothing().when(connection).rollback();
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("name");
-    Mockito.when(datasetSchemaService.getDataSchemaById(Mockito.anyString()))
-        .thenReturn(new DataSetSchemaVO());
     dataCollectionService.createEmptyDataCollection(1L, LocalDateTime.now(), true, false, false,
-        false, true);
+        false, true, false);
     Mockito.verify(connection, times(1)).rollback();
   }
 
@@ -664,10 +656,8 @@ public class DataCollectionServiceImplTest {
         .thenReturn(new ArrayList<>());
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("name");
-    Mockito.when(datasetSchemaService.getDataSchemaById(Mockito.anyString()))
-        .thenReturn(new DataSetSchemaVO());
     dataCollectionService.createEmptyDataCollection(1L, LocalDateTime.now(), true, false, false,
-        false, true);
+        false, true, false);
     Mockito.verify(connection, times(1)).rollback();
   }
 
