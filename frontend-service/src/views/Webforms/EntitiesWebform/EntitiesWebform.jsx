@@ -569,10 +569,6 @@ export const EntitiesWebform = ({
 
   const renderLayout = children => (
     <Fragment>
-      <h2 className={styles.title}>
-        <FontAwesomeIcon icon={AwesomeIcons('exclamationTriangle')} />
-        <strong> {resourcesContext.messages['webformEntitiesTitle']}</strong>
-      </h2>
       {children}
       {entitiesWebformState.isAddEntityIdDialogVisible && (
         <ConfirmDialog
