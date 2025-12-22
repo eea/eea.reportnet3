@@ -660,6 +660,7 @@
     "errorStatisticsByIdError": "The schema could not be loaded: Failed loading statistics of dataset <strong title='{:datasetName}'>{:shortDatasetName}</strong>. Please try again or contact the Service Desk if the issue persists.",
     "errorType": "Error type",
     "errorTypePlaceholder": "Select an error type",
+    "etlImport": "ETL Import",
     "euDataset": "EU dataset",
     "euDatasetLockedError": "The EU Export process is locked because EU datasets are opened in exclusive use. Please contact Service Desk for further assistance.",
     "evaluateSql": "Evaluate SQL",

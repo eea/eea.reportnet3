@@ -1,6 +1,7 @@
 {
   "COPY_TO_EU_DATASET": { "key": "COPY_TO_EU_DATASET", "label": "copyToEuDataset" },
   "DELETE": { "key": "DELETE", "label": "delete" },
+  "ETL_IMPORT": { "key": "ETL_IMPORT", "label": "etlImport" },
   "EXPORT": { "key": "EXPORT", "label": "export" },
   "FILE_EXPORT": { "key": "FILE_EXPORT", "label": "fileExport" },
   "IMPORT": { "key": "IMPORT", "label": "import" },
