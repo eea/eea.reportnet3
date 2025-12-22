@@ -135,7 +135,8 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @Override
   @HystrixCommand
   @PostMapping(value = "/createEmptyDatasetSchema")
-  @PreAuthorize("(secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN','DATAFLOW_STEWARD','DATAFLOW_EDITOR_WRITE'))")
+  @PreAuthorize("(secondLevelAuthorize(#dataflowId,T(org.eea.dataset.security.EndpointAuthorization)" +
+          ".getRequiredRightsForEndpoint(\"/dataschema/createEmptyDatasetSchema\")))")
   @ApiOperation(value = "Create empty Dataset Schema", hidden = true)
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully create"),
           @ApiResponse(code = 400, message = EEAErrorMessage.DATASET_NAME_DUPLICATED),
@@ -1381,7 +1382,8 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
    * @return the simple schema
    */
   @Override
-  @PreAuthorize("checkApiKey(#dataflowId,#providerId,#datasetId,'DATASET_STEWARD','DATASET_CUSTODIAN','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASCHEMA_CUSTODIAN','DATASCHEMA_STEWARD','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','REFERENCEDATASET_STEWARD')")
+  @PreAuthorize("checkApiKey(#dataflowId,#providerId,#datasetId,T(org.eea.dataset.security.EndpointAuthorization)" +
+          ".getRequiredRightsForEndpoint(\"/dataschema/v1/getSimpleSchema/dataset/{datasetId}\"))")
   @GetMapping(value = "/v1/getSimpleSchema/dataset/{datasetId}",
           produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Get dataset schema by dataset id",
@@ -1423,7 +1425,8 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
    * @return the simple schema legacy
    */
   @Override
-  @PreAuthorize("checkApiKey(#dataflowId,#providerId,#datasetId,'DATASET_STEWARD','DATASET_CUSTODIAN','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASCHEMA_CUSTODIAN','DATASCHEMA_STEWARD','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','REFERENCEDATASET_STEWARD')")
+  @PreAuthorize("checkApiKey(#dataflowId,#providerId,#datasetId,T(org.eea.dataset.security.EndpointAuthorization)" +
+          ".getRequiredRightsForEndpoint(\"/dataschema/getSimpleSchema/dataset/{datasetId}\"))")
   @GetMapping(value = "/getSimpleSchema/dataset/{datasetId}",
           produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Get dataset schema by dataset id", hidden = true)
