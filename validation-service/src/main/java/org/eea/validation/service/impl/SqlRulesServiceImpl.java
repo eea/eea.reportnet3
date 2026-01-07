@@ -44,6 +44,7 @@ import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.validation.exception.EEAForbiddenSQLCommandException;
+import org.eea.validation.exception.EEAInvalidSQLCommentsException;
 import org.eea.validation.exception.EEAInvalidSQLException;
 import org.eea.validation.mapper.RuleMapper;
 import org.eea.validation.persistence.data.domain.FieldValidation;
@@ -444,6 +445,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
     try {
 
       if (checkQuerySyntax(sqlRule)) {
+        validateNoTrailingComments(datasetId, sqlRule);
         ids = getListOfDatasetsOnQuery(sqlRule);
         datasetIds = new ArrayList<>(ids);
         checkDatasetFromSameDataflow(dataSetMetabaseVO, ids);
@@ -496,6 +498,8 @@ public class SqlRulesServiceImpl implements SqlRulesService {
       }
     } catch (StringIndexOutOfBoundsException e) {
       throw new StringIndexOutOfBoundsException("SQL sentence has wrong format, please check.");
+    } catch (EEAInvalidSQLCommentsException e){
+      throw new EEAInvalidSQLCommentsException(e.getMessage());
     } catch (EEAForbiddenSQLCommandException e) {
       throw new EEAForbiddenSQLCommandException("SQL Command not allowed in SQL Rule.", e);
     } catch (EEAInvalidSQLException e) {
@@ -528,6 +532,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
 
     try {
       if (checkQuerySyntax(sqlRule)) {
+        validateNoTrailingComments(datasetId, sqlRule);
         ids = getListOfDatasetsOnQuery(sqlRule);
         checkDatasetFromSameDataflow(dataSetMetabaseVO, ids);
         if (!ids.isEmpty()) {
@@ -555,6 +560,8 @@ public class SqlRulesServiceImpl implements SqlRulesService {
       }
     } catch (StringIndexOutOfBoundsException e) {
       throw new StringIndexOutOfBoundsException("SQL sentence has wrong format, please check it");
+    } catch (EEAInvalidSQLCommentsException e) {
+      throw new EEAInvalidSQLCommentsException(e.getMessage(), e);
     } catch (EEAForbiddenSQLCommandException e) {
       throw new EEAForbiddenSQLCommandException("SQL Command not allowed in SQL Rule.", e);
     } catch (EEAInvalidSQLException e) {
@@ -601,6 +608,12 @@ public class SqlRulesServiceImpl implements SqlRulesService {
       query = sqlCountryCompanyOrganizationCodeUtils.replaceCodesIfNeeded(dataSetMetabaseVO.getId(), query);
 
       if (checkQuerySyntax(query)) {
+        try {
+          validateNoTrailingComments(dataSetMetabaseVO.getId(), query);
+        } catch (EEAInvalidSQLCommentsException e){
+          isSQLCorrect = "SQL validation failed, sql ends with a comment.";
+          LOG.error(e.getMessage());
+        }
         List<String> ids = getListOfDatasetsOnQuery(query);
         checkDatasetFromSameDataflow(dataSetMetabaseVO, ids);
         if (!ids.isEmpty()) {
@@ -641,6 +654,119 @@ public class SqlRulesServiceImpl implements SqlRulesService {
       LOG.info("Rule validation passed: {}", rule);
     }
     return isSQLCorrect;
+  }
+
+  /**
+   * Validates that a SQL query does not end with a comment.
+   * This method checks for trailing line comments like `-- abc` or block comments `/* abc *​/`
+   * It ignores whitespace and semicolons at the end.
+   * It also ignores comments inside strings.
+   * </p>
+   *
+   * @param sql the SQL query string to validate
+   * @throws EEAInvalidSQLCommentsException if the SQL ends with a comment
+   */
+  private void validateNoTrailingComments(Long datasetId, String sql) throws EEAInvalidSQLCommentsException {
+    if (sql == null || sql.isBlank()) return;
+
+    final char NEWLINE = '\n';
+    final char CARRIAGE_RETURN = '\r';
+    final char SINGLE_QUOTE = '\'';
+    final char DOUBLE_QUOTE = '"';
+    final char ASTERISK = '*';
+    final char SLASH = '/';
+    final char DASH = '-';
+    final char SEMICOLON = ';';
+    final char NULL_CHAR = '\0';
+
+    final String LINE_COMMENT_START = "--";
+    final String BLOCK_COMMENT_START = "/*";
+    final String BLOCK_COMMENT_END = "*/";
+
+    // tracking some cases
+    boolean insideSingleQuotedString = false;
+    boolean insideDoubleQuotedString = false;
+    boolean insideLineComment = false;
+    boolean insideBlockComment = false;
+
+    int lastMeaningfulSqlCharacterIndex = -1;
+    int lastCommentStartIndex = -1;
+
+    // iterate through given SQL string character by character
+    for (int index = 0; index < sql.length(); index++) {
+
+      char character = sql.charAt(index);
+      char nextCharacter = (index + 1 < sql.length()) ? sql.charAt(index + 1) : NULL_CHAR;
+
+      // handle exiting line comments
+      if (insideLineComment) {
+        if (character == NEWLINE || character == CARRIAGE_RETURN) {
+          insideLineComment = false;
+        }
+        continue;
+      }
+
+      // handle exiting block comments
+      if (insideBlockComment) {
+        if (character == ASTERISK && nextCharacter == SLASH) {
+          insideBlockComment = false;
+          index++; // skip '/'
+        }
+        continue;
+      }
+
+      // handle the string literals
+      if (insideSingleQuotedString) {
+        if (character == SINGLE_QUOTE && nextCharacter != SINGLE_QUOTE) {
+          insideSingleQuotedString = false;
+        }
+        continue;
+      }
+
+      if (insideDoubleQuotedString) {
+        if (character == DOUBLE_QUOTE) {
+          insideDoubleQuotedString = false;
+        }
+        continue;
+      }
+
+      // detect entering string literals
+      if (character == SINGLE_QUOTE) {
+        insideSingleQuotedString = true;
+        lastMeaningfulSqlCharacterIndex = index;
+        continue;
+      }
+
+      if (character == DOUBLE_QUOTE) {
+        insideDoubleQuotedString = true;
+        lastMeaningfulSqlCharacterIndex = index;
+        continue;
+      }
+
+      // detect the entering comments
+      if (character == DASH && nextCharacter == DASH) {
+        insideLineComment = true;
+        lastCommentStartIndex = index;
+        index++; // skip second '-'
+        continue;
+      }
+
+      if (character == SLASH && nextCharacter == ASTERISK) {
+        insideBlockComment = true;
+        lastCommentStartIndex = index;
+        index++; // skip '*'
+        continue;
+      }
+
+      // track meaningful SQL characters
+      if (!Character.isWhitespace(character) && character != SEMICOLON) {
+        lastMeaningfulSqlCharacterIndex = index;
+      }
+    }
+
+    if (lastCommentStartIndex > lastMeaningfulSqlCharacterIndex) {
+      throw new EEAInvalidSQLCommentsException("SQL validation failed: SQL ends with a trailing comment. datasetId: " + datasetId + " given SQL: " + sql);
+    }
   }
 
   /**
