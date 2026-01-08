@@ -32,6 +32,9 @@
     cursor: pointer;
     text-decoration: none;
   }
+  &:has(.statusDate){
+    display:block;
+  }
 }
 .noDatasets {
   display: flex;
@@ -99,11 +102,12 @@
   }
 }
 
+.statusDate {
+  margin-left: 0;
+  display:block;
+}
+
 .link {
   color: var(--hyperlink-color);
   cursor: pointer;
-}
-
-.statusDate {
-  margin-left: 0.4rem;
 }
