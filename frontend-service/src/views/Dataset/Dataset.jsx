@@ -1436,6 +1436,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
         editedTables={editedTables}
         hasWritePermissions={hasWritePermissions}
         isDatasetReleased={isDatasetReleased}
+        isEditingEnabled={editingStatus?.isEditing}
         isEditor={editingStatus?.isEditing && editingStatus?.editor === userName}
         isGroupedValidationDeleted={dataViewerOptions.isGroupedValidationDeleted}
         isGroupedValidationSelected={dataViewerOptions.isGroupedValidationSelected}

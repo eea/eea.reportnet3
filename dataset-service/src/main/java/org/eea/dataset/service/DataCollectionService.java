@@ -49,7 +49,7 @@ public interface DataCollectionService {
    */
   void createEmptyDataCollection(Long dataflowId, LocalDateTime dueDate,
       boolean stopAndNotifySQLErrors, boolean manualCheck, boolean showPublicInfo,
-      boolean referenceDataflow, boolean stopAndNotifyPKError);
+      boolean referenceDataflow, boolean stopAndNotifyPKError, boolean isBigDataflow);
 
   /**
    * Adds the foreign relations from new reportings.

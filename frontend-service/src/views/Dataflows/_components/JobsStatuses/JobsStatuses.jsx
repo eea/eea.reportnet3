@@ -344,6 +344,10 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
           value: config.jobType.DELETE.key
         },
         {
+          type: resourcesContext.messages[config.jobType.ETL_IMPORT.label].toUpperCase(),
+          value: config.jobType.ETL_IMPORT.key
+        },
+        {
           type: resourcesContext.messages[config.jobType.EXPORT.label].toUpperCase(),
           value: config.jobType.EXPORT.key
         },
@@ -464,10 +468,7 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
       <ActionsColumn
         disabledButtons={
           (!isAdmin && !isDataflowCustodian && userContext.preferredUsername !== job.creatorUsername) ||
-          !(
-            job.jobStatus === 'IN_PROGRESS' &&
-            getDateDifferenceInMinutes(job.dateStatusChanged) > 9
-          )
+          !(job.jobStatus === 'IN_PROGRESS' && getDateDifferenceInMinutes(job.dateStatusChanged) > 9)
         }
         onDeleteClick={() => {
           setIsDeleteDialogVisible(true);
@@ -758,7 +759,9 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
           rowsPerPageOptions={[5, 10, 15]}
           sortField={sort.field}
           sortOrder={sort.order}
-          totalRecords={isFiltered ? filteredRecords : shouldRestrictToProviderData ? providersTotalRecords : totalRecords}
+          totalRecords={
+            isFiltered ? filteredRecords : shouldRestrictToProviderData ? providersTotalRecords : totalRecords
+          }
           value={jobsStatuses}>
           {getTableColumns()}
         </DataTable>

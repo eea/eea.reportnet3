@@ -25,6 +25,7 @@ export const TabsSchema = ({
   hasCountryCode,
   hasWritePermissions = false,
   isDatasetReleased,
+  isEditingEnabled,
   isEditor,
   isExportable = true,
   isFilterable,
@@ -91,6 +92,7 @@ export const TabsSchema = ({
                   datasetType={datasetType}
                   hasCountryCode={hasCountryCode}
                   hasWritePermissions={hasWritePermissions}
+                  isEditingEnabled={isEditingEnabled}
                   isEditor={isEditor}
                   isExportable={isExportable}
                   isFilterable={isFilterable}
