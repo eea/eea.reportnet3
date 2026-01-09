@@ -70,6 +70,7 @@ export const EUDataset = () => {
     isRefreshHighlighted: false,
     levelErrorTypes: [],
     metadata: undefined,
+    sncData: false,
     tableSchema: undefined,
     tableSchemaColumns: undefined,
     tableSchemaId: undefined,
@@ -153,7 +154,8 @@ export const EUDataset = () => {
         payload: {
           bigData: data.bigData,
           dataflowType: data.type,
-          name: data.name
+          name: data.name,
+          sncData: data.sncData
         }
       });
     } catch (error) {
@@ -370,8 +372,18 @@ export const EUDataset = () => {
   );
 
   const getSubtitle = () => {
-    let subtitle = euDatasetState.bigData
-      ? TextUtils.parseText(resourcesContext.messages['bigDataDataflowNamed'], { name: dataflowName })
+    let subtitle = euDatasetState.sncData
+      ? euDatasetState.bigData
+        ? TextUtils.parseText(resourcesContext.messages['sncBigDataDataflowNamed'], {
+            name: dataflowName
+          })
+        : TextUtils.parseText(resourcesContext.messages['sncCitusDataflowNamed'], {
+            name: dataflowName
+          })
+      : euDatasetState.bigData
+      ? TextUtils.parseText(resourcesContext.messages['bigDataDataflowNamed'], {
+          name: dataflowName
+        })
       : dataflowName;
 
     if (euDatasetState?.metaData?.dataflow.deleted) {

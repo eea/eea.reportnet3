@@ -1358,7 +1358,19 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   }
 
   const getSubtitle = () => {
-    let subtitle = metadata?.dataflow.bigData
+    let subtitle = metadata?.dataflow.sncData
+      ? metadata?.dataflow.bigData
+        ? TextUtils.parseText(resourcesContext.messages['sncBigDataDataflowNamed'], {
+            name: `${metadata?.dataflow.name} - ${
+              isTestDataset ? resourcesContext.messages['testDataset'] : datasetName
+            }`
+          })
+        : TextUtils.parseText(resourcesContext.messages['sncCitusDataflowNamed'], {
+            name: `${metadata?.dataflow.name} - ${
+              isTestDataset ? resourcesContext.messages['testDataset'] : datasetName
+            }`
+          })
+      : metadata?.dataflow.bigData
       ? TextUtils.parseText(resourcesContext.messages['bigDataDataflowNamed'], {
           name: `${metadata?.dataflow.name} - ${isTestDataset ? resourcesContext.messages['testDataset'] : datasetName}`
         })

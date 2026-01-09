@@ -116,6 +116,7 @@ const parseDataflowDTO = dataflowDTO => {
     representatives: RepresentativeUtils.parseRepresentativeListDTO(dataflowDTO.representatives),
     requestId: dataflowDTO.requestId,
     showPublicInfo: dataflowDTO.showPublicInfo,
+    sncData: dataflowDTO.sncData,
     status: dataflowDTO.status,
     testDatasets: DatasetUtils.parseDatasetListDTO(dataflowDTO.testDatasets),
     type: dataflowDTO.type,
