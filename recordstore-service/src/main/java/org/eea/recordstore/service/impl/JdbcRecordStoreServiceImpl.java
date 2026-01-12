@@ -3,6 +3,7 @@ package org.eea.recordstore.service.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.FeignException;
+import lombok.SneakyThrows;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.eea.datalake.service.S3Helper;
@@ -2425,10 +2426,21 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     return s3Helper.getFilenamesFromTableNames(s3Path);
   }
 
+  @SneakyThrows
   private void checkAndPromoteFolder(S3PathResolver s3PathResolver, String path) {
     if (s3Helper.checkTableNameDCProviderFolderExist(s3PathResolver)) {
-      String query = "ALTER TABLE " + s3Service.getTableDCAsFolderQueryPath(s3PathResolver, path) + " REFRESH METADATA AUTO PROMOTION";
-      dremioJdbcTemplate.execute(query);
+      String dcFolderQueryPath = s3Service.getTableDCAsFolderQueryPath(s3PathResolver, path);
+      String promoteQuery = "ALTER TABLE " + dcFolderQueryPath + " REFRESH METADATA AUTO PROMOTION";
+      dremioJdbcTemplate.execute(promoteQuery);
+      //After failed attachment releases in #296045 we added the following demote and promote in order to refresh metadata again of data collection
+      LOG.info("Failover demote promote - Started for {}", dcFolderQueryPath);
+      Thread.sleep(2000);
+      String demoteQuery = "ALTER TABLE " + dcFolderQueryPath + " FORGET METADATA";
+      dremioJdbcTemplate.execute(demoteQuery);
+      Thread.sleep(2000);
+      dremioJdbcTemplate.execute(promoteQuery);
+      LOG.info("Failover demote promote - Ended for {}", dcFolderQueryPath);
+
     }
   }
 

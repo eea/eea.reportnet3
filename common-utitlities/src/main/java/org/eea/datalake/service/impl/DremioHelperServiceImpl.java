@@ -473,12 +473,12 @@ public class DremioHelperServiceImpl implements DremioHelperService {
         if(!folderWasPromoted) {
             throw new Exception("Could not promote folder " + tablePath);
         }
-        LOG.info("Failover demote promote - Started");
+        LOG.info("Failover demote promote - Started {}", refreshTableAndDemoteQuery);
         executeSqlStatement(refreshTableAndDemoteQuery);
         Thread.sleep(2000);
         executeSqlStatement(refreshTableAndPromoteQuery);
         Thread.sleep(2000);
-        LOG.info("Failover demote promote - Ended");
+        LOG.info("Failover demote promote - Ended {}", refreshTableAndPromoteQuery);
     }
 
     /**
