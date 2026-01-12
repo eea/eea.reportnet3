@@ -87,52 +87,20 @@ public class DataCollectionNationalCoordinatorCommand extends AbstractEEAEventHa
   public void execute(EEAEventVO eeaEventVO) throws EEAException {
     EventType successEvent = null;
     Long dataflowId = Long.parseLong(String.valueOf(eeaEventVO.getData().get("dataflowId")));
+    Boolean isCreation = Boolean.parseBoolean(String.valueOf(eeaEventVO.getData().get("isCreation")));
     try {
-      // we create national coordinator dataflow resource
-      resourceManagementControllerZuul.createResource(
-              createGroup(dataflowId, ResourceTypeEnum.DATAFLOW, SecurityRoleEnum.NATIONAL_COORDINATOR));
+      // fetch dataflow data and extract dataflow type
+      DataFlowVO dataflow = dataflowControllerZuul.getMetabaseById(dataflowId);
+      TypeDataflowEnum typeDataflowEnum = dataflow.getType();
 
-      LOG.info("Dataflow-{}-NATIONAL_COORDINATOR created", dataflowId);
-
-      Map<Long, String> mapRepresentativeProviders = mapRepresentativeProviders(dataflowId);
-
-      // we find all providers in that dataflow to assing the dataset provider
-      for (Map.Entry<Long, String> providers : mapRepresentativeProviders.entrySet()) {
-
-        // we find all users who have a national coordinator group, to assing its news dataflow and
-        // datasets
-        List<ResourceAssignationVO> resourcesForDataProvider = new ArrayList<>();
-        String resource =
-                ResourceGroupEnum.PROVIDER_NATIONAL_COORDINATOR.getGroupName(providers.getValue());
-        List<UserRepresentationVO> users = userManagementControllerZull.getUsersByGroup(resource);
-        if (null != users) {
-          for (UserRepresentationVO userRepresentationVO : users) {
-            // we find all datasets for that user with the provider id to assing it
-            List<Long> datasetIds = dataSetMetabaseRepository
-                    .getDatasetIdsByDataflowIdAndDataProviderId(dataflowId, providers.getKey());
-
-            // and we create all groups and assing all the data for all of them
-            for (Long datasetId : datasetIds) {
-              resourceManagementControllerZuul.createResource(createGroup(datasetId,
-                      ResourceTypeEnum.DATASET, SecurityRoleEnum.NATIONAL_COORDINATOR));
-              resourcesForDataProvider.add(fillResourceAssignation(datasetId,
-                      userRepresentationVO.getEmail(), ResourceGroupEnum.DATASET_NATIONAL_COORDINATOR));
-            }
-            resourcesForDataProvider.add(fillResourceAssignation(dataflowId,
-                    userRepresentationVO.getEmail(), ResourceGroupEnum.DATAFLOW_NATIONAL_COORDINATOR));
-          }
-
-          // finally we add all contributors for this providerid
-          userManagementControllerZull.addContributorsToResources(resourcesForDataProvider);
-
-        }
-        LOG.info("all national coordinator for provider {} created", providers.getKey());
+      if (TypeDataflowEnum.BUSINESS.equals(dataflow.getType())) {
+        LOG.info("Business dataflows don't need national coordinators. Proceed to finish data collection creation. Dataflow id: {}", dataflowId);
+      } else {
+        // we create national coordinator dataflow resource
+        createNationalCoordinatorResources(dataflowId);
       }
 
       // Release the notification to end the process
-      Boolean isCreation =
-              Boolean.parseBoolean(String.valueOf(eeaEventVO.getData().get("isCreation")));
-      DataFlowVO dataflow = dataflowControllerZuul.getMetabaseById(dataflowId);
       if (dataflow != null && !TypeDataflowEnum.REFERENCE.equals(dataflow.getType())) {
         successEvent = Boolean.TRUE.equals(isCreation) ? EventType.ADD_DATACOLLECTION_COMPLETED_EVENT
                 : EventType.UPDATE_DATACOLLECTION_COMPLETED_EVENT;
@@ -155,6 +123,55 @@ public class DataCollectionNationalCoordinatorCommand extends AbstractEEAEventHa
       String topic = (successEvent != null) ? successEvent.getTopic() : null;
       LOG.error("Unexpected error! Error releasing event {} with topic {} Message: {}", eeaEventVO, topic, e.getMessage());
       throw e;
+    }
+  }
+
+  /**
+   * Creates and assigns NATIONAL_COORDINATOR resources for the given dataflow.
+   * This method creates the national coordinator resources for the dataflow and datasets.
+   * It then assigns both dataflow and dataset resources to all users belonging to the provider's national coordinator group.
+   *
+   * @param dataflowId
+   */
+  private void createNationalCoordinatorResources(Long dataflowId) {
+    resourceManagementControllerZuul.createResource(
+            createGroup(dataflowId, ResourceTypeEnum.DATAFLOW, SecurityRoleEnum.NATIONAL_COORDINATOR));
+
+    LOG.info("Dataflow-{}-NATIONAL_COORDINATOR created", dataflowId);
+
+    Map<Long, String> mapRepresentativeProviders = mapRepresentativeProviders(dataflowId);
+
+    // we find all providers in that dataflow to assing the dataset provider
+    for (Map.Entry<Long, String> providers : mapRepresentativeProviders.entrySet()) {
+
+      // we find all users who have a national coordinator group, to assing its news dataflow and
+      // datasets
+      List<ResourceAssignationVO> resourcesForDataProvider = new ArrayList<>();
+      String resource =
+              ResourceGroupEnum.PROVIDER_NATIONAL_COORDINATOR.getGroupName(providers.getValue());
+      List<UserRepresentationVO> users = userManagementControllerZull.getUsersByGroup(resource);
+      if (null != users) {
+        for (UserRepresentationVO userRepresentationVO : users) {
+          // we find all datasets for that user with the provider id to assing it
+          List<Long> datasetIds = dataSetMetabaseRepository
+                  .getDatasetIdsByDataflowIdAndDataProviderId(dataflowId, providers.getKey());
+
+          // and we create all groups and assing all the data for all of them
+          for (Long datasetId : datasetIds) {
+            resourceManagementControllerZuul.createResource(createGroup(datasetId,
+                    ResourceTypeEnum.DATASET, SecurityRoleEnum.NATIONAL_COORDINATOR));
+            resourcesForDataProvider.add(fillResourceAssignation(datasetId,
+                    userRepresentationVO.getEmail(), ResourceGroupEnum.DATASET_NATIONAL_COORDINATOR));
+          }
+          resourcesForDataProvider.add(fillResourceAssignation(dataflowId,
+                  userRepresentationVO.getEmail(), ResourceGroupEnum.DATAFLOW_NATIONAL_COORDINATOR));
+        }
+
+        // finally we add all contributors for this providerid
+        userManagementControllerZull.addContributorsToResources(resourcesForDataProvider);
+
+      }
+      LOG.info("all national coordinator for provider {} created", providers.getKey());
     }
   }
 
