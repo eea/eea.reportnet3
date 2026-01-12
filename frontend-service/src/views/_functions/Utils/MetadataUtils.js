@@ -14,8 +14,9 @@ const getMetadata = async ({ dataflowId, datasetId }) => {
       name: dataflowMetadata.name || '',
       description: dataflowMetadata.description || '',
       type: dataflowMetadata.type,
+      sncData: dataflowMetadata.sncData,
       status: dataflowMetadata.status || '',
-      representatives:dataflowMetadata.representatives || ''
+      representatives: dataflowMetadata.representatives || ''
     };
   }
 

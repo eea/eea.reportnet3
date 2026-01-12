@@ -40,7 +40,8 @@ export const designerReducer = (state, { type, payload }) => {
         dataflowName: payload.dataflowName,
         dataflowType: payload.dataflowType,
         datasetSchemaName: payload.schemaName,
-        metaData: payload.metaData
+        metaData: payload.metaData,
+        sncData: payload.sncData
       };
 
     case 'GET_SELECTED_IMPORT_EXTENSION':
