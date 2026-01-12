@@ -4267,6 +4267,7 @@ public class DatasetControllerImpl implements DatasetController {
     }
   }
 
+  @SneakyThrows
   @Override
   @HystrixCommand
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_CUSTODIAN','DATASET_STEWARD','DATASET_OBSERVER','DATASET_STEWARD_SUPPORT','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATACOLLECTION_CUSTODIAN','DATASCHEMA_CUSTODIAN','DATASCHEMA_STEWARD','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','DATASET_NATIONAL_COORDINATOR','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','EUDATASET_OBSERVER','EUDATASET_STEWARD_SUPPORT','DATACOLLECTION_OBSERVER','DATACOLLECTION_STEWARD_SUPPORT','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','DATACOLLECTION_STEWARD','REFERENCEDATASET_OBSERVER','REFERENCEDATASET_STEWARD_SUPPORT','REFERENCEDATASET_STEWARD','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD') OR checkApiKey(#dataflowId,#providerId,#datasetId,'DATASET_CUSTODIAN','DATASET_STEWARD','DATASET_OBSERVER','DATASET_STEWARD_SUPPORT','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATACOLLECTION_CUSTODIAN','DATASCHEMA_CUSTODIAN','DATASCHEMA_STEWARD','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','DATASET_NATIONAL_COORDINATOR','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','EUDATASET_OBSERVER','EUDATASET_STEWARD_SUPPORT','DATACOLLECTION_OBSERVER','DATACOLLECTION_STEWARD_SUPPORT','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','DATACOLLECTION_STEWARD','REFERENCEDATASET_OBSERVER','REFERENCEDATASET_STEWARD_SUPPORT','REFERENCEDATASET_STEWARD','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD')")
@@ -4274,7 +4275,8 @@ public class DatasetControllerImpl implements DatasetController {
   public ResponseEntity<byte[]> getRecordGeometry(
           @PathVariable("datasetId") Long datasetId,
           @PathVariable("recordId") String recordId,
-          @RequestParam("fieldName") String fieldName,
+          @RequestParam("fieldId") String fieldId,
+          @RequestParam(value = "fieldName", required = false) String fieldName,
           @RequestParam("dataflowId") Long dataflowId,
           @RequestParam(value = "providerId", required = false) Long providerId,
           @RequestParam("idTableSchema") String idTableSchema
@@ -4282,6 +4284,11 @@ public class DatasetControllerImpl implements DatasetController {
     try {
       Boolean isBigDataflow =
               dataFlowControllerZuul.isBigDataflow(dataflowId);
+      if (fieldName == null){
+        String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
+        FieldSchemaVO fieldschemaVo = datasetSchemaService.getFieldSchema(datasetSchemaId,fieldId);
+        fieldName = fieldschemaVo.getName();
+      }
 
       if (!Boolean.TRUE.equals(isBigDataflow)) {
         throw new ResponseStatusException(
@@ -4319,10 +4326,8 @@ public class DatasetControllerImpl implements DatasetController {
     } catch (ResponseStatusException e) {
       throw e;
     } catch (Exception e) {
-      LOG.error(
-              "Unexpected error! Error retrieving geometry for dataflowId {} datasetId {} fieldName {} recordId {} Message: {}",
-              dataflowId, datasetId, fieldName, recordId, e.getMessage()
-      );
+      LOG.error("Unexpected error! Error retrieving geometry for dataflowId {} datasetId {} fieldName {} recordId {} Message: {}",
+              dataflowId, datasetId, fieldName, recordId, e.getMessage());
       throw e;
     }
   }
