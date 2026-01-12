@@ -91,7 +91,6 @@ public class DataCollectionNationalCoordinatorCommand extends AbstractEEAEventHa
     try {
       // fetch dataflow data and extract dataflow type
       DataFlowVO dataflow = dataflowControllerZuul.getMetabaseById(dataflowId);
-      TypeDataflowEnum typeDataflowEnum = dataflow.getType();
 
       if (TypeDataflowEnum.BUSINESS.equals(dataflow.getType())) {
         LOG.info("Business dataflows don't need national coordinators. Proceed to finish data collection creation. Dataflow id: {}", dataflowId);

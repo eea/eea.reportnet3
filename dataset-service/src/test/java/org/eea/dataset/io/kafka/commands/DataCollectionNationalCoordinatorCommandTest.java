@@ -13,8 +13,10 @@ import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControl
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
+import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
+import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.ums.UserRepresentationVO;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
@@ -136,6 +138,10 @@ public class DataCollectionNationalCoordinatorCommandTest {
     Mockito.when(dataSetMetabaseRepository.getDatasetIdsByDataflowIdAndDataProviderId(Mockito.any(),
         Mockito.any())).thenReturn(datasetIds);
     doNothing().when(resourceManagementControllerZull).createResource(Mockito.any());
+
+    DataFlowVO dataFlowVO = new DataFlowVO();
+    dataFlowVO.setType(TypeDataflowEnum.REPORTING);
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataFlowVO);
 
     dataCollectionNationalCoordinatorCommand.execute(eeaEventVO);
     Mockito.verify(userManagementControllerZull, times(1))
