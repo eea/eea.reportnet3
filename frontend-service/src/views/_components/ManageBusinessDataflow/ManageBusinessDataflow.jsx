@@ -248,7 +248,8 @@ export const ManageBusinessDataflow = ({
           obligation.id,
           selectedGroup.dataProviderGroupId,
           selectedFmeUser.id,
-          bigData
+          bigData,
+          bigData === true ? true : undefined
         );
         if (pinDataflow) {
           const inmUserProperties = { ...userContext.userProps };
