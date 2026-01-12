@@ -2388,6 +2388,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
             invalidExtensionMessage={resourcesContext.messages['invalidExtensionFile']}
             isDesignDataset={true}
             isDialog={true}
+            maxFileSize={designerState.bigData ? config.MAX_BIG_DATA_FILE_SIZE : config.MAX_CITUS_FILE_SIZE}
             name="file"
             onChangeImportDialogVisibility={onChangeImportDialogVisibility}
             onError={onImportDatasetError}

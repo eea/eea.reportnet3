@@ -1753,6 +1753,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
           integrationId={selectedCustomImportIntegration.id ? selectedCustomImportIntegration.id : undefined}
           invalidExtensionMessage={resourcesContext.messages['invalidExtensionFile']}
           isDialog={true}
+          maxFileSize={metadata?.dataflow.bigData ? config.MAX_BIG_DATA_FILE_SIZE : config.MAX_CITUS_FILE_SIZE}
           name="file"
           onChangeImportDialogVisibility={onChangeImportDialogVisibility}
           onError={onImportDatasetError}
