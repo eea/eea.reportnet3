@@ -1126,6 +1126,7 @@ public interface DatasetController {
   ResponseEntity<byte[]> getRecordGeometry(
           @PathVariable("datasetId") Long datasetId,
           @PathVariable("recordId") String recordId,
+          @RequestParam("fieldId") String fieldId,
           @RequestParam("fieldName") String fieldName,
           @RequestParam("dataflowId") Long dataflowId,
           @RequestParam(value = "providerId", required = false) Long providerId,
