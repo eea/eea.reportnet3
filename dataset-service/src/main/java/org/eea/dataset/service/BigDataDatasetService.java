@@ -332,4 +332,10 @@ public interface BigDataDatasetService {
      * @param fieldVO The field object
      */
     Boolean duplicateFieldValueExists(Long datasetId, Long dataflowId, Long providerId, String tableName, FieldVO fieldVO);
+
+    byte[] getGeometryAsGeoJson(
+            DataSetMetabaseVO dataset,
+            TableSchemaVO tableSchemaVO,
+            String geometryColumn,
+            String recordId);
 }

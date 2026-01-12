@@ -4266,4 +4266,63 @@ public class DatasetControllerImpl implements DatasetController {
       throw e;
     }
   }
+
+  @Override
+  @HystrixCommand
+  @GetMapping("/v1/{datasetId}/record/{recordId}/geometry")
+  public ResponseEntity<byte[]> getRecordGeometry(
+          @PathVariable("datasetId") Long datasetId,
+          @PathVariable("recordId") String recordId,
+          @RequestParam("fieldName") String fieldName,
+          @RequestParam("dataflowId") Long dataflowId,
+          @RequestParam(value = "providerId", required = false) Long providerId,
+          @RequestParam("idTableSchema") String idTableSchema
+  ) {
+    try {
+      Boolean isBigDataflow =
+              dataFlowControllerZuul.isBigDataflow(dataflowId);
+
+      if (!Boolean.TRUE.equals(isBigDataflow)) {
+        throw new ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "Geometry not available for non-big dataflow"
+        );
+      }
+
+      DataSetMetabaseVO dataset =
+              datasetMetabaseService.findDatasetMetabase(datasetId);
+      String datasetSchemaId = dataset.getDatasetSchema();
+      TableSchemaVO tableSchemaVO =
+              datasetSchemaService.getTableSchemaVO(
+                      idTableSchema,
+                      datasetSchemaId
+              );
+
+      byte[] file =
+              bigDataDatasetService.getGeometryAsGeoJson(
+                      dataset,
+                      tableSchemaVO,
+                      fieldName,
+                      recordId
+              );
+      String filename =
+              fieldName + "_" + recordId + ".geojson";
+
+      HttpHeaders httpHeaders = new HttpHeaders();
+      httpHeaders.set(
+              HttpHeaders.CONTENT_DISPOSITION,
+              "attachment; filename=" + filename
+      );
+
+      return new ResponseEntity<>(file, httpHeaders, HttpStatus.OK);
+    } catch (ResponseStatusException e) {
+      throw e;
+    } catch (Exception e) {
+      LOG.error(
+              "Unexpected error! Error retrieving geometry for dataflowId {} datasetId {} fieldName {} recordId {} Message: {}",
+              dataflowId, datasetId, fieldName, recordId, e.getMessage()
+      );
+      throw e;
+    }
+  }
 }
