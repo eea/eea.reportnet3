@@ -216,6 +216,12 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
   /** The Constant IS_DELETED. */
   private static final String IS_DELETED = " %s = :%s ";
 
+  /** The Constant BIG_DATA. */
+  private static final String BIG_DATA = " %s = :%s ";
+
+  /** The Constant SNC_DATA. */
+  private static final String SNC_DATA = " %s = :%s ";
+
   /** The Constant AND. */
   private static final String AND = " and ";
 
@@ -690,62 +696,68 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
    * @throws EEAException
    */
   private void setFilters(StringBuilder stringQuery, String key, String value, boolean hasPinned)
-      throws EEAException {
-    switch (key) {
-      case "is_deleted":
-        stringQuery.append(String.format(IS_DELETED, "is_deleted", key));
-        break;
-      case "creation_date_from":
-        stringQuery.append(String.format(DATE_FROM, "creation_date", key));
-        break;
-      case "creation_date_to":
-        stringQuery.append(String.format(DATE_TO, "creation_date", key));
-        break;
-      case "deadline_date_from":
-        stringQuery.append(String.format(DATE_FROM, "deadline_date", key));
-        break;
-      case "deadline_date_to":
-        stringQuery.append(String.format(DATE_TO, "deadline_date", key));
-        break;
-      case "delivery_date_from":
-        stringQuery.append(String.format(DATE_FROM, DATE_RELEASED, key));
-        break;
-      case "delivery_date_to":
-        stringQuery.append(String.format(DATE_TO, DATE_RELEASED, key));
-        break;
-      case "first_delivery_date_from":
-        stringQuery.append(String.format(DATE_FROM, FIRST_DATE_RELEASED, key));
-        break;
-      case "first_delivery_date_to":
-        stringQuery.append(String.format(DATE_TO, FIRST_DATE_RELEASED, key));
-        break;
-      case "date_status_changed_from":
-        stringQuery.append(String.format(DATE_FROM, DATE_STATUS_CHANGED, key));
-        break;
-      case "date_status_changed_to":
-        stringQuery.append(String.format(DATE_TO, DATE_STATUS_CHANGED, key));
-        break;
-      case DELIVERY_STATUS:
-        stringQuery.append(String.format(DELIVERY_STATUS_IN, DELIVERY_STATUS, key));
-        break;
-      case "status":
-        switch (value) {
-          case "OPEN":
-          case "CLOSED":
-            stringQuery.append(STATUS).append(AND).append(RELEASABLE);
-            break;
-          case "DESIGN":
-            stringQuery.append(STATUS);
-            break;
-        }
-        break;
-      case "pinned":
-        stringQuery.append(PINNED_FILTER);
-        break;
-      default:
-        stringQuery.append(String.format(LIKE, getTablePrefix(key, hasPinned), key));
-        break;
-    }
+          throws EEAException {
+      switch (key) {
+          case "is_deleted":
+              stringQuery.append(String.format(IS_DELETED, "is_deleted", key));
+              break;
+          case "big_data":
+              stringQuery.append(String.format(BIG_DATA, "big_data", key));
+              break;
+          case "snc_data":
+              stringQuery.append(String.format(SNC_DATA, "snc_data", key));
+              break;
+          case "creation_date_from":
+              stringQuery.append(String.format(DATE_FROM, "creation_date", key));
+              break;
+          case "creation_date_to":
+              stringQuery.append(String.format(DATE_TO, "creation_date", key));
+              break;
+          case "deadline_date_from":
+              stringQuery.append(String.format(DATE_FROM, "deadline_date", key));
+              break;
+          case "deadline_date_to":
+              stringQuery.append(String.format(DATE_TO, "deadline_date", key));
+              break;
+          case "delivery_date_from":
+              stringQuery.append(String.format(DATE_FROM, DATE_RELEASED, key));
+              break;
+          case "delivery_date_to":
+              stringQuery.append(String.format(DATE_TO, DATE_RELEASED, key));
+              break;
+          case "first_delivery_date_from":
+              stringQuery.append(String.format(DATE_FROM, FIRST_DATE_RELEASED, key));
+              break;
+          case "first_delivery_date_to":
+              stringQuery.append(String.format(DATE_TO, FIRST_DATE_RELEASED, key));
+              break;
+          case "date_status_changed_from":
+              stringQuery.append(String.format(DATE_FROM, DATE_STATUS_CHANGED, key));
+              break;
+          case "date_status_changed_to":
+              stringQuery.append(String.format(DATE_TO, DATE_STATUS_CHANGED, key));
+              break;
+          case DELIVERY_STATUS:
+              stringQuery.append(String.format(DELIVERY_STATUS_IN, DELIVERY_STATUS, key));
+              break;
+          case "status":
+              switch (value) {
+                  case "OPEN":
+                  case "CLOSED":
+                      stringQuery.append(STATUS).append(AND).append(RELEASABLE);
+                      break;
+                  case "DESIGN":
+                      stringQuery.append(STATUS);
+                      break;
+              }
+              break;
+          case "pinned":
+              stringQuery.append(PINNED_FILTER);
+              break;
+          default:
+              stringQuery.append(String.format(LIKE, getTablePrefix(key, hasPinned), key));
+              break;
+      }
   }
 
   /**
