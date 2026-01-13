@@ -1817,7 +1817,7 @@ public class FileTreatmentHelper implements DisposableBean {
             } else {
                 List<File> validatedNamesList = validateFileNames(tableSchemaId, schema, files, processId, datasetId, jobId, originalFileName);
                 List<File> validatedHeadersList = !validatedNamesList.isEmpty() ? validateFileHeaders(tableSchemaId, schema,originalFileName, validatedNamesList, delimiter, processId, datasetId, jobId) : new ArrayList<>();
-                List<File> validateData = validateFileHasData(tableSchemaId, schema,originalFileName, validatedHeadersList, delimiter, processId, datasetId, jobId);
+                List<File> validateData = validateFileHasData(tableSchemaId, schema,originalFileName, validatedHeadersList, processId, datasetId, jobId);
                 List<File> finalFiles = validateData;
                 importExecutorService.submit(() -> {
                     try {
@@ -1949,12 +1949,11 @@ public class FileTreatmentHelper implements DisposableBean {
      * @param schema the dataset schema
      * @param originalFileName the original file name
      * @param files the list of files to validate; invalid files will be removed from this list
-     * @param delimiter the delimiter to use when reading CSV files
      * @param datasetId the dataset id
      * @throws IOException if an I/O error occurs during file reading
      * @throws EEAException if all CSV files are invalid
      */
-    public List<File> validateFileHasData(String tableSchemaId, DataSetSchema schema, String originalFileName, List<File> files, String delimiter, String processId, Long datasetId, Long jobId)
+    public List<File> validateFileHasData(String tableSchemaId, DataSetSchema schema, String originalFileName, List<File> files, String processId, Long datasetId, Long jobId)
       throws IOException, EEAException {
         String error = null;
         int filesCount = files.size();
@@ -1972,7 +1971,6 @@ public class FileTreatmentHelper implements DisposableBean {
             }
 
             String fileName = file.getName();
-            String findTableSchemaId = tableSchemaId == null ? getTableSchemaIdFromFileName(schema, fileName, true) : tableSchemaId;
             String fileType = datasetService.getMimetype(fileName);
 
             if (!fileType.equalsIgnoreCase("csv")) {
