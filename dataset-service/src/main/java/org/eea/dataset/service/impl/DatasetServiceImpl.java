@@ -89,6 +89,7 @@ import org.springframework.transaction.annotation.Propagation;
 import javax.transaction.Transactional;
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.*;
@@ -3912,4 +3913,35 @@ public class DatasetServiceImpl implements DatasetService {
     }
   }
 
+  @Override
+  public byte[] getGeometryAsGeoJson(
+          Long datasetId,
+          String recordId,
+          String fieldId
+  ) throws EEAException {
+    TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, datasetId));
+
+
+    // 1. Find the FieldValue for this record + field
+    FieldValue fieldValue = fieldRepository
+                    .findByRecordIdAndFieldSchema(recordId, fieldId)
+                    .orElseThrow(() -> new EEAException(
+                            EEAErrorMessage.FIELD_NOT_FOUND +
+                                    " No geometry for recordId " + recordId +
+                                    " and fieldId " + fieldId
+                    ));
+
+    // 2. Extract GeoJSON value
+    String geoJson = fieldValue.getValue();
+
+    if (geoJson == null || geoJson.trim().isEmpty()) {
+      throw new EEAException(
+              EEAErrorMessage.FIELD_NOT_FOUND+
+              "Empty geometry for recordId " + recordId
+      );
+    }
+
+    // 3. Return as bytes
+    return geoJson.getBytes(StandardCharsets.UTF_8);
+  }
 }

@@ -217,5 +217,17 @@ public interface FieldRepository
   @Query(value = "SELECT * FROM field_value WHERE id_field_schema = :idFieldSchema AND value IS NOT NULL AND TRIM(value) <> '' ORDER BY CAST(value AS BIGINT) DESC LIMIT 1", nativeQuery = true)
   Optional<FieldValue> findMaxValueByIdFieldSchema(@Param("idFieldSchema") String idFieldSchema);
 
-
+  @Query(
+          nativeQuery = true,
+          value =
+                  "SELECT * " +
+                          "FROM field_value " +
+                          "WHERE id_record = :recordId " +
+                          "AND id_field_schema = :fieldId " +
+                          "LIMIT 1"
+  )
+  Optional<FieldValue>  findByRecordIdAndFieldSchema(
+          @Param("recordId") String recordId,
+          @Param("fieldId") String fieldId
+  );
 }
