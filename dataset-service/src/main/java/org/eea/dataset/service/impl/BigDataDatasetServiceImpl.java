@@ -2845,9 +2845,14 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                         tableSchemaVO.getNameTableSchema(),
                         false
                 );
-        s3RootResolver.setIsIcebergTable(false);
 
-        // Check folder exists
+        if (BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(dataset.getId(), tableSchemaVO.getIdTableSchema()))){
+            s3RootResolver.setIsIcebergTable(true);
+        } else {
+            s3RootResolver.setIsIcebergTable(false);
+        }
+
+        //2 Check folder exists
         if (!s3HelperPrivate.checkTableNameDCFolderExist(s3RootResolver)) {
             LOG.warn("Table folder does not exist for {}", tableSchemaVO.getNameTableSchema());
             return new byte[0];
@@ -2862,19 +2867,9 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             return new byte[0];
         }
 
-        // 2. QUERY resolver
-        S3PathResolver s3QueryResolver =
-                new S3PathResolver(
-                        dataset.getDataflowId(),
-                        dataset.getId(),
-                        tableSchemaVO.getNameTableSchema(),
-                        S3_TABLE_NAME_DC_FOLDER_PATH
-                );
-        s3QueryResolver.setIsIcebergTable(false);
-
         String tablePath =
                 s3ServicePrivate.getTableAsFolderQueryPath(
-                        s3QueryResolver,
+                        s3RootResolver,
                         S3_TABLE_AS_FOLDER_QUERY_PATH
                 );
 
