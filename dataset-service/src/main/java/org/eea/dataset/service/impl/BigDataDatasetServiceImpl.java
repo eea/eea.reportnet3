@@ -2861,7 +2861,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         // 2. Check folder exists
         if (!s3HelperPrivate.checkTableNameDCFolderExist(s3RootResolver)) {
             throw new EEAException(
-                    EEAErrorMessage.FIELD_NOT_FOUND +
+                    EEAErrorMessage.RECORD_NOTFOUND +
                             " Table folder does not exist for table " +
                             tableSchemaVO.getNameTableSchema()
             );
@@ -2874,7 +2874,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 s3RootResolver.getTableName()
         )) {
             throw new EEAException(
-                    EEAErrorMessage.FIELD_NOT_FOUND +
+                    EEAErrorMessage.RECORD_NOTFOUND +
                             " Table not promoted in Dremio: " +
                             tableSchemaVO.getNameTableSchema()
             );
@@ -2900,7 +2900,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
             if (geoJson == null || geoJson.trim().isEmpty()) {
                 throw new EEAException(
-                        EEAErrorMessage.FIELD_NOT_FOUND +
+                        EEAErrorMessage.RECORD_NOTFOUND +
                                 " Empty geometry for recordId " + recordId
                 );
             }
@@ -2909,7 +2909,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
         } catch (EmptyResultDataAccessException e) {
             throw new EEAException(
-                    EEAErrorMessage.FIELD_NOT_FOUND +
+                    EEAErrorMessage.RECORD_NOTFOUND +
                             " No geometry found for recordId " + recordId
             );
         }
