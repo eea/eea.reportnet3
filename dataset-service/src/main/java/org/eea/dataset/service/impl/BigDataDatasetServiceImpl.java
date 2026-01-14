@@ -2837,7 +2837,8 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             TableSchemaVO tableSchemaVO,
             String geometryColumnFieldId,
             String recordId
-    ) {
+    ) throws EEAException {
+
         // 1. ROOT resolve
         S3PathResolver s3RootResolver =
                 s3ServicePrivate.getS3PathResolverByDatasetType(
@@ -2846,25 +2847,37 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                         false
                 );
 
-        if (BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(dataset.getId(), tableSchemaVO.getIdTableSchema()))){
+        if (BooleanUtils.isTrue(
+                datasetTableService.icebergTableIsCreated(
+                        dataset.getId(),
+                        tableSchemaVO.getIdTableSchema()
+                )
+        )) {
             s3RootResolver.setIsIcebergTable(true);
         } else {
             s3RootResolver.setIsIcebergTable(false);
         }
 
-        //2 Check folder exists
+        // 2. Check folder exists
         if (!s3HelperPrivate.checkTableNameDCFolderExist(s3RootResolver)) {
-            LOG.warn("Table folder does not exist for {}", tableSchemaVO.getNameTableSchema());
-            return new byte[0];
+            throw new EEAException(
+                    EEAErrorMessage.FIELD_NOT_FOUND +
+                            " Table folder does not exist for table " +
+                            tableSchemaVO.getNameTableSchema()
+            );
         }
 
-       dremioAutoPromotionService.ensureSafeFolderPromotion(dataset, s3RootResolver);
+        dremioAutoPromotionService.ensureSafeFolderPromotion(dataset, s3RootResolver);
 
         if (!dremioHelperService.checkFolderPromoted(
                 s3RootResolver,
-                s3RootResolver.getTableName())) {
-            LOG.warn("Table not promoted in Dremio: {}", tableSchemaVO.getNameTableSchema());
-            return new byte[0];
+                s3RootResolver.getTableName()
+        )) {
+            throw new EEAException(
+                    EEAErrorMessage.FIELD_NOT_FOUND +
+                            " Table not promoted in Dremio: " +
+                            tableSchemaVO.getNameTableSchema()
+            );
         }
 
         String tablePath =
@@ -2885,13 +2898,20 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             String geoJson =
                     dremioJdbcTemplate.queryForObject(sql, String.class);
 
-            return geoJson != null
-                    ? geoJson.getBytes(StandardCharsets.UTF_8)
-                    : new byte[0];
+            if (geoJson == null || geoJson.trim().isEmpty()) {
+                throw new EEAException(
+                        EEAErrorMessage.FIELD_NOT_FOUND +
+                                " Empty geometry for recordId " + recordId
+                );
+            }
+
+            return geoJson.getBytes(StandardCharsets.UTF_8);
 
         } catch (EmptyResultDataAccessException e) {
-            LOG.warn("No geometry found for recordId {}", recordId);
-            return new byte[0];
+            throw new EEAException(
+                    EEAErrorMessage.FIELD_NOT_FOUND +
+                            " No geometry found for recordId " + recordId
+            );
         }
     }
 }

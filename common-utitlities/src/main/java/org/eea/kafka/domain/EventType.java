@@ -861,7 +861,13 @@ public enum EventType {
           "dataset_enable_editing_failed_event", true),
 
   DATASET_DISABLE_EDITING_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
-          "dataset_disable_editing_failed_event", true);
+          "dataset_disable_editing_failed_event", true),
+
+  DOWNLOAD_GEOMETRY_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+          "download_geometry_completed_event", true),
+
+  DOWNLOAD_GEOMETRY_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+          "download_geometry_failed_event", true);
 
   /** The topic. */
   private String topic;
