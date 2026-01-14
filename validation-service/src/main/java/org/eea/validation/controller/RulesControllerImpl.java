@@ -1112,7 +1112,7 @@ public class RulesControllerImpl implements RulesController {
       LOG.info("Successfully ran sql rule {} for datasetId {}", sqlRule.getSqlRule(), datasetId);
     } catch (EEAInvalidSQLCommentsException e){
       LOG.error(
-              "There was an error trying to execute the SQL Rule: {} for datasetId {}. Check your SQL comments.",
+              "There was an error with trailing comments while trying to execute this SQL Rule: {} for datasetId {}.",
               sqlRule.getSqlRule(), datasetId, e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "SQL validation failed, sql ends with a comment.");
     } catch (EEAInvalidSQLException e) {
@@ -1172,10 +1172,9 @@ public class RulesControllerImpl implements RulesController {
           @ApiParam(value = "SQL rule that is going to be evaluated") @RequestBody SqlRuleVO sqlRule) {
     double sqlCost = 0;
     try {
-      if(sqlRule != null){
+      if (sqlRule != null) {
         LOG.info("Evaluating sql rule {} for datasetId {}", sqlRule.getSqlRule(), datasetId);
-      }
-      else{
+      } else {
         LOG.info("Sql rule is null for datasetId {}", datasetId);
       }
       sqlCost = sqlRulesService.evaluateSqlRule(datasetId, sqlRule.getSqlRule());
@@ -1186,6 +1185,11 @@ public class RulesControllerImpl implements RulesController {
               sqlRule.getSqlRule(), datasetId, e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
 
+    } catch (EEAInvalidSQLCommentsException e) {
+      LOG.error(
+              "There was an error with trailing comments while trying to evaluate this SQL Rule: {} for datasetId {}.",
+              sqlRule.getSqlRule(), datasetId, e);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "SQL validation failed, sql ends with a comment.");
     } catch (EEAInvalidSQLException e) {
       LOG.error(
               "There was an error trying to execute the SQL Rule: {}. Check your SQL Syntax.",
