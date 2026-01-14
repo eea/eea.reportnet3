@@ -747,4 +747,10 @@ public interface DatasetService {
    * @param fieldVO The field object
    */
   Boolean duplicateFieldValueExists(Long datasetId, FieldVO fieldVO);
+
+  byte[] getGeometryAsGeoJson(
+          Long datasetId,
+          String recordId,
+          String fieldId
+  ) throws EEAException;
 }

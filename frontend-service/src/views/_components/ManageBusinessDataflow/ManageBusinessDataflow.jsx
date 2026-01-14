@@ -248,7 +248,8 @@ export const ManageBusinessDataflow = ({
           obligation.id,
           selectedGroup.dataProviderGroupId,
           selectedFmeUser.id,
-          bigData
+          bigData,
+          bigData === true ? true : undefined
         );
         if (pinDataflow) {
           const inmUserProperties = { ...userContext.userProps };
@@ -335,6 +336,30 @@ export const ManageBusinessDataflow = ({
         );
       }
     };
+
+    const renderSncData = () => {
+      if (!isEditing) {
+        return (
+          <div className={styles.checkboxWrapper}>
+            <Checkbox
+              ariaLabel={resourcesContext.messages['sncData']}
+              checked={true}
+              disabled={true}
+              id="sncDataCheckbox"
+              inputId="sncDataCheckbox"
+              role="checkbox"
+            />
+            <label>
+              <span>{resourcesContext.messages['sncData']}</span>
+            </label>
+            <TooltipButton
+              message={resourcesContext.messages['sncDataMessage']}
+              uniqueIdentifier="sncData"></TooltipButton>
+          </div>
+        );
+      }
+    };
+
     return (
       <Fragment>
         <div className="p-toolbar-group-left">
@@ -358,6 +383,7 @@ export const ManageBusinessDataflow = ({
           {renderCheckBoxPinned()}
         </div>
         <div className="p-toolbar-group-left">{renderBigDataStorage()}</div>
+        {bigData && <div className="p-toolbar-group-left">{renderSncData()}</div>}
         <Button
           className={`p-button-primary ${
             !isEmpty(name) &&

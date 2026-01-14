@@ -5,7 +5,7 @@ import { getUrl } from './_utils/UrlUtils';
 import { HTTPRequester } from './_utils/HTTPRequester';
 
 export const BusinessDataflowRepository = {
-  create: async (name, description, obligationId, dataProviderGroupId, fmeUserId, bigData) =>
+  create: async (name, description, obligationId, dataProviderGroupId, fmeUserId, bigData, sncData) =>
     await HTTPRequester.post({
       url: getUrl(DataflowConfig.createUpdate),
       data: {
@@ -16,7 +16,8 @@ export const BusinessDataflowRepository = {
         type: 'BUSINESS',
         dataProviderGroupId,
         fmeUserId,
-        bigData
+        bigData,
+        sncData
       }
     }),
 

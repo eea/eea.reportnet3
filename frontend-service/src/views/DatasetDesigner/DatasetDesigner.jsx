@@ -205,6 +205,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
     schemaTables: [],
     selectedImportExtension: null,
     selectedWebform: undefined,
+    sncData: false,
     tabs: [],
     uniqueConstraintsList: [],
     validationListDialogVisible: false,
@@ -396,7 +397,8 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
         dataflowName: metaData.dataflow.name,
         dataflowType: metaData.dataflow.type,
         metaData,
-        schemaName: metaData.dataset.name
+        schemaName: metaData.dataset.name,
+        sncData: metaData.dataflow.sncData
       }
     });
 
@@ -1365,8 +1367,16 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
   };
 
   const getSubtitle = () => {
-    let subtitle = designerState.bigData
-      ? TextUtils.parseText(resourcesContext.messages['bigDataDataflowNamed'], { name: designerState.dataflowName })
+    let subtitle = designerState.sncData
+      ? designerState.bigData
+        ? TextUtils.parseText(resourcesContext.messages['sncBigDataDataflowNamed'], {
+            name: designerState.dataflowName
+          })
+        : TextUtils.parseText(resourcesContext.messages['sncCitusDataflowNamed'], { name: designerState.dataflowName })
+      : designerState.bigData
+      ? TextUtils.parseText(resourcesContext.messages['bigDataDataflowNamed'], {
+          name: designerState.dataflowName
+        })
       : designerState.dataflowName;
 
     if (designerState.metaData?.dataflow?.deleted) {
@@ -2388,6 +2398,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
             invalidExtensionMessage={resourcesContext.messages['invalidExtensionFile']}
             isDesignDataset={true}
             isDialog={true}
+            maxFileSize={designerState.bigData ? config.MAX_BIG_DATA_FILE_SIZE : config.MAX_CITUS_FILE_SIZE}
             name="file"
             onChangeImportDialogVisibility={onChangeImportDialogVisibility}
             onError={onImportDatasetError}

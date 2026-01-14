@@ -1817,7 +1817,8 @@ public class FileTreatmentHelper implements DisposableBean {
             } else {
                 List<File> validatedNamesList = validateFileNames(tableSchemaId, schema, files, processId, datasetId, jobId, originalFileName);
                 List<File> validatedHeadersList = !validatedNamesList.isEmpty() ? validateFileHeaders(tableSchemaId, schema,originalFileName, validatedNamesList, delimiter, processId, datasetId, jobId) : new ArrayList<>();
-                List<File> finalFiles = validatedHeadersList;
+                List<File> validateData = validateFileHasData(tableSchemaId, schema,originalFileName, validatedHeadersList, processId, datasetId, jobId);
+                List<File> finalFiles = validateData;
                 importExecutorService.submit(() -> {
                     try {
                         if(this.enableTaskBasedAsynchronousImport){
@@ -1941,6 +1942,61 @@ public class FileTreatmentHelper implements DisposableBean {
 
     }
 
+    /**
+     * Validates CSV files by checking that they contain data.
+     *
+     * @param tableSchemaId the table schema id
+     * @param schema the dataset schema
+     * @param originalFileName the original file name
+     * @param files the list of files to validate; invalid files will be removed from this list
+     * @param datasetId the dataset id
+     * @throws IOException if an I/O error occurs during file reading
+     * @throws EEAException if all CSV files are invalid
+     */
+    public List<File> validateFileHasData(String tableSchemaId, DataSetSchema schema, String originalFileName, List<File> files, String processId, Long datasetId, Long jobId)
+      throws IOException, EEAException {
+        String error = null;
+        int filesCount = files.size();
+        List<String> warningList = new ArrayList<>();
+        Iterator<File> fileIterator = files.iterator();
+        while (fileIterator.hasNext()) {
+            File file = fileIterator.next();
+
+            int lines = 0;
+
+            try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+                while (br.readLine() != null) {
+                    lines++;
+                }
+            }
+
+            String fileName = file.getName();
+            String fileType = datasetService.getMimetype(fileName);
+
+            if (!fileType.equalsIgnoreCase("csv")) {
+                continue;
+            }
+
+            if(lines <= 1){
+                warningList.add(JobInfoEnum.WARNING_SOME_FILES_ARE_EMPTY.getValue(null));
+                LOG.info("One or more of your import files are empty, so some tables could not be populated with data.");
+                fileIterator.remove();
+            }
+        }
+
+        if (filesCount == warningList.size()) {
+            error = EEAErrorMessage.ERROR_IMPORT_EMPTY_FILES;
+            warningList.clear();
+        }
+
+        if (error != null || !warningList.isEmpty()) {
+            assignJobNotifications(tableSchemaId, originalFileName, processId, datasetId, jobId, error, warningList);
+        }
+
+        return files;
+
+    }
+
   /**
    * Validates files by checking that their filename maps to a tableSchemaId.
    * Removes any invalid files from the list and emits notifications.
@@ -2033,6 +2089,9 @@ public class FileTreatmentHelper implements DisposableBean {
                 if (EEAErrorMessage.ERROR_IMPORT_FILES_CONTAIN_WRONG_HEADERS.equals(error)) {
                     jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.ERROR_IMPORT_FILES_CONTAIN_WRONG_HEADERS, null);
                     eventType = EventType.IMPORT_WRONG_HEADERS_ERROR_EVENT;
+                } else if (EEAErrorMessage.ERROR_IMPORT_EMPTY_FILES.equals(error)) {
+                    jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.ERROR_ALL_FILES_ARE_EMPTY, null);
+                    eventType = EventType.IMPORT_EMPTY_FILES_ERROR_EVENT;
                 } else if (EEAErrorMessage.ERROR_FILE_NAME_MATCHING.equals(error)) {
                   jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.ERROR_WRONG_FILE_NAME, null);
                   eventType = DatasetTypeEnum.REPORTING.equals(type) || DatasetTypeEnum.TEST.equals(type)
@@ -2064,6 +2123,14 @@ public class FileTreatmentHelper implements DisposableBean {
                             .datasetId(datasetId).fileName(originalFileName).build();
                     kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.IMPORT_WRONG_HEADERS_WARNING_EVENT,
                             value, notificationWarning);
+                }
+                if(warningList.contains(JobInfoEnum.WARNING_SOME_FILES_ARE_EMPTY.getValue(null))) {
+                    jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.WARNING_SOME_FILES_ARE_EMPTY, null);
+                    NotificationVO notificationWarning = NotificationVO.builder()
+                      .user(SecurityContextHolder.getContext().getAuthentication().getName())
+                      .datasetId(datasetId).fileName(originalFileName).build();
+                    kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.IMPORT_EMPTY_FILES_WARNING_EVENT,
+                      value, notificationWarning);
                 }
                 if(warningList.contains(JobInfoEnum.WARNING_SOME_FILENAMES_DO_NOT_MATCH_TABLES.getValue(null))) {
                   jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.WARNING_SOME_FILENAMES_DO_NOT_MATCH_TABLES, null);

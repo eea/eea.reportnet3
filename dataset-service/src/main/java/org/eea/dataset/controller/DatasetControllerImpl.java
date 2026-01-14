@@ -4266,4 +4266,73 @@ public class DatasetControllerImpl implements DatasetController {
       throw e;
     }
   }
+
+  @SneakyThrows
+  @Override
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_CUSTODIAN','DATASET_STEWARD','DATASET_OBSERVER','DATASET_STEWARD_SUPPORT','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATACOLLECTION_CUSTODIAN','DATASCHEMA_CUSTODIAN','DATASCHEMA_STEWARD','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','DATASET_NATIONAL_COORDINATOR','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','EUDATASET_OBSERVER','EUDATASET_STEWARD_SUPPORT','DATACOLLECTION_OBSERVER','DATACOLLECTION_STEWARD_SUPPORT','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','DATACOLLECTION_STEWARD','REFERENCEDATASET_OBSERVER','REFERENCEDATASET_STEWARD_SUPPORT','REFERENCEDATASET_STEWARD','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD') OR hasAnyRole('ADMIN') OR checkApiKey(#dataflowId,#providerId,#datasetId,'DATASET_CUSTODIAN','DATASET_STEWARD','DATASET_OBSERVER','DATASET_STEWARD_SUPPORT','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATACOLLECTION_CUSTODIAN','DATASCHEMA_CUSTODIAN','DATASCHEMA_STEWARD','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','DATASET_NATIONAL_COORDINATOR','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','EUDATASET_OBSERVER','EUDATASET_STEWARD_SUPPORT','DATACOLLECTION_OBSERVER','DATACOLLECTION_STEWARD_SUPPORT','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','DATACOLLECTION_STEWARD','REFERENCEDATASET_OBSERVER','REFERENCEDATASET_STEWARD_SUPPORT','REFERENCEDATASET_STEWARD','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD')")
+  @GetMapping("/v1/{datasetId}/record/{recordId}/geometry")
+  public ResponseEntity<byte[]> getRecordGeometry(
+          @PathVariable("datasetId") Long datasetId,
+          @PathVariable("recordId") String recordId,
+          @RequestParam("fieldId") String fieldId,
+          @RequestParam(value = "fieldName", required = false) String fieldName,
+          @RequestParam("dataflowId") Long dataflowId,
+          @RequestParam(value = "providerId", required = false) Long providerId,
+          @RequestParam("idTableSchema") String idTableSchema
+  ) {
+    try {
+      Boolean isBigDataflow =
+              dataFlowControllerZuul.isBigDataflow(dataflowId);
+      if (fieldName == null){
+        String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
+        FieldSchemaVO fieldschemaVo = datasetSchemaService.getFieldSchema(datasetSchemaId,fieldId);
+        fieldName = fieldschemaVo.getName();
+      }
+      byte[] file;
+
+      if (Boolean.TRUE.equals(isBigDataflow)) {
+
+      DataSetMetabaseVO dataset =
+              datasetMetabaseService.findDatasetMetabase(datasetId);
+      String datasetSchemaId = dataset.getDatasetSchema();
+      TableSchemaVO tableSchemaVO =
+              datasetSchemaService.getTableSchemaVO(
+                      idTableSchema,
+                      datasetSchemaId
+              );
+
+       file =
+              bigDataDatasetService.getGeometryAsGeoJson(
+                      dataset,
+                      tableSchemaVO,
+                      fieldName,
+                      recordId
+              );
+      }
+       else {
+         //CITUS Dataflows
+          file = datasetService.getGeometryAsGeoJson(
+                          datasetId,
+                          recordId,
+                          fieldId
+                  );
+        }
+      String filename =
+              fieldName + "_" + recordId + ".geojson";
+
+      HttpHeaders httpHeaders = new HttpHeaders();
+      httpHeaders.set(
+              HttpHeaders.CONTENT_DISPOSITION,
+              "attachment; filename=" + filename
+      );
+
+      return new ResponseEntity<>(file, httpHeaders, HttpStatus.OK);
+    } catch (ResponseStatusException e) {
+      throw e;
+    } catch (Exception e) {
+      LOG.error("Unexpected error! Error retrieving geometry for dataflowId {} datasetId {} fieldName {} recordId {} Message: {}",
+              dataflowId, datasetId, fieldName, recordId, e.getMessage());
+      throw e;
+    }
+  }
 }

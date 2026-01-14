@@ -1121,4 +1121,15 @@ public interface DatasetController {
   @GetMapping("/hasEnabledEditingDatasets")
   Boolean hasEnabledEditingDatasets(@RequestParam(value = "dataflowId") Long dataflowId,
                                            @RequestParam(value = "providerId") Long providerId);
-  }
+
+  @GetMapping("/v1/{datasetId}/record/{recordId}/geometry")
+  ResponseEntity<byte[]> getRecordGeometry(
+          @PathVariable("datasetId") Long datasetId,
+          @PathVariable("recordId") String recordId,
+          @RequestParam("fieldId") String fieldId,
+          @RequestParam("fieldName") String fieldName,
+          @RequestParam("dataflowId") Long dataflowId,
+          @RequestParam(value = "providerId", required = false) Long providerId,
+          @RequestParam("idTableSchema") String idTableSchema
+  );
+}

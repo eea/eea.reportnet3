@@ -1399,18 +1399,23 @@ export const Dataflow = () => {
 
   const getSubtitle = () => {
     let subtitle;
-    if (parseInt(representativeId) === 0) {
-      subtitle = dataflowState.data.name;
+
+    if (isInsideACountry && !isNil(country) && country.length > 0) {
+      subtitle = dataflowState.data.sncData
+        ? dataflowState.data.bigData
+          ? TextUtils.parseText(resourcesContext.messages['sncBigDataDataflowNamed'], {
+              name: dataflowState.data.name
+            })
+          : TextUtils.parseText(resourcesContext.messages['sncCitusDataflowNamed'], { name: dataflowState.data.name })
+        : dataflowState.data.name;
     } else {
-      if (isInsideACountry && !isNil(country) && country.length > 0) {
-        subtitle = dataflowState.data.bigData
-          ? TextUtils.parseText(resourcesContext.messages['bigDataDataflowNamed'], { name: dataflowState.data.name })
-          : dataflowState.data.name;
-      } else {
-        subtitle = dataflowState.data.bigData
-          ? resourcesContext.messages['bigDataDataflow']
-          : resourcesContext.messages['dataflow'];
-      }
+      subtitle = dataflowState.data.sncData
+        ? dataflowState.data.bigData
+          ? resourcesContext.messages['sncBigDataNoName']
+          : resourcesContext.messages['sncCitusNoName']
+        : dataflowState.data.bigData
+        ? resourcesContext.messages['bigDataDataflow']
+        : resourcesContext.messages['dataflow'];
     }
 
     if (dataflowState.data.deleted) {

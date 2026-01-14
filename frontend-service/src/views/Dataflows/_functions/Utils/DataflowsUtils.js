@@ -22,6 +22,7 @@ const parseDataflows = (data, pinnedDataflows) => {
     pinned: pinnedDataflows.some(pinnedDataflow => pinnedDataflow === dataflow.id.toString()) ? 'pinned' : 'unpinned',
     reportingDatasetsStatus: dataflow.reportingDatasetsStatus,
     showPublicInfo: dataflow.showPublicInfo,
+    sncData: dataflow.sncData,
     status: dataflow.status,
     statusKey: dataflow.statusKey,
     userRole: dataflow.userRole

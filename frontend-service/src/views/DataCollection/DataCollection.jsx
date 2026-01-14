@@ -367,8 +367,18 @@ export const DataCollection = () => {
   };
 
   const getSubtitle = () => {
-    let subtitle = metadata?.dataflow.bigData
-      ? TextUtils.parseText(resourcesContext.messages['bigDataDataflowNamed'], { name: dataflowName })
+    let subtitle = metadata?.dataflow.sncData
+      ? metadata?.dataflow.bigData
+        ? TextUtils.parseText(resourcesContext.messages['sncBigDataDataflowNamed'], {
+            name: dataflowName
+          })
+        : TextUtils.parseText(resourcesContext.messages['sncCitusDataflowNamed'], {
+            name: dataflowName
+          })
+      : metadata?.dataflow.bigData
+      ? TextUtils.parseText(resourcesContext.messages['bigDataDataflowNamed'], {
+          name: dataflowName
+        })
       : dataflowName;
 
     if (metadata?.dataflow.deleted) {
