@@ -4280,45 +4280,55 @@ public class DatasetControllerImpl implements DatasetController {
           @RequestParam(value = "providerId", required = false) Long providerId,
           @RequestParam("idTableSchema") String idTableSchema
   ) {
+
+    String username = SecurityContextHolder.getContext()
+            .getAuthentication()
+            .getName();
+
     try {
       Boolean isBigDataflow =
               dataFlowControllerZuul.isBigDataflow(dataflowId);
-      if (fieldName == null){
-        String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
-        FieldSchemaVO fieldschemaVo = datasetSchemaService.getFieldSchema(datasetSchemaId,fieldId);
-        fieldName = fieldschemaVo.getName();
+
+      if (fieldName == null) {
+        String datasetSchemaId =
+                datasetSchemaService.getDatasetSchemaId(datasetId);
+        FieldSchemaVO fieldSchemaVO =
+                datasetSchemaService.getFieldSchema(datasetSchemaId, fieldId);
+        fieldName = fieldSchemaVO.getName();
       }
+
       byte[] file;
 
       if (Boolean.TRUE.equals(isBigDataflow)) {
 
-      DataSetMetabaseVO dataset =
-              datasetMetabaseService.findDatasetMetabase(datasetId);
-      String datasetSchemaId = dataset.getDatasetSchema();
-      TableSchemaVO tableSchemaVO =
-              datasetSchemaService.getTableSchemaVO(
-                      idTableSchema,
-                      datasetSchemaId
-              );
+        DataSetMetabaseVO dataset =
+                datasetMetabaseService.findDatasetMetabase(datasetId);
 
-       file =
-              bigDataDatasetService.getGeometryAsGeoJson(
-                      dataset,
-                      tableSchemaVO,
-                      fieldName,
-                      recordId
-              );
+        String datasetSchemaId = dataset.getDatasetSchema();
+
+        TableSchemaVO tableSchemaVO =
+                datasetSchemaService.getTableSchemaVO(
+                        idTableSchema,
+                        datasetSchemaId
+                );
+
+        file = bigDataDatasetService.getGeometryAsGeoJson(
+                dataset,
+                tableSchemaVO,
+                fieldName,
+                recordId
+        );
+
+      } else {
+        // CITUS dataflows
+        file = datasetService.getGeometryAsGeoJson(
+                datasetId,
+                recordId,
+                fieldId
+        );
       }
-       else {
-         //CITUS Dataflows
-          file = datasetService.getGeometryAsGeoJson(
-                          datasetId,
-                          recordId,
-                          fieldId
-                  );
-        }
-      String filename =
-              fieldName + "_" + recordId + ".geojson";
+
+      String filename = fieldName + "_" + recordId + ".geojson";
 
       HttpHeaders httpHeaders = new HttpHeaders();
       httpHeaders.set(
@@ -4326,12 +4336,51 @@ public class DatasetControllerImpl implements DatasetController {
               "attachment; filename=" + filename
       );
 
+      kafkaSenderUtils.releaseNotificableKafkaEvent(
+              EventType.DOWNLOAD_GEOMETRY_COMPLETED_EVENT,
+              null,
+              NotificationVO.builder()
+                      .user(username)
+                      .datasetId(datasetId)
+                      .dataflowId(dataflowId)
+                      .build()
+      );
+
+      LOG.info(
+              "Geometry download completed for datasetId {} recordId {} field {}",
+              datasetId, recordId, fieldName
+      );
+
       return new ResponseEntity<>(file, httpHeaders, HttpStatus.OK);
+
     } catch (ResponseStatusException e) {
+      kafkaSenderUtils.releaseNotificableKafkaEvent(
+              EventType.DOWNLOAD_GEOMETRY_FAILED_EVENT,
+              null,
+              NotificationVO.builder()
+                      .user(username)
+                      .datasetId(datasetId)
+                      .dataflowId(dataflowId)
+                      .error(e.getReason())
+                      .build()
+      );
       throw e;
     } catch (Exception e) {
-      LOG.error("Unexpected error! Error retrieving geometry for dataflowId {} datasetId {} fieldName {} recordId {} Message: {}",
-              dataflowId, datasetId, fieldName, recordId, e.getMessage());
+
+      LOG.error(
+              "Unexpected error! Error retrieving geometry for dataflowId {} datasetId {} fieldName {} recordId {} Message: {}",
+              dataflowId, datasetId, fieldName, recordId, e.getMessage()
+      );
+      kafkaSenderUtils.releaseNotificableKafkaEvent(
+              EventType.DOWNLOAD_GEOMETRY_FAILED_EVENT,
+              null,
+              NotificationVO.builder()
+                      .user(username)
+                      .datasetId(datasetId)
+                      .dataflowId(dataflowId)
+                      .error(e.getMessage())
+                      .build()
+      );
       throw e;
     }
   }

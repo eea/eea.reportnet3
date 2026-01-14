@@ -3926,7 +3926,7 @@ public class DatasetServiceImpl implements DatasetService {
     FieldValue fieldValue = fieldRepository
                     .findByRecordIdAndFieldSchema(recordId, fieldId)
                     .orElseThrow(() -> new EEAException(
-                            EEAErrorMessage.FIELD_NOT_FOUND +
+                            EEAErrorMessage.RECORD_NOTFOUND +
                                     " No geometry for recordId " + recordId +
                                     " and fieldId " + fieldId
                     ));
@@ -3936,7 +3936,7 @@ public class DatasetServiceImpl implements DatasetService {
 
     if (geoJson == null || geoJson.trim().isEmpty()) {
       throw new EEAException(
-              EEAErrorMessage.FIELD_NOT_FOUND+
+              EEAErrorMessage.RECORD_NOTFOUND+
               "Empty geometry for recordId " + recordId
       );
     }
