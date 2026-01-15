@@ -1234,6 +1234,9 @@
           "key": "DATASET_ENABLE_EDITING_FAILED_ACTIVE_EDITING_BY_OTHER_USER_EVENT"
         },
         {
+          "key": "DOWNLOAD_GEOMETRY_FAILED_EVENT"
+        },
+        {
           "key": "PARQUET_TO_ICEBERG_FAILED_ACTIVE_EDITING_BY_OTHER_USER"
         },
         {
@@ -1578,6 +1581,9 @@
         },
         {
           "key": "DATASET_DISABLE_EDITING_COMPLETED_EVENT"
+        },
+        {
+          "key": "DOWNLOAD_GEOMETRY_COMPLETED_EVENT"
         }
       ]
     },

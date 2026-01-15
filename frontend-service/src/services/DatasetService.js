@@ -195,6 +195,9 @@ export const DatasetService = {
       providerCode
     }),
 
+  downloadGeometry: async ({ datasetId, recordId,  fieldId, dataflowId, tableSchemaId, providerId }) =>
+    await DatasetRepository.downloadGeometry({ datasetId, recordId, fieldId, dataflowId, tableSchemaId, providerId }),
+
   downloadPublicDatasetFile: async (dataflowId, dataProviderId, fileName) =>
     await DatasetRepository.downloadPublicDatasetFile(dataflowId, dataProviderId, fileName),
 
