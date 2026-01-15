@@ -122,10 +122,22 @@ export const recordReducer = (state, { type, payload }) => {
       }
 
     case 'CLOSE_COORDINATES_MORE_INFO':
-      return { ...state, isCoordinatesMoreInfoVisible: false, coordinatesMoreInfo: '' };
+      return {
+        ...state,
+        isCoordinatesMoreInfoVisible: false,
+        coordinatesMoreInfo: '',
+        coordinatesRecordId: '',
+        coordinatesFieldName: ''
+      };
 
     case 'OPEN_COORDINATES_MORE_INFO':
-      return { ...state, isCoordinatesMoreInfoVisible: true, coordinatesMoreInfo: payload };
+      return {
+        ...state,
+        isCoordinatesMoreInfoVisible: true,
+        coordinatesMoreInfo: payload.geoJson,
+        coordinatesRecordId: payload.recordId,
+        coordinatesFieldName: payload.fieldName
+      };
 
     case 'OPEN_MAP':
       const inmDrawElements = { ...state.drawElements };
