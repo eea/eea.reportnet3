@@ -210,7 +210,7 @@ export const DataViewer = ({
   const mapEditingEnabled =
     hasWritePermissions && !isDesignDatasetEditorRead && !isDataflowOpen && !records.geometryReadOnly;
 
-  const mapVisibilityEnabled = bigData && !isEditingEnabled;
+  const mapVisibilityEnabled = !isEditingEnabled;
 
   const cellDataEditor = (cells, record) => {
     return (
