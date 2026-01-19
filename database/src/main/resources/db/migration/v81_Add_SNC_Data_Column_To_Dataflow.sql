@@ -1,0 +1,1 @@
+ALTER TABLE public.dataflow ADD COLUMN IF NOT EXISTS "snc_data" bool NOT NULL DEFAULT false;

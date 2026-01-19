@@ -37,6 +37,7 @@ export const EntitiesWebform = ({
   dataProviderId,
   datasetId,
   hideEntities,
+  isEditor,
   isIcebergCreated,
   isReleasing,
   isReporting,
@@ -496,6 +497,7 @@ export const EntitiesWebform = ({
           datasetSchemaId={datasetSchema.datasetSchemaId}
           getFieldSchemaId={getFieldSchemaId}
           isAddingRootTableId={entitiesWebformState.isAddingEntityRecord}
+          isEditor={isEditor}
           isIcebergCreated={isIcebergCreated}
           isRefresh={entitiesWebformState.isRefresh}
           isReporting={isReporting}
@@ -517,8 +519,9 @@ export const EntitiesWebform = ({
         bigData={bigData}
         dataflowId={dataflowId}
         datasetId={datasetId}
-        disableActionButtons={bigData && !isIcebergCreated}
+        disableActionButtons={!isEditor}
         isAddingRootTableId={entitiesWebformState.isAddingEntityRecord}
+        isEditor={isEditor}
         isIcebergCreated={isIcebergCreated}
         loading={isLoading}
         onAddTableRecord={onAddTableRecord}
@@ -566,10 +569,6 @@ export const EntitiesWebform = ({
 
   const renderLayout = children => (
     <Fragment>
-      <h2 className={styles.title}>
-        <FontAwesomeIcon icon={AwesomeIcons('exclamationTriangle')} />
-        <strong> {resourcesContext.messages['webformEntitiesTitle']}</strong>
-      </h2>
       {children}
       {entitiesWebformState.isAddEntityIdDialogVisible && (
         <ConfirmDialog
@@ -640,9 +639,7 @@ export const EntitiesWebform = ({
           <Button
             className={styles.addButton}
             disabled={
-              (bigData && !isIcebergCreated) + entitiesWebformState.isAddingEntityRecord ||
-              isReleasing ||
-              entitiesWebformState.isViewMode
+              !isEditor || entitiesWebformState.isAddingEntityRecord || isReleasing || entitiesWebformState.isViewMode
             }
             icon={entitiesWebformState.isAddingEntityRecord ? 'spinnerAnimate' : 'add'}
             label={resourcesContext.messages['addEntity']}
@@ -674,14 +671,14 @@ export const EntitiesWebform = ({
                     }`}
                     key={uniqueId()}
                     onClick={() => {
-                      if (!(bigData && !isIcebergCreated)) {
+                      if (isEditor) {
                         entitiesWebformDispatch({
                           type: 'ON_REFRESH',
                           payload: { value: !entitiesWebformState.isRefresh }
                         });
                         onSelectRecord(items.recordId, items.id);
                         onToggleView('details');
-                      } else if (bigData && !isIcebergCreated) {
+                      } else if (!isEditor) {
                         entitiesWebformDispatch({
                           type: 'ON_REFRESH',
                           payload: { value: !entitiesWebformState.isRefresh }
@@ -699,7 +696,8 @@ export const EntitiesWebform = ({
                 <Button
                   className={styles.addButton}
                   disabled={
-                    (bigData && !isIcebergCreated) + entitiesWebformState.isAddingEntityRecord ||
+                    !isEditor ||
+                    entitiesWebformState.isAddingEntityRecord ||
                     isReleasing ||
                     entitiesWebformState.isViewMode
                   }

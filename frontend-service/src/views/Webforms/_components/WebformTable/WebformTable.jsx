@@ -30,6 +30,7 @@ export const WebformTable = ({
   datasetSchema,
   datasetSchemaId,
   getFieldSchemaId = () => ({ fieldSchema: undefined, fieldId: undefined }),
+  isEditor,
   isIcebergCreated,
   isLoadingIceberg,
   isRefresh,
@@ -461,7 +462,7 @@ export const WebformTable = ({
           style={
             bigData && (isLoadingIceberg || !allManualCheck)
               ? { opacity: 0.5, pointerEvents: 'none' }
-              : !bigData || isIcebergCreated || isViewMode || updatingField.isUpdating
+              : isEditor || isViewMode || updatingField.isUpdating
               ? { opacity: 1 }
               : { opacity: 0.5, pointerEvents: 'none' }
           }>

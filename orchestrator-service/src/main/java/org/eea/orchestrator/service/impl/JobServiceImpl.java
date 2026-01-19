@@ -636,6 +636,10 @@ public class JobServiceImpl implements JobService {
                 kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.COPY_DATA_TO_EUDATASET_CANCELED_EVENT, value,
                         NotificationVO.builder().dataflowId(jobVO.getDataflowId()).user(user).error(CANCELED_BY_ADMIN_ERROR).build());
                 break;
+            case DELETE:
+                String tableSchemaId = (jobVO.getParameters().get("tableSchemaId") != null) ? (String) jobVO.getParameters().get("tableSchemaId") : null;
+                dataSetControllerZuul.deleteLocksToDeleteProcess(jobVO.getDatasetId(), tableSchemaId);
+                break;
         }
     }
 

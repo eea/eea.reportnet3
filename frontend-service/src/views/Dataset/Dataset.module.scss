@@ -9,6 +9,12 @@
   }
 }
 
+.ButtonsBarWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
 .Dialog {
   width: 55vw;
   .checkboxWrapper {
@@ -41,6 +47,28 @@
   }
 }
 
+.editorMessage {
+  background: #e6f4fa;
+  color: #31708f;
+  border: 1px solid #bce8f1;
+  padding: 4px 8px;
+  max-width: 70%;
+  word-wrap: break-word;
+  text-align: right;
+  border-radius: 4px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.editorMessageWrapper {
+  display: flex;
+  justify-content: flex-end;
+  padding-left: 0.25rem;
+  padding-right: 0.25rem;
+}
+
 .FileUpload .span {
   width: 100%;
   min-height: 120px;
@@ -52,6 +80,10 @@
 
 :global .p-tabview.p-tabview-top {
   padding-bottom: 80px;
+}
+
+.infoIcon {
+  margin-right: 0.5rem;
 }
 
 .InputSwitchContainer {

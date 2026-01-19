@@ -90,6 +90,10 @@ public class DataFlowVO extends GenericDataflowVO implements Serializable {
   /** When was this dataflow soft deleted. */
   private Date deletedAt;
 
+  /** The snc data. */
+  private Boolean sncData;
+
+
   /**
    * Equals.
    *

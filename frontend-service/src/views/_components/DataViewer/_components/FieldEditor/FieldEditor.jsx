@@ -32,6 +32,7 @@ export const FieldEditor = ({
   areCoordinatesDisabled = false,
   cells,
   colsSchema,
+  dataProviderId,
   datasetId,
   datasetSchemaId,
   mapVisibilityEnabled,
@@ -557,6 +558,7 @@ export const FieldEditor = ({
               crsOptions={crs}
               crsValue={!isNil(currentCRS) ? currentCRS : { label: 'WGS84 - 4326', value: 'EPSG:4326' }}
               disabled={areCoordinatesDisabled}
+              fieldId={record.field}
               id={cells.field}
               initialGeoJson={RecordUtils.getCellValue(cells, cells.field)}
               isCellEditor={true}
@@ -574,6 +576,7 @@ export const FieldEditor = ({
                   RecordUtils.getCellInfo(colsSchema, cells.field).readOnly
                 )
               }
+              recordId={record.recordId}
               xyLabels={currentCRS.value === 'EPSG:3035'}
             />
           </div>
@@ -695,7 +698,7 @@ export const FieldEditor = ({
                 setLinkItemsValue(e.value);
                 onEditorValueChange(cells, e.value);
               }}
-              onFilterInputChangeBackend={onFilter}
+              // onFilterInputChangeBackend={onFilter}
               onFocus={e => {
                 e.preventDefault();
                 if (!isUndefined(codelistItemValue)) {
@@ -834,43 +837,53 @@ export const FieldEditor = ({
     const infoLabelClass =
       isNil(value) || value === '' || !isValidJSON || differentTypes ? styles.nonEditableData : null;
 
-    const getInfoLabelContent = () => {
-      if (!isNil(value) && value !== '' && isValidJSON && !differentTypes) {
-        return JSON.parse(value).geometry.coordinates.join(', ');
-      } else {
-        if (differentTypes) {
-          return resourcesContext.messages['nonEditableDataDifferentTypes'];
-        } else {
-          if (value === '') {
-            return resourcesContext.messages['nonEditableDataAndCantParse'];
-          } else {
-            return resourcesContext.messages['nonEditableData'];
-          }
-        }
-      }
-    };
+    // // Kept for possible future use.
+    // const getInfoLabelContent = () => {
+    //   if (!isNil(value) && value !== '' && isValidJSON && !differentTypes) {
+    //     return JSON.parse(value).geometry.coordinates.join(', ');
+    //   } else {
+    //     if (differentTypes) {
+    //       return resourcesContext.messages['nonEditableDataDifferentTypes'];
+    //     } else {
+    //       if (value === '') {
+    //         return resourcesContext.messages['nonEditableDataAndCantParse'];
+    //       } else {
+    //         return resourcesContext.messages['nonEditableData'];
+    //       }
+    //     }
+    //   }
+    // };
 
     const renderMoreInfo = () => {
       if (value !== '') {
         return (
           <TooltipButton
             message={resourcesContext.messages['coordinatesMoreInfo']}
-            onClick={() => onCoordinatesMoreInfoClick(RecordUtils.getCellValue(cells, cells.field))}
+            onClick={() =>
+              onCoordinatesMoreInfoClick(
+                RecordUtils.getCellValue(cells, cells.field),
+                record.recordId,
+                cells.field,
+                cells.fieldSchemaId,
+                dataProviderId
+              )
+            }
             uniqueIdentifier={`coordinates_${cells.field}`}></TooltipButton>
         );
       }
+      return null;
     };
-
-    const completeCoordinates = getInfoLabelContent();
+    // // Commented out Complete Coordinates.It is kept for possible future use.
+    // const completeCoordinates = getInfoLabelContent();
 
     return (
       <div>
-        {isNil(infoLabelClass) && <label className={styles.epsg}>{resourcesContext.messages['coords']}</label>}
+        {isNil(infoLabelClass) && <label className={styles.epsg}>{resourcesContext.messages['coordsInfo']}</label>}
         {isNil(infoLabelClass) && renderMoreInfo()}
-        <div className={styles.completeCoordinatesWrapper}>
+        {/* <div className={styles.completeCoordinatesWrapper}>
           <label className={infoLabelClass}>{completeCoordinates}</label>
           {!isNil(infoLabelClass) && renderMoreInfo()}
-        </div>
+        </div> */}
       </div>
     );
   };

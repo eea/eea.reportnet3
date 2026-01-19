@@ -224,11 +224,7 @@ export const WebformView = ({
     return renderTable(combinatedTableValues);
   };
 
-  const renderTable = fields => (
-    <DataTable summary={resourcesContext.messages['webformPaMsTitle']} value={fields}>
-      {renderColumns(fields)}
-    </DataTable>
-  );
+  const renderTable = fields => <DataTable value={fields}>{renderColumns(fields)}</DataTable>;
 
   const onChangeWebformTab = name => {
     Object.keys(isVisible).forEach(tab => {

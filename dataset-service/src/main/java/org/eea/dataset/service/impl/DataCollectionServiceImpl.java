@@ -356,6 +356,10 @@ public class DataCollectionServiceImpl implements DataCollectionService {
       failEvent = EventType.ADD_DATACOLLECTION_FAILED_EVENT_ICEBERG_EXISTS;
     }
 
+    if(errorMessage.equals(EEAErrorMessage.DATA_COLLECTION_FAILED_DATASET_LOCKED_FOR_EDITING_EXISTS)){
+      failEvent = EventType.ADD_DATACOLLECTION_FAILED_EVENT_DATASET_LOCKED_FOR_EDITING_EXISTS;
+    }
+
     // Release the lock
     Map<String, Object> lockCriteria = new HashMap<>();
     lockCriteria.put(LiteralConstants.SIGNATURE, methodSignature);
@@ -382,7 +386,8 @@ public class DataCollectionServiceImpl implements DataCollectionService {
   @Override
   @Async
   public void updateDataCollection(Long dataflowId, boolean referenceDataflow) {
-    manageDataCollection(dataflowId, null, false, false, false, referenceDataflow, false);
+    final Boolean isBigDataflow = dataflowControllerZuul.isBigDataflow(dataflowId);
+    manageDataCollection(dataflowId, null, false, false, false, referenceDataflow, false, isBigDataflow);
     LOG.info("Successfully updated data collection for dataflowId {}", dataflowId);
   }
 
@@ -402,12 +407,12 @@ public class DataCollectionServiceImpl implements DataCollectionService {
   @Async
   public void createEmptyDataCollection(Long dataflowId, LocalDateTime dueDate,
       boolean stopAndNotifySQLErrors, boolean manualCheck, boolean showPublicInfo,
-      boolean referenceDataflow, boolean stopAndNotifyPKError) {
+      boolean referenceDataflow, boolean stopAndNotifyPKError, boolean isBigDataflow) {
 
-    Boolean isBigDataflow = dataflowControllerZuul.isBigDataflow(dataflowId);
+    List<DataSetMetabaseVO> datasets = datasetMetabaseService.findDataSetByDataflowIds(Collections.singletonList(dataflowId));
+
     if(Boolean.TRUE.equals(isBigDataflow)){
       //check if there are tables converted to Iceberg and convert them back to Parquet
-      List<DataSetMetabaseVO> datasets = datasetMetabaseService.findDataSetByDataflowIds(Collections.singletonList(dataflowId));
       for (DataSetMetabaseVO dataset : datasets) {
         List<TableSchemaIdNameVO> tables = datasetSchemaService.getTableSchemasIds(dataset.getId());
         String datasetSchemaId = dataset.getDatasetSchema();
@@ -421,9 +426,19 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         }
       }
     }
+    //check locks for Citus
+    if(Boolean.FALSE.equals(isBigDataflow)) {
+      List<Long> datasetIds = datasets.stream()
+              .map(DataSetMetabaseVO::getId)
+              .collect(Collectors.toList());
+      if (datasetTableService.isAnyDatasetBeingEdited(datasetIds)) {
+        releaseLockAndNotification(dataflowId, EEAErrorMessage.DATA_COLLECTION_FAILED_DATASET_LOCKED_FOR_EDITING_EXISTS, true, false);
+        throw new Exception("Can not create data collection for dataflowId " + dataflowId + " because there is in editing Dataset");
+      }
+    }
 
     manageDataCollection(dataflowId, dueDate, true, stopAndNotifySQLErrors, manualCheck,
-        referenceDataflow, stopAndNotifyPKError);
+        referenceDataflow, stopAndNotifyPKError, isBigDataflow);
     LOG.info("Managed creating data collection for dataflowId {}", dataflowId);
 
     updateReportingDatasetsVisibility(dataflowId, showPublicInfo);
@@ -477,11 +492,13 @@ public class DataCollectionServiceImpl implements DataCollectionService {
    */
   private void manageDataCollection(Long dataflowId, LocalDateTime dueDate, boolean isCreation,
       boolean stopAndNotifySQLErrors, boolean manualCheck, boolean referenceDataflow,
-      boolean stopAndNotifyPKError) {
+      boolean stopAndNotifyPKError, boolean isBigDataflow) {
     String time = Timestamp.valueOf(LocalDateTime.now()).toString();
 
     boolean rulesOk = true;
     boolean hasPk = true;
+    // Cache reference-schema checks per DC execution
+    Map<String, Boolean> isReferenceSchemaBySchemaId = new HashMap<>();
 
     // 1. Get the design datasets
     List<DesignDatasetVO> designs = designDatasetService.getDesignDataSetIdByDataflowId(dataflowId);
@@ -503,14 +520,19 @@ public class DataCollectionServiceImpl implements DataCollectionService {
       LOG.info("Validate SQL Rules for dataflowId {}, Data Collection creation process.", dataflowId);
       List<Boolean> rulesWithError = new ArrayList<>();
       List<Long> emptyDatasetTables = new ArrayList<>();
-      designs.stream().forEach(dataset -> {
 
+      designs.stream().forEach(dataset -> {
         //we will update the materialized views only once and only for not reference datasets
-        if(stopAndNotifySQLErrors) {
-          DataSetSchemaVO schema = datasetSchemaService.getDataSchemaById(dataset.getDatasetSchema());
-          if (schema != null && schema.getReferenceDataset() != null
-                  && Boolean.TRUE.equals(schema.getReferenceDataset())) {
-            LOG.info("Will not create or update materialized views for reference dataset with id {}", dataset.getId());
+        //we skip materialized views for big data dataflows
+        if(stopAndNotifySQLErrors  && !isBigDataflow) {
+          boolean isReferenceSchema =
+                  isReferenceSchemaBySchemaId.computeIfAbsent(
+                          dataset.getDatasetSchema(),
+                          id -> datasetSchemaService.isReferenceSchema(id)
+                  );
+
+          if (isReferenceSchema) {
+            LOG.info("Will not create or update materialized views...");
           }
           else{
             recordStoreControllerZuul.createUpdateQueryView(dataset.getId(), false);
@@ -523,8 +545,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
           rulesSql.stream().forEach(ruleVO -> rulesWithError.add(rulesControllerZuul
               .validateSqlRuleDataCollection(dataset.getId(), dataset.getDatasetSchema(), ruleVO)));
 
-          DataFlowVO dataFlowVO = dataflowControllerZuul.getMetabaseById(dataflowId);
-          if (dataFlowVO!=null && BooleanUtils.isTrue(dataFlowVO.getBigData())) {
+          if (isBigDataflow) {
             rulesSql.stream().forEach(ruleVO -> {
               checkIfTablesEmpty(emptyDatasetTables, dataset, ruleVO);
             });
@@ -543,9 +564,11 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     List<DesignDatasetVO> referenceDatasets = new ArrayList<>();
     List<String> referenceSchemasId = new ArrayList<>();
     designs.stream().forEach(dataset -> {
-      DataSetSchemaVO schema = datasetSchemaService.getDataSchemaById(dataset.getDatasetSchema());
-      if (schema != null && schema.getReferenceDataset() != null
-          && Boolean.TRUE.equals(schema.getReferenceDataset())) {
+      boolean isReferenceSchema = isReferenceSchemaBySchemaId.computeIfAbsent(
+                      dataset.getDatasetSchema(),
+                      id -> datasetSchemaService.isReferenceSchema(id)
+              );
+      if (isReferenceSchema) {
         referenceDatasets.add(dataset);
         referenceSchemasId.add(dataset.getDatasetSchema());
         if (isCreation) {
@@ -620,7 +643,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         processDataCollectionAndRoles(dataflowId, dueDate, isCreation, manualCheck, time, designs,
             referenceDatasets, representatives, map, dataCollectionIds, datasetIdsEmails,
             referenceDatasetIdsEmails, datasetIdsAndSchemaIds, euDatasetIds, connection, statement,
-            referenceDataflow);
+            referenceDataflow, isBigDataflow);
 
       } catch (SQLException e) {
         LOG.error("Error rolling back manageDataCollection for dataflowId {}. Message: {}", dataflowId, e.getMessage(), e);
@@ -766,7 +789,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
       Map<Long, String> map, List<Long> dataCollectionIds, Map<Long, List<String>> datasetIdsEmails,
       Map<Long, List<String>> referenceDatasetIdsEmails, Map<Long, String> datasetIdsAndSchemaIds,
       List<Long> euDatasetIds, Connection connection, Statement statement,
-      boolean referenceDataflow) throws SQLException {
+      boolean referenceDataflow, boolean isBigDataflow) throws SQLException {
     try {
       connection.setAutoCommit(false);
 
@@ -818,7 +841,6 @@ public class DataCollectionServiceImpl implements DataCollectionService {
             testDatasetIds.add(testDatasetId);
             datasetIdsAndSchemaIds.put(testDatasetId, design.getDatasetSchema());
 
-            Boolean isBigDataflow = dataflowControllerZuul.isBigDataflow(dataflowId);
             if(Boolean.TRUE.equals(isBigDataflow)){
               //create prefilled tables for test dataset if needed
               bigDataDatasetService.createPrefilledTables(design.getId(), design.getDatasetSchema(), testDatasetId, 0L, null);
@@ -903,6 +925,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
 
       createPermissions(datasetIdsEmails, referenceDatasetIdsEmails, dataCollectionIds,
           euDatasetIds, testDatasetIds, referenceDatasetIds, dataflowId, isCreation);
+
       // 9. Delete editors
       removePermissionEditors(dataflowId);
 
@@ -1874,5 +1897,16 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     }
     return null;
   }
+
+  public boolean isAnyDatasetBeingEdited(List<Long> datasetIds, String username) {
+    for (Long datasetId : datasetIds) {
+      String editor = datasetTableService.getDatasetEditingUsername(datasetId);
+      if (editor != null && !editor.equals(username)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
 
 }

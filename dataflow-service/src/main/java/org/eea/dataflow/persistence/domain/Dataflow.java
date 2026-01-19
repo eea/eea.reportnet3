@@ -129,6 +129,11 @@ public class Dataflow {
   @Column(name = "DELETED_AT")
   private Date deletedAt;
 
+  /** The SNC data column. */
+  @Column(name = "SNC_DATA")
+  private Boolean sncData;
+
+
   /**
    * Equals.
    *

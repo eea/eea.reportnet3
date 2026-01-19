@@ -101,7 +101,13 @@ export const DataCollection = () => {
       const filteredData = data.data.filter(item => item.datasetSchema === datasetSchemaId);
       setRepresentatives(filteredData);
       if (filteredData.length > 0) {
-        setSelectedRepresentatives(filteredData[0].dataProviderId);
+        const dropdownOptions = filteredData
+          .map(representative => ({
+            label: representative.dataSetName,
+            value: representative.dataProviderId
+          }))
+          .sort((a, b) => a.label.localeCompare(b.label));
+        setSelectedRepresentatives(dropdownOptions[0].value);
       } else {
         setSelectedRepresentatives(null);
       }
@@ -361,8 +367,18 @@ export const DataCollection = () => {
   };
 
   const getSubtitle = () => {
-    let subtitle = metadata?.dataflow.bigData
-      ? TextUtils.parseText(resourcesContext.messages['bigDataDataflowNamed'], { name: dataflowName })
+    let subtitle = metadata?.dataflow.sncData
+      ? metadata?.dataflow.bigData
+        ? TextUtils.parseText(resourcesContext.messages['sncBigDataDataflowNamed'], {
+            name: dataflowName
+          })
+        : TextUtils.parseText(resourcesContext.messages['sncCitusDataflowNamed'], {
+            name: dataflowName
+          })
+      : metadata?.dataflow.bigData
+      ? TextUtils.parseText(resourcesContext.messages['bigDataDataflowNamed'], {
+          name: dataflowName
+        })
       : dataflowName;
 
     if (metadata?.dataflow.deleted) {

@@ -18,6 +18,7 @@ export class ReferenceDataflow {
     representatives,
     requestId,
     showPublicInfo,
+    sncData,
     status,
     testDatasets,
     type,
@@ -41,6 +42,7 @@ export class ReferenceDataflow {
     this.representatives = representatives;
     this.requestId = requestId;
     this.showPublicInfo = showPublicInfo;
+    this.sncData = sncData;
     this.status = status;
     this.testDatasets = testDatasets;
     this.type = type;

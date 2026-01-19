@@ -90,6 +90,7 @@ import software.amazon.awssdk.services.s3.model.S3Object;
 import software.amazon.awssdk.transfer.s3.config.DownloadFilter;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -130,6 +131,8 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
     private final JobProcessControllerZuul jobProcessControllerZuul;
 
     private final DatasetMetabaseService datasetMetabaseService;
+
+    private final DremioAutoPromotionService dremioAutoPromotionService;
 
     private final ProcessControllerZuul processControllerZuul;
 
@@ -217,7 +220,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                                      ParquetConverterService parquetConverterService, JdbcTemplate dremioJdbcTemplate, SchemasRepository schemasRepository, @Lazy DatasetSnapshotService datasetSnapshotService, @Lazy DatasetService datasetService, JobControllerZuul jobControllerZuul,
                                      JobProcessControllerZuul jobProcessControllerZuul, DatasetMetabaseService datasetMetabaseService, ProcessControllerZuul processControllerZuul, KafkaSenderUtils kafkaSenderUtils, RepresentativeControllerZuul representativeControllerZuul,
                                      FileCommonUtils fileCommonUtils, @Lazy DatasetSchemaService datasetSchemaService, SpatialDataHandling  spatialDataHandling, DatasetTableService datasetTableService, DataFlowControllerZuul dataFlowControllerZuul, CreateEmptyTables createEmptyTables,
-                                     PkCatalogueRepository pkCatalogueRepository, TableDataRetriever tableDataRetriever, EtlExportV5Service etlExportV5Service, NotificationControllerZuul notificationControllerZuul, RedisLockService redisLockService) {
+                                     PkCatalogueRepository pkCatalogueRepository, TableDataRetriever tableDataRetriever, EtlExportV5Service etlExportV5Service, NotificationControllerZuul notificationControllerZuul, RedisLockService redisLockService, DremioAutoPromotionService dremioAutoPromotionService) {
         this.jobControllerZuul =  jobControllerZuul;
         this.jobProcessControllerZuul = jobProcessControllerZuul;
         this.datasetMetabaseService = datasetMetabaseService;
@@ -246,6 +249,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         this.etlExportV5Service = etlExportV5Service;
         this.notificationControllerZuul = notificationControllerZuul;
         this.redisLockService = redisLockService;
+        this.dremioAutoPromotionService = dremioAutoPromotionService;
     }
 
     @Override
@@ -1225,7 +1229,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
             //iceberg enabled should be updated to true at the end of the conversion to ensure that all available tables were converted.
             for (TableSchemaVO table : availableForConversionTables) {
-                DatasetTable datasetTableEntry = new DatasetTable(datasetId, datasetSchemaId, table.getIdTableSchema(), true);
+                DatasetTable datasetTableEntry = new DatasetTable(datasetId, datasetSchemaId, table.getIdTableSchema(), true, user);
                 datasetTableService.saveOrUpdateDatasetTableEntry(datasetTableEntry);
             }
 
@@ -1385,7 +1389,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                     s3HelperPrivate.deleteFolder(s3IcebergTablePathResolver, S3_TABLE_NAME_FOLDER_PATH_FOR_VALID_PREFIX);
                 }
 
-                DatasetTable datasetTableEntry = new DatasetTable(datasetId, datasetSchemaId, table.getIdTableSchema(), false);
+                DatasetTable datasetTableEntry = new DatasetTable(datasetId, datasetSchemaId, table.getIdTableSchema(), false, null);
                 datasetTableService.saveOrUpdateDatasetTableEntry(datasetTableEntry);
             }
 
@@ -2824,6 +2828,90 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         }
         else{
             return false;
+        }
+    }
+
+    @Override
+    public byte[] getGeometryAsGeoJson(
+            DataSetMetabaseVO dataset,
+            TableSchemaVO tableSchemaVO,
+            String geometryColumnFieldId,
+            String recordId
+    ) throws EEAException {
+
+        // 1. ROOT resolve
+        S3PathResolver s3RootResolver =
+                s3ServicePrivate.getS3PathResolverByDatasetType(
+                        dataset,
+                        tableSchemaVO.getNameTableSchema(),
+                        false
+                );
+
+        if (BooleanUtils.isTrue(
+                datasetTableService.icebergTableIsCreated(
+                        dataset.getId(),
+                        tableSchemaVO.getIdTableSchema()
+                )
+        )) {
+            s3RootResolver.setIsIcebergTable(true);
+        } else {
+            s3RootResolver.setIsIcebergTable(false);
+        }
+
+        // 2. Check folder exists
+        if (!s3HelperPrivate.checkTableNameDCFolderExist(s3RootResolver)) {
+            throw new EEAException(
+                    EEAErrorMessage.RECORD_NOTFOUND +
+                            " Table folder does not exist for table " +
+                            tableSchemaVO.getNameTableSchema()
+            );
+        }
+
+        dremioAutoPromotionService.ensureSafeFolderPromotion(dataset, s3RootResolver);
+
+        if (!dremioHelperService.checkFolderPromoted(
+                s3RootResolver,
+                s3RootResolver.getTableName()
+        )) {
+            throw new EEAException(
+                    EEAErrorMessage.RECORD_NOTFOUND +
+                            " Table not promoted in Dremio: " +
+                            tableSchemaVO.getNameTableSchema()
+            );
+        }
+
+        String tablePath =
+                s3ServicePrivate.getTableAsFolderQueryPath(
+                        s3RootResolver,
+                        S3_TABLE_AS_FOLDER_QUERY_PATH
+                );
+
+        // 3. Build Dremio SQL
+        String sql =
+                "SELECT ST_AsGeoJSON(" + UtilityClass.addQuotesToFieldNames(geometryColumnFieldId) + ") " +
+                        "FROM " + tablePath + " " +
+                        "WHERE " + PARQUET_RECORD_ID_COLUMN_HEADER + " = '" + recordId + "'";
+
+        LOG.info("Executing geometry GeoJSON query: {}", sql);
+
+        try {
+            String geoJson =
+                    dremioJdbcTemplate.queryForObject(sql, String.class);
+
+            if (geoJson == null || geoJson.trim().isEmpty()) {
+                throw new EEAException(
+                        EEAErrorMessage.RECORD_NOTFOUND +
+                                " Empty geometry for recordId " + recordId
+                );
+            }
+
+            return geoJson.getBytes(StandardCharsets.UTF_8);
+
+        } catch (EmptyResultDataAccessException e) {
+            throw new EEAException(
+                    EEAErrorMessage.RECORD_NOTFOUND +
+                            " No geometry found for recordId " + recordId
+            );
         }
     }
 }

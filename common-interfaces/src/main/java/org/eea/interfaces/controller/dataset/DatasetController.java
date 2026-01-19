@@ -4,6 +4,7 @@ import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.dataset.*;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
+import org.eea.interfaces.vo.dataset.schemas.DatasetEditingStatusVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaIdNameVO;
 import org.eea.interfaces.vo.orchestrator.JobPresignedUrlInfo;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
@@ -875,6 +876,18 @@ public interface DatasetController {
   @DeleteMapping(value = "/deleteLocksToImportProcess/{datasetId}")
   void deleteLocksToImportProcess(@PathVariable("datasetId") Long datasetId);
 
+
+  /**
+   * Deletes the locks related to delete
+   * @param datasetId
+   * @param tableSchemaId
+   * @return
+   */
+  @DeleteMapping(value = "/private/deleteLocksToDeleteProcess/{datasetId}")
+  void deleteLocksToDeleteProcess(@PathVariable("datasetId") Long datasetId, @RequestParam(value="tableSchemaId", required = false) String tableSchemaId);
+
+
+
   /**
    * Finds tasks by processId and status
    * @param processId
@@ -1093,4 +1106,30 @@ public interface DatasetController {
 
   @PostMapping("/duplicateFieldValueExists/{datasetId}")
   Boolean duplicateFieldValueExists(@PathVariable("datasetId") Long datasetId, @RequestParam(value = "tableSchemaId") String tableSchemaId, @RequestBody FieldVO fieldVO) throws Exception;
+
+  @PutMapping("/{id}/enableEditing")
+  void enableEditing(@PathVariable("id") Long datasetId,
+  @RequestParam(value = "tableSchemaIds", required = false) List<String> tableSchemaIds);
+
+  @PutMapping("/{id}/disableEditing")
+  void disableEditing(@PathVariable("id") Long datasetId);
+
+  @GetMapping("/{id}/editingStatus")
+  DatasetEditingStatusVO getEditingStatus(
+          @PathVariable("id") Long datasetId);
+
+  @GetMapping("/hasEnabledEditingDatasets")
+  Boolean hasEnabledEditingDatasets(@RequestParam(value = "dataflowId") Long dataflowId,
+                                           @RequestParam(value = "providerId") Long providerId);
+
+  @GetMapping("/v1/{datasetId}/record/{recordId}/geometry")
+  ResponseEntity<byte[]> getRecordGeometry(
+          @PathVariable("datasetId") Long datasetId,
+          @PathVariable("recordId") String recordId,
+          @RequestParam("fieldId") String fieldId,
+          @RequestParam("fieldName") String fieldName,
+          @RequestParam("dataflowId") Long dataflowId,
+          @RequestParam(value = "providerId", required = false) Long providerId,
+          @RequestParam("idTableSchema") String idTableSchema
+  );
 }

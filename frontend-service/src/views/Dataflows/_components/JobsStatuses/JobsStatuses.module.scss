@@ -166,3 +166,12 @@ h6 {
     left: 0;
   }
 }
+
+.dialogContent {
+  :global {   
+    .p-multiselect-panel {
+      width: auto !important;
+      min-width: 220px !important;
+    }
+  }
+}

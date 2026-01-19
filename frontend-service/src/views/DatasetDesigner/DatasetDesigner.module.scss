@@ -39,9 +39,38 @@
   }
 }
 
+.editorMessage {
+  position: relative;
+  top: 1rem;
+
+  background: #e6f4fa;
+  color: #31708f;
+  border: 1px solid #bce8f1;
+  align-items: center;
+  padding: 4px 8px;
+  max-width: 70%;
+  word-wrap: break-word;
+  text-align: right;
+  border-radius: 4px;
+
+  display: inline-flex;
+  justify-content: flex-end;
+}
+
+.editorMessageWrapper {
+  display: flex;
+  justify-content: flex-end;
+  padding-left: 0.25rem;
+  padding-right: 0.25rem;
+}
+
 .FileUpload .span {
   width: 100%;
   min-height: 120px;
+}
+
+.infoIcon {
+  margin-right: 0.5rem;
 }
 
 .replaceDataLabel {

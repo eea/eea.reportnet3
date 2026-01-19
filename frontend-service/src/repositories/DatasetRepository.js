@@ -8,6 +8,16 @@ export const DatasetRepository = {
       url: getUrl(DatasetConfig.testImportProcess, { datasetId })
     }),
 
+  enableEditing: async ({ datasetId }) =>
+    await HTTPRequester.update({
+      url: getUrl(DatasetConfig.enableEditing, { datasetId })
+    }),
+
+  disableEditing: async ({ datasetId }) =>
+    await HTTPRequester.update({
+      url: getUrl(DatasetConfig.disableEditing, { datasetId })
+    }),
+
   convertParquetsToIcebergs: async ({ dataflowId, datasetId, providerId }) =>
     await HTTPRequester.post({
       url: getUrl(DatasetConfig.convertParquetsToIcebergs, { dataflowId, datasetId, providerId })
@@ -152,6 +162,18 @@ export const DatasetRepository = {
     });
   },
 
+  downloadGeometry: async ({ datasetId, recordId, fieldId, dataflowId, tableSchemaId, providerId }) =>
+    await HTTPRequester.download({
+      url: getUrl(DatasetConfig.downloadGeometry, {
+        datasetId,
+        recordId,
+        fieldId,
+        dataflowId,
+        tableSchemaId,
+        providerId
+      })
+    }),
+
   downloadPublicReferenceDatasetFileData: async (dataflowId, fileName) =>
     await HTTPRequester.download({
       url: getUrl(DatasetConfig.downloadPublicReferenceDatasetFileData, { dataflowId, fileName })
@@ -243,6 +265,9 @@ export const DatasetRepository = {
       url: getUrl(DatasetConfig.exportTableSchema, { datasetId, datasetSchemaId, fileType, tableSchemaId }),
       headers: { 'Content-Type': 'application/octet-stream' }
     }),
+
+  getEditingStatus: async ({ datasetId }) =>
+    await HTTPRequester.get({ url: getUrl(DatasetConfig.getEditingStatus, { datasetId }) }),
 
   getMetadata: async datasetId => await HTTPRequester.get({ url: getUrl(DatasetConfig.getMetadata, { datasetId }) }),
 
@@ -439,11 +464,10 @@ export const DatasetRepository = {
     });
   },
   checkDuplicateValues: async (datasetId, tableSchemaId, fieldVO) =>
-
     // When sending an object( like fieldVO ), a POST call must be sent to the backend.
     await HTTPRequester.post({
       url: getUrl(DatasetConfig.checkDuplicateValues, { datasetId, tableSchemaId }),
-      data: fieldVO,
+      data: fieldVO
     }),
 
   importTableFileWithS3: async ({

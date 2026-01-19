@@ -146,9 +146,15 @@ public class DataCollectionControllerImpl implements DataCollectionController {
     Long dataflowId = dataCollectionVO.getIdDataflow();
     // new check: dataflow is Reference dataset?
     DataFlowVO dataflow = dataCollectionService.getDataflowMetabase(dataflowId);
+    boolean isBigDataflow = (dataflow != null)
+            ? Boolean.TRUE.equals(dataflow.getBigData())
+            : Boolean.FALSE;
+
     boolean referenceDataflow = false;
     if (null != dataflow && TypeDataflowEnum.REFERENCE.equals(dataflow.getType())) {
       referenceDataflow = true;
+      // temporary logs until ticket 294280 has a root cause
+      LOG.info("[294280] createEmptyDataCollection | dataflowId={} | showPublicInfo is {} but it will be set automatically to false because dataflow type is REFERENCE", dataCollectionVO.getIdDataflow(), showPublicInfo);
       showPublicInfo = false;
       manualCheck = false;
       stopAndNotifySQLErrors = false;
@@ -181,7 +187,7 @@ public class DataCollectionControllerImpl implements DataCollectionController {
       // This method will release the lock
        LOG.info("Creating empty data collection for dataflowId {}", dataflowId);
       dataCollectionService.createEmptyDataCollection(dataflowId, date, stopAndNotifySQLErrors,
-              manualCheck, showPublicInfo, referenceDataflow, stopAndNotifyPKError);
+              manualCheck, showPublicInfo, referenceDataflow, stopAndNotifyPKError, isBigDataflow);
       LOG.info("DataCollection creation for Dataflow {} started", dataflowId);
     } catch (Exception e) {
 

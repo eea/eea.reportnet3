@@ -488,51 +488,55 @@ const useBigButtonList = ({
 
   const dataCollectionModels = isNil(dataflowState.data.dataCollections)
     ? []
-    : dataflowState.data.dataCollections.map(dataCollection => ({
-        buttonClass: 'dataCollection',
-        buttonIcon: 'dataCollection',
-        caption: dataCollection.dataCollectionName,
-        handleRedirect: () => {
-          handleRedirect(
-            getUrl(routes.DATA_COLLECTION, { dataflowId, datasetId: dataCollection.dataCollectionId }, true)
-          );
-        },
-        helpClassName: 'dataflow-datacollection-help-step',
-        layout: 'defaultBigButton',
-        model: [
-          {
-            label: resourcesContext.messages['historicReleases'],
-            command: () => {
-              onShowHistoricReleases('dataCollection');
-              getDataHistoricReleases(dataCollection.dataCollectionId, dataCollection.dataCollectionName);
+    : dataflowState.data.dataCollections
+        .map(dataCollection => ({
+          buttonClass: 'dataCollection',
+          buttonIcon: 'dataCollection',
+          caption: dataCollection.dataCollectionName,
+          handleRedirect: () => {
+            handleRedirect(
+              getUrl(routes.DATA_COLLECTION, { dataflowId, datasetId: dataCollection.dataCollectionId }, true)
+            );
+          },
+          helpClassName: 'dataflow-datacollection-help-step',
+          layout: 'defaultBigButton',
+          model: [
+            {
+              label: resourcesContext.messages['historicReleases'],
+              command: () => {
+                onShowHistoricReleases('dataCollection');
+                getDataHistoricReleases(dataCollection.dataCollectionId, dataCollection.dataCollectionName);
+              }
             }
-          }
-        ],
-        visibility: true
-      })).sort((a, b) => a.caption.localeCompare(b.caption));
+          ],
+          visibility: true
+        }))
+        .sort((a, b) => a.caption.localeCompare(b.caption));
 
   const euDatasetModels = isNil(dataflowState.data.euDatasets)
     ? []
-    : dataflowState.data.euDatasets.map(euDataset => ({
-        buttonClass: 'euDataset',
-        buttonIcon: 'euDataset',
-        caption: euDataset.euDatasetName,
-        handleRedirect: () => {
-          handleRedirect(getUrl(routes.EU_DATASET, { dataflowId, datasetId: euDataset.euDatasetId }, true));
-        },
-        helpClassName: 'dataflow-eudataset-help-step',
-        layout: 'defaultBigButton',
-        model: [
-          {
-            label: resourcesContext.messages['historicReleases'],
-            command: () => {
-              onShowHistoricReleases('EUDataset');
-              getDataHistoricReleases(euDataset.euDatasetId, euDataset.euDatasetName);
+    : dataflowState.data.euDatasets
+        .map(euDataset => ({
+          buttonClass: 'euDataset',
+          buttonIcon: 'euDataset',
+          caption: euDataset.euDatasetName,
+          handleRedirect: () => {
+            handleRedirect(getUrl(routes.EU_DATASET, { dataflowId, datasetId: euDataset.euDatasetId }, true));
+          },
+          helpClassName: 'dataflow-eudataset-help-step',
+          layout: 'defaultBigButton',
+          model: [
+            {
+              label: resourcesContext.messages['historicReleases'],
+              command: () => {
+                onShowHistoricReleases('EUDataset');
+                getDataHistoricReleases(euDataset.euDatasetId, euDataset.euDatasetName);
+              }
             }
-          }
-        ],
-        visibility: true
-      })).sort((a, b) => a.caption.localeCompare(b.caption));
+          ],
+          visibility: true
+        }))
+        .sort((a, b) => a.caption.localeCompare(b.caption));
 
   const isReleasing = dataflowState?.data?.datasets?.some(dataset => dataset.isReleasing);
 

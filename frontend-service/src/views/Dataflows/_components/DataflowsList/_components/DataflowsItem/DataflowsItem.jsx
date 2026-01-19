@@ -165,13 +165,24 @@ export const DataflowsItem = ({ isAdmin, isCustodian, itemContent, reorderDatafl
 
       <div className={`${styles.text}`}>
         <h3 className={`${styles.title}`} data-for={idTooltip} data-tip>
-          {itemContent.bigData ? (
-            <p
-              dangerouslySetInnerHTML={{
-                __html: TextUtils.parseText(resourcesContext.messages['bigDataDataflowNamed'], {
-                  name: itemContent.name
-                })?.replace(/\(SNC Data\)/g, `<span class="${styles.sncData}">$&</span>`)
-              }}></p>
+          {itemContent.sncData ? (
+            itemContent.bigData ? (
+              <p
+                dangerouslySetInnerHTML={{
+                  __html: TextUtils.parseText(resourcesContext.messages['sncBigDataDataflowNamed'], {
+                    name: itemContent.name
+                  })?.replace(/\(SNC Data\)/g, `<span class="${styles.sncData}">$&</span>`)
+                }}></p>
+            ) : (
+              <p
+                dangerouslySetInnerHTML={{
+                  __html: TextUtils.parseText(resourcesContext.messages['sncCitusDataflowNamed'], {
+                    name: itemContent.name
+                  })?.replace(/\(SNC Data\)/g, `<span class="${styles.sncData}">$&</span>`)
+                }}></p>
+            )
+          ) : itemContent.bigData ? (
+            TextUtils.parseText(resourcesContext.messages['bigDataDataflowNamed'], { name: itemContent.name })
           ) : (
             itemContent.name
           )}

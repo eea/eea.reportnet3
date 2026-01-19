@@ -625,20 +625,37 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
         return record;
     }
 
-    private static void refactorMessage(List<Map<String, Object>> customQueryResultSet, ObjectWrapper objectWrapper) {
-        if (!customQueryResultSet.isEmpty()) {
-            customQueryResultSet.stream()
-                .filter(map -> !map.containsKey("reason") && objectWrapper.getRecordId().equals(String.valueOf(map.get(RECORD_ID))))
-                .findFirst()
-                .ifPresent(map -> {
-                    map.forEach((key, value) -> {
-                        if (!key.equals(RECORD_ID)) {
-                            objectWrapper.setMessage(objectWrapper.getMessage().replace("{%" + key + "%}", String.valueOf(value)));
-                        }
-                    });
-                });
+  private static void refactorMessage(List<Map<String, Object>> customQueryResultSet, ObjectWrapper objectWrapper) {
+    if (!customQueryResultSet.isEmpty()) {
+      for (Map<String, Object> map : customQueryResultSet) {
+        if (!objectWrapper.getRecordId().equals(String.valueOf(map.get(RECORD_ID)))) {
+          continue;
         }
+        if (!map.containsKey("reason")) {
+          for (Map.Entry<String, Object> entry : map.entrySet()) {
+            String key = entry.getKey();
+            Object value = entry.getValue();
+
+            if (!key.equals(RECORD_ID)) {
+              String placeholder = "{%" + key + "%}";
+              if (objectWrapper.getMessage().contains(placeholder)) {
+                objectWrapper.setMessage(objectWrapper.getMessage().replace(placeholder, String.valueOf(value)));
+              }
+            }
+          }
+        } else {
+          for (Map.Entry<String, Object> entry : map.entrySet()) {
+            String key = entry.getKey();
+            Object value = entry.getValue();
+
+            if (key.equals("reason")) {
+              objectWrapper.setMessage(objectWrapper.getMessage().replace("{%reason%}", String.valueOf(value)));
+            }
+          }
+        }
+      }
     }
+  }
 
     /**
      * Finds primary key and foreign key field name values
