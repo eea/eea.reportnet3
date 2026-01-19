@@ -33,6 +33,7 @@ export const PaMsWebform = ({
   dataflowId,
   dataProviderId,
   datasetId,
+  isEditor,
   isIcebergCreated,
   isLoadingIceberg,
   isReleasing,
@@ -341,6 +342,7 @@ export const PaMsWebform = ({
           datasetSchemaId={datasetSchema.datasetSchemaId}
           getFieldSchemaId={getFieldSchemaId}
           isAddingPamsId={paMsWebformState.isAddingSingleRecord || paMsWebformState.isAddingGroupRecord}
+          isEditor={isEditor}
           isIcebergCreated={isIcebergCreated}
           isLoadingIceberg={isLoadingIceberg}
           isRefresh={paMsWebformState.isRefresh}
@@ -361,7 +363,9 @@ export const PaMsWebform = ({
         bigData={bigData}
         dataflowId={dataflowId}
         datasetId={datasetId}
+        disableActionButtons={!isEditor}
         isAddingPamsId={paMsWebformState.isAddingSingleRecord || paMsWebformState.isAddingGroupRecord}
+        isEditor={isEditor}
         loading={isLoading}
         onAddTableRecord={onAddTableRecord}
         onRefresh={onUpdateData}
@@ -431,7 +435,12 @@ export const PaMsWebform = ({
             <div className={styles.addButtonWrapper}>
               <Button
                 className={styles.addButton}
-                disabled={paMsWebformState.isAddingSingleRecord || paMsWebformState.isAddingGroupRecord || isReleasing}
+                disabled={
+                  !isEditor ||
+                  paMsWebformState.isAddingSingleRecord ||
+                  paMsWebformState.isAddingGroupRecord ||
+                  isReleasing
+                }
                 icon={
                   list === 'single'
                     ? paMsWebformState.isAddingSingleRecord
