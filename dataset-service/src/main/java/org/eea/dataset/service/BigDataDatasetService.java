@@ -337,5 +337,5 @@ public interface BigDataDatasetService {
             DataSetMetabaseVO dataset,
             TableSchemaVO tableSchemaVO,
             String geometryColumn,
-            String recordId);
+            String recordId) throws EEAException;
 }

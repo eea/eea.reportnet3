@@ -162,6 +162,18 @@ export const DatasetRepository = {
     });
   },
 
+  downloadGeometry: async ({ datasetId, recordId, fieldId, dataflowId, tableSchemaId, providerId }) =>
+    await HTTPRequester.download({
+      url: getUrl(DatasetConfig.downloadGeometry, {
+        datasetId,
+        recordId,
+        fieldId,
+        dataflowId,
+        tableSchemaId,
+        providerId
+      })
+    }),
+
   downloadPublicReferenceDatasetFileData: async (dataflowId, fileName) =>
     await HTTPRequester.download({
       url: getUrl(DatasetConfig.downloadPublicReferenceDatasetFileData, { dataflowId, fileName })

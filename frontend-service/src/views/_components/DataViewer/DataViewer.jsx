@@ -57,6 +57,7 @@ import { ErrorUtils } from 'views/_functions/Utils/ErrorUtils';
 
 import { getUrl } from 'repositories/_utils/UrlUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
+import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotifications';
 
 export const DataViewer = ({
   bigData,
@@ -138,6 +139,8 @@ export const DataViewer = ({
 
   const [records, dispatchRecords] = useReducer(recordReducer, {
     coordinatesMoreInfo: '',
+    coordinatesRecordId: '',
+    coordinatesFieldName: '',
     crs: 'EPSG:4326',
     drawElements: {
       circle: false,
@@ -186,11 +189,11 @@ export const DataViewer = ({
 
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
+  const [isDownloadingGeometry, setIsDownloadingGeometry] = useState(false);
 
   let contextMenuRef = useRef();
   let datatableRef = useRef();
   let divRef = useRef();
-
   const { areEquals, removeSemicolonSeparatedWhiteSpaces } = TextUtils;
 
   const { colsSchema, columnOptions } = useLoadColsSchemasAndColumnOptions(tableSchemaColumns);
@@ -207,7 +210,7 @@ export const DataViewer = ({
   const mapEditingEnabled =
     hasWritePermissions && !isDesignDatasetEditorRead && !isDataflowOpen && !records.geometryReadOnly;
 
-  const mapVisibilityEnabled = bigData && !isEditingEnabled;
+  const mapVisibilityEnabled = !isEditingEnabled;
 
   const cellDataEditor = (cells, record) => {
     return (
@@ -220,6 +223,7 @@ export const DataViewer = ({
         }
         cells={cells}
         colsSchema={colsSchema}
+        dataProviderId={dataProviderId}
         datasetId={datasetId}
         datasetSchemaId={datasetSchemaId}
         mapVisibilityEnabled={mapVisibilityEnabled}
@@ -261,8 +265,17 @@ export const DataViewer = ({
 
   const onChangePointCRS = crs => dispatchRecords({ type: 'SET_MAP_CRS', payload: crs });
 
-  const onCoordinatesMoreInfoClick = geoJson =>
-    dispatchRecords({ type: 'OPEN_COORDINATES_MORE_INFO', payload: geoJson });
+  const onCoordinatesMoreInfoClick = (geoJson, recordId, fieldName, fieldId, dataProviderId) =>
+    dispatchRecords({
+      type: 'OPEN_COORDINATES_MORE_INFO',
+      payload: { geoJson, recordId, fieldName, fieldId, dataProviderId }
+    });
+
+  useCheckNotifications(
+    ['DOWNLOAD_GEOMETRY_COMPLETED_EVENT', 'DOWNLOAD_GEOMETRY_FAILED_EVENT'],
+    setIsDownloadingGeometry,
+    false
+  );
 
   const onFileDownload = async (fileName, fieldId, recordId, fieldName, dataProviderCode) => {
     try {
@@ -1127,7 +1140,7 @@ export const DataViewer = ({
 
   const coordinatesMoreInfoDialogFooter = (
     <div className="ui-dialog-buttonpane p-clearfix">
-      <div className="p-toolbar-group-left">
+      {/* <div className="p-toolbar-group-left">
         <Button
           className="p-button-secondary p-button-animated-blink"
           icon="clone"
@@ -1136,7 +1149,7 @@ export const DataViewer = ({
           tooltip={resourcesContext.messages['geoJSONHelpCopyTooltip']}
           tooltipOptions={{ position: 'top' }}
         />
-      </div>
+      </div> */}
       <div>
         <Button
           className="p-button-animated-blink"
@@ -1177,8 +1190,19 @@ export const DataViewer = ({
     </div>
   );
 
-  const renderCoordinatesMoreInfo = () => <CoordinatesMoreInfo geoJSON={records.coordinatesMoreInfo} />;
-
+  const renderCoordinatesMoreInfo = () => (
+    <CoordinatesMoreInfo
+      dataflowId={dataflowId}
+      datasetId={datasetId}
+      fieldId={records.coordinatesFieldName}
+      geoJSON={records.coordinatesMoreInfo}
+      isDownloading={isDownloadingGeometry}
+      providerId={dataProviderId}
+      recordId={records.coordinatesRecordId}
+      setIsDownloading={setIsDownloadingGeometry}
+      tableSchemaId={tableId}
+    />
+  );
   const mapRender = () => (
     <Map
       disabledEdition={!mapEditingEnabled}

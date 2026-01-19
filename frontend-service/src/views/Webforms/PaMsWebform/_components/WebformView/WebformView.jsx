@@ -36,6 +36,7 @@ export const WebformView = ({
   datasetSchemaId,
   getFieldSchemaId,
   isAddingPamsId = false,
+  isEditor,
   isIcebergCreated,
   isLoadingIceberg,
   isRefresh,
@@ -275,6 +276,7 @@ export const WebformView = ({
         datasetId={datasetId}
         datasetSchemaId={datasetSchemaId}
         getFieldSchemaId={getFieldSchemaId}
+        isEditor={isEditor}
         isGroup={isGroup}
         isIcebergCreated={isIcebergCreated}
         isLoadingIceberg={isLoadingIceberg}
