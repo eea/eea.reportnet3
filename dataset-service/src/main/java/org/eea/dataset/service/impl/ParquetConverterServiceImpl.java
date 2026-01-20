@@ -449,7 +449,11 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
 
   private void handleReferenceDataset(ImportFileInDremioInfo importFileInDremioInfo, S3PathResolver s3TablePathResolver) throws Exception {
     String tableSchemaName = s3TablePathResolver.getTableName();
+    //setting path with / at the end
+    s3TablePathResolver.setPath(S3_TABLE_NAME_FOLDER_PATH_FOR_VALID_PREFIX);
     List<S3Object> tableNameFilenames = s3Helper.getFilenamesFromTableNames(s3TablePathResolver);
+    //setting previous path
+    s3TablePathResolver.setPath(S3_TABLE_NAME_FOLDER_PATH);
     AtomicInteger fileCounter = new AtomicInteger();
 
     //demote reference table folder
