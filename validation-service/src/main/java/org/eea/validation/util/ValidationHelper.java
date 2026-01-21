@@ -1224,6 +1224,12 @@ public class ValidationHelper implements DisposableBean {
       } catch (JsonProcessingException e) {
         LOG.error("error processing json for processId {}", processId);
       }
+      /*
+      We should send a Kafka event here instead of saving all the info on the TASK table. This table is red by
+      Validation pods with a cron scheduled job and this causes race conditions. If instead of the TABLE
+      we use a Kafka topic the tasks will be serialized and there will be no race conditions.
+      Check out ValidationScheduler to find where the tasks are picked up.
+        */
       Task task = new Task(null, processId, ProcessStatusEnum.IN_QUEUE, TaskType.VALIDATION_TASK, new Date(), null, null,
           json, 0, null);
       taskRepository.save(task);
