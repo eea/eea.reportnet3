@@ -21,7 +21,7 @@
     "jwt-decode": "3.1.2",
     "leaflet-draw": "1.0.4",
     "leaflet": "1.7.1",
-    "lodash": "4.17.21",
+    "lodash": "4.17.23",
     "mapbox-gl": "2.7.0",
     "primeicons": "2.0.0",
     "primereact": "4.2.2",
