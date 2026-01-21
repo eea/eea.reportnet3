@@ -11,6 +11,10 @@ public final class LiteralConstants {
   /** The Constant COMMAND_TOPIC: {@value}. */
   public static final String COMMAND_TOPIC = "COMMAND_TOPIC";
 
+  public static final String HIGH_PRIORITY_TASK_TOPIC = "HIGH_PRIORITY_TASK_TOPIC";
+
+  public static final String LOW_PRIORITY_TASK_TOPIC = "LOW_PRIORITY_TASK_TOPIC";
+
   /** The Constant BROADCAST_TOPIC: {@value}. */
   public static final String BROADCAST_TOPIC = "BROADCAST_TOPIC";
 

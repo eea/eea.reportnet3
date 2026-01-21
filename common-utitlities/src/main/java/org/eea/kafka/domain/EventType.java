@@ -867,9 +867,15 @@ public enum EventType {
           "download_geometry_completed_event", true),
 
   DOWNLOAD_GEOMETRY_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
-          "download_geometry_failed_event", true);
+          "download_geometry_failed_event", true),
 
-  /** The topic. */
+  HIGH_PRIORITY_TASK_CREATED_EVENT(LiteralConstants.HIGH_PRIORITY_TASK_TOPIC,
+          "high_priority_task_created_event", true),
+
+  LOW_PRIORITY_TASK_CREATED_EVENT(LiteralConstants.LOW_PRIORITY_TASK_TOPIC,
+          "low_priority_task_created_event", true);
+
+    /** The topic. */
   private String topic;
 
   /** The key. */
