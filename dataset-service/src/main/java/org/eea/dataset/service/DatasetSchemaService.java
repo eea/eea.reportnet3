@@ -637,4 +637,6 @@ public interface DatasetSchemaService {
    * @throws EEAException
    */
   void validateTableFieldNameHasNoWhitespace(String fieldName) throws EEAException;
+
+  boolean isReferenceSchema(String datasetSchemaId);
 }

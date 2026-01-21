@@ -26,6 +26,7 @@ const parseBusinessDataflowDTO = businessDataflowDTO => {
     name: businessDataflowDTO.name,
     obligation: ObligationUtils.parseObligation(businessDataflowDTO.obligation),
     reportingDatasetsStatus: businessDataflowDTO.reportingStatus,
+    sncData: businessDataflowDTO.sncData,
     status: businessDataflowDTO.status,
     type: businessDataflowDTO.type,
     userRole: businessDataflowDTO.userRole

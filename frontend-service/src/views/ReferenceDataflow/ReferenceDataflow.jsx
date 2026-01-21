@@ -284,6 +284,7 @@ export const ReferenceDataflow = () => {
           dataflowType: referenceDataflow.type,
           description: referenceDataflow.description,
           name: referenceDataflow.name,
+          sncData: referenceDataflow.sncData,
           status: referenceDataflow.status
         }
       });
@@ -366,7 +367,15 @@ export const ReferenceDataflow = () => {
   };
 
   const getSubtitle = () => {
-    let subtitle = dataflowState.bigData
+    let subtitle = dataflowState.sncData
+      ? dataflowState.bigData
+        ? TextUtils.parseText(resourcesContext.messages['sncBigDataDataflowNamed'], {
+            name: resourcesContext.messages['referenceDataflowCrumbLabel']
+          })
+        : TextUtils.parseText(resourcesContext.messages['sncCitusDataflowNamed'], {
+            name: resourcesContext.messages['referenceDataflowCrumbLabel']
+          })
+      : dataflowState.bigData
       ? TextUtils.parseText(resourcesContext.messages['bigDataDataflowNamed'], {
           name: resourcesContext.messages['referenceDataflowCrumbLabel']
         })

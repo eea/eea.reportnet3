@@ -19,6 +19,7 @@ const parseReferenceDataflowDTO = referenceDataflowDTO =>
     reportingDatasetsStatus: referenceDataflowDTO.reportingStatus,
     requestId: referenceDataflowDTO.requestId,
     showPublicInfo: referenceDataflowDTO.showPublicInfo,
+    sncData: referenceDataflowDTO.sncData,
     status: referenceDataflowDTO.status,
     testDatasets: DatasetUtils.parseDatasetListDTO(referenceDataflowDTO.testDatasets),
     type: referenceDataflowDTO.type,

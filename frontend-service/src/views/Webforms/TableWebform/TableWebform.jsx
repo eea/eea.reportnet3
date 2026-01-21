@@ -26,6 +26,7 @@ export const TableWebform = ({
   isReporting,
   state,
   tables = [],
+  isEditor,
   isIcebergCreated,
   isLoadingIceberg
 }) => {
@@ -90,6 +91,7 @@ export const TableWebform = ({
         dataProviderId={dataProviderId}
         datasetId={datasetId}
         datasetSchemaId={datasetSchema.datasetSchemaId}
+        isEditor={isEditor}
         isIcebergCreated={isIcebergCreated}
         isLoadingIceberg={isLoadingIceberg}
         isReporting={isReporting}

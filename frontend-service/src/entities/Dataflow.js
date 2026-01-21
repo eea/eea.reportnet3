@@ -27,6 +27,7 @@ export class Dataflow {
     representatives,
     requestId,
     showPublicInfo,
+    sncData,
     status,
     testDatasets,
     type,
@@ -60,6 +61,7 @@ export class Dataflow {
     this.representatives = representatives;
     this.requestId = requestId;
     this.showPublicInfo = showPublicInfo;
+    this.sncData = sncData;
     this.status = status;
     this.testDatasets = testDatasets;
     this.type = type;

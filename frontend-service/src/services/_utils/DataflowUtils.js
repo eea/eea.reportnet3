@@ -116,6 +116,7 @@ const parseDataflowDTO = dataflowDTO => {
     representatives: RepresentativeUtils.parseRepresentativeListDTO(dataflowDTO.representatives),
     requestId: dataflowDTO.requestId,
     showPublicInfo: dataflowDTO.showPublicInfo,
+    sncData: dataflowDTO.sncData,
     status: dataflowDTO.status,
     testDatasets: DatasetUtils.parseDatasetListDTO(dataflowDTO.testDatasets),
     type: dataflowDTO.type,
@@ -281,7 +282,8 @@ const parseRequestPublicCountrySortField = sortField => {
     legalInstrument: 'legal_instrument',
     deadline: 'deadline_date',
     deliveryDate: 'delivery_date',
-    deliveryStatus: 'delivery_status'
+    deliveryStatus: 'delivery_status',
+    firstReleaseDate: 'first_date_released'
   };
 
   return replacements[sortField] || sortField;

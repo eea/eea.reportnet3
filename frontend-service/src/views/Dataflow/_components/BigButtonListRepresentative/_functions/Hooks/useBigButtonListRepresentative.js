@@ -39,7 +39,6 @@ const useBigButtonListRepresentative = ({
     }
   }, [userContext, dataflowState.data.datasets]);
 
-
   const getButtonsVisibility = () => {
     const isManualAcceptance = dataflowState.data.manualAcceptance;
     const isTestDataset = parseInt(representativeId) === 0;
@@ -170,7 +169,8 @@ const useBigButtonListRepresentative = ({
           handleRedirect(getUrl(routes.DATASET, { dataflowId: dataflowState.id, datasetId: dataset.datasetId }, true));
         },
         hasUpdatesAfterRelease: dataset.hasUpdatesAfterRelease,
-        hasUpdatesAfterReleaseTooltip: dataset.hasUpdatesAfterRelease && resourcesContext.messages['hasUpdatesAfterReleaseDatasetTooltip'],
+        hasUpdatesAfterReleaseTooltip:
+          dataset.hasUpdatesAfterRelease && resourcesContext.messages['hasUpdatesAfterReleaseDatasetTooltip'],
         helpClassName: 'dataflow-dataset-container-help-step',
         infoStatus: dataset.isReleased,
         infoStatusIcon: true,
@@ -205,7 +205,8 @@ const useBigButtonListRepresentative = ({
         technicalAcceptanceStatus: technicalAcceptanceStatus,
         visibility: true
       };
-    }).sort((a, b) => a.caption.localeCompare(b.caption));
+    })
+    .sort((a, b) => a.caption.localeCompare(b.caption));
 
   const onBuildReceiptButton = () => [
     {
@@ -233,17 +234,15 @@ const useBigButtonListRepresentative = ({
     representative => representative.dataProviderId === dataProviderId
   );
 
-  const onBuildReleaseButton = (isSilent) => [
+  const onBuildReleaseButton = isSilent => [
     {
       buttonClass: 'schemaDataset',
       buttonIcon: getIsReleasing() ? 'spinner' : 'released',
       buttonIconClass: getIsReleasing() ? 'spinner' : 'released',
-      caption: resourcesContext.messages[
-        isSilent ? 'releaseDataCollectionSilently' : 'releaseDataCollection'
-        ],
-      enabled: !dataflowState.hasIcebergTables && dataflowState.isReleasable && !getIsReleasing(),
+      caption: resourcesContext.messages[isSilent ? 'releaseDataCollectionSilently' : 'releaseDataCollection'],
+      enabled: !dataflowState.hasEnableEditingDatasets && dataflowState.isReleasable && !getIsReleasing(),
       handleRedirect:
-        !dataflowState.hasIcebergTables && dataflowState.isReleasable && !getIsReleasing()
+        !dataflowState.hasEnableEditingDatasets && dataflowState.isReleasable && !getIsReleasing()
           ? isSilent
             ? () => onOpenSilentReleaseConfirmDialog()
             : () => onOpenReleaseConfirmDialog()
@@ -272,9 +271,7 @@ const useBigButtonListRepresentative = ({
     ...groupByRepresentativeModels,
     ...receiptBigButton,
     ...releaseBigButton,
-    ...(isAdmin
-      ? silentReleaseButton
-      : []),
+    ...(isAdmin ? silentReleaseButton : []),
     ...testDatasetsModels
   ];
 };

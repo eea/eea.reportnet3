@@ -35,7 +35,9 @@ export const TableManagement = ({
   bigData,
   dataflowId,
   datasetId,
+  disableActionButtons = false,
   isAddingPamsId = false,
+  isEditor,
   loading,
   onAddTableRecord,
   onRefresh,
@@ -429,6 +431,8 @@ export const TableManagement = ({
 
   const renderActionsTemplate = () => (
     <ActionsColumn
+      disabledButtons={disableActionButtons}
+      isEditor={isEditor}
       onDeleteClick={() => manageDialogs('delete', true)}
       onEditClick={() => manageDialogs('manageRows', true)}
     />
@@ -516,7 +520,6 @@ export const TableManagement = ({
         onRowClick={event => {
           tableManagementDispatch({ type: 'SET_SELECTED_RECORD', payload: { selectedRecord: event.data } });
         }}
-        summary={resourcesContext.messages['webformPaMsTitle']}
         value={tableManagementState.records}>
         {renderTableColumns()}
       </DataTable>

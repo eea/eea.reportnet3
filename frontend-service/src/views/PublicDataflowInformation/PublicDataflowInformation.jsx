@@ -320,35 +320,70 @@ export const PublicDataflowInformation = () => {
   const setPublicInformation = (datasets, hasManualAcceptance) => {
     if (isNil(datasets)) return [];
 
+    const crLabel = resourcesContext.messages[config.datasetStatus.CORRECTION_REQUESTED.label];
+    const taLabel = resourcesContext.messages[config.datasetStatus.TECHNICALLY_ACCEPTED.label];
+
+    const correctionRequested = crLabel?.replace(/_/g, ' ').trim().toUpperCase();
+    const technicallyAccepted = taLabel?.replace(/_/g, ' ').trim().toUpperCase();
+
     const datasetsSchemaName = uniq(datasets.map(dataset => dataset.datasetSchemaName));
+
     const representatives = datasetsSchemaName.map(datasetSchemaName => {
       const datasetsFromRepresentative = datasets.filter(dataset => dataset.datasetSchemaName === datasetSchemaName);
-      const dataset = datasetsFromRepresentative[0];
+      const firstDataset = datasetsFromRepresentative[0];
       const publicFileNames = datasetsFromRepresentative
-        .filter(dataset => !isNil(dataset.publicFileName))
-        .map(dataset => dataset.publicFileName);
-      return {
-        dataProviderName: datasetSchemaName,
-        dataProviderId: dataset.dataProviderId,
-        dataflowType: dataflowType,
-        deliveryDate: dataset.releaseDate,
-        firstReleaseDate: dataset.firstReleaseDate,
-        restrictFromPublic: dataset.restrictFromPublic,
-        publicsFileName: publicFileNames,
-        deliveryStatus: !dataset.isReleased
-          ? resourcesContext.messages[config.datasetStatus.PENDING.label]
-          : !hasManualAcceptance
+        .filter(ds => !isNil(ds.publicFileName))
+        .map(ds => ds.publicFileName);
+
+      const datedEntries = datasetsFromRepresentative
+        .filter(ds => !isNil(ds.dateStatusChanged))
+        .map(ds => ({
+          date: dayjs(ds.dateStatusChanged),
+          status: ds.status.replace(/_/g, ' ').trim().toUpperCase(),
+          originalDate: ds.dateStatusChanged
+        }));
+
+      let prioritizedDate = null;
+      let prioritizedStatusText = null;
+
+      const crEntries = datedEntries.filter(ds => ds.status === correctionRequested);
+      if (crEntries.length > 0) {
+        const latest = crEntries.reduce((max, curr) => curr.date.isAfter(max.date) ? curr : max);
+        prioritizedDate = latest.originalDate;
+        prioritizedStatusText = crLabel;
+      }
+
+      else {
+        const taEntries = datedEntries.filter(ds => ds.status === technicallyAccepted);
+        if (taEntries.length > 0) {
+          const latest = taEntries.reduce((max, curr) => curr.date.isAfter(max.date) ? curr : max);
+          prioritizedDate = latest.originalDate;
+          prioritizedStatusText = taLabel;
+        }
+      }
+
+      const defaultStatus = !firstDataset.isReleased
+        ? resourcesContext.messages[config.datasetStatus.PENDING.label]
+        : !hasManualAcceptance
           ? resourcesContext.messages[config.datasetStatus.DELIVERED.label]
           : resourcesContext.messages[
-              DataflowUtils.getTechnicalAcceptanceStatus(datasetsFromRepresentative.map(dataset => dataset.status))
-            ],
-        dateStatusChanged: dataset.dateStatusChanged
+            DataflowUtils.getTechnicalAcceptanceStatus(datasetsFromRepresentative.map(ds => ds.status))
+            ];
+
+      return {
+        dataProviderName: datasetSchemaName,
+        dataProviderId: firstDataset.dataProviderId,
+        dataflowType: dataflowType,
+        deliveryDate: firstDataset.releaseDate,
+        firstReleaseDate: firstDataset.firstReleaseDate,
+        restrictFromPublic: firstDataset.restrictFromPublic,
+        publicsFileName: publicFileNames,
+        deliveryStatus: prioritizedStatusText || defaultStatus,
+        dateStatusChanged: prioritizedDate || firstDataset.dateStatusChanged || ' '
       };
     });
-
     setRepresentatives(representatives);
   };
-
   const deliveryStatusBodyColumn = rowData => {
     const correctionText = resourcesContext.messages[config.datasetStatus.CORRECTION_REQUESTED.label];
     const techAcceptedText = resourcesContext.messages[config.datasetStatus.TECHNICALLY_ACCEPTED.label];

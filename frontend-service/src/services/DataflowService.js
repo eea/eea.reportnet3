@@ -353,7 +353,7 @@ export const DataflowService = {
     return publicDataflowsByCountryCodeResponse.data;
   },
 
-   getPublicDataflowData: async dataflowId => {
+  getPublicDataflowData: async dataflowId => {
     const publicDataflowDataDTO = await DataflowRepository.getPublicDataflowData(dataflowId);
     const publicDataflowData = DataflowUtils.parsePublicDataflowDTO(publicDataflowDataDTO.data);
     publicDataflowData.datasets = orderBy(publicDataflowData.datasets, 'datasetSchemaName');
@@ -441,6 +441,12 @@ export const DataflowService = {
     const icebergTables = await DataflowRepository.getIcebergTables({ dataflowId, providerId, datasetId });
 
     return icebergTables;
+  },
+
+  getEditStatus: async ({ dataflowId, providerId }) => {
+    const isEditingEnabled = await DataflowRepository.getEditStatus({ dataflowId, providerId });
+
+    return isEditingEnabled;
   },
 
   getRepresentativeCode: async selectedRepresentatives =>

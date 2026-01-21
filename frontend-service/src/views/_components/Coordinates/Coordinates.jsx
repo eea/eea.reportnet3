@@ -32,7 +32,9 @@ export const Coordinates = ({
   onKeyDown = () => {},
   onMapOpen = () => {},
   showMessageError = false,
-  xyLabels = false
+  xyLabels = false,
+  recordId,
+  fieldId
 }) => {
   const resourcesContext = useContext(ResourcesContext);
   const [hasErrors, setHasErrors] = useState({});
@@ -173,7 +175,7 @@ export const Coordinates = ({
         return (
           <TooltipButton
             message={resourcesContext.messages['coordinatesMoreInfo']}
-            onClick={() => onCoordinatesMoreInfoClick(initialGeoJson)}
+            onClick={() => onCoordinatesMoreInfoClick(initialGeoJson,recordId,fieldId)}
             uniqueIdentifier={uniqueId('coordinates_more_info')}></TooltipButton>
         );
       }

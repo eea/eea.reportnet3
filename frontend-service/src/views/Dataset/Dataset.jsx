@@ -106,6 +106,10 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
     tableSchemaId: QuerystringUtils.getUrlParamValue('tab') !== '' ? QuerystringUtils.getUrlParamValue('tab') : ''
   });
   const [datasetHasData, setDatasetHasData] = useState(false);
+  const [editingStatus, setEditingStatus] = useState({
+    editor: null,
+    isEditing: false
+  });
   const [exportButtonsList, setExportButtonsList] = useState([]);
   const [externalOperationsList, setExternalOperationsList] = useState({
     export: [],
@@ -168,6 +172,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   const isDataflowCustodian = userContext.hasContextAccessPermission(config.permissions.prefixes.DATAFLOW, dataflowId, [
     config.permissions.roles.CUSTODIAN.key
   ]);
+  const userName = userContext.name;
 
   let exportMenuRef = useRef();
   let importMenuRef = useRef();
@@ -187,6 +192,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   });
 
   useEffect(() => {
+    getEditingStatus();
     getMetadata();
     if (isEmpty(webformOptions)) {
       getWebformList();
@@ -371,7 +377,9 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
         'PARQUET_TO_ICEBERG_CONVERSION_FAILED_EVENT',
         'PARQUET_TO_ICEBERG_FAILED_ACTIVE_JOBS_EVENT',
         'ICEBERG_TO_PARQUET_FAILED_ACTIVE_JOBS_EVENT',
-        'ANOTHER_CONVERSION_IS_RUNNING_FAILED_EVENT'
+        'ANOTHER_CONVERSION_IS_RUNNING_FAILED_EVENT',
+        'PARQUET_TO_ICEBERG_FAILED_ACTIVE_EDITING_BY_OTHER_USER',
+        'ICEBERG_TO_PARQUET_FAILED_ACTIVE_EDITING_BY_OTHER_USER'
       ].includes(notification.key)
     );
 
@@ -423,6 +431,26 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
       } catch (error) {
         console.error('Dataset - getWebformList.', error);
         notificationContext.add({ type: 'LOADING_WEBFORM_OPTIONS_ERROR' }, true);
+      }
+    }
+  };
+
+  const toggleEditMode = async () => {
+    if (editingStatus?.isEditing) {
+      try {
+        await DatasetService.disableEditing({ datasetId });
+      } catch (error) {
+        console.error('Dataset - toggleEditMode.', error);
+      } finally {
+        handleRefresh();
+      }
+    } else {
+      try {
+        await DatasetService.enableEditing({ datasetId });
+      } catch (error) {
+        console.error('Dataset - toggleEditMode.', error);
+      } finally {
+        handleRefresh();
       }
     }
   };
@@ -599,6 +627,19 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
       return CurrentPage.DATAFLOW_REFERENCE_DATASET;
     }
   }
+
+  const getEditingStatus = async () => {
+    try {
+      const editingStatusData = await DatasetService.getEditingStatus({ datasetId });
+
+      setEditingStatus({
+        editor: editingStatusData?.data?.editor,
+        isEditing: editingStatusData?.data?.isEditing
+      });
+    } catch (error) {
+      console.error('Dataset - getEditingStatus.', error);
+    }
+  };
 
   const getFileExtensions = async () => {
     try {
@@ -968,7 +1009,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   const getDataSchema = async () => {
     try {
       const datasetSchema = await DatasetService.getSchema(dataflowId, datasetId);
-      filterManualEdit(datasetSchema.tables);
+      metadata?.dataflow?.bigData && filterManualEdit(datasetSchema.tables);
       setDatasetSchemaAllTables(datasetSchema.tables);
       setDatasetSchemaName(datasetSchema.datasetSchemaName);
       setLevelErrorTypes(datasetSchema.levelErrorTypes);
@@ -1310,13 +1351,26 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   };
 
   function handleRefresh() {
+    getEditingStatus();
     onLoadDatasetSchema();
     getEditedTables();
     getTableImportedMetadata();
   }
 
   const getSubtitle = () => {
-    let subtitle = metadata?.dataflow.bigData
+    let subtitle = metadata?.dataflow.sncData
+      ? metadata?.dataflow.bigData
+        ? TextUtils.parseText(resourcesContext.messages['sncBigDataDataflowNamed'], {
+            name: `${metadata?.dataflow.name} - ${
+              isTestDataset ? resourcesContext.messages['testDataset'] : datasetName
+            }`
+          })
+        : TextUtils.parseText(resourcesContext.messages['sncCitusDataflowNamed'], {
+            name: `${metadata?.dataflow.name} - ${
+              isTestDataset ? resourcesContext.messages['testDataset'] : datasetName
+            }`
+          })
+      : metadata?.dataflow.bigData
       ? TextUtils.parseText(resourcesContext.messages['bigDataDataflowNamed'], {
           name: `${metadata?.dataflow.name} - ${isTestDataset ? resourcesContext.messages['testDataset'] : datasetName}`
         })
@@ -1369,6 +1423,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
           dataflowId={dataflowId}
           dataProviderId={metadata?.dataset.dataProviderId}
           datasetId={datasetId}
+          isEditor={editingStatus?.isEditing && editingStatus?.editor === userName}
           isIcebergCreated={isIcebergCreated}
           isLoadingIceberg={isLoadingIceberg}
           isReleasing={dataset.isReleasing}
@@ -1393,6 +1448,8 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
         editedTables={editedTables}
         hasWritePermissions={hasWritePermissions}
         isDatasetReleased={isDatasetReleased}
+        isEditingEnabled={editingStatus?.isEditing}
+        isEditor={editingStatus?.isEditing && editingStatus?.editor === userName}
         isGroupedValidationDeleted={dataViewerOptions.isGroupedValidationDeleted}
         isGroupedValidationSelected={dataViewerOptions.isGroupedValidationSelected}
         isIcebergCreated={isIcebergCreated}
@@ -1432,6 +1489,23 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
       </div>
     );
 
+  const renderEditorMessage = () => {
+    if (editingStatus?.isEditing) {
+      return (
+        <div className={styles.editorMessage} role="alert">
+          <i className={`pi pi-info-circle ${styles.infoIcon}`} />
+          <span
+            dangerouslySetInnerHTML={{
+              __html: TextUtils.parseText(resourcesContext.messages['editorMessage'], {
+                editor: editingStatus?.editor
+              })
+            }}></span>
+        </div>
+      );
+    }
+    return null;
+  };
+
   return layout(
     <SnapshotContext.Provider
       value={{
@@ -1447,169 +1521,181 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
         subtitle={getSubtitle()}
         title={datasetSchemaName}
       />
-      <div className={styles.ButtonsBar}>
-        <Toolbar>
-          <div className="p-toolbar-group-left datasetSchema-buttonsbar-dataset-data-help-step">
-            {hasWritePermissions && (
-              <Fragment>
-                <Button
-                  className={`p-button-rounded p-button-secondary datasetSchema-buttonsbar-dataset-data-help-step ${
-                    !hasWritePermissions ? null : 'p-button-animated-blink'
-                  }`}
-                  disabled={
-                    isIcebergCreated ||
-                    !hasWritePermissions ||
-                    isTableDataRestorationInProgress ||
-                    actionsContext.isInProgress
-                  }
-                  icon={
-                    actionsContext.isInProgress && actionsContext.importDatasetProcessing ? 'spinnerAnimate' : 'import'
-                  }
-                  label={
-                    actionsContext.isInProgress && actionsContext.importDatasetProcessing
-                      ? resourcesContext.messages['importInProgress']
-                      : resourcesContext.messages['importDataset']
-                  }
-                  onClick={event => importMenuRef.current.show(event)}
-                />
-                <Menu
-                  className={styles.menuWrapper}
-                  id="importDataSetMenu"
-                  model={importButtonsList}
-                  popup={true}
-                  ref={importMenuRef}
-                />
-              </Fragment>
-            )}
-            <Button
-              className="p-button-rounded p-button-secondary-transparent p-button-animated-blink datasetSchema-export-dataset-help-step"
-              disabled={
-                (hasWritePermissions && isIcebergCreated) ||
-                isTableDataRestorationInProgress ||
-                actionsContext.isInProgress
-              }
-              icon={actionsContext.isInProgress && actionsContext.exportDatasetProcessing ? 'spinnerAnimate' : 'export'}
-              id="buttonExportDataset"
-              label={
-                actionsContext.isInProgress && actionsContext.exportDatasetProcessing
-                  ? resourcesContext.messages['exportInProgress']
-                  : resourcesContext.messages['exportDataset']
-              }
-              onClick={event => exportMenuRef.current.show(event)}
-            />
-            <Menu
-              className={styles.menuWrapper}
-              id="exportDataSetMenu"
-              model={exportButtonsList}
-              popup={true}
-              ref={exportMenuRef}
-            />
-            <DatasetDeleteDataDialog
-              disabled={
-                isIcebergCreated ||
-                !hasWritePermissions ||
-                isTableDataRestorationInProgress ||
-                actionsContext.isInProgress
-              }
-              icon={actionsContext.isInProgress && actionsContext.deleteDatasetProcessing ? 'spinnerAnimate' : 'trash'}
-              label={
-                actionsContext.isInProgress && actionsContext.deleteDatasetProcessing
-                  ? resourcesContext.messages['deleteInProgress']
-                  : resourcesContext.messages['deleteDatasetData']
-              }
-              onConfirmDelete={onConfirmDelete}
-            />
-          </div>
-          <div className="p-toolbar-group-right">
-            <Button
-              className="p-button-rounded p-button-secondary-transparent p-button-animated-blink"
-              icon="openFolder"
-              label={resourcesContext.messages['importedFiles']}
-              onClick={() => setIsImportedFilesDialogVisible(true)}
-            />
-            {isImportedFilesDialogVisible && (
-              <ImportedFilesDialog
-                dataflowId={dataflowId}
-                datasetId={datasetId}
-                isDialogVisible={isImportedFilesDialogVisible}
-                onCloseDialog={() => setIsImportedFilesDialogVisible(false)}
+      <div className={styles.ButtonsBarWrapper}>
+        <div className={styles.editorMessageWrapper}>{renderEditorMessage()}</div>
+        <div className={styles.ButtonsBar}>
+          <Toolbar>
+            <div className="p-toolbar-group-left datasetSchema-buttonsbar-dataset-data-help-step">
+              {hasWritePermissions && (
+                <Fragment>
+                  <Button
+                    className={`p-button-rounded p-button-secondary datasetSchema-buttonsbar-dataset-data-help-step ${
+                      !hasWritePermissions ? null : 'p-button-animated-blink'
+                    }`}
+                    disabled={
+                      editingStatus?.isEditing ||
+                      !hasWritePermissions ||
+                      isTableDataRestorationInProgress ||
+                      actionsContext.isInProgress
+                    }
+                    icon={
+                      actionsContext.isInProgress && actionsContext.importDatasetProcessing
+                        ? 'spinnerAnimate'
+                        : 'import'
+                    }
+                    label={
+                      actionsContext.isInProgress && actionsContext.importDatasetProcessing
+                        ? resourcesContext.messages['importInProgress']
+                        : resourcesContext.messages['importDataset']
+                    }
+                    onClick={event => importMenuRef.current.show(event)}
+                  />
+                  <Menu
+                    className={styles.menuWrapper}
+                    id="importDataSetMenu"
+                    model={importButtonsList}
+                    popup={true}
+                    ref={importMenuRef}
+                  />
+                </Fragment>
+              )}
+              <Button
+                className="p-button-rounded p-button-secondary-transparent p-button-animated-blink datasetSchema-export-dataset-help-step"
+                disabled={
+                  (hasWritePermissions && editingStatus?.isEditing) ||
+                  isTableDataRestorationInProgress ||
+                  actionsContext.isInProgress
+                }
+                icon={
+                  actionsContext.isInProgress && actionsContext.exportDatasetProcessing ? 'spinnerAnimate' : 'export'
+                }
+                id="buttonExportDataset"
+                label={
+                  actionsContext.isInProgress && actionsContext.exportDatasetProcessing
+                    ? resourcesContext.messages['exportInProgress']
+                    : resourcesContext.messages['exportDataset']
+                }
+                onClick={event => exportMenuRef.current.show(event)}
               />
-            )}
-            <DatasetValidateDialog
-              disabled={
-                isIcebergCreated ||
-                !hasWritePermissions ||
-                isTableDataRestorationInProgress ||
-                actionsContext.isInProgress
-              }
-              icon={
-                actionsContext.isInProgress && actionsContext.validateDatasetProcessing ? 'spinnerAnimate' : 'validate'
-              }
-              label={
-                actionsContext.isInProgress && actionsContext.validateDatasetProcessing
-                  ? resourcesContext.messages['validationInProgress']
-                  : resourcesContext.messages['validate']
-              }
-              onConfirmValidate={onConfirmValidate}
-            />
-            <Button
-              className="p-button-rounded p-button-secondary-transparent dataset-showValidations-help-step p-button-animated-blink"
-              icon="warning"
-              iconClasses={datasetHasErrors ? 'warning' : ''}
-              label={resourcesContext.messages['showValidations']}
-              onClick={() => onSetVisible(setValidationsVisible, true)}
-            />
-            <Button
-              className={
-                'p-button-rounded p-button-secondary-transparent p-button-animated-blink datasetSchema-qcRules-help-step'
-              }
-              icon="horizontalSliders"
-              label={resourcesContext.messages['qcRules']}
-              onClick={() => onSetVisible(setValidationListDialogVisible, true)}
-            />
-            <DatasetDashboardDialog
-              disabled={!datasetHasData}
-              levelErrorTypes={levelErrorTypes}
-              tableSchemas={schemaTables.map(table => table.name)}
-            />
-            <Button
-              className={`p-button-rounded p-button-secondary-transparent datasetSchema-manageCopies-help-step ${
-                !hasWritePermissions ? null : 'p-button-animated-blink'
-              }`}
-              disabled={!hasWritePermissions}
-              icon="camera"
-              label={resourcesContext.messages['snapshots']}
-              onClick={() => setIsSnapshotsBarVisible(!isSnapshotsBarVisible)}
-            />
-            <Button
-              className={`p-button-rounded p-button-${
-                isRefreshHighlighted ? 'primary' : 'secondary-transparent'
-              } p-button-animated-blink dataset-refresh-help-step`}
-              icon="refresh"
-              label={resourcesContext.messages['refresh']}
-              onClick={handleRefresh}
-            />
-            {metadata?.dataflow.bigData && (
+              <Menu
+                className={styles.menuWrapper}
+                id="exportDataSetMenu"
+                model={exportButtonsList}
+                popup={true}
+                ref={exportMenuRef}
+              />
+              <DatasetDeleteDataDialog
+                disabled={
+                  editingStatus?.isEditing ||
+                  !hasWritePermissions ||
+                  isTableDataRestorationInProgress ||
+                  actionsContext.isInProgress
+                }
+                icon={
+                  actionsContext.isInProgress && actionsContext.deleteDatasetProcessing ? 'spinnerAnimate' : 'trash'
+                }
+                label={
+                  actionsContext.isInProgress && actionsContext.deleteDatasetProcessing
+                    ? resourcesContext.messages['deleteInProgress']
+                    : resourcesContext.messages['deleteDatasetData']
+                }
+                onConfirmDelete={onConfirmDelete}
+              />
+            </div>
+            <div className="p-toolbar-group-right">
+              <Button
+                className="p-button-rounded p-button-secondary-transparent p-button-animated-blink"
+                icon="openFolder"
+                label={resourcesContext.messages['importedFiles']}
+                onClick={() => setIsImportedFilesDialogVisible(true)}
+              />
+              {isImportedFilesDialogVisible && (
+                <ImportedFilesDialog
+                  dataflowId={dataflowId}
+                  datasetId={datasetId}
+                  isDialogVisible={isImportedFilesDialogVisible}
+                  onCloseDialog={() => setIsImportedFilesDialogVisible(false)}
+                />
+              )}
+              <DatasetValidateDialog
+                disabled={
+                  editingStatus?.isEditing ||
+                  !hasWritePermissions ||
+                  isTableDataRestorationInProgress ||
+                  actionsContext.isInProgress
+                }
+                icon={
+                  actionsContext.isInProgress && actionsContext.validateDatasetProcessing
+                    ? 'spinnerAnimate'
+                    : 'validate'
+                }
+                label={
+                  actionsContext.isInProgress && actionsContext.validateDatasetProcessing
+                    ? resourcesContext.messages['validationInProgress']
+                    : resourcesContext.messages['validate']
+                }
+                onConfirmValidate={onConfirmValidate}
+              />
+              <Button
+                className="p-button-rounded p-button-secondary-transparent dataset-showValidations-help-step p-button-animated-blink"
+                icon="warning"
+                iconClasses={datasetHasErrors ? 'warning' : ''}
+                label={resourcesContext.messages['showValidations']}
+                onClick={() => onSetVisible(setValidationsVisible, true)}
+              />
+              <Button
+                className={
+                  'p-button-rounded p-button-secondary-transparent p-button-animated-blink datasetSchema-qcRules-help-step'
+                }
+                icon="horizontalSliders"
+                label={resourcesContext.messages['qcRules']}
+                onClick={() => onSetVisible(setValidationListDialogVisible, true)}
+              />
+              <DatasetDashboardDialog
+                disabled={!datasetHasData}
+                levelErrorTypes={levelErrorTypes}
+                tableSchemas={schemaTables.map(table => table.name)}
+              />
+              <Button
+                className={`p-button-rounded p-button-secondary-transparent datasetSchema-manageCopies-help-step ${
+                  !hasWritePermissions ? null : 'p-button-animated-blink'
+                }`}
+                disabled={!hasWritePermissions}
+                icon="camera"
+                label={resourcesContext.messages['snapshots']}
+                onClick={() => setIsSnapshotsBarVisible(!isSnapshotsBarVisible)}
+              />
+              <Button
+                className={`p-button-rounded p-button-${
+                  isRefreshHighlighted ? 'primary' : 'secondary-transparent'
+                } p-button-animated-blink dataset-refresh-help-step`}
+                icon="refresh"
+                label={resourcesContext.messages['refresh']}
+                onClick={handleRefresh}
+              />
               <Button
                 className={styles.openWebformButton}
                 disabled={
+                  (editingStatus?.isEditing && editingStatus?.editor !== userName) ||
                   (isAdmin && (!isCustodian || !isDataflowCustodian)) ||
                   !hasWritePermissions ||
                   isLoadingIceberg ||
                   noEditableCheck
                 }
-                helpClassName={!isIcebergCreated ? 'p-button-reverse' : 'p-button-copy'}
-                icon={!isIcebergCreated ? 'lock' : 'unlock'}
+                helpClassName={!editingStatus?.isEditing ? 'p-button-reverse' : 'p-button-copy'}
+                icon={!editingStatus?.isEditing ? 'lock' : 'unlock'}
                 isLoading={isLoadingIceberg}
                 key={isIcebergCreated}
                 label={
-                  !isIcebergCreated ? resourcesContext.messages['enableEdit'] : resourcesContext.messages['disableEdit']
+                  !editingStatus?.isEditing
+                    ? resourcesContext.messages['enableEdit']
+                    : resourcesContext.messages['disableEdit']
                 }
-                onClick={() => convertHelper()}
+                onClick={() => (metadata?.dataflow.bigData ? convertHelper() : toggleEditMode())}
               />
-            )}
-          </div>
-        </Toolbar>
+            </div>
+          </Toolbar>
+        </div>
       </div>
       <div className={styles.progressSwitchWrapper}>{renderSwitchView()}</div>
       {renderTableWebformView()}
@@ -1679,6 +1765,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
           integrationId={selectedCustomImportIntegration.id ? selectedCustomImportIntegration.id : undefined}
           invalidExtensionMessage={resourcesContext.messages['invalidExtensionFile']}
           isDialog={true}
+          maxFileSize={metadata?.dataflow.bigData ? config.MAX_BIG_DATA_FILE_SIZE : config.MAX_CITUS_FILE_SIZE}
           name="file"
           onChangeImportDialogVisibility={onChangeImportDialogVisibility}
           onError={onImportDatasetError}

@@ -66,8 +66,10 @@ export const DataflowRepository = {
 
   delete: async dataflowId => await HTTPRequester.delete({ url: getUrl(DataflowConfig.delete, { dataflowId }) }),
 
-  softDelete: async dataflowId => await HTTPRequester.update({ url: getUrl(DataflowConfig.softDelete, { dataflowId }) }),
-  reverseSoftDelete: async dataflowId => await HTTPRequester.update({ url: getUrl(DataflowConfig.reverseSoftDelete, { dataflowId }) }),
+  softDelete: async dataflowId =>
+    await HTTPRequester.update({ url: getUrl(DataflowConfig.softDelete, { dataflowId }) }),
+  reverseSoftDelete: async dataflowId =>
+    await HTTPRequester.update({ url: getUrl(DataflowConfig.reverseSoftDelete, { dataflowId }) }),
 
   exportSchemas: async dataflowId =>
     await HTTPRequester.download({ url: getUrl(DataflowConfig.exportSchemas, { dataflowId }) }),
@@ -90,7 +92,6 @@ export const DataflowRepository = {
 
   getDatasetsProvidersStatus: async dataflowId =>
     await HTTPRequester.get({ url: getUrl(DataflowConfig.getDatasetsProvidersStatus, { dataflowId }) }),
-
 
   getRepresentativesUsersList: async dataflowId =>
     await HTTPRequester.get({ url: getUrl(DataflowConfig.getRepresentativesUsersList, { dataflowId }) }),
@@ -137,13 +138,29 @@ export const DataflowRepository = {
   getIcebergTables: async ({ dataflowId, providerId, datasetId }) =>
     await HTTPRequester.get({ url: getUrl(DataflowConfig.getIcebergTables, { dataflowId, providerId, datasetId }) }),
 
-  getRepresentativeCode:async selectedRepresentatives =>
+  getEditStatus: async ({ dataflowId, providerId }) => {
+    return await HTTPRequester.get({
+      url: getUrl(DataflowConfig.getEditStatus, { dataflowId, providerId })
+    });
+  },
+
+  getRepresentativeCode: async selectedRepresentatives =>
     await HTTPRequester.get({ url: getUrl(DataflowConfig.getRepresentativeCode, { selectedRepresentatives }) }),
 
   getSchemasValidation: async dataflowId =>
     await HTTPRequester.get({ url: getUrl(DataflowConfig.getSchemasValidation, { dataflowId }) }),
 
-  update: async (dataflowId, name, description, obligationId, isReleasable, showPublicInfo, bigData, dataProviderGroupId,deadlineDate) =>
+  update: async (
+    dataflowId,
+    name,
+    description,
+    obligationId,
+    isReleasable,
+    showPublicInfo,
+    bigData,
+    dataProviderGroupId,
+    deadlineDate
+  ) =>
     await HTTPRequester.update({
       url: getUrl(DataflowConfig.createUpdate),
       data: {

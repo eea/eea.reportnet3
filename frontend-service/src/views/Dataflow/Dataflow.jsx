@@ -91,7 +91,7 @@ export const Dataflow = () => {
     designDatasetSchemas: [],
     formHasLeadReporters: false,
     hasCustodianPermissions: false,
-    hasIcebergTables: false,
+    hasEnableEditingDatasets: false,
     hasReporters: false,
     hasRepresentativesWithoutDatasets: false,
     hasWritePermissions: false,
@@ -307,7 +307,6 @@ export const Dataflow = () => {
       setIsDownloadingUsers(false);
     }
   }, [notificationContext.hidden]);
-
 
   const exportImportMenuItems = [
     {
@@ -851,8 +850,12 @@ export const Dataflow = () => {
         navigate(getUrl(routes.REFERENCE_DATAFLOW, { referenceDataflowId: dataflowId }, true));
       }
 
-      const icebergTables =
-        dataProviderId && (await DataflowService.getIcebergTables({ dataflowId, providerId: dataProviderId }));
+      let icebergTables, isEditingEnabled;
+
+      dataProviderId &&
+        (dataflow.bigData
+          ? (icebergTables = await DataflowService.getIcebergTables({ dataflowId, providerId: dataProviderId }))
+          : (isEditingEnabled = await DataflowService.getEditStatus({ dataflowId, providerId: dataProviderId })));
 
       dataflowDispatch({ type: 'SET_IS_FETCHING_DATA', payload: { isFetchingData: false } });
       dataflowDispatch({
@@ -867,7 +870,7 @@ export const Dataflow = () => {
             label: dataflow.dataProviderGroupName
           },
           description: dataflow.description,
-          hasIcebergTables: !isEmpty(icebergTables?.data),
+          hasEnableEditingDatasets: dataflow.bigData ? !isEmpty(icebergTables?.data) : isEditingEnabled?.data,
           isAutomaticReportingDeletion: dataflow.isAutomaticReportingDeletion,
           isReleasable: dataflow.isReleasable,
           name: dataflow.name,
@@ -990,7 +993,8 @@ export const Dataflow = () => {
         notification.key === 'RELEASE_BLOCKED_EVENT' ||
         notification.key === 'RELEASE_BLOCKERS_FAILED_EVENT' ||
         notification.key === 'ADD_DATASET_SNAPSHOT_FAILED_EVENT' ||
-        notification.key === 'RELEASE_FAILED_ICEBERG_EXISTS_EVENT'
+        notification.key === 'RELEASE_FAILED_ICEBERG_EXISTS_EVENT' ||
+        notification.key === 'RELEASE_FAILED_DATASET_LOCKED_FOR_EDITING_EXISTS_EVENT'
     );
 
     dataflowState.data.datasets.forEach(dataset => {
@@ -1014,14 +1018,14 @@ export const Dataflow = () => {
     }
   }, [notificationContext.hidden]);
 
-
   useCheckNotifications(
     [
       'RELEASE_FAILED_EVENT',
       'RELEASE_BLOCKED_EVENT',
       'RELEASE_BLOCKERS_FAILED_EVENT',
       'ADD_DATASET_SNAPSHOT_FAILED_EVENT',
-      'RELEASE_FAILED_ICEBERG_EXISTS_EVENT'
+      'RELEASE_FAILED_ICEBERG_EXISTS_EVENT',
+      'RELEASE_FAILED_DATASET_LOCKED_FOR_EDITING_EXISTS_EVENT'
     ],
     setIsReleasingDatasetsProviderId,
     false
@@ -1089,17 +1093,9 @@ export const Dataflow = () => {
       }
 
       if (isSilent) {
-        await SnapshotService.silentRelease(
-          dataflowId,
-          dataProviderId,
-          dataflowState.restrictFromPublic
-        );
+        await SnapshotService.silentRelease(dataflowId, dataProviderId, dataflowState.restrictFromPublic);
       } else {
-        await SnapshotService.release(
-          dataflowId,
-          dataProviderId,
-          dataflowState.restrictFromPublic
-        );
+        await SnapshotService.release(dataflowId, dataProviderId, dataflowState.restrictFromPublic);
       }
       dataflowState.data.datasets
         .filter(dataset => dataset.dataProviderId === dataProviderId)
@@ -1108,19 +1104,12 @@ export const Dataflow = () => {
       if (!isSilent && error.response && error.response.status === 423) {
         notificationContext.add({ type: 'RELEASE_BLOCKED_EVENT' }, true);
       } else {
-        console.error(
-          `Dataflow - onConfirm${isSilent ? 'Silent' : ''}Release.`,
-          error
-        );
-        const errorType = isSilent
-          ? 'SILENT_RELEASE_FAILED_EVENT'
-          : 'RELEASE_FAILED_EVENT';
+        console.error(`Dataflow - onConfirm${isSilent ? 'Silent' : ''}Release.`, error);
+        const errorType = isSilent ? 'SILENT_RELEASE_FAILED_EVENT' : 'RELEASE_FAILED_EVENT';
         notificationContext.add({ type: errorType, content: {} }, true);
       }
     } finally {
-      const dialogKey = isSilent
-        ? 'isReleaseSilentDialogVisible'
-        : 'isReleaseDialogVisible';
+      const dialogKey = isSilent ? 'isReleaseSilentDialogVisible' : 'isReleaseDialogVisible';
       manageDialogs(dialogKey, false);
     }
   };
@@ -1410,18 +1399,23 @@ export const Dataflow = () => {
 
   const getSubtitle = () => {
     let subtitle;
-    if (parseInt(representativeId) === 0) {
-      subtitle = dataflowState.data.name;
+
+    if (isInsideACountry && !isNil(country) && country.length > 0) {
+      subtitle = dataflowState.data.sncData
+        ? dataflowState.data.bigData
+          ? TextUtils.parseText(resourcesContext.messages['sncBigDataDataflowNamed'], {
+              name: dataflowState.data.name
+            })
+          : TextUtils.parseText(resourcesContext.messages['sncCitusDataflowNamed'], { name: dataflowState.data.name })
+        : dataflowState.data.name;
     } else {
-      if (isInsideACountry && !isNil(country) && country.length > 0) {
-        subtitle = dataflowState.data.bigData
-          ? TextUtils.parseText(resourcesContext.messages['bigDataDataflowNamed'], { name: dataflowState.data.name })
-          : dataflowState.data.name;
-      } else {
-        subtitle = dataflowState.data.bigData
-          ? resourcesContext.messages['bigDataDataflow']
-          : resourcesContext.messages['dataflow'];
-      }
+      subtitle = dataflowState.data.sncData
+        ? dataflowState.data.bigData
+          ? resourcesContext.messages['sncBigDataNoName']
+          : resourcesContext.messages['sncCitusNoName']
+        : dataflowState.data.bigData
+        ? resourcesContext.messages['bigDataDataflow']
+        : resourcesContext.messages['dataflow'];
     }
 
     if (dataflowState.data.deleted) {

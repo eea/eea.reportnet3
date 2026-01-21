@@ -14,7 +14,8 @@ export const euDatasetReducer = (state, { type, payload }) => {
         ...state,
         bigData: payload.bigData,
         dataflowName: payload.name,
-        dataflowType: payload.dataflowType
+        dataflowType: payload.dataflowType,
+        sncData: payload.sncData
       };
 
     case 'GET_EXPORT_EXTENSIONS_LIST':

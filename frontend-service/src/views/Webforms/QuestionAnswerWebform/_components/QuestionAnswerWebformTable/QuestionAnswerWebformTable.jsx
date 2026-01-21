@@ -26,6 +26,7 @@ export const QuestionAnswerWebformTable = ({
   dataflowId,
   datasetId,
   errorMessages,
+  isEditor,
   isIcebergCreated,
   isLoadingIceberg,
   schemaTables,
@@ -135,7 +136,7 @@ export const QuestionAnswerWebformTable = ({
         style={
           bigData && isLoadingIceberg
             ? { opacity: 0.5, pointerEvents: 'none' }
-            : !bigData || isIcebergCreated
+            : isEditor
             ? { opacity: 1 }
             : { opacity: 0.5, pointerEvents: 'none' }
         }>

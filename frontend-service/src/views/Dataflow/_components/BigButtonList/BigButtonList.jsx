@@ -158,6 +158,11 @@ export const BigButtonList = ({
 
   useCheckNotifications(['ADD_DATACOLLECTION_FAILED_EVENT'], changeIsActiveButtonState, true);
   useCheckNotifications(['ADD_DATACOLLECTION_FAILED_EVENT_ICEBERG_EXISTS'], changeIsActiveButtonState, true);
+  useCheckNotifications(
+    ['ADD_DATACOLLECTION_FAILED_EVENT_DATASET_LOCKED_FOR_EDITING_EXISTS'],
+    changeIsActiveButtonState,
+    true
+  );
   useCheckNotifications(['UPDATE_DATACOLLECTION_COMPLETED_EVENT'], onUpdateData);
   useCheckNotifications(['UPDATE_DATACOLLECTION_COMPLETED_EVENT'], changeIsActiveButtonState, true);
   useCheckNotifications(['ADD_DATACOLLECTION_COMPLETED_EVENT'], changeIsActiveButtonState, true);
@@ -388,7 +393,12 @@ export const BigButtonList = ({
       setIsQCsNotValidWarningVisible(true);
       changeIsActiveButtonState(true);
       setIsActiveButton(true);
-    } else if (notificationContext.hidden.find(notification => notification.key === 'EMPTY_TABLE_EVENT' && notification.content.dataflowId === Number(dataflowId))) {
+    } else if (
+      notificationContext.hidden.find(
+        notification =>
+          notification.key === 'EMPTY_TABLE_EVENT' && notification.content.dataflowId === Number(dataflowId)
+      )
+    ) {
       setEmptyTable(true);
       setIsQCsNotValidWarningVisible(false);
       setIsActiveButton(true);

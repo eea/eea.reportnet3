@@ -2,6 +2,9 @@ package org.eea.validation.util;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.validation.persistence.data.domain.DatasetValidation;
@@ -13,6 +16,7 @@ import org.eea.validation.persistence.data.domain.RecordValue;
 import org.eea.validation.persistence.data.domain.TableValidation;
 import org.eea.validation.persistence.data.domain.TableValue;
 import org.eea.validation.persistence.data.domain.Validation;
+import org.springframework.beans.factory.annotation.Value;
 
 /**
  * The Class ValidationRuleDrools.
@@ -20,6 +24,12 @@ import org.eea.validation.persistence.data.domain.Validation;
 public class ValidationRuleDrools {
 
 
+
+  /** The max errors. */
+  @Value(value = "${validation.maximumErrors}")
+  private static int maxErrors;
+  private static final Map<String, AtomicInteger> ruleCallCount =
+    new ConcurrentHashMap<>();
   /**
    * Fill validation.
    *
@@ -33,6 +43,12 @@ public class ValidationRuleDrools {
    */
   public static void fillValidation(DatasetValue dataSetValue, String message, String typeError,
       String ruleId, String tableName, String shortCode, String fieldName) {
+
+    if (reachedMaxErrors(ruleId)) {
+      return;
+    }
+
+
     Validation newValidation = createValidationObject(message, typeError, ruleId,
         EntityTypeEnum.DATASET, tableName, shortCode);
     DatasetValidation datasetValidation = new DatasetValidation();
@@ -57,6 +73,11 @@ public class ValidationRuleDrools {
    */
   public static void fillValidation(TableValue tableValue, String message, String typeError,
       String ruleId, String tableName, String shortCode, String fieldName) {
+
+    if (reachedMaxErrors(ruleId)) {
+      return;
+    }
+
     Validation newValidation = createValidationObject(message, typeError, ruleId,
         EntityTypeEnum.TABLE, tableName, shortCode);
     TableValidation tableValidation = new TableValidation();
@@ -81,6 +102,10 @@ public class ValidationRuleDrools {
    */
   public static void fillValidation(FieldValue fieldValue, String message, String typeError,
       String ruleId, String tableName, String shortCode, String fieldName) {
+
+    if (reachedMaxErrors(ruleId)) {
+      return;
+    }
 
     Validation newValidation = createValidationObject(message, typeError, ruleId,
         EntityTypeEnum.FIELD, tableName, shortCode);
@@ -107,6 +132,11 @@ public class ValidationRuleDrools {
    */
   public static void fillValidation(RecordValue recordValue, String message, String typeError,
       String ruleId, String tableName, String shortCode, String fieldName) {
+
+    if (reachedMaxErrors(ruleId)) {
+      return;
+    }
+
     Validation newValidation = createValidationObject(message, typeError, ruleId,
         EntityTypeEnum.RECORD, tableName, shortCode);
     RecordValidation recordValidation = new RecordValidation();
@@ -146,4 +176,17 @@ public class ValidationRuleDrools {
     return newValidation;
   }
 
+
+  private static boolean reachedMaxErrors(String ruleId) {
+    AtomicInteger counter =
+      ruleCallCount.computeIfAbsent(ruleId, r -> new AtomicInteger(0));
+
+    // increment and check limit
+    int currentCount = counter.incrementAndGet();
+    if (maxErrors == 0) maxErrors = 1001;
+    if (currentCount > maxErrors) {
+      return true;
+    }
+    return false;
+  }
 }

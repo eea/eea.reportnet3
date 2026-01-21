@@ -929,6 +929,8 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
     }
 
     ThreadPropertiesManager.setVariable("user", user);
+    DataFlowVO dataflow = dataflowControllerZull.getMetabaseById(dataflowId);
+    Boolean isBigDataflow = dataflow != null ? dataflow.getBigData() : null;
 
     LOG.info("The user invoking DataSetSnaphotControllerImpl.createReleaseSnapshots for dataflowId {} and dataProviderId {} with jobId {} is {}",
             dataflowId, dataProviderId, jobId, user);
@@ -970,8 +972,45 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
         }
       }
     }
+    //check Locks for Citus
+    if (!Boolean.TRUE.equals(isBigDataflow)) {
+      List<Long> datasetIds = datasets.stream()
+              .map(ReportingDatasetVO::getId)
+              .collect(Collectors.toList());
 
-    DataFlowVO dataflow = dataflowControllerZull.getMetabaseById(dataflowId);
+      if (datasetTableService.isAnyDatasetBeingEdited(datasetIds)) {
+        LOG.info("Can not release for dataflowId {} and dataProviderId {} because a dataset is locked for editing",
+                dataflowId, dataProviderId);
+
+        if (jobId != null) {
+          jobControllerZuul.updateJobInfo(jobId,
+                  JobInfoEnum.ERROR_DATASET_IS_LOCKED_FOR_EDITING, null);
+          jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FAILED);
+          datasetSnapshotService.releaseLocksRelatedToRelease(dataflowId, dataProviderId);
+
+          if (!silentRelease) {
+            Map<String, Object> value = new HashMap<>();
+            value.put(LiteralConstants.USER, user);
+            value.put("release_job_id", jobId);
+            kafkaSenderUtils.releaseNotificableKafkaEvent(
+                    EventType.RELEASE_FAILED_DATASET_LOCKED_FOR_EDITING_EXISTS_EVENT,
+                    value,
+                    NotificationVO.builder()
+                            .user(user)
+                            .dataflowId(dataflowId)
+                            .providerId(dataProviderId)
+                            .error("There is a dataset locked for editing for dataflowId "
+                                    + dataflowId + " and providerId " + dataProviderId)
+                            .build());
+          }
+        }
+
+        throw new Exception("Can not release for dataflowId " + dataflowId
+                + " and dataProviderId " + dataProviderId
+                + " because at least one dataset is locked for editing");
+      }
+    }
+
     if (null != dataflow && dataflow.isReleasable()) {
       try {
         datasetSnapshotService.createReleaseSnapshots(dataflowId, dataProviderId,

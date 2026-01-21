@@ -19,6 +19,7 @@ export const Webforms = ({
   dataflowId,
   dataProviderId,
   datasetId,
+  isEditor,
   isIcebergCreated,
   isLoadingIceberg,
   isReleasing,
@@ -96,6 +97,7 @@ export const Webforms = ({
           datasetId={datasetId}
           hideEntities={selectedConfiguration?.hideEntities}
           hideTabularData={selectedConfiguration?.hideTabularData}
+          isEditor={isEditor}
           isIcebergCreated={isIcebergCreated}
           isLoadingIceberg={isLoadingIceberg}
           isReleasing={isReleasing}
@@ -115,6 +117,7 @@ export const Webforms = ({
           dataflowId={dataflowId}
           dataProviderId={dataProviderId}
           datasetId={datasetId}
+          isEditor={isEditor}
           isIcebergCreated={isIcebergCreated}
           isLoadingIceberg={isLoadingIceberg}
           isReleasing={isReleasing}
@@ -132,6 +135,7 @@ export const Webforms = ({
           dataflowId={dataflowId}
           dataProviderId={dataProviderId}
           datasetId={datasetId}
+          isEditor={isEditor}
           isIcebergCreated={isIcebergCreated}
           isLoadingIceberg={isLoadingIceberg}
           isReporting={isReporting}
@@ -146,6 +150,7 @@ export const Webforms = ({
           dataflowId={dataflowId}
           dataProviderId={dataProviderId}
           datasetId={datasetId}
+          isEditor={isEditor}
           isIcebergCreated={isIcebergCreated}
           isLoadingIceberg={isLoadingIceberg}
           isReporting={isReporting}

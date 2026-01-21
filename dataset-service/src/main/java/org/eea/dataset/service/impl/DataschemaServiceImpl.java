@@ -85,7 +85,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.Future;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 /**
  * The Class DataschemaServiceImpl.
@@ -3693,6 +3692,12 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     if (fieldName != null && fieldName.chars().anyMatch(Character::isWhitespace)) {
       throw new EEAException(EEAErrorMessage.FIELD_NAME_WHITESPACES);
     }
+  }
+
+  @Override
+  public boolean isReferenceSchema(String datasetSchemaId){
+    DataSetSchemaVO schema = getDataSchemaById(datasetSchemaId);
+    return schema != null && Boolean.TRUE.equals(schema.getReferenceDataset());
   }
 
 }

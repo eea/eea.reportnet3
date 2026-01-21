@@ -29,6 +29,7 @@ export const PaMsWebformTable = ({
   datasetId,
   datasetSchemaId,
   getFieldSchemaId = () => ({ fieldSchema: undefined, fieldId: undefined }),
+  isEditor,
   isGroup,
   isIcebergCreated,
   isLoadingIceberg,
@@ -425,7 +426,7 @@ export const PaMsWebformTable = ({
           style={
             bigData && (isLoadingIceberg || !allManualCheck)
               ? { opacity: 0.5, pointerEvents: 'none' }
-              : !bigData || isIcebergCreated
+              : isEditor
               ? { opacity: 1 }
               : { opacity: 0.5, pointerEvents: 'none' }
           }>

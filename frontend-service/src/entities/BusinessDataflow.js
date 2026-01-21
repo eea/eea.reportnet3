@@ -20,6 +20,7 @@ export class BusinessDataflow {
     reportingDatasetsStatus,
     representatives,
     requestId,
+    sncData,
     status,
     testDatasets,
     type,
@@ -46,6 +47,7 @@ export class BusinessDataflow {
     this.reportingDatasetsStatus = reportingDatasetsStatus;
     this.representatives = representatives;
     this.requestId = requestId;
+    this.sncData = sncData;
     this.status = status;
     this.testDatasets = testDatasets;
     this.type = type;

@@ -38,6 +38,7 @@ export const TableManagement = ({
   datasetId,
   disableActionButtons = false,
   isAddingRootTableId = false,
+  isEditor,
   isIcebergCreated,
   loading,
   onRefresh,
@@ -403,6 +404,7 @@ export const TableManagement = ({
       <ActionsColumn
         bigData={bigData}
         disabledButtons={disableActionButtons}
+        isEditor={isEditor}
         isIcebergCreated={isIcebergCreated}
         onDeleteClick={() => {
           tableManagementDispatch({ type: 'SET_SELECTED_RECORD', payload: rowData });
@@ -613,7 +615,6 @@ export const TableManagement = ({
           scrollable={true}
           sortField={sort.sortField}
           sortOrder={sort.sortOrder}
-          summary={resourcesContext.messages['webformEntitiesTitle']}
           totalRecords={
             valueFilter && valueFilter !== ''
               ? tableManagementState.totalFilteredRecords

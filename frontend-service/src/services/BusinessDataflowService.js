@@ -33,8 +33,16 @@ export const BusinessDataflowService = {
     };
   },
 
-  create: async (name, description, obligationId, dataProviderGroupId, fmeUserId, bigData) =>
-    BusinessDataflowRepository.create(name, description, obligationId, dataProviderGroupId, fmeUserId, bigData),
+  create: async (name, description, obligationId, dataProviderGroupId, fmeUserId, bigData, sncData) =>
+    BusinessDataflowRepository.create(
+      name,
+      description,
+      obligationId,
+      dataProviderGroupId,
+      fmeUserId,
+      bigData,
+      sncData
+    ),
 
   update: async (dataflowId, description, obligationId, name, dataProviderGroupId, fmeUserId, bigData) =>
     BusinessDataflowRepository.update(

@@ -36,6 +36,7 @@ export const WebformView = ({
   datasetSchemaId,
   getFieldSchemaId,
   isAddingPamsId = false,
+  isEditor,
   isIcebergCreated,
   isLoadingIceberg,
   isRefresh,
@@ -224,11 +225,7 @@ export const WebformView = ({
     return renderTable(combinatedTableValues);
   };
 
-  const renderTable = fields => (
-    <DataTable summary={resourcesContext.messages['webformPaMsTitle']} value={fields}>
-      {renderColumns(fields)}
-    </DataTable>
-  );
+  const renderTable = fields => <DataTable value={fields}>{renderColumns(fields)}</DataTable>;
 
   const onChangeWebformTab = name => {
     Object.keys(isVisible).forEach(tab => {
@@ -279,6 +276,7 @@ export const WebformView = ({
         datasetId={datasetId}
         datasetSchemaId={datasetSchemaId}
         getFieldSchemaId={getFieldSchemaId}
+        isEditor={isEditor}
         isGroup={isGroup}
         isIcebergCreated={isIcebergCreated}
         isLoadingIceberg={isLoadingIceberg}

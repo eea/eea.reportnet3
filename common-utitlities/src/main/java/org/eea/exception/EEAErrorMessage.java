@@ -893,6 +893,12 @@ public final class EEAErrorMessage {
   /** The Constant ERROR_ILLEGAL_HEADER_CHARACTER */
   public static final String ERROR_ILLEGAL_HEADER_CHARACTER = "There's an Illegal character in field header ";
 
+  /** The Constant DATASET_IS_LOCKED */
+  public static final String DATASET_IS_LOCKED_FOR_EDITING = "The dataset is locked for editing  ";
+
+  /** The Constant DATA_COLLECTION_FAILED_ICEBERG_EXISTS: {@value}. */
+  public static final String DATA_COLLECTION_FAILED_DATASET_LOCKED_FOR_EDITING_EXISTS = "Error creating data collection. Dataset locked for editing exists";
+
   /**
    * Instantiates a new EEA error message.
    */
