@@ -43,7 +43,7 @@ const getWebformTabs = (allTables = [], schemaTables, configTables = {}) => {
 
 /*Added the function below in order to accept selectedTableName value and simplify the previous getWebformTabs. For now I kept both functions and just renamed the new one so that it can be used only in Pams WebformView and don't break other places that the first function is called. Should consider removing the first getWebformTabs entirely and use the new one everywhere*/
 
-const getPamsWebformTabs = (allTables = [], schemaTables = [], selectedTableName = '') => {
+const getPamsWebformTabs = (allTables = [], schemaTables = [], configTables = [], selectedTableName = '') => {
   let activeTable = selectedTableName;
 
   if (!activeTable) {
