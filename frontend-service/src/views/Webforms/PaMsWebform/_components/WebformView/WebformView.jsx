@@ -52,11 +52,11 @@ export const WebformView = ({
   const resourcesContext = useContext(ResourcesContext);
 
   const tableSchemaNames = state.schemaTables.map(table => table.name);
-  const { getWebformTabs } = WebformsUtils;
+  const { getPamsWebformTabs } = WebformsUtils;
 
   const [webformViewState, webformViewDispatch] = useReducer(webformViewReducer, {
     isLoading: false,
-    isVisible: getWebformTabs(
+    isVisible: getPamsWebformTabs(
       tables.map(table => table.name),
       state.schemaTables,
       tables,
