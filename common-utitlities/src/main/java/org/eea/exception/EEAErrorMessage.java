@@ -286,6 +286,10 @@ public final class EEAErrorMessage {
   public static final String DATASET_NOT_BELONG_DATAFLOW =
       "Forbidden: Dataset %d does not belongs to dataflow %d";
 
+  /** The Constant DATAFLOW_NOT_BELONG_DATAFLOW: {@value}. */
+  public static final String DATAFLOW_NOT_BELONG_DATAFLOW =
+          "Forbidden: Dataflow %d is not big data";
+
   /** The Constant UNREPORTED_DATA: {@value}. */
   public static final String UNREPORTED_DATA = "Unreported data";
 

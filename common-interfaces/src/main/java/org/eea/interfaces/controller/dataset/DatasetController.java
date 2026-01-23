@@ -496,6 +496,26 @@ public interface DatasetController {
       @RequestParam(value = "replaceData", required = false) Boolean replaceData);
 
   /**
+   * Etl import dataset Big Data.
+   *
+   * @param datasetId the dataset id
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
+   * @param replaceData the provider id
+   * @param tableSchemaId the table schema id
+   * @param delimiter
+   * @param filePathInS3
+   */
+  @PostMapping("/{datasetId}/etlImportDL")
+  Map<String, Object> etlImportDatasetDL(@PathVariable("datasetId") Long datasetId, @RequestParam("dataflowId") Long dataflowId,
+                                       @RequestParam(value = "providerId", required = false) Long providerId,
+                                       @RequestParam(value = "replaceData", required = false) Boolean replaceData,
+                                       @RequestParam(value = "tableSchemaId") String tableSchemaId,
+                                       @RequestParam(value = "delimiter") String delimiter,
+                                       @RequestBody String filePathInS3) throws Exception;
+
+
+  /**
    * Gets the attachment.
    *
    * @param datasetId the dataset id
@@ -963,7 +983,8 @@ public interface DatasetController {
    * @param replace the replace
    * @param integrationId the integrationId
    * @param delimiter the delimiter
-   *
+   * @param fileName
+   * @param etlImport
    */
   @GetMapping("/{datasetId}/generateImportPresignedUrl")
   JobPresignedUrlInfo generateImportPresignedUrl(@PathVariable("datasetId") Long datasetId,
@@ -973,7 +994,8 @@ public interface DatasetController {
            @RequestParam(value = "replace", required = false) boolean replace,
            @RequestParam(value = "integrationId", required = false) Long integrationId,
            @RequestParam(value = "delimiter", required = false) String delimiter,
-           @RequestParam(value = "fileName", required = false) String fileName);
+           @RequestParam(value = "fileName", required = false) String fileName,
+           @RequestParam(value = "etlImport", required = false) Boolean etlImport);
 
   /**
    * Convert Parquet To Iceberg Tables

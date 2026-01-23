@@ -104,6 +104,7 @@ import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
+import static org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum.REPORTING;
 import static org.eea.utils.LiteralConstants.*;
 
 
@@ -187,6 +188,8 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
     private static final Pattern CSV_WITH_UUID_PATTERN = Pattern.compile(
             "^.+?_[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\\.csv$"
     );
+
+    private String ETL_IMPORT_FOLDER = "etlImport_%s";
 
     private void deleteCsvFilesWithUuidSuffix(String datasetId) {
         // this method is matching and deleting all csv files that have an ending of a UUID and then `.csv` like:
@@ -493,7 +496,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 if (numberOfWrongFiles == files.size()) {
                     sendWrongFileNameWarning = false;
                     DatasetTypeEnum type = datasetService.getDatasetType(importFileInDremioInfo.getDatasetId());
-                    EventType eventType = DatasetTypeEnum.REPORTING.equals(type) || DatasetTypeEnum.TEST.equals(type)
+                    EventType eventType = REPORTING.equals(type) || DatasetTypeEnum.TEST.equals(type)
                             ? EventType.IMPORT_REPORTING_FAILED_NAMEFILE_EVENT
                             : EventType.IMPORT_DESIGN_FAILED_NAMEFILE_EVENT;
 
@@ -715,12 +718,12 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         if (importFileInDremioInfo.getErrorMessage() != null) {
             if (EEAErrorMessage.ERROR_FILE_NAME_MATCHING.equals(importFileInDremioInfo.getErrorMessage())) {
                 jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.ERROR_WRONG_FILE_NAME, null);
-                eventType = DatasetTypeEnum.REPORTING.equals(type) || DatasetTypeEnum.TEST.equals(type)
+                eventType = REPORTING.equals(type) || DatasetTypeEnum.TEST.equals(type)
                         ? EventType.IMPORT_REPORTING_FAILED_NAMEFILE_EVENT
                         : EventType.IMPORT_DESIGN_FAILED_NAMEFILE_EVENT;
             } else if (EEAErrorMessage.ERROR_FILE_NO_HEADERS_MATCHING.equals(importFileInDremioInfo.getErrorMessage())) {
                 jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.ERROR_NO_HEADERS_MATCHING, null);
-                eventType = DatasetTypeEnum.REPORTING.equals(type) || DatasetTypeEnum.TEST.equals(type)
+                eventType = REPORTING.equals(type) || DatasetTypeEnum.TEST.equals(type)
                         ? EventType.IMPORT_REPORTING_FAILED_NO_HEADERS_MATCHING_EVENT
                         : EventType.IMPORT_DESIGN_FAILED_NO_HEADERS_MATCHING_EVENT;
             } else if (EEAErrorMessage.ERROR_IMPORT_EMPTY_FILES.equals(importFileInDremioInfo.getErrorMessage())) {
@@ -746,7 +749,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 eventType = EventType.IMPORT_WRONG_HEADERS_ERROR_EVENT;
             }
             else {
-                eventType = DatasetTypeEnum.REPORTING.equals(type) || DatasetTypeEnum.TEST.equals(type)
+                eventType = REPORTING.equals(type) || DatasetTypeEnum.TEST.equals(type)
                         ? EventType.IMPORT_REPORTING_DATASET_DATA_FAILED_EVENT
                         : EventType.IMPORT_DESIGN_DATASET_DATA_FAILED_EVENT;
             }
@@ -769,7 +772,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                         SecurityContextHolder.getContext().getAuthentication().getName(), defaultImportProcessPriority, null);
             }
 
-            eventType = DatasetTypeEnum.REPORTING.equals(type) || DatasetTypeEnum.TEST.equals(type)
+            eventType = REPORTING.equals(type) || DatasetTypeEnum.TEST.equals(type)
                     ? EventType.IMPORT_REPORTING_COMPLETED_EVENT
                     : EventType.IMPORT_DESIGN_COMPLETED_EVENT;
 
@@ -947,7 +950,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FINISHED);
 
                 // after the table has been deleted, an event is sent to notify it
-                EventType eventType = DatasetTypeEnum.REPORTING.equals(datasetService.getDatasetType(datasetId))
+                EventType eventType = REPORTING.equals(datasetService.getDatasetType(datasetId))
                         ? EventType.DELETE_TABLE_COMPLETED_EVENT
                         : EventType.DELETE_TABLE_SCHEMA_COMPLETED_EVENT;
                 Map<String, Object> value = new HashMap<>();
@@ -1012,7 +1015,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             if (jobId != null) {
                 jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FINISHED);
 
-                EventType eventType = DatasetTypeEnum.REPORTING.equals(datasetService.getDatasetType(datasetId))
+                EventType eventType = REPORTING.equals(datasetService.getDatasetType(datasetId))
                         ? EventType.DELETE_DATASET_DATA_COMPLETED_EVENT
                         : EventType.DELETE_DATASET_SCHEMA_COMPLETED_EVENT;
 
@@ -2421,7 +2424,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
               if (includeAttachments) {
                 //get attachments if they exist
                 String path = null;
-                if (datasetType.equals(DatasetTypeEnum.DESIGN) || datasetType.equals(DatasetTypeEnum.TEST) || datasetType.equals(DatasetTypeEnum.REPORTING) || datasetType.equals(DatasetTypeEnum.REFERENCE)) {
+                if (datasetType.equals(DatasetTypeEnum.DESIGN) || datasetType.equals(DatasetTypeEnum.TEST) || datasetType.equals(REPORTING) || datasetType.equals(DatasetTypeEnum.REFERENCE)) {
                   path = S3_ATTACHMENTS_TABLE_PATH;
                 } else if (datasetType.equals(DatasetTypeEnum.COLLECTION)) {
                   path = S3_ATTACHMENTS_DC_TABLE_PATH;
@@ -2442,7 +2445,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
               if (includeAttachments) {
                 //get attachments if they exist
                 String path = null;
-                if (datasetType.equals(DatasetTypeEnum.DESIGN) || datasetType.equals(DatasetTypeEnum.TEST) || datasetType.equals(DatasetTypeEnum.REPORTING) || datasetType.equals(DatasetTypeEnum.REFERENCE)) {
+                if (datasetType.equals(DatasetTypeEnum.DESIGN) || datasetType.equals(DatasetTypeEnum.TEST) || datasetType.equals(REPORTING) || datasetType.equals(DatasetTypeEnum.REFERENCE)) {
                   path = S3_ATTACHMENTS_PARENT_FOLDER_PATH;
                 } else if (datasetType.equals(DatasetTypeEnum.COLLECTION)) {
                   path = S3_ATTACHMENTS_DC_FOLDER_PATH;
@@ -2914,4 +2917,211 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             );
         }
     }
+
+    /**
+     * Etl import dataset DL.
+     *
+     * @param datasetId    the dataset id
+     * @param dataflowId the dataflowa id
+     * @param providerId   the provider id
+     * @param replaceData
+     * @param tableSchemaId
+     * @param delimiter
+     * @param filePathInS3
+     * @param jobId
+     * @throws Exception
+     */
+    @Async
+    @Override
+    public void etlImportDataset(Long datasetId, Long dataflowId, Long providerId, Boolean replaceData, String tableSchemaId, String delimiter, String filePathInS3, Long jobId) throws Exception {
+        File etlImportFolder = null;
+        try {
+            //check requirements and fail job if they are not met
+            DatasetTypeEnum datasetTypeEnum = DatasetTypeEnum.REPORTING;//datasetService.getDatasetType(datasetId);
+            DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
+            TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, dataSetMetabaseVO.getDatasetSchema());
+            if (datasetTypeEnum.equals(REPORTING) || datasetTypeEnum.equals((DatasetTypeEnum.TEST))) {
+                if (BooleanUtils.isTrue(tableSchemaVO.getReadOnly())) { //table should not be read only
+                    LOG.error("Failing etlImport with jobId {} because table is read only", jobId);
+                    jobControllerZuul.updateJobStatusAndInfo(jobId, JobStatusEnum.FAILED, JobInfoEnum.ERROR_IMPORT_FAILED_READ_ONLY_TABLE, null);
+                    return;
+                }
+                if (BooleanUtils.isTrue(tableSchemaVO.getFixedNumber())) { // table should not have fixed number of records
+                    LOG.error("Failing etlImport with jobId {} because table has fixed number of records", jobId);
+                    jobControllerZuul.updateJobStatusAndInfo(jobId, JobStatusEnum.FAILED, JobInfoEnum.ERROR_IMPORT_FAILED_FIXED_NUM, null);
+                    return;
+                }
+                Boolean readOnlyFieldsExist = tableSchemaVO.getRecordSchema().getFieldSchema().stream().anyMatch(FieldSchemaVO::getReadOnly);
+                if (BooleanUtils.isTrue(readOnlyFieldsExist)) { //table should not have read only fields
+                    LOG.error("Failing etlImport with jobId {} because table contains read only fields", jobId);
+                    jobControllerZuul.updateJobStatusAndInfo(jobId, JobStatusEnum.FAILED, JobInfoEnum.ERROR_IMPORT_FAILED_READ_ONLY_FIELDS, null);
+                    return;
+                }
+            }
+            //download file from filePathInS3 and store it in the disk.
+            String fileExtension = getFileExtensionFromFilePath(filePathInS3);
+            if (!fileExtension.equals(".zip")) {
+                LOG.error("Failing etlImport with jobId {} because file is not zip", jobId);
+                jobControllerZuul.updateJobStatusAndInfo(jobId, JobStatusEnum.FAILED, JobInfoEnum.ERROR_IMPORT_FAILED_FILE_NOT_ZIP, null);
+                return;
+            }
+
+            //store zip file
+            File importParentfolder = new File(importPath + "/" + datasetId);
+            if (!importParentfolder.exists()) {
+                importParentfolder.mkdir();
+            }
+
+            //create etlImport folder if it doesn't exist
+            etlImportFolder = new File(importParentfolder.getCanonicalPath() + "/" + String.format(ETL_IMPORT_FOLDER, jobId));
+            if (!etlImportFolder.exists()) {
+                etlImportFolder.mkdir();
+            }
+
+            List<File> csvFiles = storeAndUnzipEtlImportZipFile(datasetId, filePathInS3, fileExtension, jobId, etlImportFolder);
+            if(csvFiles == null){ // job has already failed
+                return;
+            }
+
+            //TODO
+            //begin csv import
+            //handle attachments
+
+            LOG.info("Completed etlImport for jobId {}", jobId);
+            jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FINISHED);
+        }
+        catch (Exception e){
+            LOG.error("Unexpected error! Error in etlImportDatasetDL for jobId {} and filePathInS3 {} Message: {}", jobId, filePathInS3, e.getMessage());
+            jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FAILED);
+
+        }
+        finally {
+            //remove csv and attachment files from disk
+            if (etlImportFolder != null && etlImportFolder.exists()){
+                FileUtils.deleteDirectory(etlImportFolder);
+            }
+            //remove file from public S3 if job is finished
+            //todo uncomment the following
+            /*if (jobControllerZuul.findJobById(jobId).getJobStatus() == JobStatusEnum.FINISHED) {
+                s3HelperPublic.deleteFileFromS3(filePathInS3);
+            }*/
+        }
+    }
+
+    private List<File> storeAndUnzipEtlImportZipFile(Long datasetId, String filePathInS3, String fileExtension, Long jobId, File etlImportFolder) throws Exception {
+        String[] filePathInS3Split = filePathInS3.split("/");
+        String fileNameInS3 = filePathInS3Split[filePathInS3Split.length - 1];
+        String filePathStructure = "/" + datasetId + "/" + fileNameInS3;
+        File s3File = null;
+        try {
+            LOG.info("For jobId {} downloading file from s3 in path {} with fileExtension {}", jobId, filePathInS3, fileExtension);
+            s3File = s3HelperPublic.getFileFromS3(filePathInS3, filePathStructure.replace(fileExtension, ""), importPath, fileExtension);
+        } catch (Exception e) {
+            LOG.error("For jobId {} could not find file {} in public s3. Error: {}", jobId, filePathInS3, e.getMessage());
+            jobControllerZuul.updateJobStatusAndInfo(jobId, JobStatusEnum.FAILED, JobInfoEnum.ERROR_NO_FILE_IN_S3, null);
+            return null;
+        }
+
+        List<File> files = new ArrayList<>();
+        try (InputStream input = new FileInputStream(s3File);
+             ZipInputStream zip = new ZipInputStream(input)) {
+
+            ZipEntry entry;
+            while ((entry = zip.getNextEntry()) != null) {
+
+                String entryName = entry.getName();
+
+                File file = new File(etlImportFolder, entryName);
+                String canonicalPath = file.getCanonicalPath();
+                String basePath = etlImportFolder.getCanonicalPath() + File.separator;
+
+                // Zip Slip protection
+                if (!canonicalPath.startsWith(basePath)) {
+                    LOG.error("Zip slip attempt: {}. jobId {}", entryName, jobId);
+                    continue;
+                }
+
+                boolean isDirectory = entry.isDirectory();
+                boolean isRootLevel = !entryName.contains("/");
+
+                boolean allowed = false;
+                boolean isCsv = false;
+
+                if (isRootLevel) {
+                    if (!isDirectory) {
+                        // root-level files must be CSV
+                        String mimeType = datasetService.getMimetype(entryName);
+                        isCsv = FileTypeEnum.CSV.getValue().equalsIgnoreCase(mimeType);
+                        allowed = isCsv;
+                    }
+                } else {
+                    // nested entries must follow strict attachment rules
+                    allowed = isValidAttachmentEntry(entryName, isDirectory);
+                }
+
+
+                if (!allowed) {
+                    LOG.error("Ignored ZIP entry (invalid contract): {}. jobId {}", entryName, jobId);
+                    continue;
+                }
+
+                // do not create directories yet because we only create them if they are not empty
+                if (isDirectory) {
+                    continue;
+                }
+
+                // Ensure parent directories exist
+                file.getParentFile().mkdirs();
+
+                // Write file
+                try (FileOutputStream output = new FileOutputStream(file)) {
+                    IOUtils.copyLarge(zip, output);
+                    LOG.info("Stored file {}. jobId {}", file.getPath(), jobId);
+                }
+
+                // gather root csv files for import
+                if (isCsv && isRootLevel) {
+                    files.add(file);
+                }
+            }
+            // check if csv files for import were provided
+            if (!files.isEmpty()) {
+                return files;
+            } else {
+                LOG.error("Failing etlImport with jobId {} because zip does not contain csv files for import", jobId);
+                jobControllerZuul.updateJobStatusAndInfo(jobId, JobStatusEnum.FAILED, JobInfoEnum.ERROR_ZIP_FOLDER_WITHOUT_CSV_FILES, null);
+                return null;
+            }
+        } catch (Exception e) {
+            LOG.error("Unexpected error! Error in fileManagement for etlImportDL with jobId {} Message: {}", jobId, e.getMessage());
+            throw e;
+        }
+    }
+
+    private static boolean isValidAttachmentEntry(String entryName, boolean isDirectory) {
+        final String prefix = "attachments/";
+        // must start with "attachments/"
+        if (!entryName.startsWith(prefix)) {
+            return false;
+        }
+
+        // if entryName is exactly "attachments" or "attachments/" invalid (empty folder)
+        if (entryName.equals("attachments") || entryName.equals(prefix)) {
+            return false;
+        }
+
+        // now it's safe to take substring
+        String relative = entryName.substring(prefix.length());
+
+        // remove trailing slash
+        if (relative.endsWith("/")) {
+            relative = relative.substring(0, relative.length() - 1);
+        }
+
+        String[] parts = relative.split("/");
+
+        // only allow attachments/tableName/attachmentFile
+        return parts.length == 2 && !isDirectory;
+    }
+
 }

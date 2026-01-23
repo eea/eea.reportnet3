@@ -352,7 +352,11 @@ public class JobControllerImpl implements JobController {
     public Long addEtlImportJob(@PathVariable("datasetId") Long datasetId,
                                 @RequestParam(value = "dataflowId", required = false) Long dataflowId,
                                 @RequestParam(value = "providerId", required = false) Long providerId,
-                                @RequestParam(value = "jobStatus", required = false) JobStatusEnum jobStatus) {
+                                @RequestParam(value = "jobStatus", required = false) JobStatusEnum jobStatus,
+                                @RequestParam(value = "replace", required = false) Boolean replace,
+                                @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,
+                                @RequestParam(value = "delimiter", required = false) String delimiter,
+                                @RequestParam(value = "filePathInS3", required = false) String filePathInS3) {
 
         ThreadPropertiesManager.setVariable("user",
                 SecurityContextHolder.getContext().getAuthentication().getName());
@@ -361,6 +365,10 @@ public class JobControllerImpl implements JobController {
         parameters.put("dataflowId", dataflowId);
         parameters.put("datasetId", datasetId);
         parameters.put("dataProviderId", providerId);
+        parameters.put("tableSchemaId", tableSchemaId);
+        parameters.put("replace", replace);
+        parameters.put("delimiter", delimiter);
+        parameters.put("filePathInS3", filePathInS3);
         JobStatusEnum statusToInsert = JobStatusEnum.IN_PROGRESS;
         if(jobStatus != null){
             statusToInsert = jobStatus;
@@ -1024,6 +1032,26 @@ public class JobControllerImpl implements JobController {
         }
         catch (Exception e){
             LOG.error("Could not retrieve active jobs for dataflowId {} datasetId {} and providerId {} Error: {}", dataflowId, datasetId, providerId, e.getMessage());
+            throw e;
+        }
+    }
+
+    /**
+     * Updates job status and info value
+     * @param jobId
+     * @param jobStatus
+     * @param jobInfo
+     * @param lineNumber
+     */
+    @Override
+    @PostMapping(value = "/private/updateJobStatusAndInfo/{jobId}")
+    public void updateJobStatusAndInfo(@PathVariable("jobId") Long jobId, @RequestParam(value = "jobStatus") JobStatusEnum jobStatus, @RequestParam(value = "jobInfo") JobInfoEnum jobInfo,
+                                       @RequestParam(value = "lineNumber", required = false) Integer lineNumber){
+        try {
+            jobService.updateJobStatus(jobId, jobStatus);
+            jobService.updateJobInfo(jobId, jobInfo, lineNumber, true);
+        } catch (Exception e) {
+            LOG.error("Error while updating job status and info for jobId {} jobStatus and jobInfo {}", jobId, jobStatus, jobInfo.getValue(lineNumber), e);
             throw e;
         }
     }

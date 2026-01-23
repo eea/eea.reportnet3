@@ -13,6 +13,7 @@ import org.eea.interfaces.vo.orchestrator.JobPresignedUrlInfo;
 import org.eea.interfaces.vo.orchestrator.JobVO;
 import org.eea.multitenancy.DatasetId;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
@@ -338,4 +339,19 @@ public interface BigDataDatasetService {
             TableSchemaVO tableSchemaVO,
             String geometryColumn,
             String recordId) throws EEAException;
+
+    /**
+     * Etl import dataset DL.
+     *
+     * @param datasetId    the dataset id
+     * @param dataflowId the dataflowa id
+     * @param providerId   the provider id
+     * @param replaceData
+     * @param tableSchemaId
+     * @param delimiter
+     * @param filePathInS3
+     * @param jobId
+     * @throws EEAException the EEA exception
+     */
+     void etlImportDataset(Long datasetId, Long dataflowId, Long providerId, Boolean replaceData, String tableSchemaId, String delimiter, String filePathInS3, Long jobId) throws Exception;
 }
