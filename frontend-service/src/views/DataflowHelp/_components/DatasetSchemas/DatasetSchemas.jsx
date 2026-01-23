@@ -24,23 +24,24 @@ import { IntegrationService } from 'services/IntegrationService';
 import { UniqueConstraintService } from 'services/UniqueConstraintService';
 import { ValidationService } from 'services/ValidationService';
 
-export const DatasetSchemas = ({ dataflowId, datasetsSchemas, hasCustodianPermissions, onLoadDatasetsSchemas }) => {
+export const DatasetSchemas = ({ dataflowId, datasetsSchemas, hasCustodianPermissions,isLoadingSchemas, onLoadDatasetsSchemas }) => {
   const resourcesContext = useContext(ResourcesContext);
   const notificationContext = useContext(NotificationContext);
 
-  const [isLoading, setIsLoading] = useState(!isEmpty(datasetsSchemas));
+  const [isLoading, setIsLoading] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
   const [extensionsOperationsList, setExtensionsOperationsList] = useState();
   const [uniqueList, setUniqueList] = useState();
   const [qcList, setQCList] = useState();
 
   useEffect(() => {
-    if (!isEmpty(datasetsSchemas)) {
+    if (!isEmpty(datasetsSchemas) && !isLoadingSchemas) {
+      setIsLoading(true);
       getValidationList(datasetsSchemas);
       getUniqueList(datasetsSchemas);
       getExtensionsOperations(datasetsSchemas);
     }
-  }, [datasetsSchemas]);
+  }, [datasetsSchemas, isLoadingSchemas]);
 
   useEffect(() => {
     if (!isUndefined(extensionsOperationsList) && !isUndefined(uniqueList) && !isUndefined(qcList)) {
@@ -419,7 +420,7 @@ export const DatasetSchemas = ({ dataflowId, datasetsSchemas, hasCustodianPermis
   return (
     <Fragment>
       {renderToolbar()}
-      {isLoading ? (
+      {isLoadingSchemas || isLoading ? (
         <Spinner className={styles.positioning} />
       ) : (
         <div>
