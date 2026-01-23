@@ -2937,10 +2937,10 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         File etlImportFolder = null;
         try {
             //check requirements and fail job if they are not met
-            DatasetTypeEnum datasetTypeEnum = DatasetTypeEnum.REPORTING;//datasetService.getDatasetType(datasetId);
-            DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
-            TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, dataSetMetabaseVO.getDatasetSchema());
+            DatasetTypeEnum datasetTypeEnum = datasetService.getDatasetType(datasetId);
             if (datasetTypeEnum.equals(REPORTING) || datasetTypeEnum.equals((DatasetTypeEnum.TEST))) {
+                DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
+                TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, dataSetMetabaseVO.getDatasetSchema());
                 if (BooleanUtils.isTrue(tableSchemaVO.getReadOnly())) { //table should not be read only
                     LOG.error("Failing etlImport with jobId {} because table is read only", jobId);
                     jobControllerZuul.updateJobStatusAndInfo(jobId, JobStatusEnum.FAILED, JobInfoEnum.ERROR_IMPORT_FAILED_READ_ONLY_TABLE, null);
@@ -2966,17 +2966,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 return;
             }
 
-            //store zip file
-            File importParentfolder = new File(importPath + "/" + datasetId);
-            if (!importParentfolder.exists()) {
-                importParentfolder.mkdir();
-            }
-
-            //create etlImport folder if it doesn't exist
-            etlImportFolder = new File(importParentfolder.getCanonicalPath() + "/" + String.format(ETL_IMPORT_FOLDER, jobId));
-            if (!etlImportFolder.exists()) {
-                etlImportFolder.mkdir();
-            }
+            etlImportFolder = createEtlImportFolder(datasetId, jobId);
 
             List<File> csvFiles = storeAndUnzipEtlImportZipFile(datasetId, filePathInS3, fileExtension, jobId, etlImportFolder);
             if(csvFiles == null){ // job has already failed
@@ -3002,13 +2992,13 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             }
             //remove file from public S3 if job is finished
             //todo uncomment the following
-            /*if (jobControllerZuul.findJobById(jobId).getJobStatus() == JobStatusEnum.FINISHED) {
+            if (jobControllerZuul.findJobById(jobId).getJobStatus() == JobStatusEnum.FINISHED) {
                 s3HelperPublic.deleteFileFromS3(filePathInS3);
-            }*/
+            }
         }
     }
 
-    private List<File> storeAndUnzipEtlImportZipFile(Long datasetId, String filePathInS3, String fileExtension, Long jobId, File etlImportFolder) throws Exception {
+    protected List<File> storeAndUnzipEtlImportZipFile(Long datasetId, String filePathInS3, String fileExtension, Long jobId, File etlImportFolder) throws Exception {
         String[] filePathInS3Split = filePathInS3.split("/");
         String fileNameInS3 = filePathInS3Split[filePathInS3Split.length - 1];
         String filePathStructure = "/" + datasetId + "/" + fileNameInS3;
@@ -3122,6 +3112,22 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
         // only allow attachments/tableName/attachmentFile
         return parts.length == 2 && !isDirectory;
+    }
+
+    protected File createEtlImportFolder(Long datasetId, Long jobId) throws Exception {
+        //store zip file
+        File importParentfolder = new File(importPath + "/" + datasetId);
+        if (!importParentfolder.exists()) {
+            importParentfolder.mkdir();
+        }
+
+        //create etlImport folder if it doesn't exist
+        File etlImportFolder = new File(importParentfolder.getCanonicalPath() + "/" + String.format(ETL_IMPORT_FOLDER, jobId));
+        if (!etlImportFolder.exists()) {
+            etlImportFolder.mkdir();
+        }
+
+        return etlImportFolder;
     }
 
 }

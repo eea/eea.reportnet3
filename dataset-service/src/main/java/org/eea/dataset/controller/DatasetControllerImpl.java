@@ -2293,7 +2293,7 @@ public class DatasetControllerImpl implements DatasetController {
       // check if dataflow is big data
       if(!dataFlowControllerZuul.isBigDataflow(dataflowId)){
         LOG.error("Dataflow {} is not big data", dataflowId);
-        throw new ResponseStatusException(HttpStatus.FORBIDDEN, String.format(EEAErrorMessage.DATAFLOW_NOT_BELONG_DATAFLOW, datasetId, dataflowId));
+        throw new ResponseStatusException(HttpStatus.FORBIDDEN, String.format(EEAErrorMessage.DATAFLOW_NOT_BIG_DATA, datasetId, dataflowId));
       }
       // check if dataset is reportable
       if (!datasetService.isDatasetReportable(datasetId)) {
