@@ -11,6 +11,7 @@ import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.communication.NotificationController.NotificationControllerZuul;
 import org.eea.interfaces.controller.dataflow.ContributorController.ContributorControllerZuul;
+import org.eea.interfaces.controller.dataflow.DataFlowController;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataflow.IntegrationController.IntegrationControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetSchemaController;
@@ -35,6 +36,7 @@ import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
 import org.eea.thread.ThreadPropertiesManager;
+import org.jline.utils.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -125,8 +127,10 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @Lazy
   @Autowired
   private BigDataDatasetService bigDataDatasetService;
+    @Autowired
+    private DataFlowControllerZuul dataFlowControllerZuul;
 
-  /**
+    /**
    * Creates the empty dataset schema.
    *
    * @param dataflowId the dataflow id
@@ -146,6 +150,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
                   example = "0") @RequestParam("dataflowId") final Long dataflowId,
           @ApiParam(type = "String", value = "Dataset schema name",
                   example = "abc") @RequestParam("datasetSchemaName") String datasetSchemaName) {
+
 
     String nameTrimmed = datasetSchemaName.trim();
     boolean isSchema = true;
@@ -439,7 +444,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @DeleteMapping(value = "/private/deleteUniqueConstrains", produces = MediaType.APPLICATION_JSON_VALUE)
   public void deleteUniqueConstrainsPrivate(@RequestParam("schemaId") String schemaId) {
     try {
-      dataschemaService.deleteUniquesConstraintFromDataset(schemaId);
+     dataschemaService.deleteUniquesConstraintFromDataset(schemaId);
       LOG.info("Finished deleting Unique constrains for schemaId, {}", schemaId);
     } catch (EEAException e) {
       LOG.error("Error deleting Unique Constrains with schematId {}. Message: {}", schemaId, e.getMessage(), e);
@@ -503,9 +508,12 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
     boolean isSchema = false;
     filterName(nameTrimmed, isSchema);
     tableSchemaVO.setNameTableSchema(nameTrimmed);
+    
+    final Long dataflowId = datasetService.getDataFlowIdById(datasetId);
+    final DataFlowVO dataFlowVO = dataflowControllerZuul.getMetabaseById(dataflowId);
+    final Boolean isBigDataFlow = dataFlowVO.getBigData();
 
-    if (!TypeStatusEnum.DESIGN.equals(dataflowControllerZuul
-            .getMetabaseById(datasetService.getDataFlowIdById(datasetId)).getStatus())) {
+    if (!TypeStatusEnum.DESIGN.equals(dataFlowVO.getStatus())) {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid dataflow status");
     }
 
@@ -515,8 +523,9 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
               SecurityContextHolder.getContext().getAuthentication().getName());
       tableSchemaVO = dataschemaService.createTableSchema(
               dataschemaService.getDatasetSchemaId(datasetId), tableSchemaVO, datasetId);
-      datasetService.saveTablePropagation(datasetId, tableSchemaVO);
-      // recordStoreControllerZuul.createUpdateQueryView(datasetId, false);
+      if (Boolean.FALSE.equals(isBigDataFlow)) {
+          datasetService.saveTablePropagation(datasetId, tableSchemaVO);
+      }
       dataschemaService.releaseCreateUpdateView(datasetId,
               SecurityContextHolder.getContext().getAuthentication().getName(), false);
       LOG.info("Successfully created table schema for datasetId {}", datasetId);
@@ -558,9 +567,12 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
       filterName(nameTrimmed, isSchema);
       tableSchemaVO.setNameTableSchema(nameTrimmed);
     }
-    Long dataflowId = datasetService.getDataFlowIdById(datasetId);
-    if (!TypeStatusEnum.DESIGN.equals(dataflowControllerZuul
-            .getMetabaseById(dataflowId).getStatus())) {
+
+    final Long dataflowId = datasetService.getDataFlowIdById(datasetId);
+    final DataFlowVO dataFlowVO = dataflowControllerZuul.getMetabaseById(dataflowId);
+    final Boolean isBigDataFlow = dataFlowVO.getBigData();
+    
+    if (!TypeStatusEnum.DESIGN.equals(dataFlowVO.getStatus())) {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid dataflow status");
     }
 
@@ -569,8 +581,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
 
     try {
       Boolean updateMaterializedViews = true;
-      Boolean isBigDataflow = dataflowControllerZuul.isBigDataflow(dataflowId);
-      if(Boolean.TRUE.equals(isBigDataflow)){
+      if(Boolean.TRUE.equals(isBigDataFlow)){
         updateMaterializedViews = false;
       }
       dataschemaService.updateTableSchema(datasetId, tableSchemaVO, updateMaterializedViews);
@@ -618,20 +629,22 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
           @ApiParam(type = "String", value = "table Schema Id",
                   example = "5cf0e9b3b793310e9ceca190") @PathVariable("tableSchemaId") String tableSchemaId) throws Exception {
 
-    if (!TypeStatusEnum.DESIGN.equals(dataflowControllerZuul
-            .getMetabaseById(datasetService.getDataFlowIdById(datasetId)).getStatus())) {
+      final Long dataflowId = datasetService.getDataFlowIdById(datasetId);
+      final DataFlowVO dataFlowVO = dataflowControllerZuul.getMetabaseById(dataflowId);
+      final Boolean isBigDataFlow = dataFlowVO.getBigData();
+
+    if (!TypeStatusEnum.DESIGN.equals(dataFlowVO.getStatus())) {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid dataflow status");
     }
 
     try {
       final String datasetSchemaId = dataschemaService.getDatasetSchemaId(datasetId);
       DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
-      Boolean isBigData = dataflowControllerZuul.isBigDataflow(dataSetMetabaseVO.getDataflowId());
 
       LOG.info("Deleting table schema with id {} for datasetId {}",tableSchemaId, datasetId);
 
       //if table is big data remove first data from s3
-      if(BooleanUtils.isTrue(isBigData)){
+      if (BooleanUtils.isTrue(isBigDataFlow)) {
         bigDataDatasetService.deleteTableData(datasetId, dataSetMetabaseVO.getDataflowId(), dataSetMetabaseVO.getDataProviderId(), tableSchemaId, null, false);
       }
 
@@ -647,7 +660,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
       rulesControllerZuul.deleteRuleByReferenceId(datasetSchemaId, tableSchemaId);
 
       //if table is not big data remove citus values and update materialized views
-      if(!BooleanUtils.isTrue(isBigData)){
+      if (!BooleanUtils.isTrue(isBigDataFlow)) {
         datasetService.deleteTableValue(datasetId, tableSchemaId);
         recordStoreControllerZuul.createUpdateQueryView(datasetId, false);
       }
@@ -726,8 +739,12 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
                   example = "0") @PathVariable("datasetId") Long datasetId,
           @ApiParam(value = "Field schema object") @RequestBody final FieldSchemaVO fieldSchemaVO) {
 
+      final Long dataflowId = datasetService.getDataFlowIdById(datasetId);
+      final DataFlowVO dataFlowVO = dataflowControllerZuul.getMetabaseById(dataflowId);
+      final Boolean isBigDataFlow = dataFlowVO.getBigData();
+
     if (!TypeStatusEnum.DESIGN.equals(dataflowControllerZuul
-            .getMetabaseById(datasetService.getDataFlowIdById(datasetId)).getStatus())) {
+            .getMetabaseById(dataflowId).getStatus())) {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid dataflow status");
     }
 
@@ -750,9 +767,12 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
       if (StringUtils.isBlank(response)) {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.INVALID_OBJECTID);
       }
-      // propagate the new field to the existing records in the dataset value
-      datasetService.prepareNewFieldPropagation(datasetId, fieldSchemaVO);
-      // with that we create the rule automatic required
+      
+      if (Boolean.FALSE.equals(isBigDataFlow)) {
+          // propagate the new field to the existing records in the dataset value
+          datasetService.prepareNewFieldPropagation(datasetId, fieldSchemaVO);
+          // with that we create the rule automatic required
+      }
 
       if (Boolean.TRUE.equals(fieldSchemaVO.getRequired())) {
 
@@ -896,8 +916,11 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
                                         example = "5cf0e9b3b793310e9ceca190") @PathVariable("fieldSchemaId") @LockCriteria(
                                         name = "fieldSchemaId") String fieldSchemaId) {
 
-    if (!TypeStatusEnum.DESIGN.equals(dataflowControllerZuul
-            .getMetabaseById(datasetService.getDataFlowIdById(datasetId)).getStatus())) {
+    final Long dataflowId = datasetService.getDataFlowIdById(datasetId);
+    final DataFlowVO dataFlowVO = dataflowControllerZuul.getMetabaseById(dataflowId);
+    final Boolean isBigDataFlow = dataFlowVO.getBigData();
+
+    if (!TypeStatusEnum.DESIGN.equals(dataFlowVO.getStatus())) {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid dataflow status");
     }
 
@@ -922,8 +945,11 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
                 || DataType.EXTERNAL_LINK.equals(fieldVO.getType()))) {
           rulesControllerZuul.deleteRuleByReferenceFieldSchemaPKId(datasetSchemaId, fieldSchemaId);
         }
-        // Delete the fieldSchema from the dataset
-        datasetService.deleteFieldValues(datasetId, fieldSchemaId);
+
+        if (Boolean.FALSE.equals(isBigDataFlow)) {
+            // Delete the fieldSchema from the dataset
+            datasetService.deleteFieldValues(datasetId, fieldSchemaId);
+        }
 
         // Delete the Pk if needed from the catalogue
         dataschemaService.deleteFromPkCatalogue(fieldVO, datasetId);

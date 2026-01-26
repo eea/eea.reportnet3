@@ -943,8 +943,20 @@ public class DataCollectionServiceImpl implements DataCollectionService {
       LOG.info("Metabase changes completed on DataCollection creation");
 
       // 10. Create schemas for each dataset
-      // This method will release the lock
-      recordStoreControllerZuul.createSchemas(datasetIdsAndSchemaIds, dataflowId, isCreation, true);
+      // If this is not a big dataflow create schemas as normally
+      // otherwise skip schema creation and release locks
+      if (!isBigDataflow) {
+          recordStoreControllerZuul.createSchemas(datasetIdsAndSchemaIds, dataflowId, isCreation, true);
+      }
+      else {
+          // Release the lock
+          final String methodSignature = isCreation ? LockSignature.CREATE_DATA_COLLECTION.getValue()
+                  : LockSignature.UPDATE_DATA_COLLECTION.getValue();
+          final Map<String, Object> lockCriteria = new HashMap<>();
+          lockCriteria.put(LiteralConstants.SIGNATURE, methodSignature);
+          lockCriteria.put(LiteralConstants.DATAFLOWID, dataflowId);
+          lockService.removeLockByCriteria(lockCriteria);
+      }
     } catch (SQLException e) {
       LOG.error("Error persisting changes. Rolling back...", e);
       releaseLockAndRollback(connection, dataflowId, isCreation);

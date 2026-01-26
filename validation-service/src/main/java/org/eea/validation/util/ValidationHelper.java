@@ -191,10 +191,14 @@ public class ValidationHelper implements DisposableBean {
   @Autowired
   private JobProcessControllerZuul jobProcessControllerZuul;
 
-  @Autowired
-  private DatasetController.DataSetControllerZuul dataSetControllerZuul;
+    @Autowired
+    private DatasetController.DataSetControllerZuul dataSetControllerZuul;
 
-  /** The Constant DATASET: {@value}. */
+    @Autowired
+    private DatasetSchemaControllerZuul datasetSchemaControllerZuul;
+
+
+    /** The Constant DATASET: {@value}. */
   private static final String DATASET = "dataset_";
 
   /** The data set mapper. */
@@ -935,15 +939,20 @@ public class ValidationHelper implements DisposableBean {
           SecurityContextHolder.getContext().getAuthentication().getName());
 
       TenantResolver.setTenantName(DATASET_PREFIX + datasetId);
-      List<TableValue> tableList = tableRepository.findAll();
-      for (TableValue table : tableList) {
+      final List<TableSchemaIdNameVO> tableList = datasetSchemaControllerZuul
+              .getTableSchemasIds(
+                      datasetMetabaseVO.getId(),
+                      datasetMetabaseVO.getId(),
+                      datasetMetabaseVO.getDataProviderId());
+
+      for (TableSchemaIdNameVO table : tableList) {
         Map<String, Object> mapCriteriaDeleteTable = new HashMap<>();
         mapCriteriaDeleteTable.put(DATASETID, datasetId);
         mapCriteriaDeleteTable.put(TABLESCHEMAID, table.getIdTableSchema());
         createLockWithSignature(LockSignature.DELETE_IMPORT_TABLE, mapCriteriaDeleteTable,
             SecurityContextHolder.getContext().getAuthentication().getName());
       }
-      // We add a lock to the validation processs itself
+      // We add a lock to the validation process itself.
       Map<String, Object> mapCriteriaValidation = new HashMap<>();
       mapCriteriaValidation.put(DATASETID, datasetId);
       createLockWithSignature(LockSignature.FORCE_EXECUTE_VALIDATION, mapCriteriaValidation,
@@ -990,8 +999,14 @@ public class ValidationHelper implements DisposableBean {
     lockService.removeLockByCriteria(mapCriteriaDeleteDataset);
 
     TenantResolver.setTenantName(DATASET_PREFIX + datasetId);
-    List<TableValue> tableList = tableRepository.findAll();
-    for (TableValue table : tableList) {
+
+      final List<TableSchemaIdNameVO> tables = datasetSchemaControllerZuul
+              .getTableSchemasIds(
+                      datasetMetabaseVO.getId(),
+                      datasetMetabaseVO.getId(),
+                      datasetMetabaseVO.getDataProviderId());
+
+    for (TableSchemaIdNameVO table : tables) {
       Map<String, Object> mapCriteriaDeleteTable = new HashMap<>();
       mapCriteriaDeleteTable.put(SIGNATURE,
           LockSignature.DELETE_IMPORT_TABLE.getValue());
@@ -1062,7 +1077,8 @@ public class ValidationHelper implements DisposableBean {
     TenantResolver.setTenantName(DATASET_PREFIX + dataset.getId());
 
     List<TableValue> tableList = tableRepository.findAll();
-    int i = 0;
+
+      int i = 0;
     List<Rule> rules =
         rulesRepository.findSqlRulesEnabled(new ObjectId(dataset.getDatasetSchema()));
     DataSetSchema datasetSchema =
@@ -1210,6 +1226,7 @@ public class ValidationHelper implements DisposableBean {
   public void addValidationTaskToProcess(final String processId, final EventType eventType,
       final Map<String, Object> value) {
     if (checkStartedProcess(processId)) {
+
       EEAEventVO eeaEventVO = new EEAEventVO();
       eeaEventVO.setEventType(eventType);
       value.put("processId", processId);
