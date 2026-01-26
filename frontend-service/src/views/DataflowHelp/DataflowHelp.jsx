@@ -56,7 +56,8 @@ export const DataflowHelp = () => {
   const [isDeletingDocument, setIsDeletingDocument] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingDocuments, setIsLoadingDocuments] = useState(true);
-  const [isLoadingSchemas, setIsLoadingSchemas] = useState(true);
+  const [isLoadingSchemas, setIsLoadingSchemas] = useState(false);
+  const [hasLoadedSchemas, setHasLoadedSchemas] = useState(false);
   const [isLoadingWebLinks, setIsLoadingWeblinks] = useState(false);
   const [isDocumentsWeblinksToolbarVisible, setIsDocumentsWeblinksToolbarVisible] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -106,10 +107,18 @@ export const DataflowHelp = () => {
     fetchDocumentsData();
   }, [isDataUpdated]);
 
-  useEffect(() => {
-    onLoadDatasetsSchemas();
-  }, [hasCustodianPermissions, isAdmin]);
 
+  const onTabClick = e => {
+    setSelectedIndex(e.index);
+
+    // If we click on Dataset Schemas tab, then load the schemas.
+    if (e.index === 2 && !hasLoadedSchemas && !isUndefined(userContext.contextRoles)) {
+      setHasLoadedSchemas(true);
+      setIsLoadingSchemas(true);
+      onLoadDatasetsSchemas();
+    }
+  };
+  
   useCheckNotifications(
     ['DELETE_DOCUMENT_FAILED_EVENT', 'DELETE_DOCUMENT_COMPLETED_EVENT'],
     setIsDeletingDocument,
@@ -190,6 +199,7 @@ export const DataflowHelp = () => {
             });
 
             setDatasetsSchemas(uniqBy(completed, 'datasetSchemaId'));
+            setIsLoadingSchemas(false);
           });
         } else {
           setIsLoadingSchemas(false);
@@ -206,6 +216,7 @@ export const DataflowHelp = () => {
               ).datasetId;
             });
             setDatasetsSchemas(uniqBy(completed, 'datasetSchemaId'));
+            setIsLoadingSchemas(false);
           });
         } else {
           setIsLoadingSchemas(false);
@@ -214,6 +225,7 @@ export const DataflowHelp = () => {
     } catch (error) {
       console.error('DataflowHelp - onLoadDatasetsSchemas.', error);
       notificationContext.add({ type: 'LOAD_DATASETS_ERROR', content: {} }, true);
+      setIsLoadingSchemas(false);
     }
   };
 
@@ -265,7 +277,7 @@ export const DataflowHelp = () => {
           subtitle={dataflowName}
           title={`${resourcesContext.messages['dataflowHelp']} `}
         />
-        <TabView activeIndex={0} hasQueryString={false} name="DataflowHelp" onTabClick={e => setSelectedIndex(e)}>
+        <TabView activeIndex={0} hasQueryString={false} name="DataflowHelp" onTabClick={onTabClick}>
           <TabPanel
             header={resourcesContext.messages['supportingDocuments']}
             headerClassName="dataflowHelp-documents-help-step">
@@ -297,15 +309,15 @@ export const DataflowHelp = () => {
             />
           </TabPanel>
           <TabPanel
-            disabled={isEmpty(datasetsSchemas)}
             header={resourcesContext.messages['datasetSchemas']}
             headerClassName="dataflowHelp-schemas-help-step"
-            rightIcon={isEmpty(datasetsSchemas) && isLoadingSchemas ? config.icons['spinnerAnimate'] : null}>
+            rightIcon={isLoadingSchemas ? config.icons['spinnerAnimate'] : null}>
             <DatasetSchemas
               dataflowId={dataflowId}
               dataflowName={dataflowName}
               datasetsSchemas={datasetsSchemas}
               hasCustodianPermissions={hasCustodianPermissions}
+              isLoadingSchemas={isLoadingSchemas}
               onLoadDatasetsSchemas={onLoadDatasetsSchemas}
             />
           </TabPanel>
