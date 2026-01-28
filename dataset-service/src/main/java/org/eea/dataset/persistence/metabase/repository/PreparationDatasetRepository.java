@@ -39,18 +39,15 @@ public interface PreparationDatasetRepository
             @Param("providerId") Long providerId);
 
     /**
-     * Delete all preparation datasets by dataflow id and provider id.
+     * Check if a preparation dataset exists by dataflow, provider and code.
      *
      * @param dataflowId the dataflow id
      * @param providerId the provider id
+     * @param code the preparation code
+     * @return true if exists
      */
-    @Modifying
-    @Query("DELETE FROM PreparationDataset p "
-            + "WHERE p.dataflowId = :dataflowId "
-            + "AND p.providerId = :providerId")
-    void deleteByDataflowIdAndProviderId(
-            @Param("dataflowId") Long dataflowId,
-            @Param("providerId") Long providerId);
-
-
+    boolean existsByDataflowIdAndProviderIdAndCode(
+            Long dataflowId,
+            Long providerId,
+            String code);
 }

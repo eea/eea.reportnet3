@@ -1,6 +1,8 @@
 package org.eea.dataset.service;
 
 import java.util.List;
+
+import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.PreparationDatasetVO;
 
 /**
@@ -29,22 +31,12 @@ public interface PreparationDatasetService {
     void createPreparationDataset(
             Long dataflowId,
             Long parentDatasetId,
-            PreparationDatasetVO preparationDatasetVO);
+            PreparationDatasetVO preparationDatasetVO) throws EEAException;
 
     /**
      * Delete a preparation dataset by id.
      *
      * @param preparationDatasetId the preparation dataset id
      */
-    void deletePreparationDatasetById(Long preparationDatasetId);
-
-    /**
-     * Delete all preparation datasets by dataflow id and provider id.
-     *
-     * @param dataflowId the dataflow id
-     * @param providerId the provider id
-     */
-    void deleteAllPreparationDatasetsByProviderAndDataflowId(
-            Long dataflowId,
-            Long providerId);
+    void deletePreparationDatasetById(Long preparationDatasetId) throws EEAException;
 }

@@ -33,9 +33,4 @@ public interface PreparationDatasetController {
     @DeleteMapping("/preparations/{id}")
     void deletePreparationDatasetById(
             @PathVariable("id") Long preparationId);
-
-    @DeleteMapping("/preparations")
-    void deleteAllPreparationDatasetsByProviderAndDataflowId(
-            @RequestParam("dataflowId") Long dataflowId,
-            @RequestParam("providerId") Long providerId);
 }
