@@ -423,6 +423,7 @@ export const BigButtonListReference = ({
           <NewDatasetSchemaForm
             dataflowId={dataflowId}
             datasetSchemaInfo={dataflowState.updatedDatasetSchema}
+            datasetSnc={dataflowState.data.sncData}
             onCreate={() => handleDialogs({ dialog: 'isNewDataset', isVisible: false })}
             onUpdateData={onUpdateData}
             setNewDatasetDialog={onToggleNewDatasetDialog}

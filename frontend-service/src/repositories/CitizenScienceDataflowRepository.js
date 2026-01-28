@@ -5,7 +5,7 @@ import { getUrl } from './_utils/UrlUtils';
 import { HTTPRequester } from './_utils/HTTPRequester';
 
 export const CitizenScienceDataflowRepository = {
-  create: async (name, description, obligationId, type, bigData, dataProviderGroupId) =>
+  create: async (name, description, obligationId, type, bigData, dataProviderGroupId,sncData) =>
     await HTTPRequester.post({
       url: getUrl(DataflowConfig.createUpdate),
       data: {
@@ -15,6 +15,7 @@ export const CitizenScienceDataflowRepository = {
         type: 'CITIZEN_SCIENCE',
         bigData,
         dataProviderGroupId,
+        sncData,
         releasable: true
       }
     }),

@@ -21,6 +21,7 @@ import { TextUtils } from 'repositories/_utils/TextUtils';
 export const NewDatasetSchemaForm = ({
   dataflowId,
   datasetSchemaInfo,
+  datasetSnc,
   onCreate,
   onUpdateData,
   setNewDatasetDialog
@@ -194,10 +195,15 @@ export const NewDatasetSchemaForm = ({
             setIsCreateDatasetSchemaConfirmDialogVisible(false);
           }}
           visible={isCreateDatasetSchemaConfirmDialogVisible}>
-          <p
+          {datasetSnc ? <p
+            dangerouslySetInnerHTML={{
+              __html: TextUtils.parseText(resourcesContext.messages['confirmNewDatasetSchemaCreationBodyWithSnc'])
+            }}></p>
+            : <p
             dangerouslySetInnerHTML={{
               __html: TextUtils.parseText(resourcesContext.messages['confirmNewDatasetSchemaCreationBody'])
-            }}></p>
+            }}></p>}
+
         </ConfirmDialog>
       )}
     </Fragment>
