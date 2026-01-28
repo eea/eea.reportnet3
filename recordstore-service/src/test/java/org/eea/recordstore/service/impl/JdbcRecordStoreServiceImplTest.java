@@ -303,7 +303,6 @@ public class JdbcRecordStoreServiceImplTest {
 
     DataFlowVO dataflow = new DataFlowVO();
     dataflow.setBigData(false);
-    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflow);
 
     jdbcRecordStoreService.createDataSnapshot(1L, 1L, 1L, new Date().toString(), false, null);
     Mockito.verify(jdbcTemplate, Mockito.times(1)).query(Mockito.anyString(),
