@@ -2434,10 +2434,10 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       dremioJdbcTemplate.execute(promoteQuery);
       //After failed attachment releases in #296045 we added the following demote and promote in order to refresh metadata again of data collection
       LOG.info("Failover demote promote - Started for {}", dcFolderQueryPath);
-      Thread.sleep(2000);
+      Thread.sleep(5000);
       String demoteQuery = "ALTER TABLE " + dcFolderQueryPath + " FORGET METADATA";
       dremioJdbcTemplate.execute(demoteQuery);
-      Thread.sleep(2000);
+      Thread.sleep(5000);
       dremioJdbcTemplate.execute(promoteQuery);
       LOG.info("Failover demote promote - Ended for {}", dcFolderQueryPath);
 
