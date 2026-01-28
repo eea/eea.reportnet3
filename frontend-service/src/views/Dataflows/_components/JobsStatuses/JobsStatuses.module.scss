@@ -133,7 +133,7 @@ h6 {
 
 .tooltip .tooltiptext {
   visibility: hidden;
-  width: 120px;
+  width: 160px;
   background-color: rgb(83, 83, 83);
   color: #fff;
   text-align: center;
@@ -168,7 +168,7 @@ h6 {
 }
 
 .dialogContent {
-  :global {   
+  :global {
     .p-multiselect-panel {
       width: auto !important;
       min-width: 220px !important;
