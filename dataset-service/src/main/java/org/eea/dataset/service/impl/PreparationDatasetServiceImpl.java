@@ -8,6 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.eea.dataset.persistence.metabase.repository.PreparationDatasetRepository;
 import org.eea.dataset.persistence.metabase.domain.PreparationDataset;
 import org.eea.dataset.service.PreparationDatasetService;
+import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.PreparationDatasetVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -56,18 +57,12 @@ public class PreparationDatasetServiceImpl
     public void createPreparationDataset(
             Long dataflowId,
             Long parentDatasetId,
-            PreparationDatasetVO vo) {
+            PreparationDatasetVO vo) throws EEAException {
 
-        if (vo == null) {
-            throw new IllegalArgumentException("PreparationDatasetVO is mandatory");
-        }
-
-        if (StringUtils.isBlank(vo.getCode())) {
-            throw new IllegalArgumentException("Preparation dataset code is mandatory");
-        }
-
-        if (StringUtils.isBlank(vo.getDatasetName())) {
-            throw new IllegalArgumentException("Preparation dataset name is mandatory");
+        if (preparationDatasetRepository
+                .existsByDataflowIdAndProviderIdAndCode(
+                        dataflowId, vo.getProviderId(), vo.getCode())) {
+            throw new EEAException("Preparation dataset with this code already exists");
         }
 
         PreparationDataset preparationDataset = new PreparationDataset();
@@ -76,27 +71,21 @@ public class PreparationDatasetServiceImpl
         preparationDataset.setParentDatasetId(parentDatasetId);
         preparationDataset.setCode(vo.getCode());
         preparationDataset.setDatasetName(vo.getDatasetName());
-        preparationDataset.setIsCreated(
-                vo.getIsCreated() != null ? vo.getIsCreated() : null);
+        preparationDataset.setIsCreated(Boolean.TRUE.equals(vo.getIsCreated()));
 
         preparationDatasetRepository.save(preparationDataset);
     }
 
-    @Override
-    @Transactional
-    public void deletePreparationDatasetById(Long preparationDatasetId) {
-        preparationDatasetRepository.deleteById(preparationDatasetId);
-    }
-
 
     @Override
     @Transactional
-    public void deleteAllPreparationDatasetsByProviderAndDataflowId(
-            Long dataflowId,
-            Long providerId) {
+    public void deletePreparationDatasetById(Long preparationId) throws EEAException {
 
-        preparationDatasetRepository
-                .deleteByDataflowIdAndProviderId(dataflowId, providerId);
+        if (!preparationDatasetRepository.existsById(preparationId)) {
+            throw new EEAException("Preparation dataset not found");
+        }
+
+        preparationDatasetRepository.deleteById(preparationId);
     }
 
     /**
