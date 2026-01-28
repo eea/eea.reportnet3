@@ -7,6 +7,7 @@ import java.util.List;
 
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import org.apache.commons.lang3.StringUtils;
 import org.eea.dataset.service.PreparationDatasetService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.PreparationDatasetController;
@@ -73,8 +74,25 @@ public class PreparationDatasetControllerImpl
             @ApiResponse(code = 500, message = "Unexpected error")
     })
     @ResponseStatus(HttpStatus.CREATED)
-    public void createPreparationDataset(@Valid
+    public void createPreparationDataset(
             @RequestBody PreparationDatasetVO vo) {
+
+        if (vo.getDataflowId() == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, "dataflowId is required");
+        }
+        if (vo.getProviderId() == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, "providerId is required");
+        }
+        if (StringUtils.isBlank(vo.getCode())) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, "code is required");
+        }
+        if (StringUtils.isBlank(vo.getDatasetName())) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, "datasetName is required");
+        }
 
         try {
             preparationDatasetService.createPreparationDataset(

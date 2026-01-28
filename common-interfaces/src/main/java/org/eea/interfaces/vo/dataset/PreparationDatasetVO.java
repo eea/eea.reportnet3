@@ -1,7 +1,6 @@
 package org.eea.interfaces.vo.dataset;
 
 import lombok.*;
-import javax.validation.constraints.NotNull;
 
 import java.io.Serializable;
 
@@ -27,25 +26,21 @@ public class PreparationDatasetVO implements Serializable {
     /**
      * Parent dataflow id.
      */
-    @NotNull
     private Long dataflowId;
 
     /**
      * Parent provider id.
      */
-    @NotNull
     private Long providerId;
 
     /**
      * Preparation dataset display name.
      */
-    @NotNull
     private String datasetName;
 
     /**
      * Preparation dataset code.
      */
-    @NotNull
     private String code;
 
     /**
