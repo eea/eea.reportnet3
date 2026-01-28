@@ -11,8 +11,8 @@ export const ReferenceDataflowRepository = {
       data: { ...filterBy }
     }),
 
-  create: async (name, description, type, bigData) =>
-    await HTTPRequester.post({ url: getUrl(DataflowConfig.createUpdate), data: { name, description, type, bigData } }),
+  create: async (name, description, type, bigData,sncData) =>
+    await HTTPRequester.post({ url: getUrl(DataflowConfig.createUpdate), data: { name, description, type, bigData,sncData } }),
 
   update: async (dataflowId, description, name, type, bigData) =>
     await HTTPRequester.update({

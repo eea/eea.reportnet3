@@ -62,6 +62,8 @@ import { DataflowsUtils } from './_functions/Utils/DataflowsUtils';
 import { PaginatorRecordsCount } from 'views/_components/DataTable/_functions/Utils/PaginatorRecordsCount';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 import { AddOrganizations } from './_components/AddOrganizations';
+import {Checkbox} from "../_components/Checkbox";
+import {TooltipButton} from "../_components/TooltipButton";
 
 const { permissions } = config;
 
@@ -112,6 +114,33 @@ export const Dataflows = () => {
 
   const { obligation, resetObligations, setObligationToPrevious, setCheckedObligation, setToCheckedObligation } =
     useReportingObligations();
+
+  const renderSncData = (isEditing, forceChecked = false, forceDisabled = false, onChange = null) => {
+    if (!isEditing) {
+      return (
+        <div className={styles.checkboxWrapper}>
+          <Checkbox
+            ariaLabel={resourcesContext.messages['sncData']}
+            checked={forceChecked}
+            disabled={forceDisabled}
+            id="sncDataCheckbox"
+            inputId="sncDataCheckbox"
+            onChange={onChange}
+            role="checkbox"
+          />
+          <label htmlFor="sncDataCheckbox">
+            <span>{resourcesContext.messages['sncData']}</span>
+          </label>
+          <TooltipButton
+            message={resourcesContext.messages['sncDataMessage']}
+            uniqueIdentifier="sncData"
+          />
+        </div>
+      );
+    }
+    return null;
+  };
+
 
   const {
     activeIndex,
@@ -1033,6 +1062,7 @@ export const Dataflows = () => {
           isVisible={dataflowsState.isReferencedDataflowDialogVisible}
           manageDialogs={manageDialogs}
           onCreateDataflow={onCreateDataflow}
+          renderSncData={renderSncData}
         />
       )}
 
@@ -1043,6 +1073,7 @@ export const Dataflows = () => {
           manageDialogs={manageDialogs}
           obligation={obligation}
           onCreateDataflow={onCreateDataflow}
+          renderSncData={renderSncData}
           resetObligations={resetObligations}
         />
       )}
@@ -1103,6 +1134,7 @@ export const Dataflows = () => {
           manageDialogs={manageDialogs}
           obligation={obligation}
           onCreateDataflow={onCreateDataflow}
+          renderSncData={renderSncData}
           resetObligations={resetObligations}
           state={dataflowsState}
         />
@@ -1114,6 +1146,7 @@ export const Dataflows = () => {
           manageDialogs={manageDialogs}
           obligation={obligation}
           onCreateDataflow={onCreateDataflow}
+          renderSncData={renderSncData}
           resetObligations={resetObligations}
           state={dataflowsState}
         />

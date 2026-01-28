@@ -39,7 +39,8 @@ export const ManageReferenceDataflow = ({
   onCreateDataflow,
   onEditDataflow,
   onLoadReferenceDataflow,
-  onUpdateSoftDelete
+  onUpdateSoftDelete,
+  renderSncData
 }) => {
   const dialogName = isEditing ? 'isEditDialogVisible' : 'isReferencedDataflowDialogVisible';
 
@@ -69,6 +70,7 @@ export const ManageReferenceDataflow = ({
   const [isSending, setIsSending] = useState(false);
   const [name, setName] = useState(isEditing ? metadata.name : '');
   const [pinDataflow, setPinDataflow] = useState(false);
+  const [sncData, setSncData] = useState(false);
 
   const deleteInputRef = useRef(null);
   const inputRef = useRef(null);
@@ -186,7 +188,7 @@ export const ManageReferenceDataflow = ({
         manageDialogs(dialogName, false);
         onEditDataflow(name, description);
       } else {
-        const { data } = await ReferenceDataflowService.create(name, description, 'REFERENCE', bigData);
+        const { data } = await ReferenceDataflowService.create(name, description, 'REFERENCE', bigData,sncData === true ? true : undefined);
         if (pinDataflow) {
           const inmUserProperties = { ...userContext.userProps };
           inmUserProperties.pinnedDataflows.push(data.toString());
@@ -285,6 +287,16 @@ export const ManageReferenceDataflow = ({
           </div>
         )}
       </div>
+      {bigData && (
+        <div className="p-toolbar-group-left">
+          {renderSncData && renderSncData(
+            false,
+            sncData,
+            false,
+            () => setSncData(!sncData)
+          )}
+        </div>
+      )}
       <Button
         className={`p-button-primary ${
           !isEmpty(name) && !isEmpty(description) && !isSending && 'p-button-animated-blink'
