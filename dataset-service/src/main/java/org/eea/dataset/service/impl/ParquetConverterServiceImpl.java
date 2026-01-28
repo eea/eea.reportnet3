@@ -46,6 +46,7 @@ import org.eea.exception.DremioApiException;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.orchestrator.JobController.JobControllerZuul;
+import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
@@ -835,6 +836,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
               (!DatasetTypeEnum.DESIGN.equals(datasetType) && BooleanUtils.isTrue(expectedHeader.getReadOnly()) && !BooleanUtils.isTrue(importFileInDremioInfo.getReplaceData()))) {
         //if the field is attachment or replace data is not selected and the field is read only, no value should be inserted
         row.add("");
+        //TODO handle this for etlImport Only
       } else if (fieldType == DataType.TEXTAREA){
         // Resolve the value safely for normal header and then BOM header.
         String value = null;
@@ -1164,6 +1166,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
           else if (expectedHeaderName.equals(LiteralConstants.PARQUET_RECORD_ID_COLUMN_HEADER) || expectedHeaderName.equals(LiteralConstants.PARQUET_PROVIDER_CODE_COLUMN_HEADER) ||
                     fieldType == DataType.ATTACHMENT){
             //we will not update these values
+            //todo for future handling when read only fields are allowed in etlImport
               continue;
           } else if (csvRecord.isMapped(expectedHeaderName)) {
             String value = csvRecord.get(expectedHeaderName);
@@ -1289,6 +1292,11 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
     lastImportFileExtensionStat.setStatName(LAST_IMPORT_FILE_EXTENSION);
     lastImportFileExtensionStat.setValue(fileExtension);
     statisticsService.saveOrUpdateStatistics(lastImportFileExtensionStat);
+  }
+
+  @Override
+  public void handleEtlImportDataset(ImportFileInDremioInfo importFileInDremioInfo, File etlImportFolder, List<File> csvFiles, DataSetSchema dataSetSchema) throws Exception {
+    convertCsvFilesToParquetFiles(importFileInDremioInfo, csvFiles, dataSetSchema);
   }
 
   /**

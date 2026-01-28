@@ -2933,14 +2933,13 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
      */
     @Async
     @Override
-    public void etlImportDataset(Long datasetId, Long dataflowId, Long providerId, Boolean replaceData, String tableSchemaId, String delimiter, String filePathInS3, Long jobId) throws Exception {
+    public void etlImportDataset(Long datasetId, Long dataflowId, Long providerId, Boolean replaceData, String tableSchemaId, String delimiter, String filePathInS3, Long jobId, DataFlowVO dataFlowVO, DataSetMetabaseVO dataSetMetabaseVO) throws Exception {
         File etlImportFolder = null;
         try {
             //check requirements and fail job if they are not met
             DatasetTypeEnum datasetTypeEnum = datasetService.getDatasetType(datasetId);
+            TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, dataSetMetabaseVO.getDatasetSchema());
             if (datasetTypeEnum.equals(REPORTING) || datasetTypeEnum.equals((DatasetTypeEnum.TEST))) {
-                DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
-                TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, dataSetMetabaseVO.getDatasetSchema());
                 if (BooleanUtils.isTrue(tableSchemaVO.getReadOnly())) { //table should not be read only
                     LOG.error("Failing etlImport with jobId {} because table is read only", jobId);
                     jobControllerZuul.updateJobStatusAndInfo(jobId, JobStatusEnum.FAILED, JobInfoEnum.ERROR_IMPORT_FAILED_READ_ONLY_TABLE, null);
@@ -2973,9 +2972,37 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 return;
             }
 
+            //keep only csv file for specific table schema
+            List<File> csvFileListForSpecificTable = csvFiles.stream()
+                    .filter(f -> f.getName().equalsIgnoreCase(tableSchemaVO.getNameTableSchema() + CSV_TYPE))
+                    .limit(1)
+                    .collect(Collectors.toList());;
+
+            if(csvFileListForSpecificTable.size() == 0){
+                //todo handle this?
+            }
+
+
             //TODO
-            //begin csv import
             //handle attachments
+            DataSetSchema datasetSchema = datasetService.getSchemaIfReportable(datasetId, tableSchemaId);
+            String providerCode = null;
+            if(providerId != null && providerId != 0L){
+                DataProviderVO dataProviderVO = representativeControllerZuul.findDataProviderById(providerId);
+                providerCode = dataProviderVO.getCode();
+            }
+
+
+            //todo check filename
+            ImportFileInDremioInfo importFileInDremioInfo = new ImportFileInDremioInfo(jobId, datasetId, dataflowId, providerId, tableSchemaId, null, replaceData, delimiter, null, providerCode);
+            if (DatasetTypeEnum.REFERENCE.equals(datasetTypeEnum) && dataFlowVO.getStatus() == TypeStatusEnum.DRAFT) {
+                importFileInDremioInfo.setUpdateReferenceFolder(true);
+            }
+            else{
+                importFileInDremioInfo.setUpdateReferenceFolder(false);
+            }
+
+            parquetConverterService.handleEtlImportDataset(importFileInDremioInfo, etlImportFolder, csvFileListForSpecificTable, datasetSchema);
 
             LOG.info("Completed etlImport for jobId {}", jobId);
             jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FINISHED);
@@ -2992,9 +3019,10 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             }
             //remove file from public S3 if job is finished
             //todo uncomment the following
-            if (jobControllerZuul.findJobById(jobId).getJobStatus() == JobStatusEnum.FINISHED) {
+         /*   if (jobControllerZuul.findJobById(jobId).getJobStatus() == JobStatusEnum.FINISHED) {
                 s3HelperPublic.deleteFileFromS3(filePathInS3);
             }
+*/
         }
     }
 
@@ -3088,7 +3116,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         }
     }
 
-    private static boolean isValidAttachmentEntry(String entryName, boolean isDirectory) {
+    protected static boolean isValidAttachmentEntry(String entryName, boolean isDirectory) {
         final String prefix = "attachments/";
         // must start with "attachments/"
         if (!entryName.startsWith(prefix)) {

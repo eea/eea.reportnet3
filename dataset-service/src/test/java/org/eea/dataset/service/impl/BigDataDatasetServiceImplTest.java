@@ -3,16 +3,20 @@ package org.eea.dataset.service.impl;
 import org.eea.datalake.service.DremioHelperService;
 import org.eea.datalake.service.S3Helper;
 import org.eea.datalake.service.SpatialDataHandling;
+import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.repository.PkCatalogueRepository;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.*;
 import org.eea.dataset.service.file.FileCommonUtils;
+import org.eea.dataset.service.model.ImportFileInDremioInfo;
 import org.eea.interfaces.controller.communication.NotificationController;
 import org.eea.interfaces.controller.dataflow.DataFlowController;
 import org.eea.interfaces.controller.dataflow.RepresentativeController;
 import org.eea.interfaces.controller.orchestrator.JobController.JobControllerZuul;
 import org.eea.interfaces.controller.orchestrator.JobProcessController;
 import org.eea.interfaces.controller.recordstore.ProcessController;
+import org.eea.interfaces.vo.dataflow.DataFlowVO;
+import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
@@ -36,6 +40,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import static org.junit.Assert.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class BigDataDatasetServiceImplTest {
@@ -96,12 +102,12 @@ public class BigDataDatasetServiceImplTest {
         JobVO jobVO = new JobVO();
         jobVO.setId(jobId);
         jobVO.setJobStatus(jobStatus);
+        DataFlowVO dataFlowVO = new DataFlowVO();
 
         Mockito.when(datasetService.getDatasetType(datasetId)).thenReturn(datasetType);
-        Mockito.when(datasetMetabaseService.findDatasetMetabase(datasetId)).thenReturn(dataSetMetabaseVO);
         Mockito.when(datasetSchemaService.getTableSchemaVO(tableSchemaId, datasetSchemaId)).thenReturn(tableSchemaVO);
         Mockito.when(jobControllerZuul.findJobById(jobId)).thenReturn(jobVO);
-        bigDataDatasetService.etlImportDataset(datasetId, dataflowId, providerId, replaceData, tableSchemaId, delimiter, filePathInS3, jobId);
+        bigDataDatasetService.etlImportDataset(datasetId, dataflowId, providerId, replaceData, tableSchemaId, delimiter, filePathInS3, jobId, dataFlowVO, dataSetMetabaseVO);
         Mockito.verify(jobControllerZuul, Mockito.times(1)).updateJobStatusAndInfo(jobId, jobStatus, jobInfo, null);
     }
 
@@ -127,12 +133,12 @@ public class BigDataDatasetServiceImplTest {
         JobVO jobVO = new JobVO();
         jobVO.setId(jobId);
         jobVO.setJobStatus(jobStatus);
+        DataFlowVO dataFlowVO = new DataFlowVO();
 
         Mockito.when(datasetService.getDatasetType(datasetId)).thenReturn(datasetType);
-        Mockito.when(datasetMetabaseService.findDatasetMetabase(datasetId)).thenReturn(dataSetMetabaseVO);
         Mockito.when(datasetSchemaService.getTableSchemaVO(tableSchemaId, datasetSchemaId)).thenReturn(tableSchemaVO);
         Mockito.when(jobControllerZuul.findJobById(jobId)).thenReturn(jobVO);
-        bigDataDatasetService.etlImportDataset(datasetId, dataflowId, providerId, replaceData, tableSchemaId, delimiter, filePathInS3, jobId);
+        bigDataDatasetService.etlImportDataset(datasetId, dataflowId, providerId, replaceData, tableSchemaId, delimiter, filePathInS3, jobId, dataFlowVO, dataSetMetabaseVO);
         Mockito.verify(jobControllerZuul, Mockito.times(1)).updateJobStatusAndInfo(jobId, jobStatus, jobInfo, null);
     }
 
@@ -163,12 +169,12 @@ public class BigDataDatasetServiceImplTest {
         JobVO jobVO = new JobVO();
         jobVO.setId(jobId);
         jobVO.setJobStatus(jobStatus);
+        DataFlowVO dataFlowVO = new DataFlowVO();
 
         Mockito.when(datasetService.getDatasetType(datasetId)).thenReturn(datasetType);
-        Mockito.when(datasetMetabaseService.findDatasetMetabase(datasetId)).thenReturn(dataSetMetabaseVO);
-        Mockito.when(datasetSchemaService.getTableSchemaVO(tableSchemaId, datasetSchemaId)).thenReturn(tableSchemaVO);
         Mockito.when(jobControllerZuul.findJobById(jobId)).thenReturn(jobVO);
-        bigDataDatasetService.etlImportDataset(datasetId, dataflowId, providerId, replaceData, tableSchemaId, delimiter, filePathInS3, jobId);
+        Mockito.when(datasetSchemaService.getTableSchemaVO(tableSchemaId, dataSetMetabaseVO.getDatasetSchema())).thenReturn(tableSchemaVO);
+        bigDataDatasetService.etlImportDataset(datasetId, dataflowId, providerId, replaceData, tableSchemaId, delimiter, filePathInS3, jobId, dataFlowVO, dataSetMetabaseVO);
         Mockito.verify(jobControllerZuul, Mockito.times(1)).updateJobStatusAndInfo(jobId, jobStatus, jobInfo, null);
     }
 
@@ -188,10 +194,12 @@ public class BigDataDatasetServiceImplTest {
         JobVO jobVO = new JobVO();
         jobVO.setId(jobId);
         jobVO.setJobStatus(jobStatus);
+        DataFlowVO dataFlowVO = new DataFlowVO();
+        DataSetMetabaseVO dataSetMetabaseVO = new DataSetMetabaseVO();
 
         Mockito.when(datasetService.getDatasetType(datasetId)).thenReturn(datasetType);
         Mockito.when(jobControllerZuul.findJobById(jobId)).thenReturn(jobVO);
-        bigDataDatasetService.etlImportDataset(datasetId, dataflowId, providerId, replaceData, tableSchemaId, delimiter, filePathInS3, jobId);
+        bigDataDatasetService.etlImportDataset(datasetId, dataflowId, providerId, replaceData, tableSchemaId, delimiter, filePathInS3, jobId, dataFlowVO, dataSetMetabaseVO);
         Mockito.verify(jobControllerZuul, Mockito.times(1)).updateJobStatusAndInfo(jobId, jobStatus, jobInfo, null);
     }
 
@@ -212,6 +220,11 @@ public class BigDataDatasetServiceImplTest {
         JobVO jobVO = new JobVO();
         jobVO.setId(jobId);
         jobVO.setJobStatus(jobStatus);
+        DataFlowVO dataFlowVO = new DataFlowVO();
+        DataSetMetabaseVO dataSetMetabaseVO = new DataSetMetabaseVO();
+        ImportFileInDremioInfo importFileInDremioInfo = new ImportFileInDremioInfo(jobId, datasetId, dataflowId, providerId, tableSchemaId, null, replaceData, delimiter, null, null);
+        DataSetSchema datasetSchema = new DataSetSchema();
+        DataProviderVO dataProviderVO  = new DataProviderVO();
 
         Mockito.when(datasetService.getDatasetType(datasetId)).thenReturn(datasetType);
         Mockito.when(jobControllerZuul.findJobById(jobId)).thenReturn(jobVO);
@@ -220,8 +233,19 @@ public class BigDataDatasetServiceImplTest {
         BigDataDatasetServiceImpl bigDataDatasetServiceSpy = Mockito.spy(bigDataDatasetService);
         Mockito.doReturn(mockFile).when(bigDataDatasetServiceSpy).createEtlImportFolder(datasetId, jobId);
         Mockito.doReturn(fileList).when(bigDataDatasetServiceSpy).storeAndUnzipEtlImportZipFile(datasetId, filePathInS3, fileExtension, jobId, mockFile);
+        Mockito.when(representativeControllerZuul.findDataProviderById(providerId)).thenReturn(dataProviderVO);
 
-        bigDataDatasetServiceSpy.etlImportDataset(datasetId, dataflowId, providerId, replaceData, tableSchemaId, delimiter, filePathInS3, jobId);
+        bigDataDatasetServiceSpy.etlImportDataset(datasetId, dataflowId, providerId, replaceData, tableSchemaId, delimiter, filePathInS3, jobId, dataFlowVO, dataSetMetabaseVO);
         Mockito.verify(jobControllerZuul, Mockito.times(1)).updateJobStatus(jobId, jobStatus);
+    }
+
+    @Test
+    public void isValidAttachmentEntryTest() {
+        assertTrue(bigDataDatasetService.isValidAttachmentEntry("attachments/tableName/file.pdf", false)); //correct use
+        assertFalse(bigDataDatasetService.isValidAttachmentEntry("attachments/file.pdf", false)); //file inside attachments folder
+        assertFalse(bigDataDatasetService.isValidAttachmentEntry("attachments/tableName/", true)); //empty table folder inside attachments folder
+        assertFalse(bigDataDatasetService.isValidAttachmentEntry("attachments/tableName/dir/file.pdf", false)); //attachments folder with folder inside table folder
+        assertFalse(bigDataDatasetService.isValidAttachmentEntry("attachments", true)); //empty attachments folder
+        assertFalse(bigDataDatasetService.isValidAttachmentEntry("wrongName/tableName/file.pdf", true)); //parent folder is not named attachments
     }
 }

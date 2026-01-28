@@ -2276,7 +2276,7 @@ public class DatasetControllerImpl implements DatasetController {
   @PostMapping("/{datasetId}/etlImportDL")
   public Map<String, Object> etlImportDatasetDL(@PathVariable("datasetId") Long datasetId, @RequestParam("dataflowId") Long dataflowId,
                                          @RequestParam(value = "providerId", required = false) Long providerId,
-                                         @RequestParam(value = "replaceData", required = false) Boolean replaceData,
+                                         @RequestParam(value = "replaceData", required = false, defaultValue = "false") Boolean replaceData,
                                          @RequestParam(value = "tableSchemaId") String tableSchemaId,
                                          @RequestParam(value = "delimiter") String delimiter,
                                          @RequestBody String filePathInS3) throws Exception {
@@ -2290,8 +2290,9 @@ public class DatasetControllerImpl implements DatasetController {
         LOG.error(errorMessage);
         throw new ResponseStatusException(HttpStatus.FORBIDDEN, String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId));
       }
+      DataFlowVO dataFlowVO = dataFlowControllerZuul.getMetabaseById(dataflowId);
       // check if dataflow is big data
-      if(!dataFlowControllerZuul.isBigDataflow(dataflowId)){
+      if(!dataFlowVO.getBigData()){
         LOG.error("Dataflow {} is not big data", dataflowId);
         throw new ResponseStatusException(HttpStatus.FORBIDDEN, String.format(EEAErrorMessage.DATAFLOW_NOT_BIG_DATA, datasetId, dataflowId));
       }
@@ -2312,8 +2313,11 @@ public class DatasetControllerImpl implements DatasetController {
       }
       jobId = jobControllerZuul.addEtlImportJob(datasetId, dataflowId, providerId, jobStatus, replaceData, tableSchemaId, delimiter, filePathInS3);
 
+      DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
+      providerId = (providerId != null) ? providerId : dataSetMetabaseVO.getDataProviderId();
+      providerId = (providerId != null) ? providerId : 0L;
       LOG.info("Calling etlImport for jobId {} dataflowId {} datasetId {} and replaceData {}", jobId, dataflowId, datasetId, replaceData);
-      bigDataDatasetService.etlImportDataset(datasetId, dataflowId, providerId, replaceData, tableSchemaId, delimiter, filePathInS3, jobId);
+      bigDataDatasetService.etlImportDataset(datasetId, dataflowId, providerId, replaceData, tableSchemaId, delimiter, filePathInS3, jobId, dataFlowVO, dataSetMetabaseVO);
 
       Map<String, Object> result = new HashMap<>();
       String pollingUrl = "/orchestrator/jobs/pollForJobStatus/" + jobId + "?datasetId=" + datasetId + "&dataflowId=" + dataflowId;

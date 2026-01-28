@@ -351,7 +351,9 @@ public interface BigDataDatasetService {
      * @param delimiter
      * @param filePathInS3
      * @param jobId
+     * @param dataFlowVO
+     * @param dataSetMetabaseVO
      * @throws EEAException the EEA exception
      */
-     void etlImportDataset(Long datasetId, Long dataflowId, Long providerId, Boolean replaceData, String tableSchemaId, String delimiter, String filePathInS3, Long jobId) throws Exception;
+     void etlImportDataset(Long datasetId, Long dataflowId, Long providerId, Boolean replaceData, String tableSchemaId, String delimiter, String filePathInS3, Long jobId, DataFlowVO dataFlowVO, DataSetMetabaseVO dataSetMetabaseVO) throws Exception;
 }
