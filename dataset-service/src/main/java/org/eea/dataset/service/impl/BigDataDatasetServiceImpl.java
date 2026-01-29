@@ -313,6 +313,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             importFileInDremioInfo.setReplaceData(replace);
             importFileInDremioInfo.setDelimiter(delimiter);
             importFileInDremioInfo.setDataProviderCode(providerCode);
+            importFileInDremioInfo.setIsEtlImport(false);
 
             DatasetTypeEnum datasetType = datasetService.getDatasetType(importFileInDremioInfo.getDatasetId());
             if (DatasetTypeEnum.REFERENCE.equals(datasetType) && dataflowVO.getStatus() == TypeStatusEnum.DRAFT) {
@@ -2936,27 +2937,23 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
     public void etlImportDataset(Long datasetId, Long dataflowId, Long providerId, Boolean replaceData, String tableSchemaId, String delimiter, String filePathInS3, Long jobId, DataFlowVO dataFlowVO, DataSetMetabaseVO dataSetMetabaseVO) throws Exception {
         File etlImportFolder = null;
         try {
-            //check requirements and fail job if they are not met
             DatasetTypeEnum datasetTypeEnum = datasetService.getDatasetType(datasetId);
-            TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, dataSetMetabaseVO.getDatasetSchema());
-            if (datasetTypeEnum.equals(REPORTING) || datasetTypeEnum.equals((DatasetTypeEnum.TEST))) {
-                if (BooleanUtils.isTrue(tableSchemaVO.getReadOnly())) { //table should not be read only
-                    LOG.error("Failing etlImport with jobId {} because table is read only", jobId);
-                    jobControllerZuul.updateJobStatusAndInfo(jobId, JobStatusEnum.FAILED, JobInfoEnum.ERROR_IMPORT_FAILED_READ_ONLY_TABLE, null);
-                    return;
-                }
-                if (BooleanUtils.isTrue(tableSchemaVO.getFixedNumber())) { // table should not have fixed number of records
-                    LOG.error("Failing etlImport with jobId {} because table has fixed number of records", jobId);
-                    jobControllerZuul.updateJobStatusAndInfo(jobId, JobStatusEnum.FAILED, JobInfoEnum.ERROR_IMPORT_FAILED_FIXED_NUM, null);
-                    return;
-                }
-                Boolean readOnlyFieldsExist = tableSchemaVO.getRecordSchema().getFieldSchema().stream().anyMatch(FieldSchemaVO::getReadOnly);
-                if (BooleanUtils.isTrue(readOnlyFieldsExist)) { //table should not have read only fields
-                    LOG.error("Failing etlImport with jobId {} because table contains read only fields", jobId);
-                    jobControllerZuul.updateJobStatusAndInfo(jobId, JobStatusEnum.FAILED, JobInfoEnum.ERROR_IMPORT_FAILED_READ_ONLY_FIELDS, null);
+            List<TableSchemaIdNameVO> tableSchemaIdNameVOS = datasetSchemaService.getTableSchemasIds(datasetId);
+            if(StringUtils.isNotBlank(tableSchemaId)){ //check requirements for only one table
+                Boolean continueEtlImport = checkSchemaRequirementsForEtlImport(datasetId, dataSetMetabaseVO.getDatasetSchema(), tableSchemaId, jobId, datasetTypeEnum);
+                if(!continueEtlImport){
                     return;
                 }
             }
+            else{ //check requirements for all tables
+                for(TableSchemaIdNameVO tableSchemaIdNameVO: tableSchemaIdNameVOS){
+                    Boolean continueEtlImport = checkSchemaRequirementsForEtlImport(datasetId, dataSetMetabaseVO.getDatasetSchema(), tableSchemaIdNameVO.getIdTableSchema(), jobId, datasetTypeEnum);
+                    if(!continueEtlImport){
+                        return;
+                    }
+                }
+            }
+
             //download file from filePathInS3 and store it in the disk.
             String fileExtension = getFileExtensionFromFilePath(filePathInS3);
             if (!fileExtension.equals(".zip")) {
@@ -2967,24 +2964,15 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
             etlImportFolder = createEtlImportFolder(datasetId, jobId);
 
-            List<File> csvFiles = storeAndUnzipEtlImportZipFile(datasetId, filePathInS3, fileExtension, jobId, etlImportFolder);
+
+            Set<String> tableNamesSet = tableSchemaIdNameVOS.stream().map(vo -> vo.getNameTableSchema().toLowerCase()).collect(Collectors.toSet());
+            Map<String, Boolean> attachmentsExistPerTableName = new HashMap();
+
+            List<File> csvFiles = storeAndUnzipEtlImportZipFile(datasetId, filePathInS3, fileExtension, jobId, etlImportFolder, tableNamesSet, attachmentsExistPerTableName);
             if(csvFiles == null){ // job has already failed
                 return;
             }
 
-            //keep only csv file for specific table schema
-            List<File> csvFileListForSpecificTable = csvFiles.stream()
-                    .filter(f -> f.getName().equalsIgnoreCase(tableSchemaVO.getNameTableSchema() + CSV_TYPE))
-                    .limit(1)
-                    .collect(Collectors.toList());;
-
-            if(csvFileListForSpecificTable.size() == 0){
-                //todo handle this?
-            }
-
-
-            //TODO
-            //handle attachments
             DataSetSchema datasetSchema = datasetService.getSchemaIfReportable(datasetId, tableSchemaId);
             String providerCode = null;
             if(providerId != null && providerId != 0L){
@@ -3001,8 +2989,11 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             else{
                 importFileInDremioInfo.setUpdateReferenceFolder(false);
             }
+            importFileInDremioInfo.setIsEtlImport(true);
+            importFileInDremioInfo.setEtlImportFolderPath(etlImportFolder.getPath());
+            importFileInDremioInfo.setAttachmentsExistPerTableName(attachmentsExistPerTableName);
 
-            parquetConverterService.handleEtlImportDataset(importFileInDremioInfo, etlImportFolder, csvFileListForSpecificTable, datasetSchema);
+            parquetConverterService.handleEtlImportDataset(importFileInDremioInfo, etlImportFolder, csvFiles, datasetSchema);
 
             LOG.info("Completed etlImport for jobId {}", jobId);
             jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FINISHED);
@@ -3019,14 +3010,15 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             }
             //remove file from public S3 if job is finished
             //todo uncomment the following
-         /*   if (jobControllerZuul.findJobById(jobId).getJobStatus() == JobStatusEnum.FINISHED) {
+            if (jobControllerZuul.findJobById(jobId).getJobStatus() == JobStatusEnum.FINISHED) {
                 s3HelperPublic.deleteFileFromS3(filePathInS3);
             }
-*/
+
         }
     }
 
-    protected List<File> storeAndUnzipEtlImportZipFile(Long datasetId, String filePathInS3, String fileExtension, Long jobId, File etlImportFolder) throws Exception {
+    protected List<File> storeAndUnzipEtlImportZipFile(Long datasetId, String filePathInS3, String fileExtension, Long jobId, File etlImportFolder, Set<String> tableNamesSet, Map<String, Boolean> attachmentsExistPerTableName) throws Exception {
+        boolean attachmentsFolderSeen = false;
         String[] filePathInS3Split = filePathInS3.split("/");
         String fileNameInS3 = filePathInS3Split[filePathInS3Split.length - 1];
         String filePathStructure = "/" + datasetId + "/" + fileNameInS3;
@@ -3048,6 +3040,19 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             while ((entry = zip.getNextEntry()) != null) {
 
                 String entryName = entry.getName();
+
+                if (entryName.equals(ETL_IMPORT_ATTACHMENTS_FOLDER + "/")
+                        || entryName.startsWith(ETL_IMPORT_ATTACHMENTS_FOLDER + "/")) {
+
+                    if (!attachmentsFolderSeen) {
+                        attachmentsFolderSeen = true;
+
+                        // initialize all tables to false
+                        for (String table : tableNamesSet) {
+                            attachmentsExistPerTableName.put(table, false);
+                        }
+                    }
+                }
 
                 File file = new File(etlImportFolder, entryName);
                 String canonicalPath = file.getCanonicalPath();
@@ -3075,6 +3080,17 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 } else {
                     // nested entries must follow strict attachment rules
                     allowed = isValidAttachmentEntry(entryName, isDirectory);
+                    if (allowed && !isDirectory && attachmentsFolderSeen) {
+
+                        // entryName : attachments/tableName/attachment
+                        String relative = entryName.substring((ETL_IMPORT_ATTACHMENTS_FOLDER + "/").length());
+
+                        String tableNameInZip = relative.substring(0, relative.indexOf('/')).toLowerCase();
+
+                        if (attachmentsExistPerTableName.containsKey(tableNameInZip)) {
+                            attachmentsExistPerTableName.put(tableNameInZip, true);
+                        }
+                    }
                 }
 
 
@@ -3117,14 +3133,14 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
     }
 
     protected static boolean isValidAttachmentEntry(String entryName, boolean isDirectory) {
-        final String prefix = "attachments/";
+        final String prefix = ETL_IMPORT_ATTACHMENTS_FOLDER + "/";
         // must start with "attachments/"
         if (!entryName.startsWith(prefix)) {
             return false;
         }
 
         // if entryName is exactly "attachments" or "attachments/" invalid (empty folder)
-        if (entryName.equals("attachments") || entryName.equals(prefix)) {
+        if (entryName.equals(ETL_IMPORT_ATTACHMENTS_FOLDER) || entryName.equals(prefix)) {
             return false;
         }
 
@@ -3156,6 +3172,29 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         }
 
         return etlImportFolder;
+    }
+
+    protected Boolean checkSchemaRequirementsForEtlImport(Long datasetId, String datasetSchemaId, String tableSchemaId, Long jobId, DatasetTypeEnum datasetTypeEnum){
+        TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, datasetSchemaId);
+        if (datasetTypeEnum.equals(REPORTING) || datasetTypeEnum.equals((DatasetTypeEnum.TEST))) {
+            if (BooleanUtils.isTrue(tableSchemaVO.getReadOnly())) { //table should not be read only
+                LOG.error("Failing etlImport with jobId {} because table is read only", jobId);
+                jobControllerZuul.updateJobStatusAndInfo(jobId, JobStatusEnum.FAILED, JobInfoEnum.ERROR_IMPORT_FAILED_READ_ONLY_TABLE, null);
+                return false;
+            }
+            if (BooleanUtils.isTrue(tableSchemaVO.getFixedNumber())) { // table should not have fixed number of records
+                LOG.error("Failing etlImport with jobId {} because table has fixed number of records", jobId);
+                jobControllerZuul.updateJobStatusAndInfo(jobId, JobStatusEnum.FAILED, JobInfoEnum.ERROR_IMPORT_FAILED_FIXED_NUM, null);
+                return false;
+            }
+            Boolean readOnlyFieldsExist = tableSchemaVO.getRecordSchema().getFieldSchema().stream().anyMatch(FieldSchemaVO::getReadOnly);
+            if (BooleanUtils.isTrue(readOnlyFieldsExist)) { //table should not have read only fields
+                LOG.error("Failing etlImport with jobId {} because table contains read only fields", jobId);
+                jobControllerZuul.updateJobStatusAndInfo(jobId, JobStatusEnum.FAILED, JobInfoEnum.ERROR_IMPORT_FAILED_READ_ONLY_FIELDS, null);
+                return false;
+            }
+        }
+        return true;
     }
 
 }

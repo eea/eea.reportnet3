@@ -510,7 +510,7 @@ public interface DatasetController {
   Map<String, Object> etlImportDatasetDL(@PathVariable("datasetId") Long datasetId, @RequestParam("dataflowId") Long dataflowId,
                                        @RequestParam(value = "providerId", required = false) Long providerId,
                                        @RequestParam(value = "replaceData", required = false) Boolean replaceData,
-                                       @RequestParam(value = "tableSchemaId") String tableSchemaId,
+                                       @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,
                                        @RequestParam(value = "delimiter") String delimiter,
                                        @RequestBody String filePathInS3) throws Exception;
 

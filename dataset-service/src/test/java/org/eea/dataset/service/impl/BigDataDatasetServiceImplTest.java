@@ -21,6 +21,7 @@ import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.RecordSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.TableSchemaIdNameVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.orchestrator.JobVO;
 import org.eea.interfaces.vo.orchestrator.enums.JobInfoEnum;
@@ -37,11 +38,11 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;
+import static org.mockito.ArgumentMatchers.any;
 
 @RunWith(MockitoJUnitRunner.class)
 public class BigDataDatasetServiceImplTest {
@@ -108,6 +109,62 @@ public class BigDataDatasetServiceImplTest {
         Mockito.when(datasetSchemaService.getTableSchemaVO(tableSchemaId, datasetSchemaId)).thenReturn(tableSchemaVO);
         Mockito.when(jobControllerZuul.findJobById(jobId)).thenReturn(jobVO);
         bigDataDatasetService.etlImportDataset(datasetId, dataflowId, providerId, replaceData, tableSchemaId, delimiter, filePathInS3, jobId, dataFlowVO, dataSetMetabaseVO);
+        Mockito.verify(jobControllerZuul, Mockito.times(1)).updateJobStatusAndInfo(jobId, jobStatus, jobInfo, null);
+    }
+
+    @Test
+    public void etlImportDatasetReportingDatasetReadOnlyTableMultipleTablesToImportsTest() throws Exception {
+        Long dataflowId = 1L;
+        Long datasetId = 1L;
+        Long providerId = 1L;
+        Boolean replaceData = false;
+        String tableSchemaId1 = "abc1";
+        String tableName1 = "name1";
+        String tableSchemaId2 = "abc2";
+        String tableName2 = "name2";
+        String delimiter = ",";
+        String filePathInS3 = "path";
+        Long jobId = 1L;
+        String datasetSchemaId = "abc";
+        DatasetTypeEnum datasetType = DatasetTypeEnum.REPORTING;
+        DataSetMetabaseVO dataSetMetabaseVO = new DataSetMetabaseVO();
+        dataSetMetabaseVO.setDatasetSchema(datasetSchemaId);
+        TableSchemaIdNameVO tableSchemaIdNameVO1 = new TableSchemaIdNameVO();
+        tableSchemaIdNameVO1.setIdTableSchema(tableSchemaId1);
+        tableSchemaIdNameVO1.setNameTableSchema(tableName1);
+        TableSchemaIdNameVO tableSchemaIdNameVO2 = new TableSchemaIdNameVO();
+        tableSchemaIdNameVO2.setIdTableSchema(tableSchemaId2);
+        tableSchemaIdNameVO2.setNameTableSchema(tableName2);
+        List<TableSchemaIdNameVO> tableSchemaIdNameVOS = new ArrayList<>();
+        tableSchemaIdNameVOS.add(tableSchemaIdNameVO1);
+        tableSchemaIdNameVOS.add(tableSchemaIdNameVO2);
+
+        FieldSchemaVO fieldSchemaVO = new FieldSchemaVO();
+        fieldSchemaVO.setReadOnly(false);
+        RecordSchemaVO recordSchemaVO = new RecordSchemaVO();
+        recordSchemaVO.setFieldSchema(new ArrayList<>(Collections.singleton(fieldSchemaVO)));
+        TableSchemaVO tableSchemaVO1 = new TableSchemaVO();
+        tableSchemaVO1.setReadOnly(false);
+        tableSchemaVO1.setFixedNumber(false);
+        tableSchemaVO1.setRecordSchema(recordSchemaVO);
+
+
+        TableSchemaVO tableSchemaVO2 = new TableSchemaVO();
+        tableSchemaVO2.setReadOnly(true);
+
+        JobStatusEnum jobStatus = JobStatusEnum.FAILED;
+        JobInfoEnum jobInfo = JobInfoEnum.ERROR_IMPORT_FAILED_READ_ONLY_TABLE;
+        JobVO jobVO = new JobVO();
+        jobVO.setId(jobId);
+        jobVO.setJobStatus(jobStatus);
+        DataFlowVO dataFlowVO = new DataFlowVO();
+
+        Mockito.when(datasetService.getDatasetType(datasetId)).thenReturn(datasetType);
+        Mockito.when(datasetSchemaService.getTableSchemasIds(datasetId)).thenReturn(tableSchemaIdNameVOS);
+        Mockito.when(datasetSchemaService.getTableSchemaVO(tableSchemaId1, datasetSchemaId)).thenReturn(tableSchemaVO1);
+        Mockito.when(datasetSchemaService.getTableSchemaVO(tableSchemaId2, datasetSchemaId)).thenReturn(tableSchemaVO2);
+        Mockito.when(jobControllerZuul.findJobById(jobId)).thenReturn(jobVO);
+        bigDataDatasetService.etlImportDataset(datasetId, dataflowId, providerId, replaceData, null, delimiter, filePathInS3, jobId, dataFlowVO, dataSetMetabaseVO);
         Mockito.verify(jobControllerZuul, Mockito.times(1)).updateJobStatusAndInfo(jobId, jobStatus, jobInfo, null);
     }
 
@@ -210,6 +267,7 @@ public class BigDataDatasetServiceImplTest {
         Long providerId = 1L;
         Boolean replaceData = false;
         String tableSchemaId = "abc";
+        String tableName = "name";
         String delimiter = ",";
         String filePathInS3 = "path.zip";
         Long jobId = 1L;
@@ -222,17 +280,24 @@ public class BigDataDatasetServiceImplTest {
         jobVO.setJobStatus(jobStatus);
         DataFlowVO dataFlowVO = new DataFlowVO();
         DataSetMetabaseVO dataSetMetabaseVO = new DataSetMetabaseVO();
-        ImportFileInDremioInfo importFileInDremioInfo = new ImportFileInDremioInfo(jobId, datasetId, dataflowId, providerId, tableSchemaId, null, replaceData, delimiter, null, null);
-        DataSetSchema datasetSchema = new DataSetSchema();
         DataProviderVO dataProviderVO  = new DataProviderVO();
+        Map<String, Boolean> attachmentsExistPerTableName = new HashMap<>();
+        TableSchemaIdNameVO tableSchemaIdNameVO = new TableSchemaIdNameVO();
+        tableSchemaIdNameVO.setIdTableSchema(tableSchemaId);
+        tableSchemaIdNameVO.setNameTableSchema(tableName);
+        List<TableSchemaIdNameVO> tableSchemaIdNameVOS = new ArrayList<>();
+        tableSchemaIdNameVOS.add(tableSchemaIdNameVO);
+        Set<String> tableNamesSet = tableSchemaIdNameVOS.stream().map(vo -> vo.getNameTableSchema().toLowerCase()).collect(Collectors.toSet());
+
 
         Mockito.when(datasetService.getDatasetType(datasetId)).thenReturn(datasetType);
         Mockito.when(jobControllerZuul.findJobById(jobId)).thenReturn(jobVO);
 
         // Use spy in order to mock protected methods
         BigDataDatasetServiceImpl bigDataDatasetServiceSpy = Mockito.spy(bigDataDatasetService);
+        Mockito.when(datasetSchemaService.getTableSchemasIds(datasetId)).thenReturn(tableSchemaIdNameVOS);
         Mockito.doReturn(mockFile).when(bigDataDatasetServiceSpy).createEtlImportFolder(datasetId, jobId);
-        Mockito.doReturn(fileList).when(bigDataDatasetServiceSpy).storeAndUnzipEtlImportZipFile(datasetId, filePathInS3, fileExtension, jobId, mockFile);
+        Mockito.doReturn(fileList).when(bigDataDatasetServiceSpy).storeAndUnzipEtlImportZipFile(datasetId, filePathInS3, fileExtension, jobId, mockFile, tableNamesSet, attachmentsExistPerTableName);
         Mockito.when(representativeControllerZuul.findDataProviderById(providerId)).thenReturn(dataProviderVO);
 
         bigDataDatasetServiceSpy.etlImportDataset(datasetId, dataflowId, providerId, replaceData, tableSchemaId, delimiter, filePathInS3, jobId, dataFlowVO, dataSetMetabaseVO);
