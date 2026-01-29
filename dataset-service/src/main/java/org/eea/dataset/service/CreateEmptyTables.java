@@ -1,6 +1,5 @@
 package org.eea.dataset.service;
 
-import org.eea.datalake.service.DremioHelperService;
 import org.eea.datalake.service.model.S3PathResolver;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
@@ -32,4 +31,9 @@ public interface CreateEmptyTables {
    * @throws Exception exception
    */
   void deleteTableIfEmpty(String tableSchemaName, S3PathResolver tablePathResolver) throws Exception;
+
+  void runCreationForPreparationDataset(DataSetMetabaseVO parentDataset, String preparationSetName) throws EEAException;
+
+  void runCreationForPreparationDatasetTable(DataSetMetabaseVO parentDataset, String tableSchemaId, String preparationSetName) throws EEAException;
+
 }

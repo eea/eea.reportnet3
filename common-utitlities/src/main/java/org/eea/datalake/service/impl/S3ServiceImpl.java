@@ -14,9 +14,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
 
 import static org.eea.utils.LiteralConstants.*;
 
@@ -233,6 +230,24 @@ public class S3ServiceImpl implements S3Service {
         String datasetFolder = formatFolderName(s3PathResolver.getDatasetId(), S3_DATASET_PATTERN);
         String dataCollectionFolder =  formatFolderName(s3PathResolver.getDatasetId(), S3_DATA_COLLECTION_PATTERN);
         String euDatasetFolder =  formatFolderName(s3PathResolver.getDatasetId(), S3_EU_DATASET_PATTERN);
+
+        String preparationSetCode = s3PathResolver.getPreparationSetCode();
+
+        // handling preparation dataset case
+        if (StringUtils.isNotBlank(preparationSetCode)) {
+
+            switch (path) {
+                case S3_TABLE_AS_FOLDER_QUERY_PATH:
+                    return S3_DEFAULT_BUCKET + String.format(S3_TABLE_NAME_PREPARATION_DATASET_FOLDER_PATH, dataflowFolder, dataProviderFolder, datasetFolder, preparationSetCode, s3PathResolver.getTableName());
+                case S3_TABLE_NAME_FOLDER_PATH:
+                case S3_TABLE_NAME_PATH:
+                    return String.format(S3_TABLE_NAME_PREPARATION_DATASET_FOLDER_PATH, dataflowFolder, dataProviderFolder, datasetFolder, preparationSetCode, s3PathResolver.getTableName());
+                case S3_TABLE_NAME_QUERY_PATH:
+                    return String.format(S3_TABLE_NAME_PREPARATION_DATASET_QUERY_PATH, dataflowFolder, dataProviderFolder, datasetFolder, preparationSetCode, s3PathResolver.getTableName());
+                default:
+                    break;
+            }
+        }
 
         switch (path) {
             case S3_EXPORT_PREFILLED_TABLE_FILE_PATH:
