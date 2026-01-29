@@ -2121,19 +2121,13 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     value.put(LiteralConstants.DATASET_ID, datasetId);
     value.put(LiteralConstants.USER, user);
     value.put(LiteralConstants.JOB_ID, jobId);
-    ConnectionDataVO conexion =
-            getConnectionDataForDataset(LiteralConstants.DATASET_PREFIX + datasetId);
+
     // We get the datasetId from the snapshot
     Long datasetIdFromSnapshot = Boolean.TRUE.equals(isSchemaSnapshot)
             ? dataSetSnapshotControllerZuul.getSchemaById(idSnapshot).getDatasetId()
             : dataSetSnapshotControllerZuul.getById(idSnapshot).getDatasetId();
 
-    try (
-            Connection con = DriverManager.getConnection(conexion.getConnectionString(),
-                    conexion.getUser(), conexion.getPassword());
-            Statement stmt = con.createStatement()) {
-      con.setAutoCommit(true);
-
+    try {
       LOG.info("Init restoring for jobId {}", jobId);
       LOG.info("Init restoring for processVO {}", processVO);
       LOG.info("Init restoring for prefillingReference {}", prefillingReference);
