@@ -62,6 +62,7 @@ import { getUrl } from 'repositories/_utils/UrlUtils';
 import { TextByDataflowTypeUtils } from 'views/_functions/Utils/TextByDataflowTypeUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 import { Calendar } from 'views/_components/Calendar';
+import { ManagePreparationSets } from './_components/ManagePreparationSets/ManagePreparationSets';
 
 export const Dataflow = () => {
   const navigate = useNavigate();
@@ -114,6 +115,7 @@ export const Dataflow = () => {
     isFetchingData: false,
     isImportLeadReportersVisible: false,
     isImportAndReplaceLeadReportersVisible: false,
+    isManagePreparationSetsDialogVisible: false,
     isManageReportersDialogVisible: false,
     isManageRequestersDialogVisible: false,
     isManageRolesDialogVisible: false,
@@ -1070,6 +1072,10 @@ export const Dataflow = () => {
     manageDialogs('isReleaseSilentDialogVisible', true);
   };
 
+  const onShowManagePreparationSetsDialog = visible => {
+    manageDialogs('isManagePreparationSetsDialogVisible', visible);
+  };
+
   const onConfirmExport = async () => {
     try {
       dataflowDispatch({ type: 'SET_IS_EXPORTING', payload: true });
@@ -1382,6 +1388,7 @@ export const Dataflow = () => {
           onCleanUpReceipt={onCleanUpReceipt}
           onOpenReleaseConfirmDialog={onOpenReleaseConfirmDialog}
           onOpenSilentReleaseConfirmDialog={onOpenSilentReleaseConfirmDialog}
+          onShowManagePreparationSetsDialog={onShowManagePreparationSetsDialog}
           representativeId={representativeId}
           setIsReceiptLoading={setIsReceiptLoading}
         />
@@ -1479,6 +1486,15 @@ export const Dataflow = () => {
             visible={dataflowState.isReleaseSilentDialogVisible}>
             {resourcesContext.messages['confirmSilentReleaseQuestion']}
           </ConfirmDialog>
+        )}
+
+        {dataflowState.isManagePreparationSetsDialogVisible && (
+          <ManagePreparationSets
+            dataflowId={dataflowId}
+            isDialogVisible={dataflowState.isManagePreparationSetsDialogVisible}
+            onCloseDialog={() => onShowManagePreparationSetsDialog(false)}
+            providerId={dataProviderId}
+          />
         )}
 
         {hasCustodianPermissions && dataflowState.isManageRolesDialogVisible && (
