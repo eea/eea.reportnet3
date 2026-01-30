@@ -956,6 +956,13 @@ public class DataCollectionServiceImpl implements DataCollectionService {
           lockCriteria.put(LiteralConstants.SIGNATURE, methodSignature);
           lockCriteria.put(LiteralConstants.DATAFLOWID, dataflowId);
           lockService.removeLockByCriteria(lockCriteria);
+
+          // command to assign national coordinators and end the dataCollectionProcess.
+          final Map<String, Object> result = new HashMap<>();
+          result.put("dataflowId", dataflowId);
+          result.put("isCreation", isCreation);
+          kafkaSenderUtils.releaseKafkaEvent(EventType.DATACOLLECTION_NATIONAL_COORDINATOR_EVENT,
+                  result);
       }
     } catch (SQLException e) {
       LOG.error("Error persisting changes. Rolling back...", e);
