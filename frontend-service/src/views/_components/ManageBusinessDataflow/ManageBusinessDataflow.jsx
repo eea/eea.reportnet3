@@ -362,7 +362,7 @@ export const ManageBusinessDataflow = ({
           {renderCheckBoxPinned()}
         </div>
         <div className="p-toolbar-group-left">{renderBigDataStorage()}</div>
-        {bigData && <div className="p-toolbar-group-left">{renderSncData()}</div>}
+        {bigData && <div className="p-toolbar-group-left">{renderSncData && renderSncData(false, true, true)}</div>}
         <Button
           className={`p-button-primary ${
             !isEmpty(name) &&
