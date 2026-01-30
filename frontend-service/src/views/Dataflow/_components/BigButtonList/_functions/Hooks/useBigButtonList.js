@@ -39,6 +39,7 @@ const useBigButtonList = ({
   onShowDataCollectionModal,
   onShowExportEUDatasetModal,
   onShowHistoricReleases,
+  onShowManagePreparationSetsDialog,
   onShowManageReportersDialog,
   onShowManualTechnicalAcceptanceDialog,
   onShowNewSchemaDialog,
@@ -92,6 +93,16 @@ const useBigButtonList = ({
     const isReleased =
       !isNil(dataflowState.data.datasets) && dataflowState.data.datasets.some(dataset => dataset.isReleased);
 
+    const representativeWithSameDataProviderID = dataflowState.data?.representatives?.find(
+      representative => representative.dataProviderId === dataProviderId
+    );
+
+    const isLeadReporterOfThisCountry = !isEmpty(representativeWithSameDataProviderID)
+      ? representativeWithSameDataProviderID.leadReporters?.some(
+          leadReporter => leadReporter.account === userContext.email
+        )
+      : false;
+
     return {
       createDataCollection: !(isAdmin && !isCustodian) && isLeadDesigner && isDesignStatus,
       cloneSchemasFromDataflow: isLeadDesigner && isDesignStatus,
@@ -112,6 +123,7 @@ const useBigButtonList = ({
         ((isStewardSupport || isLeadDesigner) && isDraftStatus && isManualAcceptance) ||
         (isLeadReporterOfCountry && isReleased && isManualAcceptance),
       groupByRepresentative: (isLeadDesigner || isObserver || isStewardSupport) && isDraftStatus,
+      managePreparationSets: isLeadReporterOfThisCountry,
       manageReporters: isLeadDesigner || isStewardSupport,
       manualTechnicalAcceptance: (isLeadDesigner || isStewardSupport) && isManualAcceptance,
       newSchema: isDataflowCustodian && isDesigner && isDesignStatus,
@@ -145,6 +157,17 @@ const useBigButtonList = ({
       helpClassName: 'dataflow-big-buttons-manageReporters-help-step',
       layout: 'defaultBigButton',
       visibility: buttonsVisibility.manageReporters
+    }
+  ];
+
+  const managePreparationSetsBigButton = [
+    {
+      buttonClass: 'managePreparationSets',
+      buttonIcon: 'managePreparationSets',
+      caption: resourcesContext.messages['managePreparationSets'],
+      handleRedirect: () => onShowManagePreparationSetsDialog(true),
+      layout: 'defaultBigButton',
+      visibility: buttonsVisibility.managePreparationSets
     }
   ];
 
@@ -669,6 +692,7 @@ const useBigButtonList = ({
   const releaseBigButton = onBuildReleaseButton();
 
   return [
+    ...managePreparationSetsBigButton,
     ...manageReportersBigButton,
     ...helpBigButton,
     ...designDatasetModels,

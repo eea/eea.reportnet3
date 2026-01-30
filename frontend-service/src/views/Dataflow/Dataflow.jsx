@@ -1365,6 +1365,7 @@ export const Dataflow = () => {
           onCleanUpReceipt={onCleanUpReceipt}
           onOpenReleaseConfirmDialog={onOpenReleaseConfirmDialog}
           onSaveName={onSaveName}
+          onShowManagePreparationSetsDialog={onShowManagePreparationSetsDialog}
           onShowManageReportersDialog={onShowManageReportersDialog}
           onUpdateAddUserText={onUpdateAddUserText}
           onUpdateData={setIsDataUpdated}
