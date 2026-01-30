@@ -26,7 +26,8 @@ const useBigButtonListRepresentative = ({
   onShowHistoricReleases,
   representativeId,
   onShowReleaseSnapshots,
-  getDataReleaseSnapshots
+  getDataReleaseSnapshots,
+  onShowManagePreparationSetsDialog
 }) => {
   const resourcesContext = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
@@ -62,6 +63,7 @@ const useBigButtonListRepresentative = ({
     return {
       feedback: isLeadReporterOfThisCountry && isReleased && isManualAcceptance,
       help: true,
+      managePreparationSets: isLeadReporterOfThisCountry,
       receipt: isLeadReporterOfThisCountry && isReleased,
       release: isLeadReporterOfThisCountry && !isTestDataset,
       silentRelease: !isTestDataset && isAdmin,
@@ -94,6 +96,17 @@ const useBigButtonListRepresentative = ({
       visibility: true
     }));
   };
+
+  const managePreparationSetsBigButton = [
+    {
+      buttonClass: 'managePreparationSets',
+      buttonIcon: 'managePreparationSets',
+      caption: resourcesContext.messages['managePreparationSets'],
+      handleRedirect: () => onShowManagePreparationSetsDialog(true),
+      layout: 'defaultBigButton',
+      visibility: buttonsVisibility.managePreparationSets
+    }
+  ];
 
   const feedbackButton = {
     layout: 'defaultBigButton',
@@ -265,6 +278,7 @@ const useBigButtonListRepresentative = ({
   const silentReleaseButton = onBuildReleaseButton(true);
 
   return [
+    ...managePreparationSetsBigButton,
     helpButton,
     feedbackButton,
     ...getReferenceDatasetModels(),

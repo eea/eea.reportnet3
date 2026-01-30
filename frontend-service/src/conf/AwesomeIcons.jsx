@@ -111,7 +111,8 @@ import {
   faVectorSquare,
   faVolumeUp,
   faLaptop,
-  faTools
+  faTools,
+  faCopy
 } from '@fortawesome/free-solid-svg-icons';
 
 import {
@@ -304,6 +305,8 @@ export const AwesomeIcons = icon => {
       return faPowerOff;
     case 'manageReporters':
       return faUsersCog;
+    case 'managePreparationSets':
+      return faCopy;
     case 'map':
       return faMapMarkedAlt;
     case 'mdb':
