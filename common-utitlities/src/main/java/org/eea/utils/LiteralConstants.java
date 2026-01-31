@@ -184,6 +184,15 @@ public final class LiteralConstants {
   /** The Constant NO_IMPORT_IN_PROGRESS. */
   public static final String NO_IMPORT_IN_PROGRESS = "There is no import process in progress";
 
+  /** The Constant S3_PREPARATION_DATASET_PATH: {@value}. */
+  public static final String S3_PREPARATION_DATASET_PATH = "%s/%s/%s/current/preparation/%s/%s";
+
+  /** The Constant S3_TABLE_NAME_PREPARATION_DATASET_FOLDER_PATH: {@value}. */
+  public static final String S3_TABLE_NAME_PREPARATION_DATASET_FOLDER_PATH = "%s/%s/%s/current/preparation/%s/%s/%s";
+
+  /** The Constant S3_TABLE_NAME_PREPARATION_DATASET_QUERY_PATH: {@value}. */
+  public static final String S3_TABLE_NAME_PREPARATION_DATASET_QUERY_PATH = ".\"%s\".\"%s\".\"%s\".\"current\".\"preparation\".\"%s\".\"%s\".\"%s\"";
+
   /** The Constant S3_NAME_PATTERN_LENGTH: {@value}. */
   public static final int S3_NAME_PATTERN_LENGTH = 7;
 

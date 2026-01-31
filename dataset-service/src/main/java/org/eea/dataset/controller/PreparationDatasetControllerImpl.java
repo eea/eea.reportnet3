@@ -8,9 +8,11 @@ import java.util.List;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import org.apache.commons.lang3.StringUtils;
+import org.eea.dataset.service.CreateEmptyTables;
 import org.eea.dataset.service.PreparationDatasetService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.PreparationDatasetController;
+import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.PreparationDatasetVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,6 +40,9 @@ public class PreparationDatasetControllerImpl
 
     @Autowired
     private PreparationDatasetService preparationDatasetService;
+
+    @Autowired
+    private CreateEmptyTables createEmptyTables;
 
     /**
      * List preparation datasets by dataflow id and provider id.
@@ -167,5 +172,13 @@ public class PreparationDatasetControllerImpl
                     HttpStatus.INTERNAL_SERVER_ERROR,
                     "Unexpected error while deleting preparation dataset");
         }
+    }
+
+    @PostMapping("/run-creation-for-preparation-dataset")
+    @ApiOperation("Create preparation datasets inside Dremio")
+    public void runCreationForPreparationDataset(
+            @RequestBody DataSetMetabaseVO parentDataset,
+            @RequestParam("preparationSetName") String preparationSetName) throws EEAException {
+        createEmptyTables.runCreationForPreparationDataset(parentDataset, preparationSetName);
     }
 }
