@@ -44,6 +44,9 @@ public enum EventType {
   /** The copyToEuDataset refused event. */
   COPY_DATA_TO_EUDATASET_REFUSED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "copy_to_eu_dataset_refused_key", true),
 
+  /** The validateAsProvider refused event. */
+  VALIDATE_AS_PROVIDER_REFUSED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "validate_as_provider_refused_event", true),
+
   /** The import reporting dataset data failed event. */
   IMPORT_REPORTING_DATASET_DATA_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
           "import_reporting_dataset_data_failed_event", true),
