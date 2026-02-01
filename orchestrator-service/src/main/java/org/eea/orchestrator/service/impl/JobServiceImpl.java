@@ -7,6 +7,7 @@ import org.apache.commons.lang3.BooleanUtils;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController;
+import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetSnapshotController;
 import org.eea.interfaces.controller.dataset.DatasetSnapshotController.DataSetSnapshotControllerZuul;
@@ -14,6 +15,8 @@ import org.eea.interfaces.controller.dataset.EUDatasetController.EUDatasetContro
 import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.controller.validation.ValidationController.ValidationControllerZuul;
+import org.eea.interfaces.vo.dataflow.DataProviderVO;
+import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.orchestrator.JobVO;
 import org.eea.interfaces.vo.orchestrator.JobsVO;
@@ -43,6 +46,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -50,6 +54,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import javax.transaction.Transactional;
 import java.io.File;
@@ -139,6 +144,9 @@ public class JobServiceImpl implements JobService {
 
     @Autowired
     private DataFlowController.DataFlowControllerZuul dataFlowControllerZuul;
+
+    @Autowired
+    private RepresentativeControllerZuul representativeControllerZuul;
 
     /**
      * The job utils.
@@ -526,6 +534,53 @@ public class JobServiceImpl implements JobService {
                     processId, processVO.getUser(), processVO.getPriority(), processVO.isReleased());
         }
     }
+
+    /**
+     * Validates the given validateAsProviderCode if it's part of any of the dataflow's representatives.
+     * Will stop the process before a validation job starts.
+     *
+     * @param dataflowId the dataflow id
+     * @param user the user name
+     * @param validateAsProviderCode the validation provider code
+     */
+    @Override
+    public void assertValidProviderCodeForDataflow(Long dataflowId, String user, String validateAsProviderCode) {
+        // Second check if a value has been received.
+        if (validateAsProviderCode == null || validateAsProviderCode.isEmpty()) {
+            return;
+        }
+
+        Long groupId = dataFlowControllerZuul.findDataProviderGroupIdById(dataflowId);
+        DataProviderVO provider = representativeControllerZuul.findDataProviderByCodeAndGroupId(validateAsProviderCode, groupId);
+        if (provider == null) {
+            validateAsProviderRefusedNotification(user, dataflowId);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                "Invalid validateAsProviderCode: " + validateAsProviderCode + " does not belong to any provider");
+        }
+
+        List<RepresentativeVO> reps = representativeControllerZuul.findRepresentativesByDataFlowIdAndProviderIdList(dataflowId, List.of(provider.getId()));
+        boolean belongsToDataflow = reps != null && reps.stream()
+            .anyMatch(r -> r != null && provider.getId().equals(r.getDataProviderId()));
+
+        if (!belongsToDataflow) {
+            validateAsProviderRefusedNotification(user, dataflowId);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                "validateAsProviderCode " + validateAsProviderCode + " does not belong to dataflow " + dataflowId);
+        }
+    }
+
+    public void validateAsProviderRefusedNotification(String user, Long dataflowId) {
+        Map<String, Object> value = new HashMap<>();
+        value.put(LiteralConstants.USER, user);
+        try {
+            kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.VALIDATE_AS_PROVIDER_REFUSED_EVENT, value,
+                NotificationVO.builder().user(user).dataflowId(dataflowId)
+                    .error("The selected provider code is not part of any groups that belong to dataflowId " + dataflowId).build());
+        } catch (EEAException e) {
+            LOG.error("Could not send VALIDATE_AS_PROVIDER_REFUSED_EVENT for, dataflowId {} and user {}. Error Message: ", dataflowId, user, e);
+        }
+    }
+
     @Override
     public void cancelJob(Long jobId, JobInfoEnum jobInfo, Boolean jobShouldFail) throws EEAException {
         JobStatusEnum jobStatus = JobStatusEnum.CANCELED_BY_ADMIN;

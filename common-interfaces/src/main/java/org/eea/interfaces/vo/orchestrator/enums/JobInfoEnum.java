@@ -79,8 +79,9 @@ public enum JobInfoEnum {
 
     ERROR_RELEASE_PARTIALLY_COMPLETED("Not all datasets were able to release. Please try again or contact the Service Desk"),
 
-    ERROR_DATASET_IS_LOCKED_FOR_EDITING("Dataset is locked for editing");
+    ERROR_DATASET_IS_LOCKED_FOR_EDITING("Dataset is locked for editing"),
 
+    ERROR_INVALID_VALIDATE_AS_PROVIDER_CODE("The selected validation provider code doesn't belong to the dataflow.");
 
     /** The value. */
     private final String value;

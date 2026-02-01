@@ -78,6 +78,20 @@ public interface SqlRulesService {
       throws EEAException;
 
   /**
+   * Overload of runSqlRule
+   *
+   * @param datasetId the dataset id
+   * @param sqlRule the sql rule about to be run
+   * @param showInternalFields the show internal fields
+   * @param runSQLAsProvider the run SQL as provider
+   * @return the list containing the rows
+   * @throws EEAException the EEA exception
+   */
+  List<List<ValueVO>> runSqlRule(Long datasetId, String sqlRule, boolean showInternalFields, String runSQLAsProvider)
+      throws EEAException;
+
+
+  /**
    * Evaluate sql rule.
    *
    * @param datasetId the dataset id

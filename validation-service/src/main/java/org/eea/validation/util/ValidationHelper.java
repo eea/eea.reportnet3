@@ -2,6 +2,7 @@ package org.eea.validation.util;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.FeignException;
 import lombok.AllArgsConstructor;
@@ -17,6 +18,7 @@ import org.eea.datalake.service.model.S3PathResolver;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
+import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetController;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetSchemaController.DatasetSchemaControllerZuul;
@@ -26,6 +28,8 @@ import org.eea.interfaces.controller.orchestrator.JobProcessController.JobProces
 import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
+import org.eea.interfaces.vo.dataflow.DataProviderVO;
+import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.DatasetTableVO;
@@ -79,10 +83,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
+import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import javax.annotation.PostConstruct;
 import java.math.BigInteger;
@@ -214,7 +220,12 @@ public class ValidationHelper implements DisposableBean {
   @Autowired
   private RecordStoreControllerZuul recordStoreControllerZuul;
 
+  @Autowired
+  private RepresentativeControllerZuul representativeControllerZuul;
+
   private final S3Service s3ServicePrivate;
+
+  private final Map<String, String> validateAsProviderCodeByProcessId = new ConcurrentHashMap<>();
 
   /**
    * Instantiates a new validation helper.
@@ -313,59 +324,116 @@ public class ValidationHelper implements DisposableBean {
    * @param updateViews the update views
    * @throws EEAException the EEA exception
    */
+  public void executeValidation(@LockCriteria(name = "datasetId") Long datasetId, String processId,
+                                boolean released, boolean updateViews) throws EEAException {
+    executeValidation(datasetId, processId, released, updateViews, null);
+  }
+
+  /**
+   * Overload of executeValidation.
+   * Execute validation with Provider code.
+   *
+   * @param datasetId the dataset id
+   * @param processId the process id
+   * @param released the released
+   * @param updateViews the update views
+   * @param validateAsProviderCode the provider code
+   * @throws EEAException the EEA exception
+   */
   @Async
   @LockMethod(removeWhenFinish = true, isController = false)
   public void executeValidation(@LockCriteria(name = "datasetId") Long datasetId, String processId,
-      boolean released, boolean updateViews) throws EEAException {
+      boolean released, boolean updateViews, String validateAsProviderCode) throws EEAException {
+    LOG.info("ENTER executeValidation datasetId={} processId={} override={}", datasetId, processId, validateAsProviderCode);
 
-    DataSetMetabaseVO dataset = datasetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
-    LOG.info(
-        "Obtaining dataset metabase from datasetId {} to perform validation. The schema from the metabase is {}",
-        datasetId, dataset.getDatasetSchema());
-    // In case there's no processId, set a new one (because the processId is set in
-    // ValidationControlleriImpl)
-    if (StringUtils.isBlank(processId) || "null".equals(processId)) {
-      processId = UUID.randomUUID().toString();
-      LOG.info("processId is empty. Generating one: {} for validating datasetId {}", processId, datasetId);
-    }
-    ProcessVO processVO = processControllerZuul.findById(processId);
-    if (processControllerZuul.updateProcess(datasetId, dataset.getDataflowId(),
-        ProcessStatusEnum.IN_PROGRESS, ProcessTypeEnum.VALIDATION, processId,
-        processVO.getUser(), 0, released)) {
-
-
-      // If there's no SQL rules enabled, no need to refresh the views, so directly start the
-      // validation
-      TenantResolver.setTenantName(DATASET_PREFIX + dataset.getId());
-      List<Rule> listSql =
-          rulesRepository.findSqlRulesEnabled(new ObjectId(dataset.getDatasetSchema()));
-      Boolean hasSqlEnabled = true;
-      if (CollectionUtils.isEmpty(listSql)) {
-        hasSqlEnabled = false;
+    try {
+      DataSetMetabaseVO dataset = datasetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
+      LOG.info(
+          "Obtaining dataset metabase from datasetId {} to perform validation. The schema from the metabase is {}",
+          datasetId, dataset.getDatasetSchema());
+      // In case there's no processId, set a new one (because the processId is set in
+      // ValidationControlleriImpl)
+      if (StringUtils.isBlank(processId) || "null".equals(processId)) {
+        processId = UUID.randomUUID().toString();
+        LOG.info("processId is empty. Generating one: {} for validating datasetId {}", processId, datasetId);
       }
 
-      LOG.info("In executeValidation for datasetId {} and processId {} updateViews is {} and hasSqlEnabled is {}", datasetId, processId, updateViews, hasSqlEnabled);
-      if (Boolean.FALSE.equals(updateViews) || Boolean.FALSE.equals(hasSqlEnabled)) {
-        //if updateViews is false it means that the materialized views have already been updated, so we must compare the number of records
-        executeValidationProcess(dataset, processId, !updateViews);
-      } else {
-        deleteLockToReleaseProcess(datasetId);
-        Map<String, Object> values = new HashMap<>();
-        values.put(DATASET_ID, datasetId);
-        values.put("released", released);
-        values.put("referencesToRefresh",
-            List.copyOf(updateMaterializedViewsOfReferenceDatasetsInSQL(datasetId,
-                dataset.getDataflowId(), dataset.getDatasetSchema())));
-        values.put("processId", processId);
-        kafkaSenderUtils.releaseKafkaEvent(EventType.REFRESH_MATERIALIZED_VIEW_EVENT, values);
+      // Pass processId and validateAsProviderCode to task.
+      if (validateAsProviderCode != null && !validateAsProviderCode.isEmpty()) {
+        validateAsProviderCodeByProcessId.put(processId, validateAsProviderCode);
       }
+
+      ProcessVO processVO = processControllerZuul.findById(processId);
+      if (processControllerZuul.updateProcess(datasetId, dataset.getDataflowId(),
+          ProcessStatusEnum.IN_PROGRESS, ProcessTypeEnum.VALIDATION, processId,
+          processVO.getUser(), 0, released)) {
+
+
+        // If there's no SQL rules enabled, no need to refresh the views, so directly start the
+        // validation
+        TenantResolver.setTenantName(DATASET_PREFIX + dataset.getId());
+        List<Rule> listSql =
+            rulesRepository.findSqlRulesEnabled(new ObjectId(dataset.getDatasetSchema()));
+        Boolean hasSqlEnabled = true;
+        if (CollectionUtils.isEmpty(listSql)) {
+          hasSqlEnabled = false;
+        }
+
+        LOG.info("In executeValidation for datasetId {} and processId {} updateViews is {} and hasSqlEnabled is {}", datasetId, processId, updateViews, hasSqlEnabled);
+        if (Boolean.FALSE.equals(updateViews) || Boolean.FALSE.equals(hasSqlEnabled)) {
+          //if updateViews is false it means that the materialized views have already been updated, so we must compare the number of records
+          executeValidationProcess(dataset, processId, !updateViews, validateAsProviderCode);
+        } else {
+          deleteLockToReleaseProcess(datasetId);
+          Map<String, Object> values = new HashMap<>();
+          values.put(DATASET_ID, datasetId);
+          values.put("released", released);
+          values.put("referencesToRefresh",
+              List.copyOf(updateMaterializedViewsOfReferenceDatasetsInSQL(datasetId,
+                  dataset.getDataflowId(), dataset.getDatasetSchema())));
+          values.put("processId", processId);
+          kafkaSenderUtils.releaseKafkaEvent(EventType.REFRESH_MATERIALIZED_VIEW_EVENT, values);
+        }
+      }
+      LOG.info("Successfully executed validation for datasetId {}", datasetId);
+      dataset = null;
+    } finally {
+      validateAsProviderCodeByProcessId.remove(processId);
     }
-    LOG.info("Successfully executed validation for datasetId {}", datasetId);
-    dataset = null;
   }
 
-  @LockMethod(removeWhenFinish = true, isController = false)
+  /**
+   * Execute validation Data Lakes.
+   *
+   * @param datasetId the dataset id
+   * @param processId the process id
+   * @param released the released
+   * @param s3PathResolver the S3 Path Resolver
+   * @param createParquetWithSQL the creation Parquet with SQL
+   * @throws EEAException the EEA exception
+   */
   public void executeValidationDL(@LockCriteria(name = "datasetId") Long datasetId, String processId, boolean released, S3PathResolver s3PathResolver, boolean createParquetWithSQL) throws EEAException {
+    executeValidationDL(datasetId, processId, released, s3PathResolver, createParquetWithSQL, null);
+  }
+
+  /**
+   * Execute validation Data Lakes with Provider code.
+   *
+   * @param datasetId the dataset id
+   * @param processId the process id
+   * @param released the released
+   * @param s3PathResolver the S3 Path Resolver
+   * @param createParquetWithSQL the creation Parquet with SQL
+   * @param validateAsProviderCode the provider code
+   * @throws EEAException the EEA exception
+   */
+  @LockMethod(removeWhenFinish = true, isController = false)
+  public void executeValidationDL(@LockCriteria(name = "datasetId") Long datasetId, String processId, boolean released,
+                                  S3PathResolver s3PathResolver, boolean createParquetWithSQL, String validateAsProviderCode) throws EEAException {
+
+    if (validateAsProviderCode != null && !validateAsProviderCode.trim().isEmpty()) {
+      validateAsProviderCodeByProcessId.put(processId, validateAsProviderCode.trim());
+    }
 
     DataSetMetabaseVO dataset = datasetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
     Long jobId = jobProcessControllerZuul.findJobIdByProcessId(processId);
@@ -451,6 +519,12 @@ public class ValidationHelper implements DisposableBean {
         value.put("tableSchemaId", tableSchema.getIdTableSchema().toString());
         value.put("bigData", "true");
         value.put("createParquetWithSQL", createParquetWithSQL);
+
+        String providerCode = validateAsProviderCodeByProcessId.get(processId);;
+        if (providerCode != null) {
+          value.put("validateAsProviderCode", providerCode);
+        }
+
         if (rule.getSqlSentence()!=null || isDremioSqlRuleMethod(rule.getWhenCondition())) {
           addValidationTaskToProcess(processId, EventType.COMMAND_VALIDATE_DL_WITH_SQL, value);
         } else if (rule.getWhenCondition().contains("RuleOperators")) {
@@ -471,7 +545,7 @@ public class ValidationHelper implements DisposableBean {
 
   private String extractHeaderFromMessage(String jsonBody, String prefix) {
     try {
-      com.fasterxml.jackson.databind.JsonNode root = new com.fasterxml.jackson.databind.ObjectMapper().readTree(jsonBody);
+      JsonNode root = new ObjectMapper().readTree(jsonBody);
       String msg = root.path("message").asText("");
       int i = msg.indexOf(prefix);
       if (i >= 0) {
@@ -782,46 +856,57 @@ public class ValidationHelper implements DisposableBean {
    * @param processId the process id
    */
   @SneakyThrows
-  public void executeValidationProcess(final DataSetMetabaseVO dataset, String processId, Boolean compareRecordsToMaterializedViews) {
-    if(compareRecordsToMaterializedViews) {
-      //check materialized view record count and compare it to record_value
-      Long jobId = jobProcessControllerZuul.findJobIdByProcessId(processId);
-      Boolean recordCountIsCorrect;
-      try {
-        recordCountIsCorrect = recordStoreControllerZuul.recordValueCountMatchesMatViewCount(dataset, jobId);
-      } catch (Exception e) {
-        LOG.error("There was an error during materialized view record comparison for jobId {} and datasetId {} Error:", jobId, dataset.getId(), e.getMessage());
-        jobControllerZuul.cancelJob(jobId, dataset.getDataflowId(), dataset.getId(), JobInfoEnum.ERROR_MATERIALIZED_VIEWS_ARE_NOT_CORRECT, true);
-        return;
-      }
-      if (!BooleanUtils.isTrue(recordCountIsCorrect)) {
-        jobControllerZuul.cancelJob(jobId, dataset.getDataflowId(), dataset.getId(), JobInfoEnum.ERROR_MATERIALIZED_VIEWS_ARE_NOT_CORRECT, true);
-        return;
-      }
+  public void executeValidationProcess(final DataSetMetabaseVO dataset, String processId, Boolean compareRecordsToMaterializedViews, String validateAsProviderCode) {
+    // Add to the map the resolved from the current job validation provider code.
+    String override = resolveValidateAsProviderCodeFromJobByProcessId(processId);
+    if (override != null) {
+      validateAsProviderCodeByProcessId.put(processId, override);
     }
 
+    try {
 
+      if (BooleanUtils.isTrue(compareRecordsToMaterializedViews)) {
+        Long jobId = jobProcessControllerZuul.findJobIdByProcessId(processId);
+        Boolean recordCountIsCorrect;
+        try {
+          recordCountIsCorrect = recordStoreControllerZuul.recordValueCountMatchesMatViewCount(dataset, jobId);
+        } catch (Exception e) {
+          LOG.error("There was an error during materialized view record comparison for jobId {} and datasetId {} Error:",
+              jobId, dataset.getId(), e.getMessage());
+          jobControllerZuul.cancelJob(jobId, dataset.getDataflowId(), dataset.getId(),
+              JobInfoEnum.ERROR_MATERIALIZED_VIEWS_ARE_NOT_CORRECT, true);
+          return;
+        }
+        if (!BooleanUtils.isTrue(recordCountIsCorrect)) {
+          jobControllerZuul.cancelJob(jobId, dataset.getDataflowId(), dataset.getId(),
+              JobInfoEnum.ERROR_MATERIALIZED_VIEWS_ARE_NOT_CORRECT, true);
+          return;
+        }
+      }
 
-    // Initialize process as coordinator
-    RulesSchema rules =
-        rulesRepository.findByIdDatasetSchema(new ObjectId(dataset.getDatasetSchema()));
-    initializeProcess(processId, SecurityContextHolder.getContext().getAuthentication().getName());
-    TenantResolver.setTenantName(DATASET_PREFIX + dataset.getId());
-    LOG.info("Deleting all Validations for processId {} and datasetId {}", processId, dataset.getId());
-    validationService.deleteAllValidation(dataset.getId());
-    LOG.info("Collecting Dataset Validation tasks for processId {} and datasetId {}", processId, dataset.getId());
-    releaseDatasetValidation(dataset, processId);
-    LOG.info("Collecting Record Validation tasks for processId {} and datasetId {}", processId, dataset.getId());
-    if (rules.getRules().stream().anyMatch(rule -> EntityTypeEnum.RECORD.equals(rule.getType()))) {
-      releaseRecordsValidation(dataset, processId);
+      // Initialize process as coordinator
+      RulesSchema rules =
+          rulesRepository.findByIdDatasetSchema(new ObjectId(dataset.getDatasetSchema()));
+      initializeProcess(processId, SecurityContextHolder.getContext().getAuthentication().getName());
+      TenantResolver.setTenantName(DATASET_PREFIX + dataset.getId());
+      LOG.info("Deleting all Validations for processId {} and datasetId {}", processId, dataset.getId());
+      validationService.deleteAllValidation(dataset.getId());
+      LOG.info("Collecting Dataset Validation tasks for processId {} and datasetId {}", processId, dataset.getId());
+      releaseDatasetValidation(dataset, processId);
+      LOG.info("Collecting Record Validation tasks for processId {} and datasetId {}", processId, dataset.getId());
+      if (rules.getRules().stream().anyMatch(rule -> EntityTypeEnum.RECORD.equals(rule.getType()))) {
+        releaseRecordsValidation(dataset, processId);
+      }
+      LOG.info("Collecting Field Validation tasks for processId {} and datasetId {}", processId, dataset.getId());
+      releaseFieldsValidation(dataset, processId, !filterEmptyFields(rules.getRules()));
+      LOG.info("Collecting Table Validation tasks for processId {} and datasetId {}", processId, dataset.getId());
+      releaseTableValidation(dataset, processId);
+      datasetMetabaseControllerZuul.updateDatasetRunningStatus(dataset.getId(),
+          DatasetRunningStatusEnum.VALIDATING);
+      LOG.info("Validation process has been executed for datasetId {} and processId {}", dataset.getId(), processId);
+    } finally {
+      validateAsProviderCodeByProcessId.remove(processId);
     }
-    LOG.info("Collecting Field Validation tasks for processId {} and datasetId {}", processId, dataset.getId());
-    releaseFieldsValidation(dataset, processId, !filterEmptyFields(rules.getRules()));
-    LOG.info("Collecting Table Validation tasks for processId {} and datasetId {}", processId, dataset.getId());
-    releaseTableValidation(dataset, processId);
-    datasetMetabaseControllerZuul.updateDatasetRunningStatus(dataset.getId(),
-        DatasetRunningStatusEnum.VALIDATING);
-    LOG.info("Validation process has been executed for datasetId {} and processId {}", dataset.getId(), processId);
   }
 
 
@@ -1029,6 +1114,25 @@ public class ValidationHelper implements DisposableBean {
   }
 
   /**
+   * Delete validation lock.
+   *
+   * @param datasetId the dataset id
+   */
+  private void releaseValidationLocks(Long datasetId) {
+    if (datasetId == null) return;
+
+    Map<String, Object> executeValidation = new HashMap<>();
+    executeValidation.put(SIGNATURE, LockSignature.EXECUTE_VALIDATION.getValue());
+    executeValidation.put(DATASETID, datasetId);
+    lockService.removeLockByCriteria(executeValidation);
+
+    Map<String, Object> forceExecuteValidation = new HashMap<>();
+    forceExecuteValidation.put(SIGNATURE, LockSignature.FORCE_EXECUTE_VALIDATION.getValue());
+    forceExecuteValidation.put(DATASETID, datasetId);
+    lockService.removeLockByCriteria(forceExecuteValidation);
+  }
+
+  /**
    * Release fields validation.
    *
    * @param dataset the dataset
@@ -1141,6 +1245,12 @@ public class ValidationHelper implements DisposableBean {
     value.put(DATASET_ID, dataset.getId());
     value.put("uuid", processId);
     value.put("user", processesMap.get(processId).getRequestingUser());
+
+    // Value !null only when a provider code is received from a DESIGN or TEST dataset.
+    String providerCode = validateAsProviderCodeByProcessId.get(processId);
+    if (providerCode != null) {
+      value.put("validateAsProviderCode", providerCode);
+    }
     addValidationTaskToProcess(processId, EventType.COMMAND_VALIDATE_DATASET, value);
   }
 
@@ -1170,6 +1280,11 @@ public class ValidationHelper implements DisposableBean {
       value.put("ruleLevelError", null);
     }
 
+    // Value !null only when a provider code is received from a DESIGN or TEST dataset.
+    String providerCode = validateAsProviderCodeByProcessId.get(processId);
+    if (providerCode != null) {
+      value.put("validateAsProviderCode", providerCode);
+    }
 
     addValidationTaskToProcess(processId, EventType.COMMAND_VALIDATE_TABLE, value);
   }
@@ -1188,6 +1303,13 @@ public class ValidationHelper implements DisposableBean {
     value.put("uuid", processId);
     value.put("numPag", numPag);
     value.put("user", processesMap.get(processId).getRequestingUser());
+
+    // Value !null only when a provider code is received from a DESIGN or TEST dataset.
+    String providerCode = validateAsProviderCodeByProcessId.get(processId);
+    if (providerCode != null) {
+      value.put("validateAsProviderCode", providerCode);
+    }
+
     addValidationTaskToProcess(processId, EventType.COMMAND_VALIDATE_RECORD, value);
   }
 
@@ -1210,6 +1332,13 @@ public class ValidationHelper implements DisposableBean {
     value.put("onlyEmptyFields", onlyEmptyFields);
     value.put("dataProviderId", dataset.getDataProviderId());
     value.put("datasetSchema", dataset.getDatasetSchema());
+
+    // Value !null only when a provider code is received from a DESIGN or TEST dataset.
+    String providerCode = validateAsProviderCodeByProcessId.get(processId);
+    if (providerCode != null) {
+      value.put("validateAsProviderCode", providerCode);
+    }
+
     addValidationTaskToProcess(processId, EventType.COMMAND_VALIDATE_FIELD, value);
 
 
@@ -1665,6 +1794,108 @@ public class ValidationHelper implements DisposableBean {
    */
   public String removeSpacesEnum(String listFormatted) {
     return listFormatted.replace(", ", ",").replace("[", "").replace("]", "");
+  }
+
+
+  /**
+   * Validates the given validateAsProviderCode if it's part of any of the dataflow's representatives.
+   *
+   * @param jobId the job id
+   * @param datasetId the dataset id
+   * @param dataflowId the dataflow id
+   * @param user the user name
+   * @param validateAsProviderCode the validation provider code
+   */
+  public void assertValidProviderCodeForDataflow(Long jobId, Long datasetId, Long dataflowId,String user, String validateAsProviderCode) {
+    LOG.info("Checking validation as a provider parameter validity for validateAsProviderCode:{}", validateAsProviderCode);
+    if (validateAsProviderCode == null || validateAsProviderCode.isEmpty()) {
+      LOG.warn("Validation as provider attempted but empty sting was given." +
+          " JobId:{}, datasetId:{}, validateAsProviderCode:{}",jobId, datasetId, validateAsProviderCode);
+      return;
+    }
+
+    Long groupId = dataFlowControllerZuul.findDataProviderGroupIdById(dataflowId);
+    DataProviderVO provider = representativeControllerZuul.findDataProviderByCodeAndGroupId(validateAsProviderCode, groupId);
+    if (provider == null) {
+      validateAsProviderFailJob(jobId, datasetId, user, dataflowId, validateAsProviderCode);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          "Invalid validateAsProviderCode: " + validateAsProviderCode + " does not belong to any provider");
+    }
+
+    List<RepresentativeVO> reps = representativeControllerZuul.findRepresentativesByDataFlowIdAndProviderIdList(dataflowId, List.of(provider.getId()));
+
+    boolean belongsToDataflow = reps != null && reps.stream()
+        .anyMatch(r -> r != null && provider.getId().equals(r.getDataProviderId()));
+
+    if (!belongsToDataflow) {
+      validateAsProviderFailJob(jobId, datasetId, user, dataflowId, validateAsProviderCode);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          "validateAsProviderCode " + validateAsProviderCode + " does not belong to dataflow " + dataflowId);
+    }
+  }
+
+  /**
+   * Pulls validateAsProviderCode from job parameters.
+   * Used in cases where validateAsProviderCode has been nullified due to recalls.
+   *
+   * @param processId the process id
+   * @return the String
+   */
+  private String resolveValidateAsProviderCodeFromJobByProcessId(String processId) {
+    if (processId == null) {
+      return null;
+    }
+
+    Long jobId = null;
+    try {
+      jobId = jobProcessControllerZuul.findJobIdByProcessId(processId);
+      if (jobId == null) {
+        return null;
+      }
+
+      JobVO job = jobControllerZuul.findJobById(jobId);
+      if (job == null || job.getParameters() == null) {
+        return null;
+      }
+
+      Object parameter = job.getParameters().get("validateAsProviderCode");
+      if (parameter == null) {
+        return null;
+      }
+
+      String validateAsProviderCode = String.valueOf(parameter).trim();
+      return validateAsProviderCode.isEmpty() ? null : validateAsProviderCode;
+    } catch (Exception e) {
+      LOG.error("Could not resolve validateAsProviderCode for jobId: {} and processId: {} e: {}", jobId, processId, e.getMessage());
+      return null;
+    }
+  }
+
+  /**
+   * Pulls validateAsProviderCode from job parameters.
+   * Used in cases where validateAsProviderCode has been nullified due to recalls.
+   *
+   * @param jobId the job id
+   * @param datasetId the dataset id
+   * @param user the user name
+   * @param dataflowId the dataflow id
+   * @param validateAsProviderCode the validate as provider code
+   */
+  public void validateAsProviderFailJob(Long jobId, Long datasetId, String user, Long dataflowId, String validateAsProviderCode) {
+    Map<String, Object> value = new HashMap<>();
+    value.put(USER, user);
+    try {
+      jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FAILED);
+      jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.ERROR_INVALID_VALIDATE_AS_PROVIDER_CODE, null);
+      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.VALIDATE_AS_PROVIDER_REFUSED_EVENT, null,
+          NotificationVO.builder().user(user).dataflowId(dataflowId)
+              .error("The selected provider code is not part of any groups that belong to dataflowId " + dataflowId).build());
+      // Remove the lock that validation controller adds.
+      releaseValidationLocks(datasetId);
+      LOG.info("Failed to proceed jobId {} datasetId {} due to invalid provider code from validateAsProviderCode: {}", jobId, datasetId, validateAsProviderCode);
+    } catch (EEAException e) {
+      LOG.error("Could not send VALIDATE_AS_PROVIDER_REFUSED_EVENT for, dataflowId {} and user {}. Error Message: ", dataflowId, user, e);
+    }
   }
 
   /**

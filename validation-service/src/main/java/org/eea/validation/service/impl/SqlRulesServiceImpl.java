@@ -70,10 +70,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -434,11 +436,27 @@ public class SqlRulesServiceImpl implements SqlRulesService {
   @Override
   public List<List<ValueVO>> runSqlRule(Long datasetId, String sqlRule, boolean showInternalFields)
       throws EEAException {
+    return runSqlRule(datasetId, sqlRule, showInternalFields, null);
+  }
+
+  /**
+   * Overload of runSqlRule.
+   *
+   * @param datasetId the dataset id
+   * @param sqlRule the sql rule about to be run
+   * @param showInternalFields the show internal fields
+   * @param runSQLAsProvider the run SQL as provider
+   * @return the string formatted as JSON
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public List<List<ValueVO>> runSqlRule(Long datasetId, String sqlRule, boolean showInternalFields, String runSQLAsProvider)
+      throws EEAException {
 
     StringBuilder sb = new StringBuilder("");
     List<List<ValueVO>> result = new ArrayList<>();
-    DataSetMetabaseVO dataSetMetabaseVO =
-        datasetMetabaseController.findDatasetMetabaseById(datasetId);
+    DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseController.findDatasetMetabaseById(datasetId);
+    String effectiveRunAs = resolveAndValidateRunSqlAsProvider(dataSetMetabaseVO, runSQLAsProvider);
     List<String> ids = new ArrayList<>();
     List<String> datasetIds;
 
@@ -456,12 +474,12 @@ public class SqlRulesServiceImpl implements SqlRulesService {
         throw new EEAForbiddenSQLCommandException("SQL Command not allowed in SQL Rule.");
       }
 
-      if (!ids.isEmpty() || ids.contains(datasetId.toString())) {
+      if (!ids.isEmpty() && !ids.contains(datasetId.toString())) {
         throw new EEAException();
       } else {
         DataFlowVO dataFlowVO = dataFlowController.getMetabaseById(dataSetMetabaseVO.getDataflowId());
 
-        if (dataFlowVO!=null && ((dataFlowVO.getBigData()!=null && !dataFlowVO.getBigData()) || dataFlowVO.getBigData()==null)) {
+        if (dataFlowVO!=null && (dataFlowVO.getBigData()==null || !dataFlowVO.getBigData())) {
           datasetRepository.validateQuery("explain " + sqlRule, datasetId);
         }
         if (showInternalFields) {
@@ -472,11 +490,16 @@ public class SqlRulesServiceImpl implements SqlRulesService {
           sb = buildWithTableQuery(datasetIds, sb, sqlRule);
         }
 
-        if (dataFlowVO!=null && dataFlowVO.getBigData()!=null && dataFlowVO.getBigData()) {
-          String sqlCode = this.replaceTableNamesWithS3Path(sb.toString());
+        // Apply placeholder replacement BEFORE execution.
+        String sqlToRun = sb.toString();
+        sqlToRun = sqlCountryCompanyOrganizationCodeUtils.replaceCodesIfNeeded(datasetId, sqlToRun, effectiveRunAs);
+
+        if (dataFlowVO != null && Boolean.TRUE.equals(dataFlowVO.getBigData())) {
+
+          String sqlCode = this.replaceTableNamesWithS3Path(sqlToRun);
           sqlCode = sqlCode.replace("OFFSET 0 LIMIT 10", "LIMIT 10 OFFSET 0");
-          // replace provider code with {%R3_COUNTRY_CODE%} or {%R3_COMPANY_CODE%} or {%R3_ORGANIZATION_CODE%}
-          sqlCode = sqlCountryCompanyOrganizationCodeUtils.replaceCodesIfNeeded(datasetId, sqlCode);
+
+          LOG.info("RunSQL Big data datasetId={} runSQLAsProvider={} finalSql={}",datasetId, effectiveRunAs, sqlCode);
 
           result = dremioJdbcTemplate.query(sqlCode, (resultSet, i) -> {
             ++i;
@@ -493,12 +516,13 @@ public class SqlRulesServiceImpl implements SqlRulesService {
             return valueVOList;
           });
         } else {
-          result = datasetRepository.runSqlRule(datasetId, sb.toString());
+          LOG.info("RunSQL =Citus datasetId={} runSQLAsProvider={} finalSql={}",datasetId, effectiveRunAs, sqlToRun);
+          result = datasetRepository.runSqlRule(datasetId, sqlToRun);
         }
       }
     } catch (StringIndexOutOfBoundsException e) {
       throw new StringIndexOutOfBoundsException("SQL sentence has wrong format, please check.");
-    } catch (EEAInvalidSQLCommentsException e){
+    } catch (EEAInvalidSQLCommentsException e) {
       throw new EEAInvalidSQLCommentsException(e.getMessage());
     } catch (EEAForbiddenSQLCommandException e) {
       throw new EEAForbiddenSQLCommandException("SQL Command not allowed in SQL Rule.", e);
@@ -1489,5 +1513,40 @@ public class SqlRulesServiceImpl implements SqlRulesService {
       }
     }
     return tableName;
+  }
+
+  /**
+   * Validates the given runSQLAsProvider if it's part of any of the dataflow's
+   * representatives and if the dataset is of DESIGN type.
+   *
+   * @param dataset the dataset
+   * @param runSQLAsProvider the run SQL as provider
+   * @return String
+   */
+  private String resolveAndValidateRunSqlAsProvider(DataSetMetabaseVO dataset, String runSQLAsProvider) {
+    if (runSQLAsProvider == null || runSQLAsProvider.isEmpty()) {
+      return null;
+    }
+
+    DatasetTypeEnum datasetTypeEnum = dataset.getDatasetTypeEnum();
+    if (!DatasetTypeEnum.DESIGN.equals(datasetTypeEnum)) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          "Parameter runSQLAsProvider is allowed only for DESIGN datasets. Dataset type that it was attempted on: "
+              + (datasetTypeEnum != null ? datasetTypeEnum : "null"));
+    }
+
+    Long groupId = dataFlowController.findDataProviderGroupIdById(dataset.getDataflowId());
+    if (groupId == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          "Provider group is not defined for dataflow " + dataset.getDataflowId());
+    }
+
+    DataProviderVO provider = representativeControllerZuul.findDataProviderByCodeAndGroupId(runSQLAsProvider, groupId);
+    if (provider == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          "Invalid runSQLAsProvider: " + runSQLAsProvider);
+    }
+
+    return runSQLAsProvider;
   }
 }
