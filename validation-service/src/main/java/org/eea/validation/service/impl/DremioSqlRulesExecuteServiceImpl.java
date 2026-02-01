@@ -1,5 +1,7 @@
 package org.eea.validation.service.impl;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
@@ -25,6 +27,7 @@ import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.IntegrityVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
+import org.eea.interfaces.vo.validation.TaskVO;
 import org.eea.utils.UtilityClass;
 import org.eea.validation.persistence.repository.SchemasRepository;
 import org.eea.validation.persistence.schemas.DataSetSchema;
@@ -119,6 +122,20 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
             S3PathResolver dataTableResolver = new S3PathResolver(dataflowId, dataProviderId != null ? dataProviderId : 0, datasetId, tableName);
             String path = getPath(datasetId);
 
+            // Draw validateAsProviderCode from task json if exists.
+            String validateAsProviderCode = resolveValidateAsProviderCodeFromTask(taskId);
+
+            // If validation was without a provider code, set to XX to replace the query placeholders.
+            if (validateAsProviderCode == null) {
+                DataSetMetabaseVO ds = dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
+                String providerCode = "XX";
+                if (ds.getDataProviderId() != null && ds.getDataProviderId() != 0) {
+                    DataProviderVO provider = representativeControllerZuul.findDataProviderById(ds.getDataProviderId());
+                    if (provider != null && provider.getCode() != null) providerCode = provider.getCode();
+                }
+                validateAsProviderCode = providerCode;
+            }
+
             String tablePath = s3Service.getTableAsFolderQueryPath(dataTableResolver, path);
             S3PathResolver validationResolver = new S3PathResolver(dataflowId, dataProviderId != null ? dataProviderId : 0, datasetId, S3_VALIDATION);
             RuleVO ruleVO = rulesService.findRule(datasetSchemaId, ruleId);
@@ -153,17 +170,19 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
                 field.set(object, dremioJdbcTemplate);
                 Method method = dremioRulesService.getRuleMethodFromClass(ruleMethodName, cls);
 
-                //I have checked only the case one (method.getParameters().length) for message parameter value, I don't know if we need to check also the other cases
-                if(ruleVO.getThenCondition() != null &&
-                    !ruleVO.getThenCondition().isEmpty() && ruleVO.getThenCondition().get(0).contains("{%")) {
+                /**I have checked only the case one (method.getParameters().length) for message parameter value, I don't know if we need to check also the other cases
+                 * I have added the getSqlSentence()
+                 */
+                if((ruleVO.getThenCondition() != null && !ruleVO.getThenCondition().isEmpty() && ruleVO.getThenCondition().get(0).contains("{%"))
+                || (ruleVO.getSqlSentence() != null && ruleVO.getSqlSentence().contains("{%"))) {
                     if (ruleContainCodes(ruleVO)) {
-                        replaceCodes(dataTableResolver, ruleVO);
+                        replaceCodes(dataTableResolver, ruleVO, validateAsProviderCode);
                     } else {
-                        customQueryResultSet = getResultSet(method, ruleMethodName, cls, customQueryResultSet, dataTableResolver, ruleVO, object);
+                        customQueryResultSet = getResultSet(method, ruleMethodName, cls, customQueryResultSet, dataTableResolver, ruleVO, object, validateAsProviderCode);
                     }
                 }
 
-                recordIds = getRecordIds(dataTableResolver, tableSchemaId, tablePath, ruleVO, parameters, fieldName, object, method);
+                recordIds = getRecordIds(dataTableResolver, tableSchemaId, tablePath, ruleVO, parameters, fieldName, object, method, validateAsProviderCode);
                 if (rowCount == 0 && ruleVO.getShortCode().toLowerCase().contains(LOCK.toLowerCase())) {
                     recordIds.add(TABLE_EMPTY);
                 }
@@ -195,9 +214,10 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
      * @param dataTableResolver The datatable resolver
      * @param ruleVO The ruleVo object
      */
-    private void replaceCodes(S3PathResolver dataTableResolver, RuleVO ruleVO) {
+    private void replaceCodes(S3PathResolver dataTableResolver, RuleVO ruleVO, String validateAsProviderCode) {
         DataSetMetabaseVO dataSetMetabaseVO = dataSetMetabaseControllerZuul.findDatasetMetabaseById(dataTableResolver.getDatasetId());
-        String providerCode = "XX";
+        // Will be XX if no validateAsProviderCode or providerId is given at all.
+        String providerCode = validateAsProviderCode;
         if (dataSetMetabaseVO.getDataProviderId()!=null && dataSetMetabaseVO.getDataProviderId()!=0) {
             DataProviderVO provider = representativeControllerZuul.findDataProviderById(dataSetMetabaseVO.getDataProviderId());
             providerCode = provider.getCode();
@@ -341,7 +361,7 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
      * @throws IllegalAccessException
      * @throws InvocationTargetException
      */
-    private List<String> getRecordIds(S3PathResolver datatableResolver, String tableSchemaId, String tablePath, RuleVO ruleVO, List<String> parameters, String fieldName, Object object, Method method) throws IllegalAccessException, InvocationTargetException {
+    private List<String> getRecordIds(S3PathResolver datatableResolver, String tableSchemaId, String tablePath, RuleVO ruleVO, List<String> parameters, String fieldName, Object object, Method method, String validateAsProviderCode) throws IllegalAccessException, InvocationTargetException {
         List<String> recordIds = new ArrayList<>();
         int parameterLength = method.getParameters().length;
         switch (parameterLength) {
@@ -349,11 +369,13 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
                 DataSetMetabaseVO dataSetMetabaseVO = dataSetMetabaseControllerZuul.findDatasetMetabaseById(datatableResolver.getDatasetId());
                 String sqlCode = sqlRulesService.proccessQuery(dataSetMetabaseVO, ruleVO.getSqlSentence());
                 sqlCode = sqlRulesService.replaceTableNamesWithS3Path(sqlCode);
-                String providerCode = "XX";
+                // Will be XX if no provider is given at all.
+                String providerCode = validateAsProviderCode;
                 if (dataSetMetabaseVO.getDataProviderId()!=null && dataSetMetabaseVO.getDataProviderId()!=0) {
                     DataProviderVO provider = representativeControllerZuul.findDataProviderById(dataSetMetabaseVO.getDataProviderId());
                     providerCode = provider.getCode();
                 }
+                // Will be XX if no validateAsProviderCode or providerId is given at all.
                 sqlCode = sqlCode.replace("{%R3_COUNTRY_CODE%}", providerCode);
                 sqlCode = sqlCode.replace("{%R3_COMPANY_CODE%}", providerCode);
                 sqlCode = sqlCode.replace("{%R3_ORGANIZATION_CODE%}", providerCode);
@@ -374,20 +396,21 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
         return recordIds;
     }
 
-    private List<Map<String, Object>> getResultSet(Method method, String ruleMethodName, Class<?> cls, List<Map<String, Object>> customQueryResultSet, S3PathResolver dataTableResolver, RuleVO ruleVO, Object object) throws IllegalAccessException, InvocationTargetException {
+    private List<Map<String, Object>> getResultSet(Method method, String ruleMethodName, Class<?> cls, List<Map<String, Object>> customQueryResultSet, S3PathResolver dataTableResolver, RuleVO ruleVO, Object object, String validateAsProviderCode) throws IllegalAccessException, InvocationTargetException {
         int parameterLength = method.getParameters().length;
         if (parameterLength == 1 && ruleMethodName.equalsIgnoreCase("isSQLSentenceWithCode")) {
             Method method1 = dremioRulesService.getRuleMethodFromClass("isSQLSentenceWithCodeMap", cls);
-            customQueryResultSet = getCustomQueryResultSet(dataTableResolver, ruleVO, object, method1);
+            customQueryResultSet = getCustomQueryResultSet(dataTableResolver, ruleVO, object, method1, validateAsProviderCode);
         }
         return customQueryResultSet;
     }
 
-    private List<Map<String, Object>> getCustomQueryResultSet(S3PathResolver datatableResolver, RuleVO ruleVO, Object object, Method method) throws IllegalAccessException, InvocationTargetException {
+    private List<Map<String, Object>> getCustomQueryResultSet(S3PathResolver datatableResolver, RuleVO ruleVO, Object object, Method method, String validateAsProviderCode) throws IllegalAccessException, InvocationTargetException {
         DataSetMetabaseVO dataSetMetabaseVO = dataSetMetabaseControllerZuul.findDatasetMetabaseById(datatableResolver.getDatasetId());
         String sqlCode = sqlRulesService.proccessQuery(dataSetMetabaseVO, ruleVO.getSqlSentence());
         sqlCode = sqlRulesService.replaceTableNamesWithS3Path(sqlCode);
-        String providerCode = "XX";
+        // Will be XX if no provider is given at all.
+        String providerCode = validateAsProviderCode;
         if (dataSetMetabaseVO.getDataProviderId()!=null && dataSetMetabaseVO.getDataProviderId()!=0) {
             DataProviderVO provider = representativeControllerZuul.findDataProviderById(dataSetMetabaseVO.getDataProviderId());
             providerCode = provider.getCode();
@@ -700,6 +723,44 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
         pkAndFkDetailsList.add(optionalPK);
         pkAndFkDetailsList.add(optionalFK);
         return pkAndFkDetailsList;
+    }
+
+    /**
+     * Finds validateAsProviderCode from task json.
+     *
+     * @param taskId
+     * @return String
+     */
+    private String resolveValidateAsProviderCodeFromTask(Long taskId) {
+        if (taskId == null) {
+            return null;
+        }
+
+        TaskVO task = validationHelper.findTaskById(taskId);
+        if (task == null || task.getJson() == null || task.getJson().isBlank()) {
+            return null;
+        }
+
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode root = mapper.readTree(task.getJson());
+            JsonNode data = root.get("data");
+            if (data == null) {
+                return null;
+            }
+
+            JsonNode node = data.get("validateAsProviderCode");
+            if (node == null || node.isNull()) {
+                return null;
+            }
+
+            String code = node.asText().trim();
+            return code.isEmpty() ? null : code;
+        } catch (Exception e) {
+            LOG.error("Could not parse validateAsProviderCode from task json for taskId {}: {}",
+                taskId, e.getMessage());
+            return null;
+        }
     }
 }
 
