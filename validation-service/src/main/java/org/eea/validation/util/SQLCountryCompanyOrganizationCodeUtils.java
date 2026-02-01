@@ -43,13 +43,18 @@ public class SQLCountryCompanyOrganizationCodeUtils {
    * @param datasetId
    * @param sqlCode The sql sentence to be validated
    */
-  private String replaceCodes(Long datasetId, String sqlCode) {
+  private String replaceCodes(Long datasetId, String sqlCode, String validateAsProviderCode) {
     DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseController.findDatasetMetabaseById(datasetId);
     String providerCode = "XX";
     if (dataSetMetabaseVO.getDataProviderId()!=null && dataSetMetabaseVO.getDataProviderId()!=0) {
       DataProviderVO provider = representativeControllerZuul.findDataProviderById(dataSetMetabaseVO.getDataProviderId());
       providerCode = provider.getCode();
     }
+
+    if (validateAsProviderCode != null && !validateAsProviderCode.isEmpty()) {
+      providerCode = validateAsProviderCode;
+    }
+
     return sqlCode
             .replace("{%R3_COUNTRY_CODE%}", providerCode)
             .replace("{%R3_COMPANY_CODE%}", providerCode)
@@ -66,10 +71,14 @@ public class SQLCountryCompanyOrganizationCodeUtils {
    * @param sqlCode   sql string to check and optionally modify
    * @return the updated or original SQL sentence (with provider codes applied if placeholders exist)
    */
-  public String replaceCodesIfNeeded(Long datasetId, String sqlCode) {
+  public String replaceCodesIfNeeded(Long datasetId, String sqlCode, String validateAsProviderCode) {
     if (sqlCodeContainCodes(sqlCode)) {
-      return replaceCodes(datasetId, sqlCode);
+      return replaceCodes(datasetId, sqlCode, validateAsProviderCode);
     }
     return sqlCode;
+  }
+
+  public String replaceCodesIfNeeded(Long datasetId, String sqlCode) {
+    return replaceCodesIfNeeded(datasetId, sqlCode, null);
   }
 }
