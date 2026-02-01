@@ -136,7 +136,7 @@ public class JobForFinalizingInProgressValidationJobsWithFinishedTasks {
                         } else if (queuedProcess != null) {
                             //a process for one of the provider datasets is stuck in state IN_QUEUE, so execute validation for that process
                             ProcessVO process = processControllerZuul.findById(queuedProcess);
-                            validationControllerZuul.executeValidation(process.getDatasetId(), process.getProcessId(), true, true);
+                            validationControllerZuul.executeValidation(process.getDatasetId(), process.getProcessId(), true, true, null);
                         }
                     } else {
                         //validation with release false
