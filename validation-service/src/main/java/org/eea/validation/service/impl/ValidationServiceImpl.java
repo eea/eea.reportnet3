@@ -1,6 +1,8 @@
 package org.eea.validation.service.impl;
 
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.opencsv.CSVWriter;
 import org.apache.commons.collections.CollectionUtils;
 import org.bson.types.ObjectId;
@@ -38,6 +40,7 @@ import org.eea.thread.ThreadPropertiesManager;
 import org.eea.utils.LiteralConstants;
 import org.eea.validation.exception.EEAInvalidSQLException;
 import org.eea.validation.persistence.data.domain.*;
+import org.eea.validation.persistence.data.metabase.domain.Task;
 import org.eea.validation.persistence.data.metabase.repository.TaskRepository;
 import org.eea.validation.persistence.data.repository.*;
 import org.eea.validation.persistence.repository.RulesRepository;
@@ -49,6 +52,7 @@ import org.eea.validation.service.DataLakeValidationService;
 import org.eea.validation.service.ValidationService;
 import org.eea.validation.util.KieBaseManager;
 import org.eea.validation.util.RulesErrorUtils;
+import org.eea.validation.util.SQLCountryCompanyOrganizationCodeUtils;
 import org.eea.validation.util.SQLValidationUtils;
 import org.joda.time.LocalDate;
 import org.kie.api.KieBase;
@@ -228,6 +232,9 @@ public class ValidationServiceImpl implements ValidationService {
 
   @Autowired
   private DataLakeValidationService dataLakeValidationService;
+
+  @Autowired
+  private SQLCountryCompanyOrganizationCodeUtils sqlCountryCompanyOrganizationCodeUtils;
 
   /**
    * Run dataset validations.
@@ -428,7 +435,8 @@ public class ValidationServiceImpl implements ValidationService {
     try {
       TenantResolver.setTenantName(LiteralConstants.DATASET_PREFIX + datasetId);
       if (!"null".equals(sqlRule)) {
-        sqlValidationUtils.executeValidationSQLRule(datasetId, sqlRule, dataProviderId);
+        String validateAsProviderCode = resolveValidateAsProviderCodeFromTask(taskId);
+        sqlValidationUtils.executeValidationSQLRule(datasetId, sqlRule, dataProviderId, validateAsProviderCode);
       } else {
         table = tableRepository.findById(idTable).orElse(null);
         session = kieBase.newKieSession();
@@ -1096,5 +1104,44 @@ public class ValidationServiceImpl implements ValidationService {
   @Override
   public Integer getNumberOfRecordsInTable(Long datasetId, String tableSchemaId){
     return recordRepository.countRecordsTable(tableSchemaId);
+  }
+
+  /**
+   * Resolve the ValidateAsProviderCode value.
+   *
+   * @param taskId the task id
+   * @return the String
+   */
+  private String resolveValidateAsProviderCodeFromTask(Long taskId) {
+    if (taskId == null) {
+      return null;
+    }
+
+    Task task = taskRepository.findById(taskId).orElse(null);
+    if (task == null || task.getJson() == null || task.getJson().isBlank()) {
+      return null;
+    }
+
+    try {
+      ObjectMapper mapper = new ObjectMapper();
+      JsonNode root = mapper.readTree(task.getJson());
+      JsonNode data = root.get("data");
+      if (data == null) {
+        return null;
+      }
+
+      JsonNode node = data.get("validateAsProviderCode");
+      if (node == null || node.isNull()) {
+        return null;
+      }
+
+      String code = node.asText().trim();
+      return code.isEmpty() ? null : code;
+
+    } catch (Exception e) {
+      LOG.error("Could not parse validateAsProviderCode from task json for taskId {}: {}",
+          taskId, e.getMessage());
+      return null;
+    }
   }
 }
