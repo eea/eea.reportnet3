@@ -668,7 +668,7 @@ public class RulesControllerImplTest {
   public void runSqlTest() throws EEAException {
     SqlRuleVO sqlRule = new SqlRuleVO();
     sqlRule.setSqlRule("SELECT * from dataset_1.table_value");
-    rulesControllerImpl.runSqlRule(1L, sqlRule, true);
+    rulesControllerImpl.runSqlRule(1L, sqlRule, true, null);
     Mockito.verify(sqlRulesService, times(1)).runSqlRule(1L, "SELECT * from dataset_1.table_value",
         true);
   }
@@ -680,7 +680,7 @@ public class RulesControllerImplTest {
     Mockito.when(sqlRulesService.runSqlRule(1L, sqlRule.getSqlRule(), true))
         .thenThrow(new EEAForbiddenSQLCommandException());
     try {
-      rulesControllerImpl.runSqlRule(1L, sqlRule, true);
+      rulesControllerImpl.runSqlRule(1L, sqlRule, true, null);
     } catch (ResponseStatusException e) {
       assertEquals(EEAErrorMessage.SQL_COMMAND_NOT_ALLOWED, e.getReason());
       throw e;
@@ -695,7 +695,7 @@ public class RulesControllerImplTest {
     Mockito.when(sqlRulesService.runSqlRule(1L, sqlRule.getSqlRule(), true))
         .thenThrow(new EEAException());
     try {
-      rulesControllerImpl.runSqlRule(1L, sqlRule, true);
+      rulesControllerImpl.runSqlRule(1L, sqlRule, true, null);
     } catch (ResponseStatusException e) {
       assertEquals(EEAErrorMessage.RUNNING_RULE, e.getReason());
       throw e;
@@ -845,7 +845,7 @@ public class RulesControllerImplTest {
     try {
       SqlRuleVO sql = new SqlRuleVO();
       sql.setSqlRule("sql");
-      rulesControllerImpl.runSqlRule(1L, sql, false);
+      rulesControllerImpl.runSqlRule(1L, sql, false, null);
     } catch (NumberFormatException e) {
       assertNotNull(e);
       throw e;
@@ -859,7 +859,7 @@ public class RulesControllerImplTest {
     try {
       SqlRuleVO sql = new SqlRuleVO();
       sql.setSqlRule("sql");
-      rulesControllerImpl.runSqlRule(1L, sql, false);
+      rulesControllerImpl.runSqlRule(1L, sql, false, null);
     } catch (StringIndexOutOfBoundsException e) {
       assertNotNull(e);
       throw e;
@@ -880,7 +880,7 @@ public class RulesControllerImplTest {
     try {
       SqlRuleVO sql = new SqlRuleVO();
       sql.setSqlRule("sql");
-      rulesControllerImpl.runSqlRule(1L, sql, false);
+      rulesControllerImpl.runSqlRule(1L, sql, false, null);
     } catch (ResponseStatusException e) {
       assertNotNull(e);
       assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
@@ -902,7 +902,7 @@ public class RulesControllerImplTest {
     try {
       SqlRuleVO sql = new SqlRuleVO();
       sql.setSqlRule("sql");
-      rulesControllerImpl.runSqlRule(1L, sql, false);
+      rulesControllerImpl.runSqlRule(1L, sql, false, null);
     } catch (ResponseStatusException e) {
       assertNotNull(e);
       assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
