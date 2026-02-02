@@ -536,7 +536,7 @@ public class JobServiceImpl implements JobService {
     }
 
     /**
-     * Validates the given validateAsProviderCode if it's part of any of the dataflow's representatives.
+     * Validates the given validateAsProviderCode if it belongs to any provider of the dataflow's group.
      * Will stop the process before a validation job starts.
      *
      * @param dataflowId the dataflow id
@@ -551,22 +551,19 @@ public class JobServiceImpl implements JobService {
         }
 
         Long groupId = dataFlowControllerZuul.findDataProviderGroupIdById(dataflowId);
+        if (groupId == null) {
+            validateAsProviderRefusedNotification(user, dataflowId);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                "Invalid validateAsProviderCode: " + validateAsProviderCode + " does not belong to any group.");
+        }
+
         DataProviderVO provider = representativeControllerZuul.findDataProviderByCodeAndGroupId(validateAsProviderCode, groupId);
         if (provider == null) {
             validateAsProviderRefusedNotification(user, dataflowId);
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                "Invalid validateAsProviderCode: " + validateAsProviderCode + " does not belong to any provider");
+                "Invalid validateAsProviderCode: " + validateAsProviderCode + " does not belong to any providers of the dataflow's group.");
         }
 
-        List<RepresentativeVO> reps = representativeControllerZuul.findRepresentativesByDataFlowIdAndProviderIdList(dataflowId, List.of(provider.getId()));
-        boolean belongsToDataflow = reps != null && reps.stream()
-            .anyMatch(r -> r != null && provider.getId().equals(r.getDataProviderId()));
-
-        if (!belongsToDataflow) {
-            validateAsProviderRefusedNotification(user, dataflowId);
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                "validateAsProviderCode " + validateAsProviderCode + " does not belong to dataflow " + dataflowId);
-        }
     }
 
     public void validateAsProviderRefusedNotification(String user, Long dataflowId) {

@@ -1516,8 +1516,8 @@ public class SqlRulesServiceImpl implements SqlRulesService {
   }
 
   /**
-   * Validates the given runSQLAsProvider if it's part of any of the dataflow's
-   * representatives and if the dataset is of DESIGN type.
+   * Validates the given runSQLAsProvider if it belongs to any provider of the dataflow's group
+   * and if the dataset is of DESIGN type.
    *
    * @param dataset the dataset
    * @param runSQLAsProvider the run SQL as provider

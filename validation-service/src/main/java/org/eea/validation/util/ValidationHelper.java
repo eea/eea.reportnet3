@@ -1800,7 +1800,7 @@ public class ValidationHelper implements DisposableBean {
 
 
   /**
-   * Validates the given validateAsProviderCode if it's part of any of the dataflow's representatives.
+   * Validates the given validateAsProviderCode if it belongs to any provider of the dataflow's group.
    *
    * @param jobId the job id
    * @param datasetId the dataset id
@@ -1817,23 +1817,19 @@ public class ValidationHelper implements DisposableBean {
     }
 
     Long groupId = dataFlowControllerZuul.findDataProviderGroupIdById(dataflowId);
+    if (groupId == null) {
+      validateAsProviderFailJob(jobId, datasetId, user, dataflowId, validateAsProviderCode);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          "Invalid validateAsProviderCode: " + validateAsProviderCode + " does not belong to any group.");
+    }
+
     DataProviderVO provider = representativeControllerZuul.findDataProviderByCodeAndGroupId(validateAsProviderCode, groupId);
     if (provider == null) {
       validateAsProviderFailJob(jobId, datasetId, user, dataflowId, validateAsProviderCode);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          "Invalid validateAsProviderCode: " + validateAsProviderCode + " does not belong to any provider");
+          "Invalid validateAsProviderCode: " + validateAsProviderCode + " does not belong to any providers of the dataflow's group.");
     }
 
-    List<RepresentativeVO> reps = representativeControllerZuul.findRepresentativesByDataFlowIdAndProviderIdList(dataflowId, List.of(provider.getId()));
-
-    boolean belongsToDataflow = reps != null && reps.stream()
-        .anyMatch(r -> r != null && provider.getId().equals(r.getDataProviderId()));
-
-    if (!belongsToDataflow) {
-      validateAsProviderFailJob(jobId, datasetId, user, dataflowId, validateAsProviderCode);
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          "validateAsProviderCode " + validateAsProviderCode + " does not belong to dataflow " + dataflowId);
-    }
   }
 
   /**
