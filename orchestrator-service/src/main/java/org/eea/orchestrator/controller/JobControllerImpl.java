@@ -191,7 +191,7 @@ public class JobControllerImpl implements JobController {
             parameters.put("createParquetWithSQL", createParquetWithSQL);
 
             // Validate as a provider only for Design and Test datasets and if we receive a validateAsProviderCode.
-            if ((dataset.getDatasetTypeEnum().equals(DatasetTypeEnum.DESIGN) || dataset.getDatasetTypeEnum().equals(DatasetTypeEnum.TEST))
+            if ((DatasetTypeEnum.DESIGN.equals(dataset.getDatasetTypeEnum()) || DatasetTypeEnum.TEST.equals(dataset.getDatasetTypeEnum()))
                 && (validateAsProviderCode != null && !validateAsProviderCode.isEmpty())) {
                 jobService.assertValidProviderCodeForDataflow(dataflowId, username, validateAsProviderCode);
                 parameters.put("validateAsProviderCode", validateAsProviderCode);

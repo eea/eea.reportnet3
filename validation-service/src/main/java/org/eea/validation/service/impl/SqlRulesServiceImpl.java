@@ -133,6 +133,10 @@ public class SqlRulesServiceImpl implements SqlRulesService {
   @Autowired
   private TestDatasetControllerZuul testDatasetControllerZuul;
 
+  /** The dataflow controller zuul. */
+  @Autowired
+  private DataFlowControllerZuul dataFlowControllerZuul;
+
   /** The entity manager. */
   @PersistenceContext
   private EntityManager entityManager;
@@ -456,7 +460,8 @@ public class SqlRulesServiceImpl implements SqlRulesService {
     StringBuilder sb = new StringBuilder("");
     List<List<ValueVO>> result = new ArrayList<>();
     DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseController.findDatasetMetabaseById(datasetId);
-    String effectiveRunAs = resolveAndValidateRunSqlAsProvider(dataSetMetabaseVO, runSQLAsProvider);
+    // We get an effective runSQLAsProvider and then proceed only if null or valid code.
+    String effectiveRunSQLAsProvider = resolveAndValidateRunSqlAsProvider(dataSetMetabaseVO, runSQLAsProvider);
     List<String> ids = new ArrayList<>();
     List<String> datasetIds;
 
@@ -477,9 +482,8 @@ public class SqlRulesServiceImpl implements SqlRulesService {
       if (!ids.isEmpty() && !ids.contains(datasetId.toString())) {
         throw new EEAException();
       } else {
-        DataFlowVO dataFlowVO = dataFlowController.getMetabaseById(dataSetMetabaseVO.getDataflowId());
-
-        if (dataFlowVO!=null && (dataFlowVO.getBigData()==null || !dataFlowVO.getBigData())) {
+        final boolean isBigDataflow = dataFlowControllerZuul.isBigDataflow(dataSetMetabaseVO.getDataflowId());
+        if (!isBigDataflow) {
           datasetRepository.validateQuery("explain " + sqlRule, datasetId);
         }
         if (showInternalFields) {
@@ -491,15 +495,13 @@ public class SqlRulesServiceImpl implements SqlRulesService {
         }
 
         // Apply placeholder replacement BEFORE execution.
-        String sqlToRun = sb.toString();
-        sqlToRun = sqlCountryCompanyOrganizationCodeUtils.replaceCodesIfNeeded(datasetId, sqlToRun, effectiveRunAs);
+        String sqlToRun = sqlCountryCompanyOrganizationCodeUtils.replaceCodesIfNeeded(datasetId, sb.toString(), effectiveRunSQLAsProvider);
 
-        if (dataFlowVO != null && Boolean.TRUE.equals(dataFlowVO.getBigData())) {
+        if (isBigDataflow) {
+          String sqlCode = this.replaceTableNamesWithS3Path(sqlToRun)
+              .replace("OFFSET 0 LIMIT 10", "LIMIT 10 OFFSET 0");
 
-          String sqlCode = this.replaceTableNamesWithS3Path(sqlToRun);
-          sqlCode = sqlCode.replace("OFFSET 0 LIMIT 10", "LIMIT 10 OFFSET 0");
-
-          LOG.info("RunSQL Big data datasetId={} runSQLAsProvider={} finalSql={}",datasetId, effectiveRunAs, sqlCode);
+          LOG.info("RunSQL Big data datasetId={} runSQLAsProvider={} finalSql={}",datasetId, effectiveRunSQLAsProvider, sqlCode);
 
           result = dremioJdbcTemplate.query(sqlCode, (resultSet, i) -> {
             ++i;
@@ -516,7 +518,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
             return valueVOList;
           });
         } else {
-          LOG.info("RunSQL =Citus datasetId={} runSQLAsProvider={} finalSql={}",datasetId, effectiveRunAs, sqlToRun);
+          LOG.info("RunSQL =Citus datasetId={} runSQLAsProvider={} finalSql={}",datasetId, effectiveRunSQLAsProvider, sqlToRun);
           result = datasetRepository.runSqlRule(datasetId, sqlToRun);
         }
       }

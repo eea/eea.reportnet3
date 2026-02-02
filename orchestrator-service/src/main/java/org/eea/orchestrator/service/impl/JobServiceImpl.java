@@ -571,8 +571,12 @@ public class JobServiceImpl implements JobService {
         value.put(LiteralConstants.USER, user);
         try {
             kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.VALIDATE_AS_PROVIDER_REFUSED_EVENT, value,
-                NotificationVO.builder().user(user).dataflowId(dataflowId)
-                    .error("The selected provider code is not part of any groups that belong to dataflowId " + dataflowId).build());
+                NotificationVO
+                    .builder()
+                    .user(user)
+                    .dataflowId(dataflowId)
+                    .error("The selected provider code is not part of any groups that belong to dataflowId " + dataflowId)
+                    .build());
         } catch (EEAException e) {
             LOG.error("Could not send VALIDATE_AS_PROVIDER_REFUSED_EVENT for, dataflowId {} and user {}. Error Message: ", dataflowId, user, e);
         }

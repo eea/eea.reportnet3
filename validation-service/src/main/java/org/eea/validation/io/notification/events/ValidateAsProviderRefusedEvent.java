@@ -39,11 +39,11 @@ public class ValidateAsProviderRefusedEvent implements NotificableEventHandler  
      * @throws EEAException the EEA exception
      */
     @Override
-    public Map<String, Object> getMap(NotificationVO notificationVO) throws EEAException {
-        Long dataflowId = notificationVO.getDataflowId();
-        DataFlowVO dataflow = dataFlowControllerZuul.getMetabaseById(dataflowId);
+    public Map<String, Object> getMap(final NotificationVO notificationVO) throws EEAException {
+        final Long dataflowId = notificationVO.getDataflowId();
+        final DataFlowVO dataflow = dataFlowControllerZuul.getMetabaseById(dataflowId);
 
-        Map<String, Object> notification = new HashMap<>();
+        final Map<String, Object> notification = new HashMap<>();
         notification.put("user", notificationVO.getUser());
         notification.put("dataflowId", dataflowId);
         notification.put("dataflowName", dataflow.getName());

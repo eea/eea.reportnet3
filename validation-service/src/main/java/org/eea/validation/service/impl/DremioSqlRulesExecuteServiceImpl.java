@@ -173,8 +173,10 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
                 /**I have checked only the case one (method.getParameters().length) for message parameter value, I don't know if we need to check also the other cases
                  * I have added the getSqlSentence()
                  */
-                if((ruleVO.getThenCondition() != null && !ruleVO.getThenCondition().isEmpty() && ruleVO.getThenCondition().get(0).contains("{%"))
-                || (ruleVO.getSqlSentence() != null && ruleVO.getSqlSentence().contains("{%"))) {
+                if((ruleVO.getThenCondition() != null
+                    && !ruleVO.getThenCondition().isEmpty()
+                    && ruleVO.getThenCondition().get(0).contains("{%"))
+                    || (ruleVO.getSqlSentence() != null && ruleVO.getSqlSentence().contains("{%"))) {
                     if (ruleContainCodes(ruleVO)) {
                         replaceCodes(dataTableResolver, ruleVO, validateAsProviderCode);
                     } else {

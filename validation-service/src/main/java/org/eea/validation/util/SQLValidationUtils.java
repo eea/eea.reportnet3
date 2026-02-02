@@ -189,28 +189,28 @@ public class SQLValidationUtils {
   private QueryVO getTableToEvaluate(QueryVO queryVO, String dataProviderCode, String validateAsProviderCode) {
     String query = queryVO != null ? queryVO.getRule().getSqlSentence() : null;
     try {
-      if (query != null) {
-        String preparedquery = query.contains(";") ? query.replace(";", "") : query;
-        String providerCodeAux = "XX";
-        if (validateAsProviderCode != null && !validateAsProviderCode.isEmpty()) {
-          providerCodeAux = validateAsProviderCode;
-        } else if (dataProviderCode != null && !"null".equals(dataProviderCode)) {
-          DataProviderVO providerCode =
-              representativeControllerZuul.findDataProviderById(Long.valueOf(dataProviderCode));
-          if (providerCode != null && StringUtils.isNotBlank(providerCode.getCode())) {
-            providerCodeAux = providerCode.getCode();
-          }
-        }
-
-        preparedquery = preparedquery.replace("{%R3_COUNTRY_CODE%}", providerCodeAux);
-        preparedquery = preparedquery.replace("{%R3_COMPANY_CODE%}", providerCodeAux);
-        preparedquery = preparedquery.replace("{%R3_ORGANIZATION_CODE%}", providerCodeAux);
-        queryVO = sqlRulesService.retrieveTableData(preparedquery, queryVO, Boolean.FALSE);
-        LOG.info("providerCodeAux={}", providerCodeAux);
-        LOG.info("Prepared SQL after replacement: {}", preparedquery);
-      } else {
+      if (query == null) {
         throw new EEAInvalidSQLException("No sql found");
       }
+
+      String preparedquery = query.contains(";") ? query.replace(";", "") : query;
+      String providerCodeAux = "XX";
+      if (dataProviderCode != null && !"null".equals(dataProviderCode)) {
+        DataProviderVO providerCode =
+            representativeControllerZuul.findDataProviderById(Long.valueOf(dataProviderCode));
+        if (providerCode != null && StringUtils.isNotBlank(providerCode.getCode())) {
+          providerCodeAux = providerCode.getCode();
+        }
+      } else if (validateAsProviderCode != null && !validateAsProviderCode.isEmpty()) {
+        providerCodeAux = validateAsProviderCode;
+      }
+
+      preparedquery = preparedquery.replace("{%R3_COUNTRY_CODE%}", providerCodeAux);
+      preparedquery = preparedquery.replace("{%R3_COMPANY_CODE%}", providerCodeAux);
+      preparedquery = preparedquery.replace("{%R3_ORGANIZATION_CODE%}", providerCodeAux);
+      queryVO = sqlRulesService.retrieveTableData(preparedquery, queryVO, Boolean.FALSE);
+      LOG.info("providerCodeAux={}", providerCodeAux);
+      LOG.info("Prepared SQL after replacement: {}", preparedquery);
     } catch (EEAInvalidSQLException e) {
       LOG.error("SQL can't be executed: {}", e.getMessage(), e);
     }
