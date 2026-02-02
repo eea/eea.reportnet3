@@ -81,6 +81,16 @@ public enum JobInfoEnum {
 
     ERROR_DATASET_IS_LOCKED_FOR_EDITING("Dataset is locked for editing"),
 
+    ERROR_IMPORT_FAILED_READ_ONLY_TABLE("Import failed because the table is read only."),
+
+    ERROR_IMPORT_FAILED_FIXED_NUM("Import failed because the table has fixed number of records."),
+
+    ERROR_IMPORT_FAILED_READ_ONLY_FIELDS("Import failed because the table contains read only fields."),
+
+    ERROR_IMPORT_FAILED_FILE_NOT_ZIP("Import failed because the file is not zip."),
+
+    ERROR_ZIP_FOLDER_WITHOUT_CSV_FILES("The ZIP file you uploaded does not contain any csv files for import. Please include at least one csv file and try again.");
+
     ERROR_INVALID_VALIDATE_AS_PROVIDER_CODE("The selected validation provider code doesn't belong to the dataflow.");
 
     /** The value. */
@@ -105,5 +115,14 @@ public enum JobInfoEnum {
             return String.format(value, lineNumber);
         }
         return value;
+    }
+
+    public static JobInfoEnum fromValue(String value, Integer lineNumber) {
+        for (JobInfoEnum jobInfo : JobInfoEnum.values()) {
+            if (jobInfo.getValue(lineNumber).equals(value)) {
+                return jobInfo;
+            }
+        }
+        throw new IllegalArgumentException("No enum constant with value " + value);
     }
 }

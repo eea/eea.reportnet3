@@ -118,7 +118,7 @@ public class ValidationHelper implements DisposableBean {
   private static final Logger LOG = LoggerFactory.getLogger(ValidationHelper.class);
 
   /** The processes map. */
-  private Map<String, ValidationProcessVO> processesMap;
+  private final Map<String, ValidationProcessVO> processesMap;
 
   /** The validation executor service. */
   private ExecutorService validationExecutorService;
@@ -289,12 +289,13 @@ public class ValidationHelper implements DisposableBean {
         if (removed != null) {
           LOG.info("Removing process {} from processesMap ", processId);
           result = true;
-        } else {
+        }
+        else {
           LOG.info("Process {} not removed from processesMap", processId);
         }
-      } else {
-        LOG.info("Process {} not found in processesMap" + processId);
-        result = true;
+      }
+      else {
+        LOG.info("Process {} not found in processesMap" , processId);
       }
     }
     return result;
@@ -1695,7 +1696,8 @@ public class ValidationHelper implements DisposableBean {
           }
           isFinished = true;
         }
-      } else {
+      }
+      else {
         if (taskRepository.isProcessEnding(processId)) {
           try {
             LOG.info("Process {} for dataset {} ending", processId, datasetId);

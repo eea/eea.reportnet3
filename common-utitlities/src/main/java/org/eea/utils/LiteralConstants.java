@@ -538,6 +538,8 @@ public final class LiteralConstants {
 
   public static final String PUBLIC_HEADER = "Public";
 
+  public static final String ETL_IMPORT_ATTACHMENTS_FOLDER = "attachments";
+
   /**
    * Instantiates a new literal constants.
    */

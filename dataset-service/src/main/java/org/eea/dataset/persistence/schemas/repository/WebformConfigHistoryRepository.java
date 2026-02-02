@@ -16,7 +16,7 @@ public interface WebformConfigHistoryRepository extends MongoRepository<WebformC
   // Find the latest version
   Optional<WebformConfigHistory> findFirstByIdWebformConfigSchemaOrderByVersionDesc(ObjectId idWebformConfigSchema);
 
-  // TODO: Find all records with the same idWebformConfigSchema
+  //TODO: Find all records with the same idWebformConfigSchema
   List<WebformConfigHistory> findByIdWebformConfigSchema(ObjectId idWebformConfigSchema);
 }
 
