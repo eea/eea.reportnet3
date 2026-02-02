@@ -115,4 +115,13 @@ public enum JobInfoEnum {
         }
         return value;
     }
+
+    public static JobInfoEnum fromValue(String value, Integer lineNumber) {
+        for (JobInfoEnum jobInfo : JobInfoEnum.values()) {
+            if (jobInfo.getValue(lineNumber).equals(value)) {
+                return jobInfo;
+            }
+        }
+        throw new IllegalArgumentException("No enum constant with value " + value);
+    }
 }

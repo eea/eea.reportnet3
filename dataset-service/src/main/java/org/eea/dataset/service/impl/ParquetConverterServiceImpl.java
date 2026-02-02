@@ -47,7 +47,6 @@ import org.eea.exception.DremioApiException;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.orchestrator.JobController.JobControllerZuul;
-import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
@@ -60,7 +59,6 @@ import org.eea.utils.UtilityClass;
 import org.mozilla.universalchardet.UniversalDetector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -199,8 +197,6 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
       //update statistics
       updateImportStatistics(tableSchemaVO.getIdTableSchema(), numberOfRecordsToBeInserted.toString(), dataSetMetabase, fileExtension);
     }
-
-    //todo handle etlIImport true
 
     //handle warnings
     if(importFileInDremioInfo.getWarningMessages() != null && !importFileInDremioInfo.getWarningMessages().isEmpty()) {
@@ -1324,11 +1320,6 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
     lastImportFileExtensionStat.setStatName(LAST_IMPORT_FILE_EXTENSION);
     lastImportFileExtensionStat.setValue(fileExtension);
     statisticsService.saveOrUpdateStatistics(lastImportFileExtensionStat);
-  }
-
-  @Override
-  public void handleEtlImportDataset(ImportFileInDremioInfo importFileInDremioInfo, File etlImportFolder, List<File> csvFiles, DataSetSchema dataSetSchema) throws Exception {
-    convertCsvFilesToParquetFiles(importFileInDremioInfo, csvFiles, dataSetSchema);
   }
 
   /**

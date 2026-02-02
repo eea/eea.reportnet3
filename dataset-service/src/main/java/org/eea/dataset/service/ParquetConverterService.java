@@ -23,6 +23,4 @@ public interface ParquetConverterService {
     void updateImportStatistics(String tableSchemaId, String numberOfRecordsToBeInserted, DataSetMetabase dataSetMetabase, String fileExtension);
 
     void deleteAllDataBeforeImport (ImportFileInDremioInfo importFileInDremioInfo, String datasetSchemaId) throws Exception;
-
-    void handleEtlImportDataset(ImportFileInDremioInfo importFileInDremioInfo, File etlImportFolder, List<File> csvFiles, DataSetSchema dataSetSchema) throws Exception;
 }

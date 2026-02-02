@@ -486,9 +486,6 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 if (FileTypeEnum.getEnum(fileMimeType.toLowerCase()) == FileTypeEnum.CSV) {
                     correctFilesForImport.add(file);
                 }
-                else {
-                    //TODO handle xlsx files
-                }
             } else {
                 sendWrongFileNameWarning = true;
                 LOG.error("Importing file {} to s3. {}. There's no table with that fileName", fileName, importFileInDremioInfo);
@@ -1754,7 +1751,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         String processId = dremioHelperService.executeSqlStatement(updateQueryBuilder.toString());
         dremioHelperService.checkIfDremioProcessFinishedSuccessfully(updateQueryBuilder.toString(), processId, 2000L);
 
-        // TODO: Handle updateCascadePK
+        //TODO: Handle updateCascadePK
     }
 
     @Override
@@ -2980,8 +2977,6 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 providerCode = dataProviderVO.getCode();
             }
 
-
-            //todo check filename
             ImportFileInDremioInfo importFileInDremioInfo = new ImportFileInDremioInfo(jobId, datasetId, dataflowId, providerId, tableSchemaId, null, replaceData, delimiter, null, providerCode);
             if (DatasetTypeEnum.REFERENCE.equals(datasetTypeEnum) && dataFlowVO.getStatus() == TypeStatusEnum.DRAFT) {
                 importFileInDremioInfo.setUpdateReferenceFolder(true);
@@ -2993,10 +2988,21 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             importFileInDremioInfo.setEtlImportFolderPath(etlImportFolder.getPath());
             importFileInDremioInfo.setAttachmentsExistPerTableName(attachmentsExistPerTableName);
 
-            parquetConverterService.handleEtlImportDataset(importFileInDremioInfo, etlImportFolder, csvFiles, datasetSchema);
-
+            try {
+                parquetConverterService.convertCsvFilesToParquetFiles(importFileInDremioInfo, csvFiles, datasetSchema);
+            }
+            catch(Exception e){
+                LOG.error("Error in convertCsvFilesToParquetFiles for job {} ", importFileInDremioInfo, e);
+                if(StringUtils.isBlank(importFileInDremioInfo.getErrorMessage())){
+                    //something went wrong but no specific error is documented. job needs to be failed
+                    jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FAILED);
+                }
+            }
+            finally {
+                //update job status and info
+                finishEtlImportJob(importFileInDremioInfo);
+            }
             LOG.info("Completed etlImport for jobId {}", jobId);
-            jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FINISHED);
         }
         catch (Exception e){
             LOG.error("Unexpected error! Error in etlImportDatasetDL for jobId {} and filePathInS3 {} Message: {}", jobId, filePathInS3, e.getMessage());
@@ -3009,8 +3015,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 FileUtils.deleteDirectory(etlImportFolder);
             }
             //remove file from public S3 if job is finished
-            //todo uncomment the following
-            if (jobControllerZuul.findJobById(jobId).getJobStatus() == JobStatusEnum.FINISHED) {
+           if (jobControllerZuul.findJobById(jobId).getJobStatus() == JobStatusEnum.FINISHED) {
                 s3HelperPublic.deleteFileFromS3(filePathInS3);
             }
 
@@ -3195,6 +3200,52 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             }
         }
         return true;
+    }
+
+    protected void finishEtlImportJob(ImportFileInDremioInfo importFileInDremioInfo){
+        Long jobId = importFileInDremioInfo.getJobId();
+        if(StringUtils.isNotBlank(importFileInDremioInfo.getErrorMessage())){
+            if (EEAErrorMessage.ERROR_FILE_NAME_MATCHING.equals(importFileInDremioInfo.getErrorMessage())) {
+                jobControllerZuul.updateJobStatusAndInfo(jobId, JobStatusEnum.CANCELED, JobInfoEnum.ERROR_WRONG_FILE_NAME, null);
+            } else if (EEAErrorMessage.ERROR_FILE_NO_HEADERS_MATCHING.equals(importFileInDremioInfo.getErrorMessage())) {
+                jobControllerZuul.updateJobStatusAndInfo(jobId, JobStatusEnum.CANCELED, JobInfoEnum.ERROR_NO_HEADERS_MATCHING, null);
+            } else if (EEAErrorMessage.ERROR_IMPORT_EMPTY_FILES.equals(importFileInDremioInfo.getErrorMessage())) {
+                jobControllerZuul.updateJobStatusAndInfo(jobId, JobStatusEnum.CANCELED, JobInfoEnum.ERROR_ALL_FILES_ARE_EMPTY, null);
+            } else if(EEAErrorMessage.ERROR_IMPORT_FAILED_FIXED_NUM_WITHOUT_REPLACE_DATA.equals(importFileInDremioInfo.getErrorMessage())){
+                jobControllerZuul.updateJobStatusAndInfo(jobId, JobStatusEnum.CANCELED, JobInfoEnum.ERROR_IMPORT_FAILED_FIXED_NUM_WITHOUT_REPLACE_DATA, null);
+            } else if(EEAErrorMessage.ERROR_IMPORT_FAILED_WRONG_NUM_OF_RECORDS.equals(importFileInDremioInfo.getErrorMessage())){
+                jobControllerZuul.updateJobStatusAndInfo(jobId, JobStatusEnum.CANCELED, JobInfoEnum.ERROR_IMPORT_FAILED_WRONG_NUM_OF_RECORDS, null);
+            } else if(EEAErrorMessage.ERROR_IMPORT_FAILED_ONLY_READ_ONLY_FIELDS.equals(importFileInDremioInfo.getErrorMessage())){
+                jobControllerZuul.updateJobStatusAndInfo(jobId, JobStatusEnum.CANCELED, JobInfoEnum.ERROR_IMPORT_FAILED_ONLY_READ_ONLY_FIELDS, null);
+            } else if(EEAErrorMessage.ERROR_IMPORT_FAILED_READ_ONLY_TABLES.equals(importFileInDremioInfo.getErrorMessage())){
+                jobControllerZuul.updateJobStatusAndInfo(jobId, JobStatusEnum.CANCELED, JobInfoEnum.ERROR_IMPORT_FAILED_READ_ONLY_TABLES, null);
+            } else if(EEAErrorMessage.DREMIO_ENDPOINT_ERROR_RESPONSE.equals(importFileInDremioInfo.getErrorMessage())){
+                jobControllerZuul.updateJobStatusAndInfo(jobId, JobStatusEnum.CANCELED, JobInfoEnum.ERROR_DREMIO_ENDPOINT_RESPONSE, null);
+            } else if(EEAErrorMessage.ERROR_IMPORT_FILES_CONTAIN_WRONG_HEADERS.equals(importFileInDremioInfo.getErrorMessage())){
+                jobControllerZuul.updateJobStatusAndInfo(jobId, JobStatusEnum.CANCELED, JobInfoEnum.ERROR_IMPORT_FILES_CONTAIN_WRONG_HEADERS, null);
+            }
+            else{
+                jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FAILED);
+            }
+        }
+        else{
+            if(importFileInDremioInfo.getWarningMessages() != null && !importFileInDremioInfo.getWarningMessages().isEmpty() && StringUtils.isNotBlank(importFileInDremioInfo.getWarningMessages().get(0))) {
+                //update job info message by the first warning
+                String warningToUpdate = importFileInDremioInfo.getWarningMessages().get(0);
+                JobInfoEnum jobInfoWarning = null;
+                try {
+                    jobInfoWarning = JobInfoEnum.fromValue(warningToUpdate, null);
+                    jobControllerZuul.updateJobStatusAndInfo(jobId, JobStatusEnum.FINISHED, jobInfoWarning, null);
+                } catch (Exception e) {
+                    LOG.error("Could not find job info enum for value {} for job {} Error: {}", warningToUpdate, importFileInDremioInfo, e.getMessage());
+                    //will not set up a job info message
+                    jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FINISHED);
+                }
+            }
+            else{
+                jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FINISHED);
+            }
+        }
     }
 
 }

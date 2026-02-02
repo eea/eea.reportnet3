@@ -9,6 +9,7 @@ import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.*;
 import org.eea.dataset.service.file.FileCommonUtils;
 import org.eea.dataset.service.model.ImportFileInDremioInfo;
+import org.eea.exception.EEAErrorMessage;
 import org.eea.interfaces.controller.communication.NotificationController;
 import org.eea.interfaces.controller.dataflow.DataFlowController;
 import org.eea.interfaces.controller.dataflow.RepresentativeController;
@@ -31,6 +32,7 @@ import org.eea.lock.redis.RedisLockService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -43,6 +45,7 @@ import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 
 @RunWith(MockitoJUnitRunner.class)
 public class BigDataDatasetServiceImplTest {
@@ -261,6 +264,119 @@ public class BigDataDatasetServiceImplTest {
     }
 
     @Test
+    public void etlImportDatasetDesignDatasetCanceledJobTest() throws Exception {
+        Long dataflowId = 1L;
+        Long datasetId = 1L;
+        Long providerId = 1L;
+        Boolean replaceData = false;
+        String tableSchemaId = "abc";
+        String tableName = "name";
+        String delimiter = ",";
+        String filePathInS3 = "path.zip";
+        Long jobId = 1L;
+        DatasetTypeEnum datasetType = DatasetTypeEnum.DESIGN;
+        JobStatusEnum jobStatus = JobStatusEnum.CANCELED;
+        JobInfoEnum jobInfoEnum = JobInfoEnum.ERROR_IMPORT_FILES_CONTAIN_WRONG_HEADERS;
+        String fileExtension = ".zip";
+        List<File> fileList = new ArrayList<>();
+        JobVO jobVO = new JobVO();
+        jobVO.setId(jobId);
+        jobVO.setJobStatus(jobStatus);
+        DataFlowVO dataFlowVO = new DataFlowVO();
+        DataSetMetabaseVO dataSetMetabaseVO = new DataSetMetabaseVO();
+        DataProviderVO dataProviderVO  = new DataProviderVO();
+        Map<String, Boolean> attachmentsExistPerTableName = new HashMap<>();
+        TableSchemaIdNameVO tableSchemaIdNameVO = new TableSchemaIdNameVO();
+        tableSchemaIdNameVO.setIdTableSchema(tableSchemaId);
+        tableSchemaIdNameVO.setNameTableSchema(tableName);
+        List<TableSchemaIdNameVO> tableSchemaIdNameVOS = new ArrayList<>();
+        tableSchemaIdNameVOS.add(tableSchemaIdNameVO);
+        Set<String> tableNamesSet = tableSchemaIdNameVOS.stream().map(vo -> vo.getNameTableSchema().toLowerCase()).collect(Collectors.toSet());
+        String errorMessage = EEAErrorMessage.ERROR_IMPORT_FILES_CONTAIN_WRONG_HEADERS;
+        DataSetSchema datasetSchema = new DataSetSchema();
+
+        Mockito.when(datasetService.getDatasetType(datasetId)).thenReturn(datasetType);
+        Mockito.when(jobControllerZuul.findJobById(jobId)).thenReturn(jobVO);
+
+        // Use spy in order to mock protected methods
+        BigDataDatasetServiceImpl bigDataDatasetServiceSpy = Mockito.spy(bigDataDatasetService);
+        Mockito.when(datasetSchemaService.getTableSchemasIds(datasetId)).thenReturn(tableSchemaIdNameVOS);
+        Mockito.when(datasetService.getSchemaIfReportable(datasetId, tableSchemaId)).thenReturn(datasetSchema);
+        Mockito.doReturn(mockFile).when(bigDataDatasetServiceSpy).createEtlImportFolder(datasetId, jobId);
+        Mockito.doReturn(fileList).when(bigDataDatasetServiceSpy).storeAndUnzipEtlImportZipFile(datasetId, filePathInS3, fileExtension, jobId, mockFile, tableNamesSet, attachmentsExistPerTableName);
+        Mockito.when(representativeControllerZuul.findDataProviderById(providerId)).thenReturn(dataProviderVO);
+
+        Mockito.doAnswer(invocation -> {
+                    ImportFileInDremioInfo info = invocation.getArgument(0);
+                    info.setErrorMessage(errorMessage);
+                    throw new Exception(errorMessage);
+                }).when(parquetConverterService).convertCsvFilesToParquetFiles(any(), eq(fileList), eq(datasetSchema));
+
+        bigDataDatasetServiceSpy.etlImportDataset(datasetId, dataflowId, providerId, replaceData, tableSchemaId, delimiter, filePathInS3, jobId, dataFlowVO, dataSetMetabaseVO);
+
+        ArgumentCaptor<ImportFileInDremioInfo> captor = ArgumentCaptor.forClass(ImportFileInDremioInfo.class);
+        Mockito.verify(parquetConverterService).convertCsvFilesToParquetFiles(captor.capture(), eq(fileList), eq(datasetSchema));
+        assertEquals(errorMessage, captor.getValue().getErrorMessage());
+        Mockito.verify(jobControllerZuul).updateJobStatusAndInfo(jobId, jobStatus, jobInfoEnum, null);
+    }
+
+    @Test
+    public void etlImportDatasetDesignDatasetFailedJobTest() throws Exception {
+        Long dataflowId = 1L;
+        Long datasetId = 1L;
+        Long providerId = 1L;
+        Boolean replaceData = false;
+        String tableSchemaId = "abc";
+        String tableName = "name";
+        String delimiter = ",";
+        String filePathInS3 = "path.zip";
+        Long jobId = 1L;
+        DatasetTypeEnum datasetType = DatasetTypeEnum.DESIGN;
+        JobStatusEnum jobStatus = JobStatusEnum.FAILED;
+        String fileExtension = ".zip";
+        List<File> fileList = new ArrayList<>();
+        JobVO jobVO = new JobVO();
+        jobVO.setId(jobId);
+        jobVO.setJobStatus(jobStatus);
+        DataFlowVO dataFlowVO = new DataFlowVO();
+        DataSetMetabaseVO dataSetMetabaseVO = new DataSetMetabaseVO();
+        DataProviderVO dataProviderVO  = new DataProviderVO();
+        Map<String, Boolean> attachmentsExistPerTableName = new HashMap<>();
+        TableSchemaIdNameVO tableSchemaIdNameVO = new TableSchemaIdNameVO();
+        tableSchemaIdNameVO.setIdTableSchema(tableSchemaId);
+        tableSchemaIdNameVO.setNameTableSchema(tableName);
+        List<TableSchemaIdNameVO> tableSchemaIdNameVOS = new ArrayList<>();
+        tableSchemaIdNameVOS.add(tableSchemaIdNameVO);
+        Set<String> tableNamesSet = tableSchemaIdNameVOS.stream().map(vo -> vo.getNameTableSchema().toLowerCase()).collect(Collectors.toSet());
+        String errorMessage = "non existing message";
+        DataSetSchema datasetSchema = new DataSetSchema();
+
+        Mockito.when(datasetService.getDatasetType(datasetId)).thenReturn(datasetType);
+        Mockito.when(jobControllerZuul.findJobById(jobId)).thenReturn(jobVO);
+
+        // Use spy in order to mock protected methods
+        BigDataDatasetServiceImpl bigDataDatasetServiceSpy = Mockito.spy(bigDataDatasetService);
+        Mockito.when(datasetSchemaService.getTableSchemasIds(datasetId)).thenReturn(tableSchemaIdNameVOS);
+        Mockito.when(datasetService.getSchemaIfReportable(datasetId, tableSchemaId)).thenReturn(datasetSchema);
+        Mockito.doReturn(mockFile).when(bigDataDatasetServiceSpy).createEtlImportFolder(datasetId, jobId);
+        Mockito.doReturn(fileList).when(bigDataDatasetServiceSpy).storeAndUnzipEtlImportZipFile(datasetId, filePathInS3, fileExtension, jobId, mockFile, tableNamesSet, attachmentsExistPerTableName);
+        Mockito.when(representativeControllerZuul.findDataProviderById(providerId)).thenReturn(dataProviderVO);
+
+        Mockito.doAnswer(invocation -> {
+            ImportFileInDremioInfo info = invocation.getArgument(0);
+            info.setErrorMessage(errorMessage);
+            throw new RuntimeException(errorMessage);
+        }).when(parquetConverterService).convertCsvFilesToParquetFiles(any(), eq(fileList), eq(datasetSchema));
+
+        bigDataDatasetServiceSpy.etlImportDataset(datasetId, dataflowId, providerId, replaceData, tableSchemaId, delimiter, filePathInS3, jobId, dataFlowVO, dataSetMetabaseVO);
+
+        ArgumentCaptor<ImportFileInDremioInfo> captor = ArgumentCaptor.forClass(ImportFileInDremioInfo.class);
+        Mockito.verify(parquetConverterService).convertCsvFilesToParquetFiles(captor.capture(), eq(fileList), eq(datasetSchema));
+        assertEquals(errorMessage, captor.getValue().getErrorMessage());
+        Mockito.verify(jobControllerZuul).updateJobStatus(jobId, jobStatus);
+    }
+
+    @Test
     public void etlImportDatasetDesignDatasetFinishedJobTest() throws Exception {
         Long dataflowId = 1L;
         Long datasetId = 1L;
@@ -302,6 +418,123 @@ public class BigDataDatasetServiceImplTest {
 
         bigDataDatasetServiceSpy.etlImportDataset(datasetId, dataflowId, providerId, replaceData, tableSchemaId, delimiter, filePathInS3, jobId, dataFlowVO, dataSetMetabaseVO);
         Mockito.verify(jobControllerZuul, Mockito.times(1)).updateJobStatus(jobId, jobStatus);
+    }
+
+    @Test
+    public void etlImportDatasetDesignDatasetFinishedJobWithWarningTest() throws Exception {
+        Long dataflowId = 1L;
+        Long datasetId = 1L;
+        Long providerId = 1L;
+        Boolean replaceData = false;
+        String tableSchemaId = "abc";
+        String tableName = "name";
+        String delimiter = ",";
+        String filePathInS3 = "path.zip";
+        Long jobId = 1L;
+        DatasetTypeEnum datasetType = DatasetTypeEnum.DESIGN;
+        JobStatusEnum jobStatus = JobStatusEnum.FINISHED;
+        JobInfoEnum jobInfoEnum = JobInfoEnum.WARNING_SOME_IMPORT_FILES_CONTAIN_WRONG_HEADERS;
+        String fileExtension = ".zip";
+        List<File> fileList = new ArrayList<>();
+        JobVO jobVO = new JobVO();
+        jobVO.setId(jobId);
+        jobVO.setJobStatus(jobStatus);
+        DataFlowVO dataFlowVO = new DataFlowVO();
+        DataSetMetabaseVO dataSetMetabaseVO = new DataSetMetabaseVO();
+        DataProviderVO dataProviderVO  = new DataProviderVO();
+        Map<String, Boolean> attachmentsExistPerTableName = new HashMap<>();
+        TableSchemaIdNameVO tableSchemaIdNameVO = new TableSchemaIdNameVO();
+        tableSchemaIdNameVO.setIdTableSchema(tableSchemaId);
+        tableSchemaIdNameVO.setNameTableSchema(tableName);
+        List<TableSchemaIdNameVO> tableSchemaIdNameVOS = new ArrayList<>();
+        tableSchemaIdNameVOS.add(tableSchemaIdNameVO);
+        Set<String> tableNamesSet = tableSchemaIdNameVOS.stream().map(vo -> vo.getNameTableSchema().toLowerCase()).collect(Collectors.toSet());
+        DataSetSchema datasetSchema = new DataSetSchema();
+        List<String> warningMessages = new ArrayList<>();
+        warningMessages.add(jobInfoEnum.getValue(null));
+        warningMessages.add(JobInfoEnum.WARNING_SOME_FILES_ARE_EMPTY.getValue(null));
+
+
+        Mockito.when(datasetService.getDatasetType(datasetId)).thenReturn(datasetType);
+        Mockito.when(jobControllerZuul.findJobById(jobId)).thenReturn(jobVO);
+
+        // Use spy in order to mock protected methods
+        BigDataDatasetServiceImpl bigDataDatasetServiceSpy = Mockito.spy(bigDataDatasetService);
+        Mockito.when(datasetSchemaService.getTableSchemasIds(datasetId)).thenReturn(tableSchemaIdNameVOS);
+        Mockito.when(datasetService.getSchemaIfReportable(datasetId, tableSchemaId)).thenReturn(datasetSchema);
+        Mockito.doReturn(mockFile).when(bigDataDatasetServiceSpy).createEtlImportFolder(datasetId, jobId);
+        Mockito.doReturn(fileList).when(bigDataDatasetServiceSpy).storeAndUnzipEtlImportZipFile(datasetId, filePathInS3, fileExtension, jobId, mockFile, tableNamesSet, attachmentsExistPerTableName);
+        Mockito.when(representativeControllerZuul.findDataProviderById(providerId)).thenReturn(dataProviderVO);
+
+        Mockito.doAnswer(invocation -> {
+            ImportFileInDremioInfo info = invocation.getArgument(0);
+            info.setWarningMessages(warningMessages);
+            return null;
+        }).when(parquetConverterService).convertCsvFilesToParquetFiles(any(), eq(fileList), eq(datasetSchema));
+
+        bigDataDatasetServiceSpy.etlImportDataset(datasetId, dataflowId, providerId, replaceData, tableSchemaId, delimiter, filePathInS3, jobId, dataFlowVO, dataSetMetabaseVO);
+
+        ArgumentCaptor<ImportFileInDremioInfo> captor = ArgumentCaptor.forClass(ImportFileInDremioInfo.class);
+        Mockito.verify(parquetConverterService).convertCsvFilesToParquetFiles(captor.capture(), eq(fileList), eq(datasetSchema));
+        Mockito.verify(jobControllerZuul).updateJobStatusAndInfo(jobId, jobStatus, jobInfoEnum, null);
+    }
+
+    @Test
+    public void etlImportDatasetDesignDatasetFinishedJobWithNonExistingWarningTest() throws Exception {
+        Long dataflowId = 1L;
+        Long datasetId = 1L;
+        Long providerId = 1L;
+        Boolean replaceData = false;
+        String tableSchemaId = "abc";
+        String tableName = "name";
+        String delimiter = ",";
+        String filePathInS3 = "path.zip";
+        Long jobId = 1L;
+        DatasetTypeEnum datasetType = DatasetTypeEnum.DESIGN;
+        JobStatusEnum jobStatus = JobStatusEnum.FINISHED;
+        String fileExtension = ".zip";
+        List<File> fileList = new ArrayList<>();
+        JobVO jobVO = new JobVO();
+        jobVO.setId(jobId);
+        jobVO.setJobStatus(jobStatus);
+        DataFlowVO dataFlowVO = new DataFlowVO();
+        DataSetMetabaseVO dataSetMetabaseVO = new DataSetMetabaseVO();
+        DataProviderVO dataProviderVO  = new DataProviderVO();
+        Map<String, Boolean> attachmentsExistPerTableName = new HashMap<>();
+        TableSchemaIdNameVO tableSchemaIdNameVO = new TableSchemaIdNameVO();
+        tableSchemaIdNameVO.setIdTableSchema(tableSchemaId);
+        tableSchemaIdNameVO.setNameTableSchema(tableName);
+        List<TableSchemaIdNameVO> tableSchemaIdNameVOS = new ArrayList<>();
+        tableSchemaIdNameVOS.add(tableSchemaIdNameVO);
+        Set<String> tableNamesSet = tableSchemaIdNameVOS.stream().map(vo -> vo.getNameTableSchema().toLowerCase()).collect(Collectors.toSet());
+        DataSetSchema datasetSchema = new DataSetSchema();
+        List<String> warningMessages = new ArrayList<>();
+        warningMessages.add("warning doesn't exist");
+        warningMessages.add(JobInfoEnum.WARNING_SOME_FILES_ARE_EMPTY.getValue(null));
+
+
+        Mockito.when(datasetService.getDatasetType(datasetId)).thenReturn(datasetType);
+        Mockito.when(jobControllerZuul.findJobById(jobId)).thenReturn(jobVO);
+
+        // Use spy in order to mock protected methods
+        BigDataDatasetServiceImpl bigDataDatasetServiceSpy = Mockito.spy(bigDataDatasetService);
+        Mockito.when(datasetSchemaService.getTableSchemasIds(datasetId)).thenReturn(tableSchemaIdNameVOS);
+        Mockito.when(datasetService.getSchemaIfReportable(datasetId, tableSchemaId)).thenReturn(datasetSchema);
+        Mockito.doReturn(mockFile).when(bigDataDatasetServiceSpy).createEtlImportFolder(datasetId, jobId);
+        Mockito.doReturn(fileList).when(bigDataDatasetServiceSpy).storeAndUnzipEtlImportZipFile(datasetId, filePathInS3, fileExtension, jobId, mockFile, tableNamesSet, attachmentsExistPerTableName);
+        Mockito.when(representativeControllerZuul.findDataProviderById(providerId)).thenReturn(dataProviderVO);
+
+        Mockito.doAnswer(invocation -> {
+            ImportFileInDremioInfo info = invocation.getArgument(0);
+            info.setWarningMessages(warningMessages);
+            return null;
+        }).when(parquetConverterService).convertCsvFilesToParquetFiles(any(), eq(fileList), eq(datasetSchema));
+
+        bigDataDatasetServiceSpy.etlImportDataset(datasetId, dataflowId, providerId, replaceData, tableSchemaId, delimiter, filePathInS3, jobId, dataFlowVO, dataSetMetabaseVO);
+
+        ArgumentCaptor<ImportFileInDremioInfo> captor = ArgumentCaptor.forClass(ImportFileInDremioInfo.class);
+        Mockito.verify(parquetConverterService).convertCsvFilesToParquetFiles(captor.capture(), eq(fileList), eq(datasetSchema));
+        Mockito.verify(jobControllerZuul).updateJobStatus(jobId, jobStatus);
     }
 
     @Test
