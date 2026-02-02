@@ -286,6 +286,10 @@ public final class EEAErrorMessage {
   public static final String DATASET_NOT_BELONG_DATAFLOW =
       "Forbidden: Dataset %d does not belongs to dataflow %d";
 
+  /** The Constant DATAFLOW_NOT_BIG_DATA: {@value}. */
+  public static final String DATAFLOW_NOT_BIG_DATA =
+          "Forbidden: Dataflow %d is not big data";
+
   /** The Constant UNREPORTED_DATA: {@value}. */
   public static final String UNREPORTED_DATA = "Unreported data";
 
@@ -894,7 +898,7 @@ public final class EEAErrorMessage {
   public static final String ERROR_ILLEGAL_HEADER_CHARACTER = "There's an Illegal character in field header ";
 
   /** The Constant DATASET_IS_LOCKED */
-  public static final String DATASET_IS_LOCKED_FOR_EDITING = "The dataset is locked for editing  ";
+  public static final String DATASET_IS_LOCKED_FOR_EDITING = "The dataset is locked for editing from user ";
 
   /** The Constant DATA_COLLECTION_FAILED_ICEBERG_EXISTS: {@value}. */
   public static final String DATA_COLLECTION_FAILED_DATASET_LOCKED_FOR_EDITING_EXISTS = "Error creating data collection. Dataset locked for editing exists";

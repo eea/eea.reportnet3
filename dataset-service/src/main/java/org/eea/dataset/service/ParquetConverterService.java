@@ -5,6 +5,7 @@ import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.service.helper.FileTreatmentHelper;
 import org.eea.dataset.service.model.ImportFileInDremioInfo;
+import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 
 import java.io.File;
 import java.util.List;

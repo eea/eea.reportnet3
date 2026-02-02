@@ -1,6 +1,7 @@
 package org.eea.dataset.service.model;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import lombok.*;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
@@ -27,6 +28,9 @@ public class ImportFileInDremioInfo {
     private String dataProviderCode;
     private Boolean updateReferenceFolder;
     private Boolean hasCorrectHeaders;
+    private Boolean isEtlImport;
+    private String etlImportFolderPath;
+    private Map<String, Boolean> attachmentsExistPerTableName;
 
     public ImportFileInDremioInfo(Long jobId, Long datasetId, Long dataflowId, Long providerId, String tableSchemaId, String fileName, Boolean replaceData,
                                   String delimiter, Long integrationId, String dataProviderCode) {
