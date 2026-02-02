@@ -289,4 +289,102 @@ public class DatasetDataRetrieverDL implements DataLakeDataRetriever {
             DatasetTypeEnum.TEST.getValue());
         return acceptedTypes.stream().anyMatch(datasetType::equals);
     }
+
+    @Override
+    public TableVO getPreparationTableResult(DataSetMetabaseVO dataset, TableSchemaVO tableSchemaVO, Pageable pageable, String fields, String fieldSchemaId, String fieldValue, ErrorTypeEnum[] levelError,
+                                  String[] qcCodes, String preparationCode) throws EEAException {
+        Long totalRecords = 0L;
+        Long datasetId = dataset.getId();
+        TableVO result = new TableVO();
+        S3PathResolver s3PathResolverParentDataset;
+        //parent dataset resolver
+        if(BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable()) && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, tableSchemaVO.getIdTableSchema()))){
+            s3PathResolverParentDataset = s3Service.getS3PathResolverByDatasetType(dataset, tableSchemaVO.getNameTableSchema(), true);
+            s3PathResolverParentDataset.setIsIcebergTable(true);
+        }
+        else{
+            s3PathResolverParentDataset = s3Service.getS3PathResolverByDatasetType(dataset, tableSchemaVO.getNameTableSchema(), false);
+            s3PathResolverParentDataset.setIsIcebergTable(false);
+        }
+
+        //preparations resolver
+        S3PathResolver s3PathResolverPreparations = new S3PathResolver(dataset.getDataflowId(),
+                dataset.getDataProviderId() != null ? dataset.getDataProviderId() : 0,
+                dataset.getId(), tableSchemaVO.getNameTableSchema());
+        s3PathResolverPreparations.setPath(S3_PREPARATION_TABLE_NAME_FOLDER_PATH);
+        s3PathResolverPreparations.setPreparationCode(preparationCode);
+
+        boolean preparationsIsIcebergTable = false; // to be substituted when preparations table editing available
+        if(BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable()) && BooleanUtils.isTrue(preparationsIsIcebergTable)) {
+            s3PathResolverPreparations.setIsIcebergTable(true);
+        }
+        else {
+            s3PathResolverPreparations.setIsIcebergTable(false);
+        }
+
+
+        boolean parentFolderExist = s3Helper.checkFolderExist(s3PathResolverParentDataset);
+
+        if (parentFolderExist) {
+            // Try to auto promote if it’s safe and not already promoted.
+            dremioAutoPromotionService.ensureSafeFolderPromotion(dataset, s3PathResolverParentDataset);
+            //dremioAutoPromotionService.ensureSafeFolderPromotion(dataset, s3PathResolverPreparations);
+
+            // Check for promotion again.
+            if (dremioHelperService.checkFolderPromoted(s3PathResolverParentDataset, s3PathResolverParentDataset.getTableName())) {
+                StringBuilder dataQuery = new StringBuilder();
+                StringBuilder recordsCountQuery = new StringBuilder();
+
+                if (REFERENCE.equals(dataset.getDatasetTypeEnum()) && s3PathResolverParentDataset.getIsIcebergTable() == false) {
+                    s3PathResolverParentDataset.setPath(S3_DATAFLOW_REFERENCE_QUERY_PATH);
+                    totalRecords = dremioJdbcTemplate.queryForObject(s3Helper.getRecordsCountQuery(s3PathResolverParentDataset), Long.class);
+                    dataQuery.append("select * from " + s3Service.getTableAsFolderQueryPath(s3PathResolverParentDataset) + " t ");
+                    recordsCountQuery.append("select count(record_id) from " + s3Service.getTableAsFolderQueryPath(s3PathResolverParentDataset) + " t ");
+                } else {
+                    totalRecords = dremioJdbcTemplate.queryForObject(s3Helper.buildRecordsCountQuery(s3PathResolverPreparations), Long.class);
+                    //select * from "rn3-dataset"."rn3-dataset"."df-0000150"."dp-0000002"."ds-0001542"."current"."t1" t
+                    dataQuery.append("select * from " + s3Service.getTableAsFolderQueryPath(s3PathResolverPreparations, S3_PREPARATION_TABLE_AS_FOLDER_QUERY_PATH) + " t ");
+                    recordsCountQuery.append("select count(record_id) from " + s3Service.getTableAsFolderQueryPath(s3PathResolverPreparations, S3_PREPARATION_TABLE_AS_FOLDER_QUERY_PATH) + " t ");
+                }
+                result.setTotalRecords(totalRecords);
+
+                Map<String, FieldSchemaVO> fieldIdMap = tableSchemaVO.getRecordSchema().getFieldSchema().stream().collect(Collectors.toMap(FieldSchemaVO::getId, Function.identity()));
+                S3PathResolver validationS3PathResolver = new S3PathResolver(
+                        dataset.getDataflowId(),
+                        dataset.getDataProviderId() != null ? dataset.getDataProviderId() : 0,
+                        dataset.getId(),
+                        S3_VALIDATION
+                );
+                validationS3PathResolver.setIsIcebergTable(false);
+                validationS3PathResolver.setPath(S3_TABLE_AS_FOLDER_QUERY_PATH);
+
+                String validationTablePath = s3Service.getTableAsFolderQueryPath(validationS3PathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
+                StringBuilder filteredQuery = DataLakeDataRetrieverUtils.buildFilteredQuery(dataset, fields, fieldSchemaId, fieldValue, fieldIdMap, levelError, qcCodes, validationTablePath);
+
+                if (filteredQuery.toString().isEmpty() && levelError != null && levelError.length == 0) {
+                    result.setTotalFilteredRecords(0L);
+                    result.setTotalRecords(totalRecords);
+                    result.setRecords(new ArrayList<>());
+                } else {
+                    recordsCountQuery.append(filteredQuery);
+                    // Table path for metadata refresh and promotion.
+                    String tablePathForRefresh;
+                    if (REFERENCE.equals(dataset.getDatasetTypeEnum()) && !Boolean.TRUE.equals(s3PathResolverParentDataset.getIsIcebergTable())) {
+                        tablePathForRefresh = s3Service.getTableAsFolderQueryPath(s3PathResolverParentDataset);
+                    } else {
+                        tablePathForRefresh = s3Service.getTableAsFolderQueryPath(s3PathResolverParentDataset, S3_TABLE_AS_FOLDER_QUERY_PATH);
+                    }
+
+                    loadTableWithRetry(dataset, tableSchemaVO, pageable, result, s3PathResolverParentDataset, validationS3PathResolver,
+                            dataQuery, recordsCountQuery, validationTablePath, filteredQuery, tablePathForRefresh);
+                }
+            } else {
+                setEmptyResults(result);
+            }
+        } else {
+            setEmptyResults(result);
+        }
+        return result;
+    }
+
 }

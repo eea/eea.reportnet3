@@ -538,6 +538,11 @@ public final class LiteralConstants {
 
   public static final String PUBLIC_HEADER = "Public";
 
+  public static final String S3_PREPARATION_TABLE_NAME_FOLDER_PATH = "%s/%s/%s/preparation/%s/%s";
+
+  public static final String S3_PREPARATION_TABLE_AS_FOLDER_QUERY_PATH = ".\"%s\".\"%s\".\"%s\".\"preparation\".\"%s\".\"%s\"";
+
+
   /**
    * Instantiates a new literal constants.
    */

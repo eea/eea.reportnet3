@@ -82,6 +82,11 @@ public class DataCollectionDataRetrieverDL implements DataLakeDataRetriever {
         return result;
     }
 
+    @Override
+    public TableVO getPreparationTableResult(DataSetMetabaseVO dataset, TableSchemaVO tableSchemaVO, Pageable pageable, String fields, String fieldSchemaId, String fieldValue, ErrorTypeEnum[] levelError, String[] qcCodes, String preparationCode) throws EEAException {
+        return null; // no preparation for datacollection
+    }
+
     /**
      * Helper that makes a second try to fetch the table data if it fails the first time.
      */

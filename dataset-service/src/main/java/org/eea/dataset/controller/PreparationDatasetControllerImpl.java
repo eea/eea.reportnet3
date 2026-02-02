@@ -7,20 +7,30 @@ import java.util.List;
 
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.ApiParam;
 import org.apache.commons.lang3.StringUtils;
+import org.eea.dataset.service.DataLakeDataRetrieverFactory;
+import org.eea.dataset.service.DatasetMetabaseService;
+import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.PreparationDatasetService;
+import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.PreparationDatasetController;
+import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.PreparationDatasetVO;
+import org.eea.interfaces.vo.dataset.TableVO;
+import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
+import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import javax.validation.Valid;
 
 /**
  * The Class PreparationDatasetControllerImpl.
@@ -38,6 +48,15 @@ public class PreparationDatasetControllerImpl
 
     @Autowired
     private PreparationDatasetService preparationDatasetService;
+
+    @Autowired
+    private DatasetMetabaseService datasetMetabaseService;
+
+    @Autowired
+    private DatasetSchemaService datasetSchemaService;
+
+    @Autowired
+    private DataLakeDataRetrieverFactory dataLakeDataRetrieverFactory;
 
     /**
      * List preparation datasets by dataflow id and provider id.
@@ -167,5 +186,88 @@ public class PreparationDatasetControllerImpl
                     HttpStatus.INTERNAL_SERVER_ERROR,
                     "Unexpected error while deleting preparation dataset");
         }
+    }
+
+    /**
+     * Get table data for a preparation dataset (DL).
+     */
+    @Override
+    @GetMapping("/preparations/TableValueDatasetDL/{id}")
+    @ApiOperation(value = "Get preparation table data", hidden = true)
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Successfully retrieved preparation data"),
+            @ApiResponse(code = 400, message = "Preparation id or table schema incorrect"),
+            @ApiResponse(code = 404, message = "Preparation dataset not found"),
+            @ApiResponse(code = 500, message = "Error retrieving preparation data")
+    })
+    public TableVO getPreparationTableValuesDL(
+            @ApiParam(type = "Long", value = "Preparation dataset id")
+            @PathVariable("id") Long preparationId,
+            @RequestParam("code") String preparationCode,
+            @ApiParam(type = "String", value = "Table schema id")
+            @RequestParam("idTableSchema") String idTableSchema,
+
+            @ApiParam(type = "Integer", value = "Page number")
+            @RequestParam(value = "pageNum", defaultValue = "0", required = false)
+            Integer pageNum,
+
+            @ApiParam(type = "Integer", value = "Page size")
+            @RequestParam(value = "pageSize", required = false)
+            Integer pageSize,
+
+            @ApiParam(type = "String", value = "Field names")
+            @RequestParam(value = "fields", required = false)
+            String fields,
+
+            @ApiParam(value = "Level error to filter")
+            @RequestParam(value = "levelError", required = false)
+            ErrorTypeEnum[] levelError,
+
+            @ApiParam(value = "List of rule ids to filter")
+            @RequestParam(value = "idRules", required = false)
+            String[] idRules,
+
+            @ApiParam(type = "String", value = "Field schema id")
+            @RequestParam(value = "fieldSchemaId", required = false)
+            String fieldSchemaId,
+
+            @ApiParam(type = "String", value = "Value to filter")
+            @RequestParam(value = "fieldValue", required = false)
+            String fieldValue,
+
+            @ApiParam(value = "List of qc codes to filter")
+            @RequestParam(value = "qcCodes", required = false)
+            String[] qcCodes) {
+        if (null == preparationCode || null == idTableSchema) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    EEAErrorMessage.DATASET_INCORRECT_ID);
+        }
+
+        // check if the parameters received from the frontend are the needed to get the table values
+        // WITHOUT PAGINATION
+        Pageable pageable = null;
+        if (pageSize != null) {
+            pageable = PageRequest.of(pageNum, pageSize);
+        }
+        // else pageable will be null, it will be created inside the service
+        TableVO result = null;
+        try {
+            DataSetMetabaseVO dataset = datasetMetabaseService.findDatasetMetabase(preparationId);
+            String datasetSchemaId = dataset.getDatasetSchema();
+            TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(idTableSchema, datasetSchemaId);
+            result = dataLakeDataRetrieverFactory.getRetriever(preparationId).getPreparationTableResult(dataset, tableSchemaVO, pageable, fields, fieldSchemaId, fieldValue, levelError, qcCodes, preparationCode);
+        } catch (EEAException e) {
+            LOG.error(e.getMessage());
+            if (e.getMessage().equals(EEAErrorMessage.DATASET_NOTFOUND)) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DATASET_NOTFOUND);
+            }
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+                    EEAErrorMessage.OBTAINING_TABLE_DATA);
+        } catch (Exception e) {
+            LOG.error("Unexpected error! Error retrieving big data table values for datasetId {} and tableSchemaId {} Message: {}", preparationId, idTableSchema, e.getMessage());
+            throw e;
+        }
+
+        return result;
     }
 }
