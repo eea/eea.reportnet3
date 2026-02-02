@@ -253,6 +253,11 @@ public class S3ServiceImpl implements S3Service {
                     return S3_ICEBERG_BUCKET + String.format(path, dataflowFolder, dataProviderFolder, datasetFolder, s3PathResolver.getTableName());
                 }
                 return S3_DEFAULT_BUCKET + String.format(path, dataflowFolder, dataProviderFolder, datasetFolder, s3PathResolver.getTableName());
+            case S3_PREPARATION_TABLE_AS_FOLDER_QUERY_PATH:
+                if(BooleanUtils.isTrue(s3PathResolver.getIsIcebergTable())){
+                    return S3_ICEBERG_BUCKET + String.format(path, dataflowFolder, dataProviderFolder, datasetFolder, s3PathResolver.getPreparationCode(), s3PathResolver.getTableName());
+                }
+                return S3_DEFAULT_BUCKET + String.format(path, dataflowFolder, dataProviderFolder, datasetFolder, s3PathResolver.getPreparationCode(), s3PathResolver.getTableName());
             case S3_IMPORT_TABLE_NAME_FOLDER_PATH:
             case S3_VALIDATION_TABLE_PATH:
             case S3_TABLE_NAME_FOLDER_PATH:
