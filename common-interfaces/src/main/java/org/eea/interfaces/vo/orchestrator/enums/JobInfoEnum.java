@@ -64,7 +64,7 @@ public enum JobInfoEnum {
     ERROR_MATERIALIZED_VIEWS_ARE_NOT_CORRECT("The necessary reportnet data views could not be created. Please try again or contact the Service Desk."),
 
     WARNING_HAS_CANCELED_VALIDATION_TASKS("There are canceled validation tasks. Please review and address the issues before retrying."),
-    
+
     IMPORT_JOB_FAILED_STUCK_QUEUED("The import job failed because it was stuck in status QUEUED for a long time. Please try again."),
 
     IMPORT_JOB_RESTART_FAILED("The import job could not be completed as it became stuck following a restart. Please try again or contact the Service Desk."),
@@ -89,7 +89,7 @@ public enum JobInfoEnum {
 
     ERROR_IMPORT_FAILED_FILE_NOT_ZIP("Import failed because the file is not zip."),
 
-    ERROR_ZIP_FOLDER_WITHOUT_CSV_FILES("The ZIP file you uploaded does not contain any csv files for import. Please include at least one csv file and try again.");
+    ERROR_ZIP_FOLDER_WITHOUT_CSV_FILES("The ZIP file you uploaded does not contain any csv files for import. Please include at least one csv file and try again."),
 
     ERROR_INVALID_VALIDATE_AS_PROVIDER_CODE("The selected validation provider code doesn't belong to the dataflow.");
 
