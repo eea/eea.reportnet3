@@ -2303,6 +2303,20 @@ public class DatasetControllerImpl implements DatasetController {
                 String.format(EEAErrorMessage.DATASET_NOT_REPORTABLE, datasetId));
       }
 
+      //check if iceberg is enabled
+      String userEditingDataset;
+      if(StringUtils.isBlank(tableSchemaId)) {
+        userEditingDataset = datasetTableService.getDatasetEditingUsername(datasetId);
+
+      }
+      else{
+        userEditingDataset = datasetTableService.getDatasetEditingUsernameForTable(datasetId, tableSchemaId);
+      }
+      if (userEditingDataset != null) {
+        LOG.error("Can not etl import for datasetId {} because the table is locked for username {}", datasetId, userEditingDataset);
+        throw new ResponseStatusException(HttpStatus.CONFLICT, EEAErrorMessage.DATASET_IS_LOCKED_FOR_EDITING + userEditingDataset);
+      }
+
       //check eligibility of new job
       List<Long> datasetIds = new ArrayList<>();
       datasetIds.add(datasetId);

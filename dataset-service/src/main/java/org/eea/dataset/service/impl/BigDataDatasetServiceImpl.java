@@ -439,7 +439,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         if (integrationVO != null && filesToImport.size() != 0) {
             handleFmeRequest(integrationVO, importFileInDremioInfo, filesToImport.get(0), mimeType);
         } else {
-            List<File> correctFilesForImport = checkCsvFiles(importFileInDremioInfo, schema, filesToImport, integrationVO, mimeType);
+            List<File> correctFilesForImport = checkCsvFiles(importFileInDremioInfo, schema, filesToImport);
             parquetConverterService.convertCsvFilesToParquetFiles(importFileInDremioInfo, correctFilesForImport, schema);
 
         }
@@ -455,7 +455,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         }
     }
 
-    private List<File> checkCsvFiles(ImportFileInDremioInfo importFileInDremioInfo, DataSetSchema schema, List<File> files, IntegrationVO integrationVO, String mimeType)
+    private List<File> checkCsvFiles(ImportFileInDremioInfo importFileInDremioInfo, DataSetSchema schema, List<File> files)
             throws EEAException {
 
         LOG.info("Checking csv files {}. {}", files, importFileInDremioInfo);
@@ -2962,7 +2962,14 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             etlImportFolder = createEtlImportFolder(datasetId, jobId);
 
 
-            Set<String> tableNamesSet = tableSchemaIdNameVOS.stream().map(vo -> vo.getNameTableSchema().toLowerCase()).collect(Collectors.toSet());
+            Set<String> tableNamesSet = null;
+            if(StringUtils.isBlank(tableSchemaId)){
+                tableNamesSet = tableSchemaIdNameVOS.stream().map(vo -> vo.getNameTableSchema().toLowerCase()).collect(Collectors.toSet());
+            }
+            else{
+                tableNamesSet = tableSchemaIdNameVOS.stream().filter(vo -> tableSchemaId.equals(vo.getIdTableSchema()))
+                        .map(vo -> vo.getNameTableSchema().toLowerCase()).collect(Collectors.toSet());
+            }
             Map<String, Boolean> attachmentsExistPerTableName = new HashMap();
 
             List<File> csvFiles = storeAndUnzipEtlImportZipFile(datasetId, filePathInS3, fileExtension, jobId, etlImportFolder, tableNamesSet, attachmentsExistPerTableName);
@@ -2970,7 +2977,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 return;
             }
 
-            DataSetSchema datasetSchema = datasetService.getSchemaIfReportable(datasetId, tableSchemaId);
+            DataSetSchema datasetSchema = schemasRepository.findByIdDataSetSchema(new ObjectId(dataSetMetabaseVO.getDatasetSchema()));
             String providerCode = null;
             if(providerId != null && providerId != 0L){
                 DataProviderVO dataProviderVO = representativeControllerZuul.findDataProviderById(providerId);
@@ -3080,7 +3087,13 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                         // root-level files must be CSV
                         String mimeType = datasetService.getMimetype(entryName);
                         isCsv = FileTypeEnum.CSV.getValue().equalsIgnoreCase(mimeType);
-                        allowed = isCsv;
+                        if (isCsv) {
+                            // extract table name from "tableName.csv"
+                            String baseName = entryName.substring(0, entryName.lastIndexOf('.')).toLowerCase();
+                            allowed = tableNamesSet.contains(baseName);
+                        } else {
+                            allowed = false;
+                        }
                     }
                 } else {
                     // nested entries must follow strict attachment rules

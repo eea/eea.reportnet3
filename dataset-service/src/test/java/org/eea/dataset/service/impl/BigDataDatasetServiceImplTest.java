@@ -1,5 +1,6 @@
 package org.eea.dataset.service.impl;
 
+import org.bson.types.ObjectId;
 import org.eea.datalake.service.DremioHelperService;
 import org.eea.datalake.service.S3Helper;
 import org.eea.datalake.service.SpatialDataHandling;
@@ -294,6 +295,8 @@ public class BigDataDatasetServiceImplTest {
         Set<String> tableNamesSet = tableSchemaIdNameVOS.stream().map(vo -> vo.getNameTableSchema().toLowerCase()).collect(Collectors.toSet());
         String errorMessage = EEAErrorMessage.ERROR_IMPORT_FILES_CONTAIN_WRONG_HEADERS;
         DataSetSchema datasetSchema = new DataSetSchema();
+        String datasetSchemaId = new ObjectId().toHexString();
+        dataSetMetabaseVO.setDatasetSchema(datasetSchemaId);
 
         Mockito.when(datasetService.getDatasetType(datasetId)).thenReturn(datasetType);
         Mockito.when(jobControllerZuul.findJobById(jobId)).thenReturn(jobVO);
@@ -301,7 +304,7 @@ public class BigDataDatasetServiceImplTest {
         // Use spy in order to mock protected methods
         BigDataDatasetServiceImpl bigDataDatasetServiceSpy = Mockito.spy(bigDataDatasetService);
         Mockito.when(datasetSchemaService.getTableSchemasIds(datasetId)).thenReturn(tableSchemaIdNameVOS);
-        Mockito.when(datasetService.getSchemaIfReportable(datasetId, tableSchemaId)).thenReturn(datasetSchema);
+        Mockito.when(schemasRepository.findByIdDataSetSchema(any())).thenReturn(datasetSchema);
         Mockito.doReturn(mockFile).when(bigDataDatasetServiceSpy).createEtlImportFolder(datasetId, jobId);
         Mockito.doReturn(fileList).when(bigDataDatasetServiceSpy).storeAndUnzipEtlImportZipFile(datasetId, filePathInS3, fileExtension, jobId, mockFile, tableNamesSet, attachmentsExistPerTableName);
         Mockito.when(representativeControllerZuul.findDataProviderById(providerId)).thenReturn(dataProviderVO);
@@ -350,6 +353,8 @@ public class BigDataDatasetServiceImplTest {
         Set<String> tableNamesSet = tableSchemaIdNameVOS.stream().map(vo -> vo.getNameTableSchema().toLowerCase()).collect(Collectors.toSet());
         String errorMessage = "non existing message";
         DataSetSchema datasetSchema = new DataSetSchema();
+        String datasetSchemaId = new ObjectId().toHexString();
+        dataSetMetabaseVO.setDatasetSchema(datasetSchemaId);
 
         Mockito.when(datasetService.getDatasetType(datasetId)).thenReturn(datasetType);
         Mockito.when(jobControllerZuul.findJobById(jobId)).thenReturn(jobVO);
@@ -357,7 +362,7 @@ public class BigDataDatasetServiceImplTest {
         // Use spy in order to mock protected methods
         BigDataDatasetServiceImpl bigDataDatasetServiceSpy = Mockito.spy(bigDataDatasetService);
         Mockito.when(datasetSchemaService.getTableSchemasIds(datasetId)).thenReturn(tableSchemaIdNameVOS);
-        Mockito.when(datasetService.getSchemaIfReportable(datasetId, tableSchemaId)).thenReturn(datasetSchema);
+        Mockito.when(schemasRepository.findByIdDataSetSchema(any())).thenReturn(datasetSchema);
         Mockito.doReturn(mockFile).when(bigDataDatasetServiceSpy).createEtlImportFolder(datasetId, jobId);
         Mockito.doReturn(fileList).when(bigDataDatasetServiceSpy).storeAndUnzipEtlImportZipFile(datasetId, filePathInS3, fileExtension, jobId, mockFile, tableNamesSet, attachmentsExistPerTableName);
         Mockito.when(representativeControllerZuul.findDataProviderById(providerId)).thenReturn(dataProviderVO);
@@ -404,7 +409,9 @@ public class BigDataDatasetServiceImplTest {
         List<TableSchemaIdNameVO> tableSchemaIdNameVOS = new ArrayList<>();
         tableSchemaIdNameVOS.add(tableSchemaIdNameVO);
         Set<String> tableNamesSet = tableSchemaIdNameVOS.stream().map(vo -> vo.getNameTableSchema().toLowerCase()).collect(Collectors.toSet());
-
+        DataSetSchema datasetSchema = new DataSetSchema();
+        String datasetSchemaId = new ObjectId().toHexString();
+        dataSetMetabaseVO.setDatasetSchema(datasetSchemaId);
 
         Mockito.when(datasetService.getDatasetType(datasetId)).thenReturn(datasetType);
         Mockito.when(jobControllerZuul.findJobById(jobId)).thenReturn(jobVO);
@@ -412,6 +419,7 @@ public class BigDataDatasetServiceImplTest {
         // Use spy in order to mock protected methods
         BigDataDatasetServiceImpl bigDataDatasetServiceSpy = Mockito.spy(bigDataDatasetService);
         Mockito.when(datasetSchemaService.getTableSchemasIds(datasetId)).thenReturn(tableSchemaIdNameVOS);
+        Mockito.when(schemasRepository.findByIdDataSetSchema(any())).thenReturn(datasetSchema);
         Mockito.doReturn(mockFile).when(bigDataDatasetServiceSpy).createEtlImportFolder(datasetId, jobId);
         Mockito.doReturn(fileList).when(bigDataDatasetServiceSpy).storeAndUnzipEtlImportZipFile(datasetId, filePathInS3, fileExtension, jobId, mockFile, tableNamesSet, attachmentsExistPerTableName);
         Mockito.when(representativeControllerZuul.findDataProviderById(providerId)).thenReturn(dataProviderVO);
@@ -453,7 +461,8 @@ public class BigDataDatasetServiceImplTest {
         List<String> warningMessages = new ArrayList<>();
         warningMessages.add(jobInfoEnum.getValue(null));
         warningMessages.add(JobInfoEnum.WARNING_SOME_FILES_ARE_EMPTY.getValue(null));
-
+        String datasetSchemaId = new ObjectId().toHexString();
+        dataSetMetabaseVO.setDatasetSchema(datasetSchemaId);
 
         Mockito.when(datasetService.getDatasetType(datasetId)).thenReturn(datasetType);
         Mockito.when(jobControllerZuul.findJobById(jobId)).thenReturn(jobVO);
@@ -461,7 +470,7 @@ public class BigDataDatasetServiceImplTest {
         // Use spy in order to mock protected methods
         BigDataDatasetServiceImpl bigDataDatasetServiceSpy = Mockito.spy(bigDataDatasetService);
         Mockito.when(datasetSchemaService.getTableSchemasIds(datasetId)).thenReturn(tableSchemaIdNameVOS);
-        Mockito.when(datasetService.getSchemaIfReportable(datasetId, tableSchemaId)).thenReturn(datasetSchema);
+        Mockito.when(schemasRepository.findByIdDataSetSchema(any())).thenReturn(datasetSchema);
         Mockito.doReturn(mockFile).when(bigDataDatasetServiceSpy).createEtlImportFolder(datasetId, jobId);
         Mockito.doReturn(fileList).when(bigDataDatasetServiceSpy).storeAndUnzipEtlImportZipFile(datasetId, filePathInS3, fileExtension, jobId, mockFile, tableNamesSet, attachmentsExistPerTableName);
         Mockito.when(representativeControllerZuul.findDataProviderById(providerId)).thenReturn(dataProviderVO);
@@ -511,7 +520,8 @@ public class BigDataDatasetServiceImplTest {
         List<String> warningMessages = new ArrayList<>();
         warningMessages.add("warning doesn't exist");
         warningMessages.add(JobInfoEnum.WARNING_SOME_FILES_ARE_EMPTY.getValue(null));
-
+        String datasetSchemaId = new ObjectId().toHexString();
+        dataSetMetabaseVO.setDatasetSchema(datasetSchemaId);
 
         Mockito.when(datasetService.getDatasetType(datasetId)).thenReturn(datasetType);
         Mockito.when(jobControllerZuul.findJobById(jobId)).thenReturn(jobVO);
@@ -519,7 +529,7 @@ public class BigDataDatasetServiceImplTest {
         // Use spy in order to mock protected methods
         BigDataDatasetServiceImpl bigDataDatasetServiceSpy = Mockito.spy(bigDataDatasetService);
         Mockito.when(datasetSchemaService.getTableSchemasIds(datasetId)).thenReturn(tableSchemaIdNameVOS);
-        Mockito.when(datasetService.getSchemaIfReportable(datasetId, tableSchemaId)).thenReturn(datasetSchema);
+        Mockito.when(schemasRepository.findByIdDataSetSchema(any())).thenReturn(datasetSchema);
         Mockito.doReturn(mockFile).when(bigDataDatasetServiceSpy).createEtlImportFolder(datasetId, jobId);
         Mockito.doReturn(fileList).when(bigDataDatasetServiceSpy).storeAndUnzipEtlImportZipFile(datasetId, filePathInS3, fileExtension, jobId, mockFile, tableNamesSet, attachmentsExistPerTableName);
         Mockito.when(representativeControllerZuul.findDataProviderById(providerId)).thenReturn(dataProviderVO);

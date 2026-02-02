@@ -1451,8 +1451,6 @@ public class DatasetServiceImpl implements DatasetService {
       result = true;
     } else if (DatasetTypeEnum.REPORTING.equals(type)
         || (DatasetTypeEnum.REFERENCE.equals(type)
-            && !Boolean.TRUE.equals(referenceDatasetRepository.findById(idDataset)
-                .orElse(new ReferenceDataset()).getUpdatable())
             || DatasetTypeEnum.TEST.equals(type))) {
       result = true;
     } else {

@@ -24,7 +24,6 @@ import org.eea.dataset.service.helper.FileTreatmentHelper;
 import org.eea.dataset.service.helper.UpdateRecordHelper;
 import org.eea.dataset.service.impl.BigDataDatasetServiceImpl;
 import org.eea.dataset.service.impl.DatasetServiceImpl;
-import org.eea.dataset.service.impl.DesignDatasetServiceImpl;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.communication.NotificationController.NotificationControllerZuul;
@@ -43,10 +42,8 @@ import org.eea.interfaces.vo.dataset.schemas.RecordSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.lock.LockVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
-import org.eea.interfaces.vo.orchestrator.enums.JobInfoEnum;
 import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.interfaces.vo.orchestrator.enums.JobTypeEnum;
-import org.eea.kafka.domain.EventType;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.service.LockService;
 import org.eea.utils.LiteralConstants;
@@ -93,10 +90,6 @@ public class DatasetControllerImplTest {
   /** The lock service. */
   @Mock
   private LockService lockService;
-
-  /** The design dataset service. */
-  @Mock
-  private DesignDatasetServiceImpl designDatasetService;
 
   /** The dataset schema service. */
   @Mock
@@ -2207,6 +2200,64 @@ public class DatasetControllerImplTest {
     catch (ResponseStatusException e) {
       assertEquals(String.format(EEAErrorMessage.DATASET_NOT_REPORTABLE, datasetId), e.getReason());
       assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
+      throw e;
+    }
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void etlImportDatasetDLTableIsIcebergTest() throws Exception {
+    Long dataflowId = 1L;
+    Long datasetId = 1L;
+    Long providerId = 1L;
+    Boolean replaceData = false;
+    String tableSchemaId = "abc";
+    String delimiter = ",";
+    String filePathInS3 = "path";
+    List<Long> datasetIds = new ArrayList<>();
+    datasetIds.add(datasetId);
+    DataFlowVO dataFlowVO = new DataFlowVO();
+    dataFlowVO.setBigData(true);
+    String userEditingDataset = "user";
+
+    Mockito.when(datasetService.getDataFlowIdById(datasetId)).thenReturn(dataflowId);
+    Mockito.when(dataFlowControllerZuul.getMetabaseById(dataflowId)).thenReturn(dataFlowVO);
+    Mockito.when(datasetService.isDatasetReportable(datasetId)).thenReturn(true);
+    Mockito.when(datasetTableService.getDatasetEditingUsernameForTable(datasetId, tableSchemaId)).thenReturn(userEditingDataset);
+    try {
+      datasetControllerImpl.etlImportDatasetDL(datasetId, dataflowId, providerId, replaceData, tableSchemaId, delimiter, filePathInS3);
+    }
+    catch (ResponseStatusException e) {
+      assertEquals(EEAErrorMessage.DATASET_IS_LOCKED_FOR_EDITING + userEditingDataset, e.getReason());
+      assertEquals(HttpStatus.CONFLICT, e.getStatus());
+      throw e;
+    }
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void etlImportDatasetDLIcebergTableExistsTest() throws Exception {
+    Long dataflowId = 1L;
+    Long datasetId = 1L;
+    Long providerId = 1L;
+    Boolean replaceData = false;
+    String tableSchemaId = null;
+    String delimiter = ",";
+    String filePathInS3 = "path";
+    List<Long> datasetIds = new ArrayList<>();
+    datasetIds.add(datasetId);
+    DataFlowVO dataFlowVO = new DataFlowVO();
+    dataFlowVO.setBigData(true);
+    String userEditingDataset = "user";
+
+    Mockito.when(datasetService.getDataFlowIdById(datasetId)).thenReturn(dataflowId);
+    Mockito.when(dataFlowControllerZuul.getMetabaseById(dataflowId)).thenReturn(dataFlowVO);
+    Mockito.when(datasetService.isDatasetReportable(datasetId)).thenReturn(true);
+    Mockito.when(datasetTableService.getDatasetEditingUsername(datasetId)).thenReturn(userEditingDataset);
+    try {
+      datasetControllerImpl.etlImportDatasetDL(datasetId, dataflowId, providerId, replaceData, tableSchemaId, delimiter, filePathInS3);
+    }
+    catch (ResponseStatusException e) {
+      assertEquals(EEAErrorMessage.DATASET_IS_LOCKED_FOR_EDITING + userEditingDataset, e.getReason());
+      assertEquals(HttpStatus.CONFLICT, e.getStatus());
       throw e;
     }
   }

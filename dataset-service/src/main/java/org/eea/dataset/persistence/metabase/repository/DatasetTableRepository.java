@@ -40,6 +40,15 @@ public interface DatasetTableRepository extends JpaRepository<DatasetTable, Long
     )
     List<String> findEditors(@Param("datasetId") Long datasetId);
 
+    @Query(
+            "SELECT DISTINCT t.editingUsername " +
+                    "FROM DatasetTable t " +
+                    "WHERE t.datasetId = :datasetId " +
+                    "AND t.tableSchemaId = :tableSchemaId " +
+                    "AND t.editingUsername IS NOT NULL"
+    )
+    List<String> findEditorsOfTable(@Param("datasetId") Long datasetId, @Param("tableSchemaId") String tableSchemaId);
+
 
     @Transactional
     @Modifying
