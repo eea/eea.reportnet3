@@ -490,16 +490,16 @@ public class SqlRulesServiceImpl implements SqlRulesService {
           sb = buildWithTableQuery(datasetIds, sb, sqlRule);
         }
 
-        // Apply macro replacement BEFORE execution (for both engines)
+        // Apply placeholder replacement BEFORE execution.
         String sqlToRun = sb.toString();
-        LOG.info("RunSQL pre-replace for datasetId={} runSQLAsProvider={} finalSql={}", datasetId, effectiveRunAs, sqlToRun);
-        sqlToRun = sqlCountryCompanyOrganizationCodeUtils
-            .replaceCodesIfNeeded(datasetId, sqlToRun, effectiveRunAs);
+        sqlToRun = sqlCountryCompanyOrganizationCodeUtils.replaceCodesIfNeeded(datasetId, sqlToRun, effectiveRunAs);
 
         if (dataFlowVO != null && Boolean.TRUE.equals(dataFlowVO.getBigData())) {
 
           String sqlCode = this.replaceTableNamesWithS3Path(sqlToRun);
           sqlCode = sqlCode.replace("OFFSET 0 LIMIT 10", "LIMIT 10 OFFSET 0");
+
+          LOG.info("RunSQL Big data datasetId={} runSQLAsProvider={} finalSql={}",datasetId, effectiveRunAs, sqlCode);
 
           result = dremioJdbcTemplate.query(sqlCode, (resultSet, i) -> {
             ++i;
@@ -516,8 +516,8 @@ public class SqlRulesServiceImpl implements SqlRulesService {
             return valueVOList;
           });
         } else {
+          LOG.info("RunSQL =Citus datasetId={} runSQLAsProvider={} finalSql={}",datasetId, effectiveRunAs, sqlToRun);
           result = datasetRepository.runSqlRule(datasetId, sqlToRun);
-          LOG.info("RunSQL IN ELSE datasetId={} runSQLAsProvider={} finalSql={}", datasetId, effectiveRunAs, sqlToRun);
         }
       }
     } catch (StringIndexOutOfBoundsException e) {
