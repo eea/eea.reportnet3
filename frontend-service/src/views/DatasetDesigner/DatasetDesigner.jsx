@@ -757,6 +757,53 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
     }
   };
 
+  const onConfirmValidateWithProvider = async providerId => {
+    const action = 'DATASET_VALIDATE';
+    actionsContext.testProcess(datasetId, action);
+    try {
+      await DatasetService.validate(datasetId);
+      notificationContext.add(
+        {
+          type: 'VALIDATE_DATA_WITH_PROVIDER_INIT',
+          content: {
+            customContent: { datasetName: designerState.datasetSchemaName },
+            dataflowId,
+            dataflowName: designerState.metaData?.dataflow?.name,
+            datasetId,
+            datasetName: designerState.datasetSchemaName,
+            providerId,
+            type: 'DESIGN'
+          }
+        },
+        true
+      );
+      designerDispatch({
+        type: 'CHANGE_DATASET_PROGRESS_BAR_STEP',
+        payload: { step: 1, currentStep: 2, isRunning: true }
+      });
+    } catch (error) {
+      if (error.response?.status === 423) {
+        notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' }, true);
+      } else {
+        console.error('DatasetDesigner - onConfirmValidateWithProvider.', error);
+        notificationContext.add(
+          {
+            type: 'VALIDATE_DESIGN_DATA_WITH_PROVIDER_ERROR',
+            content: {
+              customContent: { datasetName: designerState.datasetSchemaName },
+              dataflowId,
+              dataflowName: designerState.metaData?.dataflow?.name,
+              datasetId,
+              datasetName: designerState.datasetSchemaName,
+              providerId
+            }
+          },
+          true
+        );
+      }
+    }
+  };
+
   const onConfirmDelete = async () => {
     const action = 'DATASET_DELETE';
     actionsContext.testProcess(datasetId, action);
@@ -1946,12 +1993,12 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
                     }}
                     style={{
                       color: 'var(--main-font-color)',
-                      cursor: (isDesignDatasetEditorRead || designerState.sncData) ? 'default' : 'pointer',
+                      cursor: isDesignDatasetEditorRead || designerState.sncData ? 'default' : 'pointer',
                       fontSize: '10pt',
                       fontWeight: 'bold',
                       marginLeft: '6px',
                       marginRight: '6px',
-                      opacity: (isDesignDatasetEditorRead || designerState.sncData) ? 0.5 : 1
+                      opacity: isDesignDatasetEditorRead || designerState.sncData ? 0.5 : 1
                     }}>
                     {resourcesContext.messages['availableInPublicView']}
                   </label>
@@ -2103,6 +2150,8 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
                     : resourcesContext.messages['validate']
                 }
                 onConfirmValidate={onConfirmValidate}
+                onConfirmValidateWithProvider={onConfirmValidateWithProvider}
+                dataflowId={dataflowId}
               />
               <Button
                 className="p-button-rounded p-button-secondary-transparent p-button-animated-blink"

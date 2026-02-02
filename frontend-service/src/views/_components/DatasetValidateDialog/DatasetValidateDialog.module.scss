@@ -1,0 +1,44 @@
+.validateDialog {
+  :global(.p-dialog-content) {
+    padding: 1.5rem;
+  }
+}
+
+.validationOption {
+  padding: 1.5rem;
+  border: 1px solid var(--gray-200);
+  border-radius: 4px;
+  background-color: var(--gray-50);
+  
+  &:hover {
+    border-color: var(--primary-color);
+    background-color: var(--primary-color-lightest);
+  }
+}
+
+.optionTitle {
+  margin: 0 0 0.75rem 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+.optionDescription {
+  margin: 0 0 1rem 0;
+  color: var(--text-color-secondary);
+  line-height: 1.5;
+}
+
+.providerValidationSection {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+}
+
+.providerDropdown {
+  flex: 2;
+}
+
+.providerValidateButton {
+  white-space: nowrap;
+}

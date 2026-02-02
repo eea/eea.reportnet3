@@ -735,6 +735,50 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
     }
   };
 
+  const onConfirmValidateWithProvider = async providerId => {
+    const action = 'DATASET_VALIDATE';
+    actionsContext.testProcess(datasetId, action);
+    try {
+      await DatasetService.validateWithProvider(datasetId, providerId);
+      notificationContext.add(
+        {
+          type: 'VALIDATE_DATA_WITH_PROVIDER_INIT',
+          content: {
+            customContent: { origin: datasetName },
+            dataflowId,
+            dataflowName: metadata.dataflow.name,
+            datasetId,
+            datasetName: datasetSchemaName,
+            providerId,
+            type: 'REPORTING'
+          }
+        },
+        true
+      );
+      changeProgressStepBar({ step: 1, currentStep: 2, isRunning: true });
+    } catch (error) {
+      if (error.response.status === 423) {
+        notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' }, true);
+      } else {
+        console.error('Dataset - onConfirmValidateWithProvider.', error);
+        notificationContext.add(
+          {
+            type: 'VALIDATE_REPORTING_DATA_WITH_PROVIDER_ERROR',
+            content: {
+              customContent: { origin: datasetName },
+              dataflowId,
+              dataflowName: metadata.dataflow.name,
+              datasetId,
+              datasetName: datasetSchemaName,
+              providerId
+            }
+          },
+          true
+        );
+      }
+    }
+  };
+
   const cleanImportOtherSystemsDialog = () => {
     setReplaceData(false);
     onSetVisible(setIsImportOtherSystemsDialogVisible, false);
@@ -1635,6 +1679,8 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
                     : resourcesContext.messages['validate']
                 }
                 onConfirmValidate={onConfirmValidate}
+                onConfirmValidateWithProvider={onConfirmValidateWithProvider}
+                dataflowId={dataflowId}
               />
               <Button
                 className="p-button-rounded p-button-secondary-transparent dataset-showValidations-help-step p-button-animated-blink"
