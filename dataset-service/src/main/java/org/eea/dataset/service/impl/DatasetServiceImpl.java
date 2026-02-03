@@ -1729,9 +1729,12 @@ public class DatasetServiceImpl implements DatasetService {
   @Override
   @Transactional
   public void deleteTempEtlExport(@DatasetId Long datasetId) {
-    TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, datasetId));
-    datasetRepository.removeTempEtlExport(datasetId);
-    LOG.info("Removed everything from table temp_etlexport for datasetId {}", datasetId);
+      final boolean isBigData = dataflowControllerZuul.isBigDataflowDataset(datasetId);
+      if (!isBigData) {
+          TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, datasetId));
+          datasetRepository.removeTempEtlExport(datasetId);
+          LOG.info("Removed everything from table temp_etlexport for datasetId {}", datasetId);
+      }
   }
 
 
@@ -3539,8 +3542,11 @@ public class DatasetServiceImpl implements DatasetService {
   @Override
   @Transactional
   public void updateCheckView(@DatasetId Long datasetId, Boolean updated) {
-    datasetRepository.updateCheckView(datasetId, updated);
-    LOG.info("Updated check view for datasetId {} with value {}", datasetId, updated);
+      final boolean isBigData = dataflowControllerZuul.isBigDataflowDataset(datasetId);
+      if (!isBigData) {
+          datasetRepository.updateCheckView(datasetId, updated);
+          LOG.info("Updated check view for datasetId {} with value {}", datasetId, updated);
+      }
   }
 
   /**

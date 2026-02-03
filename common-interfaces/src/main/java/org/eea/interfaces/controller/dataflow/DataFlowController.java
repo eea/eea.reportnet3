@@ -215,6 +215,15 @@ public interface DataFlowController {
   @GetMapping(value = "/private/v1/{dataflowId}/isBigDataflow", produces = MediaType.APPLICATION_JSON_VALUE)
   Boolean isBigDataflow(@PathVariable("dataflowId") Long dataflowId);
 
+    /**
+     * Determines whether the dataflow associated with the given dataset is configured as a Big Data dataflow.
+     *
+     * @param datasetId the ID of the dataset whose dataflow should be checked
+     * @return {@code true} if the dataflow is marked as Big Data, {@code false} otherwise
+     *
+     */
+    @GetMapping(value = "/private/v1/isBigDataflow/{datasetId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    Boolean isBigDataflowDataset(@PathVariable("datasetId") Long datasetId);
 
   /**
    * Gets the metabase by id legacy.

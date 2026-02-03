@@ -669,7 +669,7 @@ public class DataflowControllerImpl implements DataFlowController {
   @HystrixCommand
   @GetMapping(value = "/private/v1/{dataflowId}/isBigDataflow", produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Get dataflow metadata by dataflow id",
-      produces = MediaType.APPLICATION_JSON_VALUE, response = DataFlowVO.class,
+      produces = MediaType.APPLICATION_JSON_VALUE, response = Boolean.class,
       notes = "Allowed roles: CUSTODIAN, STEWARD, OBSERVER, LEAD REPORTER, REPORTER WRITE, REPORTER READ, EDITOR READ, EDITOR WRITE, NATIONAL COORDINATOR, ADMIN, STEWARD SUPPORT")
   @ApiResponse(code = 400, message = EEAErrorMessage.DATAFLOW_INCORRECT_ID)
   public Boolean isBigDataflow(@ApiParam(value = "Dataflow id", example = "0") @PathVariable("dataflowId") Long dataflowId) {
@@ -690,7 +690,30 @@ public class DataflowControllerImpl implements DataFlowController {
     return result;
   }
 
-  /**
+    @Override
+    @HystrixCommand
+    @GetMapping(value = "/private/v1/isBigDataflow/{datasetId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "Determines whether the dataflow associated with the given dataset is configured as a Big Data dataflow.",
+            produces = MediaType.APPLICATION_JSON_VALUE, response = Boolean.class,
+            notes = "Allowed roles: CUSTODIAN, STEWARD, OBSERVER, LEAD REPORTER, REPORTER WRITE, REPORTER READ, EDITOR READ, EDITOR WRITE, NATIONAL COORDINATOR, ADMIN, STEWARD SUPPORT")
+    @ApiResponse(code = 400, message = EEAErrorMessage.DATASET_INCORRECT_ID)
+    public Boolean isBigDataflowDataset(@ApiParam(value = "Dataset id", example = "0") @PathVariable("datasetId") Long datasetId) {
+
+        if (datasetId == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    EEAErrorMessage.DATASET_INCORRECT_ID);
+        }
+        try {
+            return dataflowService.isBigData(datasetId);
+        }
+        catch (Exception e){
+            LOG.error("Unexpected error! Could not retrieve dataflow metadata for datasetId {} Message: {}", datasetId, e.getMessage());
+            throw e;
+        }
+    }
+
+
+    /**
    * Gets the metabase by id legacy.
    *
    * @param dataflowId the dataflow id
