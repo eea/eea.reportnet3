@@ -854,8 +854,6 @@ public class SqlRulesServiceImplTest {
         .thenReturn(datasetMetabaseVO);
     Mockito.when(datasetSchemaControllerZuul.findDataSchemaByDatasetIdPrivate(1L))
         .thenReturn(datasetSchemaVO);
-    Mockito.when(dataFlowControllerZuul.getMetabaseById(Mockito.anyLong()))
-        .thenReturn(dataFlowVO);
 
     Mockito.doNothing().when(datasetRepository)
         .validateQuery(Mockito.anyString(), Mockito.anyLong());
