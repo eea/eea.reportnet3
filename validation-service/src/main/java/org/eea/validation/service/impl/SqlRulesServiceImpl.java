@@ -133,10 +133,6 @@ public class SqlRulesServiceImpl implements SqlRulesService {
   @Autowired
   private TestDatasetControllerZuul testDatasetControllerZuul;
 
-  /** The dataflow controller zuul. */
-  @Autowired
-  private DataFlowControllerZuul dataFlowControllerZuul;
-
   /** The entity manager. */
   @PersistenceContext
   private EntityManager entityManager;
@@ -482,7 +478,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
       if (!ids.isEmpty() && !ids.contains(datasetId.toString())) {
         throw new EEAException();
       } else {
-        final boolean isBigDataflow = dataFlowControllerZuul.isBigDataflow(dataSetMetabaseVO.getDataflowId());
+        final boolean isBigDataflow = dataFlowController.isBigDataflow(dataSetMetabaseVO.getDataflowId());
         if (!isBigDataflow) {
           datasetRepository.validateQuery("explain " + sqlRule, datasetId);
         }
