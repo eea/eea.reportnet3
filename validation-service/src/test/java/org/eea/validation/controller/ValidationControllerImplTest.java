@@ -144,7 +144,7 @@ public class ValidationControllerImplTest {
             .thenReturn(status);
     validationController.validateDataSetData(1L, false, null);
     Mockito.verify(validationHelper, times(1)).executeValidation(Mockito.any(), Mockito.any(),
-        Mockito.anyBoolean(), Mockito.anyBoolean());
+        Mockito.anyBoolean(), Mockito.anyBoolean(), Mockito.any());
   }
 
   /**
@@ -189,7 +189,7 @@ public class ValidationControllerImplTest {
     Mockito.when(dataSetControllerZuul.getEditingStatus(Mockito.anyLong()))
             .thenReturn(status);
     doThrow(new EEAException("e")).when(validationHelper).executeValidation(Mockito.anyLong(),
-        Mockito.any(), Mockito.anyBoolean(), Mockito.anyBoolean());
+        Mockito.any(), Mockito.anyBoolean(), Mockito.anyBoolean(), Mockito.any());
     validationController.validateDataSetData(1L, false, null);
 
     Mockito.verify(validationHelper, times(1)).deleteLockToReleaseProcess(Mockito.any());

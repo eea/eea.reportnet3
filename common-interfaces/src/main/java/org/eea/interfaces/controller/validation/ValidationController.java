@@ -232,7 +232,7 @@ public interface ValidationController {
    * @throws Exception
    */
   @PutMapping("/private/executeValidation/{datasetId}")
-  void executeValidation(@PathVariable("datasetId") Long datasetId, @RequestParam("processId") String processId, @RequestParam("released") boolean released, @RequestParam("updateViews") boolean updateViews) throws Exception;
+  void executeValidation(@PathVariable("datasetId") Long datasetId, @RequestParam("processId") String processId, @RequestParam("released") boolean released, @RequestParam("updateViews") boolean updateViews, @RequestParam(value = "validateAsProviderCode", required = false) String validateAsProviderCode) throws Exception;
 
   /**
    * Finds task by taskId

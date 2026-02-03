@@ -1057,6 +1057,14 @@
           }
         },
         {
+          "key": "VALIDATE_AS_PROVIDER_REFUSED_EVENT",
+          "navigateTo": {
+            "section": "DATAFLOW",
+            "parameters": ["dataflowId"],
+            "hasQueryString": true
+          }
+        },
+        {
           "key": "COPY_DATA_TO_EUDATASET_CANCELED_EVENT",
           "navigateTo": {
             "section": "DATAFLOW",

@@ -84,7 +84,6 @@ public class SQLValidationUtils {
   @Value(value = "${validation.maximumErrors}")
   private int maxErrors;
 
-
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(SQLValidationUtils.class);
 
@@ -97,13 +96,28 @@ public class SQLValidationUtils {
    * @throws EEAInvalidSQLException the EEA invalid SQL exception
    */
   public void executeValidationSQLRule(Long datasetId, String ruleId, String dataProviderCode)
+      throws EEAInvalidSQLException {
+    executeValidationSQLRule(datasetId, ruleId, dataProviderCode, null);
+  }
+
+
+  /**
+   * Overload of the original executeValidationSQLRule.
+   *
+   * @param datasetId the dataset id
+   * @param ruleId the rule id
+   * @param dataProviderCode the data provider code
+   * @param validateAsProviderCode the validation data provider code
+   * @throws EEAInvalidSQLException the EEA invalid SQL exception
+   */
+  public void executeValidationSQLRule(Long datasetId, String ruleId, String dataProviderCode, String validateAsProviderCode)
           throws EEAInvalidSQLException {
     Rule rule = sqlRulesService.getRule(datasetId, ruleId);
     rule.setSqlSentence(rule.getSqlSentence().replace(";", ""));
     DataSetMetabaseVO dataSetMetabaseVO =
             datasetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
     QueryVO queryVO = new QueryVO(null, rule, null, dataSetMetabaseVO, null, null);
-    queryVO = getTableToEvaluate(queryVO, dataProviderCode);
+    queryVO = getTableToEvaluate(queryVO, dataProviderCode, validateAsProviderCode);
     Integer totalRecords =
             Integer.parseInt(datasetRepository.evaluateSqlRule(datasetId, "with tableAux as ("
                     + queryVO.getNewQuery() + ") select cast(count(*) as text) from tableaux;"));
@@ -167,32 +181,36 @@ public class SQLValidationUtils {
   /**
    * Gets the table to evaluate.
    *
-   * @param datasetId the dataset id
-   * @param rule the rule
+   * @param queryVO the queryVO
    * @param dataProviderCode the data provider code
+   * @param validateAsProviderCode the validation data provider code
    * @return the table to evaluate
    */
-  private QueryVO getTableToEvaluate(QueryVO queryVO, String dataProviderCode) {
+  private QueryVO getTableToEvaluate(QueryVO queryVO, String dataProviderCode, String validateAsProviderCode) {
     String query = queryVO != null ? queryVO.getRule().getSqlSentence() : null;
     try {
-      if (query != null) {
-        String preparedquery = query.contains(";") ? query.replace(";", "") : query;
-        String providerCodeAux = "XX";
-        if (dataProviderCode != null && !"null".equals(dataProviderCode)) {
-          DataProviderVO providerCode =
-                  representativeControllerZuul.findDataProviderById(Long.valueOf(dataProviderCode));
-          if (null != providerCode && StringUtils.isNotBlank(providerCode.getCode())) {
-            providerCodeAux = providerCode.getCode();
-          }
-        }
-        preparedquery = preparedquery.replace("{%R3_COUNTRY_CODE%}", providerCodeAux);
-        preparedquery = preparedquery.replace("{%R3_COMPANY_CODE%}", providerCodeAux);
-        preparedquery = preparedquery.replace("{%R3_ORGANIZATION_CODE%}", providerCodeAux);
-        queryVO = sqlRulesService.retrieveTableData(preparedquery, queryVO, Boolean.FALSE);
-
-      } else {
+      if (query == null) {
         throw new EEAInvalidSQLException("No sql found");
       }
+
+      String preparedquery = query.contains(";") ? query.replace(";", "") : query;
+      String providerCodeAux = "XX";
+      if (dataProviderCode != null && !"null".equals(dataProviderCode)) {
+        DataProviderVO providerCode =
+            representativeControllerZuul.findDataProviderById(Long.valueOf(dataProviderCode));
+        if (providerCode != null && StringUtils.isNotBlank(providerCode.getCode())) {
+          providerCodeAux = providerCode.getCode();
+        }
+      } else if (validateAsProviderCode != null && !validateAsProviderCode.isEmpty()) {
+        providerCodeAux = validateAsProviderCode;
+      }
+
+      preparedquery = preparedquery.replace("{%R3_COUNTRY_CODE%}", providerCodeAux);
+      preparedquery = preparedquery.replace("{%R3_COMPANY_CODE%}", providerCodeAux);
+      preparedquery = preparedquery.replace("{%R3_ORGANIZATION_CODE%}", providerCodeAux);
+      queryVO = sqlRulesService.retrieveTableData(preparedquery, queryVO, Boolean.FALSE);
+      LOG.info("providerCodeAux={}", providerCodeAux);
+      LOG.info("Prepared SQL after replacement: {}", preparedquery);
     } catch (EEAInvalidSQLException e) {
       LOG.error("SQL can't be executed: {}", e.getMessage(), e);
     }

@@ -1758,6 +1758,7 @@
     "validatedData": "Validated data",
     "validateDesignDataError": "Error validating data at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName} ({:origin})</a>. Please try again or contact the Service Desk if the issue persists.",
     "validatedQcRuleEvent": "QC validated successfully",
+    "validateAsProviderRefusedEvent": "Failure to start a validation as a provider for dataflow <a href='{:navigateTo}' title='{:dataflowName}'>{:dataflowName}</a> because the selected provider code doesn't belong to any provider group of this dataflow. Please, try again later and contact Service Desk is the issue persists.",
     "validateEUDatasetHeader": "Validate EU dataset",
     "validateLeadReportersCompletedEvent": "All lead reporters validated successfully",
     "validateLeadReportersFailedEvent": "Error validating lead reporters. Please try again or contact the Service Desk if the issue persists.",

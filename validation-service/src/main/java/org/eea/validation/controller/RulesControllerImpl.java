@@ -1098,7 +1098,8 @@ public class RulesControllerImpl implements RulesController {
           @ApiParam(value = "SQL rule that is going to be executed") @RequestBody SqlRuleVO sqlRule,
           @ApiParam(value = "Show internal fields in query results",
                   defaultValue = "false") @RequestParam(
-                  defaultValue = "false") boolean showInternalFields) {
+                  defaultValue = "false") boolean showInternalFields,
+          @RequestParam(value = "runSQLAsProvider", required = false) String runSQLAsProvider) {
     List<List<ValueVO>> obtainedTableValues = new ArrayList<>();
     try {
       if(sqlRule != null){
@@ -1108,7 +1109,7 @@ public class RulesControllerImpl implements RulesController {
         LOG.info("Sql rule is null for datasetId {}", datasetId);
       }
       obtainedTableValues =
-              sqlRulesService.runSqlRule(datasetId, sqlRule.getSqlRule(), showInternalFields);
+              sqlRulesService.runSqlRule(datasetId, sqlRule.getSqlRule(), showInternalFields, runSQLAsProvider);
       LOG.info("Successfully ran sql rule {} for datasetId {}", sqlRule.getSqlRule(), datasetId);
     } catch (EEAInvalidSQLCommentsException e){
       LOG.error(
