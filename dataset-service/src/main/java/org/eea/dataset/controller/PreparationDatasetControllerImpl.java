@@ -48,14 +48,15 @@ public class PreparationDatasetControllerImpl
     @ApiOperation(value = "List preparation datasets")
     public List<PreparationDatasetVO> list(
             @RequestParam("dataflowId") Long dataflowId,
-            @RequestParam("providerId") Long providerId) {
+            @RequestParam("providerId") Long providerId,
+            @RequestParam(value = "code", required = false) String code) {
 
         LOG.info(
                 "Listing preparation datasets dataflowId={}, providerId={}",
                 dataflowId, providerId);
 
         return preparationDatasetService
-                .findPreparationDatasets(dataflowId, providerId);
+                .findPreparationDatasets(dataflowId, providerId, code);
     }
 
     /**

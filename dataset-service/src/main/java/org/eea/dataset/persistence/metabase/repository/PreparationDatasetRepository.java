@@ -50,4 +50,13 @@ public interface PreparationDatasetRepository
             Long dataflowId,
             Long providerId,
             String code);
+
+    @Query("SELECT p FROM PreparationDataset p "
+            + "WHERE p.dataflowId = :dataflowId "
+            + "AND p.providerId = :providerId "
+            + "AND p.code = :code")
+    List<PreparationDataset> findByDataflowIdAndProviderIdAndCode(
+            @Param("dataflowId") Long dataflowId,
+            @Param("providerId") Long providerId,
+            @Param("code") String code);
 }

@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eea.dataset.persistence.metabase.repository.PreparationDatasetRepository;
 import org.eea.dataset.persistence.metabase.domain.PreparationDataset;
 import org.eea.dataset.service.PreparationDatasetService;
@@ -31,24 +32,27 @@ public class PreparationDatasetServiceImpl
     @Transactional
     public List<PreparationDatasetVO> findPreparationDatasets(
             Long dataflowId,
-            Long providerId) {
+            Long providerId,
+            String code) {
 
         List<PreparationDataset> entities;
 
-        if (providerId != null) {
-            entities =
-                    preparationDatasetRepository
-                            .findByDataflowIdAndProviderId(dataflowId, providerId);
+        if (StringUtils.isNotBlank(code)) {
+            entities = preparationDatasetRepository
+                    .findByDataflowIdAndProviderIdAndCode(dataflowId, providerId, code);
+        } else if (providerId != null) {
+            entities = preparationDatasetRepository
+                    .findByDataflowIdAndProviderId(dataflowId, providerId);
         } else {
-            entities =
-                    preparationDatasetRepository
-                            .findByDataflowId(dataflowId);
+            entities = preparationDatasetRepository
+                    .findByDataflowId(dataflowId);
         }
 
         return entities.stream()
                 .map(this::toVO)
                 .collect(Collectors.toList());
     }
+
 
 
     @Override

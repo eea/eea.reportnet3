@@ -19,7 +19,8 @@ public interface PreparationDatasetService {
      */
     List<PreparationDatasetVO> findPreparationDatasets(
             Long dataflowId,
-            Long providerId);
+            Long providerId,
+            String code);
 
     /**
      * Create a new preparation dataset.
