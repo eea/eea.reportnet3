@@ -768,7 +768,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
               dataflowId,
               dataflowName: metadata.dataflow.name,
               datasetId,
-              datasetName: datasetSchemaName,
+              datasetName: datasetSchemaName
             }
           },
           true
@@ -1673,6 +1673,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
                     ? 'spinnerAnimate'
                     : 'validate'
                 }
+                isTestDataset={isTestDataset}
                 label={
                   actionsContext.isInProgress && actionsContext.validateDatasetProcessing
                     ? resourcesContext.messages['validationInProgress']

@@ -18,7 +18,8 @@ export const DatasetValidateDialog = ({
   onConfirmValidate,
   onConfirmValidateAsProvider,
   dataflowId,
-  dataflowType
+  dataflowType,
+  isTestDataset
 }) => {
   const resourcesContext = useContext(ResourcesContext);
 
@@ -42,7 +43,6 @@ export const DatasetValidateDialog = ({
 
       // If no group found, fetch and use the first available group based on dataflow type
       if (!dataProviderGroup?.dataProviderGroupId && dataflowType) {
-
         let groups = [];
 
         if (dataflowType === config.dataflowType.REPORTING.value) {
@@ -135,38 +135,40 @@ export const DatasetValidateDialog = ({
             />
           </div>
 
-          <div className={styles.validationOption}>
-            <h4 className={styles.optionTitle}>{resourcesContext.messages['validateWithProvider']}</h4>
-            <p
-              className={styles.optionDescription}
-              dangerouslySetInnerHTML={{ __html: resourcesContext.messages['validateWithProviderDescription'] }}
-            />
-            <div className={styles.providerValidationSection}>
-              <Dropdown
-                appendTo={document.body}
-                className={styles.providerDropdown}
-                disabled={isLoadingProviders || providers.length === 0}
-                onChange={e => setSelectedProvider(e.value)}
-                optionLabel="label"
-                options={providers}
-                placeholder={
-                  isLoadingProviders
-                    ? resourcesContext.messages['loading']
-                    : providers.length === 0
-                    ? resourcesContext.messages['noProvidersAvailable']
-                    : resourcesContext.messages['selectProvider']
-                }
-                value={selectedProvider}
+          {(isTestDataset === undefined || isTestDataset === true) && (
+            <div className={styles.validationOption}>
+              <h4 className={styles.optionTitle}>{resourcesContext.messages['validateWithProvider']}</h4>
+              <p
+                className={styles.optionDescription}
+                dangerouslySetInnerHTML={{ __html: resourcesContext.messages['validateWithProviderDescription'] }}
               />
-              <Button
-                className={`p-button-rounded p-button-primary ${!disabled ? ' p-button-animated-blink' : null}`}
-                disabled={!selectedProvider || isLoadingProviders}
-                icon={icon}
-                label={resourcesContext.messages['validateWithProvider']}
-                onClick={onConfirmProviderValidation}
-              />
+              <div className={styles.providerValidationSection}>
+                <Dropdown
+                  appendTo={document.body}
+                  className={styles.providerDropdown}
+                  disabled={isLoadingProviders || providers.length === 0}
+                  onChange={e => setSelectedProvider(e.value)}
+                  optionLabel="label"
+                  options={providers}
+                  placeholder={
+                    isLoadingProviders
+                      ? resourcesContext.messages['loading']
+                      : providers.length === 0
+                      ? resourcesContext.messages['noProvidersAvailable']
+                      : resourcesContext.messages['selectProvider']
+                  }
+                  value={selectedProvider}
+                />
+                <Button
+                  className={`p-button-rounded p-button-primary ${!disabled ? ' p-button-animated-blink' : null}`}
+                  disabled={!selectedProvider || isLoadingProviders}
+                  icon={icon}
+                  label={resourcesContext.messages['validateWithProvider']}
+                  onClick={onConfirmProviderValidation}
+                />
+              </div>
             </div>
-          </div>
+          )}
         </Dialog>
       );
     }
