@@ -8,14 +8,17 @@ import { Dropdown } from 'views/_components/Dropdown';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { RepresentativeService } from 'services/RepresentativeService';
+import { AddOrganizationsService } from 'services/AddOrganizationsService';
+import { config } from 'conf';
 
 export const DatasetValidateDialog = ({
   disabled,
   icon,
   label,
   onConfirmValidate,
-  onConfirmValidateWithProvider,
-  dataflowId
+  onConfirmValidateAsProvider,
+  dataflowId,
+  dataflowType
 }) => {
   const resourcesContext = useContext(ResourcesContext);
 
@@ -34,32 +37,42 @@ export const DatasetValidateDialog = ({
     try {
       setIsLoadingProviders(true);
       const representativesData = await RepresentativeService.getRepresentatives(dataflowId);
-      console.log('representativesData', representativesData);
 
-      if (
-        representativesData &&
-        representativesData.representatives &&
-        representativesData.representatives.length > 0
-      ) {
-        // Get the unique dataProviderIds from representatives
-        const providerIds = representativesData.representatives.map(rep => rep.dataProviderId);
+      let dataProviderGroup = representativesData?.group;
 
-        if (representativesData.group && representativesData.group.dataProviderGroupId) {
-          const allDataProvidersData = await RepresentativeService.getDataProviders(representativesData.group);
+      // If no group found, fetch and use the first available group based on dataflow type
+      if (!dataProviderGroup?.dataProviderGroupId && dataflowType) {
 
-          // Filter to only include providers that are representatives for this dataflow
-          const filteredProviders = allDataProvidersData.filter(provider =>
-            providerIds.includes(provider.dataProviderId)
+        let groups = [];
+
+        if (dataflowType === config.dataflowType.REPORTING.value) {
+          const allProviderGroups = await AddOrganizationsService.getProviderGroups();
+          groups = allProviderGroups.filter(
+            group => group.dataProviderGroupId === 2 || group.dataProviderGroupId === 8
           );
-
-          const formattedProviders = filteredProviders.map(provider => ({
-            id: provider.dataProviderId,
-            label: provider.label,
-            code: provider.code
-          }));
-
-          setProviders(formattedProviders);
+        } else if (
+          dataflowType === config.dataflowType.CITIZEN_SCIENCE.value ||
+          dataflowType === config.dataflowType.BUSINESS.value
+        ) {
+          const response = await RepresentativeService.getGroupOrganizations();
+          groups = response.data;
+        } else {
+          const response = await RepresentativeService.getGroupCountries();
+          groups = response.data;
         }
+
+        dataProviderGroup = groups[0];
+      }
+      if (dataProviderGroup?.dataProviderGroupId) {
+        const dataProvidersData = await RepresentativeService.getDataProviders(dataProviderGroup);
+
+        const formattedProviders = dataProvidersData.map(provider => ({
+          id: provider.dataProviderId,
+          label: provider.label,
+          code: provider.code
+        }));
+
+        setProviders(formattedProviders);
       } else {
         setProviders([]);
       }
@@ -77,11 +90,9 @@ export const DatasetValidateDialog = ({
   };
 
   const onConfirmProviderValidation = () => {
-    if (selectedProvider && onConfirmValidateWithProvider) {
-      setIsValidateDialogVisible(false);
-      onConfirmValidateWithProvider(selectedProvider);
-      setSelectedProvider(null);
-    }
+    setIsValidateDialogVisible(false);
+    onConfirmValidateAsProvider(selectedProvider?.code);
+    setSelectedProvider(null);
   };
 
   const onHideDialog = () => {
@@ -106,32 +117,37 @@ export const DatasetValidateDialog = ({
       return (
         <Dialog
           className={styles.validateDialog}
+          footer={null}
           header={resourcesContext.messages['validateDataset']}
           onHide={onHideDialog}
-          visible={isValidateDialogVisible}
-          footer={null}>
+          visible={isValidateDialogVisible}>
           <div className={styles.validationOption}>
             <h4 className={styles.optionTitle}>{resourcesContext.messages['validation']}</h4>
-            <p className={styles.optionDescription}>{resourcesContext.messages['validateDatasetConfirm']}</p>
+            <p
+              className={styles.optionDescription}
+              dangerouslySetInnerHTML={{ __html: resourcesContext.messages['validateDatasetConfirm'] }}
+            />
             <Button
               className={`p-button-rounded p-button-primary ${!disabled ? ' p-button-animated-blink' : null}`}
-              label={resourcesContext.messages['validate']}
               icon={icon}
+              label={resourcesContext.messages['validate']}
               onClick={onConfirmSimpleValidation}
             />
           </div>
 
           <div className={styles.validationOption}>
             <h4 className={styles.optionTitle}>{resourcesContext.messages['validateWithProvider']}</h4>
-            <p className={styles.optionDescription}>{resourcesContext.messages['validateWithProviderDescription']}</p>
-
+            <p
+              className={styles.optionDescription}
+              dangerouslySetInnerHTML={{ __html: resourcesContext.messages['validateWithProviderDescription'] }}
+            />
             <div className={styles.providerValidationSection}>
               <Dropdown
                 appendTo={document.body}
                 className={styles.providerDropdown}
                 disabled={isLoadingProviders || providers.length === 0}
+                onChange={e => setSelectedProvider(e.value)}
                 optionLabel="label"
-                optionValue="id"
                 options={providers}
                 placeholder={
                   isLoadingProviders
@@ -140,15 +156,14 @@ export const DatasetValidateDialog = ({
                     ? resourcesContext.messages['noProvidersAvailable']
                     : resourcesContext.messages['selectProvider']
                 }
-                onChange={e => setSelectedProvider(e.value)}
                 value={selectedProvider}
               />
               <Button
                 className={`p-button-rounded p-button-primary ${!disabled ? ' p-button-animated-blink' : null}`}
-                icon={icon}
-                label={resourcesContext.messages['validateWithProviderBtn'] || 'Validate with Provider'}
-                onClick={onConfirmProviderValidation}
                 disabled={!selectedProvider || isLoadingProviders}
+                icon={icon}
+                label={resourcesContext.messages['validateWithProvider']}
+                onClick={onConfirmProviderValidation}
               />
             </div>
           </div>

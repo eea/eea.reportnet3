@@ -757,21 +757,20 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
     }
   };
 
-  const onConfirmValidateWithProvider = async providerId => {
+  const onConfirmValidateAsProvider = async providerId => {
     const action = 'DATASET_VALIDATE';
     actionsContext.testProcess(datasetId, action);
     try {
-      await DatasetService.validate(datasetId);
+      await DatasetService.validateAsProvider(datasetId,dataflowId, providerId);
       notificationContext.add(
         {
-          type: 'VALIDATE_DATA_WITH_PROVIDER_INIT',
+          type: 'VALIDATE_DATA_INIT',
           content: {
-            customContent: { datasetName: designerState.datasetSchemaName },
+            customContent: { origin: 'DESIGN' },
             dataflowId,
             dataflowName: designerState.metaData?.dataflow?.name,
             datasetId,
             datasetName: designerState.datasetSchemaName,
-            providerId,
             type: 'DESIGN'
           }
         },
@@ -785,17 +784,16 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
       if (error.response?.status === 423) {
         notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' }, true);
       } else {
-        console.error('DatasetDesigner - onConfirmValidateWithProvider.', error);
+        console.error('DatasetDesigner - onConfirmValidateAsProvider.', error);
         notificationContext.add(
           {
-            type: 'VALIDATE_DESIGN_DATA_WITH_PROVIDER_ERROR',
+            type: 'VALIDATE_DESIGN_DATA_ERROR',
             content: {
               customContent: { datasetName: designerState.datasetSchemaName },
               dataflowId,
               dataflowName: designerState.metaData?.dataflow?.name,
               datasetId,
               datasetName: designerState.datasetSchemaName,
-              providerId
             }
           },
           true
@@ -2138,6 +2136,8 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
                 />
               )}
               <DatasetValidateDialog
+                dataflowId={dataflowId}
+                dataflowType={designerState.dataflowType}
                 disabled={isDesignDatasetEditorRead || editingStatus?.isEditing || actionsContext.isInProgress}
                 icon={
                   actionsContext.isInProgress && actionsContext.validateDatasetProcessing
@@ -2150,8 +2150,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
                     : resourcesContext.messages['validate']
                 }
                 onConfirmValidate={onConfirmValidate}
-                onConfirmValidateWithProvider={onConfirmValidateWithProvider}
-                dataflowId={dataflowId}
+                onConfirmValidateAsProvider={onConfirmValidateAsProvider}
               />
               <Button
                 className="p-button-rounded p-button-secondary-transparent p-button-animated-blink"
@@ -2306,6 +2305,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
         {designerState.datasetSchema && designerState.tabs && validationContext.isVisible && (
           <Validations
             bigData={designerState.bigData}
+            dataflowId={dataflowId}
             dataflowType={designerState.dataflowType}
             datasetId={datasetId}
             datasetSchema={designerState.datasetSchema}

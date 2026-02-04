@@ -590,6 +590,11 @@ export const DatasetRepository = {
     }),
   validate: async datasetId => await HTTPRequester.update({ url: getUrl(DatasetConfig.validate, { datasetId }) }),
 
+  validateAsProvider: async (datasetId, dataflowId, providerId) =>
+    await HTTPRequester.update({
+      url: getUrl(DatasetConfig.validateAsProvider, { datasetId, dataflowId, providerId })
+    }),
+
   validateAllSql: async datasetId =>
     await HTTPRequester.post({ url: getUrl(DatasetConfig.validateAllSql, { datasetId }) }),
 

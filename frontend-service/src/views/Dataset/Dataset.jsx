@@ -735,21 +735,20 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
     }
   };
 
-  const onConfirmValidateWithProvider = async providerId => {
+  const onConfirmValidateAsProvider = async providerId => {
     const action = 'DATASET_VALIDATE';
     actionsContext.testProcess(datasetId, action);
     try {
-      await DatasetService.validateWithProvider(datasetId, providerId);
+      await DatasetService.validateAsProvider(datasetId, dataflowId, providerId);
       notificationContext.add(
         {
-          type: 'VALIDATE_DATA_WITH_PROVIDER_INIT',
+          type: 'VALIDATE_DATA_INIT',
           content: {
             customContent: { origin: datasetName },
             dataflowId,
             dataflowName: metadata.dataflow.name,
             datasetId,
             datasetName: datasetSchemaName,
-            providerId,
             type: 'REPORTING'
           }
         },
@@ -760,17 +759,16 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
       if (error.response.status === 423) {
         notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' }, true);
       } else {
-        console.error('Dataset - onConfirmValidateWithProvider.', error);
+        console.error('Dataset - onConfirmValidateAsProvider.', error);
         notificationContext.add(
           {
-            type: 'VALIDATE_REPORTING_DATA_WITH_PROVIDER_ERROR',
+            type: 'VALIDATE_REPORTING_DATA_ERROR',
             content: {
               customContent: { origin: datasetName },
               dataflowId,
               dataflowName: metadata.dataflow.name,
               datasetId,
               datasetName: datasetSchemaName,
-              providerId
             }
           },
           true
@@ -1662,6 +1660,8 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
                 />
               )}
               <DatasetValidateDialog
+                dataflowId={dataflowId}
+                dataflowType={dataflowType}
                 disabled={
                   editingStatus?.isEditing ||
                   !hasWritePermissions ||
@@ -1679,8 +1679,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
                     : resourcesContext.messages['validate']
                 }
                 onConfirmValidate={onConfirmValidate}
-                onConfirmValidateWithProvider={onConfirmValidateWithProvider}
-                dataflowId={dataflowId}
+                onConfirmValidateAsProvider={onConfirmValidateAsProvider}
               />
               <Button
                 className="p-button-rounded p-button-secondary-transparent dataset-showValidations-help-step p-button-animated-blink"
