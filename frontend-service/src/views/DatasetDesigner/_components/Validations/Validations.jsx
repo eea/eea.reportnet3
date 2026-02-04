@@ -6,7 +6,7 @@ import { RowValidation } from './_components/RowValidation';
 
 import { ValidationContext } from 'views/_functions/Contexts/ValidationContext';
 
-export const Validations = ({ bigData,  dataflowId, dataflowType, datasetSchema, datasetSchemas, tabs, datasetId}) => {
+export const Validations = ({ bigData, dataflowId, dataflowType, datasetSchema, datasetSchemas, tabs, datasetId}) => {
   const validationContext = useContext(ValidationContext);
 
   if (validationContext.level === 'field') {
@@ -14,12 +14,13 @@ export const Validations = ({ bigData,  dataflowId, dataflowType, datasetSchema,
   }
 
   if (validationContext.level === 'row') {
-    return <RowValidation bigData={bigData} dataflowType={dataflowType} datasetId={datasetId} tabs={tabs} />;
+    return <RowValidation bigData={bigData} dataflowId={dataflowId} dataflowType={dataflowType} datasetId={datasetId} tabs={tabs} />;
   }
 
   return (
     <TableValidation
       bigData={bigData}
+      dataflowId={dataflowId}
       dataflowType={dataflowType}
       datasetId={datasetId}
       datasetSchema={datasetSchema}

@@ -43,7 +43,7 @@ import { resetValidationRuleCreation } from 'views/DatasetDesigner/_components/V
 import { setExpressionsFieldsTypes } from 'views/DatasetDesigner/_components/Validations/_functions/Utils/setExpressionsFieldsTypes';
 import { setValidationExpression } from 'views/DatasetDesigner/_components/Validations/_functions/Utils/setValidationExpression';
 
-export const RowValidation = ({ bigData, dataflowType, datasetId, tabs }) => {
+export const RowValidation = ({ bigData, dataflowId, dataflowType, datasetId, tabs }) => {
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
   const validationContext = useContext(ValidationContext);
@@ -99,6 +99,7 @@ export const RowValidation = ({ bigData, dataflowType, datasetId, tabs }) => {
             bigData={bigData}
             componentName={componentName}
             creationFormState={creationFormState}
+            dataflowId={dataflowId}
             dataflowType={dataflowType}
             datasetId={datasetId}
             onAddNewExpression={onAddNewExpression}
@@ -731,7 +732,7 @@ export const RowValidation = ({ bigData, dataflowType, datasetId, tabs }) => {
               : resourcesContext.messages['createRowConstraint']
           }
           onHide={() => onHide()}
-          style={{ width: '975px' }}
+          style={{ width: '1200px' }}
           visible={validationContext.isVisible}>
           {children}
         </Dialog>
