@@ -31,8 +31,6 @@ public interface PreparationDatasetController {
             @RequestParam("dataflowId") Long dataflowId,
             @RequestParam("providerId") Long providerId,
             @RequestParam("code") String code);
-    @GetMapping(value = "/preparations", produces = MediaType.APPLICATION_JSON_VALUE)
-    List<PreparationDatasetVO> list(@RequestParam("dataflowId") Long dataflowId, @RequestParam("providerId") Long providerId);
 
     @PostMapping(value = "/preparations", consumes = MediaType.APPLICATION_JSON_VALUE)
     void createPreparationDataset(@RequestBody PreparationDatasetVO vo);
