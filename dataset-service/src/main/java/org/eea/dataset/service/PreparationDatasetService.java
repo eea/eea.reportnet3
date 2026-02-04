@@ -2,7 +2,9 @@ package org.eea.dataset.service;
 
 import java.util.List;
 
+import org.eea.dataset.persistence.metabase.domain.PreparationDataset;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.PreparationDatasetVO;
 
 /**
@@ -40,4 +42,10 @@ public interface PreparationDatasetService {
      * @param preparationDatasetId the preparation dataset id
      */
     void deletePreparationDatasetById(Long preparationDatasetId) throws EEAException;
+
+    List<PreparationDatasetVO> findByDataflowIdAndProviderIdAndIsCreated(Long dataflowId, Long providerId, Boolean isCreated);
+
+    void createAllEligiblePreparationSets(Long dataflowId, Long providerId);
+
+    void copyParentDatasetDataToPreparationDataset(DataSetMetabaseVO parentDataset, String preparationCode) throws Exception;
 }

@@ -46,9 +46,14 @@ public class S3PathResolver {
     /** The isIcebergTable. */
     private Boolean isIcebergTable;
 
-    /** The preparation code if applicable. */
-
+    /** Name of the preparation dataset, if applicable */
     private String preparationCode;
+
+    public S3PathResolver(long dataflowId, long dataProviderId, long datasetId,
+                          String tableName, String filename, String preparationCode, String path) {
+        this(dataflowId, dataProviderId, datasetId, tableName, filename, path);
+        this.preparationCode = preparationCode;
+    }
 
     public S3PathResolver(long dataflowId, long dataProviderId, long datasetId) {
         this.dataflowId = dataflowId;
@@ -107,11 +112,5 @@ public class S3PathResolver {
         this.dataflowId = dataflowId;
         this.filename = filename;
         this.path = path;
-    }
-
-    public S3PathResolver(long dataflowId, long dataProviderId, long datasetId,
-                          String tableName, String filename, String preparationCode, String path) {
-        this(dataflowId, dataProviderId, datasetId, tableName, filename, path);
-        this.preparationCode = preparationCode;
     }
 }
