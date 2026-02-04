@@ -839,9 +839,6 @@ public class SqlRulesServiceImplTest {
   public void runSQLRuleTest() throws EEAException {
 
     String sqlRule = "SELECT * from dataset_1.table_value";
-    new ArrayList<>();
-    new ArrayList<>();
-
 
     DataSetMetabaseVO datasetMetabaseVO = new DataSetMetabaseVO();
     datasetMetabaseVO.setDataflowId(1L);
@@ -850,21 +847,38 @@ public class SqlRulesServiceImplTest {
     datasetSchemaVO.setIdDataSetSchema("dsId");
     datasetSchemaVO.setTableSchemas(new ArrayList<>());
 
+    DataFlowVO dataFlowVO = new DataFlowVO();
+    dataFlowVO.setBigData(false);
 
     Mockito.when(datasetMetabaseController.findDatasetMetabaseById(Mockito.anyLong()))
         .thenReturn(datasetMetabaseVO);
     Mockito.when(datasetSchemaControllerZuul.findDataSchemaByDatasetIdPrivate(1L))
         .thenReturn(datasetSchemaVO);
 
-    sqlRulesServiceImpl.runSqlRule(1L, sqlRule, false);
+    Mockito.doNothing().when(datasetRepository)
+        .validateQuery(Mockito.anyString(), Mockito.anyLong());
 
-    Mockito.verify(datasetRepository, Mockito.times(1)).runSqlRule(1L,
-        "WITH  SELECT * FROM (SELECT * from table_value) as userSelect OFFSET 0 LIMIT 10");
+    Mockito.when(sqlCountryCompanyOrganizationCodeUtils.replaceCodesIfNeeded(Mockito.anyLong(), Mockito.anyString(),
+            Mockito.any())).thenAnswer(inv -> inv.getArgument(1));
 
-    sqlRulesServiceImpl.runSqlRule(1L, sqlRule, true);
+    sqlRulesServiceImpl.runSqlRule(1L, sqlRule, false, null);
 
-    Mockito.verify(datasetRepository, Mockito.times(1)).runSqlRule(1L,
-        "WITH  SELECT * FROM (SELECT * from table_value) as userSelect OFFSET 0 LIMIT 10");
+    Mockito.verify(datasetRepository, Mockito.times(1))
+        .validateQuery("explain " + sqlRule, 1L);
+
+    Mockito.verify(datasetRepository, Mockito.times(1))
+        .runSqlRule(Mockito.eq(1L),Mockito.argThat(q -> q != null
+                    && q.contains("SELECT * FROM (SELECT * from table_value) as userSelect")
+                    && q.contains("OFFSET 0 LIMIT 10"))
+        );
+
+    sqlRulesServiceImpl.runSqlRule(1L, sqlRule, true, null);
+
+    Mockito.verify(datasetRepository, Mockito.times(2))
+        .validateQuery("explain " + sqlRule, 1L);
+
+    Mockito.verify(datasetRepository, Mockito.times(2))
+        .runSqlRule(Mockito.eq(1L),Mockito.argThat(q -> q != null && q.contains("OFFSET 0 LIMIT 10")));
   }
 
   @Test(expected = EEAInvalidSQLException.class)

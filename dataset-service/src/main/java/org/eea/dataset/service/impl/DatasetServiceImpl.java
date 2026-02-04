@@ -626,59 +626,61 @@ public class DatasetServiceImpl implements DatasetService {
   @Override
   @Transactional
   public void saveStatistics(final Long datasetId, boolean bigData) throws EEAException {
-    DatasetValue dataset = datasetRepository.findById(datasetId).orElse(new DatasetValue());
 
-    if (dataset!=null && dataset.getId()!=null && StringUtils.isNotBlank(dataset.getIdDatasetSchema()) || bigData) {
-      List<Statistics> statsList = Collections.synchronizedList(new ArrayList<>());
+      if (datasetId == null) {
+          LOG.error("Error, datasetId is null");
+          return;
+      }
 
-      DataSetMetabase datasetMb =
-          dataSetMetabaseRepository.findById(datasetId).orElse(new DataSetMetabase());
+      final DataSetMetabase datasetMb =
+              dataSetMetabaseRepository.findById(datasetId).orElse(new DataSetMetabase());
 
-      DataSetSchema schema =
-          schemasRepository.findByIdDataSetSchema(new ObjectId(datasetMb.getDatasetSchema()));
+      final DataSetSchema schema =
+              schemasRepository.findByIdDataSetSchema(new ObjectId(datasetMb.getDatasetSchema()));
 
-      Map<String, String> mapIdNameDatasetSchema = new HashMap<>();
+      final Map<String, String> mapIdNameDatasetSchema = new HashMap<>();
       for (TableSchema tableSchema : schema.getTableSchemas()) {
 
-        mapIdNameDatasetSchema.put(tableSchema.getIdTableSchema().toString(),
-            tableSchema.getNameTableSchema());
+          mapIdNameDatasetSchema.put(tableSchema.getIdTableSchema().toString(),
+                  tableSchema.getNameTableSchema());
       }
+      final List<Statistics> statsList = Collections.synchronizedList(new ArrayList<>());
+      boolean datasetErrors = false;
 
-      Boolean datasetErrors = false;
       if (bigData) {
-        S3PathResolver s3PathResolver = new S3PathResolver(datasetMb.getDataflowId(), datasetMb.getDataProviderId()!=null ? datasetMb.getDataProviderId() : 0, datasetId, S3_VALIDATION);
-        if (s3Helper.checkFolderExist(s3PathResolver, S3_VALIDATION_TABLE_PATH)) {
-          datasetErrors = true;
-        }
-        schema.getTableSchemas().parallelStream().forEach(tableSchema -> statsList.addAll(processTableStatsDL(tableSchema, datasetMb)));
-      } else {
-        List<TableValue> allTableValues = dataset.getTableValues();
-        allTableValues.parallelStream().forEach(tableValue -> statsList
-                .addAll(processTableStats(tableValue, datasetId, mapIdNameDatasetSchema)));
-        // Check dataset validations
-        if (dataset.getDatasetValidations() != null && !dataset.getDatasetValidations().isEmpty()) {
-          datasetErrors = true;
-        } else {
-          Optional<Statistics> opt = statsList.stream()
-                  .filter(s -> "tableErrors".equals(s.getStatName()) && "true".equals(s.getValue()))
-                  .findFirst();
-          if (opt.isPresent()) {
-            datasetErrors = true;
+          final S3PathResolver s3PathResolver = new S3PathResolver(datasetMb.getDataflowId(), datasetMb.getDataProviderId() != null ? datasetMb.getDataProviderId() : 0, datasetId, S3_VALIDATION);
+          if (s3Helper.checkFolderExist(s3PathResolver, S3_VALIDATION_TABLE_PATH)) {
+              datasetErrors = true;
           }
-        }
+          schema.getTableSchemas().parallelStream().forEach(tableSchema -> statsList.addAll(processTableStatsDL(tableSchema, datasetMb)));
+      } else {
+          final DatasetValue dataset = datasetRepository.findById(datasetId).orElse(new DatasetValue());
+          if (dataset.getId() == null || StringUtils.isBlank(dataset.getIdDatasetSchema())) {
+              LOG.error("No dataset found to save statistics. DatasetId:{}", datasetId);
+              return;
+          }
+          final List<TableValue> allTableValues = dataset.getTableValues();
+          allTableValues.parallelStream().forEach(tableValue -> statsList
+                  .addAll(processTableStats(tableValue, datasetId, mapIdNameDatasetSchema)));
+          // Check dataset validations
+          if (dataset.getDatasetValidations() != null && !dataset.getDatasetValidations().isEmpty()) {
+              datasetErrors = true;
+          } else {
+              final Optional<Statistics> opt = statsList.stream()
+                      .filter(s -> "tableErrors".equals(s.getStatName()) && "true".equals(s.getValue()))
+                      .findFirst();
+              if (opt.isPresent()) {
+                  datasetErrors = true;
+              }
+          }
       }
-
-
       statsList.add(fillStat(datasetId, null, "idDataSetSchema", datasetMb.getDatasetSchema()));
       statsList.add(fillStat(datasetId, null, "nameDataSetSchema", datasetMb.getDataSetName()));
-      statsList.add(fillStat(datasetId, null, "datasetErrors", datasetErrors.toString()));
+      statsList.add(fillStat(datasetId, null, "datasetErrors", Boolean.toString(datasetErrors)));
 
-      List<String> statisticsToIgnore = Arrays.asList(LAST_IMPORT_DATE, TOTAL_RECORDS_IMPORTED, LAST_IMPORT_FILE_EXTENSION);
+      final List<String> statisticsToIgnore = Arrays.asList(LAST_IMPORT_DATE, TOTAL_RECORDS_IMPORTED, LAST_IMPORT_FILE_EXTENSION);
       statisticsService.deleteOldStatsAndSaveNewOnes(datasetId, statisticsToIgnore, statsList);
       LOG.info("Statistics saved to datasetId {}.", datasetId);
-    } else {
-      LOG.error("No dataset found to save statistics. DatasetId:{}", datasetId);
-    }
   }
 
   /**
@@ -1451,8 +1453,6 @@ public class DatasetServiceImpl implements DatasetService {
       result = true;
     } else if (DatasetTypeEnum.REPORTING.equals(type)
         || (DatasetTypeEnum.REFERENCE.equals(type)
-            && !Boolean.TRUE.equals(referenceDatasetRepository.findById(idDataset)
-                .orElse(new ReferenceDataset()).getUpdatable())
             || DatasetTypeEnum.TEST.equals(type))) {
       result = true;
     } else {
@@ -1729,9 +1729,12 @@ public class DatasetServiceImpl implements DatasetService {
   @Override
   @Transactional
   public void deleteTempEtlExport(@DatasetId Long datasetId) {
-    TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, datasetId));
-    datasetRepository.removeTempEtlExport(datasetId);
-    LOG.info("Removed everything from table temp_etlexport for datasetId {}", datasetId);
+      final boolean isBigData = dataflowControllerZuul.isBigDataflowDataset(datasetId);
+      if (!isBigData) {
+          TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, datasetId));
+          datasetRepository.removeTempEtlExport(datasetId);
+          LOG.info("Removed everything from table temp_etlexport for datasetId {}", datasetId);
+      }
   }
 
 
@@ -3539,8 +3542,11 @@ public class DatasetServiceImpl implements DatasetService {
   @Override
   @Transactional
   public void updateCheckView(@DatasetId Long datasetId, Boolean updated) {
-    datasetRepository.updateCheckView(datasetId, updated);
-    LOG.info("Updated check view for datasetId {} with value {}", datasetId, updated);
+      final boolean isBigData = dataflowControllerZuul.isBigDataflowDataset(datasetId);
+      if (!isBigData) {
+          datasetRepository.updateCheckView(datasetId, updated);
+          LOG.info("Updated check view for datasetId {} with value {}", datasetId, updated);
+      }
   }
 
   /**

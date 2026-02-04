@@ -272,6 +272,13 @@ public interface DataflowService {
   boolean isReferenceDataflowDraft(EntityClassEnum entity, Long entityId);
 
 
+    /**
+     * Determines whether the dataflow associated with the given dataset is configured as a Big Data dataflow.
+     *
+     * @param datasetId the ID of the dataset whose dataflow should be checked
+     * @return {@code true} if the dataflow is marked as Big Data, {@code false} otherwise
+     */
+  boolean isBigData(Long datasetId);
   /**
    * Checks if is dataflow type.
    *

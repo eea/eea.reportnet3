@@ -270,6 +270,18 @@ public interface DataflowRepository
       value = " select aux_dataflows.type as type , count(*) as amount from (select * from dataflow df where df.id IN :ids) aux_dataflows group by type")
   List<IDataflowCount> countDataflowByTypeAndUser(@Param("ids") List<Long> ids);
 
+
+
+  /**
+   * Determines whether the dataflow associated with the given dataset is configured as a Big Data dataflow.
+   *
+   * @param datasetId the ID of the dataset whose dataflow should be checked
+   * @return {@code true} if the dataflow is marked as Big Data, {@code false} otherwise
+   */
+  @Query(nativeQuery = true,
+          value = "SELECT dataflow.big_data FROM dataflow INNER JOIN dataset ON dataset.dataflowid = dataflow.id WHERE dataset.id = :datasetId ")
+  boolean isBigData(@Param("datasetId") Long datasetId);
+
   /**
    * Find by show public info true.
    *

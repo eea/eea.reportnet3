@@ -7,10 +7,12 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
+import org.eea.interfaces.controller.dataset.DatasetController;
 import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.orchestrator.JobController;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
+import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.orchestrator.JobVO;
 import org.eea.interfaces.vo.orchestrator.JobsVO;
 import org.eea.interfaces.vo.orchestrator.JobHistoryVO;
@@ -81,6 +83,9 @@ public class JobControllerImpl implements JobController {
     /** The dataset metabase controller zuul */
     @Autowired
     private ProcessControllerZuul processControllerZuul;
+
+    @Autowired
+    private DatasetController.DataSetControllerZuul dataSetControllerZuul;
 
     @Autowired
     private JobUtils jobUtils;
@@ -156,7 +161,8 @@ public class JobControllerImpl implements JobController {
                                  @ApiParam(value = "Dataflow id that contains the dataset that will be validated", example = "15") @RequestParam(value = "dataflowId", required = false) Long dataflowId,
                                  @ApiParam(value = "Provider id related to the dataset that will be validated", example = "15") @RequestParam(value = "providerId", required = false) Long providerId,
                                  @ApiParam(value = "Is the dataset released?", example = "true", required = false) @RequestParam(value = "released", required = false) boolean released,
-                                 @RequestParam(value = "createParquetWithSQL", required = false) boolean createParquetWithSQL) {
+                                 @RequestParam(value = "createParquetWithSQL", required = false) boolean createParquetWithSQL,
+                                 @RequestParam(value = "validateAsProviderCode", required = false) String validateAsProviderCode) {
         Long jobId;
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         // Set the username on the thread
@@ -173,7 +179,6 @@ public class JobControllerImpl implements JobController {
             catch (Exception e) {
                 LOG.error("Error when trying to receive dataflow name for dataflowId {} ", dataset.getDataflowId(), e);
             }
-
             Map<String, Object> parameters = new HashMap<>();
             parameters.put("dataflowId", dataset.getDataflowId());
             Long dataProvider = null;
@@ -184,6 +189,14 @@ public class JobControllerImpl implements JobController {
             parameters.put("datasetId", datasetId);
             parameters.put("released", released);
             parameters.put("createParquetWithSQL", createParquetWithSQL);
+
+            // Validate as a provider only for Design and Test datasets and if we receive a validateAsProviderCode.
+            if ((DatasetTypeEnum.DESIGN.equals(dataset.getDatasetTypeEnum()) || DatasetTypeEnum.TEST.equals(dataset.getDatasetTypeEnum()))
+                && (validateAsProviderCode != null && !validateAsProviderCode.isEmpty())) {
+                jobService.assertValidProviderCodeForDataflow(dataflowId, username, validateAsProviderCode);
+                parameters.put("validateAsProviderCode", validateAsProviderCode);
+            }
+
             String userId = ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails()).get(AuthenticationDetails.USER_ID);
             parameters.put("userId", userId);
             JobStatusEnum statusToInsert = jobService.checkEligibilityOfJob(JobTypeEnum.VALIDATION.toString(), dataset.getDataflowId(), dataProvider, Arrays.asList(datasetId), false);
@@ -352,7 +365,11 @@ public class JobControllerImpl implements JobController {
     public Long addEtlImportJob(@PathVariable("datasetId") Long datasetId,
                                 @RequestParam(value = "dataflowId", required = false) Long dataflowId,
                                 @RequestParam(value = "providerId", required = false) Long providerId,
-                                @RequestParam(value = "jobStatus", required = false) JobStatusEnum jobStatus) {
+                                @RequestParam(value = "jobStatus", required = false) JobStatusEnum jobStatus,
+                                @RequestParam(value = "replace", required = false) Boolean replace,
+                                @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,
+                                @RequestParam(value = "delimiter", required = false) String delimiter,
+                                @RequestParam(value = "filePathInS3", required = false) String filePathInS3) {
 
         ThreadPropertiesManager.setVariable("user",
                 SecurityContextHolder.getContext().getAuthentication().getName());
@@ -361,6 +378,10 @@ public class JobControllerImpl implements JobController {
         parameters.put("dataflowId", dataflowId);
         parameters.put("datasetId", datasetId);
         parameters.put("dataProviderId", providerId);
+        parameters.put("tableSchemaId", tableSchemaId);
+        parameters.put("replace", replace);
+        parameters.put("delimiter", delimiter);
+        parameters.put("filePathInS3", filePathInS3);
         JobStatusEnum statusToInsert = JobStatusEnum.IN_PROGRESS;
         if(jobStatus != null){
             statusToInsert = jobStatus;
@@ -1024,6 +1045,26 @@ public class JobControllerImpl implements JobController {
         }
         catch (Exception e){
             LOG.error("Could not retrieve active jobs for dataflowId {} datasetId {} and providerId {} Error: {}", dataflowId, datasetId, providerId, e.getMessage());
+            throw e;
+        }
+    }
+
+    /**
+     * Updates job status and info value
+     * @param jobId
+     * @param jobStatus
+     * @param jobInfo
+     * @param lineNumber
+     */
+    @Override
+    @PostMapping(value = "/private/updateJobStatusAndInfo/{jobId}")
+    public void updateJobStatusAndInfo(@PathVariable("jobId") Long jobId, @RequestParam(value = "jobStatus") JobStatusEnum jobStatus, @RequestParam(value = "jobInfo") JobInfoEnum jobInfo,
+                                       @RequestParam(value = "lineNumber", required = false) Integer lineNumber){
+        try {
+            jobService.updateJobStatus(jobId, jobStatus);
+            jobService.updateJobInfo(jobId, jobInfo, lineNumber, true);
+        } catch (Exception e) {
+            LOG.error("Error while updating job status and info for jobId {} jobStatus and jobInfo {}", jobId, jobStatus, jobInfo.getValue(lineNumber), e);
             throw e;
         }
     }

@@ -104,6 +104,9 @@ public class DesignDatasetServiceTest {
   private RulesControllerZuul rulesControllerZuul;
 
   @Mock
+  private DataFlowControllerZuul dataFlowControllerZuul;
+
+  @Mock
   private IntegrationControllerZuul integrationControllerZuul;
 
   @Mock

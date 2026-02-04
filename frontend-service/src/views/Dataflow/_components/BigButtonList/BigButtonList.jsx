@@ -229,7 +229,8 @@ export const BigButtonList = ({
     <div style={{ float: 'left' }}>
       <Checkbox
         ariaLabelledBy="show_public_info_label"
-        checked={showPublicInfo}
+        checked={dataflowState.data.sncData ? false : showPublicInfo}
+        disabled={!!dataflowState.data.sncData}
         id="show_public_info_checkbox"
         inputId="show_public_info_checkbox"
         onChange={e => setShowPublicInfo(e.checked)}
@@ -237,8 +238,20 @@ export const BigButtonList = ({
       />
       <label
         id="show_public_info_label"
-        onClick={() => setShowPublicInfo(!showPublicInfo)}
-        style={{ cursor: 'pointer', fontWeight: 'bold', marginLeft: '3px' }}>
+        onClick={() => {
+          if (!dataflowState.data.sncData) {
+            setShowPublicInfo(!showPublicInfo)
+          }
+        }}
+        style={{
+        color: 'var(--main-font-color)',
+        cursor: (dataflowState.data.sncData) ? 'default' : 'pointer',
+        fontSize: '10pt',
+        fontWeight: 'bold',
+        marginLeft: '6px',
+        marginRight: '6px',
+        opacity: (dataflowState.data.sncData) ? 0.5 : 1
+      }}>
         {resourcesContext.messages['showPublicInfo']}
       </label>
 
@@ -709,6 +722,7 @@ export const BigButtonList = ({
           <NewDatasetSchemaForm
             dataflowId={dataflowId}
             datasetSchemaInfo={dataflowState.updatedDatasetSchema}
+            datasetSnc={dataflowState.data.sncData}
             onCreate={onCreateDatasetSchema}
             onUpdateData={onUpdateData}
             setNewDatasetDialog={setNewDatasetDialog}

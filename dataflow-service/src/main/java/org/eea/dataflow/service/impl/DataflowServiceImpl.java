@@ -1250,7 +1250,19 @@ public class DataflowServiceImpl implements DataflowService {
     return reference;
   }
 
-  /**
+
+    /**
+     * Determines whether the dataflow associated with the given dataset is configured as a Big Data dataflow.
+     *
+     * @param datasetId the ID of the dataset whose dataflow should be checked
+     * @return {@code true} if the dataflow is marked as Big Data, {@code false} otherwise
+     */
+    @Override
+    public boolean isBigData(Long datasetId) {
+        return dataflowRepository.isBigData(datasetId);
+    }
+
+    /**
    * Checks if is dataflow type.
    *
    * @param dataflowType the dataflow type

@@ -120,6 +120,17 @@ public class DatasetTableServiceImpl implements DatasetTableService {
                 .orElse(null);
     }
 
+    @Override
+    public String getDatasetEditingUsernameForTable(Long datasetId, String tableSchemaId){
+        List<String> editors = datasetTableRepository.findEditorsOfTable(datasetId, tableSchemaId);
+        return editors.stream()
+                .filter(Objects::nonNull)
+                .distinct()
+                .sorted()           // alphabetical for deterministic output
+                .findFirst()
+                .orElse(null);
+    }
+
     @SneakyThrows
     @Override
     @Transactional

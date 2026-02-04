@@ -1926,8 +1926,8 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
                 <div>
                   <Checkbox
                     ariaLabelledBy="available_in_public_view_label"
-                    checked={designerState.availableInPublic}
-                    disabled={isDesignDatasetEditorRead}
+                    checked={designerState.sncData ? false : designerState.availableInPublic}
+                    disabled={isDesignDatasetEditorRead || !!designerState.sncData}
                     id="available_in_public_view"
                     inputId="available_in_public_view_checkbox"
                     onChange={e => onChangeAvailableInPublicView(e.checked)}
@@ -1936,7 +1936,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
                   <label
                     id="available_in_public_view_label"
                     onClick={() => {
-                      if (!isDesignDatasetEditorRead) {
+                      if (!isDesignDatasetEditorRead && !designerState.sncData) {
                         designerDispatch({
                           type: 'SET_AVAILABLE_PUBLIC_VIEW',
                           payload: !designerState.availableInPublic
@@ -1946,12 +1946,12 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
                     }}
                     style={{
                       color: 'var(--main-font-color)',
-                      cursor: isDesignDatasetEditorRead ? 'default' : 'pointer',
+                      cursor: (isDesignDatasetEditorRead || designerState.sncData) ? 'default' : 'pointer',
                       fontSize: '10pt',
                       fontWeight: 'bold',
                       marginLeft: '6px',
                       marginRight: '6px',
-                      opacity: isDesignDatasetEditorRead ? 0.5 : 1
+                      opacity: (isDesignDatasetEditorRead || designerState.sncData) ? 0.5 : 1
                     }}>
                     {resourcesContext.messages['availableInPublicView']}
                   </label>
