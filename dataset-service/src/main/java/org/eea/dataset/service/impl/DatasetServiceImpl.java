@@ -3558,8 +3558,12 @@ public class DatasetServiceImpl implements DatasetService {
   @Override
   @Transactional
   public Boolean getCheckView(Long datasetId) {
-    TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, datasetId));
-    return datasetRepository.findViewUpdatedById(datasetId);
+      final boolean isBigData = dataflowControllerZuul.isBigDataflowDataset(datasetId);
+      if (!isBigData) {
+          TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, datasetId));
+          return datasetRepository.findViewUpdatedById(datasetId);
+      }
+      return false;
   }
 
   /**
