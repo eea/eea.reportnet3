@@ -542,6 +542,8 @@ public final class LiteralConstants {
 
   public static final String S3_PREPARATION_TABLE_AS_FOLDER_QUERY_PATH = ".\"%s\".\"%s\".\"%s\".\"preparation\".\"%s\".\"%s\"";
 
+  /** The Constant S3_PPREPARATION_VALIDATION_TABLE_PATH: {@value}. */
+  public static final String S3_PREPARATION_VALIDATION_TABLE_PATH = "%s/%s/%s/preparation/%s/validation";
 
   /**
    * Instantiates a new literal constants.
