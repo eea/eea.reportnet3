@@ -96,7 +96,6 @@ export const SqlSentence = ({
       // If no group found, fetch and use the first available group based on dataflow type
       if (!dataProviderGroup?.dataProviderGroupId && dataflowType) {
         let groups = [];
-        console.log('SqlSentence - No group found, fetching based on dataflowType:', dataflowType);
 
         if (dataflowType === config.dataflowType.REPORTING.value) {
           const allProviderGroups = await AddOrganizationsService.getProviderGroups();
