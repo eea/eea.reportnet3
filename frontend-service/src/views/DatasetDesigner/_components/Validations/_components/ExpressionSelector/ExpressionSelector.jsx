@@ -21,6 +21,7 @@ export const ExpressionSelector = ({
   creationFormState,
   dataflowType,
   datasetId,
+  dataflowId,
   onAddNewExpression,
   onAddNewExpressionIf,
   onAddNewExpressionThen,
@@ -203,6 +204,7 @@ export const ExpressionSelector = ({
         <SqlSentence
           bigData={bigData}
           creationFormState={creationFormState}
+          dataflowId={dataflowId}
           dataflowType={dataflowType}
           datasetId={datasetId}
           level={validationContext.level}

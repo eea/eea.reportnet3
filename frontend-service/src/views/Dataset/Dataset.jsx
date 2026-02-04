@@ -735,6 +735,48 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
     }
   };
 
+  const onConfirmValidateAsProvider = async providerId => {
+    const action = 'DATASET_VALIDATE';
+    actionsContext.testProcess(datasetId, action);
+    try {
+      await DatasetService.validateAsProvider(datasetId, dataflowId, providerId);
+      notificationContext.add(
+        {
+          type: 'VALIDATE_DATA_INIT',
+          content: {
+            customContent: { origin: datasetName },
+            dataflowId,
+            dataflowName: metadata.dataflow.name,
+            datasetId,
+            datasetName: datasetSchemaName,
+            type: 'REPORTING'
+          }
+        },
+        true
+      );
+      changeProgressStepBar({ step: 1, currentStep: 2, isRunning: true });
+    } catch (error) {
+      if (error.response.status === 423) {
+        notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' }, true);
+      } else {
+        console.error('Dataset - onConfirmValidateAsProvider.', error);
+        notificationContext.add(
+          {
+            type: 'VALIDATE_REPORTING_DATA_ERROR',
+            content: {
+              customContent: { origin: datasetName },
+              dataflowId,
+              dataflowName: metadata.dataflow.name,
+              datasetId,
+              datasetName: datasetSchemaName,
+            }
+          },
+          true
+        );
+      }
+    }
+  };
+
   const cleanImportOtherSystemsDialog = () => {
     setReplaceData(false);
     onSetVisible(setIsImportOtherSystemsDialogVisible, false);
@@ -1618,6 +1660,8 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
                 />
               )}
               <DatasetValidateDialog
+                dataflowId={dataflowId}
+                dataflowType={dataflowType}
                 disabled={
                   editingStatus?.isEditing ||
                   !hasWritePermissions ||
@@ -1635,6 +1679,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
                     : resourcesContext.messages['validate']
                 }
                 onConfirmValidate={onConfirmValidate}
+                onConfirmValidateAsProvider={onConfirmValidateAsProvider}
               />
               <Button
                 className="p-button-rounded p-button-secondary-transparent dataset-showValidations-help-step p-button-animated-blink"

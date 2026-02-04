@@ -13,15 +13,26 @@ import { Spinner } from 'views/_components/Spinner';
 import { SqlHelp } from './_components/SqlHelp';
 import { SqlInputTextArea } from './_components/SqlHelp/_components/SqlInputTextArea';
 import { TrafficLight } from 'views/_components/TrafficLight';
+import { Dropdown } from 'views/_components/Dropdown';
 
 import { ValidationService } from 'services/ValidationService';
-
+import { RepresentativeService } from 'services/RepresentativeService';
+import { AddOrganizationsService } from 'services/AddOrganizationsService';
+import { config } from 'conf';
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 import { TextByDataflowTypeUtils } from 'views/_functions/Utils/TextByDataflowTypeUtils';
 
-export const SqlSentence = ({ bigData, creationFormState, dataflowType, datasetId, level, onSetSqlSentence }) => {
+export const SqlSentence = ({
+  bigData,
+  creationFormState,
+  dataflowType,
+  datasetId,
+  dataflowId,
+  level,
+  onSetSqlSentence
+}) => {
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
 
@@ -37,6 +48,10 @@ export const SqlSentence = ({ bigData, creationFormState, dataflowType, datasetI
   const [sqlSentenceCost, setSqlSentenceCost] = useState(0);
   const [validationErrorMessage, setValidationErrorMessage] = useState('');
   const [isViewUpdated, setIsViewUpdated] = useState(false);
+
+  const [providers, setProviders] = useState([]);
+  const [selectedProvider, setSelectedProvider] = useState(null);
+  const [isLoadingProviders, setIsLoadingProviders] = useState(false);
 
   useEffect(() => {
     if (!isNil(creationFormState.candidateRule.sqlError) && !isNil(creationFormState.candidateRule.sqlSentence)) {
@@ -64,6 +79,63 @@ export const SqlSentence = ({ bigData, creationFormState, dataflowType, datasetI
     if (creationFormState.candidateRule.sqlSentenceCost !== 0)
       setSqlSentenceCost(creationFormState.candidateRule.sqlSentenceCost);
   }, [creationFormState.candidateRule.sqlSentenceCost]);
+
+  useEffect(() => {
+    if (dataflowId) {
+      fetchProviders();
+    }
+  }, [dataflowId]);
+
+  const fetchProviders = async () => {
+    try {
+      setIsLoadingProviders(true);
+      const representativesData = await RepresentativeService.getRepresentatives(dataflowId);
+
+      let dataProviderGroup = representativesData?.group;
+
+      // If no group found, fetch and use the first available group based on dataflow type
+      if (!dataProviderGroup?.dataProviderGroupId && dataflowType) {
+        let groups = [];
+
+        if (dataflowType === config.dataflowType.REPORTING.value) {
+          const allProviderGroups = await AddOrganizationsService.getProviderGroups();
+          groups = allProviderGroups.filter(
+            group => group.dataProviderGroupId === 2 || group.dataProviderGroupId === 8
+          );
+        } else if (
+          dataflowType === config.dataflowType.CITIZEN_SCIENCE.value ||
+          dataflowType === config.dataflowType.BUSINESS.value
+        ) {
+          const response = await RepresentativeService.getGroupOrganizations();
+          groups = response.data;
+        } else {
+          const response = await RepresentativeService.getGroupCountries();
+          groups = response.data;
+        }
+
+        dataProviderGroup = groups[0];
+      }
+
+      if (dataProviderGroup?.dataProviderGroupId) {
+        const dataProvidersData = await RepresentativeService.getDataProviders(dataProviderGroup);
+
+        const formattedProviders = dataProvidersData.map(provider => ({
+          id: provider.dataProviderId,
+          label: provider.label,
+          code: provider.code
+        }));
+
+        setProviders(formattedProviders);
+      } else {
+        setProviders([]);
+      }
+    } catch (error) {
+      console.error('SqlSentence - fetchProviders.', error);
+      setProviders([]);
+    } finally {
+      setIsLoadingProviders(false);
+    }
+  };
 
   const levelTypes = {
     FIELD: 'field',
@@ -192,6 +264,45 @@ export const SqlSentence = ({ bigData, creationFormState, dataflowType, datasetI
     }
   };
 
+  const runSqlSentenceAsProvider = async () => {
+    if (!selectedProvider) {
+      notificationContext.add({ type: 'SELECT_PROVIDER_ERROR' }, true);
+      return;
+    }
+
+    const invalidSql = /\b(limit|offset)\s*\d*$|--.*$/i.test(creationFormState?.candidateRule?.sqlSentence?.trim());
+
+    if (invalidSql) {
+      setIsSqlErrorDialogVisible(true);
+      return;
+    }
+
+    setIsValidatingQuery(true);
+    try {
+      const showInternalFields = true;
+      const response = await ValidationService.runSqlRuleAsProvider(
+        datasetId,
+        creationFormState.candidateRule.sqlSentence,
+        showInternalFields,
+        selectedProvider.code
+      );
+      setSqlResponse(response);
+      const { data } = await ValidationService.viewUpdated(datasetId);
+      setIsViewUpdated(data);
+    } catch (error) {
+      console.error('SqlSentence - runSqlSentenceAsProvider.', error);
+      if (error.response?.status === 400 || error.response?.status === 422) {
+        setValidationErrorMessage(error.response.data.message);
+        setHasValidationError(true);
+      } else {
+        notificationContext.add({ type: 'VALIDATE_SQL_ERROR' }, true);
+        setIsVisibleSqlSentenceValidationDialog(false);
+      }
+    } finally {
+      setIsValidatingQuery(false);
+    }
+  };
+
   const renderErrorMessage = () => {
     if (hasValidationError) {
       return <p className={styles.sqlErrorMessage}>{validationErrorMessage}</p>;
@@ -218,66 +329,104 @@ export const SqlSentence = ({ bigData, creationFormState, dataflowType, datasetI
           <SqlHelp onSetSqlSentence={onSetSqlSentence} sqlSentence={creationFormState.candidateRule.sqlSentence} />
         </div>
         <div className={styles.sqlSentence}>
-          <h3 className={styles.title}>
-            {bigData ? resourcesContext.messages['sqlSentenceBigData'] : resourcesContext.messages['sqlSentence']}
-            <Button
-              className={`${styles.sqlSentenceInfoBtn} p-button-rounded p-button-secondary-transparent`}
-              icon="infoCircle"
-              id="infoSqlSentence"
-              onClick={onClickInfoButton}
-              tooltip={resourcesContext.messages['sqlSentenceInfoTooltip']}
-            />
-            <Button
-              className={`${styles.ccButton} p-button-rounded p-button-secondary-transparent`}
-              label={TextByDataflowTypeUtils.getLabelByDataflowType(
-                resourcesContext.messages,
-                dataflowType,
-                'qcCodeAcronymButtonLabel'
-              )}
-              onClick={onCCButtonClick}
-              tooltip={TextByDataflowTypeUtils.getLabelByDataflowType(
-                resourcesContext.messages,
-                dataflowType,
-                'qcCodeAcronymButtonTooltip'
-              )}
-              tooltipOptions={{ position: 'top' }}
-            />
-            <Button
-              className={`${styles.runButton} p-button-rounded p-button-secondary-transparent`}
-              disabled={
-                isNil(creationFormState.candidateRule.sqlSentence) ||
-                isEmpty(creationFormState.candidateRule.sqlSentence) ||
-                isValidatingQuery
-              }
-              icon={isValidatingQuery ? 'spinnerAnimate' : 'play'}
-              label={resourcesContext.messages['runSql']}
-              onClick={() => {
-                const invalidSql = /\b(limit|offset)\s*\d*$|--.*$/i.test(
-                  creationFormState?.candidateRule?.sqlSentence?.trim()
-                );
+          <div className={styles.title}>
+            <div className={styles.titleHeader}>
+              <h3 style={{ margin: 0 }}>
+                {bigData ? resourcesContext.messages['sqlSentenceBigData'] : resourcesContext.messages['sqlSentence']}
+              </h3>
+              <Button
+                className={`${styles.sqlSentenceInfoBtn} p-button-rounded p-button-secondary-transparent`}
+                icon="infoCircle"
+                id="infoSqlSentence"
+                onClick={onClickInfoButton}
+                tooltip={resourcesContext.messages['sqlSentenceInfoTooltip']}
+              />
+            </div>
 
-                invalidSql ? setIsSqlErrorDialogVisible(true) : runSqlSentence();
-              }}
-            />
-            <Button
-              className={`${styles.validateButton} p-button-rounded p-button-secondary-transparent`}
-              disabled={
-                isNil(creationFormState.candidateRule.sqlSentence) ||
-                isEmpty(creationFormState.candidateRule.sqlSentence)
-              }
-              icon="clock"
-              iconClasses={styles.validateSqlSentenceIcon}
-              label={resourcesContext.messages['evaluateSql']}
-              onClick={() => {
-                const invalidSql = /\b(limit|offset)\s*\d*$|--.*$/i.test(
-                  creationFormState?.candidateRule?.sqlSentence?.trim()
-                );
+            <div className={styles.controlsStack}>
+              <Button
+                className={`${styles.validateButton} p-button-rounded p-button-secondary-transparent`}
+                disabled={
+                  isNil(creationFormState.candidateRule.sqlSentence) ||
+                  isEmpty(creationFormState.candidateRule.sqlSentence)
+                }
+                icon="clock"
+                iconClasses={styles.validateSqlSentenceIcon}
+                label={resourcesContext.messages['evaluateSql']}
+                onClick={() => {
+                  const invalidSql = /\b(limit|offset)\s*\d*$|--.*$/i.test(
+                    creationFormState?.candidateRule?.sqlSentence?.trim()
+                  );
 
-                invalidSql ? setIsSqlErrorDialogVisible(true) : onEvaluateSqlSentence();
-              }}
-            />
-            {renderSqlSentenceCost()}
-          </h3>
+                  invalidSql ? setIsSqlErrorDialogVisible(true) : onEvaluateSqlSentence();
+                }}
+              />
+              {renderSqlSentenceCost()}
+              <Button
+                className={`${styles.runButton} p-button-rounded p-button-secondary-transparent`}
+                disabled={
+                  isNil(creationFormState.candidateRule.sqlSentence) ||
+                  isEmpty(creationFormState.candidateRule.sqlSentence) ||
+                  isValidatingQuery
+                }
+                icon={isValidatingQuery ? 'spinnerAnimate' : 'play'}
+                label={resourcesContext.messages['runSql']}
+                onClick={() => {
+                  const invalidSql = /\b(limit|offset)\s*\d*$|--.*$/i.test(
+                    creationFormState?.candidateRule?.sqlSentence?.trim()
+                  );
+
+                  invalidSql ? setIsSqlErrorDialogVisible(true) : runSqlSentence();
+                }}
+              />
+              <div className={styles.providerGroup}>
+                <Dropdown
+                  appendTo={document.body}
+                  className={styles.providerDropdown}
+                  disabled={isLoadingProviders || providers.length === 0}
+                  onChange={e => setSelectedProvider(e.value)}
+                  optionLabel="label"
+                  options={providers}
+                  optionValue="id"
+                  placeholder={
+                    isLoadingProviders
+                      ? resourcesContext.messages['loading']
+                      : providers.length === 0
+                      ? resourcesContext.messages['noProvidersAvailable']
+                      : resourcesContext.messages['selectProvider']
+                  }
+                  value={selectedProvider}
+                />
+                <Button
+                  className={`${styles.runButton} p-button-rounded p-button-secondary-transparent`}
+                  disabled={
+                    isNil(creationFormState.candidateRule.sqlSentence) ||
+                    isEmpty(creationFormState.candidateRule.sqlSentence) ||
+                    isValidatingQuery ||
+                    !selectedProvider
+                  }
+                  icon={isValidatingQuery ? 'spinnerAnimate' : 'play'}
+                  label={resourcesContext.messages['runSqlAsProvider']}
+                  onClick={runSqlSentenceAsProvider}
+                />
+              </div>
+              <Button
+                className={`${styles.ccButton} p-button-rounded p-button-secondary-transparent`}
+                label={TextByDataflowTypeUtils.getLabelByDataflowType(
+                  resourcesContext.messages,
+                  dataflowType,
+                  'qcCodeAcronymButtonLabel'
+                )}
+                onClick={onCCButtonClick}
+                tooltip={TextByDataflowTypeUtils.getLabelByDataflowType(
+                  resourcesContext.messages,
+                  dataflowType,
+                  'qcCodeAcronymButtonTooltip'
+                )}
+                tooltipOptions={{ position: 'top' }}
+              />
+            </div>
+          </div>
           <SqlInputTextArea
             className={`p-inputtextarea ${hasValidationError || isSqlErrorVisible ? styles.hasError : ''}`}
             id="sqlSentenceText"

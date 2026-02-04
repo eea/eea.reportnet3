@@ -28,14 +28,6 @@ export const CoordinatesMoreInfo = ({
     setIsDownloading(true);
 
     try {
-      console.log('Downloading GeoJSON with parameters:', {
-        datasetId,
-        recordId,
-        fieldId,
-        dataflowId,
-        tableSchemaId,
-        providerId
-      });
       const { data } = await DatasetService.downloadGeometry({
         datasetId,
         recordId,
