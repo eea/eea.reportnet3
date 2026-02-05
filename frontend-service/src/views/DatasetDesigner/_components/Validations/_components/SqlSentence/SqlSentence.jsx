@@ -17,8 +17,6 @@ import { Dropdown } from 'views/_components/Dropdown';
 
 import { ValidationService } from 'services/ValidationService';
 import { RepresentativeService } from 'services/RepresentativeService';
-import { AddOrganizationsService } from 'services/AddOrganizationsService';
-import { config } from 'conf';
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
@@ -30,6 +28,7 @@ export const SqlSentence = ({
   dataflowType,
   datasetId,
   dataflowId,
+  dataProviderGroupId,
   level,
   onSetSqlSentence
 }) => {
@@ -89,46 +88,28 @@ export const SqlSentence = ({
   const fetchProviders = async () => {
     try {
       setIsLoadingProviders(true);
-      const representativesData = await RepresentativeService.getRepresentatives(dataflowId);
 
+      const representativesData = await RepresentativeService.getRepresentatives(dataflowId);
       let dataProviderGroup = representativesData?.group;
 
-      // If no group found, fetch and use the first available group based on dataflow type
-      if (!dataProviderGroup?.dataProviderGroupId && dataflowType) {
-        let groups = [];
-
-        if (dataflowType === config.dataflowType.REPORTING.value) {
-          const allProviderGroups = await AddOrganizationsService.getProviderGroups();
-          groups = allProviderGroups.filter(
-            group => group.dataProviderGroupId === 2 || group.dataProviderGroupId === 8
-          );
-        } else if (
-          dataflowType === config.dataflowType.CITIZEN_SCIENCE.value ||
-          dataflowType === config.dataflowType.BUSINESS.value
-        ) {
-          const response = await RepresentativeService.getGroupOrganizations();
-          groups = response.data;
-        } else {
-          const response = await RepresentativeService.getGroupCountries();
-          groups = response.data;
-        }
-
-        dataProviderGroup = groups[0];
+      if (!dataProviderGroup?.dataProviderGroupId && dataProviderGroupId) {
+        dataProviderGroup = { dataProviderGroupId };
       }
 
-      if (dataProviderGroup?.dataProviderGroupId) {
-        const dataProvidersData = await RepresentativeService.getDataProviders(dataProviderGroup);
-
-        const formattedProviders = dataProvidersData.map(provider => ({
-          id: provider.dataProviderId,
-          label: provider.label,
-          code: provider.code
-        }));
-
-        setProviders(formattedProviders);
-      } else {
+      if (!dataProviderGroup?.dataProviderGroupId) {
         setProviders([]);
+        return;
       }
+
+      const dataProvidersData = await RepresentativeService.getDataProviders(dataProviderGroup);
+
+      const formattedProviders = dataProvidersData.map(provider => ({
+        id: provider.dataProviderId,
+        label: provider.label,
+        code: provider.code
+      }));
+
+      setProviders(formattedProviders);
     } catch (error) {
       console.error('SqlSentence - fetchProviders.', error);
       setProviders([]);

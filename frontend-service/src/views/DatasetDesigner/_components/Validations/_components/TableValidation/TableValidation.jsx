@@ -39,7 +39,7 @@ import { initValidationRuleRelationCreation } from 'views/DatasetDesigner/_compo
 import { resetValidationRuleCreation } from 'views/DatasetDesigner/_components/Validations/_functions/Utils/resetValidationRuleCreation';
 import { setValidationRelation } from 'views/DatasetDesigner/_components/Validations/_functions/Utils/setValidationRelation';
 
-export const TableValidation = ({ bigData, dataflowType, datasetId, datasetSchema, datasetSchemas, tabs, dataflowId }) => {
+export const TableValidation = ({ bigData, dataflowType, datasetId, datasetSchema, datasetSchemas, tabs, dataflowId, dataProviderGroupId }) => {
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
   const validationContext = useContext(ValidationContext);
@@ -100,6 +100,7 @@ export const TableValidation = ({ bigData, dataflowType, datasetId, datasetSchem
             creationFormState={creationFormState}
             dataflowId={dataflowId}
             dataflowType={dataflowType}
+            dataProviderGroupId={dataProviderGroupId}
             datasetId={datasetId}
             onAddNewRelation={onAddNewRelation}
             onDatasetSchemaChange={onDatasetSchemaChange}

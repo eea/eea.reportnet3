@@ -22,6 +22,7 @@ export const ExpressionSelector = ({
   dataflowType,
   datasetId,
   dataflowId,
+  dataProviderGroupId,
   onAddNewExpression,
   onAddNewExpressionIf,
   onAddNewExpressionThen,
@@ -206,6 +207,7 @@ export const ExpressionSelector = ({
           creationFormState={creationFormState}
           dataflowId={dataflowId}
           dataflowType={dataflowType}
+          dataProviderGroupId={dataProviderGroupId}
           datasetId={datasetId}
           level={validationContext.level}
           onSetSqlSentence={onSetSqlSentence}

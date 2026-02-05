@@ -761,7 +761,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
     const action = 'DATASET_VALIDATE';
     actionsContext.testProcess(datasetId, action);
     try {
-      await DatasetService.validateAsProvider(datasetId,dataflowId, providerId);
+      await DatasetService.validateAsProvider(datasetId, dataflowId, providerId);
       notificationContext.add(
         {
           type: 'VALIDATE_DATA_INIT',
@@ -793,7 +793,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
               dataflowId,
               dataflowName: designerState.metaData?.dataflow?.name,
               datasetId,
-              datasetName: designerState.datasetSchemaName,
+              datasetName: designerState.datasetSchemaName
             }
           },
           true
@@ -2138,6 +2138,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
               <DatasetValidateDialog
                 dataflowId={dataflowId}
                 dataflowType={designerState.dataflowType}
+                dataProviderGroupId={designerState.metaData?.dataflow?.dataProviderGroupId}
                 disabled={isDesignDatasetEditorRead || editingStatus?.isEditing || actionsContext.isInProgress}
                 icon={
                   actionsContext.isInProgress && actionsContext.validateDatasetProcessing
@@ -2307,6 +2308,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
             bigData={designerState.bigData}
             dataflowId={dataflowId}
             dataflowType={designerState.dataflowType}
+            dataProviderGroupId={designerState.metaData?.dataflow?.dataProviderGroupId}
             datasetId={datasetId}
             datasetSchema={designerState.datasetSchema}
             datasetSchemas={designerState.datasetSchemas}
