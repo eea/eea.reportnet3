@@ -27,6 +27,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -68,11 +69,13 @@ public class PreparationDatasetControllerImpl implements PreparationDatasetContr
     @Override
     @HystrixCommand
     @GetMapping("/preparations")
+    @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_STEWARD_SUPPORT') OR hasAnyRole('ADMIN')")
     @ApiOperation(value = "List preparation datasets")
     public List<PreparationDatasetVO> list(
             @RequestParam("dataflowId") Long dataflowId,
             @RequestParam("providerId") Long providerId,
             @RequestParam(value = "code", required = false) String code) {
+
         LOG.info(
                 "Listing preparation datasets dataflowId={}, providerId={}",
                 dataflowId, providerId);
@@ -87,8 +90,14 @@ public class PreparationDatasetControllerImpl implements PreparationDatasetContr
     @Override
     @HystrixCommand
     @PostMapping(value = "/preparations", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_STEWARD_SUPPORT') OR hasAnyRole('ADMIN')")
     @ApiOperation(value = "Create preparation dataset")
-    @ApiResponses(value = {@ApiResponse(code = 201, message = "Preparation dataset created successfully"), @ApiResponse(code = 400, message = "Invalid preparation dataset data"), @ApiResponse(code = 403, message = "User not authorized"), @ApiResponse(code = 500, message = "Unexpected error")})
+    @ApiResponses(value = {
+            @ApiResponse(code = 201, message = "Preparation dataset created successfully"),
+            @ApiResponse(code = 400, message = "Invalid preparation dataset data"),
+            @ApiResponse(code = 403, message = "User not authorized"),
+            @ApiResponse(code = 500, message = "Unexpected error")
+    })
     @ResponseStatus(HttpStatus.CREATED)
     public void createPreparationDataset(@RequestBody PreparationDatasetVO vo) {
 
@@ -123,8 +132,14 @@ public class PreparationDatasetControllerImpl implements PreparationDatasetContr
     @Override
     @HystrixCommand
     @DeleteMapping("/preparations/{id}")
+    @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_STEWARD_SUPPORT') OR hasAnyRole('ADMIN')")
     @ApiOperation(value = "Delete preparation dataset by id")
-    @ApiResponses(value = {@ApiResponse(code = 204, message = "Preparation dataset deleted successfully"), @ApiResponse(code = 400, message = "Invalid preparation dataset id"), @ApiResponse(code = 404, message = "Preparation dataset not found"), @ApiResponse(code = 500, message = "Unexpected error")})
+    @ApiResponses(value = {
+            @ApiResponse(code = 204, message = "Preparation dataset deleted successfully"),
+            @ApiResponse(code = 400, message = "Invalid preparation dataset id"),
+            @ApiResponse(code = 404, message = "Preparation dataset not found"),
+            @ApiResponse(code = 500, message = "Unexpected error")
+    })
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deletePreparationDatasetById(@PathVariable("id") Long preparationId) {
 
@@ -168,6 +183,7 @@ public class PreparationDatasetControllerImpl implements PreparationDatasetContr
      */
     @Override
     @GetMapping("/preparations/TableValueDatasetDL/{id}")
+    @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_CUSTODIAN','DATASET_STEWARD','DATASET_OBSERVER','DATASET_STEWARD_SUPPORT','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATACOLLECTION_CUSTODIAN','DATASCHEMA_CUSTODIAN','DATASCHEMA_STEWARD','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','DATASET_NATIONAL_COORDINATOR','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','EUDATASET_OBSERVER','EUDATASET_STEWARD_SUPPORT','DATACOLLECTION_OBSERVER','DATACOLLECTION_STEWARD_SUPPORT','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','DATACOLLECTION_STEWARD','REFERENCEDATASET_OBSERVER','REFERENCEDATASET_STEWARD_SUPPORT','REFERENCEDATASET_STEWARD','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD') OR hasAnyRole('ADMIN') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATASET',#datasetId))")
     @ApiOperation(value = "Get preparation table data", hidden = true)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successfully retrieved preparation data"),
