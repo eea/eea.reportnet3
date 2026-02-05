@@ -5,27 +5,74 @@ import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 
 import org.apache.commons.lang3.StringUtils;
-import org.eea.dataset.persistence.metabase.repository.PreparationDatasetRepository;
+import org.eea.datalake.service.DremioHelperService;
+import org.eea.datalake.service.S3Helper;
+import org.eea.datalake.service.S3Service;
+import org.eea.datalake.service.model.S3PathResolver;
+import org.eea.dataset.mapper.PreparationDatasetMapper;
 import org.eea.dataset.persistence.metabase.domain.PreparationDataset;
+import org.eea.dataset.persistence.metabase.repository.PreparationDatasetRepository;
+import org.eea.dataset.service.DatasetMetabaseService;
+import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.PreparationDatasetService;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataflow.RepresentativeController;
+import org.eea.interfaces.vo.dataflow.DataProviderVO;
+import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.PreparationDatasetVO;
+import org.eea.interfaces.vo.dataset.enums.DataType;
+import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.TableSchemaIdNameVO;
+import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
+import org.eea.kafka.utils.KafkaSenderUtils;
+import org.eea.utils.UtilityClass;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import javax.transaction.Transactional;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static org.eea.utils.LiteralConstants.*;
 
 /**
  * The Class PreparationDatasetServiceImpl.
  */
 @Service
-public class PreparationDatasetServiceImpl
-        implements PreparationDatasetService {
+public class PreparationDatasetServiceImpl implements PreparationDatasetService {
+
+    private static final Logger LOG = LoggerFactory.getLogger(PreparationDatasetServiceImpl.class);
 
     private final PreparationDatasetRepository preparationDatasetRepository;
+    private final DremioHelperService dremioHelperService;
+    private final DatasetMetabaseService datasetMetabaseService;
+    private final DatasetSchemaService datasetSchemaService;
+    private final S3Service s3ServicePrivate;
+    private final S3Helper s3HelperPrivate;
+    private final RepresentativeController.RepresentativeControllerZuul representativeControllerZuul;
+    private final KafkaSenderUtils kafkaSenderUtils;
+    private final PreparationDatasetMapper preparationDatasetMapper;
 
     @Autowired
-    public PreparationDatasetServiceImpl(
-            PreparationDatasetRepository preparationDatasetRepository) {
+    public PreparationDatasetServiceImpl(PreparationDatasetRepository preparationDatasetRepository,
+                                         DremioHelperService dremioHelperService,
+                                         DatasetMetabaseService datasetMetabaseService,
+                                         DatasetSchemaService datasetSchemaService,
+                                         S3Helper s3HelperPrivate,
+                                         RepresentativeController.RepresentativeControllerZuul representativeControllerZuul,
+                                         KafkaSenderUtils kafkaSenderUtils,
+                                         PreparationDatasetMapper preparationDatasetMapper) {
         this.preparationDatasetRepository = preparationDatasetRepository;
+        this.dremioHelperService = dremioHelperService;
+        this.datasetMetabaseService = datasetMetabaseService;
+        this.datasetSchemaService = datasetSchemaService;
+        this.s3HelperPrivate = s3HelperPrivate;
+        this.s3ServicePrivate = s3HelperPrivate.getS3Service();
+        this.representativeControllerZuul = representativeControllerZuul;
+        this.kafkaSenderUtils = kafkaSenderUtils;
+        this.preparationDatasetMapper = preparationDatasetMapper;
     }
 
     @Override
@@ -48,23 +95,22 @@ public class PreparationDatasetServiceImpl
                     .findByDataflowId(dataflowId);
         }
 
-        return entities.stream()
-                .map(this::toVO)
-                .collect(Collectors.toList());
+        return entities.stream().map(this::toVO).collect(Collectors.toList());
     }
 
+    @Override
+    public List<PreparationDatasetVO> findByDataflowIdAndProviderIdAndIsCreated(Long dataflowId, Long providerId, Boolean isCreated) {
+        if (isCreated == null) { isCreated = false; }
+
+        return preparationDatasetMapper.entityListToClass(preparationDatasetRepository.findByDataflowIdAndProviderIdAndIsCreated(dataflowId, providerId, isCreated));
+    }
 
 
     @Override
     @Transactional
-    public void createPreparationDataset(
-            Long dataflowId,
-            Long parentDatasetId,
-            PreparationDatasetVO vo) throws EEAException {
+    public void createPreparationDataset(Long dataflowId, Long parentDatasetId, PreparationDatasetVO vo) throws EEAException {
 
-        if (preparationDatasetRepository
-                .existsByDataflowIdAndProviderIdAndCode(
-                        dataflowId, vo.getProviderId(), vo.getCode())) {
+        if (preparationDatasetRepository.existsByDataflowIdAndProviderIdAndCode(dataflowId, vo.getProviderId(), vo.getCode())) {
             throw new EEAException("Preparation dataset with this code already exists");
         }
 
@@ -91,11 +137,125 @@ public class PreparationDatasetServiceImpl
         preparationDatasetRepository.deleteById(preparationId);
     }
 
+    @Override
+    @Transactional
+    public void createAllEligiblePreparationSets(Long dataflowId, Long providerId) {
+        LOG.info("Creating preparation sets for dataflow {} and providerId {}", dataflowId, providerId);
+        // fetch all preparations datasets that haven't yet been created, `isCreated=false`
+        List<PreparationDatasetVO> preparationDatasetVOS = this.findByDataflowIdAndProviderIdAndIsCreated(dataflowId, providerId, false);
+        List<DataSetMetabaseVO> datasetMetabaseVOS = datasetMetabaseService.getDatasetsByDataflowIdAndProviderId(dataflowId, providerId);
+
+
+        // for each `preparation_dataset` record that has `is_created=false` and for all the dataset ids that need to be created within it
+        for (PreparationDatasetVO preparationDatasetVO : preparationDatasetVOS) {
+            datasetMetabaseVOS.forEach(datasetMetabaseVO -> {
+                try {
+                    LOG.info("Copying tables from parent dataset to preparation dataset for parent dataset id {} and code {} ", preparationDatasetVO.getParentDatasetId(), preparationDatasetVO.getCode());
+                    copyParentDatasetDataToPreparationDataset(datasetMetabaseVO, preparationDatasetVO.getCode());
+                    LOG.info("Successfully copied tables from parent dataset to preparation dataset for parent dataset id {} and code {} ", preparationDatasetVO.getParentDatasetId(), preparationDatasetVO.getCode());
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            });
+            preparationDatasetVO.setIsCreated(Boolean.TRUE);
+            preparationDatasetRepository.save(preparationDatasetMapper.classToEntity(preparationDatasetVO));
+        }
+        LOG.info("Successfully created preparation sets for dataflow {} and providerId {} for all datasets", dataflowId, providerId);
+    }
+
+    @Override
+    public void copyParentDatasetDataToPreparationDataset(DataSetMetabaseVO parentDataSetMetabaseVO, String preparationCode) throws Exception {
+        long providerId = parentDataSetMetabaseVO.getDataProviderId() == null ? 0 : parentDataSetMetabaseVO.getDataProviderId();
+        if (providerId == 0) {
+        } else {
+        }
+        String parentDatasetSchemaId = parentDataSetMetabaseVO.getDatasetSchema();
+        Long parentDatasetId = parentDataSetMetabaseVO.getId();
+
+        List<TableSchemaIdNameVO> parentTablesList = datasetSchemaService.getTableSchemasIds(parentDatasetId);
+        for (TableSchemaIdNameVO parentTable : parentTablesList) {
+            TableSchemaVO parentTableSchema = datasetSchemaService.getTableSchemaVO(parentTable.getIdTableSchema(), parentDatasetSchemaId);
+            if (parentTableSchema == null) {
+                LOG.error("Parent table schema is null for IdTableSchema {} and parentDatasetSchemaId {}", parentTable.getIdTableSchema(), parentDatasetSchemaId);
+                continue;
+            }
+
+            String parentTableName = parentTableSchema.getNameTableSchema();
+
+            S3PathResolver sourceParentTableDremioQueryPath = new S3PathResolver(parentDataSetMetabaseVO.getDataflowId(), providerId, parentDatasetId, parentTableName, parentTableName, S3_TABLE_AS_FOLDER_QUERY_PATH);
+            String sourceParentTableDremioQueryPathString = s3ServicePrivate.getTableAsFolderQueryPath(sourceParentTableDremioQueryPath, S3_TABLE_AS_FOLDER_QUERY_PATH);
+
+            S3PathResolver targetPreparationTableDremioQueryPath = new S3PathResolver(parentDataSetMetabaseVO.getDataflowId(), providerId, parentDatasetId, parentTableName, parentTableName, preparationCode, S3_PREPARATION_TABLE_AS_FOLDER_QUERY_PATH);
+            String targetPreparationTableDremioQueryPathString = s3ServicePrivate.getTableAsFolderQueryPath(targetPreparationTableDremioQueryPath, S3_PREPARATION_TABLE_AS_FOLDER_QUERY_PATH);
+
+            String providerCode = "''";
+            if (providerId != 0L) {
+                DataProviderVO providerMetadata = representativeControllerZuul.findDataProviderById(providerId);
+                providerCode = "'" + providerMetadata.getCode() + "'";
+            }
+
+            List<FieldSchemaVO> parentTableFields = parentTableSchema.getRecordSchema().getFieldSchema();
+
+            StringBuilder preparationSelectClause = new StringBuilder(constructRecordIdCreationForQuery());
+
+            preparationSelectClause.append(", ").append(providerCode).append(" AS ").append(UtilityClass.addQuotesToFieldNames(PARQUET_PROVIDER_CODE_COLUMN_HEADER)).append(", ");
+
+            for (FieldSchemaVO fieldSchema : parentTableFields) {
+
+                if (fieldSchema.getType().equals(DataType.ATTACHMENT)) {
+                    preparationSelectClause.append(" '' AS ");
+                }
+
+                preparationSelectClause.append(UtilityClass.addQuotesToFieldNames(fieldSchema.getName())).append(", ");
+            }
+
+            if (preparationSelectClause.toString().endsWith(", ")) {
+                preparationSelectClause = new StringBuilder(preparationSelectClause.substring(0, preparationSelectClause.length() - 2));
+            }
+
+
+            if (!s3HelperPrivate.checkFolderExist(sourceParentTableDremioQueryPath, S3_TABLE_NAME_FOLDER_PATH)) {
+                continue;
+            }
+
+
+            if (s3HelperPrivate.checkFolderExist(targetPreparationTableDremioQueryPath, S3_PREPARATION_TABLE_NAME_FOLDER_PATH)) {
+                dremioHelperService.demoteFolderOrFile(targetPreparationTableDremioQueryPath, parentTableName);
+                s3HelperPrivate.deleteFolder(targetPreparationTableDremioQueryPath, S3_PREPARATION_TABLE_NAME_FOLDER_PATH);
+            }
+
+            if (!s3HelperPrivate.checkFolderExist(targetPreparationTableDremioQueryPath, S3_PREPARATION_TABLE_NAME_FOLDER_PATH) || !dremioHelperService.checkFolderPromoted(targetPreparationTableDremioQueryPath, parentTableName)) {
+
+//                kafkaSenderUtils.releaseNotificableKafkaEvent(
+//                        EventType.PREFILLED_TABLE_HAS_NO_DATA_ERROR,
+//                        null,
+//                        NotificationVO.builder()
+//                                .user(SecurityContextHolder.getContext().getAuthentication().getName())
+//                                .dataflowId(parentDataSetMetabaseVO.getDataflowId())
+//                                .datasetId(parentDatasetId)
+//                                .tableSchemaId(requestedTableSchemaId)
+//                                .build()
+//                );
+
+            }
+
+            StringBuilder queryToCreatePrefilledTable = new StringBuilder("CREATE TABLE " + targetPreparationTableDremioQueryPathString + " AS SELECT " + preparationSelectClause + " FROM " + sourceParentTableDremioQueryPathString);
+
+            String dremioProcessId = dremioHelperService.executeSqlStatement(String.valueOf(queryToCreatePrefilledTable));
+            dremioHelperService.checkIfDremioProcessFinishedSuccessfully(String.valueOf(queryToCreatePrefilledTable), dremioProcessId, null);
+            dremioHelperService.refreshTableMetadataAndPromote(null, targetPreparationTableDremioQueryPathString, targetPreparationTableDremioQueryPath, parentTableName);
+            LOG.info("Successfully created and promoted tables for preparation sets for datasetId {}, preparationCode {} and table {}", parentDatasetId, preparationCode, parentTableName);
+        }
+    }
+
+    private String constructRecordIdCreationForQuery() {
+        return "CONCAT(\n" + "        LOWER(LPAD(TO_HEX(CAST(RAND() * 4294967295 AS BIGINT)), 8, '0')), '-',\n" + "        LOWER(LPAD(TO_HEX(CAST(RAND() * 65535 AS BIGINT)), 4, '0')), '-',\n" + "        LOWER(LPAD(TO_HEX(CAST(RAND() * 65535 AS BIGINT)), 4, '0')), '-',\n" + "        LOWER(LPAD(TO_HEX(CAST(RAND() * 65535 AS BIGINT)), 4, '0')), '-',\n" + "        LOWER(LPAD(TO_HEX(CAST(RAND() * 281474976710655 AS BIGINT)), 12, '0'))\n" + "    ) AS " + PARQUET_RECORD_ID_COLUMN_HEADER + " ";
+    }
+
     /**
      * Maps entity to VO.
      */
-    private PreparationDatasetVO toVO(
-            PreparationDataset preparationDataset) {
+    private PreparationDatasetVO toVO(PreparationDataset preparationDataset) {
 
         PreparationDatasetVO vo = new PreparationDatasetVO();
         vo.setId(preparationDataset.getId());

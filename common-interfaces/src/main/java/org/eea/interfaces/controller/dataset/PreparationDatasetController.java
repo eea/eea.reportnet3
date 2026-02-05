@@ -1,12 +1,17 @@
 package org.eea.interfaces.controller.dataset;
 
-import java.util.List;
 import org.eea.interfaces.vo.dataset.PreparationDatasetVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
-import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import java.util.List;
 
 /**
  * The Interface PreparationDatasetController.
@@ -16,8 +21,7 @@ public interface PreparationDatasetController {
     /**
      * The Interface PreparationDatasetControllerZuul.
      */
-    interface PreparationDatasetControllerZuul
-            extends PreparationDatasetController {
+    interface PreparationDatasetControllerZuul extends PreparationDatasetController {
     }
 
     @GetMapping(
@@ -28,14 +32,15 @@ public interface PreparationDatasetController {
             @RequestParam("providerId") Long providerId,
             @RequestParam("code") String code);
 
-    @PostMapping(
-            value = "/preparations",
-            consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/preparations", consumes = MediaType.APPLICATION_JSON_VALUE)
     void createPreparationDataset(@RequestBody PreparationDatasetVO vo);
 
     @DeleteMapping("/preparations/{id}")
-    void deletePreparationDatasetById(
-            @PathVariable("id") Long preparationId);
+    void deletePreparationDatasetById(@PathVariable("id") Long preparationId);
+
+    @PostMapping("/createAllEligiblePreparationSets")
+    void createAllEligiblePreparationSets(@RequestParam("dataflowId") Long dataflowId, @RequestParam("providerId") Long providerId);
+
 
     @GetMapping("/preparations/TableValueDatasetDL/{id}")
     TableVO getPreparationTableValuesDL(

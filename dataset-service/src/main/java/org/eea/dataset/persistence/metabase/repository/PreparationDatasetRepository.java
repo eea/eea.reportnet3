@@ -59,4 +59,6 @@ public interface PreparationDatasetRepository
             @Param("dataflowId") Long dataflowId,
             @Param("providerId") Long providerId,
             @Param("code") String code);
+
+    List<PreparationDataset> findByDataflowIdAndProviderIdAndIsCreated(Long dataflowId, Long providerId, Boolean isCreated);
 }

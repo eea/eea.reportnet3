@@ -14,12 +14,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
-
 import static org.eea.utils.LiteralConstants.*;
-
 
 @Service
 @Primary
@@ -76,8 +71,8 @@ public class S3ServiceImpl implements S3Service {
     private String calculateS3Path(S3PathResolver s3PathResolver) {
         String dataflowFolder = formatFolderName(s3PathResolver.getDataflowId(), S3_DATAFLOW_PATTERN);
         String dataProviderFolder = (s3PathResolver.getDataProviderName() == null)
-            ? formatFolderName(s3PathResolver.getDataProviderId(), S3_DATA_PROVIDER_PATTERN)
-            : s3PathResolver.getDataProviderName();
+                ? formatFolderName(s3PathResolver.getDataProviderId(), S3_DATA_PROVIDER_PATTERN)
+                : s3PathResolver.getDataProviderName();
         String datasetFolder = formatFolderName(s3PathResolver.getDatasetId(), S3_DATASET_PATTERN);
         String fileName = s3PathResolver.getFilename();
         String path = s3PathResolver.getPath();
@@ -86,8 +81,17 @@ public class S3ServiceImpl implements S3Service {
         String snapshotFolder = formatSnapshotFolder(s3PathResolver.getSnapshotId());
         String euDatasetFolder =  formatFolderName(s3PathResolver.getDatasetId(), S3_EU_DATASET_PATTERN);
         String tableName = s3PathResolver.getTableName();
+        String preparationCode = s3PathResolver.getPreparationCode();
 
         switch (path) {
+            case S3_PREPARATION_TABLE_AS_FOLDER_QUERY_PATH:
+                path = S3_DEFAULT_BUCKET + String.format(path, dataflowFolder, dataProviderFolder, datasetFolder,
+                        preparationCode, tableName);
+                break;
+            case S3_PREPARATION_TABLE_NAME_FOLDER_PATH:
+                path = String.format(path, dataflowFolder, dataProviderFolder, datasetFolder,
+                        preparationCode, tableName);
+                break;
             case S3_IMPORT_QUERY_PATH:
             case S3_TABLE_AS_FOLDER_QUERY_PATH:
             case S3_TABLE_NAME_QUERY_PATH:
@@ -234,7 +238,12 @@ public class S3ServiceImpl implements S3Service {
         String dataCollectionFolder =  formatFolderName(s3PathResolver.getDatasetId(), S3_DATA_COLLECTION_PATTERN);
         String euDatasetFolder =  formatFolderName(s3PathResolver.getDatasetId(), S3_EU_DATASET_PATTERN);
 
+        String preparationCode = s3PathResolver.getPreparationCode();
+        String tableName = s3PathResolver.getTableName(); // TODO: rename all occurrences of this getter
+
         switch (path) {
+            case S3_PREPARATION_TABLE_NAME_FOLDER_PATH:
+                return String.format(path, dataflowFolder, dataProviderFolder, datasetFolder, preparationCode, tableName);
             case S3_EXPORT_PREFILLED_TABLE_FILE_PATH:
             case S3_IMPORT_FILE_PATH:
             case S3_TABLE_NAME_PATH:
@@ -298,6 +307,9 @@ public class S3ServiceImpl implements S3Service {
         String euDatasetFolder = formatFolderName(s3PathResolver.getDatasetId(), S3_EU_DATASET_PATTERN);
 
         switch (path) {
+            case S3_PREPARATION_TABLE_NAME_FOLDER_PATH:
+                return String.format(path, dataflowFolder, dataProviderFolder, datasetFolder,
+                        s3PathResolver.getPreparationCode(), s3PathResolver.getTableName());
             case S3_DATAFLOW_REFERENCE_FOLDER_PATH:
                 return String.format(path, dataflowFolder, s3PathResolver.getTableName());
             case S3_DATAFLOW_REFERENCE_QUERY_PATH:
@@ -310,10 +322,6 @@ public class S3ServiceImpl implements S3Service {
             case S3_TABLE_NAME_EU_QUERY_PATH:
                 return S3_DEFAULT_BUCKET + String.format(path, dataflowFolder, euDatasetFolder,
                     s3PathResolver.getTableName());
-            case S3_PREPARATION_TABLE_NAME_FOLDER_PATH:
-                return String.format(path, dataflowFolder, dataProviderFolder, datasetFolder, s3PathResolver.getPreparationCode(),
-                        s3PathResolver.getTableName());
-
             default:
                 LOG.info("Wrong type value: {}", path);
                 break;
@@ -330,6 +338,9 @@ public class S3ServiceImpl implements S3Service {
         String euDatasetFolder = formatFolderName(s3PathResolver.getDatasetId(), S3_EU_DATASET_PATTERN);
 
         switch (path) {
+            case S3_PREPARATION_TABLE_AS_FOLDER_QUERY_PATH:
+                return S3_DEFAULT_BUCKET + String.format(path, dataflowFolder, dataProviderId, datasetId,
+                        s3PathResolver.getPreparationCode(), s3PathResolver.getTableName());
             case S3_TABLE_NAME_DC_QUERY_PATH:
                 return S3_DEFAULT_BUCKET + String.format(path, dataflowFolder, dataCollectionFolder,
                     s3PathResolver.getTableName());
@@ -360,11 +371,15 @@ public class S3ServiceImpl implements S3Service {
     public String getTablePathByDatasetType(Long dataflowId, Long datasetId, String tableName, S3PathResolver tableResolver) {
         DatasetTypeEnum datasetTypeEnum = dataSetControllerZuul.getDatasetType(datasetId);
         String tablePath = null;
+        if (tableResolver.getPreparationCode() != null) datasetTypeEnum = DatasetTypeEnum.PREPARATION;
         switch (datasetTypeEnum) {
             case REFERENCE:
                 String dataflowFolder = formatFolderName(dataflowId, S3_DATAFLOW_PATTERN);
                 tablePath = S3_DEFAULT_BUCKET + String.format(S3_DATAFLOW_REFERENCE_QUERY_PATH,
-                    dataflowFolder, tableName);
+                        dataflowFolder, tableName);
+                break;
+            case PREPARATION:
+                this.getTableAsFolderQueryPath(tableResolver, S3_PREPARATION_TABLE_AS_FOLDER_QUERY_PATH);
                 break;
             default:
                 tablePath =
