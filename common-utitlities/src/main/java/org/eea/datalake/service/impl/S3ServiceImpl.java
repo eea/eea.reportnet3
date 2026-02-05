@@ -14,12 +14,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
-
 import static org.eea.utils.LiteralConstants.*;
-
 
 @Service
 @Primary
@@ -247,8 +242,6 @@ public class S3ServiceImpl implements S3Service {
         String tableName = s3PathResolver.getTableName(); // TODO: rename all occurrences of this getter
 
         switch (path) {
-            case S3_PREPARATION_TABLE_AS_FOLDER_QUERY_PATH:
-                return S3_DEFAULT_BUCKET + String.format(path, dataflowFolder, dataProviderFolder, datasetFolder, preparationCode, tableName);
             case S3_PREPARATION_TABLE_NAME_FOLDER_PATH:
                 return String.format(path, dataflowFolder, dataProviderFolder, datasetFolder, preparationCode, tableName);
             case S3_EXPORT_PREFILLED_TABLE_FILE_PATH:
@@ -329,11 +322,6 @@ public class S3ServiceImpl implements S3Service {
             case S3_TABLE_NAME_EU_QUERY_PATH:
                 return S3_DEFAULT_BUCKET + String.format(path, dataflowFolder, euDatasetFolder,
                     s3PathResolver.getTableName());
-            case S3_PREPARATION_TABLE_NAME_FOLDER_PATH:
-                return String.format(path, dataflowFolder, dataProviderFolder, datasetFolder, s3PathResolver.getPreparationCode(),
-                        s3PathResolver.getTableName());
-
-                        s3PathResolver.getTableName());
             default:
                 LOG.info("Wrong type value: {}", path);
                 break;
