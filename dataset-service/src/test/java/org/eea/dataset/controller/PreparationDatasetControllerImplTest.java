@@ -67,13 +67,27 @@ public class PreparationDatasetControllerImplTest {
         List<PreparationDatasetVO> list = new ArrayList<>();
         list.add(new PreparationDatasetVO());
 
-        when(preparationDatasetService.findPreparationDatasets(1L, 2L))
+        when(preparationDatasetService.findPreparationDatasets(1L, 2L, null))
                 .thenReturn(list);
 
-        preparationDatasetControllerImpl.list(1L, 2L);
+        preparationDatasetControllerImpl.list(1L, 2L, null);
 
         Mockito.verify(preparationDatasetService, times(1))
-                .findPreparationDatasets(1L, 2L);
+                .findPreparationDatasets(1L, 2L, null);
+    }
+
+    @Test
+    public void listPreparationDatasetsWithCodeTest() {
+        List<PreparationDatasetVO> list = new ArrayList<>();
+        list.add(new PreparationDatasetVO());
+
+        when(preparationDatasetService.findPreparationDatasets(1L, 2L, "albania_set_1"))
+                .thenReturn(list);
+
+        preparationDatasetControllerImpl.list(1L, 2L, "albania_set_1");
+
+        Mockito.verify(preparationDatasetService, times(1))
+                .findPreparationDatasets(1L, 2L, "albania_set_1");
     }
 
     /**
