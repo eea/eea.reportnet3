@@ -195,7 +195,7 @@ export const DatasetService = {
       providerCode
     }),
 
-  downloadGeometry: async ({ datasetId, recordId,  fieldId, dataflowId, tableSchemaId, providerId }) =>
+  downloadGeometry: async ({ datasetId, recordId, fieldId, dataflowId, tableSchemaId, providerId }) =>
     await DatasetRepository.downloadGeometry({ datasetId, recordId, fieldId, dataflowId, tableSchemaId, providerId }),
 
   downloadPublicDatasetFile: async (dataflowId, dataProviderId, fileName) =>
@@ -703,7 +703,8 @@ export const DatasetService = {
     pageSize,
     qcCodes = undefined,
     tableSchemaId,
-    value = ''
+    value = '',
+    code
   }) => {
     const tableDataDTO = await DatasetRepository.getTableDataDL(
       datasetId,
@@ -714,7 +715,8 @@ export const DatasetService = {
       levelError,
       qcCodes,
       fieldSchemaId,
-      value
+      value,
+      code
     );
     const table = new DatasetTable({});
 

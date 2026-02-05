@@ -15,6 +15,7 @@ import { getUrl } from 'repositories/_utils/UrlUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
 const useBigButtonList = ({
+  code,
   dataflowId,
   dataflowState,
   dataProviderId,
@@ -26,10 +27,12 @@ const useBigButtonList = ({
   handleRedirect,
   isActiveButton,
   isCloningDataflow,
+  isCreatingPreparationSets,
   isImportingDataflow,
   isLeadReporter,
   isLeadReporterOfCountry,
   onCloneDataflow,
+  onCreatePreparationSets,
   onImportSchema,
   onLoadEUDatasetIntegration,
   onLoadReceiptData,
@@ -44,6 +47,7 @@ const useBigButtonList = ({
   onShowManualTechnicalAcceptanceDialog,
   onShowNewSchemaDialog,
   onShowUpdateDataCollectionModal,
+  preparationSetsList,
   setErrorDialogData
 }) => {
   const { permissions } = config;
@@ -69,6 +73,8 @@ const useBigButtonList = ({
   ]);
 
   const restrictFromPublicAccess = isLeadReporter && !TextUtils.areEquals(dataflowState.status, 'business');
+
+  const notCreatedSets = preparationSetsList?.filter(set => set.isCreated === false);
 
   const getButtonsVisibility = useCallback(() => {
     const isDesigner =
@@ -105,6 +111,7 @@ const useBigButtonList = ({
 
     return {
       createDataCollection: !(isAdmin && !isCustodian) && isLeadDesigner && isDesignStatus,
+      createPreparationSets: isLeadReporterOfThisCountry,
       cloneSchemasFromDataflow: isLeadDesigner && isDesignStatus,
       copyDataCollectionToEUDataset: isDataflowCustodian && isLeadDesigner && isDraftStatus,
       exportEUDataset: isDataflowCustodian && isLeadDesigner && isDraftStatus,
@@ -139,7 +146,9 @@ const useBigButtonList = ({
     dataflowState.status,
     isLeadDesigner,
     isLeadReporterOfCountry,
-    userContext
+    userContext,
+    code,
+    preparationSetsList
   ]);
 
   useLayoutEffect(() => {
@@ -426,7 +435,36 @@ const useBigButtonList = ({
       });
   };
 
+  const buildPreparationSetsModels = () => {
+    return preparationSetsList?.map(set => {
+      return {
+        buttonClass: 'preparationSet',
+        buttonIcon: 'preparationSet',
+        caption: set.datasetName,
+        helpClassName: 'dataflow-dataset-help-step',
+        handleRedirect: () => {
+          handleRedirect(
+            getUrl(
+              routes.PREPARATION_DATAFLOW_REPRESENTATIVE,
+              { dataflowId, representativeId: dataProviderId, code: set.code },
+              true
+            )
+          );
+        },
+        layout: 'defaultBigButton',
+        onWheel: getUrl(
+          routes.PREPARATION_DATAFLOW_REPRESENTATIVE,
+          { dataflowId, representativeId: dataProviderId, code: set.code },
+          true
+        ),
+        visibility: set.isCreated
+      };
+    });
+  };
+
   const groupByRepresentativeModels = buildGroupByRepresentativeModels(dataflowState?.data?.datasets);
+
+  const preparationSetsModels = isEmpty(preparationSetsList) ? [] : buildPreparationSetsModels();
 
   const checkDisabledDataCollectionButton = () =>
     isEmpty(dataflowState.data.dataCollections) &&
@@ -469,6 +507,20 @@ const useBigButtonList = ({
         ? resourcesContext.messages['disabledCreateDataCollectionNoProviders']
         : undefined,
       visibility: buttonsVisibility.createDataCollection
+    }
+  ];
+
+  const createPreparationSets = [
+    {
+      buttonClass: 'newItem',
+      buttonIcon: isCreatingPreparationSets ? 'spinner' : 'createPreparationSets',
+      buttonIconClass: isCreatingPreparationSets ? 'spinner' : '',
+      caption: resourcesContext.messages['createPreparationSets'],
+      // enabled: !isEmpty(notCreatedSets),
+      handleRedirect: () => onCreatePreparationSets(),
+      layout: 'defaultBigButton',
+      tooltip: isEmpty(notCreatedSets) ? resourcesContext.messages['preparationSetsCreated'] : undefined,
+      visibility: !code && buttonsVisibility.createPreparationSets
     }
   ];
 
@@ -710,7 +762,9 @@ const useBigButtonList = ({
     ...updateDatasetsNewRepresentatives,
     ...groupByRepresentativeModels,
     ...receiptBigButton,
-    ...releaseBigButton
+    ...createPreparationSets,
+    ...releaseBigButton,
+    ...preparationSetsModels
   ];
 };
 

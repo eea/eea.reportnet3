@@ -53,21 +53,25 @@ import { MetadataUtils } from 'views/_functions/Utils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const BigButtonList = ({
+  code,
   dataflowState,
   dataflowType,
   dataProviderId,
   handleRedirect,
+  isCreatingPreparationSets,
   isLeadReporter,
   isLeadReporterOfCountry,
   isUpdatingUserText,
   manageDialogs,
   onCleanUpReceipt,
+  onCreatePreparationSets,
   onOpenReleaseConfirmDialog,
   onSaveName,
   onShowManagePreparationSetsDialog,
   onShowManageReportersDialog,
   onUpdateData,
   onUpdateAddUserText,
+  preparationSetsList,
   setIsCopyDataCollectionToEUDatasetLoading,
   setIsExportEUDatasetLoading,
   setIsReceiptLoading,
@@ -640,6 +644,7 @@ export const BigButtonList = ({
     ));
 
   const renderBigButtonList = useBigButtonList({
+    code,
     dataflowId,
     dataflowState,
     dataProviderId,
@@ -651,6 +656,8 @@ export const BigButtonList = ({
     handleRedirect,
     isActiveButton,
     isCloningDataflow,
+    isCreatingPreparationSets,
+    onCreatePreparationSets,
     isImportingDataflow,
     isLeadReporter,
     isLeadReporterOfCountry,
@@ -669,6 +676,7 @@ export const BigButtonList = ({
     onShowManualTechnicalAcceptanceDialog,
     onShowNewSchemaDialog,
     onShowUpdateDataCollectionModal,
+    preparationSetsList,
     setErrorDialogData
   })
     .filter(button => button.visibility)

@@ -13,13 +13,16 @@ import { getUrl } from 'repositories/_utils/UrlUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
 const useBigButtonListRepresentative = ({
+  code,
   dataflowId,
   dataflowState,
   dataProviderId,
   getDataHistoricReleases,
   handleRedirect,
   isAdmin,
+  isCreatingPreparationSets,
   isLeadReporterOfCountry,
+  onCreatePreparationSets,
   onLoadReceiptData,
   onOpenReleaseConfirmDialog,
   onOpenSilentReleaseConfirmDialog,
@@ -27,12 +30,15 @@ const useBigButtonListRepresentative = ({
   representativeId,
   onShowReleaseSnapshots,
   getDataReleaseSnapshots,
-  onShowManagePreparationSetsDialog
+  onShowManagePreparationSetsDialog,
+  preparationSetsList
 }) => {
   const resourcesContext = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
 
   const [buttonsVisibility, setButtonsVisibility] = useState({});
+
+  const notCreatedSets = preparationSetsList?.filter(set => set.isCreated === false);
 
   useLayoutEffect(() => {
     if (!isNil(userContext.contextRoles)) {
@@ -61,6 +67,7 @@ const useBigButtonListRepresentative = ({
       : false;
 
     return {
+      createPreparationSets: isLeadReporterOfThisCountry,
       feedback: isLeadReporterOfThisCountry && isReleased && isManualAcceptance,
       help: true,
       managePreparationSets: isLeadReporterOfThisCountry,
@@ -104,7 +111,7 @@ const useBigButtonListRepresentative = ({
       caption: resourcesContext.messages['managePreparationSets'],
       handleRedirect: () => onShowManagePreparationSetsDialog(true),
       layout: 'defaultBigButton',
-      visibility: buttonsVisibility.managePreparationSets
+      visibility: !code && buttonsVisibility.managePreparationSets
     }
   ];
 
@@ -137,10 +144,10 @@ const useBigButtonListRepresentative = ({
     handleRedirect: () => handleRedirect(getUrl(routes.DOCUMENTS, { dataflowId: dataflowState.id }, true)),
     helpClassName: 'dataflow-documents-webLinks-help-step',
     onWheel: getUrl(routes.DOCUMENTS, { dataflowId: dataflowState.id }, true),
-    visibility: buttonsVisibility.help
+    visibility: !code && buttonsVisibility.help
   };
 
-  const testDatasetsModels = dataflowState.data.testDatasets?.map(testDataset => {
+  const testDatasetsModels = (dataflowState.data?.testDatasets ?? []).map(testDataset => {
     return {
       layout: 'defaultBigButton',
       buttonClass: 'dataset',
@@ -160,7 +167,7 @@ const useBigButtonListRepresentative = ({
     };
   });
 
-  const groupByRepresentativeModels = dataflowState.data.datasets
+  const groupByRepresentativeModels = (dataflowState.data?.datasets ?? [])
     .filter(dataset => dataset.dataProviderId === parseInt(representativeId))
     .map(dataset => {
       const getTechnicalAcceptanceStatus = () => {
@@ -179,7 +186,15 @@ const useBigButtonListRepresentative = ({
         buttonIcon: 'dataset',
         caption: dataset.name,
         handleRedirect: () => {
-          handleRedirect(getUrl(routes.DATASET, { dataflowId: dataflowState.id, datasetId: dataset.datasetId }, true));
+          handleRedirect(
+            code
+              ? getUrl(
+                  routes.PREPARATION_DATASET,
+                  { dataflowId: dataflowState.id, datasetId: dataset.datasetId, code },
+                  true
+                )
+              : getUrl(routes.DATASET, { dataflowId: dataflowState.id, datasetId: dataset.datasetId }, true)
+          );
         },
         hasUpdatesAfterRelease: dataset.hasUpdatesAfterRelease,
         hasUpdatesAfterReleaseTooltip:
@@ -205,7 +220,7 @@ const useBigButtonListRepresentative = ({
                   }
                 }
               ]
-            : [
+            : !code && [
                 {
                   label: resourcesContext.messages['historicReleases'],
                   command: () => {
@@ -214,7 +229,13 @@ const useBigButtonListRepresentative = ({
                   }
                 }
               ],
-        onWheel: getUrl(routes.DATASET, { dataflowId: dataflowState.id, datasetId: dataset.datasetId }, true),
+        onWheel: code
+          ? getUrl(
+              routes.PREPARATION_DATASET,
+              { dataflowId: dataflowState.id, datasetId: dataset.datasetId, code },
+              true
+            )
+          : getUrl(routes.DATASET, { dataflowId: dataflowState.id, datasetId: dataset.datasetId }, true),
         technicalAcceptanceStatus: technicalAcceptanceStatus,
         visibility: true
       };
@@ -236,14 +257,65 @@ const useBigButtonListRepresentative = ({
 
   const receiptBigButton = onBuildReceiptButton();
 
+  const buildPreparationSetsModels = () => {
+    return preparationSetsList?.map(set => {
+      return {
+        buttonClass: 'preparationSet',
+        buttonIcon: 'preparationSet',
+        caption: set.datasetName,
+        helpClassName: 'dataflow-dataset-help-step',
+        handleRedirect: () => {
+          handleRedirect(
+            getUrl(
+              routes.PREPARATION_DATAFLOW_REPRESENTATIVE,
+              { dataflowId: dataflowState.id, representativeId, code: set.code },
+              true
+            )
+          );
+        },
+        layout: 'defaultBigButton',
+        onWheel: getUrl(
+          routes.PREPARATION_DATAFLOW_REPRESENTATIVE,
+          { dataflowId: dataflowState.id, representativeId, code: set.code },
+          true
+        ),
+        visibility: !code && set.isCreated
+      };
+    });
+  };
+
+  const createPreparationSets = [
+    {
+      buttonClass: 'newItem',
+      buttonIcon: isCreatingPreparationSets ? 'spinner' : 'createPreparationSets',
+      buttonIconClass: isCreatingPreparationSets ? 'spinner' : '',
+      caption: resourcesContext.messages['createPreparationSets'],
+      enabled: !isEmpty(notCreatedSets),
+      handleRedirect: () => onCreatePreparationSets(),
+      layout: 'defaultBigButton',
+      tooltip: isEmpty(notCreatedSets) ? resourcesContext.messages['preparationSetsCreated'] : undefined,
+      visibility: !code && buttonsVisibility.createPreparationSets
+    }
+  ];
+
+  const preparationSetsModels = isEmpty(preparationSetsList) ? [] : buildPreparationSetsModels();
+
   const getIsReleasing = () =>
     dataflowState?.data?.datasets?.some(dataset => dataset.isReleasing && dataset.dataProviderId === dataProviderId);
 
-  const isReleased = dataflowState.data.datasets
+  // const isReleased = dataflowState.data.datasets
+  //   .filter(dataset => dataset.dataProviderId === parseInt(representativeId))
+  //   .some(dataset => dataset.isReleased);
+
+  const isReleased = (dataflowState?.data?.datasets ?? [])
     .filter(dataset => dataset.dataProviderId === parseInt(representativeId))
     .some(dataset => dataset.isReleased);
 
-  const representative = dataflowState.data.representatives.find(
+  // const representative = dataflowState.data.representatives.find(
+  //   representative => representative.dataProviderId === dataProviderId
+  // );
+
+  const representative = dataflowState?.data?.representatives?.find(
     representative => representative.dataProviderId === dataProviderId
   );
 
@@ -270,7 +342,7 @@ const useBigButtonListRepresentative = ({
       restrictFromPublicIsUpdating: dataflowState.restrictFromPublicIsUpdating.value,
       restrictFromPublicStatus: representative?.restrictFromPublic,
       tooltip: dataflowState.isReleasable ? '' : resourcesContext.messages['releaseButtonTooltip'],
-      visibility: isSilent ? buttonsVisibility.silentRelease : buttonsVisibility.release
+      visibility: !code && (isSilent ? buttonsVisibility.silentRelease : buttonsVisibility.release)
     }
   ];
 
@@ -284,9 +356,11 @@ const useBigButtonListRepresentative = ({
     ...getReferenceDatasetModels(),
     ...groupByRepresentativeModels,
     ...receiptBigButton,
+    ...createPreparationSets,
     ...releaseBigButton,
     ...(isAdmin ? silentReleaseButton : []),
-    ...testDatasetsModels
+    ...testDatasetsModels,
+    ...preparationSetsModels
   ];
 };
 

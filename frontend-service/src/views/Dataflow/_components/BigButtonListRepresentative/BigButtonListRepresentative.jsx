@@ -22,17 +22,21 @@ import { useBigButtonListRepresentative } from './_functions/Hooks/useBigButtonL
 import { useFilters } from 'views/_functions/Hooks/useFilters';
 
 export const BigButtonListRepresentative = ({
+  code,
   dataflowState,
   dataProviderId,
   handleRedirect,
   isAdmin,
+  isCreatingPreparationSets,
   isCustodian,
   isLeadReporterOfCountry,
   manageDialogs,
   onCleanUpReceipt,
+  onCreatePreparationSets,
   onShowManagePreparationSetsDialog,
   onOpenReleaseConfirmDialog,
   onOpenSilentReleaseConfirmDialog,
+  preparationSetsList,
   representativeId,
   setIsReceiptLoading,
   uniqRepresentatives
@@ -134,19 +138,23 @@ export const BigButtonListRepresentative = ({
         <div className={styles.splitButtonWrapper}>
           <div className={styles.datasetItem}>
             {useBigButtonListRepresentative({
+              code,
               dataflowState,
               dataProviderId,
               getDataHistoricReleases,
               getDataReleaseSnapshots,
               handleRedirect,
               isAdmin,
+              isCreatingPreparationSets,
               isLeadReporterOfCountry,
+              onCreatePreparationSets,
               onLoadReceiptData,
               onOpenReleaseConfirmDialog,
               onOpenSilentReleaseConfirmDialog,
               onShowManagePreparationSetsDialog,
               onShowHistoricReleases,
               onShowReleaseSnapshots,
+              preparationSetsList,
               uniqRepresentatives,
               representativeId: representativeId
             })

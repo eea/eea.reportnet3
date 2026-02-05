@@ -13,6 +13,7 @@ import { getUrl } from 'repositories/_utils/UrlUtils';
 import { TextByDataflowTypeUtils } from 'views/_functions/Utils/TextByDataflowTypeUtils';
 
 export const useBreadCrumbs = ({
+  code,
   countryCode,
   currentPage,
   dataflowId,
@@ -23,7 +24,8 @@ export const useBreadCrumbs = ({
   isLoading,
   metaData,
   referenceDataflowId,
-  representativeId
+  representativeId,
+  selectedPreparationSet
 }) => {
   const navigate = useNavigate();
   const params = useParams();
@@ -46,7 +48,8 @@ export const useBreadCrumbs = ({
     params,
     metaData,
     referenceDataflowId,
-    representativeId
+    representativeId,
+    selectedPreparationSet
   ]);
 
   const getDataCollectionCrumb = () => ({ label: resourcesContext.messages['dataCollection'], icon: 'dataCollection' });
@@ -95,6 +98,20 @@ export const useBreadCrumbs = ({
     command: () => navigate(getUrl(routes.ACCESS_POINT)),
     href: getUrl(routes.ACCESS_POINT),
     label: resourcesContext.messages['homeBreadcrumb']
+  });
+
+  const getPreparationDataflowCrumb = () => ({
+    command: () =>
+      navigate(
+        getUrl(routes.PREPARATION_DATAFLOW_REPRESENTATIVE, { dataflowId, representativeId: dataProviderId, code }, true)
+      ),
+    href: getUrl(
+      routes.PREPARATION_DATAFLOW_REPRESENTATIVE,
+      { dataflowId, representativeId: dataProviderId, code },
+      true
+    ),
+    label: selectedPreparationSet?.datasetName,
+    icon: 'preparationSet'
   });
 
   const getRepresentativeCrumb = () => {
@@ -222,6 +239,9 @@ export const useBreadCrumbs = ({
           const breadCrumbs = [getHomeCrumb(), getDataflowsCrumb(), getDataflowCrumb()];
           if (representativeId) {
             breadCrumbs.push(getRepresentativeCrumb());
+            if (code) {
+              breadCrumbs.push(getPreparationDataflowCrumb());
+            }
           }
           breadCrumbContext.add([...breadCrumbs]);
         }
@@ -236,6 +256,9 @@ export const useBreadCrumbs = ({
 
         if (dataProviderId) {
           datasetBreadCrumbs.push(getRepresentativeCrumb());
+          if (code) {
+            datasetBreadCrumbs.push(getPreparationDataflowCrumb());
+          }
         }
 
         breadCrumbContext.add([...datasetBreadCrumbs, getDatasetCrumb()]);

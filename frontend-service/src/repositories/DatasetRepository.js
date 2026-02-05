@@ -447,20 +447,34 @@ export const DatasetRepository = {
     levelError,
     qcCodes,
     fieldSchemaId,
-    value
+    value,
+    code
   ) => {
     return await HTTPRequester.get({
-      url: getUrl(DatasetConfig.getTableDataDL, {
-        datasetId,
-        fields,
-        fieldSchemaId,
-        qcCodes,
-        levelError,
-        pageNum,
-        pageSize,
-        tableSchemaId,
-        value
-      })
+      url: code
+        ? getUrl(DatasetConfig.getPreparationsTableDataDL, {
+            datasetId,
+            fields,
+            fieldSchemaId,
+            qcCodes,
+            levelError,
+            pageNum,
+            pageSize,
+            tableSchemaId,
+            value,
+            code
+          })
+        : getUrl(DatasetConfig.getTableDataDL, {
+            datasetId,
+            fields,
+            fieldSchemaId,
+            qcCodes,
+            levelError,
+            pageNum,
+            pageSize,
+            tableSchemaId,
+            value
+          })
     });
   },
   checkDuplicateValues: async (datasetId, tableSchemaId, fieldVO) =>
