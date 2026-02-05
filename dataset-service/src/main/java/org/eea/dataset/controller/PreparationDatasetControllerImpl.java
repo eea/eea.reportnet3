@@ -17,10 +17,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import javax.validation.Valid;
 
 /**
  * The Class PreparationDatasetControllerImpl.
@@ -45,6 +45,7 @@ public class PreparationDatasetControllerImpl
     @Override
     @HystrixCommand
     @GetMapping("/preparations")
+    @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_STEWARD_SUPPORT') OR hasAnyRole('ADMIN')")
     @ApiOperation(value = "List preparation datasets")
     public List<PreparationDatasetVO> list(
             @RequestParam("dataflowId") Long dataflowId,
@@ -64,9 +65,8 @@ public class PreparationDatasetControllerImpl
      */
     @Override
     @HystrixCommand
-    @PostMapping(
-            value = "/preparations",
-            consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/preparations", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_STEWARD_SUPPORT') OR hasAnyRole('ADMIN')")
     @ApiOperation(value = "Create preparation dataset")
     @ApiResponses(value = {
             @ApiResponse(code = 201, message = "Preparation dataset created successfully"),
@@ -130,6 +130,7 @@ public class PreparationDatasetControllerImpl
     @Override
     @HystrixCommand
     @DeleteMapping("/preparations/{id}")
+    @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_STEWARD_SUPPORT') OR hasAnyRole('ADMIN')")
     @ApiOperation(value = "Delete preparation dataset by id")
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Preparation dataset deleted successfully"),
