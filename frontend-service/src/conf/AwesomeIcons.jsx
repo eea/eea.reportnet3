@@ -112,7 +112,11 @@ import {
   faVolumeUp,
   faLaptop,
   faTools,
-  faCopy
+  faCopy,
+  faCodeBranch,
+  faSlidersH,
+  faRandom,
+  faExchangeAlt
 } from '@fortawesome/free-solid-svg-icons';
 
 import {
@@ -306,7 +310,9 @@ export const AwesomeIcons = icon => {
     case 'manageReporters':
       return faUsersCog;
     case 'managePreparationSets':
-      return faCopy;
+      return faSlidersH;
+    case 'createPreparationSets':
+      return faRandom;
     case 'map':
       return faMapMarkedAlt;
     case 'mdb':
@@ -397,6 +403,9 @@ export const AwesomeIcons = icon => {
       return faReply;
     case 'representative':
       return faCoins;
+    case 'preparationSet':
+      return faCodeBranch;
+    // return faSitemap;
     case 'search':
       return faSearch;
     case 'settings':

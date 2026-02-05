@@ -17,7 +17,14 @@ import { RegularExpressions } from 'views/_functions/Utils/RegularExpressions';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 import { ActionsColumn } from 'views/_components/ActionsColumn';
 
-export const ManagePreparationSets = ({ dataflowId, isDialogVisible, onCloseDialog, providerId }) => {
+export const ManagePreparationSets = ({
+  dataflowId,
+  isDialogVisible,
+  onCloseDialog,
+  onGetPreparationSetsList,
+  preparationSetsList,
+  providerId
+}) => {
   const resourcesContext = useContext(ResourcesContext);
   const notificationContext = useContext(NotificationContext);
 
@@ -25,24 +32,15 @@ export const ManagePreparationSets = ({ dataflowId, isDialogVisible, onCloseDial
     actionsButtons: { id: null },
     dialogMode: null,
     isConfirmDeleteButtonDisabled: false,
-    isLoading: true,
+    isLoading: false,
     isLoadingButton: false,
     loadingStatus: 'idle',
     preparationSetCode: '',
     preparationSetEditing: null,
-    preparationSetName: '',
-    preparationSetsList: null
+    preparationSetName: ''
   });
 
   const inputRef = useRef(null);
-
-  useEffect(() => {
-    const fetchPreparationSets = async () => {
-      await getPreparationSets();
-    };
-
-    fetchPreparationSets();
-  }, []);
 
   useInputTextFocus(state.dialogMode === 'add', inputRef);
 
@@ -51,17 +49,17 @@ export const ManagePreparationSets = ({ dataflowId, isDialogVisible, onCloseDial
   const isValidPreparationSetName = () => RegularExpressions['preparationSetName'].test(state.preparationSetName);
   const isValidPreparationSetCode = () => RegularExpressions['nonSymbols'].test(state.preparationSetCode);
   const isRepeatedPreparationSetName = () =>
-    state.preparationSetsList?.some(set => TextUtils.areEquals(set.datasetName, state.preparationSetName));
+    preparationSetsList?.some(set => TextUtils.areEquals(set.datasetName, state.preparationSetName));
   const isRepeatedPreparationSetCode = () =>
-    state.preparationSetsList?.some(set => TextUtils.areEquals(set.code, state.preparationSetCode));
+    preparationSetsList?.some(set => TextUtils.areEquals(set.code, state.preparationSetCode));
   const hasEmptyData = () => isEmpty(state.preparationSetName);
 
   const getPreparationSets = async () => {
     changeState({ loadingStatus: 'pending' });
     try {
-      const preparationSetsList = await ManagePreparationSetsService.getPreparationSets({ dataflowId, providerId });
+      await onGetPreparationSetsList();
 
-      changeState({ preparationSetsList: preparationSetsList, loadingStatus: 'success', isLoading: false });
+      changeState({ loadingStatus: 'success', isLoading: false });
     } catch (error) {
       console.error(error);
       notificationContext.add({ type: 'GET_PREPARATION_SETS_ERROR' }, true);
@@ -84,7 +82,7 @@ export const ManagePreparationSets = ({ dataflowId, isDialogVisible, onCloseDial
     changeState({ isLoadingButton: true });
     try {
       if (state.dialogMode === 'add') {
-        await ManagePreparationSetsService.createPreparationSet({
+        await ManagePreparationSetsService.addPreparationSet({
           datasetName: state.preparationSetName,
           code: state.preparationSetCode,
           dataflowId,
@@ -262,14 +260,14 @@ export const ManagePreparationSets = ({ dataflowId, isDialogVisible, onCloseDial
             <Spinner className={styles.spinnerPosition} />
           </div>
         )}
-        {!state.isLoading && state.preparationSetsList !== null && (
+        {!state.isLoading && preparationSetsList !== null && (
           <div className={styles.dialogContent}>
-            {state.preparationSetsList?.length === 0 && (
+            {preparationSetsList?.length === 0 && (
               <div className={styles.noDataContent}>
                 <span>{resourcesContext.messages['noData']}</span>
               </div>
             )}
-            {state.preparationSetsList?.length > 0 && (
+            {preparationSetsList?.length > 0 && (
               <DataTable
                 autoLayout
                 className={styles.preparationSetsTable}
@@ -278,7 +276,7 @@ export const ManagePreparationSets = ({ dataflowId, isDialogVisible, onCloseDial
                 loading={state.loadingStatus === 'pending'}
                 reorderableColumns
                 resizableColumns
-                value={state.preparationSetsList}>
+                value={preparationSetsList}>
                 {columns.map(col => (
                   <Column
                     body={col.template}

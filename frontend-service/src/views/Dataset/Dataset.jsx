@@ -59,10 +59,11 @@ import { LocalUserStorageUtils } from 'services/_utils/LocalUserStorageUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 import dayjs from 'dayjs';
 import { ImportedFilesDialog } from 'views/DatasetDesigner/_components/ImportedFilesDialog';
+import { ManagePreparationSetsService } from 'services/ManagePreparationSetsService';
 
 export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   const navigate = useNavigate();
-  const { dataflowId, datasetId } = useParams();
+  const { dataflowId, datasetId, code } = useParams();
 
   const actionsContext = useContext(ActionsContext);
   const leftSideBarContext = useContext(LeftSideBarContext);
@@ -159,6 +160,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   const [editedTables, setEditedTables] = useState({});
   const [tableImportedMetadata, setTableImportedMetadata] = useState({});
   const [isImportedFilesDialogVisible, setIsImportedFilesDialogVisible] = useState(false);
+  const [selectedPreparationSet, setSelectedPreparationSet] = useState(null);
 
   const { resetFiltersState: resetDatasetInfoFiltersState } = useFilters('datasetInfo');
   const { resetFiltersState: resetUserListFiltersState } = useFilters('userList');
@@ -181,6 +183,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   bigDataRef.current = metadata?.dataflow.bigData;
 
   useBreadCrumbs({
+    code,
     currentPage: getCurrentPage(),
     dataflowId,
     dataflowType,
@@ -188,7 +191,8 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
     dataProviderName: metadata?.dataset.name,
     isLoading,
     metaData: metadata,
-    referenceDataflowId: dataflowId
+    referenceDataflowId: dataflowId,
+    selectedPreparationSet
   });
 
   useEffect(() => {
@@ -198,6 +202,27 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
       getWebformList();
     }
   }, []);
+
+  useEffect(() => {
+    if (!code || !metadata?.dataset.dataProviderId) return;
+
+    getPreparationSets(code);
+  }, [metadata?.dataset.dataProviderId, code]);
+
+  const getPreparationSets = async code => {
+    try {
+      const preparationList = await ManagePreparationSetsService.getPreparationSets({
+        dataflowId,
+        providerId: metadata?.dataset.dataProviderId,
+        code
+      });
+      code && setSelectedPreparationSet(preparationList[0] ?? null);
+      return preparationList;
+    } catch (error) {
+      console.error(error);
+      notificationContext.add({ type: 'GET_PREPARATION_SETS_ERROR' }, true);
+    }
+  };
 
   useEffect(() => {
     leftSideBarContext.removeModels();
@@ -1362,7 +1387,11 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
       ? metadata?.dataflow.bigData
         ? TextUtils.parseText(resourcesContext.messages['sncBigDataDataflowNamed'], {
             name: `${metadata?.dataflow.name} - ${
-              isTestDataset ? resourcesContext.messages['testDataset'] : datasetName
+              isTestDataset
+                ? resourcesContext.messages['testDataset']
+                : code
+                ? selectedPreparationSet?.datasetName || ''
+                : datasetName
             }`
           })
         : TextUtils.parseText(resourcesContext.messages['sncCitusDataflowNamed'], {
@@ -1372,7 +1401,13 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
           })
       : metadata?.dataflow.bigData
       ? TextUtils.parseText(resourcesContext.messages['bigDataDataflowNamed'], {
-          name: `${metadata?.dataflow.name} - ${isTestDataset ? resourcesContext.messages['testDataset'] : datasetName}`
+          name: `${metadata?.dataflow.name} - ${
+            isTestDataset
+              ? resourcesContext.messages['testDataset']
+              : code
+              ? selectedPreparationSet?.datasetName || ''
+              : datasetName
+          }`
         })
       : `${metadata?.dataflow.name} - ${isTestDataset ? resourcesContext.messages['testDataset'] : datasetName}`;
 

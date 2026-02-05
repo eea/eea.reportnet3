@@ -25,6 +25,8 @@ export const DatasetConfig = {
     '/dataset/TableValueDataset/{:datasetId}?fieldSchemaId={:fieldSchemaId}&fieldValue={:value}&idTableSchema={:tableSchemaId}&pageNum={:pageNum}&pageSize={:pageSize}&fields={:fields}&levelError={:levelError}&idRules={:idRules}',
   getTableDataDL:
     '/dataset/TableValueDatasetDL/{:datasetId}?fieldSchemaId={:fieldSchemaId}&fieldValue={:value}&idTableSchema={:tableSchemaId}&pageNum={:pageNum}&pageSize={:pageSize}&fields={:fields}&levelError={:levelError}&qcCodes={:qcCodes}',
+  getPreparationsTableDataDL:
+    '/dataset/preparations/TableValueDatasetDL/{:datasetId}?code={:code}&fieldSchemaId={:fieldSchemaId}&fieldValue={:value}&idTableSchema={:tableSchemaId}&pageNum={:pageNum}&pageSize={:pageSize}&fields={:fields}&levelError={:levelError}&qcCodes={:qcCodes}',
   getImportedFiles: '/dataset/list-imported-files?datasetId={:datasetId}',
   downloadTableDefinitions: '/dataschema/v1/dataset/{:datasetSchemaId}/exportFieldSchemas',
   deleteSchema: '/dataschema/dataset/{:datasetId}',
@@ -49,7 +51,8 @@ export const DatasetConfig = {
     '/dataset/v1/{:datasetId}/field/{:fieldId}/attachment?dataflowId={:dataflowId}&tableSchemaName={:tableSchemaName}&fieldName={:fieldName}&fileName={:fileName}&recordId={:recordId}&providerCode={:providerCode}',
   downloadFileDataWithProviderId:
     '/dataset/v1/{:datasetId}/field/{:fieldId}/attachment?dataflowId={:dataflowId}&providerId={:providerId}&tableSchemaName={:tableSchemaName}&fieldName={:fieldName}&fileName={:fileName}&recordId={:recordId}&providerCode={:providerCode}',
-  downloadGeometry: '/dataset/v1/{:datasetId}/record/{:recordId}/geometry?fieldId={:fieldId}&dataflowId={:dataflowId}&idTableSchema={:tableSchemaId}&providerId={:providerId}',
+  downloadGeometry:
+    '/dataset/v1/{:datasetId}/record/{:recordId}/geometry?fieldId={:fieldId}&dataflowId={:dataflowId}&idTableSchema={:tableSchemaId}&providerId={:providerId}',
   downloadPublicReferenceDatasetFileData: '/dataset/exportPublicFile/dataflow/{:dataflowId}?fileName={:fileName}',
   downloadTableData: '/dataset/{:datasetId}/downloadFile?fileName={:fileName}',
   downloadTableDataDL: '/dataset/{:datasetId}/downloadFileDL?fileName={:fileName}',

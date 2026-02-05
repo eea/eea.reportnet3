@@ -20,6 +20,8 @@ export const routes = {
   FME: 'https://fme.discomap.eea.europa.eu/fmeserver/#/job/:fmeJobId/summary',
   LEGAL_NOTICE: '/legalNotice',
   LOGIN: '/login',
+  PREPARATION_DATAFLOW_REPRESENTATIVE: '/dataflow/:dataflowId/provider/:representativeId/code/:code',
+  PREPARATION_DATASET: '/dataflow/:dataflowId/dataset/:datasetId/code/:code',
   PRIVACY_POLICY_EIONET: 'https://reportnet.europa.eu/privacyPolicy',
   PRIVACY_STATEMENT: '/privacyPolicy',
   PUBLIC_COUNTRIES: '/public/countries',
