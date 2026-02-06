@@ -12,6 +12,7 @@ export const ValidationConfig = {
   getAllQCsHistoricInfo: '/rules/historicDatasetRules?datasetId={:datasetId}',
   getQcHistoricInfo: '/rules/historicInfo?datasetId={:datasetId}&ruleId={:ruleId}',
   runSqlRule: '/rules/runSqlRule?datasetId={:datasetId}&showInternalFields={:showInternalFields}',
+  runSqlRuleAsProvider: '/rules/runSqlRule?datasetId={:datasetId}&showInternalFields={:showInternalFields}&runSQLAsProvider={:providerCode}',
   update: '/rules/updateRule?datasetId={:datasetId}',
   updateAutomatic: '/rules/updateAutomaticRule/{:datasetId}',
   viewUpdated: '/dataset/{:datasetId}/viewUpdated',

@@ -18,6 +18,16 @@
         font-size: 1rem;
         color: var(--title-color);
         margin-bottom: 0.6rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+
+        .titleHeader {
+          display: flex;
+          align-items: center;
+          gap: 0.4rem;
+        }
+
         .sqlSentenceInfoBtn {
           background-color: var(--c-white-color) !important;
           border-radius: 50% !important;
@@ -25,9 +35,6 @@
           font-size: 12pt !important;
           height: 0.7em !important;
           width: 0.7em !important;
-          margin-left: 0.4rem !important;
-          margin-right: 0.9rem !important;
-          margin-top: -1rem !important;
           :global .pi-info-circle {
             padding: 0 !important;
             top: 40%;
@@ -42,24 +49,51 @@
           }
         }
 
-        .ccButton,
-        .runButton,
-        .validateButton,
-        .sqlSentenceCostWrapper {
-          margin-top: -0.9em;
-          margin-left: 0.4rem !important;
-          float: right;
+        .ccButton {
+          padding: 0.37rem 0.45rem;
+          margin-left: auto !important;
         }
         .ccButton,
         .runButton,
         .validateButton {
           border: 1px solid var(--c-custom-gray) !important;
         }
-        .ccButton {
-          padding: 0.37rem 0.45rem;
-        }
+
         .validateSqlSentenceIcon {
           padding-top: 1px;
+        }
+
+        .controlsStack {
+          display: flex;
+          flex-direction: row;
+          gap: 0.5rem;
+          width: 100%;
+          align-items: center;
+          flex-wrap: wrap;
+
+          .controlRow {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            flex: 0 1 auto;
+          }
+
+          .providerGroup {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            border: 1px solid var(--c-custom-gray);
+            border-radius: 4px;
+            padding: 0.1rem 0.2rem;
+          }
+        }
+
+        .sqlSentenceCostWrapper {
+          margin-top: 0 !important;
+        }
+
+        .providerDropdown {
+          flex: 0 1 auto;
         }
       }
       textarea {
@@ -68,11 +102,13 @@
     }
   }
 }
+
 .levelHelp {
   font-weight: 500;
   font-size: 0.8rem;
   color: var(--main-font-color);
 }
+
 .note {
   font-style: italic;
   font-weight: 500;

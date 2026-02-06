@@ -6,21 +6,23 @@ import { RowValidation } from './_components/RowValidation';
 
 import { ValidationContext } from 'views/_functions/Contexts/ValidationContext';
 
-export const Validations = ({ bigData, dataflowType, datasetSchema, datasetSchemas, tabs, datasetId }) => {
+export const Validations = ({ bigData, dataflowId, dataflowType, datasetSchema, datasetSchemas, tabs, datasetId, dataProviderGroupId }) => {
   const validationContext = useContext(ValidationContext);
 
   if (validationContext.level === 'field') {
-    return <FieldValidation bigData={bigData} dataflowType={dataflowType} datasetId={datasetId} tabs={tabs} />;
+    return <FieldValidation bigData={bigData} dataflowId={dataflowId} dataflowType={dataflowType} dataProviderGroupId={dataProviderGroupId} datasetId={datasetId} tabs={tabs}  />;
   }
 
   if (validationContext.level === 'row') {
-    return <RowValidation bigData={bigData} dataflowType={dataflowType} datasetId={datasetId} tabs={tabs} />;
+    return <RowValidation bigData={bigData} dataflowId={dataflowId} dataflowType={dataflowType} dataProviderGroupId={dataProviderGroupId} datasetId={datasetId} tabs={tabs} />;
   }
 
   return (
     <TableValidation
       bigData={bigData}
+      dataflowId={dataflowId}
       dataflowType={dataflowType}
+      dataProviderGroupId={dataProviderGroupId}
       datasetId={datasetId}
       datasetSchema={datasetSchema}
       datasetSchemas={datasetSchemas}

@@ -837,7 +837,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
       else if (fieldType == DataType.ATTACHMENT) {
         //if the field is attachment handle it if import is etl
         if (!importFileInDremioInfo.getIsEtlImport() || importFileInDremioInfo.getAttachmentsExistPerTableName() == null || importFileInDremioInfo.getAttachmentsExistPerTableName().size() == 0
-                || importFileInDremioInfo.getAttachmentsExistPerTableName().get(tableName) == null || importFileInDremioInfo.getAttachmentsExistPerTableName().get(tableName) == false) {
+                || importFileInDremioInfo.getAttachmentsExistPerTableName().get(tableName.toLowerCase()) == null || importFileInDremioInfo.getAttachmentsExistPerTableName().get(tableName.toLowerCase()) == false) {
           row.add("");
         } else {
           row.add(addRecordAttachmentAndValue(importFileInDremioInfo, tableName, expectedHeaderName, csvRecord, recordIdValue));

@@ -960,6 +960,8 @@ export const DatasetService = {
 
   validate: async datasetId => await DatasetRepository.validate(datasetId),
 
+  validateAsProvider: async (datasetId, dataflowId, providerId) => await DatasetRepository.validateAsProvider(datasetId, dataflowId, providerId),
+
   validateAllSql: async datasetId => await DatasetRepository.validateAllSql(datasetId),
 
   validateSqlRules: async (datasetId, datasetSchemaId) =>
