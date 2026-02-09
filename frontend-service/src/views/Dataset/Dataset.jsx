@@ -1496,6 +1496,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
         onLoadTableData={onLoadTableData}
         onRestoreData={onRestoreData}
         onTabChange={tableSchemaId => onTabChange(tableSchemaId)}
+        preparationSetCode={code}
         reporting={true}
         selectedRuleId={dataViewerOptions.selectedRuleId}
         selectedRuleLevelError={dataViewerOptions.selectedRuleLevelError}

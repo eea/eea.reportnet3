@@ -75,6 +75,7 @@ export const BigButtonList = ({
   setIsCopyDataCollectionToEUDatasetLoading,
   setIsExportEUDatasetLoading,
   setIsReceiptLoading,
+  setSelectedPreparationSet,
   setSelectedRepresentative,
   setUpdatedDatasetSchema
 }) => {
@@ -677,7 +678,8 @@ export const BigButtonList = ({
     onShowNewSchemaDialog,
     onShowUpdateDataCollectionModal,
     preparationSetsList,
-    setErrorDialogData
+    setErrorDialogData,
+    setSelectedPreparationSet
   })
     .filter(button => button.visibility)
     .map(button => (

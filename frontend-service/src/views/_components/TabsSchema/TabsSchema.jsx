@@ -40,6 +40,7 @@ export const TabsSchema = ({
   onLoadTableData,
   onRestoreData,
   onTabChange,
+  preparationSetCode,
   reporting,
   selectedRuleId,
   selectedRuleLevelError,
@@ -108,6 +109,7 @@ export const TabsSchema = ({
                   onHideSelectGroupedValidation={onHideSelectGroupedValidation}
                   onLoadTableData={onLoadTableData}
                   onRestoreData={onRestoreData}
+                  preparationSetCode={preparationSetCode}
                   reporting={reporting}
                   selectedRuleId={selectedRuleId}
                   selectedRuleLevelError={selectedRuleLevelError}

@@ -48,7 +48,8 @@ const useBigButtonList = ({
   onShowNewSchemaDialog,
   onShowUpdateDataCollectionModal,
   preparationSetsList,
-  setErrorDialogData
+  setErrorDialogData,
+  setSelectedPreparationSet
 }) => {
   const { permissions } = config;
 
@@ -443,6 +444,7 @@ const useBigButtonList = ({
         caption: set.datasetName,
         helpClassName: 'dataflow-dataset-help-step',
         handleRedirect: () => {
+          setSelectedPreparationSet(set);
           handleRedirect(
             getUrl(
               routes.PREPARATION_DATAFLOW_REPRESENTATIVE,

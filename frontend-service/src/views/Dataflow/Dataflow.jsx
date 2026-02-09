@@ -1,5 +1,5 @@
 import { Fragment, useContext, useEffect, useReducer, useRef, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 
 import dayjs from 'dayjs';
 import first from 'lodash/first';
@@ -271,11 +271,22 @@ export const Dataflow = () => {
     }
   }, []);
 
+  const location = useLocation();
+
+  // Reset preparation sets when navigating back to dataflow before provider is resolved
+  useEffect(() => {
+    const dataflowPath = getUrl(routes.DATAFLOW, { dataflowId }, true);
+
+    if (location.pathname === dataflowPath && !dataProviderId) {
+      setPreparationSetsList(null);
+    }
+  }, [location.pathname, dataflowId]);
+
   useEffect(() => {
     if (!dataProviderId || dataflowState.isCreatingPreparationSets) return;
 
     getPreparationSets(code);
-  }, [dataProviderId, code, dataflowState.isCreatingPreparationSets]);
+  }, [dataProviderId, dataflowState.isCreatingPreparationSets]);
 
   const getPreparationSets = async code => {
     try {
@@ -1442,6 +1453,7 @@ export const Dataflow = () => {
           setIsCopyDataCollectionToEUDatasetLoading={setIsCopyDataCollectionToEUDatasetLoading}
           setIsExportEUDatasetLoading={setIsExportEUDatasetLoading}
           setIsReceiptLoading={setIsReceiptLoading}
+          setSelectedPreparationSet={setSelectedPreparationSet}
           setSelectedRepresentative={setSelectedRepresentative}
           setUpdatedDatasetSchema={setUpdatedDatasetSchema}
         />
@@ -1466,6 +1478,7 @@ export const Dataflow = () => {
           preparationSetsList={dataflowState.preparationSetsList}
           representativeId={representativeId}
           setIsReceiptLoading={setIsReceiptLoading}
+          setSelectedPreparationSet={setSelectedPreparationSet}
         />
       );
     }
