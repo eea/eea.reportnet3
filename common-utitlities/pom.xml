@@ -14,7 +14,7 @@
 	<artifactId>common-utitlities</artifactId>
 	<version>${common-utitlities.version}</version>
 	<properties>
-		<spring.security.version>5.1.4.RELEASE</spring.security.version>
+		<spring.security.version>5.7.13</spring.security.version>
 		<aspectj.version>1.9.2</aspectj.version>
 		<sonar.moduleKey>org.eea:reportnet:common-utitlities:${sonar.jenkins.branch}</sonar.moduleKey>
 		<mockito.version>3.11.2</mockito.version>
@@ -83,7 +83,7 @@
 		<dependency>
 			<groupId>org.keycloak</groupId>
 			<artifactId>keycloak-core</artifactId>
-			<version>7.0.0</version>
+			<version>8.0.2</version>
 		</dependency>
 		<dependency>
 			<groupId>org.aspectj</groupId>
@@ -168,6 +168,24 @@
 			<artifactId>netty-nio-client</artifactId>
 			<version>2.31.38</version>
 			<scope>compile</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>io.netty</groupId>
+					<artifactId>netty-codec-http</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>io.netty</groupId>
+					<artifactId>netty-codec-http2</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>io.netty</groupId>
+					<artifactId>netty-codec</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>io.netty</groupId>
+					<artifactId>netty-handler</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.parquet</groupId>
@@ -183,6 +201,52 @@
 			<groupId>org.apache.hadoop</groupId>
 			<artifactId>hadoop-common</artifactId>
 			<version>3.3.5</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.apache.kerby</groupId>
+					<artifactId>kerb-admin</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.apache.zookeeper</groupId>
+					<artifactId>zookeeper</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.kerby</groupId>
+			<artifactId>kerb-admin</artifactId>
+			<version>2.0.3</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.zookeeper</groupId>
+			<artifactId>zookeeper</artifactId>
+			<version>3.7.2</version>
+		</dependency>
+		<dependency>
+			<groupId>io.netty</groupId>
+			<artifactId>netty-codec-http</artifactId>
+			<version>4.1.44.Final</version>
+		</dependency>
+		<dependency>
+			<groupId>io.netty</groupId>
+			<artifactId>netty-codec-http2</artifactId>
+			<version>4.1.46.Final</version>
+			<exclusions>
+				<exclusion>
+					<groupId>io.netty</groupId>
+					<artifactId>netty-codec-http2</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>io.netty</groupId>
+			<artifactId>netty-codec</artifactId>
+			<version>4.1.46.Final</version>
+		</dependency>
+		<dependency>
+			<groupId>io.netty</groupId>
+			<artifactId>netty-handler</artifactId>
+			<version>4.1.44.Final</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.hadoop</groupId>
