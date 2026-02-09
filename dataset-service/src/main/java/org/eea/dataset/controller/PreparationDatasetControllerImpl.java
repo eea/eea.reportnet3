@@ -65,7 +65,7 @@ public class PreparationDatasetControllerImpl
     @Override
     @HystrixCommand
     @GetMapping("/preparations")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_OBSERVER','DATAFLOW_STEWARD_SUPPORT','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_REQUESTER','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATAFLOW',#dataflowId)) OR checkApiKey(#dataflowId,#providerId,#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_OBSERVER','DATAFLOW_STEWARD_SUPPORT','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR') OR hasAnyRole('ADMIN')")
     @ApiOperation(value = "List preparation datasets")
     public List<PreparationDatasetVO> list(
             @RequestParam("dataflowId") Long dataflowId,
@@ -86,7 +86,7 @@ public class PreparationDatasetControllerImpl
     @Override
     @HystrixCommand
     @PostMapping(value = "/preparations", consumes = MediaType.APPLICATION_JSON_VALUE)
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_OBSERVER','DATAFLOW_STEWARD_SUPPORT','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_REQUESTER','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATAFLOW',#dataflowId)) OR checkApiKey(#dataflowId,#providerId,#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_OBSERVER','DATAFLOW_STEWARD_SUPPORT','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR') OR hasAnyRole('ADMIN')")
     @ApiOperation(value = "Create preparation dataset")
     @ApiResponses(value = {
             @ApiResponse(code = 201, message = "Preparation dataset created successfully"),
@@ -150,7 +150,7 @@ public class PreparationDatasetControllerImpl
     @Override
     @HystrixCommand
     @DeleteMapping("/preparations/{id}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_OBSERVER','DATAFLOW_STEWARD_SUPPORT','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_REQUESTER','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATAFLOW',#dataflowId)) OR checkApiKey(#dataflowId,#providerId,#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_OBSERVER','DATAFLOW_STEWARD_SUPPORT','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR') OR hasAnyRole('ADMIN')")
     @ApiOperation(value = "Delete preparation dataset by id")
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Preparation dataset deleted successfully"),
@@ -196,7 +196,7 @@ public class PreparationDatasetControllerImpl
      */
     @Override
     @GetMapping("/preparations/TableValueDatasetDL/{id}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_CUSTODIAN','DATASET_STEWARD','DATASET_OBSERVER','DATASET_STEWARD_SUPPORT','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATACOLLECTION_CUSTODIAN','DATASCHEMA_CUSTODIAN','DATASCHEMA_STEWARD','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','DATASET_NATIONAL_COORDINATOR','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','EUDATASET_OBSERVER','EUDATASET_STEWARD_SUPPORT','DATACOLLECTION_OBSERVER','DATACOLLECTION_STEWARD_SUPPORT','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','DATACOLLECTION_STEWARD','REFERENCEDATASET_OBSERVER','REFERENCEDATASET_STEWARD_SUPPORT','REFERENCEDATASET_STEWARD','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD') OR hasAnyRole('ADMIN') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATASET',#datasetId))")
     @ApiOperation(value = "Get preparation table data", hidden = true)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successfully retrieved preparation data"),
@@ -206,7 +206,7 @@ public class PreparationDatasetControllerImpl
     })
     public TableVO getPreparationTableValuesDL(
             @ApiParam(type = "Long", value = "Preparation dataset id")
-            @PathVariable("id") Long preparationId,
+            @PathVariable("id") Long datasetId,
             @RequestParam("code") String preparationCode,
             @ApiParam(type = "String", value = "Table schema id")
             @RequestParam("idTableSchema") String idTableSchema,
@@ -256,10 +256,10 @@ public class PreparationDatasetControllerImpl
         // else pageable will be null, it will be created inside the service
         TableVO result = null;
         try {
-            DataSetMetabaseVO dataset = datasetMetabaseService.findDatasetMetabase(preparationId);
+            DataSetMetabaseVO dataset = datasetMetabaseService.findDatasetMetabase(datasetId);
             String datasetSchemaId = dataset.getDatasetSchema();
             TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(idTableSchema, datasetSchemaId);
-            result = dataLakeDataRetrieverFactory.getRetriever(preparationId).getPreparationTableResult(dataset, tableSchemaVO, pageable, fields, fieldSchemaId, fieldValue, levelError, qcCodes, preparationCode);
+            result = dataLakeDataRetrieverFactory.getRetriever(datasetId).getPreparationTableResult(dataset, tableSchemaVO, pageable, fields, fieldSchemaId, fieldValue, levelError, qcCodes, preparationCode);
         } catch (EEAException e) {
             LOG.error(e.getMessage());
             if (e.getMessage().equals(EEAErrorMessage.DATASET_NOTFOUND)) {
@@ -268,7 +268,7 @@ public class PreparationDatasetControllerImpl
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
                     EEAErrorMessage.OBTAINING_TABLE_DATA);
         } catch (Exception e) {
-            LOG.error("Unexpected error! Error retrieving big data table values for datasetId {} and tableSchemaId {} Message: {}", preparationId, idTableSchema, e.getMessage());
+            LOG.error("Unexpected error! Error retrieving big data table values for datasetId {} and tableSchemaId {} Message: {}", datasetId, idTableSchema, e.getMessage());
             throw e;
         }
 
