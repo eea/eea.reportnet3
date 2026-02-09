@@ -171,11 +171,19 @@ public class ValidationControllerImpl implements ValidationController {
     }
 
     String user;
+    String validateAsProviderCode = null;
     if (jobVO!=null) {
       user = jobVO.getCreatorUsername();
       Map<String, Object> parameters = jobVO.getParameters();
       if (parameters.containsKey("createParquetWithSQL")) {
         createParquetWithSQL = (Boolean) parameters.get("createParquetWithSQL");
+      }
+      Object validateAsProviderCodeParam = parameters.get("validateAsProviderCode");
+      if (validateAsProviderCodeParam != null) {
+        validateAsProviderCode = String.valueOf(validateAsProviderCodeParam).trim();
+        if (validateAsProviderCode.isEmpty()) {
+          validateAsProviderCode = null;
+        }
       }
     } else {
       user = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -188,6 +196,8 @@ public class ValidationControllerImpl implements ValidationController {
           EEAErrorMessage.DATASET_INCORRECT_ID);
     }
     DataSetMetabaseVO dataset = datasetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
+    // Check for provider validity.
+    validationHelper.assertValidProviderCodeForDataflow(jobId, datasetId, dataset.getDataflowId(),user ,validateAsProviderCode);
     String uuid = UUID.randomUUID().toString();
     int priority = validationHelper.getPriority(dataset);
     if (!released) {
@@ -256,7 +266,7 @@ public class ValidationControllerImpl implements ValidationController {
             throw new Exception("Can not validate for jobId " + jobId + " because there is an iceberg table");
           }
         }
-        validationHelper.executeValidationDL(datasetId, uuid, released, s3PathResolver, createParquetWithSQL);
+        validationHelper.executeValidationDL(datasetId, uuid, released, s3PathResolver, createParquetWithSQL, validateAsProviderCode);
       } else {    //check locks for Citus
 
           if (dataSetControllerZuul.getEditingStatus(datasetId).getIsEditing()) {
@@ -275,7 +285,7 @@ public class ValidationControllerImpl implements ValidationController {
             }
             throw new Exception("Can not validate for jobId " + jobId + " because dataset " +datasetId + " is locked for editing");
           }
-        validationHelper.executeValidation(datasetId, uuid, released, true);
+        validationHelper.executeValidation(datasetId, uuid, released, true, validateAsProviderCode);
       }
 
       // Add lock to the release process if necessary
@@ -708,8 +718,8 @@ public class ValidationControllerImpl implements ValidationController {
 
   @Override
   @PutMapping("/private/executeValidation/{datasetId}")
-  public void executeValidation(@PathVariable("datasetId") Long datasetId, @RequestParam("processId") String processId, @RequestParam("released") boolean released, @RequestParam("updateViews") boolean updateViews) throws EEAException {
-    validationHelper.executeValidation(datasetId, processId, released, updateViews);
+  public void executeValidation(@PathVariable("datasetId") Long datasetId, @RequestParam("processId") String processId, @RequestParam("released") boolean released, @RequestParam("updateViews") boolean updateViews, @RequestParam(value = "validateAsProviderCode", required = false) String validateAsProviderCode) throws EEAException {
+    validationHelper.executeValidation(datasetId, processId, released, updateViews, validateAsProviderCode);
   }
 
   /**

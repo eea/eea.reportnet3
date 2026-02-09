@@ -18,6 +18,7 @@ import org.bson.types.ObjectId;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
+import org.eea.interfaces.controller.dataset.DatasetSchemaController.DatasetSchemaControllerZuul;
 import org.eea.interfaces.controller.dataset.ReferenceDatasetController.ReferenceDatasetControllerZuul;
 import org.eea.interfaces.controller.orchestrator.JobProcessController;
 import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
@@ -65,8 +66,7 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.*;
 
 /**
  * The Class ValidationHelperTest.
@@ -109,6 +109,9 @@ public class ValidationHelperTest {
   /** The reference dataset controller zuul. */
   @Mock
   private ReferenceDatasetControllerZuul referenceDatasetControllerZuul;
+
+  @Mock
+  private DatasetSchemaControllerZuul datasetSchemaControllerZuul;
 
   /** The data flow controller zuul. */
   @Mock
@@ -345,6 +348,8 @@ public class ValidationHelperTest {
     ProcessVO processVO = new ProcessVO();
     processVO.setUser("test");
     Mockito.when(processControllerZuul.findById(anyString())).thenReturn(processVO);
+    Mockito.when(datasetSchemaControllerZuul.getTableSchemasIds(any(),any(),any()))
+                    .thenReturn(new ArrayList<>());
     validationHelper.executeValidation(1l, "1", false, true);
     Mockito.verify(referenceDatasetControllerZuul, Mockito.times(1))
         .findReferenceDatasetByDataflowId(Mockito.any());

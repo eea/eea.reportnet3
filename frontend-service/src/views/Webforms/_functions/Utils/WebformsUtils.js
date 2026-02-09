@@ -41,6 +41,33 @@ const getWebformTabs = (allTables = [], schemaTables, configTables = {}) => {
   return initialValues;
 };
 
+/*Added the function below in order to accept selectedTableName value and simplify the previous getWebformTabs. For now I kept both functions and just renamed the new one so that it can be used only in Pams WebformView and don't break other places that the first function is called. Should consider removing the first getWebformTabs entirely and use the new one everywhere*/
+
+const getPamsWebformTabs = (allTables = [], schemaTables = [], configTables = [], selectedTableName = '') => {
+  let activeTable = selectedTableName;
+
+  if (!activeTable) {
+    const retrievedTabFromUrl = QuerystringUtils.getUrlParamValue('tab');
+    if (retrievedTabFromUrl) {
+      const matchedTable = schemaTables.find(table => table.id === retrievedTabFromUrl);
+      if (matchedTable) {
+        activeTable = matchedTable.name;
+      }
+    }
+  }
+
+  if (!activeTable || !allTables.includes(activeTable)) {
+    activeTable = allTables[0];
+  }
+
+  const initialValues = {};
+  allTables.forEach(table => {
+    initialValues[table] = table === activeTable;
+  });
+
+  return initialValues;
+};
+
 const mergeArrays = (array1 = [], array2 = [], array1Key = '', array2Key = '') => {
   const result = [];
   for (let i = 0; i < array1.length; i++) {
@@ -483,6 +510,7 @@ const parseRecordValidations = record => {
 };
 
 export const WebformsUtils = {
+  getPamsWebformTabs,
   getWebformTabs,
   mergeArrays,
   onParseWebformData,

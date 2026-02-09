@@ -1210,6 +1210,9 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   public void propagateRulesAfterUpdateSchema(String datasetSchemaId, FieldSchemaVO fieldSchemaVO,
                                               DataType type, Long datasetId) {
 
+    final Long dataflowId = datasetService.getDataFlowIdById(datasetId);
+    final Boolean isBigdata = dataFlowControllerZuul.isBigDataflow(dataflowId);
+
     if (type != null) {
       // if we change the type we need to delete all rules
       rulesControllerZuul.deleteAutomaticRuleByReferenceId(datasetSchemaId, fieldSchemaVO.getId());
@@ -1226,7 +1229,10 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
               fieldSchemaVO.getType(), EntityTypeEnum.FIELD, datasetId, Boolean.FALSE);
       // update the dataset field value
       TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, datasetId));
-      datasetService.updateFieldValueType(datasetId, fieldSchemaVO.getId(), type);
+
+      if (Boolean.FALSE.equals(isBigdata)) {
+          datasetService.updateFieldValueType(datasetId, fieldSchemaVO.getId(), type);
+      }
 
       releaseCreateUpdateView(datasetId,
               SecurityContextHolder.getContext().getAuthentication().getName(), false);
@@ -2450,7 +2456,6 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         });
         dictionaryOriginTargetObjectId.putAll(dictionaryOriginTargetTableObjectId);
 
-        // Create the schema in the metabase
         Future<Long> datasetId = datasetMetabaseService.createEmptyDataset(DatasetTypeEnum.DESIGN,
                 nameToImportedSchema(schema.getIdDataSetSchema().toString(),
                         importClasses.getSchemaNames(), designs),
@@ -3294,9 +3299,13 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       } catch (InterruptedException e) {
         LOG.info("Propagate Error");
       }
+
       TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, datasetId));
-      datasetService.saveTablePropagation(datasetId, tableSchemaMapper.entityToClass(table));
+      if (Boolean.FALSE.equals(dataFlowControllerZuul.isBigDataflow(schema.getIdDataFlow()))) {
+          datasetService.saveTablePropagation(datasetId, tableSchemaMapper.entityToClass(table));
+      }
     }
+
     // save the schema with the new values
     schemasRepository.updateSchemaDocument(schema);
     // Create the view

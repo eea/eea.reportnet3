@@ -48,7 +48,8 @@ export const ManageDataflowForm = forwardRef(
       onResetData,
       onSearch,
       onSubmit,
-      refresh
+      refresh,
+      sncData
     },
     ref
   ) => {
@@ -186,7 +187,8 @@ export const ManageDataflowForm = forwardRef(
                 metadata.obligation.id,
                 undefined,
                 bigData,
-                selectedGroup.dataProviderGroupId
+                selectedGroup.dataProviderGroupId,
+                sncData === true ? true : undefined
               )
               : await DataflowService.create(
                 name,
@@ -194,7 +196,8 @@ export const ManageDataflowForm = forwardRef(
                 metadata.obligation.id,
                 undefined,
                 bigData,
-                selectedGroup.dataProviderGroupId
+                selectedGroup.dataProviderGroupId,
+                sncData === true ? true : undefined
               );
 
             if (pinned) {

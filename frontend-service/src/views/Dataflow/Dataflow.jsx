@@ -1867,27 +1867,42 @@ export const Dataflow = () => {
             onHide={onCloseIsShowPublicInfoDialog}
             visible={dataflowState.isShowPublicInfoDialogVisible}>
             <Checkbox
-              checked={dataflowState.showPublicInfo}
+              checked={dataflowState.data.sncData ? false : dataflowState.showPublicInfo}
+              disabled={!!dataflowState.data.sncData}
               id="showPublicInfoCheckbox"
               inputId="showPublicInfoCheckbox"
-              onChange={() =>
-                dataflowDispatch({
-                  type: 'SET_SHOW_PUBLIC_INFO',
-                  payload: { showPublicInfo: !dataflowState.showPublicInfo }
-                })
-              }
-              role="checkbox"
-            />
-            <label className={styles.showPublicInfo} htmlFor="showPublicInfoCheckbox">
-              <span
-                className={styles.pointer}
-                onClick={() =>
+              onChange={() => {
+                if (!dataflowState.data.sncData) {
                   dataflowDispatch({
                     type: 'SET_SHOW_PUBLIC_INFO',
                     payload: { showPublicInfo: !dataflowState.showPublicInfo }
-                  })
-                }>
-                {resourcesContext.messages['showPublicInfoDataflowCheckboxLabel']}
+                  });
+                }
+              }}
+              role="checkbox"
+            />
+            <label className={styles.showPublicInfo} htmlFor="showPublicInfoCheckbox" style={{
+              color: 'var(--main-font-color)',
+              cursor: (dataflowState.data.sncData) ? 'default' : 'pointer',
+              fontSize: '10pt',
+              fontWeight: 'bold',
+              marginLeft: '6px',
+              marginRight: '6px',
+              opacity: (dataflowState.data.sncData) ? 0.5 : 1
+            }}>
+              <span
+                className={dataflowState.data.sncData ? "" : styles.pointer}
+                onClick={() => {
+                  if (!dataflowState.data.sncData) {
+                    dataflowDispatch({
+                      type: 'SET_SHOW_PUBLIC_INFO',
+                      payload: { showPublicInfo: !dataflowState.showPublicInfo }
+                    });
+                  }
+                }}>
+                {dataflowState.data.sncData ?
+                  resourcesContext.messages['showPublicInfoDataflowCheckboxLabelNotDueToSnc']
+                  : resourcesContext.messages['showPublicInfoDataflowCheckboxLabel']}
               </span>
             </label>
           </ConfirmDialog>

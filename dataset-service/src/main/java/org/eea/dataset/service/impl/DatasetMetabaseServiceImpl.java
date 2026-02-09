@@ -630,93 +630,99 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
       String datasetSchemaId, Long dataflowId, Date dueDate, List<RepresentativeVO> representatives,
       Integer iterationDC) throws EEAException {
 
-    if (datasetType != null && dataflowId != null) {
+    if (datasetType == null || dataflowId == null) {
+        throw new EEAException("createEmptyDataset: Bad arguments");
+    }
+      final Boolean isBigData = dataflowControllerZuul.isBigDataflow(dataflowId);
       try {
-        DataSetMetabase dataset;
-        Map<Long, String> datasetIdsEmail = new HashMap<>();
-        Long idDesignDataset = 0L;
-        switch (datasetType) {
-          case REPORTING:
-            for (RepresentativeVO representative : representatives) {
-              datasetIdsEmail
-                  .putAll(fillAndSaveReportingDataset(representative, dataflowId, datasetSchemaId));
-            }
-            this.createGroupProviderAndAddUser(datasetIdsEmail, dataflowId);
-            if (iterationDC == 0) {
-              // Notification
-              kafkaSenderUtils.releaseNotificableKafkaEvent(
-                  EventType.ADD_DATACOLLECTION_COMPLETED_EVENT, null,
-                  NotificationVO.builder()
-                      .user(SecurityContextHolder.getContext().getAuthentication().getName())
-                      .dataflowId(dataflowId).build());
+          DataSetMetabase dataset;
+          Map<Long, String> datasetIdsEmail = new HashMap<>();
+          Long idDesignDataset = 0L;
+          switch (datasetType) {
+              case REPORTING:
+                  for (RepresentativeVO representative : representatives) {
+                      datasetIdsEmail
+                              .putAll(fillAndSaveReportingDataset(representative, dataflowId, datasetSchemaId, isBigData));
+                  }
+                  this.createGroupProviderAndAddUser(datasetIdsEmail, dataflowId);
+                  if (iterationDC == 0) {
+                      // Notification
+                      kafkaSenderUtils.releaseNotificableKafkaEvent(
+                              EventType.ADD_DATACOLLECTION_COMPLETED_EVENT, null,
+                              NotificationVO.builder()
+                                      .user(SecurityContextHolder.getContext().getAuthentication().getName())
+                                      .dataflowId(dataflowId).build());
 
-            }
-            break;
-          case DESIGN:
-            dataset = new DesignDataset();
-            fillDataset(dataset, datasetName, dataflowId, datasetSchemaId);
-            designDatasetRepository.save((DesignDataset) dataset);
-            recordStoreControllerZuul.createEmptyDataset(
-                LiteralConstants.DATASET_PREFIX + dataset.getId(), datasetSchemaId);
-            this.createSchemaGroup(dataset.getId());
-            idDesignDataset = dataset.getId();
-            break;
-          case COLLECTION:
-            dataset = new DataCollection();
-            fillDataset(dataset, datasetName, dataflowId, datasetSchemaId);
-            ((DataCollection) dataset).setDueDate(dueDate);
-            dataCollectionRepository.save((DataCollection) dataset);
-            recordStoreControllerZuul.createEmptyDataset(
-                LiteralConstants.DATASET_PREFIX + dataset.getId(), datasetSchemaId);
-            LOG.info("New Data Collection created into the dataflow {}. DatasetId {} with name {}",
-                dataflowId, dataset.getId(), datasetName);
-            this.createGroupDcAndAddUser(dataset.getId());
-            break;
-          case TEST:
-            dataset = new TestDataset();
-            fillDataset(dataset, datasetName, dataflowId, datasetSchemaId);
-            testDatasetRepository.save((TestDataset) dataset);
-            recordStoreControllerZuul.createEmptyDataset(
-                LiteralConstants.DATASET_PREFIX + dataset.getId(), datasetSchemaId);
-            LOG.info("New Test Dataset created into the dataflow {}. DatasetId {} with name {}",
-                dataflowId, dataset.getId(), datasetName);
-            this.createGroupDcAndAddUser(dataset.getId());
-            break;
-          default:
-            throw new EEAException("Unsupported datasetType: " + datasetType);
-        }
+                  }
+                  break;
+              case DESIGN:
+                  dataset = new DesignDataset();
+                  fillDataset(dataset, datasetName, dataflowId, datasetSchemaId);
+                  designDatasetRepository.save((DesignDataset) dataset);
+                  if (!isBigData) {
+                      recordStoreControllerZuul.createEmptyDataset(
+                              LiteralConstants.DATASET_PREFIX + dataset.getId(), datasetSchemaId);
+                  }
+                  this.createSchemaGroup(dataset.getId());
+                  idDesignDataset = dataset.getId();
+                  break;
+              case COLLECTION:
+                  dataset = new DataCollection();
+                  fillDataset(dataset, datasetName, dataflowId, datasetSchemaId);
+                  ((DataCollection) dataset).setDueDate(dueDate);
+                  dataCollectionRepository.save((DataCollection) dataset);
+                  if (!isBigData) {
+                      recordStoreControllerZuul.createEmptyDataset(
+                              LiteralConstants.DATASET_PREFIX + dataset.getId(), datasetSchemaId);
+                  }
+                  LOG.info("New Data Collection created into the dataflow {}. DatasetId {} with name {}",
+                          dataflowId, dataset.getId(), datasetName);
+                  this.createGroupDcAndAddUser(dataset.getId());
+                  break;
+              case TEST:
+                  dataset = new TestDataset();
+                  fillDataset(dataset, datasetName, dataflowId, datasetSchemaId);
+                  testDatasetRepository.save((TestDataset) dataset);
+                  if (!isBigData) {
+                      recordStoreControllerZuul.createEmptyDataset(
+                              LiteralConstants.DATASET_PREFIX + dataset.getId(), datasetSchemaId);
+                  }
+                  LOG.info("New Test Dataset created into the dataflow {}. DatasetId {} with name {}",
+                          dataflowId, dataset.getId(), datasetName);
+                  this.createGroupDcAndAddUser(dataset.getId());
+                  break;
+              default:
+                  throw new EEAException("Unsupported datasetType: " + datasetType);
+          }
 
-        try {
-          Thread.sleep(5000);
-        } catch (InterruptedException e) {
-          LOG.info("Propagate Error in thread sleep in method createEmptyDataset for dataSchemaId {} and dataflowId {}", datasetSchemaId, dataflowId);
-        }
+          try {
+              Thread.sleep(5000);
+          } catch (InterruptedException e) {
+              LOG.info("Propagate Error in thread sleep in method createEmptyDataset for dataSchemaId {} and dataflowId {}", datasetSchemaId, dataflowId);
+          }
 
-        return new AsyncResult<>(idDesignDataset);
+          return new AsyncResult<>(idDesignDataset);
 
       } catch (EEAException e) {
-        DataFlowVO dataflow = dataflowControllerZuul.getMetabaseById(dataflowId);
-        EventType failEvent = EventType.ADD_DATACOLLECTION_FAILED_EVENT;
-        if (null != dataflow && TypeDataflowEnum.REFERENCE.equals(dataflow.getType())) {
-          failEvent = EventType.REFERENCE_DATAFLOW_PROCESS_FAILED_EVENT;
-          LOG.error("Error processing the reference dataflow {}. Error message: {}",
-              dataflowId, e.getMessage(), e);
-        } else {
-          LOG.error("Error creating a new empty data collection for dataflowId {}. Error message: {}",
-              dataflowId, e.getMessage(), e);
-        }
+          DataFlowVO dataflow = dataflowControllerZuul.getMetabaseById(dataflowId);
+          EventType failEvent = EventType.ADD_DATACOLLECTION_FAILED_EVENT;
+          if (null != dataflow && TypeDataflowEnum.REFERENCE.equals(dataflow.getType())) {
+              failEvent = EventType.REFERENCE_DATAFLOW_PROCESS_FAILED_EVENT;
+              LOG.error("Error processing the reference dataflow {}. Error message: {}",
+                      dataflowId, e.getMessage(), e);
+          } else {
+              LOG.error("Error creating a new empty data collection for dataflowId {}. Error message: {}",
+                      dataflowId, e.getMessage(), e);
+          }
 
-        // Error notification
-        kafkaSenderUtils.releaseNotificableKafkaEvent(failEvent, null,
-            NotificationVO.builder()
-                .user(SecurityContextHolder.getContext().getAuthentication().getName())
-                .dataflowId(dataflowId).error(e.getMessage()).build());
-        throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-            EEAErrorMessage.EXECUTION_ERROR);
+          // Error notification
+          kafkaSenderUtils.releaseNotificableKafkaEvent(failEvent, null,
+                  NotificationVO.builder()
+                          .user(SecurityContextHolder.getContext().getAuthentication().getName())
+                          .dataflowId(dataflowId).error(e.getMessage()).build());
+          throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+                  EEAErrorMessage.EXECUTION_ERROR);
       }
-    }
-    throw new EEAException("createEmptyDataset: Bad arguments");
-
   }
 
   /**
@@ -748,26 +754,28 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
    * @return the map
    */
   private Map<Long, String> fillAndSaveReportingDataset(RepresentativeVO representative,
-      Long dataflowId, String datasetSchemaId) {
+      Long dataflowId, String datasetSchemaId, Boolean isBigData) {
 
-    ReportingDataset dataset = new ReportingDataset();
-    Map<Long, String> datasetIdsEmail = new HashMap<>();
-    DataProviderVO provider =
-        representativeControllerZuul.findDataProviderById(representative.getDataProviderId());
+      ReportingDataset dataset = new ReportingDataset();
+      Map<Long, String> datasetIdsEmail = new HashMap<>();
+      DataProviderVO provider =
+              representativeControllerZuul.findDataProviderById(representative.getDataProviderId());
 
-    fillDataset(dataset, provider.getLabel(), dataflowId, datasetSchemaId);
-    dataset.setDataProviderId(representative.getDataProviderId());
-    Long idDataset = reportingDatasetRepository.save(dataset).getId();
-    for (String email : representative.getLeadReporters().stream().map(LeadReporterVO::getEmail)
-        .collect(Collectors.toList())) {
-      datasetIdsEmail.put(idDataset, email);
-    }
-    recordStoreControllerZuul.createEmptyDataset(LiteralConstants.DATASET_PREFIX + idDataset,
-        datasetSchemaId);
-    LOG.info("New Reporting Dataset into the dataflow {}. DatasetId {} with name {}", dataflowId,
-        idDataset, provider.getLabel());
+      fillDataset(dataset, provider.getLabel(), dataflowId, datasetSchemaId);
+      dataset.setDataProviderId(representative.getDataProviderId());
+      Long idDataset = reportingDatasetRepository.save(dataset).getId();
+      for (String email : representative.getLeadReporters().stream().map(LeadReporterVO::getEmail)
+              .collect(Collectors.toList())) {
+          datasetIdsEmail.put(idDataset, email);
+      }
+      if (!isBigData) {
+          recordStoreControllerZuul.createEmptyDataset(LiteralConstants.DATASET_PREFIX + idDataset,
+                  datasetSchemaId);
+      }
+      LOG.info("New Reporting Dataset into the dataflow {}. DatasetId {} with name {}", dataflowId,
+              idDataset, provider.getLabel());
 
-    return datasetIdsEmail;
+      return datasetIdsEmail;
   }
 
   /**

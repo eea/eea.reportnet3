@@ -55,6 +55,12 @@ export const ValidationRepository = {
       data: { sqlRule: sqlSentence }
     }),
 
+  runSqlRuleAsProvider: async (datasetId, sqlSentence, showInternalFields, providerCode) =>
+    await HTTPRequester.post({
+      url: getUrl(ValidationConfig.runSqlRuleAsProvider, { datasetId, sqlSentence, showInternalFields, providerCode }),
+      data: { sqlRule: sqlSentence }
+    }),
+
   update: async (datasetId, validationRule) =>
     await HTTPRequester.update({
       url: getUrl(validationRule.automatic ? ValidationConfig.updateAutomatic : ValidationConfig.update, { datasetId }),
