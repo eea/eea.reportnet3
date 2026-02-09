@@ -31,7 +31,8 @@ const useBigButtonListRepresentative = ({
   onShowReleaseSnapshots,
   getDataReleaseSnapshots,
   onShowManagePreparationSetsDialog,
-  preparationSetsList
+  preparationSetsList,
+  setSelectedPreparationSet
 }) => {
   const resourcesContext = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
@@ -265,6 +266,7 @@ const useBigButtonListRepresentative = ({
         caption: set.datasetName,
         helpClassName: 'dataflow-dataset-help-step',
         handleRedirect: () => {
+          setSelectedPreparationSet(set);
           handleRedirect(
             getUrl(
               routes.PREPARATION_DATAFLOW_REPRESENTATIVE,
@@ -303,17 +305,9 @@ const useBigButtonListRepresentative = ({
   const getIsReleasing = () =>
     dataflowState?.data?.datasets?.some(dataset => dataset.isReleasing && dataset.dataProviderId === dataProviderId);
 
-  // const isReleased = dataflowState.data.datasets
-  //   .filter(dataset => dataset.dataProviderId === parseInt(representativeId))
-  //   .some(dataset => dataset.isReleased);
-
   const isReleased = (dataflowState?.data?.datasets ?? [])
     .filter(dataset => dataset.dataProviderId === parseInt(representativeId))
     .some(dataset => dataset.isReleased);
-
-  // const representative = dataflowState.data.representatives.find(
-  //   representative => representative.dataProviderId === dataProviderId
-  // );
 
   const representative = dataflowState?.data?.representatives?.find(
     representative => representative.dataProviderId === dataProviderId

@@ -39,6 +39,7 @@ export const BigButtonListRepresentative = ({
   preparationSetsList,
   representativeId,
   setIsReceiptLoading,
+  setSelectedPreparationSet,
   uniqRepresentatives
 }) => {
   const notificationContext = useContext(NotificationContext);
@@ -155,6 +156,7 @@ export const BigButtonListRepresentative = ({
               onShowHistoricReleases,
               onShowReleaseSnapshots,
               preparationSetsList,
+              setSelectedPreparationSet,
               uniqRepresentatives,
               representativeId: representativeId
             })

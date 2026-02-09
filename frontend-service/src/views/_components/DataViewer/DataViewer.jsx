@@ -89,6 +89,7 @@ export const DataViewer = ({
   onIsTableDataLoading,
   onLoadTableData,
   onRestoreData,
+  preparationSetCode,
   reporting,
   selectedRuleId,
   selectedRuleLevelError,
@@ -438,7 +439,8 @@ export const DataViewer = ({
           fields,
           levelError: levelErrorValidationsItems,
           qcCodes: tableId === selectedTableSchemaId ? groupedRules : undefined,
-          value: valueFilter
+          value: valueFilter,
+          code: preparationSetCode
         });
       } else {
         data = await DatasetService.getTableData({
