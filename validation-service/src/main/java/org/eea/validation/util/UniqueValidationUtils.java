@@ -67,7 +67,6 @@ public class UniqueValidationUtils {
   private static DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul;
 
   /** The max errors. */
-  @Value(value = "${validation.maximumErrors}")
   private static int maxErrors;
 
   /*
@@ -284,7 +283,7 @@ public class UniqueValidationUtils {
         stringQuery.append(",");
       }
     }
-    stringQuery.append(") as N from table_1 where column_1 is not null) as t where n>1) limit " + maxErrors + ";");
+    stringQuery.append(") as N from table_1 where column_1 is not null) as t where n>1) limit " + getMaxErrors() + ";");
     LOG.debug("Drools, Duplicated records query: " + stringQuery.toString());
     return stringQuery.toString();
 
@@ -340,7 +339,7 @@ public class UniqueValidationUtils {
       stringQuery.append(" and t1.column_" + i + " = t2.column_" + i);
       i++;
     }
-    stringQuery.append(" where t1.column_1 is null and t2.column_1 is not null limit " + maxErrors + ";");
+    stringQuery.append(" where t1.column_1 is null and t2.column_1 is not null limit " + getMaxErrors() + ";");
     return stringQuery.toString();
 
   }
@@ -471,6 +470,15 @@ public class UniqueValidationUtils {
     }
     tableValue.setTableValidations(tableValidations);
     saveTableValidations(tableValue);
+  }
+
+  @Value("${validation.maximumErrors}")
+  public void setMaxErrors(int value) {
+    UniqueValidationUtils.maxErrors = value;
+  }
+
+  public static int getMaxErrors() {
+    return maxErrors;
   }
 
 }
