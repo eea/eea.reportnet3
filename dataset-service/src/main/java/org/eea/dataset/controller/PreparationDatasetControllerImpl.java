@@ -173,8 +173,8 @@ public class PreparationDatasetControllerImpl implements PreparationDatasetContr
         try {
             preparationDatasetService.createAllEligiblePreparationSets(dataflowId, providerId);
         } catch (Exception e) {
-            LOG.error("Could not create preparation tables for datasetId {}, preparationCode {}", dataflowId, providerId);
-            throw e;
+            LOG.error("Could not create preparation tables for datasetId {}, providerId {}", dataflowId, providerId);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
         }
     }
 
