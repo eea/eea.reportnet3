@@ -14,6 +14,14 @@
           }
         },
         {
+          "key": "PREPARATION_DATASET_CREATION_FAILED_EVENT",
+          "navigateTo": {
+            "section": "DATAFLOW",
+            "parameters": ["dataflowId", "providerId"],
+            "hasQueryString": true
+          }
+        },
+        {
           "key": "IMPORT_REPORTING_DATASET_DATA_FAILED_EVENT",
           "navigateTo": {
             "section": "DATASET",
@@ -1292,6 +1300,14 @@
           }
         },
         {
+          "key": "PREPARATION_DATASET_CREATION_COMPLETED_EVENT",
+          "navigateTo": {
+            "section": "DATAFLOW",
+            "parameters": ["dataflowId", "providerId"],
+            "hasQueryString": true
+          }
+        },
+        {
           "key": "UPDATE_RELEASE_DATE_SUCCESS"
         },
         {
@@ -1612,6 +1628,14 @@
           "navigateTo": {
             "section": "DATAFLOW",
             "parameters": ["dataflowId", "dataflowName"]
+          }
+        },
+        {
+          "key": "PREPARATION_DATASET_CREATION_HAS_EMPTY_QUEUE_EVENT",
+          "navigateTo": {
+            "section": "DATAFLOW",
+            "parameters": ["dataflowId", "providerId"],
+            "hasQueryString": true
           }
         },
         {

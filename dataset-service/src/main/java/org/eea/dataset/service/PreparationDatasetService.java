@@ -45,7 +45,7 @@ public interface PreparationDatasetService {
 
     List<PreparationDatasetVO> findByDataflowIdAndProviderIdAndIsCreated(Long dataflowId, Long providerId, Boolean isCreated);
 
-    void createAllEligiblePreparationSets(Long dataflowId, Long providerId);
+    void createAllEligiblePreparationSets(Long dataflowId, Long providerId) throws EEAException;
 
     void copyParentDatasetDataToPreparationDataset(DataSetMetabaseVO parentDataset, String preparationCode) throws Exception;
 }
