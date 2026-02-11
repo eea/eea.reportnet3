@@ -1,4 +1,4 @@
-import { Fragment, useContext, useEffect, useRef, useState } from 'react';
+import { Fragment, useContext, useRef, useState } from 'react';
 import { Column } from 'primereact/column';
 import isEmpty from 'lodash/isEmpty';
 

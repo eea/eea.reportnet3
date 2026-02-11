@@ -13,6 +13,7 @@ import { getUrl } from 'repositories/_utils/UrlUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
 const useBigButtonListRepresentative = ({
+  bigData,
   code,
   dataflowId,
   dataflowState,
@@ -112,7 +113,7 @@ const useBigButtonListRepresentative = ({
       caption: resourcesContext.messages['managePreparationSets'],
       handleRedirect: () => onShowManagePreparationSetsDialog(true),
       layout: 'defaultBigButton',
-      visibility: !code && buttonsVisibility.managePreparationSets
+      visibility: bigData && !code && buttonsVisibility.managePreparationSets
     }
   ];
 
@@ -292,11 +293,18 @@ const useBigButtonListRepresentative = ({
       buttonIcon: isCreatingPreparationSets ? 'spinner' : 'createPreparationSets',
       buttonIconClass: isCreatingPreparationSets ? 'spinner' : '',
       caption: resourcesContext.messages['createPreparationSets'],
-      enabled: !isEmpty(notCreatedSets),
-      handleRedirect: () => onCreatePreparationSets(),
+      enabled: !isEmpty(notCreatedSets) && !dataflowState.hasEnableEditingDatasets,
+      handleRedirect: () =>
+        !isEmpty(notCreatedSets) && !dataflowState.hasEnableEditingDatasets && onCreatePreparationSets(),
       layout: 'defaultBigButton',
-      tooltip: isEmpty(notCreatedSets) ? resourcesContext.messages['preparationSetsCreated'] : undefined,
-      visibility: !code && buttonsVisibility.createPreparationSets
+      tooltip:
+        isEmpty(notCreatedSets) && preparationSetsList?.length > 0
+          ? resourcesContext.messages['preparationSetsCreated']
+          : !isEmpty(notCreatedSets) && dataflowState.hasEnableEditingDatasets
+          ? resourcesContext.messages['createPreparationSetsDisableEditTooltip']
+          : undefined,
+
+      visibility: bigData && !code && buttonsVisibility.createPreparationSets
     }
   ];
 

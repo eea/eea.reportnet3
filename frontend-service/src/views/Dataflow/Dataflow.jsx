@@ -1430,6 +1430,7 @@ export const Dataflow = () => {
     if (isNil(representativeId)) {
       return (
         <BigButtonList
+          bigData={dataflowState.data.bigData}
           className="dataflow-big-buttons-help-step"
           code={code}
           dataflowState={dataflowState}
@@ -1461,6 +1462,7 @@ export const Dataflow = () => {
     } else {
       return (
         <BigButtonListRepresentative
+          bigData={dataflowState.data.bigData}
           code={code}
           dataflowState={dataflowState}
           dataProviderId={dataProviderId}

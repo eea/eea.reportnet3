@@ -53,6 +53,7 @@ import { MetadataUtils } from 'views/_functions/Utils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const BigButtonList = ({
+  bigData,
   code,
   dataflowState,
   dataflowType,
@@ -645,6 +646,7 @@ export const BigButtonList = ({
     ));
 
   const renderBigButtonList = useBigButtonList({
+    bigData,
     code,
     dataflowId,
     dataflowState,

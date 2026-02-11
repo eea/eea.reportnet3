@@ -22,6 +22,7 @@ import { useBigButtonListRepresentative } from './_functions/Hooks/useBigButtonL
 import { useFilters } from 'views/_functions/Hooks/useFilters';
 
 export const BigButtonListRepresentative = ({
+  bigData,
   code,
   dataflowState,
   dataProviderId,
@@ -139,6 +140,7 @@ export const BigButtonListRepresentative = ({
         <div className={styles.splitButtonWrapper}>
           <div className={styles.datasetItem}>
             {useBigButtonListRepresentative({
+              bigData,
               code,
               dataflowState,
               dataProviderId,
