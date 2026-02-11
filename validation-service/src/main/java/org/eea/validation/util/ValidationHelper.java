@@ -296,6 +296,10 @@ public class ValidationHelper implements DisposableBean {
       }
       else {
         LOG.info("Process {} not found in processesMap" , processId);
+        LOG.info("Processes in map");
+        for (String key : processesMap.keySet()) {
+          LOG.info("{}",processesMap.get(key));
+        }
       }
     }
     return result;
@@ -312,6 +316,7 @@ public class ValidationHelper implements DisposableBean {
         user != null ? user : processControllerZuul.findById(processId).getUser());
 
     synchronized (processesMap) {
+      LOG.info("Adding process {} in processesMap", processId);
       processesMap.put(processId, process);
     }
   }
