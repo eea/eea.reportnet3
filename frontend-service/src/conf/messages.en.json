@@ -230,6 +230,7 @@
     "createBusinessDataflowDialogHeader": "Create new business dataflow",
     "createDataCollection": "Create data collections",
     "createPreparationSets": "Create preparation sets",
+    "createPreparationSetsDisableEditTooltip": "Editing is enabled in one or more datasets. Please disable editing in order to create the preparation sets.",
     "createDataCollectionConfirm": "You can no longer edit anything related to design datasets (tables, fields, snapshots, etc). You will be able to manage new lead reporters, QC checks and external integrations.",
     "createDataCollectionConfirmQuestion": "Are you sure you want to create a data collection?",
     "createDataCollectionError": "The creation of data collection at <a href='{:navigateTo}' title='{:dataflowName}'>{:shortDataflowName}</a> was unsuccessful. Please try again or contact the Service Desk if the issue persists.",

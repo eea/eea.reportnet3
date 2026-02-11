@@ -15,6 +15,7 @@ import { getUrl } from 'repositories/_utils/UrlUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
 const useBigButtonList = ({
+  bigData,
   code,
   dataflowId,
   dataflowState,
@@ -177,7 +178,7 @@ const useBigButtonList = ({
       caption: resourcesContext.messages['managePreparationSets'],
       handleRedirect: () => onShowManagePreparationSetsDialog(true),
       layout: 'defaultBigButton',
-      visibility: buttonsVisibility.managePreparationSets
+      visibility: bigData && buttonsVisibility.managePreparationSets
     }
   ];
 
@@ -518,11 +519,18 @@ const useBigButtonList = ({
       buttonIcon: isCreatingPreparationSets ? 'spinner' : 'createPreparationSets',
       buttonIconClass: isCreatingPreparationSets ? 'spinner' : '',
       caption: resourcesContext.messages['createPreparationSets'],
-      // enabled: !isEmpty(notCreatedSets),
-      handleRedirect: () => onCreatePreparationSets(),
+      enabled: !isEmpty(notCreatedSets) && !dataflowState.hasEnableEditingDatasets,
+      handleRedirect: () =>
+        !isEmpty(notCreatedSets) && !dataflowState.hasEnableEditingDatasets && onCreatePreparationSets(),
       layout: 'defaultBigButton',
-      tooltip: isEmpty(notCreatedSets) ? resourcesContext.messages['preparationSetsCreated'] : undefined,
-      visibility: !code && buttonsVisibility.createPreparationSets
+      tooltip:
+        isEmpty(notCreatedSets) && preparationSetsList?.length > 0
+          ? resourcesContext.messages['preparationSetsCreated']
+          : !isEmpty(notCreatedSets) && dataflowState.hasEnableEditingDatasets
+          ? resourcesContext.messages['createPreparationSetsDisableEditTooltip']
+          : undefined,
+
+      visibility: bigData && !code && buttonsVisibility.createPreparationSets
     }
   ];
 
@@ -649,9 +657,9 @@ const useBigButtonList = ({
         buttonIcon: isReleasing ? 'spinner' : 'released',
         buttonIconClass: isReleasing ? 'spinner' : 'released',
         caption: resourcesContext.messages['releaseDataCollection'],
-        enabled: !dataflowState.hasIcebergTables && dataflowState.isReleasable && !isReleasing,
+        enabled: !dataflowState.hasEnableEditingDatasets && dataflowState.isReleasable && !isReleasing,
         handleRedirect:
-          !dataflowState.hasIcebergTables && dataflowState.isReleasable && !isReleasing
+          !dataflowState.hasEnableEditingDatasets && dataflowState.isReleasable && !isReleasing
             ? () => onOpenReleaseConfirmDialog()
             : () => {},
         helpClassName: 'dataflow-big-buttons-release-help-step',
