@@ -27,7 +27,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -147,16 +146,11 @@ public class PreparationDatasetControllerImpl implements PreparationDatasetContr
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "preparationId is required");
         }
 
-        LOG.info("Deleting preparation dataset id={}", preparationId);
-
         try {
             preparationDatasetService.deletePreparationDatasetById(preparationId);
-
         } catch (EEAException e) {
             LOG.error("Error deleting preparation dataset id={}", preparationId, e);
-
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
-
         } catch (Exception e) {
             LOG.error("Unexpected error deleting preparation dataset id={}", preparationId, e);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Unexpected error while deleting preparation dataset");

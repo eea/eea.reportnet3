@@ -17,11 +17,9 @@ import java.util.Map;
 @Component
 public class PreparationDatasetCreationCompletedEvent implements NotificableEventHandler {
 
-    /** The representative controller zuul. */
     @Autowired
     private RepresentativeController.RepresentativeControllerZuul representativeControllerZuul;
 
-    /** The dataflow controller zuul. */
     @Autowired
     private DataFlowController.DataFlowControllerZuul dataFlowControllerZuul;
 
