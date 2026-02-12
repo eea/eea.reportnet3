@@ -84,7 +84,8 @@ const useBigButtonListRepresentative = ({
     if (
       isNil(dataflowState.data.referenceDatasets) ||
       dataflowState.data.representatives.length > 1 ||
-      dataflowState.hasCustodianPermissions
+      dataflowState.hasCustodianPermissions ||
+      code
     ) {
       return [];
     }
@@ -135,7 +136,7 @@ const useBigButtonListRepresentative = ({
       },
       true
     ),
-    visibility: buttonsVisibility.feedback
+    visibility: !code && buttonsVisibility.feedback
   };
 
   const helpButton = {
@@ -253,7 +254,7 @@ const useBigButtonListRepresentative = ({
       handleRedirect: dataflowState.isReceiptLoading ? () => {} : () => onLoadReceiptData(),
       infoStatus: dataflowState.isReceiptOutdated,
       layout: 'defaultBigButton',
-      visibility: buttonsVisibility.receipt
+      visibility: !code && buttonsVisibility.receipt
     }
   ];
 

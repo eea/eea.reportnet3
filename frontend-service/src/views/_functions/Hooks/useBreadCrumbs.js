@@ -103,11 +103,15 @@ export const useBreadCrumbs = ({
   const getPreparationDataflowCrumb = () => ({
     command: () =>
       navigate(
-        getUrl(routes.PREPARATION_DATAFLOW_REPRESENTATIVE, { dataflowId, representativeId: dataProviderId, code }, true)
+        getUrl(
+          routes.PREPARATION_DATAFLOW_REPRESENTATIVE,
+          { dataflowId, representativeId: representativeId || dataProviderId, code },
+          true
+        )
       ),
     href: getUrl(
       routes.PREPARATION_DATAFLOW_REPRESENTATIVE,
-      { dataflowId, representativeId: dataProviderId, code },
+      { dataflowId, representativeId: representativeId || dataProviderId, code },
       true
     ),
     label: selectedPreparationSet?.datasetName,
