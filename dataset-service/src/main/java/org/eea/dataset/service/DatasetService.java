@@ -563,7 +563,7 @@ public interface DatasetService {
    * @param datasetId the id dataset
    * @param idDatasetSchema the id dataset schema
    */
-  void initializeDataset(Long datasetId, String idDatasetSchema);
+  void initializeDataset(Long datasetId, String idDatasetSchema, boolean isBigDataflow);
 
 
 

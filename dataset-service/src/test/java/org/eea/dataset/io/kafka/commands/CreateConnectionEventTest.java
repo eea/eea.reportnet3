@@ -9,6 +9,7 @@ import org.eea.dataset.persistence.data.repository.TableRepository;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.DatasetService;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataflow.DataFlowController;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.utils.KafkaSenderUtils;
@@ -50,6 +51,9 @@ public class CreateConnectionEventTest {
   /** The kafka sender utils. */
   @Mock
   private KafkaSenderUtils kafkaSenderUtils;
+
+  @Mock
+  private DataFlowController.DataFlowControllerZuul dataFlowControllerZuul;
 
   /** The eea event VO. */
   private EEAEventVO eeaEventVO;
@@ -120,11 +124,13 @@ public class CreateConnectionEventTest {
   public void executeTest4() throws EEAException {
     eeaEventVO.setEventType(EventType.CONNECTION_CREATED_EVENT);
     data = new HashMap<>();
-    data.put("dataset_id", "dataset_1");
+    data.put("dataset_id", "1234");
     data.put("idDatasetSchema", "5ce524fad31fc52540abae73");
     eeaEventVO.setData(data);
+
+    Mockito.when(dataFlowControllerZuul.isBigDataflowDataset(Long.valueOf("1234"))).thenReturn(false);
     createConnectionCommand.execute(eeaEventVO);
-    Mockito.verify(datasetService, times(1)).initializeDataset(Mockito.any(), Mockito.any());
+    Mockito.verify(datasetService, times(1)).initializeDataset(1234L,"5ce524fad31fc52540abae73", false);
   }
 
 }

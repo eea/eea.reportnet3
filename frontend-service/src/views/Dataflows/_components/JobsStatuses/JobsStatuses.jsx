@@ -768,7 +768,9 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
           rowsPerPageOptions={[5, 10, 15]}
           sortField={sort.field}
           sortOrder={sort.order}
-          totalRecords={isFiltered ? filteredRecords : shouldRestrictToProviderData ? providersTotalRecords : totalRecords}
+          totalRecords={
+            isFiltered ? filteredRecords : shouldRestrictToProviderData ? providersTotalRecords : totalRecords
+          }
           value={jobsStatuses}>
           {getTableColumns()}
         </DataTable>
