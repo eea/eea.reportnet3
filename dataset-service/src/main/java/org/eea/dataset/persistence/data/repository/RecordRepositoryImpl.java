@@ -1,5 +1,6 @@
 package org.eea.dataset.persistence.data.repository;
 
+import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -86,6 +87,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
+import com.fasterxml.jackson.core.StreamReadConstraints;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import static org.eea.utils.LiteralConstants.*;
 
@@ -1362,7 +1365,16 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
         stmt.setString(parameterPosition, "%" + filters.getFieldValue() + "%");
       }
       ResultSet rs = stmt.executeQuery();
-      ObjectMapper mapper = new ObjectMapper();
+
+      final StreamReadConstraints constraints = StreamReadConstraints.builder()
+              .maxStringLength(50_000_000)
+              .build();
+
+      final ObjectMapper mapper = new ObjectMapper(
+              JsonFactory.builder()
+                      .streamReadConstraints(constraints)
+                      .build());
+
       while (rs.next()) {
         RecordValue record = new RecordValue();
         record.setId(rs.getString("id"));
