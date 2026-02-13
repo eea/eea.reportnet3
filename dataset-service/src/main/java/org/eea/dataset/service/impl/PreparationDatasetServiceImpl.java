@@ -127,7 +127,7 @@ public class PreparationDatasetServiceImpl implements PreparationDatasetService 
 
     @Override
     @Transactional
-    public void deletePreparationDatasetById(Long preparationId) throws EEAException {
+    public void deletePreparationDatasetById(Long preparationId) throws Exception {
         PreparationDataset preparationDataset = preparationDatasetRepository
                 .findById(preparationId)
                 .orElseThrow(() -> new EEAException("Preparation dataset not found"));
@@ -160,7 +160,7 @@ public class PreparationDatasetServiceImpl implements PreparationDatasetService 
 
                 final String parentTableName = parentTable.getNameTableSchema();
                 S3PathResolver preparationTableS3Path = new S3PathResolver(dataflowId, providerId, parentDatasetId, parentTableName, parentTableName, preparationCode, S3_PREPARATION_TABLE_NAME_FOLDER_PATH);
-
+                String preparationTableDremioQueryPathString = s3ServicePrivate.getTableAsFolderQueryPath(preparationTableS3Path, S3_PREPARATION_TABLE_AS_FOLDER_QUERY_PATH);
                 // if there are no tables to delete skip them (empty tables have no dremio objects)
 
                 if (!s3HelperPrivate.checkFolderExist(preparationTableS3Path, S3_PREPARATION_TABLE_NAME_FOLDER_PATH)) {
@@ -169,20 +169,22 @@ public class PreparationDatasetServiceImpl implements PreparationDatasetService 
                 }
                 LOG.info("Preparation table {} exist for datasetId {}. Starting demotion and deletion", parentTableName, parentDatasetId);
 
-                try {
-                    dremioHelperService.demoteFolderOrFile(preparationTableS3Path, parentTableName);
-                } catch (Exception ex) {
-                    // if for any reason it cannot be demoted we cannot continue
-                    LOG.error("Failed to demote Dremio preparation table before deletion for datasetId {} and table {}", parentDatasetId, parentTableName, ex);
-                    throw new EEAException("Failed to demote preparation table in Dremio", ex);
-                }
+                dropDremioTable(preparationTableDremioQueryPathString);
 
-                try {
-                    s3HelperPrivate.deleteFolder(preparationTableS3Path, S3_PREPARATION_TABLE_NAME_FOLDER_PATH);
-                } catch (Exception ex) {
-                    LOG.error("Failed to delete S3 folder for preparation table for datasetId {} and table {}", parentDatasetId, parentTableName, ex);
-                    throw new EEAException("Failed to delete preparation table data from S3", ex);
-                }
+//                try {
+//                    dremioHelperService.demoteFolderOrFile(preparationTableS3Path, parentTableName);
+//                } catch (Exception ex) {
+//                    // if for any reason it cannot be demoted we cannot continue
+//                    LOG.error("Failed to demote Dremio preparation table before deletion for datasetId {} and table {}", parentDatasetId, parentTableName, ex);
+//                    throw new EEAException("Failed to demote preparation table in Dremio", ex);
+//                }
+//
+//                try {
+//                    s3HelperPrivate.deleteFolder(preparationTableS3Path, S3_PREPARATION_TABLE_NAME_FOLDER_PATH);
+//                } catch (Exception ex) {
+//                    LOG.error("Failed to delete S3 folder for preparation table for datasetId {} and table {}", parentDatasetId, parentTableName, ex);
+//                    throw new EEAException("Failed to delete preparation table data from S3", ex);
+//                }
                 LOG.info("Preparation table {} demoted and deleted successfully for datasetId {}", parentTableName, parentDatasetId);
             }
         }
@@ -201,6 +203,7 @@ public class PreparationDatasetServiceImpl implements PreparationDatasetService 
                 .dataflowId(dataflowId)
                 .providerId(providerId)
                 .build();
+        kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.PREPARATION_DATASET_CREATION_STARTED_EVENT, null, notificationVO);
 
         // fetch all preparations datasets that haven't yet been created, `isCreated=false`
         List<PreparationDatasetVO> preparationDatasetVOS = this.findByDataflowIdAndProviderIdAndIsCreated(dataflowId, providerId, false);
@@ -322,6 +325,8 @@ public class PreparationDatasetServiceImpl implements PreparationDatasetService 
                LOG.info("Deleted successfully the existing table for preparation dataset for datasetId {} and parent table {} to recreate them.", parentDatasetId, parentTable);
            }
 
+            dropDremioTable(targetPreparationTableDremioQueryPathString);
+
             StringBuilder queryToCreatePrefilledTable = new StringBuilder("CREATE TABLE " + targetPreparationTableDremioQueryPathString + " AS SELECT " + preparationSelectClause + " FROM " + sourceParentTableDremioQueryPathString);
 
             if (!dremioHelperService.checkFolderPromoted(sourceParentTableS3FolderPath, sourceParentTableS3FolderPath.getTableName())) {
@@ -334,6 +339,14 @@ public class PreparationDatasetServiceImpl implements PreparationDatasetService 
             dremioHelperService.checkIfDremioProcessFinishedSuccessfully(String.valueOf(queryToCreatePrefilledTable), dremioProcessId, null);
             dremioHelperService.refreshTableMetadataAndPromote(null, targetPreparationTableDremioQueryPathString, targetPreparationTableDremioQueryPath, parentTableName);
         }
+    }
+
+    private void dropDremioTable(String targetPreparationTableDremioQueryPathString) throws Exception {
+        LOG.info("[CHRIS] Dropping table {}", targetPreparationTableDremioQueryPathString);
+        String dropQuery = "DROP TABLE IF EXISTS " + targetPreparationTableDremioQueryPathString;
+        String dropQueryProcessId = dremioHelperService.executeSqlStatement(dropQuery);
+        dremioHelperService.checkIfDremioProcessFinishedSuccessfully(String.valueOf(targetPreparationTableDremioQueryPathString), dropQueryProcessId, null);
+        LOG.info("[CHRIS] Table dropped {}", targetPreparationTableDremioQueryPathString);
     }
 
     private String constructRecordIdCreationForQuery() {

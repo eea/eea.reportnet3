@@ -1624,6 +1624,14 @@
         { "key": "DOCUMENT_UPLOADING_INIT_INFO" },
         { "key": "DELETE_DOCUMENT_INIT_INFO" },
         {
+          "key": "PREPARATION_DATASET_CREATION_STARTED_EVENT",
+          "navigateTo": {
+            "section": "DATAFLOW",
+            "parameters": ["dataflowId", "providerId"],
+            "hasQueryString": true
+          }
+        },
+        {
           "key": "RECEIVED_MESSAGE",
           "navigateTo": {
             "section": "DATAFLOW",

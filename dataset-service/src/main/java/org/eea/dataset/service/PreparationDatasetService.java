@@ -41,7 +41,7 @@ public interface PreparationDatasetService {
      *
      * @param preparationDatasetId the preparation dataset id
      */
-    void deletePreparationDatasetById(Long preparationDatasetId) throws EEAException;
+    void deletePreparationDatasetById(Long preparationDatasetId) throws Exception;
 
     List<PreparationDatasetVO> findByDataflowIdAndProviderIdAndIsCreated(Long dataflowId, Long providerId, Boolean isCreated);
 
