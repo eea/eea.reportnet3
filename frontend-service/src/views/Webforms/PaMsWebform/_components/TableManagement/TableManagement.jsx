@@ -81,7 +81,7 @@ export const TableManagement = ({
 
   useEffect(() => {
     onLoadParentTablesData();
-  }, [records]);
+  }, []);
 
   useEffect(() => {
     if (!isEmpty(parentTablesWithData)) {
@@ -185,10 +185,25 @@ export const TableManagement = ({
         parentTablesWithData,
         schemaTables
       );
+      
+      const sortFieldSchemaId = getFieldSchemaColumnIdByHeader(tableSchemaColumnsAux, 'Id');
+      const sortedRecords = parsedRecordsWithValidations.sort((a, b) => {
+        const aValue = a.dataRow?.find(row => Object.keys(row.fieldData)[0] === sortFieldSchemaId)?.fieldData?.[
+          sortFieldSchemaId
+        ];
+        const bValue = b.dataRow?.find(row => Object.keys(row.fieldData)[0] === sortFieldSchemaId)?.fieldData?.[
+          sortFieldSchemaId
+        ];
+
+        if (!isNil(aValue) && !isNil(bValue)) {
+          return parseInt(aValue, 10) - parseInt(bValue, 10);
+        }
+        return 0;
+      });
       tableManagementDispatch({
         type: 'INITIAL_LOAD',
         payload: {
-          records: parsedRecordsWithValidations,
+          records: sortedRecords,
           tableSchemaColumns: tableSchemaColumnsAux,
           tableColumns: isNil(overview) ? getOldPaMs(tableSchemaColumnsAux) : parseOverview(tableSchemaColumnsAux)
         }
@@ -252,7 +267,7 @@ export const TableManagement = ({
     tableManagementDispatch({ type: 'EDIT_SELECTED_RECORD', payload: updatedRecord });
   };
 
-  const onLoadParentTablesData = () => {
+  const onLoadParentTablesData = async () => {
     const configParentTables = Object.keys(
       getWebformTabs(
         tables.map(table => table.name.toUpperCase()),
