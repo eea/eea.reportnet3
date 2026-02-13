@@ -1,8 +1,8 @@
-import { Fragment, useContext, useEffect, useReducer } from 'react';
+import { Fragment, useContext, useEffect, useReducer, useState } from 'react';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import capitalize from 'lodash/capitalize';
-import isEmpty from 'lodash/isEmpty';
+import isEmpty from 'lodash/isEmpty'; 
 import isNil from 'lodash/isNil';
 import uniqueId from 'lodash/uniqueId';
 
@@ -48,6 +48,7 @@ export const PaMsWebform = ({
 
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
+  const [hasLoadedPams, setHasLoadedPams] = useState(false);
 
   const [paMsWebformState, paMsWebformDispatch] = useReducer(paMsWebformReducer, {
     data: [],
@@ -69,11 +70,12 @@ export const PaMsWebform = ({
   useEffect(() => initialLoad(), [tables]);
 
   useEffect(() => {
-    if (!isEmpty(paMsWebformState.data)) {
+    if (!isEmpty(paMsWebformState.data) && !hasLoadedPams) {
       onLoadPamsData();
+      setHasLoadedPams(true);
       paMsWebformDispatch({ type: 'HAS_ERRORS', payload: { value: hasErrors(paMsWebformState.data) } });
     }
-  }, [paMsWebformState.data, isDataUpdated]);
+  }, [paMsWebformState.data, isDataUpdated, hasLoadedPams]);
 
   useEffect(() => {
     setIsAddingSingleRecord(false);
@@ -304,7 +306,10 @@ export const PaMsWebform = ({
 
   const onToggleView = view => paMsWebformDispatch({ type: 'ON_TOGGLE_VIEW', payload: { view } });
 
-  const onUpdateData = () => paMsWebformDispatch({ type: 'ON_UPDATE_DATA', payload: { value: !isDataUpdated } });
+  const onUpdateData = () => {
+    setHasLoadedPams(false);
+    paMsWebformDispatch({ type: 'ON_UPDATE_DATA', payload: { value: !isDataUpdated } });
+  };
 
   const setIsAddingSingleRecord = value =>
     paMsWebformDispatch({ type: 'SET_IS_ADDING_SINGLE_RECORD', payload: { value } });
