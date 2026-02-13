@@ -1,5 +1,6 @@
 package org.eea.dataset.service.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.transaction.Transactional;
@@ -124,16 +125,73 @@ public class PreparationDatasetServiceImpl implements PreparationDatasetService 
         preparationDatasetRepository.save(preparationDataset);
     }
 
-
     @Override
     @Transactional
-    public void deletePreparationDatasetById(Long preparationId) throws EEAException {
+    public void deletePreparationDatasetById(Long preparationId) throws Exception {
+        PreparationDataset preparationDataset = preparationDatasetRepository
+                .findById(preparationId)
+                .orElseThrow(() -> new EEAException("Preparation dataset not found"));
 
-        if (!preparationDatasetRepository.existsById(preparationId)) {
-            throw new EEAException("Preparation dataset not found");
+        final Long dataflowId = preparationDataset.getDataflowId();
+        final Long providerId = preparationDataset.getProviderId();
+        final String preparationCode = preparationDataset.getCode();
+
+        LOG.info("Deleting preparation dataset with id {}, dataflowId {}, providerId {}, and code {}", preparationId, dataflowId, providerId, preparationCode);
+
+        // fetch all related parent datasets
+        List<DataSetMetabaseVO> datasetMetabaseVOS = datasetMetabaseService.getDatasetsByDataflowIdAndProviderId(dataflowId, providerId);
+
+        if (datasetMetabaseVOS.isEmpty()) {
+            throw new EEAException("Parent dataset metadata not found for preparation dataset");
         }
 
+        for (DataSetMetabaseVO datasetMetabaseVO : datasetMetabaseVOS) {
+            final Long parentDatasetId = datasetMetabaseVO.getId();
+            // fetch all tables
+            List<TableSchemaIdNameVO> parentTables = datasetSchemaService.getTableSchemasIds(parentDatasetId);
+
+            // iterate all tables and delete them one by one
+            LOG.info("Preparation dataset with parent datasetId {} has {} tables, proceeding to demotion and deletion if exists. Tables of parent dataset are: {}", parentDatasetId, parentTables.size(), parentTables.stream().map(TableSchemaIdNameVO::getNameTableSchema).collect(Collectors.toList()));
+            for (TableSchemaIdNameVO parentTable : parentTables) {
+                if (parentTable.getIdTableSchema() == null) {
+                    LOG.warn("Skipping deletion: parent table schema not found");
+                    continue;
+                }
+
+                final String parentTableName = parentTable.getNameTableSchema();
+                S3PathResolver preparationTableS3Path = new S3PathResolver(dataflowId, providerId, parentDatasetId, parentTableName, parentTableName, preparationCode, S3_PREPARATION_TABLE_NAME_FOLDER_PATH);
+                String preparationTableDremioQueryPathString = s3ServicePrivate.getTableAsFolderQueryPath(preparationTableS3Path, S3_PREPARATION_TABLE_AS_FOLDER_QUERY_PATH);
+                // if there are no tables to delete skip them (empty tables have no dremio objects)
+
+                if (!s3HelperPrivate.checkFolderExist(preparationTableS3Path, S3_PREPARATION_TABLE_NAME_FOLDER_PATH)) {
+                    LOG.info("Preparation table {} does not exist for datasetId {}, nothing to delete, skipping", parentTableName, parentDatasetId);
+                    continue;
+                }
+                LOG.info("Preparation table {} exist for datasetId {}. Starting demotion and deletion", parentTableName, parentDatasetId);
+
+                dropDremioTable(preparationTableDremioQueryPathString);
+
+//                try {
+//                    dremioHelperService.demoteFolderOrFile(preparationTableS3Path, parentTableName);
+//                } catch (Exception ex) {
+//                    // if for any reason it cannot be demoted we cannot continue
+//                    LOG.error("Failed to demote Dremio preparation table before deletion for datasetId {} and table {}", parentDatasetId, parentTableName, ex);
+//                    throw new EEAException("Failed to demote preparation table in Dremio", ex);
+//                }
+//
+//                try {
+//                    s3HelperPrivate.deleteFolder(preparationTableS3Path, S3_PREPARATION_TABLE_NAME_FOLDER_PATH);
+//                } catch (Exception ex) {
+//                    LOG.error("Failed to delete S3 folder for preparation table for datasetId {} and table {}", parentDatasetId, parentTableName, ex);
+//                    throw new EEAException("Failed to delete preparation table data from S3", ex);
+//                }
+                LOG.info("Preparation table {} demoted and deleted successfully for datasetId {}", parentTableName, parentDatasetId);
+            }
+        }
+
+        // delete metabase db record as a final step
         preparationDatasetRepository.deleteById(preparationId);
+        LOG.info("Successfully deleted preparation dataset with id {}, dataflowId {}, providerId {}, and code {}", preparationId, dataflowId, providerId, preparationCode);
     }
 
     @Override
@@ -145,6 +203,7 @@ public class PreparationDatasetServiceImpl implements PreparationDatasetService 
                 .dataflowId(dataflowId)
                 .providerId(providerId)
                 .build();
+        kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.PREPARATION_DATASET_CREATION_STARTED_EVENT, null, notificationVO);
 
         // fetch all preparations datasets that haven't yet been created, `isCreated=false`
         List<PreparationDatasetVO> preparationDatasetVOS = this.findByDataflowIdAndProviderIdAndIsCreated(dataflowId, providerId, false);
@@ -157,27 +216,49 @@ public class PreparationDatasetServiceImpl implements PreparationDatasetService 
 
         List<DataSetMetabaseVO> datasetMetabaseVOS = datasetMetabaseService.getDatasetsByDataflowIdAndProviderId(dataflowId, providerId);
 
-        // for each `preparation_dataset` record that has `is_created=false` and for all the dataset ids that need to be created within it
-        for (PreparationDatasetVO preparationDatasetVO : preparationDatasetVOS) {
-            datasetMetabaseVOS.forEach(datasetMetabaseVO -> {
-                try {
-                    LOG.info("Copying tables from parent dataset to preparation dataset for parent datasetId {} and code {} ", datasetMetabaseVO.getId(), preparationDatasetVO.getCode());
-                    copyParentDatasetDataToPreparationDataset(datasetMetabaseVO, preparationDatasetVO.getCode());
-                    LOG.info("Successfully copied tables from parent dataset to preparation dataset for parent datasetId {} and code {} ", datasetMetabaseVO.getId(), preparationDatasetVO.getCode());
-                } catch (Exception e) {
-                    LOG.error("Creation of preparation dataset failed for datasetId {} and code {}", datasetMetabaseVO.getId(), preparationDatasetVO.getCode(), e);
-                    try { kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.PREPARATION_DATASET_CREATION_FAILED_EVENT,null, notificationVO);
-                    } catch (EEAException ex) { throw new RuntimeException(ex); }
-                    throw new RuntimeException(e);
-                }
-            });
-            LOG.info("Creation of preparation dataset with code {} completed.", preparationDatasetVO.getCode());
-            preparationDatasetVO.setIsCreated(Boolean.TRUE);
-            preparationDatasetRepository.save(preparationDatasetMapper.classToEntity(preparationDatasetVO));
+        // collect all exceptions in order to throw error notification only once.
+        // this is because we are looping through many items but only want 1 notification at the front-end
+        List<Exception> exceptions = new ArrayList<>();
+
+        for (PreparationDatasetVO preparationDataset : preparationDatasetVOS) {
+            try {
+                createPreparationDataset(preparationDataset, datasetMetabaseVOS, notificationVO);
+                markPreparationDatasetAsCreated(preparationDataset);
+            } catch (Exception ex) {
+                exceptions.add(ex);
+                LOG.error("Preparation dataset creation failed for code {}: {}", preparationDataset.getCode(), ex.getMessage(), ex);
+            }
         }
 
-        kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.PREPARATION_DATASET_CREATION_COMPLETED_EVENT,null, notificationVO);
-        LOG.info("Successfully created preparation sets for dataflow {} and providerId {} for all datasets", dataflowId, providerId);
+        if (exceptions.isEmpty()) {
+            kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.PREPARATION_DATASET_CREATION_COMPLETED_EVENT, null, notificationVO);
+            LOG.info("Successfully created all preparation sets for dataflow {} and providerId {}", dataflowId, providerId);
+        } else {
+            try { kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.PREPARATION_DATASET_CREATION_FAILED_EVENT, null, notificationVO);
+            } catch (EEAException kafkaEx) { throw new RuntimeException("Failed to send failure notification", kafkaEx); }
+            throw new RuntimeException("One or more preparation datasets failed. Total failures: " + exceptions.size() + ". Exception thrown: " + exceptions.get(0).getMessage(), exceptions.get(0));
+        }
+    }
+
+    private void createPreparationDataset(PreparationDatasetVO preparationDataset, List<DataSetMetabaseVO> datasets, NotificationVO notificationVO) throws Exception {
+        for (DataSetMetabaseVO dataset : datasets) {
+            try {
+                copyParentDatasetDataToPreparationDataset(dataset, preparationDataset.getCode());
+                LOG.info("Copied tables for datasetId {} and preparationCode {}", dataset.getId(), preparationDataset.getCode());
+            } catch (Exception ex) {
+                notificationVO.setDatasetId(dataset.getId());
+                notificationVO.setDatasetName(dataset.getDataSetName());
+                notificationVO.setPreparationCode(preparationDataset.getCode());
+                LOG.error("Creation failed for datasetId {} and code {}", dataset.getId(), preparationDataset.getCode(), ex);
+                throw ex;
+            }
+        }
+        LOG.info("Preparation dataset with code {} completed", preparationDataset.getCode());
+    }
+
+    private void markPreparationDatasetAsCreated(PreparationDatasetVO preparationDataset) {
+        preparationDataset.setIsCreated(Boolean.TRUE);
+        preparationDatasetRepository.save(preparationDatasetMapper.classToEntity(preparationDataset));
     }
 
     @Override
@@ -186,7 +267,7 @@ public class PreparationDatasetServiceImpl implements PreparationDatasetService 
         if (providerId == 0) {
             LOG.info("Cannot create preparation datasets for DESIGN datasetId: {}",parentDataSetMetabaseVO.getId());
             return;
-        } 
+        }
         String parentDatasetSchemaId = parentDataSetMetabaseVO.getDatasetSchema();
         Long parentDatasetId = parentDataSetMetabaseVO.getId();
 
@@ -213,28 +294,22 @@ public class PreparationDatasetServiceImpl implements PreparationDatasetService 
 
             // if the parent dataset has no data then there is no file to copy, continue
             if (!s3HelperPrivate.checkFolderExist(sourceParentTableDremioQueryPath, S3_TABLE_NAME_FOLDER_PATH)) {
-                LOG.info("No tables to copy for datasetId {} and parent table {}, skipping this dataset.", parentDatasetId, parentTable);
+                LOG.info("No tables to copy for datasetId {} and parent table {}, skipping this dataset. Extra info: idTableSchema {}", parentDatasetId, parentTable.getNameTableSchema(), parentTable.getIdTableSchema());
                 continue;
             }
 
-            String providerCode = "''";
-            if (providerId != 0L) {
-                DataProviderVO providerMetadata = representativeControllerZuul.findDataProviderById(providerId);
-                providerCode = "'" + providerMetadata.getCode() + "'";
-            }
+            DataProviderVO providerMetadata = representativeControllerZuul.findDataProviderById(providerId);
+            String providerCode = "'" + providerMetadata.getCode() + "'";
 
             List<FieldSchemaVO> parentTableFields = parentTableSchema.getRecordSchema().getFieldSchema();
 
             StringBuilder preparationSelectClause = new StringBuilder(constructRecordIdCreationForQuery());
-
             preparationSelectClause.append(", ").append(providerCode).append(" AS ").append(UtilityClass.addQuotesToFieldNames(PARQUET_PROVIDER_CODE_COLUMN_HEADER)).append(", ");
 
             for (FieldSchemaVO fieldSchema : parentTableFields) {
-
                 if (fieldSchema.getType().equals(DataType.ATTACHMENT)) {
                     preparationSelectClause.append(" '' AS ");
                 }
-
                 preparationSelectClause.append(UtilityClass.addQuotesToFieldNames(fieldSchema.getName())).append(", ");
             }
 
@@ -250,6 +325,8 @@ public class PreparationDatasetServiceImpl implements PreparationDatasetService 
                LOG.info("Deleted successfully the existing table for preparation dataset for datasetId {} and parent table {} to recreate them.", parentDatasetId, parentTable);
            }
 
+            dropDremioTable(targetPreparationTableDremioQueryPathString);
+
             StringBuilder queryToCreatePrefilledTable = new StringBuilder("CREATE TABLE " + targetPreparationTableDremioQueryPathString + " AS SELECT " + preparationSelectClause + " FROM " + sourceParentTableDremioQueryPathString);
 
             if (!dremioHelperService.checkFolderPromoted(sourceParentTableS3FolderPath, sourceParentTableS3FolderPath.getTableName())) {
@@ -262,6 +339,14 @@ public class PreparationDatasetServiceImpl implements PreparationDatasetService 
             dremioHelperService.checkIfDremioProcessFinishedSuccessfully(String.valueOf(queryToCreatePrefilledTable), dremioProcessId, null);
             dremioHelperService.refreshTableMetadataAndPromote(null, targetPreparationTableDremioQueryPathString, targetPreparationTableDremioQueryPath, parentTableName);
         }
+    }
+
+    private void dropDremioTable(String targetPreparationTableDremioQueryPathString) throws Exception {
+        LOG.info("[CHRIS] Dropping table {}", targetPreparationTableDremioQueryPathString);
+        String dropQuery = "DROP TABLE IF EXISTS " + targetPreparationTableDremioQueryPathString;
+        String dropQueryProcessId = dremioHelperService.executeSqlStatement(dropQuery);
+        dremioHelperService.checkIfDremioProcessFinishedSuccessfully(String.valueOf(targetPreparationTableDremioQueryPathString), dropQueryProcessId, null);
+        LOG.info("[CHRIS] Table dropped {}", targetPreparationTableDremioQueryPathString);
     }
 
     private String constructRecordIdCreationForQuery() {

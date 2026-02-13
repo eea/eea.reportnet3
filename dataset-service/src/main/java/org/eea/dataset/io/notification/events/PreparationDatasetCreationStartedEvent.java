@@ -15,7 +15,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Component
-public class PreparationDatasetCreationCompletedEvent implements NotificableEventHandler {
+public class PreparationDatasetCreationStartedEvent implements NotificableEventHandler {
 
     @Autowired
     private RepresentativeController.RepresentativeControllerZuul representativeControllerZuul;
@@ -25,7 +25,7 @@ public class PreparationDatasetCreationCompletedEvent implements NotificableEven
 
     @Override
     public EventType getEventType() {
-        return EventType.PREPARATION_DATASET_CREATION_COMPLETED_EVENT;
+        return EventType.PREPARATION_DATASET_CREATION_STARTED_EVENT;
     }
 
     @Override

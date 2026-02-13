@@ -872,6 +872,9 @@ public enum EventType {
   PREPARATION_DATASET_CREATION_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
           "preparation_dataset_creation_completed_event", true),
 
+  PREPARATION_DATASET_CREATION_STARTED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+          "preparation_dataset_creation_started_event", true),
+
   PREPARATION_DATASET_CREATION_HAS_EMPTY_QUEUE_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
           "preparation_dataset_creation_has_empty_queue_event", true),
 

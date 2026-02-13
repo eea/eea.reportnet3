@@ -33,6 +33,7 @@ public class PreparationDatasetCreationHasEmptyQueueEvent implements Notificable
     @Override
     public Map<String, Object> getMap(NotificationVO notificationVO) throws EEAException {
         Long dataflowId = notificationVO.getDataflowId();
+        Long datasetId = notificationVO.getDatasetId();
         Long providerId = notificationVO.getProviderId();
 
         DataFlowVO dataflow = dataFlowControllerZuul.getMetabaseById(dataflowId);
@@ -47,6 +48,7 @@ public class PreparationDatasetCreationHasEmptyQueueEvent implements Notificable
         Map<String, Object> notification = new HashMap<>();
         notification.put("user", notificationVO.getUser());
         notification.put("dataflowId", dataflowId);
+        notification.put("datasetId", datasetId);
         notification.put("dataflowName", dataflow.getName());
         notification.put("providerId", providerId);
         notification.put("dataProvider", dataProviderLabel);
