@@ -92,6 +92,7 @@ import org.eea.multitenancy.DatasetId;
 import org.eea.multitenancy.TenantResolver;
 import org.eea.thread.EEADelegatingSecurityContextExecutorService;
 import org.eea.utils.LiteralConstants;
+import org.eea.utils.UtilityClass;
 import org.locationtech.jts.io.ParseException;
 import org.mozilla.universalchardet.UniversalDetector;
 import org.slf4j.Logger;
@@ -102,7 +103,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.io.InputStreamResource;
-import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -3461,8 +3461,56 @@ public class FileTreatmentHelper implements DisposableBean {
 
             try (ZipOutputStream out = new ZipOutputStream(new FileOutputStream(fileWriteZip.toString()))) {
                 for (TableSchema tableSchema : dataSetSchema.getTableSchemas()) {
-                    LOG.info("Exporting tableSchema {}", tableSchema);
-                    convertParquetFileZip(dataset.getId(), FileTypeEnum.CSV.getValue(), tableSchema.getNameTableSchema(), out, tableSchema.getIdTableSchema().toString(), datasetType, false);
+
+                    final String tableName = tableSchema.getNameTableSchema();
+                    final String tableId = tableSchema.getIdTableSchema().toString();
+
+                    LOG.info("Exporting tableSchema {}", tableId);
+                    convertParquetFileZip(dataset.getId(), FileTypeEnum.CSV.getValue(), tableName, out, tableId, datasetType, false);
+
+                    final boolean attachmentFieldExistsInSchema = tableSchema
+                            .getRecordSchema()
+                            .getFieldSchema()
+                            .stream()
+                            .anyMatch(field -> DataType.ATTACHMENT.equals(field.getType()));
+
+                    if (attachmentFieldExistsInSchema) {
+                        LOG.info("Checking for existing attachments in tableSchema {}", tableId);
+                        final S3PathResolver s3PathResolver = new S3PathResolver(
+                                dataset.getDataflowId(),
+                                dataset.getDataProviderId(),
+                                dataset.getId());
+                        s3PathResolver.setPath(S3_ATTACHMENTS_TABLE_PATH);
+                        s3PathResolver.setTableName(tableName);
+
+                        final List<S3Object> attachments = s3Helper.getFilenamesFromTableNames(s3PathResolver);
+
+                        for (S3Object s3Object : attachments) {
+                            final String realFileName = getRealFileName(s3Object, dataset, tableName);
+
+                            if (realFileName.isBlank()) {
+                                return;
+                            }
+                            try (final InputStream s3InputStream = s3Helper.streamS3File(s3Object.key())) {
+
+                                final ZipEntry eFieldAttach = new ZipEntry(tableName + "/" + realFileName);
+                                out.putNextEntry(eFieldAttach);
+
+                                byte[] buffer = new byte[8192];
+                                int bytesRead;
+                                while ((bytesRead = s3InputStream.read(buffer)) != -1) {
+                                    out.write(buffer, 0, bytesRead);
+                                }
+
+                            } catch (ZipException e) {
+                                LOG.info("Error creating file {} because already exist", s3Object.key(),
+                                        e);
+                            } catch (Exception e) {
+                                LOG.error("Error when creating the attachment file {}", s3Object.key());
+                            }
+                            out.closeEntry();
+                        }
+                    }
                 }
             } catch (Exception e) {
                 LOG.error("Error creating zip file for datasetId {}. Message: {}", dataset.getId(), e.getMessage(), e);
@@ -3474,6 +3522,35 @@ public class FileTreatmentHelper implements DisposableBean {
             LOG.error("Error exporting DL dataset data for datasetId {}. Message: {}", dataset.getId(), e.getMessage(), e);
             throw new EEAException("Error exporting DL reference dataset", e);
         }
+    }
+
+    private String getRealFileName(S3Object s3Object, DataSetMetabase dataset, String tableName) {
+
+        final String[] keyParts = s3Object.key().split("/");
+        final String fileName = keyParts[keyParts.length - 1];
+        final String[] fileNameParts = fileName.split("_");
+        final String fieldName = fileNameParts[0];
+        final String recordId = fileNameParts[1].split("\\.")[0];
+        final S3PathResolver s3PathResolver = new S3PathResolver(
+                dataset.getDataflowId(),
+                dataset.getDataProviderId(),
+                dataset.getId());
+        s3PathResolver.setPath(S3_PROVIDER_PATH);
+        final String path = s3Service.getS3Path(s3PathResolver).replace("/", "\".\"");
+
+
+        final String escapedTableName = UtilityClass.addQuotesToFieldNames(tableName);
+        final String escapedFieldName = UtilityClass.addQuotesToFieldNames(fieldName);
+
+        final String sql = "SELECT " + escapedTableName + "." + escapedFieldName + " FROM " +
+                "\"rn3-dataset\".\"rn3-dataset\".\"" + path + "\"." + escapedTableName + " WHERE " + escapedTableName + ".record_id = '" + recordId + "'";
+
+        final SqlRowSet rowSet = dremioJdbcTemplate.queryForRowSet(sql);
+
+        if (rowSet.next()) {
+            return rowSet.getString(fieldName);
+        }
+        return "";
     }
 
         /**
