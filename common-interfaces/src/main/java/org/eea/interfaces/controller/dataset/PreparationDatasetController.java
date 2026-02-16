@@ -74,7 +74,7 @@ public interface PreparationDatasetController {
      * @param jobId the jobId
      * @param fmeJobId the fmeJobId
      */
-    @PostMapping("/v2/preparations/importFileData/{datasetId}")
+    @PostMapping("/{datasetId}/preparations/importFileData")
     Map<String, Object> importBigFileDataForPreparation(@PathVariable("datasetId") Long datasetId,
                                                         @RequestParam("code") String preparationCode,
                                                         @RequestParam(value = "dataflowId", required = false) Long dataflowId,
@@ -88,7 +88,7 @@ public interface PreparationDatasetController {
                                                       @RequestParam(value = "fmeJobId", required = false) String fmeJobId) throws Exception;
 
 
-    @GetMapping("/v2/preparations/{datasetId}/generateImportPresignedUrl")
+    @GetMapping("/{datasetId}/preparations/generateImportPresignedUrl")
     JobPresignedUrlInfo generatePreparationImportPresignedUrl(
             @PathVariable("datasetId") Long datasetId,
             @RequestParam("code") String preparationCode,
