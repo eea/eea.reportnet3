@@ -272,7 +272,7 @@ public class PreparationDatasetControllerImpl implements PreparationDatasetContr
                     name = "execution.isolation.thread.timeoutInMilliseconds",
                     value = "7200000")
     })
-    @PostMapping("/v2/preparations/importFileData/{datasetId}")
+    @PostMapping("/{datasetId}/preparations/importFileData")
     @ApiOperation(value = "Import file data into preparation dataset (Big Data)")
     public Map<String, Object> importBigFileDataForPreparation(
             @PathVariable("datasetId") Long datasetId,
@@ -316,8 +316,8 @@ public class PreparationDatasetControllerImpl implements PreparationDatasetContr
         return result;
     }
 
-    @GetMapping("/v2/preparations/{datasetId}/generateImportPresignedUrl")
     @Override
+    @GetMapping("/{datasetId}/preparations/generateImportPresignedUrl")
     public JobPresignedUrlInfo generatePreparationImportPresignedUrl(
             @PathVariable("datasetId") Long datasetId,
             @RequestParam("code") String preparationCode,
