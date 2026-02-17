@@ -22,7 +22,7 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-@Table(name = "RECORD_VALIDATION")
+@Table(name = "record_validation")
 public class RecordValidation {
 
   /**

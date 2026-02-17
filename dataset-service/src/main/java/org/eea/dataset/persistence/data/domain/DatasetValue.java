@@ -23,7 +23,7 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-@Table(name = "DATASET_VALUE")
+@Table(name = "dataset_value")
 public class DatasetValue {
 
 

@@ -2581,12 +2581,27 @@ public class DatasetServiceImpl implements DatasetService {
         partitionDataSetMetabaseRepository.findFirstByIdDataSet_idAndUsername(datasetId, USER)
             .orElse(new PartitionDataSetMetabase()).getId();
 
-    DatasetValue dataset = new DatasetValue();
-    dataset.setId(datasetId);
+    LOG.info("[CHRIS]");
+    // fetch dataset_value here, if null then save it
+    DatasetValue datasetValue = datasetRepository.findById(datasetId).orElse(null);
+    if (datasetValue == null) {
+      datasetValue = new DatasetValue();
+      datasetValue.setId(datasetId);
+      datasetValue = datasetRepository.save(datasetValue);
+    }
+    LOG.info("[CHRIS] DatasetValue: {}", datasetValue);
 
-    TableValue tableValue = new TableValue();
-    tableValue.setId(tableRepository.findIdByIdTableSchema(tableSchemaId));
-    tableValue.setDatasetId(dataset);
+
+    String schemaId = tableSchema.getIdTableSchema().toString();
+    // fetch table_value here, if null then save it
+    TableValue tableValue = tableRepository.findByIdTableSchema(schemaId);
+    if (tableValue == null) {
+      tableValue = new TableValue();
+      tableValue.setDatasetId(datasetValue);
+      tableValue.setIdTableSchema(schemaId);
+      tableValue = tableRepository.save(tableValue);
+    }
+    LOG.info("[CHRIS] TableValue: {}", tableValue);
 
     List<RecordValue> recordValues = new ArrayList<>();
 

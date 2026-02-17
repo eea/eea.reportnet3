@@ -18,6 +18,7 @@ import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.annotations.BatchSize;
 
 /**
  * The Class TableValue.
@@ -26,7 +27,7 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-@Table(name = "TABLE_VALUE")
+@Table(name = "table_value")
 public class TableValue {
 
 
@@ -35,10 +36,13 @@ public class TableValue {
    * The id.
    */
   @Id
-  @SequenceGenerator(name = "table_sequence_generator", sequenceName = "table_sequence",
-      allocationSize = 1)
+  @SequenceGenerator(
+          name = "table_sequence_generator",
+          sequenceName = "table_sequence",
+          allocationSize = 1
+  )
   @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "table_sequence_generator")
-  @Column(name = "ID", columnDefinition = "serial")
+  @Column(name = "ID")
   private Long id;
 
   /**
