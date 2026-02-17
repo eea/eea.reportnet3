@@ -1,4 +1,4 @@
-import { Fragment, useContext, useEffect, useReducer, useRef, useState } from 'react';
+import { Fragment, useContext, useEffect, useReducer, useRef, useState, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import ReactTooltip from 'react-tooltip';
 
@@ -1833,6 +1833,13 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
       </label>
     </div>
   );
+  
+  const sortedWebformOptions = useMemo(() => {
+    if (!webformOptions?.length) return [];
+    const [notSelected, ...rest] = webformOptions;
+    const sorted = rest.sort((a, b) => (a.label || '').toLowerCase().localeCompare((b.label || '').toLowerCase()));
+    return [notSelected, ...sorted];
+  }, [webformOptions]);
 
   const renderWebformOptionsContent = () => {
     const webform = webformOptions.find(option => option.name === designerState.webform?.name);
@@ -1844,13 +1851,16 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
         <Dropdown
           appendTo={document.body}
           ariaLabel={'configureWebform'}
+          className={styles.webformDropdown}
+          filter
           inputId="configureWebformDropDown"
           onChange={e =>
             designerDispatch({ type: 'SET_SELECTED_WEBFORM', payload: { selectedWebform: e.target.value } })
           }
           optionLabel="label"
-          options={webformOptions}
+          options={sortedWebformOptions}
           placeholder={resourcesContext.messages['configureWebformPlaceholder']}
+          showFilterClear
           value={designerState.selectedWebform || webform}
         />
       </Fragment>
