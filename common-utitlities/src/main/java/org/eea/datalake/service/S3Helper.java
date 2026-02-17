@@ -7,6 +7,7 @@ import software.amazon.awssdk.transfer.s3.config.DownloadFilter;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 
 public interface S3Helper {
@@ -71,6 +72,10 @@ public interface S3Helper {
      * @return
      */
     File getFileFromS3(String key, String fileName, String path, String fileType) throws IOException;
+
+
+    public InputStream streamS3File(String key);
+
 
     /**
      * Gets file from S3 for export
