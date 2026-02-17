@@ -232,20 +232,6 @@ public class JobServiceImpl implements JobService {
         if (job.getJobType() == JobTypeEnum.IMPORT && numberOfCurrentJobs < maximumNumberOfInProgressImportJobs) {
             return true;
         } else if (jobType == JobTypeEnum.VALIDATION && !job.isRelease() && numberOfCurrentJobs < maximumNumberOfInProgressValidationJobs) {
-            if (Boolean.TRUE.equals(dataFlowControllerZuul.isBigDataflow(job.getDataflowId()))) {
-                DatasetTypeEnum datasetTypeEnum = dataSetControllerZuul.getDatasetType(job.getDatasetId());
-                if (datasetTypeEnum.equals(DatasetTypeEnum.DESIGN)) {
-                    int countDesignJobs = jobRepository.countByDataflowIdAndJobStatus(job.getDataflowId(), JobStatusEnum.IN_PROGRESS);
-                    if (countDesignJobs >= 1) {
-                        return false;
-                    }
-                } else if (datasetTypeEnum.equals(DatasetTypeEnum.REPORTING)) {
-                    int countReportingJobs = jobRepository.countByDataflowIdAndProviderIdAndJobStatusAndRelease(job.getDataflowId(), job.getProviderId(), JobStatusEnum.IN_PROGRESS, false);
-                    if (countReportingJobs >= 1) {
-                        return false;
-                    }
-                }
-            }
             return true;
         } else if (jobType == JobTypeEnum.COPY_TO_EU_DATASET && numberOfCurrentJobs < maximumNumberOfInProgressCopyToEuDatasetJobs) {
             return true;

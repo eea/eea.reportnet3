@@ -7,4 +7,6 @@ public interface RedisLockService {
   void releaseLock(String lockKey, String value);
 
   Map<String, String> listActiveLocks(String prefix);
+
+  Boolean lockExists(String lockKey);
 }

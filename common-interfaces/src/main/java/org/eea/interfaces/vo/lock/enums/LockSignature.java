@@ -82,7 +82,9 @@ public enum LockSignature {
   EXECUTE_EXTERNAL_INTEGRATION("IntegrationControllerImpl.executeExternalIntegration(..)"),
 
   /** DatasetSchemaControllerImpl.importSchemas(..) */
-  IMPORT_SCHEMAS("DatasetSchemaControllerImpl.importSchemas(..)");
+  IMPORT_SCHEMAS("DatasetSchemaControllerImpl.importSchemas(..)"),
+
+  CREATE_EMPTY_REFERENCE_TABLES("DatasetControllerImpl.createEmptyTablesV2(...)");
 
   /** The value. */
   private final String value;

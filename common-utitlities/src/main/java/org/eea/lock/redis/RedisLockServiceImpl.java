@@ -63,4 +63,12 @@ public class RedisLockServiceImpl implements RedisLockService {
     }
     return activeLocks;
   }
+
+  @Override
+  public Boolean lockExists(String lockKey){
+    if(redisTemplate.opsForValue().get(lockKey) != null){
+      return true;
+    }
+    return false;
+  }
 }

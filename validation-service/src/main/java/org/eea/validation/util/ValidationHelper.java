@@ -54,6 +54,8 @@ import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
+import org.eea.lock.redis.LockEnum;
+import org.eea.lock.redis.RedisLockService;
 import org.eea.lock.service.LockService;
 import org.eea.multitenancy.TenantResolver;
 import org.eea.thread.EEADelegatingSecurityContextExecutorService;
@@ -218,9 +220,14 @@ public class ValidationHelper implements DisposableBean {
   @Autowired
   private RepresentativeControllerZuul representativeControllerZuul;
 
+  @Autowired
+  private RedisLockService redisLockService;
+
   private final S3Service s3ServicePrivate;
 
   private final Map<String, String> validateAsProviderCodeByProcessId = new ConcurrentHashMap<>();
+
+  private static final long createReferenceTablesLockExpirationInMillis = 900000L;
 
   /**
    * Instantiates a new validation helper.
@@ -465,12 +472,28 @@ public class ValidationHelper implements DisposableBean {
       datasetController.updateStatistics(datasetId, true);
 
       List<DataSetMetabaseVO> combinedDatasets = getCombinedDatasets(dataset);
-      combinedDatasets.forEach(dataSetMetabaseVO -> {
+      for(DataSetMetabaseVO dataSetMetabaseVO: combinedDatasets){
         DataSetSchema schema;
+        String lockKey = LockEnum.CREATE_EMPTY_REFERENCE_TABLES.getValue() + "_" + dataset.getId();
+        String lockValue = LockSignature.CREATE_EMPTY_REFERENCE_TABLES.toString();
         try {
           schema = schemasRepository.findByIdDataSetSchema(new ObjectId(dataSetMetabaseVO.getDatasetSchema()));
-          for (TableSchema tableSchema : schema.getTableSchemas()) {
-            dataSetControllerZuul.createEmptyTablesV2(dataSetMetabaseVO, tableSchema.getIdTableSchema().toString());
+          //changes for #297461 parallel validations
+          if(dataset.getDatasetTypeEnum().equals(DatasetTypeEnum.REFERENCE)){
+            if (redisLockService.checkAndAcquireLock(lockKey, lockValue, createReferenceTablesLockExpirationInMillis)){
+              for (TableSchema tableSchema : schema.getTableSchemas()) {
+                dataSetControllerZuul.createEmptyTablesV2(dataSetMetabaseVO, tableSchema.getIdTableSchema().toString());
+              }
+            }
+            else{
+              //lock exists so another job is creating empty reference tables. need to wait
+              for (int i=0; i<20; i++){
+                Thread.sleep(3000);
+                if(!redisLockService.lockExists(lockKey)){
+                  break; //what if tables were not created correctly ?
+                }
+              }
+            }
           }
         } catch (FeignException fe) {
           String body = fe.contentUTF8();
@@ -484,7 +507,12 @@ public class ValidationHelper implements DisposableBean {
         } catch (Exception e) {
           throw new RuntimeException(e);
         }
-      });
+        finally {
+          if(dataset.getDatasetTypeEnum().equals(DatasetTypeEnum.REFERENCE)) {
+            redisLockService.releaseLock(lockKey, lockValue);
+          }
+        }
+      }
 
       DataSetSchema schema = schemasRepository.findByIdDataSetSchema(new ObjectId(dataset.getDatasetSchema()));
       List<Rule> rules = rulesRepository.findRulesEnabled(new ObjectId(dataset.getDatasetSchema()));
