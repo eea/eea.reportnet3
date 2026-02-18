@@ -2,6 +2,10 @@ package org.eea.validation.util.datalake;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eea.validation.util.ValidationDroolsUtils;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.io.ParseException;
+import org.locationtech.jts.io.WKBReader;
 
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -117,8 +121,37 @@ public class DremioNonSQLValidationUtils {
         return ValidationDroolsUtils.validateRegExpression(value,"REG_EXP_PHONE");
     }
 
-    public boolean isBlankPoint(String value) {
-      return value != null && !value.isEmpty();
+    public boolean isBlankPoint(byte[] byteArray) {
+      if (byteArray == null || byteArray.length == 0) {
+        return false;
+      }
+      try {
+        Geometry geometry = new WKBReader().read(byteArray);
+        if (geometry == null) {
+          return false;
+        }
+
+        if (!"Point".equalsIgnoreCase(geometry.getGeometryType())) {
+          return true;
+        }
+
+        Coordinate coordinates = geometry.getCoordinate();
+        if (coordinates == null) {
+          return false;
+        }
+
+        double x = coordinates.getX();
+        double y = coordinates.getY();
+
+        // Blank point [0,0] coordinates.
+        if (x == 0d && y == 0d) {
+          return false;
+        }
+
+        return true;
+      } catch (Exception e) {
+        return false;
+      }
     }
 }
 

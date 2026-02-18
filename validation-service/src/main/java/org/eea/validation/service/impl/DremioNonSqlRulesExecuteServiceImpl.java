@@ -430,7 +430,13 @@ public class DremioNonSqlRulesExecuteServiceImpl implements DremioRulesExecuteSe
             int parameterLength = method.getParameters().length;
             switch (parameterLength) {
                 case 1:
-                    isValid = (boolean) method.invoke(object, getConvertedString(rs, fieldName));  //DremioNonSQLValidationUtils methods
+                    Class<?> parameterType = method.getParameters()[0].getType();
+                    // In case of isBlankPoint where the method accepts a byte[], we cast the raw bytes from the row to byte[].
+                    if (parameterType.equals(byte[].class)) {
+                        isValid = (boolean) method.invoke(object, (byte[]) rs.getObject(fieldName));
+                    } else {
+                        isValid = (boolean) method.invoke(object, getConvertedString(rs, fieldName));
+                    }
                     break;
                 case 2:
                     isValid = (boolean) method.invoke(object, getConvertedString(rs, fieldName), parameters.get(1));  //ValidationDroolsUtils methods
