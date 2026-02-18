@@ -351,6 +351,22 @@ export const Dataflow = () => {
     }
   }, [notificationContext.hidden]);
 
+  const hasCreatePreparationSetsNotification = list =>
+    list?.some(notification =>
+      [
+        'PREPARATION_DATASET_CREATION_FAILED_EVENT',
+        'PREPARATION_DATASET_CREATION_HAS_EMPTY_QUEUE_EVENT',
+        'PREPARATION_DATASET_CREATION_COMPLETED_EVENT'
+      ].includes(notification.key)
+    );
+
+  useEffect(() => {
+    if (hasCreatePreparationSetsNotification(notificationContext.toShow)) {
+      setIsPageLoading(true);
+      setIsCreatingPreparationSets(false);
+    }
+  }, [notificationContext.toShow]);
+
   const exportImportMenuItems = [
     {
       command: () => onExportLeadReportersTemplate(),
@@ -679,9 +695,6 @@ export const Dataflow = () => {
       });
     } catch (error) {
       console.error('Dataflow - onCreatePreparationSets.', error);
-    } finally {
-      setIsPageLoading(true);
-      setIsCreatingPreparationSets(false);
     }
   };
 
