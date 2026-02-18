@@ -547,32 +547,38 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 try (ZipInputStream zip = new ZipInputStream(input)) {
                     ZipEntry entry = zip.getNextEntry();
                     while (null != entry) {
-                        String entryName = entry.getName();
-                        String mimeType = datasetService.getMimetype(entryName);
-                        File file = new File(folder, entryName);
-                        String filePath = file.getCanonicalPath();
+                        try {
+                            String entryName = entry.getName();
+                            String mimeType = datasetService.getMimetype(entryName);
+                            File file = new File(folder, entryName);
+                            String filePath = file.getCanonicalPath();
 
-                        // Prevent Zip Slip attack or skip if the entry is a directory
-                        if ((entryName.split("/").length > 1)
-                                || !FileTypeEnum.CSV.getValue().equalsIgnoreCase(mimeType) || entry.isDirectory()
-                                || !filePath.startsWith(saveLocationPath + File.separator)) {
-                            LOG.error("Ignored file from ZIP: {}. {}", entryName, importFileInDremioInfo);
+                            // Prevent Zip Slip attack or skip if the entry is a directory
+                            if ((entryName.split("/").length > 1)
+                                    || !FileTypeEnum.CSV.getValue().equalsIgnoreCase(mimeType) || entry.isDirectory()
+                                    || !filePath.startsWith(saveLocationPath + File.separator)) {
+                                LOG.error("Ignored file from ZIP: {}. {}", entryName, importFileInDremioInfo);
+                                entry = zip.getNextEntry();
+                                continue;
+                            }
+
+                            // Store the file in the persistence volume
+                            try (FileOutputStream output = new FileOutputStream(file)) {
+                                IOUtils.copyLarge(zip, output);
+                                LOG.info("Stored file {}. {}", file.getPath(), importFileInDremioInfo);
+                            } catch (Exception e) {
+                                LOG.error("Unexpected error! Error in copyLarge for saveLocationPath {}. {} Message: {}", saveLocationPath, importFileInDremioInfo, e.getMessage());
+                                throw e;
+                            }
+
                             entry = zip.getNextEntry();
-                            continue;
+                            files.add(file);
                         }
-
-                        // Store the file in the persistence volume
-                        try (FileOutputStream output = new FileOutputStream(file)) {
-                            IOUtils.copyLarge(zip, output);
-                            LOG.info("Stored file {}. {}", file.getPath(), importFileInDremioInfo);
-                        } catch (Exception e) {
-                            LOG.error("Unexpected error! Error in copyLarge for saveLocationPath {}. {} Message: {}", saveLocationPath, importFileInDremioInfo, e.getMessage());
-                            throw e;
+                        finally {
+                            if (entry != null){
+                                zip.closeEntry();
+                            }
                         }
-
-                        entry = zip.getNextEntry();
-                        files.add(file);
-
                     }
                 } catch (Exception e) {
                     LOG.error("Unexpected error! Error in storeImportFiles {}. Message: {}", importFileInDremioInfo, e.getMessage());
@@ -633,31 +639,38 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 try (ZipInputStream zip = new ZipInputStream(input)) {
                     ZipEntry entry = zip.getNextEntry();
                     while (null != entry) {
-                        String entryName = entry.getName();
-                        String mimeType = datasetService.getMimetype(entryName);
-                        File file = new File(folder, entryName);
-                        String filePath = file.getCanonicalPath();
+                        try {
+                            String entryName = entry.getName();
+                            String mimeType = datasetService.getMimetype(entryName);
+                            File file = new File(folder, entryName);
+                            String filePath = file.getCanonicalPath();
 
-                        // Prevent Zip Slip attack or skip if the entry is a directory
-                        if ((entryName.split("/").length > 1)
-                                || !FileTypeEnum.CSV.getValue().equalsIgnoreCase(mimeType) || entry.isDirectory()
-                                || !filePath.startsWith(saveLocationPath + File.separator)) {
-                            LOG.error("Ignored file from ZIP: {}. {}", entryName, importFileInDremioInfo);
+                            // Prevent Zip Slip attack or skip if the entry is a directory
+                            if ((entryName.split("/").length > 1)
+                                    || !FileTypeEnum.CSV.getValue().equalsIgnoreCase(mimeType) || entry.isDirectory()
+                                    || !filePath.startsWith(saveLocationPath + File.separator)) {
+                                LOG.error("Ignored file from ZIP: {}. {}", entryName, importFileInDremioInfo);
+                                entry = zip.getNextEntry();
+                                continue;
+                            }
+
+                            // Store the file in the persistence volume
+                            try (FileOutputStream output = new FileOutputStream(file)) {
+                                IOUtils.copyLarge(zip, output);
+                                LOG.info("Stored file {}. {}", file.getPath(), importFileInDremioInfo);
+                            } catch (Exception e) {
+                                LOG.error("Unexpected error! Error in copyLarge for saveLocationPath {}. {} Message: {}", saveLocationPath, importFileInDremioInfo, e.getMessage());
+                                throw e;
+                            }
+
                             entry = zip.getNextEntry();
-                            continue;
+                            files.add(file);
                         }
-
-                        // Store the file in the persistence volume
-                        try (FileOutputStream output = new FileOutputStream(file)) {
-                            IOUtils.copyLarge(zip, output);
-                            LOG.info("Stored file {}. {}", file.getPath(), importFileInDremioInfo);
-                        } catch (Exception e) {
-                            LOG.error("Unexpected error! Error in copyLarge for saveLocationPath {}. {} Message: {}", saveLocationPath, importFileInDremioInfo, e.getMessage());
-                            throw e;
+                        finally {
+                            if (entry != null){
+                                zip.closeEntry();
+                            }
                         }
-
-                        entry = zip.getNextEntry();
-                        files.add(file);
 
                     }
                 } catch (Exception e) {

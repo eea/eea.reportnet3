@@ -195,8 +195,6 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
       Long numberOfRecordsToBeInserted = convertCsvToParquet(csvFile, dataSetSchema, importFileInDremioInfo, tableSchemaVO);
       //update statistics
       updateImportStatistics(tableSchemaVO.getIdTableSchema(), numberOfRecordsToBeInserted.toString(), dataSetMetabase, fileExtension);
-      //for #297419 trying timeout between file handling to see if memory of pod gets reduced
-      Thread.sleep(30000);
     }
 
     //handle warnings
