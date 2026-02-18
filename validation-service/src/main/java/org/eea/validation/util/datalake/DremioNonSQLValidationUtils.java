@@ -116,6 +116,10 @@ public class DremioNonSQLValidationUtils {
         }
         return ValidationDroolsUtils.validateRegExpression(value,"REG_EXP_PHONE");
     }
+
+    public boolean isBlankPoint(String value) {
+      return value != null && !value.isEmpty();
+    }
 }
 
 
