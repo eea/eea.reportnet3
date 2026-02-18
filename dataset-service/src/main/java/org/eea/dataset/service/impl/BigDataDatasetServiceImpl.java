@@ -3050,90 +3050,96 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
             ZipEntry entry;
             while ((entry = zip.getNextEntry()) != null) {
+                try {
 
-                String entryName = entry.getName();
+                    String entryName = entry.getName();
 
-                if (entryName.equals(ETL_IMPORT_ATTACHMENTS_FOLDER + "/")
-                        || entryName.startsWith(ETL_IMPORT_ATTACHMENTS_FOLDER + "/")) {
+                    if (entryName.equals(ETL_IMPORT_ATTACHMENTS_FOLDER + "/")
+                            || entryName.startsWith(ETL_IMPORT_ATTACHMENTS_FOLDER + "/")) {
 
-                    if (!attachmentsFolderSeen) {
-                        attachmentsFolderSeen = true;
+                        if (!attachmentsFolderSeen) {
+                            attachmentsFolderSeen = true;
 
-                        // initialize all tables to false
-                        for (String table : tableNamesSet) {
-                            attachmentsExistPerTableName.put(table, false);
+                            // initialize all tables to false
+                            for (String table : tableNamesSet) {
+                                attachmentsExistPerTableName.put(table, false);
+                            }
                         }
                     }
-                }
 
-                File file = new File(etlImportFolder, entryName);
-                String canonicalPath = file.getCanonicalPath();
-                String basePath = etlImportFolder.getCanonicalPath() + File.separator;
+                    File file = new File(etlImportFolder, entryName);
+                    String canonicalPath = file.getCanonicalPath();
+                    String basePath = etlImportFolder.getCanonicalPath() + File.separator;
 
-                // Zip Slip protection
-                if (!canonicalPath.startsWith(basePath)) {
-                    LOG.error("Zip slip attempt: {}. jobId {}", entryName, jobId);
-                    continue;
-                }
+                    // Zip Slip protection
+                    if (!canonicalPath.startsWith(basePath)) {
+                        LOG.error("Zip slip attempt: {}. jobId {}", entryName, jobId);
+                        continue;
+                    }
 
-                boolean isDirectory = entry.isDirectory();
-                boolean isRootLevel = !entryName.contains("/");
+                    boolean isDirectory = entry.isDirectory();
+                    boolean isRootLevel = !entryName.contains("/");
 
-                boolean allowed = false;
-                boolean isCsv = false;
+                    boolean allowed = false;
+                    boolean isCsv = false;
 
-                if (isRootLevel) {
-                    if (!isDirectory) {
-                        // root-level files must be CSV
-                        String mimeType = datasetService.getMimetype(entryName);
-                        isCsv = FileTypeEnum.CSV.getValue().equalsIgnoreCase(mimeType);
-                        if (isCsv) {
-                            // extract table name from "tableName.csv"
-                            String baseName = entryName.substring(0, entryName.lastIndexOf('.')).toLowerCase();
-                            allowed = tableNamesSet.contains(baseName);
-                        } else {
-                            allowed = false;
+                    if (isRootLevel) {
+                        if (!isDirectory) {
+                            // root-level files must be CSV
+                            String mimeType = datasetService.getMimetype(entryName);
+                            isCsv = FileTypeEnum.CSV.getValue().equalsIgnoreCase(mimeType);
+                            if (isCsv) {
+                                // extract table name from "tableName.csv"
+                                String baseName = entryName.substring(0, entryName.lastIndexOf('.')).toLowerCase();
+                                allowed = tableNamesSet.contains(baseName);
+                            } else {
+                                allowed = false;
+                            }
+                        }
+                    } else {
+                        // nested entries must follow strict attachment rules
+                        allowed = isValidAttachmentEntry(entryName, isDirectory);
+                        if (allowed && !isDirectory && attachmentsFolderSeen) {
+
+                            // entryName : attachments/tableName/attachment
+                            String relative = entryName.substring((ETL_IMPORT_ATTACHMENTS_FOLDER + "/").length());
+
+                            String tableNameInZip = relative.substring(0, relative.indexOf('/')).toLowerCase();
+
+                            if (attachmentsExistPerTableName.containsKey(tableNameInZip)) {
+                                attachmentsExistPerTableName.put(tableNameInZip, true);
+                            }
                         }
                     }
-                } else {
-                    // nested entries must follow strict attachment rules
-                    allowed = isValidAttachmentEntry(entryName, isDirectory);
-                    if (allowed && !isDirectory && attachmentsFolderSeen) {
 
-                        // entryName : attachments/tableName/attachment
-                        String relative = entryName.substring((ETL_IMPORT_ATTACHMENTS_FOLDER + "/").length());
 
-                        String tableNameInZip = relative.substring(0, relative.indexOf('/')).toLowerCase();
-
-                        if (attachmentsExistPerTableName.containsKey(tableNameInZip)) {
-                            attachmentsExistPerTableName.put(tableNameInZip, true);
-                        }
+                    if (!allowed) {
+                        LOG.error("Ignored ZIP entry (invalid contract): {}. jobId {}", entryName, jobId);
+                        continue;
                     }
-                }
 
+                    // do not create directories yet because we only create them if they are not empty
+                    if (isDirectory) {
+                        continue;
+                    }
 
-                if (!allowed) {
-                    LOG.error("Ignored ZIP entry (invalid contract): {}. jobId {}", entryName, jobId);
-                    continue;
-                }
+                    // Ensure parent directories exist
+                    file.getParentFile().mkdirs();
 
-                // do not create directories yet because we only create them if they are not empty
-                if (isDirectory) {
-                    continue;
-                }
+                    // Write file
+                    try (FileOutputStream output = new FileOutputStream(file)) {
+                        IOUtils.copyLarge(zip, output);
+                        LOG.info("Stored file {}. jobId {}", file.getPath(), jobId);
+                    }
 
-                // Ensure parent directories exist
-                file.getParentFile().mkdirs();
-
-                // Write file
-                try (FileOutputStream output = new FileOutputStream(file)) {
-                    IOUtils.copyLarge(zip, output);
-                    LOG.info("Stored file {}. jobId {}", file.getPath(), jobId);
-                }
-
-                // gather root csv files for import
-                if (isCsv && isRootLevel) {
-                    files.add(file);
+                    // gather root csv files for import
+                    if (isCsv && isRootLevel) {
+                        files.add(file);
+                    }
+                } finally {
+                    if(entry != null){
+                        zip.closeEntry();
+                    }
                 }
             }
             // check if csv files for import were provided
