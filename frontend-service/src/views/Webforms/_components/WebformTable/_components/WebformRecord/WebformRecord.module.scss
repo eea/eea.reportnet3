@@ -103,7 +103,7 @@
     justify-content: space-between;
     max-width:100%;
     align-items: flex-end;
-    &:not(:has(~ .fieldsBlock h3)):not(:last-child) > div:first-child{
+    &:not(:has(~ .fieldsBlock:has(h3))):not(:last-child) > div:first-child{
       flex:1 0 0;
     }
     > div:not([class]):first-child{
