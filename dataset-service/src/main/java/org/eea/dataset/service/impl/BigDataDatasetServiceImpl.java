@@ -3048,9 +3048,9 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         try (InputStream input = new FileInputStream(s3File);
              ZipInputStream zip = new ZipInputStream(input)) {
 
-            ZipEntry entry = null;
-            try {
-                while ((entry = zip.getNextEntry()) != null) {
+            ZipEntry entry;
+            while ((entry = zip.getNextEntry()) != null) {
+                try {
 
                     String entryName = entry.getName();
 
@@ -3136,11 +3136,10 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                     if (isCsv && isRootLevel) {
                         files.add(file);
                     }
-                }
-            }
-            finally {
-                if(entry != null){
-                    zip.closeEntry();
+                } finally {
+                    if(entry != null){
+                        zip.closeEntry();
+                    }
                 }
             }
             // check if csv files for import were provided
