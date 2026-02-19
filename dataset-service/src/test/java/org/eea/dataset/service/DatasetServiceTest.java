@@ -2991,7 +2991,7 @@ DatasetServiceTest {
         .thenReturn("fieldId");
 
 
-    datasetService.initializeDataset(1L, "5cf0e9b3b793310e9ceca190");
+    datasetService.initializeDataset(1L, "5cf0e9b3b793310e9ceca190", false);
     Mockito.verify(attachmentRepository, times(1)).saveAll(Mockito.any());
   }
 
@@ -3049,7 +3049,7 @@ DatasetServiceTest {
     attachment.setFieldValue(field);
     when(attachmentRepository.findAll()).thenReturn(Arrays.asList(attachment));
 
-    datasetService.initializeDataset(1L, "5cf0e9b3b793310e9ceca190");
+    datasetService.initializeDataset(1L, "5cf0e9b3b793310e9ceca190", false);
     Mockito.verify(recordRepository, times(1)).saveAll(Mockito.any());
   }
 
@@ -3117,7 +3117,7 @@ DatasetServiceTest {
 
     attachment.setContent(expectedResult);
 
-    datasetService.initializeDataset(1L, "5cf0e9b3b793310e9ceca190");
+    datasetService.initializeDataset(1L, "5cf0e9b3b793310e9ceca190", false);
     Mockito.verify(statisticsService, times(1)).saveStatistics(Mockito.any());
 
   }

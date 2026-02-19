@@ -3,6 +3,7 @@ package org.eea.dataset.kafka.io.event;
 import org.apache.commons.lang.StringUtils;
 import org.eea.dataset.persistence.data.repository.TableRepository;
 import org.eea.dataset.service.DatasetService;
+import org.eea.interfaces.controller.dataflow.DataFlowController;
 import org.eea.kafka.commands.AbstractEEAEventHandlerCommand;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
@@ -35,6 +36,9 @@ public class CreateConnectionEvent extends AbstractEEAEventHandlerCommand {
   @Autowired
   private TableRepository tableRepository;
 
+  @Autowired
+  private DataFlowController.DataFlowControllerZuul dataFlowControllerZuul;
+
   /**
    * Gets the event type.
    *
@@ -62,10 +66,13 @@ public class CreateConnectionEvent extends AbstractEEAEventHandlerCommand {
         TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, idDataset));
         // Dataset data and statistics initialization. Check first if this is not an error and the
         // dataset is already initialized
-        if (tableRepository.count() > 0) {
+        final boolean isBigDataflow = dataFlowControllerZuul.isBigDataflowDataset(idDataset);
+        // TODO Check if there is a way to know if a BigData table is initialized just like a Citus is
+        // TODO initialized with by checking tableRepository.count() > 0
+        if (!isBigDataflow && tableRepository.count() > 0) {
           LOG_ERROR.error("The dataset {} is already initialized", idDataset);
         } else {
-          datasetService.initializeDataset(idDataset, idDatasetSchema);
+          datasetService.initializeDataset(idDataset, idDatasetSchema, isBigDataflow);
         }
 
       } else {

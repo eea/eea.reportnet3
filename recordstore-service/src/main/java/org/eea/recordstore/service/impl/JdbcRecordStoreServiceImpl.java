@@ -329,86 +329,102 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   public void createSchemas(Map<Long, String> datasetIdsAndSchemaIds, Long dataflowId,
                             boolean isCreation, boolean isMaterialized) {
 
-    // Initialize resources
-    try (Connection connection = dataSource.getConnection();
-         Statement statement = connection.createStatement();
-         BufferedReader br =
-                 new BufferedReader(new InputStreamReader(resourceFile.getInputStream()))) {
+    final boolean isBigDataflow = dataflowControllerZuul.isBigDataflow(dataflowId);
 
-      // Read file and create queries
-      String command;
-      while ((command = br.readLine()) != null) {
-        for (Long datasetId : datasetIdsAndSchemaIds.keySet()) {
-          statement.addBatch(
-                  command.replace("%dataset_name%", LiteralConstants.DATASET_PREFIX + datasetId)
-                          .replace("%user%", userPostgreDb));
-        }
-      }
+    if (!isBigDataflow) {
+      // Initialize resources
+      try (Connection connection = dataSource.getConnection();
+           Statement statement = connection.createStatement();
+           BufferedReader br =
+                   new BufferedReader(new InputStreamReader(resourceFile.getInputStream()))) {
 
-      // granting access to the rest of the database users. This way all the micros will be able to
-      // use their users
-      for (Long datasetId : datasetIdsAndSchemaIds.keySet()) {
-        statement.addBatch(String.format(GRANT_ALL_PRIVILEGES_ON_SCHEMA,
-                LiteralConstants.DATASET_PREFIX + datasetId, datasetUsers));
-        statement.addBatch(String.format(GRANT_ALL_PRIVILEGES_ON_ALL_TABLES_ON_SCHEMA,
-                LiteralConstants.DATASET_PREFIX + datasetId, datasetUsers));
-        statement.addBatch(String.format(GRANT_ALL_PRIVILEGES_ON_ALL_SEQUENCES_ON_SCHEMA,
-                LiteralConstants.DATASET_PREFIX + datasetId, datasetUsers));
-      }
-
-      // Execute queries and commit results
-      statement.executeBatch();
-      statement.clearBatch();
-      LOG.info("{} Schemas created as part of DataCollection creation.",
-              datasetIdsAndSchemaIds.size());
-      // waiting X seconds before releasing notifications, so database is able to write the
-      // creation of all datasets
-      Thread.sleep(timeToWaitBeforeReleasingNotification);
-
-      //todo: add the create empty tables logic during data collection
-      /*if (Boolean.TRUE.equals(dataflowControllerZuul.isBigDataflow(dataflowId))) {
-        List<DataSetMetabaseVO> combinedDatasets = getCombinedDatasets(dataflowId);
-        combinedDatasets.forEach(dataSetMetabaseVO -> {
-          try {
-            datasetControllerZuul.createEmptyTables(dataSetMetabaseVO);
-          } catch (Exception e) {
-            throw new RuntimeException(e);
+        // Read file and create queries
+        String command;
+        while ((command = br.readLine()) != null) {
+          for (Long datasetId : datasetIdsAndSchemaIds.keySet()) {
+            statement.addBatch(
+                    command.replace("%dataset_name%", LiteralConstants.DATASET_PREFIX + datasetId)
+                            .replace("%user%", userPostgreDb));
           }
-        });
-        LOG.info("Dremio has created empty tables for all datasets");
-      }*/
+        }
 
+        // granting access to the rest of the database users. This way all the micros will be able to
+        // use their users
+        for (Long datasetId : datasetIdsAndSchemaIds.keySet()) {
+          statement.addBatch(String.format(GRANT_ALL_PRIVILEGES_ON_SCHEMA,
+                  LiteralConstants.DATASET_PREFIX + datasetId, datasetUsers));
+          statement.addBatch(String.format(GRANT_ALL_PRIVILEGES_ON_ALL_TABLES_ON_SCHEMA,
+                  LiteralConstants.DATASET_PREFIX + datasetId, datasetUsers));
+          statement.addBatch(String.format(GRANT_ALL_PRIVILEGES_ON_ALL_SEQUENCES_ON_SCHEMA,
+                  LiteralConstants.DATASET_PREFIX + datasetId, datasetUsers));
+        }
 
-      LOG.info("Releasing notifications via Kafka");
-      // Release events to initialize databases content
-      releaseConnectionCreatedEvents(datasetIdsAndSchemaIds, isMaterialized);
+        // Execute queries and commit results
+        statement.executeBatch();
+        statement.clearBatch();
+        LOG.info("{} Schemas created as part of DataCollection creation.",
+                datasetIdsAndSchemaIds.size());
+        // waiting X seconds before releasing notifications, so database is able to write the
+        // creation of all datasets
+        Thread.sleep(timeToWaitBeforeReleasingNotification);
 
-      // Release the lock
-      String methodSignature = isCreation ? LockSignature.CREATE_DATA_COLLECTION.getValue()
-              : LockSignature.UPDATE_DATA_COLLECTION.getValue();
-      Map<String, Object> lockCriteria = new HashMap<>();
-      lockCriteria.put(LiteralConstants.SIGNATURE, methodSignature);
-      lockCriteria.put(LiteralConstants.DATAFLOWID, dataflowId);
-      lockService.removeLockByCriteria(lockCriteria);
+        LOG.info("Releasing notifications via Kafka");
+        // Release events to initialize databases content
+        releaseConnectionCreatedEvents(datasetIdsAndSchemaIds, isMaterialized);
 
-      // command to assign national coordinators and end the dataCollectionProcess.
-      Map<String, Object> result = new HashMap<>();
-      result.put("dataflowId", dataflowId);
-      result.put("isCreation", isCreation);
-      kafkaSenderUtils.releaseKafkaEvent(EventType.DATACOLLECTION_NATIONAL_COORDINATOR_EVENT,
-              result);
+        // Release the lock
+        String methodSignature = isCreation ? LockSignature.CREATE_DATA_COLLECTION.getValue()
+                : LockSignature.UPDATE_DATA_COLLECTION.getValue();
+        Map<String, Object> lockCriteria = new HashMap<>();
+        lockCriteria.put(LiteralConstants.SIGNATURE, methodSignature);
+        lockCriteria.put(LiteralConstants.DATAFLOWID, dataflowId);
+        lockService.removeLockByCriteria(lockCriteria);
 
-    } catch (SQLException | IOException e) {
-      LOG.error("Error creating schemas. Rolling back: ", e);
-      // This method will release the lock
-      dataCollectionControllerZuul.undoDataCollectionCreation(
-              new ArrayList<>(datasetIdsAndSchemaIds.keySet()), dataflowId, isCreation);
-    } catch (InterruptedException e) {
-      LOG.error("Error sleeping thread before releasing notification kafka events", e);
-      Thread.currentThread().interrupt();
-    } catch (Exception e) {
-      LOG.error("Unexpected error! Error in createSchemas for dataflowId {}. Message: {}", dataflowId, e.getMessage());
-      throw e;
+        // command to assign national coordinators and end the dataCollectionProcess.
+        Map<String, Object> result = new HashMap<>();
+        result.put("dataflowId", dataflowId);
+        result.put("isCreation", isCreation);
+        kafkaSenderUtils.releaseKafkaEvent(EventType.DATACOLLECTION_NATIONAL_COORDINATOR_EVENT,
+                result);
+
+      } catch (SQLException | IOException e) {
+        LOG.error("Error creating schemas. Rolling back: ", e);
+        // This method will release the lock
+        dataCollectionControllerZuul.undoDataCollectionCreation(
+                new ArrayList<>(datasetIdsAndSchemaIds.keySet()), dataflowId, isCreation);
+      } catch (InterruptedException e) {
+        LOG.error("Error sleeping thread before releasing notification kafka events", e);
+        Thread.currentThread().interrupt();
+      } catch (Exception e) {
+        LOG.error("Unexpected error! Error in createSchemas for dataflowId {}. Message: {}", dataflowId, e.getMessage());
+        throw e;
+      }
+    }
+    else {
+      try {
+        LOG.info("Releasing notifications via Kafka");
+        // Release events to initialize databases content
+        releaseConnectionCreatedEvents(datasetIdsAndSchemaIds, isMaterialized);
+
+        // Release the lock
+        String methodSignature = isCreation ? LockSignature.CREATE_DATA_COLLECTION.getValue()
+                : LockSignature.UPDATE_DATA_COLLECTION.getValue();
+        Map<String, Object> lockCriteria = new HashMap<>();
+        lockCriteria.put(LiteralConstants.SIGNATURE, methodSignature);
+        lockCriteria.put(LiteralConstants.DATAFLOWID, dataflowId);
+        lockService.removeLockByCriteria(lockCriteria);
+
+        // command to assign national coordinators and end the dataCollectionProcess.
+        Map<String, Object> result = new HashMap<>();
+        result.put("dataflowId", dataflowId);
+        result.put("isCreation", isCreation);
+        kafkaSenderUtils.releaseKafkaEvent(EventType.DATACOLLECTION_NATIONAL_COORDINATOR_EVENT,
+                result);
+
+      } catch (Exception e) {
+        LOG.error("Unexpected error! Error in createSchemas for dataflowId {}. Message: {}", dataflowId, e.getMessage());
+        throw e;
+      }
     }
   }
 

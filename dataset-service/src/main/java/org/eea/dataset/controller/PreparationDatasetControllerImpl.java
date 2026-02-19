@@ -1,6 +1,7 @@
 package org.eea.dataset.controller;
 
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixProperty;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -11,6 +12,7 @@ import org.eea.dataset.service.DataLakeDataRetrieverFactory;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.PreparationDatasetService;
+import org.eea.interfaces.vo.orchestrator.JobPresignedUrlInfo;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.PreparationDatasetController;
@@ -37,6 +39,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 /**
@@ -252,4 +255,77 @@ public class PreparationDatasetControllerImpl implements PreparationDatasetContr
         return result;
     }
 
+    @Override
+    @HystrixCommand(commandProperties = {
+            @HystrixProperty(
+                    name = "execution.isolation.thread.timeoutInMilliseconds",
+                    value = "7200000")
+    })
+    @PostMapping("/{datasetId}/preparations/importFileData")
+    @ApiOperation(value = "Import file data into preparation dataset (Big Data)")
+    public Map<String, Object> importBigFileDataForPreparation(
+            @PathVariable("datasetId") Long datasetId,
+
+            @RequestParam("code") String preparationCode,
+
+            @RequestParam(value = "dataflowId", required = false) Long dataflowId,
+
+            @RequestParam(value = "providerId", required = false) Long providerId,
+
+            @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,
+
+            @RequestParam(value = "file", required = false) MultipartFile file,
+
+            @RequestParam(value = "replace", required = false) boolean replace,
+
+            @RequestParam(value = "integrationId", required = false) Long integrationId,
+
+            @RequestParam(value = "delimiter", required = false) String delimiter,
+
+            @RequestParam(value = "jobId", required = false) Long jobId,
+
+            @RequestParam(value = "fmeJobId", required = false) String fmeJobId
+
+    ) throws Exception {
+
+        LOG.info("Preparation import called datasetId={}, code={}, dataflowId={}, providerId={}, tableSchemaId={}, replace={}, jobId={}, fmeJobId={}",
+                datasetId, preparationCode, dataflowId, providerId,
+                tableSchemaId, replace, jobId, fmeJobId);
+
+        Map<String, Object> result = new HashMap<>();
+
+        Long mockJobId = jobId != null ? jobId : System.currentTimeMillis();
+
+        result.put("jobId", mockJobId);
+        result.put("pollingUrl",
+                "/orchestrator/jobs/pollForJobStatus/" + mockJobId +
+                        "?datasetId=" + datasetId +
+                        "&code=" + preparationCode);
+
+        return result;
+    }
+
+    @Override
+    @GetMapping("/{datasetId}/preparations/generateImportPresignedUrl")
+    public JobPresignedUrlInfo generatePreparationImportPresignedUrl(
+            @PathVariable("datasetId") Long datasetId,
+            @RequestParam("code") String preparationCode,
+            @RequestParam("dataflowId") Long dataflowId,
+            @RequestParam(value = "providerId", required = false) Long providerId,
+            @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,
+            @RequestParam(value = "replace", required = false) boolean replace,
+            @RequestParam(value = "integrationId", required = false) Long integrationId,
+            @RequestParam(value = "delimiter", required = false) String delimiter,
+            @RequestParam(value = "fileName", required = false) String fileName,
+            @RequestParam(value = "etlImport", required = false, defaultValue = "false") Boolean etlImport) {
+
+        LOG.info("MOCK generate presigned URL for preparation datasetId={}, code={}",
+                datasetId, preparationCode);
+
+        JobPresignedUrlInfo info = new JobPresignedUrlInfo();
+        info.setFilePathInS3("mock/path/preparations/" + preparationCode + "/" + fileName);
+        info.setJobId(160L);
+
+        return info;
+    }
 }

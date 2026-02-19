@@ -3127,26 +3127,29 @@ public class DatasetServiceImpl implements DatasetService {
    * @param idDatasetSchema the id dataset schema
    */
   @Override
-  public void initializeDataset(Long datasetId, String idDatasetSchema) {
+  public void   initializeDataset(Long datasetId, String idDatasetSchema, boolean isBigDataflow) {
     try {
-      // 1.Insert the dataset schema into DatasetValue
-      DatasetValue dataset = new DatasetValue();
-      dataset.setIdDatasetSchema(idDatasetSchema);
-      dataset.setId(datasetId);
 
-      // 2.Search the table schemas of the dataset and then insert it into TableValue
-      DataSetSchema schema = schemasRepository.findByIdDataSetSchema(new ObjectId(idDatasetSchema));
-      List<TableValue> tableValues = new ArrayList<>();
-      for (TableSchema tableSchema : schema.getTableSchemas()) {
-        TableValue tv = new TableValue();
-        tv.setIdTableSchema(tableSchema.getIdTableSchema().toString());
-        tv.setDatasetId(dataset);
-        tableValues.add(tv);
+      final DataSetSchema schema = schemasRepository.findByIdDataSetSchema(new ObjectId(idDatasetSchema));
+
+      if (!isBigDataflow) {
+        // 1.Insert the dataset schema into DatasetValue
+        DatasetValue dataset = new DatasetValue();
+        dataset.setIdDatasetSchema(idDatasetSchema);
+        dataset.setId(datasetId);
+
+        // 2.Search the table schemas of the dataset and then insert it into TableValue
+        List<TableValue> tableValues = new ArrayList<>();
+        for (TableSchema tableSchema : schema.getTableSchemas()) {
+          TableValue tv = new TableValue();
+          tv.setIdTableSchema(tableSchema.getIdTableSchema().toString());
+          tv.setDatasetId(dataset);
+          tableValues.add(tv);
+        }
+        dataset.setTableValues(tableValues);
+        TenantResolver.setTenantName(String.format(DATASET_ID, datasetId));
+        datasetRepository.save(dataset);
       }
-      dataset.setTableValues(tableValues);
-      TenantResolver.setTenantName(String.format(DATASET_ID, datasetId));
-      datasetRepository.save(dataset);
-
 
       List<Statistics> statsList = Collections.synchronizedList(new ArrayList<>());
 
@@ -3159,8 +3162,8 @@ public class DatasetServiceImpl implements DatasetService {
             tableSchema.getNameTableSchema());
       }
 
-      tableValues.parallelStream().forEach(tableValue -> statsList.addAll(
-          initializeTableStats(tableValue.getIdTableSchema(), datasetId, mapIdNameDatasetSchema)));
+      schema.getTableSchemas().parallelStream().forEach(tableSchema -> statsList.addAll(
+          initializeTableStats(tableSchema.getIdTableSchema().toString(), datasetId, mapIdNameDatasetSchema)));
 
       statsList.add(fillStat(datasetId, null, "idDataSetSchema", idDatasetSchema));
 
@@ -3180,8 +3183,11 @@ public class DatasetServiceImpl implements DatasetService {
           // and we have found the design dataset
           // with data to be copied into the
           // target dataset
-          LOG.info("Prefilling data into the datasetId {}.", datasetId);
-          spreadDataPrefill(schema, originDatasetDesign.getId(), datasetMb);
+          if (!isBigDataflow) {
+            //spreadDataPrefill contains only actions that should be performed on Citus dataflows.
+            LOG.info("Prefilling data into the datasetId {}.", datasetId);
+            spreadDataPrefill(schema, originDatasetDesign.getId(), datasetMb);
+          }
         }
       } else if (DatasetTypeEnum.REFERENCE.equals(type)) {
         DesignDataset originDatasetDesign =
