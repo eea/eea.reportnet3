@@ -187,21 +187,6 @@ public class PreparationDatasetServiceImpl implements PreparationDatasetService 
                 LOG.info("Preparation table {} exist for datasetId {}. Starting demotion and deletion", parentTableName, parentDatasetId);
 
                 dropDremioTable(preparationTableDremioQueryPathString);
-
-//                try {
-//                    dremioHelperService.demoteFolderOrFile(preparationTableS3Path, parentTableName);
-//                } catch (Exception ex) {
-//                    // if for any reason it cannot be demoted we cannot continue
-//                    LOG.error("Failed to demote Dremio preparation table before deletion for datasetId {} and table {}", parentDatasetId, parentTableName, ex);
-//                    throw new EEAException("Failed to demote preparation table in Dremio", ex);
-//                }
-//
-//                try {
-//                    s3HelperPrivate.deleteFolder(preparationTableS3Path, S3_PREPARATION_TABLE_NAME_FOLDER_PATH);
-//                } catch (Exception ex) {
-//                    LOG.error("Failed to delete S3 folder for preparation table for datasetId {} and table {}", parentDatasetId, parentTableName, ex);
-//                    throw new EEAException("Failed to delete preparation table data from S3", ex);
-//                }
                 LOG.info("Preparation table {} demoted and deleted successfully for datasetId {}", parentTableName, parentDatasetId);
             }
         }
