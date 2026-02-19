@@ -4,14 +4,15 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import lombok.SneakyThrows;
 import org.eea.dataset.service.*;
-import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
+import org.eea.interfaces.vo.dataset.PreparationDatasetResponseVO;
 import org.eea.interfaces.vo.dataset.PreparationDatasetVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
@@ -25,7 +26,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.server.ResponseStatusException;
 
 /**
@@ -64,11 +64,14 @@ public class PreparationDatasetControllerImplTest {
      */
     @Test
     public void listPreparationDatasetsTest() {
+        PreparationDatasetResponseVO preparationDatasetResponseVO = new PreparationDatasetResponseVO();
         List<PreparationDatasetVO> list = new ArrayList<>();
         list.add(new PreparationDatasetVO());
+        preparationDatasetResponseVO.setPreparationDatasetList(list);
+        preparationDatasetResponseVO.setActiveLocks(new HashMap<>());
 
         when(preparationDatasetService.findPreparationDatasets(1L, 2L, null))
-                .thenReturn(list);
+                .thenReturn(preparationDatasetResponseVO);
 
         preparationDatasetControllerImpl.list(1L, 2L, null);
 
@@ -78,11 +81,14 @@ public class PreparationDatasetControllerImplTest {
 
     @Test
     public void listPreparationDatasetsWithCodeTest() {
+        PreparationDatasetResponseVO preparationDatasetResponseVO = new PreparationDatasetResponseVO();
         List<PreparationDatasetVO> list = new ArrayList<>();
         list.add(new PreparationDatasetVO());
+        preparationDatasetResponseVO.setPreparationDatasetList(list);
+        preparationDatasetResponseVO.setActiveLocks(new HashMap<>());
 
         when(preparationDatasetService.findPreparationDatasets(1L, 2L, "albania_set_1"))
-                .thenReturn(list);
+                .thenReturn(preparationDatasetResponseVO);
 
         preparationDatasetControllerImpl.list(1L, 2L, "albania_set_1");
 
