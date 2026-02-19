@@ -2,9 +2,9 @@ package org.eea.dataset.service;
 
 import java.util.List;
 
-import org.eea.dataset.persistence.metabase.domain.PreparationDataset;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
+import org.eea.interfaces.vo.dataset.PreparationDatasetResponseVO;
 import org.eea.interfaces.vo.dataset.PreparationDatasetVO;
 
 /**
@@ -19,7 +19,7 @@ public interface PreparationDatasetService {
      * @param providerId the provider id (optional)
      * @return list of preparation datasets
      */
-    List<PreparationDatasetVO> findPreparationDatasets(
+    PreparationDatasetResponseVO findPreparationDatasets(
             Long dataflowId,
             Long providerId,
             String code);

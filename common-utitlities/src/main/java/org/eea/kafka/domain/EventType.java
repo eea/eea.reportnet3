@@ -869,6 +869,9 @@ public enum EventType {
   DOWNLOAD_GEOMETRY_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
           "download_geometry_completed_event", true),
 
+  ANOTHER_PREPARATION_DATASET_CREATION_IS_RUNNING_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+          "another_preparation_dataset_creation_is_running_failed_event", true),
+
   PREPARATION_DATASET_CREATION_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
           "preparation_dataset_creation_completed_event", true),
 

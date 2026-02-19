@@ -1,5 +1,6 @@
 package org.eea.interfaces.controller.dataset;
 
+import org.eea.interfaces.vo.dataset.PreparationDatasetResponseVO;
 import org.eea.interfaces.vo.dataset.PreparationDatasetVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
@@ -10,8 +11,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
-
-import java.util.List;
 
 /**
  * The Interface PreparationDatasetController.
@@ -27,7 +26,7 @@ public interface PreparationDatasetController {
     @GetMapping(
             value = "/preparations",
             produces = MediaType.APPLICATION_JSON_VALUE)
-    List<PreparationDatasetVO> list(
+    PreparationDatasetResponseVO list(
             @RequestParam("dataflowId") Long dataflowId,
             @RequestParam("providerId") Long providerId,
             @RequestParam("code") String code);
