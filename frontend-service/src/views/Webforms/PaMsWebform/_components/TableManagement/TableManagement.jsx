@@ -44,6 +44,7 @@ export const TableManagement = ({
   onSelectEditTable,
   overview,
   records,
+  refreshTrigger,
   schemaTables,
   tables
 }) => {
@@ -81,7 +82,7 @@ export const TableManagement = ({
 
   useEffect(() => {
     onLoadParentTablesData();
-  }, []);
+  }, [refreshTrigger]);
 
   useEffect(() => {
     if (!isEmpty(parentTablesWithData)) {

@@ -49,6 +49,7 @@ export const PaMsWebform = ({
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
   const [hasLoadedPams, setHasLoadedPams] = useState(false);
+  const [refreshTableTrigger, setRefreshTableTrigger] = useState(0);
 
   const [paMsWebformState, paMsWebformDispatch] = useReducer(paMsWebformReducer, {
     data: [],
@@ -309,6 +310,7 @@ export const PaMsWebform = ({
   const onUpdateData = () => {
     setHasLoadedPams(false);
     paMsWebformDispatch({ type: 'ON_UPDATE_DATA', payload: { value: !isDataUpdated } });
+    setRefreshTableTrigger(prev => prev + 1);
   };
 
   const setIsAddingSingleRecord = value =>
@@ -377,6 +379,7 @@ export const PaMsWebform = ({
         onSelectEditTable={onSelectEditTable}
         overview={overview}
         records={pamsRecords}
+        refreshTrigger={refreshTableTrigger}
         schemaTables={datasetSchema.tables}
         tables={tables}
       />
