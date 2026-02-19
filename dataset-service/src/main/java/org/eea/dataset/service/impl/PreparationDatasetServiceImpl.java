@@ -53,7 +53,7 @@ public class PreparationDatasetServiceImpl implements PreparationDatasetService 
     private static final Logger LOG = LoggerFactory.getLogger(PreparationDatasetServiceImpl.class);
     /** The service instance id. */
     @Value("${redis.lock.preparation.datasets.creation.expireTimeInMillis}")
-    private long expireTimeInMillis;
+    private long prepSetCreationExpirationTimeMs;
 
     private final PreparationDatasetRepository preparationDatasetRepository;
     private final DremioHelperService dremioHelperService;
@@ -224,7 +224,7 @@ public class PreparationDatasetServiceImpl implements PreparationDatasetService 
 
         String lockKey = LockEnum.PREPERATION_DATASET_CREATION.getValue() + "_" + dataflowId + "_" + providerId;
         String lockValue = LockEnum.PREPERATION_DATASET_CREATION.getValue()  + "_" + dataflowId + "_" + providerId + "_" + UUID.randomUUID();
-        if(!redisLockService.checkAndAcquireLock(lockKey, lockValue, expireTimeInMillis)) {
+        if(!redisLockService.checkAndAcquireLock(lockKey, lockValue, prepSetCreationExpirationTimeMs)) {
             Map<String, String> activeLocks = redisLockService.listActiveLocks(lockKey);
             kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.ANOTHER_PREPARATION_DATASET_CREATION_IS_RUNNING_FAILED_EVENT, null, notificationVO);
             throw new EEAException("Lock acquisition failed. Relative active locks: "+ activeLocks.toString());
