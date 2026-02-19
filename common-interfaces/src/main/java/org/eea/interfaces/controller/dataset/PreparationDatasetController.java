@@ -1,5 +1,6 @@
 package org.eea.interfaces.controller.dataset;
 
+import org.eea.interfaces.vo.dataset.PreparationDatasetResponseVO;
 import org.eea.interfaces.vo.dataset.PreparationDatasetVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
@@ -13,7 +14,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -30,7 +30,7 @@ public interface PreparationDatasetController {
     @GetMapping(
             value = "/preparations",
             produces = MediaType.APPLICATION_JSON_VALUE)
-    List<PreparationDatasetVO> list(
+    PreparationDatasetResponseVO list(
             @RequestParam("dataflowId") Long dataflowId,
             @RequestParam("providerId") Long providerId,
             @RequestParam("code") String code);
@@ -78,14 +78,14 @@ public interface PreparationDatasetController {
     Map<String, Object> importBigFileDataForPreparation(@PathVariable("datasetId") Long datasetId,
                                                         @RequestParam("code") String preparationCode,
                                                         @RequestParam(value = "dataflowId", required = false) Long dataflowId,
-                                                      @RequestParam(value = "providerId", required = false) Long providerId,
-                                                      @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,
-                                                      @RequestParam("file") MultipartFile file,
-                                                      @RequestParam(value = "replace", required = false) boolean replace,
-                                                      @RequestParam(value = "integrationId", required = false) Long integrationId,
-                                                      @RequestParam(value = "delimiter", required = false) String delimiter,
-                                                      @RequestParam(value = "jobId", required = false) Long jobId,
-                                                      @RequestParam(value = "fmeJobId", required = false) String fmeJobId) throws Exception;
+                                                        @RequestParam(value = "providerId", required = false) Long providerId,
+                                                        @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,
+                                                        @RequestParam("file") MultipartFile file,
+                                                        @RequestParam(value = "replace", required = false) boolean replace,
+                                                        @RequestParam(value = "integrationId", required = false) Long integrationId,
+                                                        @RequestParam(value = "delimiter", required = false) String delimiter,
+                                                        @RequestParam(value = "jobId", required = false) Long jobId,
+                                                        @RequestParam(value = "fmeJobId", required = false) String fmeJobId) throws Exception;
 
 
     @GetMapping("/{datasetId}/preparations/generateImportPresignedUrl")

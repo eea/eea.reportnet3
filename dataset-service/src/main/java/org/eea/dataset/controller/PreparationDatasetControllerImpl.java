@@ -17,6 +17,7 @@ import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.PreparationDatasetController;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
+import org.eea.interfaces.vo.dataset.PreparationDatasetResponseVO;
 import org.eea.interfaces.vo.dataset.PreparationDatasetVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
@@ -42,7 +43,6 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -75,17 +75,14 @@ public class PreparationDatasetControllerImpl implements PreparationDatasetContr
     @GetMapping("/preparations")
     @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_OBSERVER','DATAFLOW_STEWARD_SUPPORT','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_REQUESTER','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATAFLOW',#dataflowId)) OR checkApiKey(#dataflowId,#providerId,#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_OBSERVER','DATAFLOW_STEWARD_SUPPORT','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR') OR hasAnyRole('ADMIN')")
     @ApiOperation(value = "List preparation datasets")
-    public List<PreparationDatasetVO> list(
+    public PreparationDatasetResponseVO list(
             @RequestParam("dataflowId") Long dataflowId,
             @RequestParam("providerId") Long providerId,
             @RequestParam(value = "code", required = false) String code) {
 
-        LOG.info(
-                "Listing preparation datasets dataflowId={}, providerId={}",
-                dataflowId, providerId);
+        LOG.info("Listing preparation datasets dataflowId={}, providerId={}", dataflowId, providerId);
 
-        return preparationDatasetService
-                .findPreparationDatasets(dataflowId, providerId, code);
+        return preparationDatasetService.findPreparationDatasets(dataflowId, providerId, code);
     }
 
     /**

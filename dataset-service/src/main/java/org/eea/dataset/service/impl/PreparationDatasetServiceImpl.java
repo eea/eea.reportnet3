@@ -2,6 +2,8 @@ package org.eea.dataset.service.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 
@@ -20,6 +22,7 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.RepresentativeController;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
+import org.eea.interfaces.vo.dataset.PreparationDatasetResponseVO;
 import org.eea.interfaces.vo.dataset.PreparationDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
@@ -28,10 +31,14 @@ import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
+import org.eea.lock.redis.LockEnum;
+import org.eea.lock.redis.RedisLockService;
 import org.eea.utils.UtilityClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -44,6 +51,9 @@ import static org.eea.utils.LiteralConstants.*;
 public class PreparationDatasetServiceImpl implements PreparationDatasetService {
 
     private static final Logger LOG = LoggerFactory.getLogger(PreparationDatasetServiceImpl.class);
+    /** The service instance id. */
+    @Value("${redis.lock.preparation.datasets.creation.expireTimeInMillis}")
+    private long prepSetCreationExpirationTimeMs;
 
     private final PreparationDatasetRepository preparationDatasetRepository;
     private final DremioHelperService dremioHelperService;
@@ -54,6 +64,7 @@ public class PreparationDatasetServiceImpl implements PreparationDatasetService 
     private final RepresentativeController.RepresentativeControllerZuul representativeControllerZuul;
     private final KafkaSenderUtils kafkaSenderUtils;
     private final PreparationDatasetMapper preparationDatasetMapper;
+    private final RedisLockService redisLockService;
 
     @Autowired
     public PreparationDatasetServiceImpl(PreparationDatasetRepository preparationDatasetRepository,
@@ -63,7 +74,8 @@ public class PreparationDatasetServiceImpl implements PreparationDatasetService 
                                          S3Helper s3HelperPrivate,
                                          RepresentativeController.RepresentativeControllerZuul representativeControllerZuul,
                                          KafkaSenderUtils kafkaSenderUtils,
-                                         PreparationDatasetMapper preparationDatasetMapper) {
+                                         PreparationDatasetMapper preparationDatasetMapper,
+                                         RedisLockService redisLockService) {
         this.preparationDatasetRepository = preparationDatasetRepository;
         this.dremioHelperService = dremioHelperService;
         this.datasetMetabaseService = datasetMetabaseService;
@@ -73,11 +85,12 @@ public class PreparationDatasetServiceImpl implements PreparationDatasetService 
         this.representativeControllerZuul = representativeControllerZuul;
         this.kafkaSenderUtils = kafkaSenderUtils;
         this.preparationDatasetMapper = preparationDatasetMapper;
+        this.redisLockService = redisLockService;
     }
 
     @Override
     @Transactional
-    public List<PreparationDatasetVO> findPreparationDatasets(
+    public PreparationDatasetResponseVO findPreparationDatasets(
             Long dataflowId,
             Long providerId,
             String code) {
@@ -95,7 +108,11 @@ public class PreparationDatasetServiceImpl implements PreparationDatasetService 
                     .findByDataflowId(dataflowId);
         }
 
-        return entities.stream().map(this::toVO).collect(Collectors.toList());
+        List<PreparationDatasetVO> preparationDatasetVOS = entities.stream().map(preparationDatasetMapper::entityToClass).collect(Collectors.toList());
+        String lockKey = LockEnum.PREPERATION_DATASET_CREATION.getValue() + "_" + dataflowId + "_" + providerId;
+        Map<String, String> activeLocks = redisLockService.listActiveLocks(lockKey);
+
+        return new PreparationDatasetResponseVO(preparationDatasetVOS, activeLocks);
     }
 
     @Override
@@ -170,21 +187,6 @@ public class PreparationDatasetServiceImpl implements PreparationDatasetService 
                 LOG.info("Preparation table {} exist for datasetId {}. Starting demotion and deletion", parentTableName, parentDatasetId);
 
                 dropDremioTable(preparationTableDremioQueryPathString);
-
-//                try {
-//                    dremioHelperService.demoteFolderOrFile(preparationTableS3Path, parentTableName);
-//                } catch (Exception ex) {
-//                    // if for any reason it cannot be demoted we cannot continue
-//                    LOG.error("Failed to demote Dremio preparation table before deletion for datasetId {} and table {}", parentDatasetId, parentTableName, ex);
-//                    throw new EEAException("Failed to demote preparation table in Dremio", ex);
-//                }
-//
-//                try {
-//                    s3HelperPrivate.deleteFolder(preparationTableS3Path, S3_PREPARATION_TABLE_NAME_FOLDER_PATH);
-//                } catch (Exception ex) {
-//                    LOG.error("Failed to delete S3 folder for preparation table for datasetId {} and table {}", parentDatasetId, parentTableName, ex);
-//                    throw new EEAException("Failed to delete preparation table data from S3", ex);
-//                }
                 LOG.info("Preparation table {} demoted and deleted successfully for datasetId {}", parentTableName, parentDatasetId);
             }
         }
@@ -196,6 +198,7 @@ public class PreparationDatasetServiceImpl implements PreparationDatasetService 
 
     @Override
     @Transactional
+    @Async
     public void createAllEligiblePreparationSets(Long dataflowId, Long providerId) throws EEAException {
         LOG.info("Creating preparation sets for dataflow {} and providerId {}", dataflowId, providerId);
         NotificationVO notificationVO = NotificationVO.builder()
@@ -203,11 +206,21 @@ public class PreparationDatasetServiceImpl implements PreparationDatasetService 
                 .dataflowId(dataflowId)
                 .providerId(providerId)
                 .build();
+
+        String lockKey = LockEnum.PREPERATION_DATASET_CREATION.getValue() + "_" + dataflowId + "_" + providerId;
+        String lockValue = LockEnum.PREPERATION_DATASET_CREATION.getValue()  + "_" + dataflowId + "_" + providerId + "_" + UUID.randomUUID();
+        if(!redisLockService.checkAndAcquireLock(lockKey, lockValue, prepSetCreationExpirationTimeMs)) {
+            Map<String, String> activeLocks = redisLockService.listActiveLocks(lockKey);
+            kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.ANOTHER_PREPARATION_DATASET_CREATION_IS_RUNNING_FAILED_EVENT, null, notificationVO);
+            throw new EEAException("Lock acquisition failed. Relative active locks: "+ activeLocks.toString());
+        }
+
         kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.PREPARATION_DATASET_CREATION_STARTED_EVENT, null, notificationVO);
 
         // fetch all preparations datasets that haven't yet been created, `isCreated=false`
-        List<PreparationDatasetVO> preparationDatasetVOS = this.findByDataflowIdAndProviderIdAndIsCreated(dataflowId, providerId, false);
+        List<PreparationDatasetVO> preparationDatasetVOS = findByDataflowIdAndProviderIdAndIsCreated(dataflowId, providerId, false);
         if (preparationDatasetVOS.isEmpty()) {
+            redisLockService.releaseLock(lockKey, lockValue);
             kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.PREPARATION_DATASET_CREATION_HAS_EMPTY_QUEUE_EVENT,null, notificationVO);
             LOG.info("No preparation dataset found without isCreated=FALSE for dataflow {} and providerId {}", dataflowId, providerId);
             return;
@@ -230,6 +243,8 @@ public class PreparationDatasetServiceImpl implements PreparationDatasetService 
             }
         }
 
+        // release lock and send notifications
+        redisLockService.releaseLock(lockKey, lockValue);
         if (exceptions.isEmpty()) {
             kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.PREPARATION_DATASET_CREATION_COMPLETED_EVENT, null, notificationVO);
             LOG.info("Successfully created all preparation sets for dataflow {} and providerId {}", dataflowId, providerId);
@@ -342,11 +357,9 @@ public class PreparationDatasetServiceImpl implements PreparationDatasetService 
     }
 
     private void dropDremioTable(String targetPreparationTableDremioQueryPathString) throws Exception {
-        LOG.info("[CHRIS] Dropping table {}", targetPreparationTableDremioQueryPathString);
         String dropQuery = "DROP TABLE IF EXISTS " + targetPreparationTableDremioQueryPathString;
         String dropQueryProcessId = dremioHelperService.executeSqlStatement(dropQuery);
         dremioHelperService.checkIfDremioProcessFinishedSuccessfully(String.valueOf(targetPreparationTableDremioQueryPathString), dropQueryProcessId, null);
-        LOG.info("[CHRIS] Table dropped {}", targetPreparationTableDremioQueryPathString);
     }
 
     private String constructRecordIdCreationForQuery() {

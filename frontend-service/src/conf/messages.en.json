@@ -77,6 +77,7 @@
     "alignmentBetweenDatasetRecords": "Dataset number of records",
     "amPmFormat": "Switch to AM/PM format",
     "andor": "AND / OR",
+    "anotherPreparationDatasetCreationIsRunningFailedEvent": "Preparation datasets creation for <a href='{:navigateTo}' title='{:dataflowName}'>{:dataflowName}</a> failed. Another one is currently running.",
     "anOfficialWebsite": "An official website of the European Union",
     "apiKeyDataProviderIdLabel": "Data provider",
     "apiKeyDialogHead": "Manage API-key",
