@@ -72,7 +72,6 @@ public class PreparationDatasetServiceImplTest {
         securityContext = Mockito.mock(SecurityContext.class);
         securityContext.setAuthentication(authentication);
         SecurityContextHolder.setContext(securityContext);
-        Mockito.when(s3Helper.getS3Service()).thenReturn(s3Service);
 
         entity = new PreparationDataset();
         entity.setId(1L);
