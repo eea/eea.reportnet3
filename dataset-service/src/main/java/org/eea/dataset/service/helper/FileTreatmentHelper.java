@@ -3531,19 +3531,20 @@ public class FileTreatmentHelper implements DisposableBean {
         final String[] fileNameParts = fileName.split("_");
         final String fieldName = fileNameParts[0];
         final String recordId = fileNameParts[1].split("\\.")[0];
-        final S3PathResolver s3PathResolver = new S3PathResolver(
-                dataset.getDataflowId(),
-                dataset.getDataProviderId(),
-                dataset.getId());
-        s3PathResolver.setPath(S3_PROVIDER_PATH);
-        final String path = s3Service.getS3Path(s3PathResolver).replace("/", "\".\"");
-
+        S3PathResolver s3TablePathResolver = new S3PathResolver(
+                dataset.getDataflowId(), dataset.getDataProviderId(),
+                dataset.getId(),
+                tableName,
+                tableName,
+                S3_TABLE_AS_FOLDER_QUERY_PATH);
+        s3TablePathResolver.setIsIcebergTable(false);
+        String tablePath = s3Service.getTableAsFolderQueryPath(s3TablePathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
 
         final String escapedTableName = UtilityClass.addQuotesToFieldNames(tableName);
         final String escapedFieldName = UtilityClass.addQuotesToFieldNames(fieldName);
 
         final String sql = "SELECT " + escapedTableName + "." + escapedFieldName + " FROM " +
-                "\"rn3-dataset\".\"rn3-dataset\".\"" + path + "\"." + escapedTableName + " WHERE " + escapedTableName + ".record_id = '" + recordId + "'";
+                tablePath + " WHERE " + escapedTableName + ".record_id = '" + recordId + "'";
 
         final SqlRowSet rowSet = dremioJdbcTemplate.queryForRowSet(sql);
 
