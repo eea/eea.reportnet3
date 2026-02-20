@@ -44,7 +44,7 @@ pipeline {
             }
            steps {
                withSonarQubeEnv('Sonarqube') {
-                   sh 'mvn sonar:sonar -Dsonar.java.source=11  -Dsonar.projectKey=eea.reportnet3-${GIT_BRANCH} -Dsonar.projectName=eea.reportnet3-${GIT_BRANCH} -Dsonar.jenkins.branch=main'
+                   sh 'mvn sonar:sonar -Dsonar.java.source=11  -Dsonar.projectKey=eea.reportnet3  -Dsonar.projectName=eea.reportnet3 -Dsonar.branch.name=${GIT_BRANCH}'
                }
            }
        }
