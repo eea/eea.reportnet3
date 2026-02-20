@@ -129,6 +129,9 @@ export const dataflowDataReducer = (state, { type, payload }) => {
     case 'SET_PREPARATION_SETS_LIST':
       return { ...state, preparationSetsList: payload.preparationSetsList };
 
+    case 'SET_HAS_ACTIVE_LOCKS':
+      return { ...state, hasActiveLocks: payload.hasLocks };
+
     case 'SET_SELECTED_SET':
       return { ...state, selectedPreparationSet: payload };
 

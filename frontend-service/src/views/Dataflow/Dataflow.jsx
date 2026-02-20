@@ -92,6 +92,7 @@ export const Dataflow = () => {
     description: '',
     designDatasetSchemas: [],
     formHasLeadReporters: false,
+    hasActiveLocks: false,
     hasCustodianPermissions: false,
     hasEnableEditingDatasets: false,
     hasReporters: false,
@@ -283,26 +284,28 @@ export const Dataflow = () => {
   }, [location.pathname, dataflowId]);
 
   useEffect(() => {
-    if (!dataProviderId || dataflowState.isCreatingPreparationSets) return;
+    if (!dataProviderId) return;
 
-    getPreparationSets(code);
-  }, [dataProviderId, dataflowState.isCreatingPreparationSets]);
+    getPreparationSets({ setCode: code });
+  }, [dataProviderId]);
 
-  const getPreparationSets = async code => {
+  const getPreparationSets = async ({ setCode, showPageLoader = true }) => {
     try {
+      showPageLoader && setIsPageLoading(true);
       const preparationList = await ManagePreparationSetsService.getPreparationSets({
         dataflowId,
         providerId: dataProviderId,
-        code
+        code: setCode
       });
-      code && setSelectedPreparationSet(preparationList[0] ?? null);
-      setPreparationSetsList(preparationList);
+      setHasActiveLocks(!isEmpty(preparationList?.activeLocks));
+      setCode && setSelectedPreparationSet(preparationList?.preparationDatasetList[0] ?? null);
+      setPreparationSetsList(preparationList?.preparationDatasetList);
       return preparationList;
     } catch (error) {
       console.error(error);
       notificationContext.add({ type: 'GET_PREPARATION_SETS_ERROR' }, true);
     } finally {
-      setIsPageLoading(false);
+      showPageLoader && setIsPageLoading(false);
     }
   };
 
@@ -362,8 +365,8 @@ export const Dataflow = () => {
 
   useEffect(() => {
     if (hasCreatePreparationSetsNotification(notificationContext.toShow)) {
-      setIsPageLoading(true);
       setIsCreatingPreparationSets(false);
+      getPreparationSets();
     }
   }, [notificationContext.toShow]);
 
@@ -505,6 +508,13 @@ export const Dataflow = () => {
     dataflowDispatch({
       type: 'SET_PREPARATION_SETS_LIST',
       payload: { preparationSetsList: list }
+    });
+  };
+
+  const setHasActiveLocks = hasLocks => {
+    dataflowDispatch({
+      type: 'SET_HAS_ACTIVE_LOCKS',
+      payload: { hasLocks }
     });
   };
 
@@ -1450,6 +1460,7 @@ export const Dataflow = () => {
           dataflowType={dataflowState.dataflowType}
           dataProviderId={dataProviderId}
           handleRedirect={handleRedirect}
+          hasActiveLocks={dataflowState.hasActiveLocks}
           isCreatingPreparationSets={dataflowState.isCreatingPreparationSets}
           isLeadReporter={isLeadReporter}
           isLeadReporterOfCountry={isLeadReporterOfCountry}
@@ -1480,6 +1491,7 @@ export const Dataflow = () => {
           dataflowState={dataflowState}
           dataProviderId={dataProviderId}
           handleRedirect={handleRedirect}
+          hasActiveLocks={dataflowState.hasActiveLocks}
           isAdmin={isAdmin}
           isCreatingPreparationSets={dataflowState.isCreatingPreparationSets}
           isCustodian={isCustodian}

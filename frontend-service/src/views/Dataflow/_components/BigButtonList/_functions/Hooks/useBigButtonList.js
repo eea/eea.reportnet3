@@ -26,6 +26,7 @@ const useBigButtonList = ({
   getDeleteSchemaIndex,
   handleExportEUDataset,
   handleRedirect,
+  hasActiveLocks,
   isActiveButton,
   isCloningDataflow,
   isCreatingPreparationSets,
@@ -516,12 +517,15 @@ const useBigButtonList = ({
   const createPreparationSets = [
     {
       buttonClass: 'newItem',
-      buttonIcon: isCreatingPreparationSets ? 'spinner' : 'createPreparationSets',
-      buttonIconClass: isCreatingPreparationSets ? 'spinner' : '',
+      buttonIcon: hasActiveLocks || isCreatingPreparationSets ? 'spinner' : 'createPreparationSets',
+      buttonIconClass: hasActiveLocks || isCreatingPreparationSets ? 'spinner' : '',
       caption: resourcesContext.messages['createPreparationSets'],
-      enabled: !isEmpty(notCreatedSets) && !dataflowState.hasEnableEditingDatasets,
+      enabled: !hasActiveLocks && !isEmpty(notCreatedSets) && !dataflowState.hasEnableEditingDatasets,
       handleRedirect: () =>
-        !isEmpty(notCreatedSets) && !dataflowState.hasEnableEditingDatasets && onCreatePreparationSets(),
+        !hasActiveLocks &&
+        !isEmpty(notCreatedSets) &&
+        !dataflowState.hasEnableEditingDatasets &&
+        onCreatePreparationSets(),
       layout: 'defaultBigButton',
       tooltip:
         isEmpty(notCreatedSets) && preparationSetsList?.length > 0
