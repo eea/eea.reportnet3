@@ -286,19 +286,19 @@ export const Dataflow = () => {
   useEffect(() => {
     if (!dataProviderId) return;
 
-    getPreparationSets({ setCode: code });
+    getPreparationSets({ code });
   }, [dataProviderId]);
 
-  const getPreparationSets = async ({ setCode, showPageLoader = true }) => {
+  const getPreparationSets = async ({ code, showPageLoader = true } = {}) => {
     try {
       showPageLoader && setIsPageLoading(true);
       const preparationList = await ManagePreparationSetsService.getPreparationSets({
         dataflowId,
         providerId: dataProviderId,
-        code: setCode
+        code
       });
       setHasActiveLocks(!isEmpty(preparationList?.activeLocks));
-      setCode && setSelectedPreparationSet(preparationList?.preparationDatasetList[0] ?? null);
+      code && setSelectedPreparationSet(preparationList?.preparationDatasetList[0] ?? null);
       setPreparationSetsList(preparationList?.preparationDatasetList);
       return preparationList;
     } catch (error) {
@@ -355,12 +355,13 @@ export const Dataflow = () => {
   }, [notificationContext.hidden]);
 
   const hasCreatePreparationSetsNotification = list =>
-    list?.some(notification =>
-      [
-        'PREPARATION_DATASET_CREATION_FAILED_EVENT',
-        'PREPARATION_DATASET_CREATION_HAS_EMPTY_QUEUE_EVENT',
-        'PREPARATION_DATASET_CREATION_COMPLETED_EVENT'
-      ].includes(notification.key)
+    list?.some(
+      notification =>
+        [
+          'PREPARATION_DATASET_CREATION_FAILED_EVENT',
+          'PREPARATION_DATASET_CREATION_HAS_EMPTY_QUEUE_EVENT',
+          'PREPARATION_DATASET_CREATION_COMPLETED_EVENT'
+        ].includes(notification.key) && notification?.content?.providerId === dataProviderId
     );
 
   useEffect(() => {
