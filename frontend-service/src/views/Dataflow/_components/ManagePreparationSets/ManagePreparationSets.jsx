@@ -57,7 +57,7 @@ export const ManagePreparationSets = ({
   const getPreparationSets = async () => {
     changeState({ loadingStatus: 'pending' });
     try {
-      await onGetPreparationSetsList();
+      await onGetPreparationSetsList({ showPageLoader: false });
 
       changeState({ loadingStatus: 'success', isLoading: false });
     } catch (error) {

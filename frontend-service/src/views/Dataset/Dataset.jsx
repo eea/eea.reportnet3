@@ -216,7 +216,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
         providerId: metadata?.dataset.dataProviderId,
         code
       });
-      code && setSelectedPreparationSet(preparationList[0] ?? null);
+      code && setSelectedPreparationSet(preparationList?.preparationDatasetList[0] ?? null);
       return preparationList;
     } catch (error) {
       console.error(error);
