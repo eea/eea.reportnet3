@@ -117,6 +117,8 @@ public class CreateEmptyTablesImpl implements CreateEmptyTables {
           }
 
           regenerateTables(dataset, tableSchema, fields);
+          LOG.info("Created empty table for dataflowId {} providerId {} datasetId {} and table {}", s3TablePathResolver.getDataflowId(), s3TablePathResolver.getDataProviderId(),
+                  s3TablePathResolver.getDatasetId(), s3TablePathResolver.getTableName());
         } catch (Exception e) {
           String msg = e.getMessage();
           if (msg != null && msg.contains(ILLEGAL_CHAR_MARKER)) {
@@ -128,7 +130,8 @@ public class CreateEmptyTablesImpl implements CreateEmptyTables {
     } catch (EEAException eea) {
       throw eea;
     } catch (Exception e) {
-      LOG.error("Something went wrong, trying to create empty tables for dataflowId {} and datasetId {} , with exception message: {}", dataset.getDataflowId(), dataset.getId(), e.getMessage());
+      LOG.error("Something went wrong, trying to create empty table for dataflowId {} providerId {} datasetId {} and table {} , with exception message: {}",
+              dataset.getDataflowId(), dataset.getDataProviderId(), dataset.getId(), tableSchema.getNameTableSchema(), e.getMessage());
       throw new EEAException("Something went wrong, trying to create empty tables with message: " + e.getMessage());
     }
   }

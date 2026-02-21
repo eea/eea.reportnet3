@@ -1,6 +1,8 @@
 package org.eea.dataset.io.kafka.commands;
 
 import java.io.IOException;
+
+import org.apache.commons.lang3.BooleanUtils;
 import org.bson.types.ObjectId;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
@@ -81,12 +83,15 @@ public class PrefillingReferenceDatasetSnapshotCommand extends AbstractEEAEventH
       try {
         DataSetSchema schema =
             datasetSchemaRepository.findByIdDataSetSchema(new ObjectId(dataset.getDatasetSchema()));
-        fileTreatmentHelper.updateGeometryV2(datasetId, schema);
-
-        Thread.sleep(10000);
+        if(!BooleanUtils.isTrue(dataflowVO.getBigData())) {
+          fileTreatmentHelper.updateGeometryV2(datasetId, schema);
+          Thread.sleep(10000);
+        }
 
         fileTreatmentHelper.createReferenceDatasetPublicFiles(datasetId, dataflowVO);
-        recordStoreControllerZuul.refreshMaterializedView(datasetId, null);
+        if(!BooleanUtils.isTrue(dataflowVO.getBigData())) {
+          recordStoreControllerZuul.refreshMaterializedView(datasetId, null);
+        }
       } catch (IOException | InterruptedException e) {
         LOG_ERROR.error(
             "Error creating the reference dataset {} files during the creation. Error: {}",

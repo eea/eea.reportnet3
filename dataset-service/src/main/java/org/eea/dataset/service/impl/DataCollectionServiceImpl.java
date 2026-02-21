@@ -258,6 +258,9 @@ public class DataCollectionServiceImpl implements DataCollectionService {
   @Autowired
   private BigDataDatasetService bigDataDatasetService;
 
+  @Autowired
+  private CreateEmptyTables createEmptyTables;
+
 
   /**
    * Gets the dataflow status.
@@ -842,8 +845,17 @@ public class DataCollectionServiceImpl implements DataCollectionService {
             datasetIdsAndSchemaIds.put(testDatasetId, design.getDatasetSchema());
 
             if(Boolean.TRUE.equals(isBigDataflow)){
-              //create prefilled tables for test dataset if needed
+              //#297461 create prefilled tables for test dataset if needed
               bigDataDatasetService.createPrefilledTables(design.getId(), design.getDatasetSchema(), testDatasetId, 0L, null);
+
+              //create empty tables if needed
+              DataSetMetabaseVO testDataset = new DataSetMetabaseVO();
+              testDataset.setId(testDatasetId);
+              testDataset.setDataflowId(dataflowId);
+              testDataset.setDatasetSchema(design.getDatasetSchema());
+              testDataset.setDatasetTypeEnum(DatasetTypeEnum.TEST);
+              LOG.info("Creating empty tables if needed for test dataset {}", testDataset.getId());
+              createEmptyTables.runCreationForOneDataset(testDataset);
             }
 
 
@@ -891,6 +903,17 @@ public class DataCollectionServiceImpl implements DataCollectionService {
           List<IntegrityVO> integritieVOs = findIntegrityVO(rulesSchemaVO);
           prepareFKAndIntegrityForEUandDC(referenceDatasetId, newReferencesRegistry,
               lIntegrityDataCollections, referenceDataset, integritieVOs);
+
+          if(Boolean.TRUE.equals(isBigDataflow)) {
+            //#297461 create empty tables if needed for green reference dataset
+            DataSetMetabaseVO referenceDatasetMetabaseVO = new DataSetMetabaseVO();
+            referenceDatasetMetabaseVO.setId(referenceDataset.getId());
+            referenceDatasetMetabaseVO.setDataflowId(dataflowId);
+            referenceDatasetMetabaseVO.setDatasetSchema(referenceDataset.getDatasetSchema());
+            referenceDatasetMetabaseVO.setDatasetTypeEnum(DatasetTypeEnum.DESIGN); //set to design not reference because we create tables for the green reference dataset
+            LOG.info("Creating empty tables if needed for reference dataset {}", referenceDatasetMetabaseVO.getId());
+            createEmptyTables.runCreationForOneDataset(referenceDatasetMetabaseVO);
+          }
         }
       }
 
@@ -1059,8 +1082,18 @@ public class DataCollectionServiceImpl implements DataCollectionService {
 
       Boolean isBigDataflow = dataflowControllerZuul.isBigDataflow(dataflowId);
       if(Boolean.TRUE.equals(isBigDataflow)){
-        //create prefilled tables for reporting dataset if needed
+        //#297461 create prefilled tables for reporting dataset if needed
         bigDataDatasetService.createPrefilledTables(design.getId(), design.getDatasetSchema(), datasetId, representative.getDataProviderId(), null);
+
+        //create empty tables if needed
+        DataSetMetabaseVO reportingDataset = new DataSetMetabaseVO();
+        reportingDataset.setId(datasetId);
+        reportingDataset.setDataflowId(dataflowId);
+        reportingDataset.setDataProviderId(representative.getDataProviderId());
+        reportingDataset.setDatasetSchema(design.getDatasetSchema());
+        reportingDataset.setDatasetTypeEnum(DatasetTypeEnum.REPORTING); //set to design not reference because we create tables for the green reference dataset
+        LOG.info("Creating empty tables if needed for reporting dataset {}", reportingDataset.getId());
+        createEmptyTables.runCreationForOneDataset(reportingDataset);
       }
     }
   }
