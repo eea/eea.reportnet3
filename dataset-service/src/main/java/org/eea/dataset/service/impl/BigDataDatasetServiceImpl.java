@@ -1507,7 +1507,10 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         //if table does not exist or has 0 records do not do anything
         if (!icebergFolderExists || dremioJdbcTemplate.queryForObject(numberOfRecordsInIcebergTableQuery, Long.class) == 0) {
             //iceberg table does not exist and no parquet table should be created
-            LOG.info("For dataflowId {}, providerId {}, datasetId {} and table {} iceberg table does not exist or has 0 records so no parquet table will be created. LockValue: {}", dataflowId, providerId, datasetId, tableSchemaVO.getNameTableSchema(), lockValue);
+            LOG.info("For dataflowId {}, providerId {}, datasetId {} and table {} iceberg table does not exist or has 0 records so creating empty table. LockValue: {}", dataflowId, providerId, datasetId, tableSchemaVO.getNameTableSchema(), lockValue);
+            // In #297461 empty tables in parquet bucket should always exist so recreating it
+            DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
+            createEmptyTables.runCreationForSpecificTableSchema(dataSetMetabaseVO, tableSchemaVO.getIdTableSchema());
             return true;
         }
 
