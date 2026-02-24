@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.core.ResponseBytes;
+import software.amazon.awssdk.core.ResponseInputStream;
 import software.amazon.awssdk.core.sync.ResponseTransformer;
 import software.amazon.awssdk.services.s3.S3AsyncClient;
 import software.amazon.awssdk.services.s3.S3Client;
@@ -30,10 +31,7 @@ import software.amazon.awssdk.transfer.s3.model.CompletedDirectoryDownload;
 import software.amazon.awssdk.transfer.s3.model.DirectoryDownload;
 import software.amazon.awssdk.transfer.s3.model.DownloadDirectoryRequest;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -250,6 +248,15 @@ public class S3HelperImpl implements S3Helper {
 
         LOG.info("Successfully streamed file from S3 to: {}", filePath);
         return file;
+    }
+
+    public InputStream streamS3File(String key) {
+        final GetObjectRequest objectRequest = GetObjectRequest.builder()
+                .key(key)
+                .bucket(S3_DEFAULT_BUCKET_NAME)
+                .build();
+
+        return s3Client.getObject(objectRequest);
     }
 
     /**
