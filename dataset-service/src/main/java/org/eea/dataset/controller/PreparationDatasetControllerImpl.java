@@ -77,7 +77,7 @@ public class PreparationDatasetControllerImpl implements PreparationDatasetContr
     @ApiOperation(value = "List preparation datasets")
     public PreparationDatasetResponseVO list(
             @RequestParam("dataflowId") Long dataflowId,
-            @RequestParam("providerId") Long providerId,
+            @RequestParam(value = "providerId", required = false) Long providerId,
             @RequestParam(value = "code", required = false) String code) {
 
         LOG.info("Listing preparation datasets dataflowId={}, providerId={}", dataflowId, providerId);
@@ -259,44 +259,27 @@ public class PreparationDatasetControllerImpl implements PreparationDatasetContr
     }
 
     @Override
-    @HystrixCommand(commandProperties = {
-            @HystrixProperty(
-                    name = "execution.isolation.thread.timeoutInMilliseconds",
-                    value = "7200000")
-    })
+    @HystrixCommand(commandProperties = {@HystrixProperty(name = "execution.isolation.thread.timeoutInMilliseconds", value = "7200000")})
     @PostMapping("/{datasetId}/preparations/importFileData")
     @ApiOperation(value = "Import file data into preparation dataset (Big Data)")
     public Map<String, Object> importBigFileDataForPreparation(
             @PathVariable("datasetId") Long datasetId,
-
             @RequestParam("code") String preparationCode,
-
             @RequestParam(value = "dataflowId", required = false) Long dataflowId,
-
             @RequestParam(value = "providerId", required = false) Long providerId,
-
             @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,
-
             @RequestParam(value = "file", required = false) MultipartFile file,
-
             @RequestParam(value = "replace", required = false) boolean replace,
-
             @RequestParam(value = "integrationId", required = false) Long integrationId,
-
             @RequestParam(value = "delimiter", required = false) String delimiter,
-
             @RequestParam(value = "jobId", required = false) Long jobId,
-
             @RequestParam(value = "fmeJobId", required = false) String fmeJobId
-
     ) throws Exception {
-
         LOG.info("Preparation import called datasetId={}, code={}, dataflowId={}, providerId={}, tableSchemaId={}, replace={}, jobId={}, fmeJobId={}",
                 datasetId, preparationCode, dataflowId, providerId,
                 tableSchemaId, replace, jobId, fmeJobId);
 
         Map<String, Object> result = new HashMap<>();
-
         Long mockJobId = jobId != null ? jobId : System.currentTimeMillis();
 
         result.put("jobId", mockJobId);

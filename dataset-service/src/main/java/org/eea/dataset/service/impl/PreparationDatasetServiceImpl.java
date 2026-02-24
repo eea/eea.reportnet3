@@ -51,7 +51,6 @@ import static org.eea.utils.LiteralConstants.*;
 public class PreparationDatasetServiceImpl implements PreparationDatasetService {
 
     private static final Logger LOG = LoggerFactory.getLogger(PreparationDatasetServiceImpl.class);
-    /** The service instance id. */
     @Value("${redis.lock.preparation.datasets.creation.expireTimeInMillis}")
     private long prepSetCreationExpirationTimeMs;
 
@@ -90,10 +89,7 @@ public class PreparationDatasetServiceImpl implements PreparationDatasetService 
 
     @Override
     @Transactional
-    public PreparationDatasetResponseVO findPreparationDatasets(
-            Long dataflowId,
-            Long providerId,
-            String code) {
+    public PreparationDatasetResponseVO findPreparationDatasets(Long dataflowId, Long providerId, String code) {
 
         List<PreparationDataset> entities;
 
@@ -208,11 +204,11 @@ public class PreparationDatasetServiceImpl implements PreparationDatasetService 
                 .build();
 
         String lockKey = LockEnum.PREPERATION_DATASET_CREATION.getValue() + "_" + dataflowId + "_" + providerId;
-        String lockValue = LockEnum.PREPERATION_DATASET_CREATION.getValue()  + "_" + dataflowId + "_" + providerId + "_" + UUID.randomUUID();
-        if(!redisLockService.checkAndAcquireLock(lockKey, lockValue, prepSetCreationExpirationTimeMs)) {
+        String lockValue = LockEnum.PREPERATION_DATASET_CREATION.getValue() + "_" + dataflowId + "_" + providerId + "_" + UUID.randomUUID();
+        if (!redisLockService.checkAndAcquireLock(lockKey, lockValue, prepSetCreationExpirationTimeMs)) {
             Map<String, String> activeLocks = redisLockService.listActiveLocks(lockKey);
             kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.ANOTHER_PREPARATION_DATASET_CREATION_IS_RUNNING_FAILED_EVENT, null, notificationVO);
-            throw new EEAException("Lock acquisition failed. Relative active locks: "+ activeLocks.toString());
+            throw new EEAException("Lock acquisition failed. Relative active locks: " + activeLocks.toString());
         }
 
         kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.PREPARATION_DATASET_CREATION_STARTED_EVENT, null, notificationVO);
@@ -221,7 +217,7 @@ public class PreparationDatasetServiceImpl implements PreparationDatasetService 
         List<PreparationDatasetVO> preparationDatasetVOS = findByDataflowIdAndProviderIdAndIsCreated(dataflowId, providerId, false);
         if (preparationDatasetVOS.isEmpty()) {
             redisLockService.releaseLock(lockKey, lockValue);
-            kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.PREPARATION_DATASET_CREATION_HAS_EMPTY_QUEUE_EVENT,null, notificationVO);
+            kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.PREPARATION_DATASET_CREATION_HAS_EMPTY_QUEUE_EVENT, null, notificationVO);
             LOG.info("No preparation dataset found without isCreated=FALSE for dataflow {} and providerId {}", dataflowId, providerId);
             return;
         }
@@ -280,7 +276,7 @@ public class PreparationDatasetServiceImpl implements PreparationDatasetService 
     public void copyParentDatasetDataToPreparationDataset(DataSetMetabaseVO parentDataSetMetabaseVO, String preparationCode) throws Exception {
         long providerId = parentDataSetMetabaseVO.getDataProviderId() == null ? 0 : parentDataSetMetabaseVO.getDataProviderId();
         if (providerId == 0) {
-            LOG.info("Cannot create preparation datasets for DESIGN datasetId: {}",parentDataSetMetabaseVO.getId());
+            LOG.info("Cannot create preparation datasets for DESIGN datasetId: {}", parentDataSetMetabaseVO.getId());
             return;
         }
         String parentDatasetSchemaId = parentDataSetMetabaseVO.getDatasetSchema();
@@ -332,13 +328,13 @@ public class PreparationDatasetServiceImpl implements PreparationDatasetService 
                 preparationSelectClause = new StringBuilder(preparationSelectClause.substring(0, preparationSelectClause.length() - 2));
             }
 
-           // if the preparation dataset folder exists in S3 that means that we have to delete it to recreate it in the next `CREATE` statement
-           if (s3HelperPrivate.checkFolderExist(targetPreparationTableS3FolderPath, S3_PREPARATION_TABLE_NAME_FOLDER_PATH)) {
+            // if the preparation dataset folder exists in S3 that means that we have to delete it to recreate it in the next `CREATE` statement
+            if (s3HelperPrivate.checkFolderExist(targetPreparationTableS3FolderPath, S3_PREPARATION_TABLE_NAME_FOLDER_PATH)) {
                LOG.info("Deleting existing table for preparation dataset for datasetId {} and parent table {} to recreate them.", parentDatasetId, parentTable);
                dremioHelperService.demoteFolderOrFile(targetPreparationTableS3FolderPath, parentTableName);
                s3HelperPrivate.deleteFolder(targetPreparationTableS3FolderPath, S3_PREPARATION_TABLE_NAME_FOLDER_PATH);
                LOG.info("Deleted successfully the existing table for preparation dataset for datasetId {} and parent table {} to recreate them.", parentDatasetId, parentTable);
-           }
+            }
 
             dropDremioTable(targetPreparationTableDremioQueryPathString);
 
@@ -363,23 +359,12 @@ public class PreparationDatasetServiceImpl implements PreparationDatasetService 
     }
 
     private String constructRecordIdCreationForQuery() {
-        return "CONCAT(\n" + "        LOWER(LPAD(TO_HEX(CAST(RAND() * 4294967295 AS BIGINT)), 8, '0')), '-',\n" + "        LOWER(LPAD(TO_HEX(CAST(RAND() * 65535 AS BIGINT)), 4, '0')), '-',\n" + "        LOWER(LPAD(TO_HEX(CAST(RAND() * 65535 AS BIGINT)), 4, '0')), '-',\n" + "        LOWER(LPAD(TO_HEX(CAST(RAND() * 65535 AS BIGINT)), 4, '0')), '-',\n" + "        LOWER(LPAD(TO_HEX(CAST(RAND() * 281474976710655 AS BIGINT)), 12, '0'))\n" + "    ) AS " + PARQUET_RECORD_ID_COLUMN_HEADER + " ";
-    }
-
-    /**
-     * Maps entity to VO.
-     */
-    private PreparationDatasetVO toVO(PreparationDataset preparationDataset) {
-
-        PreparationDatasetVO vo = new PreparationDatasetVO();
-        vo.setId(preparationDataset.getId());
-        vo.setParentDatasetId(preparationDataset.getParentDatasetId());
-        vo.setDataflowId(preparationDataset.getDataflowId());
-        vo.setProviderId(preparationDataset.getProviderId());
-        vo.setDatasetName(preparationDataset.getDatasetName());
-        vo.setCode(preparationDataset.getCode());
-        vo.setIsCreated(preparationDataset.getIsCreated());
-
-        return vo;
+        return "CONCAT(\n"
+                + "        LOWER(LPAD(TO_HEX(CAST(RAND() * 4294967295 AS BIGINT)), 8, '0')), '-',\n"
+                + "        LOWER(LPAD(TO_HEX(CAST(RAND() * 65535 AS BIGINT)), 4, '0')), '-',\n"
+                + "        LOWER(LPAD(TO_HEX(CAST(RAND() * 65535 AS BIGINT)), 4, '0')), '-',\n"
+                + "        LOWER(LPAD(TO_HEX(CAST(RAND() * 65535 AS BIGINT)), 4, '0')), '-',\n"
+                + "        LOWER(LPAD(TO_HEX(CAST(RAND() * 281474976710655 AS BIGINT)), 12, '0'))\n"
+                + "    ) AS " + PARQUET_RECORD_ID_COLUMN_HEADER + " ";
     }
 }
