@@ -122,17 +122,25 @@ public class DremioNonSQLValidationUtils {
     }
 
     public boolean isBlankPoint(byte[] byteArray) {
+      // If there is no value at all, this rule should not apply.
       if (byteArray == null || byteArray.length == 0) {
-        return false;
+        return true;
       }
       try {
         Geometry geometry = new WKBReader().read(byteArray);
+        // Parameter exist but can't be converted to Geometry.
         if (geometry == null) {
           return false;
         }
 
+        // Empty point (GeoJSON coordinates: []).
+        if (geometry.isEmpty()) {
+          return false;
+        }
+
+        // BlankPoint invoked but not POINT type.
         if (!"Point".equalsIgnoreCase(geometry.getGeometryType())) {
-          return true;
+          return false;
         }
 
         Coordinate coordinates = geometry.getCoordinate();
@@ -144,13 +152,9 @@ public class DremioNonSQLValidationUtils {
         double y = coordinates.getY();
 
         // Blank point [0,0] coordinates.
-        if (x == 0d && y == 0d) {
-          return false;
-        }
-
-        return true;
+        return x != 0d || y != 0d;
       } catch (Exception e) {
-        return false;
+        return true;
       }
     }
 }
