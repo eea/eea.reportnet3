@@ -284,10 +284,10 @@ export const Dataflow = () => {
   }, [location.pathname, dataflowId]);
 
   useEffect(() => {
-    if (!dataProviderId) return;
+    if (!dataProviderId || !dataflowState.data.bigData) return;
 
     getPreparationSets({ code });
-  }, [dataProviderId]);
+  }, [dataProviderId, dataflowState.data.bigData]);
 
   const getPreparationSets = async ({ code, showPageLoader = true } = {}) => {
     try {
@@ -1532,6 +1532,10 @@ export const Dataflow = () => {
           : TextUtils.parseText(resourcesContext.messages['sncCitusDataflowNamed'], {
               name: code ? dataflowState?.selectedPreparationSet?.datasetName || '' : dataflowState.data.name
             })
+        : dataflowState.data.bigData
+        ? TextUtils.parseText(resourcesContext.messages['bigDataDataflowNamed'], {
+            name: dataflowState.data.name
+          })
         : dataflowState.data.name;
     } else {
       subtitle = dataflowState.data.sncData
