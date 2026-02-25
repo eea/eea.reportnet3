@@ -3938,6 +3938,28 @@ public class DatasetControllerImpl implements DatasetController {
     }
   }
 
+  /*This endpoint was implemented as part of #297461 to create empty tables if needed via postman or curl command*/
+  @PostMapping("/{datasetId}/createEmptyTablesV3")
+  @HystrixCommand(commandProperties = {@HystrixProperty(name = "execution.isolation.thread.timeoutInMilliseconds", value = "650000")})
+  @PreAuthorize("hasAnyRole('ADMIN')")
+  @Override
+  public void createEmptyTablesV3(@PathVariable Long datasetId, @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId) throws Exception {
+    try {
+      LOG.info("Creating empty tables for datasetId {} and tableSchemaId {}", datasetId, tableSchemaId);
+      DataSetMetabaseVO datasetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
+      if(StringUtils.isNotBlank(tableSchemaId)){
+        createEmptyTables.runCreationForSpecificTableSchema(datasetMetabaseVO, tableSchemaId);
+      }
+      else {
+        createEmptyTables.runCreationForOneDataset(datasetMetabaseVO);
+      }
+      LOG.info("Created empty tables for datasetId {} and tableSchemaId {}", datasetId, tableSchemaId);
+    } catch (Exception e) {
+      LOG.error("Could not create empty tables for datasetId {} and tableSchemaId {} Error: {}", datasetId, tableSchemaId, e.getMessage());
+      throw e;
+    }
+  }
+
   /**
    * Get released dataset data info
    *

@@ -440,7 +440,8 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             handleFmeRequest(integrationVO, importFileInDremioInfo, filesToImport.get(0), mimeType);
         } else {
             List<File> correctFilesForImport = checkCsvFiles(importFileInDremioInfo, schema, filesToImport);
-            parquetConverterService.convertCsvFilesToParquetFiles(importFileInDremioInfo, correctFilesForImport, schema);
+            DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(importFileInDremioInfo.getDatasetId());
+            parquetConverterService.convertCsvFilesToParquetFiles(importFileInDremioInfo, correctFilesForImport, schema, dataSetMetabaseVO);
 
         }
     }
@@ -917,9 +918,9 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 throw new Exception("Can not delete table data because iceberg table is created");
             }
             String tableSchemaName = tableSchemaVO.getNameTableSchema();
+            DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
 
             if (providerId == null) {
-                DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
                 providerId = dataSetMetabaseVO.getDataProviderId();
             }
             if (providerId == null) {
@@ -930,7 +931,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             String s3PathForCsvFolder = s3ServicePrivate.getTableAsFolderQueryPath(s3ImportPathResolver, S3_IMPORT_TABLE_NAME_FOLDER_PATH);
 
             //remove csv files that are related to the table
-            parquetConverterService.removeCsvFilesThatWillBeReplaced(s3ImportPathResolver, tableSchemaName, s3PathForCsvFolder, datasetId);
+            parquetConverterService.removeCsvFilesThatWillBeReplaced(s3ImportPathResolver, tableSchemaName, s3PathForCsvFolder, datasetId, dataSetMetabaseVO);
 
             S3PathResolver s3TablePathResolver = new S3PathResolver(dataflowId, providerId, datasetId, tableSchemaName, tableSchemaName, S3_TABLE_NAME_FOLDER_PATH);
             //remove folders that contain the previous parquet files
@@ -957,7 +958,6 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 }
             }
             if(BooleanUtils.isTrue(createEmptyTablesBool)) {
-                DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
                 createEmptyTables.runCreationForSpecificTableSchema(dataSetMetabaseVO, tableSchemaId);
             }
 
@@ -972,10 +972,9 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 NotificationVO notificationVO = NotificationVO.builder()
                         .user(SecurityContextHolder.getContext().getAuthentication().getName()).datasetId(datasetId)
                         .tableSchemaId(tableSchemaId).build();
-                DataSetMetabaseVO datasetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
-                notificationVO.setDatasetName(datasetMetabaseVO.getDataSetName());
-                notificationVO.setDataflowId(datasetMetabaseVO.getDataflowId());
-                notificationVO.setDataflowName(dataFlowControllerZuul.getMetabaseById(datasetMetabaseVO.getDataflowId()).getName());
+                notificationVO.setDatasetName(dataSetMetabaseVO.getDataSetName());
+                notificationVO.setDataflowId(dataSetMetabaseVO.getDataflowId());
+                notificationVO.setDataflowName(dataFlowControllerZuul.getMetabaseById(dataSetMetabaseVO.getDataflowId()).getName());
 
                 value.put(LiteralConstants.DATASET_ID, datasetId);
 
@@ -3016,7 +3015,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             importFileInDremioInfo.setAttachmentsExistPerTableName(attachmentsExistPerTableName);
 
             try {
-                parquetConverterService.convertCsvFilesToParquetFiles(importFileInDremioInfo, csvFiles, datasetSchema);
+                parquetConverterService.convertCsvFilesToParquetFiles(importFileInDremioInfo, csvFiles, datasetSchema, dataSetMetabaseVO);
             }
             catch(Exception e){
                 LOG.error("Error in convertCsvFilesToParquetFiles for job {} ", importFileInDremioInfo, e);
