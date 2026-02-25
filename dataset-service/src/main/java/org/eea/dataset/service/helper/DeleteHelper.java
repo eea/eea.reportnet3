@@ -276,7 +276,7 @@ public class DeleteHelper {
       Long providerId = datasetService.getDataProviderIdById(datasetId);
       ImportFileInDremioInfo importFileInDremioInfo = new ImportFileInDremioInfo(null, datasetId, dataflowId, providerId, null, null, true, null, integrationId, null);
       try {
-        parquetConverterService.deleteAllDataBeforeImport(importFileInDremioInfo, datasetSchemaId);
+        parquetConverterService.deleteAllDataBeforeImport(importFileInDremioInfo, datasetSchemaId, dataset);
       } catch (Exception e) {
         LOG.error("Error while trying to delete data from dataset {}", datasetId, e);
         return;

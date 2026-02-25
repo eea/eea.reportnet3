@@ -313,12 +313,12 @@ public class BigDataDatasetServiceImplTest {
                     ImportFileInDremioInfo info = invocation.getArgument(0);
                     info.setErrorMessage(errorMessage);
                     throw new Exception(errorMessage);
-                }).when(parquetConverterService).convertCsvFilesToParquetFiles(any(), eq(fileList), eq(datasetSchema));
+                }).when(parquetConverterService).convertCsvFilesToParquetFiles(any(), eq(fileList), eq(datasetSchema), eq(dataSetMetabaseVO));
 
         bigDataDatasetServiceSpy.etlImportDataset(datasetId, dataflowId, providerId, replaceData, tableSchemaId, delimiter, filePathInS3, jobId, dataFlowVO, dataSetMetabaseVO);
 
         ArgumentCaptor<ImportFileInDremioInfo> captor = ArgumentCaptor.forClass(ImportFileInDremioInfo.class);
-        Mockito.verify(parquetConverterService).convertCsvFilesToParquetFiles(captor.capture(), eq(fileList), eq(datasetSchema));
+        Mockito.verify(parquetConverterService).convertCsvFilesToParquetFiles(captor.capture(), eq(fileList), eq(datasetSchema), eq(dataSetMetabaseVO));
         assertEquals(errorMessage, captor.getValue().getErrorMessage());
         Mockito.verify(jobControllerZuul).updateJobStatusAndInfo(jobId, jobStatus, jobInfoEnum, null);
     }
@@ -371,12 +371,12 @@ public class BigDataDatasetServiceImplTest {
             ImportFileInDremioInfo info = invocation.getArgument(0);
             info.setErrorMessage(errorMessage);
             throw new RuntimeException(errorMessage);
-        }).when(parquetConverterService).convertCsvFilesToParquetFiles(any(), eq(fileList), eq(datasetSchema));
+        }).when(parquetConverterService).convertCsvFilesToParquetFiles(any(), eq(fileList), eq(datasetSchema), eq(dataSetMetabaseVO));
 
         bigDataDatasetServiceSpy.etlImportDataset(datasetId, dataflowId, providerId, replaceData, tableSchemaId, delimiter, filePathInS3, jobId, dataFlowVO, dataSetMetabaseVO);
 
         ArgumentCaptor<ImportFileInDremioInfo> captor = ArgumentCaptor.forClass(ImportFileInDremioInfo.class);
-        Mockito.verify(parquetConverterService).convertCsvFilesToParquetFiles(captor.capture(), eq(fileList), eq(datasetSchema));
+        Mockito.verify(parquetConverterService).convertCsvFilesToParquetFiles(captor.capture(), eq(fileList), eq(datasetSchema), eq(dataSetMetabaseVO));
         assertEquals(errorMessage, captor.getValue().getErrorMessage());
         Mockito.verify(jobControllerZuul).updateJobStatus(jobId, jobStatus);
     }
@@ -479,12 +479,12 @@ public class BigDataDatasetServiceImplTest {
             ImportFileInDremioInfo info = invocation.getArgument(0);
             info.setWarningMessages(warningMessages);
             return null;
-        }).when(parquetConverterService).convertCsvFilesToParquetFiles(any(), eq(fileList), eq(datasetSchema));
+        }).when(parquetConverterService).convertCsvFilesToParquetFiles(any(), eq(fileList), eq(datasetSchema), eq(dataSetMetabaseVO));
 
         bigDataDatasetServiceSpy.etlImportDataset(datasetId, dataflowId, providerId, replaceData, tableSchemaId, delimiter, filePathInS3, jobId, dataFlowVO, dataSetMetabaseVO);
 
         ArgumentCaptor<ImportFileInDremioInfo> captor = ArgumentCaptor.forClass(ImportFileInDremioInfo.class);
-        Mockito.verify(parquetConverterService).convertCsvFilesToParquetFiles(captor.capture(), eq(fileList), eq(datasetSchema));
+        Mockito.verify(parquetConverterService).convertCsvFilesToParquetFiles(captor.capture(), eq(fileList), eq(datasetSchema), eq(dataSetMetabaseVO));
         Mockito.verify(jobControllerZuul).updateJobStatusAndInfo(jobId, jobStatus, jobInfoEnum, null);
     }
 
@@ -538,12 +538,12 @@ public class BigDataDatasetServiceImplTest {
             ImportFileInDremioInfo info = invocation.getArgument(0);
             info.setWarningMessages(warningMessages);
             return null;
-        }).when(parquetConverterService).convertCsvFilesToParquetFiles(any(), eq(fileList), eq(datasetSchema));
+        }).when(parquetConverterService).convertCsvFilesToParquetFiles(any(), eq(fileList), eq(datasetSchema), eq(dataSetMetabaseVO));
 
         bigDataDatasetServiceSpy.etlImportDataset(datasetId, dataflowId, providerId, replaceData, tableSchemaId, delimiter, filePathInS3, jobId, dataFlowVO, dataSetMetabaseVO);
 
         ArgumentCaptor<ImportFileInDremioInfo> captor = ArgumentCaptor.forClass(ImportFileInDremioInfo.class);
-        Mockito.verify(parquetConverterService).convertCsvFilesToParquetFiles(captor.capture(), eq(fileList), eq(datasetSchema));
+        Mockito.verify(parquetConverterService).convertCsvFilesToParquetFiles(captor.capture(), eq(fileList), eq(datasetSchema), eq(dataSetMetabaseVO));
         Mockito.verify(jobControllerZuul).updateJobStatus(jobId, jobStatus);
     }
 

@@ -2333,15 +2333,13 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
                       referencePath.setPath(S3_DATAFLOW_REFERENCE_PATH);
                       referencePath.setParquetFolder(key.split("/")[5]);
                       try {
-                        LOG.info("Getting file from S3 with key : {} and filename : {}", key, filename);
-                        File parquetFile = s3Helper.getFileFromS3(key, filename, pathSnapshot, LiteralConstants.PARQUET_TYPE);
-                        String tableNameDCPath = s3Service.getS3Path(referencePath);
-                        LOG.info("Uploading file to bucket parquetFile path : {} in path: {}", tableNameDCPath, parquetFile.getPath());
-                        s3Helper.uploadFileToBucket(tableNameDCPath, parquetFile.getPath());
-                        LOG.info("Uploading finished successfully for {}", tableNameDCPath);
+                        String tableNameRefPath = s3Service.getS3Path(referencePath);
+                        // Ticket #287184 instead of storing the file to the disk, uploading it to s3 and removing it we replaced this code with copying the file to another destination using the s3Client
+                        s3Helper.copyFileToAnotherDestination(key, tableNameRefPath);
+                        LOG.info("Copied file from source {} to destination {}", key, tableNameRefPath);
                         //promote folder
                         checkAndPromoteFolder(referencePath, S3_DATAFLOW_REFERENCE_QUERY_PATH);
-                      } catch (IOException e) {
+                      } catch (Exception e) {
                         LOG.error("Error in getFileFromS3 process for reportingDatasetId {}, dataflowId {}",
                                 reportingDatasetId, dataflowId, e);
                       }

@@ -81,6 +81,7 @@ public class JobForExecutingQueuedJobs {
                         jobService.prepareAndExecuteValidationJob(job);
                     } else if (job.getJobType() == JobTypeEnum.VALIDATION && job.isRelease()) {
                         //check if another release is already running for the dataflow, but for another provider
+                        //TODO for #297462 remove following check because validations for release will be executed in parallel for the same dataflow id
                         if (!jobService.canExecuteReleaseOnDataflow(job.getDataflowId())) {
                             continue;
                         }
