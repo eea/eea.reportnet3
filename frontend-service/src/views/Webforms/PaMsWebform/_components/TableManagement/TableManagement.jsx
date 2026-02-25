@@ -378,7 +378,7 @@ export const TableManagement = ({
       <div style={{ display: 'flex', justifyContent: 'center' }}>
         <Button
           className="p-button-secondary"
-          disabled={!hasTable || isSaving}
+          disabled={!hasTable || isSaving || disableActionButtons}
           icon={hasRecord ? 'edit' : 'add'}
           label={
             hasRecord
