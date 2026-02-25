@@ -2,7 +2,7 @@ import { Fragment, useContext, useEffect, useReducer, useState } from 'react';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import capitalize from 'lodash/capitalize';
-import isEmpty from 'lodash/isEmpty'; 
+import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import uniqueId from 'lodash/uniqueId';
 
@@ -97,6 +97,33 @@ export const PaMsWebform = ({
       });
   }, [isDataUpdated]);
 
+  useEffect(() => {
+    const matchedNotifications = notificationContext.hidden.filter(
+      ({ key }) => key === 'INSERT_RECORDS_MULTI_TABLES_COMPLETED' || key === 'INSERT_RECORDS_MULTI_TABLES_FAILED'
+    );
+
+    if (isEmpty(matchedNotifications)) return;
+
+    const matchedWithDatasetId = matchedNotifications.find(
+      matchedNotification => String(matchedNotification.content?.datasetId) === String(datasetId)
+    );
+
+    if (!matchedWithDatasetId) return;
+
+    const resetAddPamState = () => {
+      setIsAddingSingleRecord(false);
+      setIsAddingGroupRecord(false);
+      setRefreshTableTrigger(prev => prev + 1);
+    };
+
+    if (matchedWithDatasetId?.key === 'INSERT_RECORDS_MULTI_TABLES_COMPLETED') {
+      onUpdateData();
+      resetAddPamState();
+    } else if (matchedWithDatasetId?.key === 'INSERT_RECORDS_MULTI_TABLES_FAILED') {
+      resetAddPamState();
+    }
+  }, [notificationContext.hidden]);
+
   const initialLoad = () => {
     paMsWebformDispatch({
       type: 'INITIAL_LOAD',
@@ -157,9 +184,8 @@ export const PaMsWebform = ({
     try {
       const pamsTableRecords = await getPamsTableRecords(tableSchemaId);
       await WebformService.addPamsRecords(datasetId, filteredTables, generatePamId(pamsTableRecords), capitalize(type));
-      onUpdateData();
     } catch (error) {
-      if (error.response.status === 423) {
+      if (error.response?.status === 423) {
         notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' }, true);
       } else {
         console.error('PaMsWebform - onAddPamsRecord.', error);
@@ -182,7 +208,6 @@ export const PaMsWebform = ({
       }
     }
   };
-
   const onAddTableRecord = async (table, pamNumber) => {
     const newEmptyRecord = parseNewTableRecord(table, pamNumber);
 
