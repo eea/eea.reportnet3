@@ -139,7 +139,7 @@ public class CreateEmptyTablesImpl implements CreateEmptyTables {
   private void regenerateTables(DataSetMetabaseVO dataset, TableSchema tableSchema, List<Schema.Field> fields) throws Exception {
     Schema schema1 = Schema.createRecord("Data", null, null, false, fields);
     String file = "0_0_0.parquet";
-    String parquetFile = parquetFilePath + file;
+    String parquetFile = parquetFilePath + UUID.randomUUID() + "/" + file;
     try {
       dremioHelperService.deleteFileFromR3IfExists(parquetFile);
       try (ParquetWriter<GenericRecord> writer = AvroParquetWriter
