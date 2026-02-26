@@ -23,6 +23,12 @@ export const getProviderColumns = (styles, resourcesContext, templates) => [
     className: styles.middleColumn
   },
   {
+    key: 'preparationCode',
+    header: resourcesContext.messages['setCode'],
+    template: templates.getSetCodeTemplate,
+    className: styles.middleColumn
+  },
+  {
     key: 'jobType',
     header: resourcesContext.messages['jobType'],
     template: templates.getJobTypeTemplate,

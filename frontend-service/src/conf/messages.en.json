@@ -1515,6 +1515,7 @@
     "send": "Send",
     "sessionExpired": "Your session has expired. Please log in again to continue.",
     "sessionExpiredHeader": "Session expired",
+    "setCode": "Set code",
     "setName": "Set name",
     "setNamePlaceholder": "Set name...",
     "settings": "Settings",
