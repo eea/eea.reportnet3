@@ -124,7 +124,7 @@ public class DremioNonSQLValidationUtils {
     public boolean isBlankPoint(byte[] byteArray) {
       // If there is no value at all, this rule should not apply.
       if (byteArray == null || byteArray.length == 0) {
-        return true;
+        return false;
       }
       try {
         Geometry geometry = new WKBReader().read(byteArray);
