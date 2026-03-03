@@ -86,10 +86,12 @@ public class DremioHelperServiceImpl implements DremioHelperService {
     @Override
     public boolean checkFolderPromoted(S3PathResolver s3PathResolver, String folderName) {
         DremioDirectoryItemsResponse directoryItems = getDirectoryItems(s3PathResolver, folderName);
-        if (directoryItems!=null) {
+        if (directoryItems != null) {
             Integer itemPosition;
             if (S3_IMPORT_FILE_PATH.equals(s3PathResolver.getPath())) {
                 itemPosition = 8;
+            } else if (S3_PREPARATION_IMPORT_FILE_PATH.equals(s3PathResolver.getPath())) {
+                itemPosition = 9;
             } else if (S3_DATAFLOW_REFERENCE_FOLDER_PATH.equals(s3PathResolver.getPath())) {
                 itemPosition = 4;
             } else if (S3_EU_SNAPSHOT_ROOT_PATH.equals(s3PathResolver.getPath())) {
@@ -114,11 +116,15 @@ public class DremioHelperServiceImpl implements DremioHelperService {
     public DremioDirectoryItemsResponse getDirectoryItems(S3PathResolver s3PathResolver, String folderName) {
         String bucketName = (BooleanUtils.isTrue(s3PathResolver.getIsIcebergTable())) ? S3_ICEBERG_BUCKET_PATH : S3_DEFAULT_BUCKET_PATH;
         String directoryPath = null;
-        if(S3_IMPORT_FILE_PATH.equals(s3PathResolver.getPath())) {
+        if (S3_IMPORT_FILE_PATH.equals(s3PathResolver.getPath())) {
             directoryPath = bucketName + "/" + s3Service.getTableAsFolderQueryPath(s3PathResolver,
-                S3_IMPORT_TABLE_NAME_FOLDER_PATH);
+                    S3_IMPORT_TABLE_NAME_FOLDER_PATH);
+        }else if (S3_PREPARATION_IMPORT_FILE_PATH.equals(s3PathResolver.getPath())) {
+            directoryPath = bucketName + "/" + s3Service.getTableAsFolderQueryPath(s3PathResolver,
+                    S3_PREPARATION_IMPORT_TABLE_NAME_FOLDER_PATH
+                    );
         } else if (S3_TABLE_NAME_ROOT_DC_FOLDER_PATH.equals(s3PathResolver.getPath())
-            || S3_EU_SNAPSHOT_ROOT_PATH.equals(s3PathResolver.getPath())) {
+                || S3_EU_SNAPSHOT_ROOT_PATH.equals(s3PathResolver.getPath())) {
             directoryPath = bucketName + "/" + s3Service.getS3Path(s3PathResolver);
         } else if (S3_DATAFLOW_REFERENCE_FOLDER_PATH.equals(s3PathResolver.getPath())) {
             directoryPath = bucketName + "/" + s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_REFERENCE_FOLDER_PATH);
@@ -131,12 +137,11 @@ public class DremioHelperServiceImpl implements DremioHelperService {
         } catch (FeignException e) {
             //retry call if there is an authentication error
             String errorMessage = "Could not retrieve directory items for datasetId " + s3PathResolver.getDatasetId() + " and table " + s3PathResolver.getTableName();
-            if (e.status()== HttpStatus.UNAUTHORIZED.value()) {
+            if (e.status() == HttpStatus.UNAUTHORIZED.value()) {
                 token = this.getAuthToken();
                 try {
                     directoryItems = dremioApiController.getDirectoryItems(token, directoryPath);
-                }
-                catch (Exception e2){
+                } catch (Exception e2) {
                     throw new DremioApiException(errorMessage);
                 }
             } else {
@@ -154,6 +159,8 @@ public class DremioHelperServiceImpl implements DremioHelperService {
             Integer itemPosition;
             if (S3_IMPORT_FILE_PATH.equals(s3PathResolver.getPath())) {
                 itemPosition = 8;
+            } else if (S3_PREPARATION_IMPORT_FILE_PATH.equals(s3PathResolver.getPath())) {
+                itemPosition = 9;
             } else if (S3_DATAFLOW_REFERENCE_FOLDER_PATH.equals(s3PathResolver.getPath())) {
                 itemPosition = 4;
             } else if (S3_EU_SNAPSHOT_ROOT_PATH.equals(s3PathResolver.getPath())) {
@@ -179,6 +186,10 @@ public class DremioHelperServiceImpl implements DremioHelperService {
         DremioPromotionRequestBody requestBody;
         if (S3_IMPORT_FILE_PATH.equals(s3PathResolver.getPath())) {
             directoryPath = S3_DEFAULT_BUCKET_PATH + "/" + s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_IMPORT_FILE_PATH);
+            String[] path = directoryPath.split("/");
+            requestBody = new DremioCSVPromotionRequestBody(ENTITY_TYPE, DREMIO_CONSTANT + directoryPath, path, DATASET_TYPE, new DremioCSVPromotionRequestBody.Format(CSV_FORMAT_TYPE, true));
+        } else if (S3_PREPARATION_IMPORT_FILE_PATH.equals(s3PathResolver.getPath())) {
+            directoryPath = S3_DEFAULT_BUCKET_PATH + "/" + s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_PREPARATION_IMPORT_FILE_PATH);
             String[] path = directoryPath.split("/");
             requestBody = new DremioCSVPromotionRequestBody(ENTITY_TYPE, DREMIO_CONSTANT + directoryPath, path, DATASET_TYPE, new DremioCSVPromotionRequestBody.Format(CSV_FORMAT_TYPE, true));
         } else if (S3_TABLE_NAME_ROOT_DC_FOLDER_PATH.equals(s3PathResolver.getPath()) || S3_EU_SNAPSHOT_ROOT_PATH.equals(s3PathResolver.getPath())) {

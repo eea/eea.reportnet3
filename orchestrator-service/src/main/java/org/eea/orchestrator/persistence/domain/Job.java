@@ -72,4 +72,7 @@ public class Job {
     @Column(name = "FME_STATUS")
     @Enumerated(EnumType.STRING)
     private FmeJobStatusEnum fmeStatus;
+
+    @Column(name = "PREPARATION_CODE")
+    private String preparationCode;
 }

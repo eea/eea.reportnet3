@@ -459,25 +459,30 @@ public class DatasetControllerImpl implements DatasetController {
           @ApiParam(type = "Long", value = "Job Id",
                   example = "9706378") @RequestParam(value = "jobId", required = false) Long jobId,
           @ApiParam(type = "String", value = "Fme Job Id",
-                  example = "9706378") @RequestParam(value = "fmeJobId", required = false) String fmeJobId) throws Exception {
+                  example = "9706378") @RequestParam(value = "fmeJobId", required = false) String fmeJobId,
+          @ApiParam(type = "String", value = "Preparation Code",
+                  example = "0") @RequestParam(value = "code", required = false) String preparationCode) throws Exception {
 
     String originalFilename = (file != null) ? file.getOriginalFilename() : null;
+    boolean isPreparationDataset = StringUtils.isNotBlank(preparationCode);
     LOG.info("Import endpoint was called for datasetId {} dataflowId {} providerId {} integrationId {} delimiter {} replace {} jobId {} fmeJobId {} and file {}", datasetId, dataflowId, providerId, integrationId, delimiter, replace, jobId, fmeJobId, originalFilename);
     Map<String, Object> result = new HashMap<>();
 
-    // --- EDITING LOCK CHECK ---
-    String userEditingDataset = datasetTableService.getDatasetEditingUsername(datasetId);
+    if(!isPreparationDataset) {
+      // --- EDITING LOCK CHECK ---
+      String userEditingDataset = datasetTableService.getDatasetEditingUsername(datasetId);
 
-    if (userEditingDataset!=null) {
-      LOG.error("Can not private import for datasetId {} because the table is locked for username {} from   {} ", datasetId, userEditingDataset, userEditingDataset);
-      datasetService.failImportJob(jobId, datasetId, EventType.DATASET_ENABLE_EDITING_FAILED_ACTIVE_EDITING_BY_OTHER_USER_EVENT, JobInfoEnum.ERROR_DATASET_IS_LOCKED_FOR_EDITING);
+      if (userEditingDataset != null) {
+        LOG.error("Can not private import for datasetId {} because the table is locked for username {} from   {} ", datasetId, userEditingDataset, userEditingDataset);
+        datasetService.failImportJob(jobId, datasetId, EventType.DATASET_ENABLE_EDITING_FAILED_ACTIVE_EDITING_BY_OTHER_USER_EVENT, JobInfoEnum.ERROR_DATASET_IS_LOCKED_FOR_EDITING);
 
-      throw new ResponseStatusException(
-              HttpStatus.CONFLICT,
-              EEAErrorMessage.DATASET_IS_LOCKED_FOR_EDITING + userEditingDataset
-      );
+        throw new ResponseStatusException(
+                HttpStatus.CONFLICT,
+                EEAErrorMessage.DATASET_IS_LOCKED_FOR_EDITING + userEditingDataset
+        );
+      }
+      // --- END LOCK CHECK ---
     }
-    // --- END LOCK CHECK ---
 
     if (dataflowId == null){
       dataflowId = datasetService.getDataFlowIdById(datasetId);
@@ -487,8 +492,10 @@ public class DatasetControllerImpl implements DatasetController {
       providerId = dataSetMetabaseVO.getDataProviderId();
     }
     DataFlowVO dataFlowVO = dataFlowControllerZuul.getMetabaseById(dataflowId);
+    //Datalakes import
     if(dataFlowVO.getBigData() != null && dataFlowVO.getBigData()){
       try {
+        if(!isPreparationDataset){
         String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
         if(StringUtils.isNotBlank(tableSchemaId)){
           TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, datasetSchemaId);
@@ -510,6 +517,7 @@ public class DatasetControllerImpl implements DatasetController {
               throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.IMPORTING_FILE_ICEBERG);
             }
           }
+         }
         }
 
         HelperMultipartFileMapper helperMultipartFileMapper = new HelperMultipartFileMapper();
@@ -518,16 +526,16 @@ public class DatasetControllerImpl implements DatasetController {
           helperMultipartFileMapper.setOriginalFilename(file.getOriginalFilename());
           helperMultipartFileMapper.setFileNull(false);
         }
-        ImportFileInDremioInfo importFileInDremioInfo = new ImportFileInDremioInfo(jobId, datasetId, dataflowId, providerId, tableSchemaId, helperMultipartFileMapper.getOriginalFilename(), replace, delimiter, integrationId, null);
+        ImportFileInDremioInfo importFileInDremioInfo = new ImportFileInDremioInfo(jobId, datasetId, dataflowId, providerId, tableSchemaId, helperMultipartFileMapper.getOriginalFilename(), replace, delimiter, integrationId, null, preparationCode);
         JobVO job = bigDataDatasetService.retrieveOrAddImportJob(importFileInDremioInfo, fmeJobId, jobId);
         jobId = job.getId();
-        bigDataDatasetService.importBigData(datasetId, dataflowId, providerId, tableSchemaId, replace, integrationId, delimiter, jobId, fmeJobId, dataFlowVO, helperMultipartFileMapper, job, importFileInDremioInfo);
+        bigDataDatasetService.importBigData(datasetId, dataflowId, providerId, tableSchemaId, replace, integrationId, delimiter, jobId, fmeJobId, dataFlowVO, helperMultipartFileMapper, job, importFileInDremioInfo,preparationCode);
       } catch (Exception e) {
         LOG.error("Error when importing data to Dremio for datasetId {}", datasetId, e);
         throw e;
       }
     }
-    else{
+    else{// NON-Datalakes Import
       JobStatusEnum jobStatus = JobStatusEnum.IN_PROGRESS;
       jobId = null;
       try {
@@ -558,7 +566,7 @@ public class DatasetControllerImpl implements DatasetController {
           List<Long> datasetIds = new ArrayList<>();
           datasetIds.add(datasetId);
           jobStatus = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.IMPORT.getValue(), false, dataflowId, providerId, datasetIds);
-          jobId = jobControllerZuul.addImportJob(datasetId, dataflowId, providerId, tableSchemaId, file.getOriginalFilename(), replace, integrationId, delimiter, jobStatus, fmeJobId, null);
+          jobId = jobControllerZuul.addImportJob(datasetId, dataflowId, providerId, tableSchemaId, file.getOriginalFilename(), replace, integrationId, null, delimiter, jobStatus, fmeJobId, null);
           if(jobStatus.getValue().equals(JobStatusEnum.REFUSED.getValue())){
             LOG.info("Added import job with id {} for datasetId {} with status REFUSED", jobId, datasetId);
             datasetService.releaseImportRefusedNotification(datasetId, dataflowId, tableSchemaId, file.getOriginalFilename());
@@ -655,7 +663,9 @@ public class DatasetControllerImpl implements DatasetController {
           @ApiParam(type = "Long", value = "Job Id",
                   example = "9706378") @RequestParam(value = "jobId", required = false) Long jobId,
           @ApiParam(type = "String", value = "Fme Job Id",
-                  example = "9706378") @RequestParam(value = "fmeJobId", required = false) String fmeJobId) {
+                  example = "9706378") @RequestParam(value = "fmeJobId", required = false) String fmeJobId,
+          @ApiParam(type = "String", value = "Preparation Code",
+                  example = "0") @RequestParam(value = "code", required = false) String preparationCode) {
 
     String originalFilename = (file != null) ? file.getOriginalFilename() : null;
     LOG.info("Private Import endpoint was called for datasetId {} dataflowId {} providerId {} integrationId {} delimiter {} replace {} jobId {} fmeJobId {} and file {}", datasetId, dataflowId, providerId, integrationId, delimiter, replace, jobId, fmeJobId, originalFilename);
@@ -699,10 +709,10 @@ public class DatasetControllerImpl implements DatasetController {
           helperMultipartFileMapper.setOriginalFilename(file.getOriginalFilename());
           helperMultipartFileMapper.setFileNull(false);
         }
-        ImportFileInDremioInfo importFileInDremioInfo = new ImportFileInDremioInfo(jobId, datasetId, dataflowId, providerId, tableSchemaId, helperMultipartFileMapper.getOriginalFilename(), replace, delimiter, integrationId, null);
+        ImportFileInDremioInfo importFileInDremioInfo = new ImportFileInDremioInfo(jobId, datasetId, dataflowId, providerId, tableSchemaId, helperMultipartFileMapper.getOriginalFilename(), replace, delimiter, integrationId, null,preparationCode);
         JobVO job = bigDataDatasetService.retrieveOrAddImportJob(importFileInDremioInfo, fmeJobId, jobId);
         jobId = job.getId();
-        bigDataDatasetService.importBigData(datasetId, dataflowId, providerId, tableSchemaId, replace, integrationId, delimiter, jobId, fmeJobId, dataFlowVO, helperMultipartFileMapper, job, importFileInDremioInfo);
+        bigDataDatasetService.importBigData(datasetId, dataflowId, providerId, tableSchemaId, replace, integrationId, delimiter, jobId, fmeJobId, dataFlowVO, helperMultipartFileMapper, job, importFileInDremioInfo, preparationCode);
       } catch (Exception e) {
         LOG.error("Error when privately importing data to Dremio for datasetId {}", datasetId, e);
         throw e;
@@ -733,7 +743,7 @@ public class DatasetControllerImpl implements DatasetController {
           List<Long> datasetIds = new ArrayList<>();
           datasetIds.add(datasetId);
           jobStatus = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.IMPORT.getValue(), false, dataflowId, providerId, datasetIds);
-          jobId = jobControllerZuul.addImportJob(datasetId, dataflowId, providerId, tableSchemaId, file.getOriginalFilename(), replace, integrationId, delimiter, jobStatus, fmeJobId, null);
+          jobId = jobControllerZuul.addImportJob(datasetId, dataflowId, providerId, tableSchemaId, file.getOriginalFilename(), replace, integrationId, null, delimiter, jobStatus, fmeJobId, null);
           if(jobStatus.getValue().equals(JobStatusEnum.REFUSED.getValue())){
             LOG.info("Added private import job with id {} for datasetId {} with status REFUSED", jobId, datasetId);
             datasetService.releaseImportRefusedNotification(datasetId, dataflowId, tableSchemaId, file.getOriginalFilename());
@@ -818,10 +828,13 @@ public class DatasetControllerImpl implements DatasetController {
           @ApiParam(type = "Long", value = "Job Id",
                   example = "9706378") @RequestParam(value = "jobId", required = false) Long jobId,
           @ApiParam(type = "String", value = "Fme Job Id",
-                  example = ",") @RequestParam(value = "fmeJobId", required = false) String fmeJobId) throws Exception {
+                  example = ",") @RequestParam(value = "fmeJobId", required = false) String fmeJobId,
+          @ApiParam(type = "String", value = "Preparation Code",
+                  example = "0") @RequestParam(value = "code", required = false) String preparationCode
+          ) throws Exception {
 
     this.importBigFileData(datasetId, dataflowId, providerId, tableSchemaId, file, replace,
-            integrationId, delimiter, jobId, fmeJobId);
+            integrationId, delimiter, jobId, fmeJobId, preparationCode);
   }
 
   /**
@@ -868,9 +881,11 @@ public class DatasetControllerImpl implements DatasetController {
           @ApiParam(type = "Long", value = "Job Id",
                   example = "9706378") @RequestParam(value = "jobId", required = false) Long jobId,
           @ApiParam(type = "String", value = "Fme Job Id",
-                  example = ",") @RequestParam(value = "fmeJobId", required = false) String fmeJobId) throws Exception {
+                  example = ",") @RequestParam(value = "fmeJobId", required = false) String fmeJobId,
+          @ApiParam(type = "String", value = "Preparation Code",
+                  example = "0") @RequestParam(value = "code", required = false) String preparationCode) throws Exception {
     this.importBigFileData(datasetId, dataflowId, providerId, tableSchemaId, file, replace,
-            integrationId, delimiter, jobId, fmeJobId);
+            integrationId, delimiter, jobId, fmeJobId, preparationCode);
   }
 
   /**
@@ -3629,22 +3644,38 @@ public class DatasetControllerImpl implements DatasetController {
           @ApiParam(type = "Long", value = "Integration id", example = "0") @RequestParam(value = "integrationId", required = false) Long integrationId,
           @ApiParam(type = "String", value = "File delimiter", example = ",") @RequestParam(value = "delimiter", required = false) String delimiter,
           @ApiParam(type = "String", value = "File name", example = "fileName") @RequestParam(value = "fileName", required = false) String fileName,
-          @ApiParam(type = "Boolean", value = "Etl Import", example = "false") @RequestParam(value = "etlImport", required = false, defaultValue = "false") Boolean etlImport){
+          @ApiParam(type = "Boolean", value = "Etl Import", example = "false") @RequestParam(value = "etlImport", required = false, defaultValue = "false") Boolean etlImport,
+          @ApiParam(type = "String", value = "Preparation Code", example = "0") @RequestParam(value = "code", required = false) String preparationCode){
     JobPresignedUrlInfo info;
+    JobStatusEnum jobStatus;
+    boolean isPreparationDataset =StringUtils.isNotBlank(preparationCode);
     try{
-      info = bigDataDatasetService.generateImportPreSignedUrl(datasetId, dataflowId, providerId, fileName);
-      LOG.info("Created presigned url for dataflowId {}, datasetId {} and providerId {} and etlImport {}", dataflowId, datasetId, providerId, etlImport);
+      if (isPreparationDataset) {
+        info = bigDataDatasetService.generatePreparationImportPreSignedUrl(datasetId, dataflowId, providerId, fileName, preparationCode);
+        LOG.info("Created presigned url for dataflowId {}, datasetId {} and preparation set {} and etlImport {} and preparation code {}", dataflowId, datasetId, preparationCode, etlImport, preparationCode);
+
+      } else {
+        info = bigDataDatasetService.generateImportPreSignedUrl(datasetId, dataflowId, providerId, fileName);
+        LOG.info("Created presigned url for dataflowId {}, datasetId {} and providerId {} and etlImport {}", dataflowId, datasetId, providerId, etlImport);
+      }
 
       if(!BooleanUtils.isTrue(etlImport)) {
         //check eligibility of job and add new import job
         List<Long> datasetIds = new ArrayList<>();
         datasetIds.add(datasetId);
-        JobStatusEnum jobStatus = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.IMPORT.getValue(), false, dataflowId, providerId, datasetIds);
+
+        if (isPreparationDataset) {
+          jobStatus = jobControllerZuul.checkEligibilityOfPreparationJob(JobTypeEnum.IMPORT.getValue(), datasetId, preparationCode);
+        } else {
+          jobStatus = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.IMPORT.getValue(), false, dataflowId, providerId, datasetIds);
+        }
+
         if (jobStatus == JobStatusEnum.IN_PROGRESS) {
           //if this endpoint is called we want to iniatialize an import job with status QUEUED instead of IN_PROGRESS
           jobStatus = JobStatusEnum.QUEUED;
         }
-        Long jobId = jobControllerZuul.addImportJob(datasetId, dataflowId, providerId, tableSchemaId, null, replace, integrationId, delimiter, jobStatus, null, info.getFilePathInS3());
+
+        Long jobId = jobControllerZuul.addImportJob(datasetId, dataflowId, providerId, tableSchemaId, null, replace, integrationId, preparationCode, delimiter,  jobStatus, null, info.getFilePathInS3());
         if (jobStatus.getValue().equals(JobStatusEnum.REFUSED.getValue())) {
           LOG.info("Added import job with id {} for datasetId {} with status REFUSED", jobId, datasetId);
           datasetService.releaseImportRefusedNotification(datasetId, dataflowId, tableSchemaId, null);

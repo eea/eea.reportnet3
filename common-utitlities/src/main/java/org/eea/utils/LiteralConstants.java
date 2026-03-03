@@ -547,6 +547,21 @@ public final class LiteralConstants {
   /** The Constant S3_PPREPARATION_VALIDATION_TABLE_PATH: {@value}. */
   public static final String S3_PREPARATION_VALIDATION_TABLE_PATH = "%s/%s/%s/preparation/%s/validation";
 
+  /** The Constant S3_PREPARATION_PROVIDER_IMPORT_PATH: {@value}. */
+  public static final String S3_PREPARATION_PROVIDER_IMPORT_PATH = "%s/%s/%s/preparation/%s/provider_import/%s";
+
+  /** The Constant S3_PREPARATION_IMPORT_FILE_PATH: {@value}. */
+  public static final String S3_PREPARATION_IMPORT_FILE_PATH = "%s/%s/%s/preparation/%s/import/%s/%s";
+
+  /** The Constant S3_PREPARATION_IMPORT_TABLE_NAME_FOLDER_PATH: {@value}. */
+  public static final String S3_PREPARATION_IMPORT_TABLE_NAME_FOLDER_PATH = "%s/%s/%s/preparation/%s/import/%s";
+
+  /** The Constant S3_PREPARATION_ATTACHMENTS_TABLE_PATH: {@value}. */
+  public static final String S3_PREPARATION_ATTACHMENTS_TABLE_PATH = "%s/%s/%s/current/attachments/%s";
+
+  /** The Constant S3_PREPARATION_IMPORT_CSV_FILE_QUERY_PATH: {@value}. */
+  public static final String S3_PREPARATION_IMPORT_CSV_FILE_QUERY_PATH = ".\"%s\".\"%s\".\"%s\".\"preparation\".\"%s\".\"import\".\"%s\".\"%s\"";
+
   /**
    * Instantiates a new literal constants.
    */

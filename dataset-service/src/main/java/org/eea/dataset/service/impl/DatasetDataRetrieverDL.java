@@ -406,11 +406,9 @@ public class DatasetDataRetrieverDL implements DataLakeDataRetriever {
             s3PathResolverPreparations.setIsIcebergTable(false);
         }
 
-
-        boolean parentFolderExist = s3Helper.checkFolderExist(s3PathResolverParentDataset);
         boolean preparationFolderExist = s3Helper.checkFolderExist(s3PathResolverPreparations);
 
-        if (parentFolderExist && preparationFolderExist) {
+        if (preparationFolderExist) {
             // Try to auto promote if it’s safe and not already promoted.
             dremioAutoPromotionService.ensureSafeFolderPromotion(dataset, s3PathResolverParentDataset);
             dremioAutoPromotionService.ensureSafeFolderPromotion(dataset, s3PathResolverPreparations);

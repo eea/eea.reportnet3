@@ -31,9 +31,10 @@ public class ImportFileInDremioInfo {
     private Boolean isEtlImport;
     private String etlImportFolderPath;
     private Map<String, Boolean> attachmentsExistPerTableName;
+    private String preparationCode;
 
     public ImportFileInDremioInfo(Long jobId, Long datasetId, Long dataflowId, Long providerId, String tableSchemaId, String fileName, Boolean replaceData,
-                                  String delimiter, Long integrationId, String dataProviderCode) {
+                                  String delimiter, Long integrationId, String dataProviderCode, String preparationCode) {
         this.jobId = jobId;
         this.datasetId = datasetId;
         this.dataflowId = dataflowId;
@@ -44,6 +45,7 @@ public class ImportFileInDremioInfo {
         this.delimiter = delimiter;
         this.integrationId = integrationId;
         this.dataProviderCode = dataProviderCode;
+        this.preparationCode = preparationCode;
     }
 
     public ImportFileInDremioInfo(Long jobId, Long dataflowId, Long providerId, Long datasetId) {

@@ -128,6 +128,12 @@ public class S3ServiceImpl implements S3Service {
                 }
                 path = String.format(path, dataflowFolder, dataProviderFolder, datasetFolder, fileName);
                 break;
+            case S3_PREPARATION_PROVIDER_IMPORT_PATH:
+                if (!s3PathResolver.isDeleteFile()) {
+                    fileName = System.currentTimeMillis() + "_" + fileName;
+                }
+                path = String.format(path, dataflowFolder, dataProviderFolder, datasetFolder, preparationCode, fileName);
+                break;
             case S3_PROVIDER_PATH:
             case S3_SNAPSHOT_FOLDER_PATH:
             case S3_VALIDATION_TABLE_PATH:
@@ -222,6 +228,13 @@ public class S3ServiceImpl implements S3Service {
             case S3_ROOT_DATAFLOW_FOLDER_PATH:
                 path = String.format(path, dataflowFolder);
                 break;
+            case S3_PREPARATION_IMPORT_FILE_PATH:
+                path = String.format(path, dataflowFolder, dataProviderFolder, datasetFolder,preparationCode, tableName, fileName);
+                break;
+            case S3_PREPARATION_IMPORT_CSV_FILE_QUERY_PATH:
+                path = S3_DEFAULT_BUCKET + String.format(path, dataflowFolder, dataProviderFolder,
+                        datasetFolder,preparationCode, tableName, fileName);
+                break;
             default:
                 LOG.info("Wrong type value: {}", path);
                 path = null;
@@ -290,6 +303,10 @@ public class S3ServiceImpl implements S3Service {
                 return String.format(path, dataflowFolder, euDatasetFolder);
             case S3_PREPARATION_VALIDATION_TABLE_PATH:
                 return String.format(path, dataflowFolder, dataProviderFolder, datasetFolder, s3PathResolver.getPreparationCode());
+            case S3_PREPARATION_IMPORT_FILE_PATH:
+                return String.format(path, dataflowFolder, dataProviderFolder, datasetFolder,s3PathResolver.getPreparationCode(), s3PathResolver.getTableName(), s3PathResolver.getFilename());
+            case S3_PREPARATION_IMPORT_TABLE_NAME_FOLDER_PATH:
+                return String.format(path, dataflowFolder, dataProviderFolder, datasetFolder,s3PathResolver.getPreparationCode(), s3PathResolver.getTableName());
 
             default:
                 LOG.info("Wrong type value: {}", path);

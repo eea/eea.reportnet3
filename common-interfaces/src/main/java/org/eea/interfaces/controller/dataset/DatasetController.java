@@ -699,7 +699,8 @@ public interface DatasetController {
       @RequestParam(value = "integrationId", required = false) Long integrationId,
       @RequestParam(value = "delimiter", required = false) String delimiter,
       @RequestParam(value = "jobId", required = false) Long jobId,
-      @RequestParam(value = "fmeJobId", required = false) String fmeJobId) throws Exception;
+      @RequestParam(value = "fmeJobId", required = false) String fmeJobId,
+      @RequestParam(value = "code", required = false) String preparationCode) throws Exception;
 
   /**
    * Import big file data private.
@@ -725,7 +726,8 @@ public interface DatasetController {
                          @RequestParam(value = "integrationId", required = false) Long integrationId,
                          @RequestParam(value = "delimiter", required = false) String delimiter,
                          @RequestParam(value = "jobId", required = false) Long jobId,
-                         @RequestParam(value = "fmeJobId", required = false) String fmeJobId);
+                         @RequestParam(value = "fmeJobId", required = false) String fmeJobId,
+                         @RequestParam(value = "code", required = false) String preparationCode);
 
 
   /**
@@ -752,7 +754,8 @@ public interface DatasetController {
       @RequestParam(value = "integrationId", required = false) Long integrationId,
       @RequestParam(value = "delimiter", required = false) String delimiter,
       @RequestParam(value = "jobId", required = false) Long jobId,
-      @RequestParam(value = "fmeJobId", required = false) String fmeJobId) throws Exception;
+      @RequestParam(value = "fmeJobId", required = false) String fmeJobId,
+      @RequestParam(value = "code", required = false) String preparationCode) throws Exception;
 
   /**
    * Import file data legacy.
@@ -778,7 +781,8 @@ public interface DatasetController {
       @RequestParam(value = "integrationId", required = false) Long integrationId,
       @RequestParam(value = "delimiter", required = false) String delimiter,
       @RequestParam(value = "jobId", required = false) Long jobId,
-      @RequestParam(value = "fmeJobId", required = false) String fmeJobId) throws Exception;
+      @RequestParam(value = "fmeJobId", required = false) String fmeJobId,
+      @RequestParam(value = "code", required = false) String preparationCode) throws Exception;
 
 
   /**
@@ -995,7 +999,8 @@ public interface DatasetController {
            @RequestParam(value = "integrationId", required = false) Long integrationId,
            @RequestParam(value = "delimiter", required = false) String delimiter,
            @RequestParam(value = "fileName", required = false) String fileName,
-           @RequestParam(value = "etlImport", required = false) Boolean etlImport);
+           @RequestParam(value = "etlImport", required = false) Boolean etlImport,
+           @RequestParam(value = "code", required = false) String preparationCode);
 
   /**
    * Convert Parquet To Iceberg Tables

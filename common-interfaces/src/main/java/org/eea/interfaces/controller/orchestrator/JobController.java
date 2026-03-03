@@ -121,7 +121,8 @@ public interface JobController {
                        @RequestParam(value = "fileName", required = false) String fileName,
                        @RequestParam(value = "replace", required = false) boolean replace,
                        @RequestParam(value = "integrationId", required = false) Long integrationId,
-                       @RequestParam(value = "delimiter", required = false) String delimiter,
+                      @RequestParam(value = "preparationCode", required = false) String preparationCode,
+                      @RequestParam(value = "delimiter", required = false) String delimiter,
                       @RequestParam(value = "jobStatus", required = false) JobStatusEnum jobStatus,
                       @RequestParam(value = "fmeJobId", required = false) String fmeJobId,
                       @RequestParam(value = "filePathInS3", required = false) String filePathInS3);
@@ -383,6 +384,16 @@ public interface JobController {
     @PostMapping(value = "/private/updateJobStatusAndInfo/{jobId}")
     void updateJobStatusAndInfo(@PathVariable("jobId") Long jobId, @RequestParam(value = "jobStatus") JobStatusEnum jobStatus, @RequestParam(value = "jobInfo") JobInfoEnum jobInfo,
                        @RequestParam(value = "lineNumber", required = false) Integer lineNumber);
+
+    /**
+     *
+     * @param jobType
+     * @param datasetId
+     * @param preparationCode
+     * @return
+     */
+    @GetMapping(value = "/checkEligibilityForPreparation")
+    JobStatusEnum checkEligibilityOfPreparationJob(@RequestParam("jobType") String jobType, @RequestParam("datasetId") Long datasetId, @RequestParam("preparationCode") String preparationCode);
 }
 
 
