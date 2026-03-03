@@ -1852,6 +1852,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
           onChangeImportDialogVisibility={onChangeImportDialogVisibility}
           onError={onImportDatasetError}
           onUpload={onUpload}
+          preparationSetCode={code}
           providerId={metadata?.dataset.dataProviderId}
           replaceCheck={true}
           s3={metadata?.dataflow.bigData ? true : false}

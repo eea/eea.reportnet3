@@ -76,10 +76,10 @@ export const DatasetConfig = {
   importTableSchema:
     '/dataschema/v1/{:datasetSchemaId}/importFieldSchemas?datasetId={:datasetId}&tableSchemaId={:tableSchemaId}',
   importTableFileWithS3:
-    '/dataset/v2/importFileData/{:datasetId}?dataflowId={:dataflowId}&providerId={:providerId}&tableSchemaId={:tableSchemaId}&replace={:replace}&integrationId={:integrationId}&delimiter={:delimiter}&jobId={:jobId}',
+    '/dataset/v2/importFileData/{:datasetId}?dataflowId={:dataflowId}&providerId={:providerId}&tableSchemaId={:tableSchemaId}&replace={:replace}&integrationId={:integrationId}&delimiter={:delimiter}&jobId={:jobId}&code={:code}',
   getAddUserText: '/release-receipts/dataflow/{:dataflowId}',
   getPresignedUrl:
-    '/dataset/{:datasetId}/generateImportPresignedUrl?dataflowId={:dataflowId}&providerId={:providerId}&tableSchemaId={:tableSchemaId}&replace={:replace}&integrationId={:integrationId}&delimiter={:delimiter}&fileName={:fileName}',
+    '/dataset/{:datasetId}/generateImportPresignedUrl?dataflowId={:dataflowId}&providerId={:providerId}&tableSchemaId={:tableSchemaId}&replace={:replace}&integrationId={:integrationId}&delimiter={:delimiter}&fileName={:fileName}&code={:code}',
   getShowValidationErrors:
     '/validation/listGroupValidations/{:datasetId}?asc={:asc}&shortCode={:shortCodeFilter}&fieldValueFilter={:fieldValueFilter}&headers={:sortField}&levelErrorsFilter={:levelErrorsFilter}&pageNum={:pageNum}&pageSize={:pageSize}&tableFilter={:tableFilter}&typeEntitiesFilter={:typeEntitiesFilter}',
   getShowValidationErrorsDL:
@@ -104,7 +104,8 @@ export const DatasetConfig = {
   updateRecord: '/dataset/{:datasetId}/updateRecord?updateCascadePK={:updateInCascade}&tableSchemaId={:tableSchemaId}',
   updateTableDesign: '/dataschema/{:datasetId}/tableSchema',
   validate: '/orchestrator/jobs/addValidationJob/{:datasetId}',
-  validateAsProvider: '/orchestrator/jobs/addValidationJob/{:datasetId}?dataflowId={:dataflowId}&validateAsProviderCode={:providerId}',
+  validateAsProvider:
+    '/orchestrator/jobs/addValidationJob/{:datasetId}?dataflowId={:dataflowId}&validateAsProviderCode={:providerId}',
   validateAllSql: '/rules/validateAllRules?datasetId={:datasetId}',
   validateSql: '/rules/validateSqlRules?datasetId={:datasetId}&datasetSchemaId={:datasetSchemaId}',
   validationViewer: '/dataset/findPositionFromAnyObject/{:objectId}?datasetId={:datasetId}&type={:entityType}',

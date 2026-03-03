@@ -205,9 +205,9 @@ public class JobServiceImpl implements JobService {
 
     @Transactional
     @Override
-    public Long addJob(Long dataflowId, Long dataProviderId, Long datasetId, Map<String, Object> parameters, JobTypeEnum jobType, JobStatusEnum jobStatus, boolean release, String fmeJobId, String dataflowName, String datasetName) {
+    public Long addJob(Long dataflowId, Long dataProviderId, Long datasetId, Map<String, Object> parameters, JobTypeEnum jobType, JobStatusEnum jobStatus, boolean release, String fmeJobId, String dataflowName, String datasetName, String preparationCode) {
         Timestamp ts = new Timestamp(System.currentTimeMillis());
-        Job job = new Job(null, jobType, jobStatus, ts, ts, parameters, SecurityContextHolder.getContext().getAuthentication().getName(), release, dataflowId, dataProviderId, datasetId, fmeJobId, dataflowName, datasetName, null, null);
+        Job job = new Job(null, jobType, jobStatus, ts, ts, parameters, SecurityContextHolder.getContext().getAuthentication().getName(), release, dataflowId, dataProviderId, datasetId, fmeJobId, dataflowName, datasetName, null, null, preparationCode);
         job = jobRepository.saveAndFlushJobManually(job);
         jobHistoryService.saveJobHistory(job);
         return job.getId();
@@ -296,7 +296,21 @@ public class JobServiceImpl implements JobService {
         } else if (jobType.equals(JobTypeEnum.IMPORT.toString()) || jobType.equals(JobTypeEnum.ETL_IMPORT.toString()) || jobType.equals(JobTypeEnum.DELETE.toString())) {
             //we shouldn't add the job if there is another queued or in progress import, validation or release for the same datasetId
             List<Job> jobList = jobRepository.findByJobStatusInAndJobTypeInAndDatasetId(Arrays.asList(JobStatusEnum.QUEUED, JobStatusEnum.IN_PROGRESS), Arrays.asList(JobTypeEnum.IMPORT, JobTypeEnum.ETL_IMPORT, JobTypeEnum.RELEASE, JobTypeEnum.VALIDATION, JobTypeEnum.DELETE), datasetIds.get(0));
-            if (jobList != null && jobList.size() > 0) {
+            boolean blockingImportJobExists = false;
+
+            if (jobList != null) {
+                for (Job job : jobList) {
+                    // Skip preparation jobs
+                    if (StringUtils.isNotBlank(job.getPreparationCode() )) {
+                        continue;
+                    }
+
+                    //dataset-level blocking job
+                    blockingImportJobExists = true;
+                    break;
+                }
+            }
+            if (blockingImportJobExists) {
                 return JobStatusEnum.REFUSED;
             } else {
                 List<Job> releasesAndValidations = jobRepository.findByJobTypeInAndJobStatusInAndRelease(Arrays.asList(JobTypeEnum.RELEASE, JobTypeEnum.VALIDATION), Arrays.asList(JobStatusEnum.QUEUED, JobStatusEnum.IN_PROGRESS), true);
@@ -796,7 +810,7 @@ public class JobServiceImpl implements JobService {
                             LOG.info("Restarting import jobId {} for big data dataflow with replace data true", jobId);
                             updateNumOfRestartsJobParameter(jobId);
                             updateJobInfo(jobId, null, null, false);
-                            dataSetControllerZuul.importBigFileDataPrivate(job.getDatasetId(), job.getDataflowId(), job.getProviderId(), tableSchemaId, null, replaceData, integrationId, delimiter, jobId, null);
+                            dataSetControllerZuul.importBigFileDataPrivate(job.getDatasetId(), job.getDataflowId(), job.getProviderId(), tableSchemaId, null, replaceData, integrationId, delimiter, jobId, null, null);
                             jobRestarted = true;
                         } else {
                             LOG.error("Can not restart import jobId {} because filePathInS3 is null", jobId);
@@ -837,5 +851,30 @@ public class JobServiceImpl implements JobService {
             jobs.addAll(jobsByDataflowAndProvider);
         }
         return jobMapper.entityListToClass(jobs);
+    }
+
+    @Override
+    public JobStatusEnum checkEligibilityOfPreparationJob(
+            String jobType,
+            Long datasetId,
+            String preparationCode) {
+
+        if (!JobTypeEnum.IMPORT.toString().equals(jobType)) {
+            return JobStatusEnum.QUEUED;
+        }
+
+        boolean inProgressImportexists =
+                jobRepository.existsByJobStatusInAndJobTypeAndDatasetIdAndPreparationCode(
+                        Arrays.asList(JobStatusEnum.QUEUED, JobStatusEnum.IN_PROGRESS),
+                        JobTypeEnum.IMPORT,
+                        datasetId,
+                        preparationCode
+                );
+
+        if (inProgressImportexists) {
+            return JobStatusEnum.REFUSED;
+        }
+
+        return JobStatusEnum.IN_PROGRESS;
     }
 }

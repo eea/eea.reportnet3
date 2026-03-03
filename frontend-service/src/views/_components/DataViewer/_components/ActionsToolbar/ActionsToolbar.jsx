@@ -67,6 +67,7 @@ export const ActionsToolbar = ({
   onHideSelectGroupedValidation,
   onUpdateData,
   originalColumns,
+  preparationSetCode,
   prevFilterValue,
   records,
   selectedRuleId,
@@ -423,6 +424,7 @@ export const ActionsToolbar = ({
       isIcebergCreated={isIcebergCreated && dataAreManuallyEditable}
       isTableDataRestorationInProgress={isTableDataRestorationInProgress}
       isTableFixedNumber={isTableFixedNumber}
+      preparationSetCode={preparationSetCode}
       showWriteButtons={showWriteButtons}
       tableId={tableId}
       tableName={tableName}

@@ -359,7 +359,8 @@ export const DatasetService = {
     replace,
     integrationId,
     delimiter,
-    fileName
+    fileName,
+    code
   }) => {
     const presignedUrl = await DatasetRepository.getPresignedUrl({
       datasetId,
@@ -369,7 +370,8 @@ export const DatasetService = {
       replace,
       integrationId,
       delimiter,
-      fileName
+      fileName,
+      code
     });
     return presignedUrl.data;
   },
@@ -790,7 +792,8 @@ export const DatasetService = {
     replace,
     integrationId,
     delimiter,
-    jobId
+    jobId,
+    code
   }) =>
     await DatasetRepository.importTableFileWithS3({
       datasetId,
@@ -800,7 +803,8 @@ export const DatasetService = {
       replace,
       integrationId,
       delimiter,
-      jobId
+      jobId,
+      code
     }),
 
   restorePrefilledTables: async ({ datasetId, tableSchemaId }) =>
@@ -962,7 +966,8 @@ export const DatasetService = {
 
   validate: async datasetId => await DatasetRepository.validate(datasetId),
 
-  validateAsProvider: async (datasetId, dataflowId, providerId) => await DatasetRepository.validateAsProvider(datasetId, dataflowId, providerId),
+  validateAsProvider: async (datasetId, dataflowId, providerId) =>
+    await DatasetRepository.validateAsProvider(datasetId, dataflowId, providerId),
 
   validateAllSql: async datasetId => await DatasetRepository.validateAllSql(datasetId),
 

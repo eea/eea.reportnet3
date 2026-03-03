@@ -30,6 +30,7 @@ export const ImportTableDataDialog = ({
   isIcebergCreated,
   isTableDataRestorationInProgress,
   isTableFixedNumber,
+  preparationSetCode,
   showWriteButtons,
   tableId,
   tableName
@@ -176,6 +177,7 @@ export const ImportTableDataDialog = ({
           }}
           onUpload={onUpload}
           onValidateFile={onValidateFile}
+          preparationSetCode={preparationSetCode}
           replaceCheck={true}
           s3={bigData ? true : false}
           tableName={tableName}

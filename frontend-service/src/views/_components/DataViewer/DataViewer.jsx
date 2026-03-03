@@ -1349,6 +1349,7 @@ export const DataViewer = ({
         onSetVisible={onSetVisible}
         onUpdateData={onUpdateData}
         originalColumns={originalColumns}
+        preparationSetCode={preparationSetCode}
         prevFilterValue={prevFilterValue}
         records={records}
         selectedRuleId={selectedRuleId}

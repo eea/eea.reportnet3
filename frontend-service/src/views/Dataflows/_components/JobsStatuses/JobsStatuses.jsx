@@ -573,6 +573,23 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
     );
   };
 
+  const getSetCodeTemplate = job => {
+    const dataflowId = job.dataflowId;
+    const datasetId = job.datasetId;
+    const preparationCode = job.preparationCode;
+    return (
+      <p>
+        <a
+          href={getUrl(routes.PREPARATION_DATASET, { dataflowId, datasetId, code: preparationCode }, true)}
+          onClick={() => {
+            navigate(getUrl(routes.PREPARATION_DATASET, { dataflowId, datasetId, code: preparationCode }, true));
+          }}>
+          {preparationCode}
+        </a>
+      </p>
+    );
+  };
+
   const getProviderIdTemplate = job => <p>{job.providerId}</p>;
 
   const rowExpansionTemplate = data => {
@@ -605,7 +622,8 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
     getDateAddedTemplate,
     getDateStatusChangedTemplate,
     getJobCreatorUsernameTemplate,
-    getProviderIdTemplate
+    getProviderIdTemplate,
+    getSetCodeTemplate
   };
 
   const onRefresh = () => {

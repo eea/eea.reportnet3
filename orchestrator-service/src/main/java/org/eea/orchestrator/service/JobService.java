@@ -33,7 +33,7 @@ public interface JobService {
 
     JobStatusEnum checkEligibilityOfJob(String jobType, Long dataflowId, Long dataProviderId, List<Long> datasetId, boolean release);
 
-    Long addJob(Long dataflowId, Long dataProviderId, Long datasetId, Map<String, Object> parameters, JobTypeEnum jobType, JobStatusEnum jobStatus, boolean release, String fmeJobId, String dataflowName, String datasetName);
+    Long addJob(Long dataflowId, Long dataProviderId, Long datasetId, Map<String, Object> parameters, JobTypeEnum jobType, JobStatusEnum jobStatus, boolean release, String fmeJobId, String dataflowName, String datasetName, String preparationCode);
 
     void prepareAndExecuteValidationJob(JobVO jobVO);
 
@@ -96,4 +96,5 @@ public interface JobService {
     void restartImportJob(Long jobId, Boolean sendRestartNotification);
 
     List<JobVO> findActiveJobsRelatedToADatasetId(Long datasetId, Long dataflowId, Long providerId);
-}
+
+    JobStatusEnum checkEligibilityOfPreparationJob(String jobType, Long datasetId, String preparationCode);}

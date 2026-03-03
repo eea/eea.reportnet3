@@ -39,7 +39,7 @@ public interface BigDataDatasetService {
      * @return
      */
     void importBigData(Long datasetId, Long dataflowId, Long providerId, String tableSchemaId,
-                       Boolean replace, Long integrationId, String delimiter, Long jobId, String fmeJobId, DataFlowVO dataflowVO, HelperMultipartFileMapper helperMultipartFileMapper, JobVO job, ImportFileInDremioInfo importFileInDremioInfo) throws Exception;
+                       Boolean replace, Long integrationId, String delimiter, Long jobId, String fmeJobId, DataFlowVO dataflowVO, HelperMultipartFileMapper helperMultipartFileMapper, JobVO job, ImportFileInDremioInfo importFileInDremioInfo, String preparationCode) throws Exception;
 
     /**
      * Generate s3 presigned Url for import
@@ -356,4 +356,14 @@ public interface BigDataDatasetService {
      * @throws EEAException the EEA exception
      */
      void etlImportDataset(Long datasetId, Long dataflowId, Long providerId, Boolean replaceData, String tableSchemaId, String delimiter, String filePathInS3, Long jobId, DataFlowVO dataFlowVO, DataSetMetabaseVO dataSetMetabaseVO) throws Exception;
+
+    /**
+     * Generate s3 presigned Url for import
+     *
+     * @param datasetId the dataset id
+     * @param dataflowId the dataflow id
+     * @param providerId the provider id
+     */
+    JobPresignedUrlInfo generatePreparationImportPreSignedUrl(Long datasetId, Long dataflowId, Long providerId, String fileName, String preparationCode);
+
 }

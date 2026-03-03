@@ -296,7 +296,8 @@ export const DatasetRepository = {
     replace,
     integrationId,
     delimiter,
-    fileName
+    fileName,
+    code
   }) =>
     await HTTPRequester.get({
       url: getUrl(DatasetConfig.getPresignedUrl, {
@@ -307,7 +308,8 @@ export const DatasetRepository = {
         replace,
         integrationId,
         delimiter,
-        fileName
+        fileName,
+        code
       })
     }),
 
@@ -492,7 +494,8 @@ export const DatasetRepository = {
     replace,
     integrationId,
     delimiter,
-    jobId
+    jobId,
+    code
   }) =>
     await HTTPRequester.post({
       url: getUrl(DatasetConfig.importTableFileWithS3, {
@@ -503,7 +506,8 @@ export const DatasetRepository = {
         replace,
         integrationId,
         delimiter,
-        jobId
+        jobId,
+        code
       })
     }),
 
