@@ -45,6 +45,7 @@ export const ManageBusinessDataflow = ({
   onEditDataflow,
   onLoadReportingDataflow,
   onUpdateSoftDelete,
+  renderSncData,
   resetObligations,
   state
 }) => {
@@ -337,28 +338,6 @@ export const ManageBusinessDataflow = ({
       }
     };
 
-    const renderSncData = () => {
-      if (!isEditing) {
-        return (
-          <div className={styles.checkboxWrapper}>
-            <Checkbox
-              ariaLabel={resourcesContext.messages['sncData']}
-              checked={true}
-              disabled={true}
-              id="sncDataCheckbox"
-              inputId="sncDataCheckbox"
-              role="checkbox"
-            />
-            <label>
-              <span>{resourcesContext.messages['sncData']}</span>
-            </label>
-            <TooltipButton
-              message={resourcesContext.messages['sncDataMessage']}
-              uniqueIdentifier="sncData"></TooltipButton>
-          </div>
-        );
-      }
-    };
 
     return (
       <Fragment>
@@ -383,7 +362,7 @@ export const ManageBusinessDataflow = ({
           {renderCheckBoxPinned()}
         </div>
         <div className="p-toolbar-group-left">{renderBigDataStorage()}</div>
-        {bigData && <div className="p-toolbar-group-left">{renderSncData()}</div>}
+        {bigData && <div className="p-toolbar-group-left">{renderSncData && renderSncData(false,true,true)}</div>}
         <Button
           className={`p-button-primary ${
             !isEmpty(name) &&

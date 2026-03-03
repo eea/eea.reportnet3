@@ -1,4 +1,4 @@
-import { Fragment, useContext, useEffect, useReducer, useRef, useState } from 'react';
+import { Fragment, useContext, useEffect, useReducer, useRef, useState, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import ReactTooltip from 'react-tooltip';
 
@@ -747,6 +747,51 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
               customContent: { origin: 'DESIGN' },
               dataflowId,
               dataflowName: designerState.dataflowName,
+              datasetId,
+              datasetName: designerState.datasetSchemaName
+            }
+          },
+          true
+        );
+      }
+    }
+  };
+
+  const onConfirmValidateAsProvider = async providerId => {
+    const action = 'DATASET_VALIDATE';
+    actionsContext.testProcess(datasetId, action);
+    try {
+      await DatasetService.validateAsProvider(datasetId, dataflowId, providerId);
+      notificationContext.add(
+        {
+          type: 'VALIDATE_DATA_INIT',
+          content: {
+            customContent: { origin: 'DESIGN' },
+            dataflowId,
+            dataflowName: designerState.metaData?.dataflow?.name,
+            datasetId,
+            datasetName: designerState.datasetSchemaName,
+            type: 'DESIGN'
+          }
+        },
+        true
+      );
+      designerDispatch({
+        type: 'CHANGE_DATASET_PROGRESS_BAR_STEP',
+        payload: { step: 1, currentStep: 2, isRunning: true }
+      });
+    } catch (error) {
+      if (error.response?.status === 423) {
+        notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' }, true);
+      } else {
+        console.error('DatasetDesigner - onConfirmValidateAsProvider.', error);
+        notificationContext.add(
+          {
+            type: 'VALIDATE_DESIGN_DATA_ERROR',
+            content: {
+              customContent: { datasetName: designerState.datasetSchemaName },
+              dataflowId,
+              dataflowName: designerState.metaData?.dataflow?.name,
               datasetId,
               datasetName: designerState.datasetSchemaName
             }
@@ -1788,6 +1833,13 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
       </label>
     </div>
   );
+  
+  const sortedWebformOptions = useMemo(() => {
+    if (!webformOptions?.length) return [];
+    const [notSelected, ...rest] = webformOptions;
+    const sorted = rest.sort((a, b) => (a.label || '').toLowerCase().localeCompare((b.label || '').toLowerCase()));
+    return [notSelected, ...sorted];
+  }, [webformOptions]);
 
   const renderWebformOptionsContent = () => {
     const webform = webformOptions.find(option => option.name === designerState.webform?.name);
@@ -1799,13 +1851,16 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
         <Dropdown
           appendTo={document.body}
           ariaLabel={'configureWebform'}
+          className={styles.webformDropdown}
+          filter
           inputId="configureWebformDropDown"
           onChange={e =>
             designerDispatch({ type: 'SET_SELECTED_WEBFORM', payload: { selectedWebform: e.target.value } })
           }
           optionLabel="label"
-          options={webformOptions}
+          options={sortedWebformOptions}
           placeholder={resourcesContext.messages['configureWebformPlaceholder']}
+          showFilterClear
           value={designerState.selectedWebform || webform}
         />
       </Fragment>
@@ -1926,8 +1981,8 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
                 <div>
                   <Checkbox
                     ariaLabelledBy="available_in_public_view_label"
-                    checked={designerState.availableInPublic}
-                    disabled={isDesignDatasetEditorRead}
+                    checked={designerState.sncData ? false : designerState.availableInPublic}
+                    disabled={isDesignDatasetEditorRead || !!designerState.sncData}
                     id="available_in_public_view"
                     inputId="available_in_public_view_checkbox"
                     onChange={e => onChangeAvailableInPublicView(e.checked)}
@@ -1936,7 +1991,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
                   <label
                     id="available_in_public_view_label"
                     onClick={() => {
-                      if (!isDesignDatasetEditorRead) {
+                      if (!isDesignDatasetEditorRead && !designerState.sncData) {
                         designerDispatch({
                           type: 'SET_AVAILABLE_PUBLIC_VIEW',
                           payload: !designerState.availableInPublic
@@ -1946,12 +2001,12 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
                     }}
                     style={{
                       color: 'var(--main-font-color)',
-                      cursor: isDesignDatasetEditorRead ? 'default' : 'pointer',
+                      cursor: isDesignDatasetEditorRead || designerState.sncData ? 'default' : 'pointer',
                       fontSize: '10pt',
                       fontWeight: 'bold',
                       marginLeft: '6px',
                       marginRight: '6px',
-                      opacity: isDesignDatasetEditorRead ? 0.5 : 1
+                      opacity: isDesignDatasetEditorRead || designerState.sncData ? 0.5 : 1
                     }}>
                     {resourcesContext.messages['availableInPublicView']}
                   </label>
@@ -2091,6 +2146,9 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
                 />
               )}
               <DatasetValidateDialog
+                dataflowId={dataflowId}
+                dataflowType={designerState.dataflowType}
+                dataProviderGroupId={designerState.metaData?.dataflow?.dataProviderGroupId}
                 disabled={isDesignDatasetEditorRead || editingStatus?.isEditing || actionsContext.isInProgress}
                 icon={
                   actionsContext.isInProgress && actionsContext.validateDatasetProcessing
@@ -2103,6 +2161,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
                     : resourcesContext.messages['validate']
                 }
                 onConfirmValidate={onConfirmValidate}
+                onConfirmValidateAsProvider={onConfirmValidateAsProvider}
               />
               <Button
                 className="p-button-rounded p-button-secondary-transparent p-button-animated-blink"
@@ -2257,7 +2316,9 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
         {designerState.datasetSchema && designerState.tabs && validationContext.isVisible && (
           <Validations
             bigData={designerState.bigData}
+            dataflowId={dataflowId}
             dataflowType={designerState.dataflowType}
+            dataProviderGroupId={designerState.metaData?.dataflow?.dataProviderGroupId}
             datasetId={datasetId}
             datasetSchema={designerState.datasetSchema}
             datasetSchemas={designerState.datasetSchemas}

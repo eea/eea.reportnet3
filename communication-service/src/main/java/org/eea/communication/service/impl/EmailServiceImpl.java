@@ -24,8 +24,8 @@ public class EmailServiceImpl implements EmailService {
   @Value("${spring.mail.active}")
   private boolean active;
 
-  @Value("${spring.mail.from}")
-  private String mailServerFrom;
+  @Value("${spring.mail.username}")
+  private String mailServerUsername;
 
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(EmailServiceImpl.class);
@@ -48,7 +48,7 @@ public class EmailServiceImpl implements EmailService {
             emailVO.getTo() != null ? emailVO.getTo().stream().toArray(String[]::new) : null);
         message.setSubject(emailVO.getSubject());
         message.setText(emailVO.getText());
-        message.setFrom(mailServerFrom);
+        message.setFrom(mailServerUsername);
 
 
         emailSender.send(message);

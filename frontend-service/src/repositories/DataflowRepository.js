@@ -22,10 +22,10 @@ export const DataflowRepository = {
   cloneSchemas: async (sourceDataflowId, targetDataflowId) =>
     await HTTPRequester.post({ url: getUrl(DataflowConfig.cloneSchemas, { sourceDataflowId, targetDataflowId }) }),
 
-  create: async (name, description, obligationId, type, bigData, dataProviderGroupId) =>
+  create: async (name, description, obligationId, type, bigData, dataProviderGroupId,sncData) =>
     await HTTPRequester.post({
       url: getUrl(DataflowConfig.createUpdate),
-      data: { name, description, obligation: { obligationId }, releasable: true, type, bigData, dataProviderGroupId }
+      data: { name, description, obligation: { obligationId }, releasable: true, type, bigData, dataProviderGroupId,sncData }
     }),
 
   downloadAllSchemasInfo: async (dataflowId, fileName) =>

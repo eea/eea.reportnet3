@@ -1039,10 +1039,7 @@ public class ValidationServiceTest {
     when(ruleServiceImpl.getActiveRulesSchemaByDatasetId(Mockito.any())).thenReturn(rulesSchemaVO);
 
     when(dataSetMetabaseControllerZuul.findDatasetMetabaseById(anyLong())).thenReturn(dataSetMetabase);
-    DataFlowVO dataFlowVO = new DataFlowVO();
-    dataFlowVO.setId(1L);
-    dataFlowVO.setBigData(false);
-    when(dataFlowControllerZuul.getMetabaseById(anyLong())).thenReturn(dataFlowVO);
+    when(dataFlowControllerZuul.isBigDataflowDataset(anyLong())).thenReturn(false);
     validationServiceImpl.exportValidationFile(1L);
     Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());

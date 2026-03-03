@@ -83,7 +83,7 @@ public class ReplacingDataPreviousFMECallCommand extends AbstractEEAEventHandler
     boolean error = false;
 
     try {
-      // TODO. Encode and copy the file content into the IntegrationVO. This method load the entire
+      //TODO. Encode and copy the file content into the IntegrationVO. This method load the entire
       // file in memory. To solve it, the FME connector should be redesigned.
 
       Map<String, String> externalParameters = new HashMap<>();

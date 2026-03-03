@@ -1,4 +1,4 @@
-import { Fragment, useContext, useEffect, useReducer } from 'react';
+import { Fragment, useContext, useEffect, useReducer, useState } from 'react';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import capitalize from 'lodash/capitalize';
@@ -48,6 +48,8 @@ export const PaMsWebform = ({
 
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
+  const [hasLoadedPams, setHasLoadedPams] = useState(false);
+  const [refreshTableTrigger, setRefreshTableTrigger] = useState(0);
 
   const [paMsWebformState, paMsWebformDispatch] = useReducer(paMsWebformReducer, {
     data: [],
@@ -69,11 +71,12 @@ export const PaMsWebform = ({
   useEffect(() => initialLoad(), [tables]);
 
   useEffect(() => {
-    if (!isEmpty(paMsWebformState.data)) {
+    if (!isEmpty(paMsWebformState.data) && !hasLoadedPams) {
       onLoadPamsData();
+      setHasLoadedPams(true);
       paMsWebformDispatch({ type: 'HAS_ERRORS', payload: { value: hasErrors(paMsWebformState.data) } });
     }
-  }, [paMsWebformState.data, isDataUpdated]);
+  }, [paMsWebformState.data, isDataUpdated, hasLoadedPams]);
 
   useEffect(() => {
     setIsAddingSingleRecord(false);
@@ -93,6 +96,33 @@ export const PaMsWebform = ({
         payload: { data: onLoadData() }
       });
   }, [isDataUpdated]);
+
+  useEffect(() => {
+    const matchedNotifications = notificationContext.hidden.filter(
+      ({ key }) => key === 'INSERT_RECORDS_MULTI_TABLES_COMPLETED' || key === 'INSERT_RECORDS_MULTI_TABLES_FAILED'
+    );
+
+    if (isEmpty(matchedNotifications)) return;
+
+    const matchedWithDatasetId = matchedNotifications.find(
+      matchedNotification => String(matchedNotification.content?.datasetId) === String(datasetId)
+    );
+
+    if (!matchedWithDatasetId) return;
+
+    const resetAddPamState = () => {
+      setIsAddingSingleRecord(false);
+      setIsAddingGroupRecord(false);
+      setRefreshTableTrigger(prev => prev + 1);
+    };
+
+    if (matchedWithDatasetId?.key === 'INSERT_RECORDS_MULTI_TABLES_COMPLETED') {
+      onUpdateData();
+      resetAddPamState();
+    } else if (matchedWithDatasetId?.key === 'INSERT_RECORDS_MULTI_TABLES_FAILED') {
+      resetAddPamState();
+    }
+  }, [notificationContext.hidden]);
 
   const initialLoad = () => {
     paMsWebformDispatch({
@@ -154,9 +184,8 @@ export const PaMsWebform = ({
     try {
       const pamsTableRecords = await getPamsTableRecords(tableSchemaId);
       await WebformService.addPamsRecords(datasetId, filteredTables, generatePamId(pamsTableRecords), capitalize(type));
-      onUpdateData();
     } catch (error) {
-      if (error.response.status === 423) {
+      if (error.response?.status === 423) {
         notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' }, true);
       } else {
         console.error('PaMsWebform - onAddPamsRecord.', error);
@@ -179,7 +208,6 @@ export const PaMsWebform = ({
       }
     }
   };
-
   const onAddTableRecord = async (table, pamNumber) => {
     const newEmptyRecord = parseNewTableRecord(table, pamNumber);
 
@@ -304,7 +332,11 @@ export const PaMsWebform = ({
 
   const onToggleView = view => paMsWebformDispatch({ type: 'ON_TOGGLE_VIEW', payload: { view } });
 
-  const onUpdateData = () => paMsWebformDispatch({ type: 'ON_UPDATE_DATA', payload: { value: !isDataUpdated } });
+  const onUpdateData = () => {
+    setHasLoadedPams(false);
+    paMsWebformDispatch({ type: 'ON_UPDATE_DATA', payload: { value: !isDataUpdated } });
+    setRefreshTableTrigger(prev => prev + 1);
+  };
 
   const setIsAddingSingleRecord = value =>
     paMsWebformDispatch({ type: 'SET_IS_ADDING_SINGLE_RECORD', payload: { value } });
@@ -372,6 +404,7 @@ export const PaMsWebform = ({
         onSelectEditTable={onSelectEditTable}
         overview={overview}
         records={pamsRecords}
+        refreshTrigger={refreshTableTrigger}
         schemaTables={datasetSchema.tables}
         tables={tables}
       />

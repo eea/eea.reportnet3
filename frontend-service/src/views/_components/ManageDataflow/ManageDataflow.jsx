@@ -49,6 +49,7 @@ export const ManageDataflow = ({
   onLoadReportingDataflow,
   onUpdateAddUserText,
   onUpdateSoftDelete,
+  renderSncData,
   resetDeliveryDate,
   resetObligations,
   setCheckedObligation,
@@ -56,6 +57,7 @@ export const ManageDataflow = ({
 }) => {
   const [addUserText, setAddUserText] = useState('');
   const [addInitialUserText, setAddInitialUserText] = useState('');
+  const [sncData, setSncData] = useState(false);
 
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
@@ -340,6 +342,16 @@ export const ManageDataflow = ({
           {renderCheckBoxPinned()}
         </div>
         <div className="p-toolbar-group-left">{renderBigDataStorage()}</div>
+        {reportingDataflowState.bigDataStorage && (
+          <div className="p-toolbar-group-left">
+            {renderSncData && renderSncData(
+              false,
+              sncData,
+              false,
+              () => setSncData(!sncData)
+            )}
+          </div>
+        )}
         <Button
           className={`p-button-primary ${
             !(isCitizenScienceDataflow && isEmpty(reportingDataflowState.providerGroup)) &&
@@ -400,6 +412,7 @@ export const ManageDataflow = ({
                 ? state.isCitizenScienceDataflowDialogVisible
                 : state.isReportingDataflowDialogVisible
             }
+            sncData={sncData}
           />
           {manualAcceptance && state.status === 'DRAFT' && (
             <>

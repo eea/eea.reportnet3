@@ -467,8 +467,11 @@ DatasetServiceTest {
     List<TableSchema> tableSchemas = new ArrayList<>();
     tableSchemas.add(tableSchema);
     DataSetSchema datasetSchema = new DataSetSchema();
+    DataSetMetabase datasetMetabase = new DataSetMetabase();
+    datasetMetabase.setDatasetSchema("5cf0e9b3b793310e9ceca191");
     datasetSchema.setTableSchemas(tableSchemas);
     Mockito.when(dataflowControllerZull.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
+    Mockito.when(dataSetMetabaseRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(datasetMetabase));
     Mockito.when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(datasetSchema);
     Mockito.when(datasetMetabaseService.findDatasetSchemaIdById(Mockito.anyLong()))
         .thenReturn("5cf0e9b3b793310e9ceca190");
@@ -489,6 +492,8 @@ DatasetServiceTest {
         .thenReturn("5cf0e9b3b793310e9ceca190");
     Mockito.when(dataflowControllerZull.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
     DataSetSchema schema = new DataSetSchema();
+    DataSetMetabase datasetMetabase = new DataSetMetabase();
+    datasetMetabase.setDatasetSchema("5cf0e9b3b793310e9ceca191");
     TableSchema table = new TableSchema();
     RecordSchema record = new RecordSchema();
     List<FieldSchema> fieldSchemaList = new ArrayList<>();
@@ -504,6 +509,7 @@ DatasetServiceTest {
     table.setRecordSchema(record);
     schema.setTableSchemas(Arrays.asList(table));
     Mockito.when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(schema);
+    Mockito.when(dataSetMetabaseRepository.findById(anyLong())).thenReturn(Optional.of(datasetMetabase));
     datasetService.deleteImportData(1L, false);
     Mockito.verify(fieldRepository, times(1)).saveAll(Mockito.any());
   }
@@ -2985,7 +2991,7 @@ DatasetServiceTest {
         .thenReturn("fieldId");
 
 
-    datasetService.initializeDataset(1L, "5cf0e9b3b793310e9ceca190");
+    datasetService.initializeDataset(1L, "5cf0e9b3b793310e9ceca190", false);
     Mockito.verify(attachmentRepository, times(1)).saveAll(Mockito.any());
   }
 
@@ -3043,7 +3049,7 @@ DatasetServiceTest {
     attachment.setFieldValue(field);
     when(attachmentRepository.findAll()).thenReturn(Arrays.asList(attachment));
 
-    datasetService.initializeDataset(1L, "5cf0e9b3b793310e9ceca190");
+    datasetService.initializeDataset(1L, "5cf0e9b3b793310e9ceca190", false);
     Mockito.verify(recordRepository, times(1)).saveAll(Mockito.any());
   }
 
@@ -3111,7 +3117,7 @@ DatasetServiceTest {
 
     attachment.setContent(expectedResult);
 
-    datasetService.initializeDataset(1L, "5cf0e9b3b793310e9ceca190");
+    datasetService.initializeDataset(1L, "5cf0e9b3b793310e9ceca190", false);
     Mockito.verify(statisticsService, times(1)).saveStatistics(Mockito.any());
 
   }

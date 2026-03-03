@@ -71,6 +71,8 @@ public interface JobService {
 
     void updateJobAndProcess(Long jobId, JobStatusEnum jobStatus, ProcessStatusEnum processStatus);
 
+    void assertValidProviderCodeForDataflow(Long dataflowId, String validateAsProviderCode, String username);
+
     void cancelJob(Long jobId, JobInfoEnum jobInfo, Boolean jobShouldFail) throws EEAException;
 
     List<JobVO> getFMEImportJobsForPolling();

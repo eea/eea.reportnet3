@@ -64,7 +64,7 @@ public enum JobInfoEnum {
     ERROR_MATERIALIZED_VIEWS_ARE_NOT_CORRECT("The necessary reportnet data views could not be created. Please try again or contact the Service Desk."),
 
     WARNING_HAS_CANCELED_VALIDATION_TASKS("There are canceled validation tasks. Please review and address the issues before retrying."),
-    
+
     IMPORT_JOB_FAILED_STUCK_QUEUED("The import job failed because it was stuck in status QUEUED for a long time. Please try again."),
 
     IMPORT_JOB_RESTART_FAILED("The import job could not be completed as it became stuck following a restart. Please try again or contact the Service Desk."),
@@ -79,8 +79,19 @@ public enum JobInfoEnum {
 
     ERROR_RELEASE_PARTIALLY_COMPLETED("Not all datasets were able to release. Please try again or contact the Service Desk"),
 
-    ERROR_DATASET_IS_LOCKED_FOR_EDITING("Dataset is locked for editing");
+    ERROR_DATASET_IS_LOCKED_FOR_EDITING("Dataset is locked for editing"),
 
+    ERROR_IMPORT_FAILED_READ_ONLY_TABLE("Import failed because the table is read only."),
+
+    ERROR_IMPORT_FAILED_FIXED_NUM("Import failed because the table has fixed number of records."),
+
+    ERROR_IMPORT_FAILED_READ_ONLY_FIELDS("Import failed because the table contains read only fields."),
+
+    ERROR_IMPORT_FAILED_FILE_NOT_ZIP("Import failed because the file is not zip."),
+
+    ERROR_ZIP_FOLDER_WITHOUT_CSV_FILES("The ZIP file you uploaded does not contain any csv files for import. Please include at least one csv file and try again."),
+
+    ERROR_INVALID_VALIDATE_AS_PROVIDER_CODE("The selected validation provider code doesn't belong to the dataflow.");
 
     /** The value. */
     private final String value;
@@ -104,5 +115,14 @@ public enum JobInfoEnum {
             return String.format(value, lineNumber);
         }
         return value;
+    }
+
+    public static JobInfoEnum fromValue(String value, Integer lineNumber) {
+        for (JobInfoEnum jobInfo : JobInfoEnum.values()) {
+            if (jobInfo.getValue(lineNumber).equals(value)) {
+                return jobInfo;
+            }
+        }
+        throw new IllegalArgumentException("No enum constant with value " + value);
     }
 }

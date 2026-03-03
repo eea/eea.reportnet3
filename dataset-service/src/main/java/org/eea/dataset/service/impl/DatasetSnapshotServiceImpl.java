@@ -653,6 +653,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     Boolean silentRelease = false;
     ProcessVO processVO = null;
     Long idDataflow = datasetMetabaseService.findDatasetMetabase(idDataset).getDataflowId();
+    final boolean isBigDataflow = dataflowControllerZuul.isBigDataflow(idDataflow);
     Long jobId = null;
     if (processId!=null) {
       jobId = jobProcessControllerZuul.findJobIdByProcessId(processId);
@@ -669,7 +670,10 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     if (provider != null && idDataCollection != null) {
       TenantResolver
               .setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, idDataCollection));
-      deleteHelper.deleteRecordValuesByProvider(idDataCollection, provider.getCode(), processId);
+
+      if (!isBigDataflow) {
+          deleteHelper.deleteRecordValuesByProvider(idDataCollection, provider.getCode(), processId);
+      }
 
       // Restore data from snapshot
       try {
@@ -706,7 +710,8 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
         }
 
         LOG.info("Snapshot {} of processId {} released", idSnapshot, processId);
-      } catch (EEAException e) {
+      }
+      catch (EEAException e) {
         LOG.error("Error releasing snapshot {} of processId {},", idSnapshot, processId, e);
         if(!silentRelease) {
           releaseEvent(EventType.RELEASE_FAILED_EVENT, idSnapshot, e.getMessage(), value);
@@ -719,7 +724,8 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
         removeLockRelatedToCopyDataToEUDataset(idDataflow);
         releaseLocksRelatedToRelease(idDataflow, idDataProvider);
       }
-    } else {
+    }
+    else {
       LOG.error("Error in release snapshot {} of processId {}", idSnapshot, processId);
       if(!silentRelease) {
         releaseEvent(EventType.RELEASE_FAILED_EVENT, idSnapshot, "Error in release snapshot", value);

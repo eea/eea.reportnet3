@@ -149,11 +149,11 @@ public class ProcessServiceImpl implements ProcessService {
         processToUpdate.setPriority(priority);
       }
       try {
-
         processRepository.save(processToUpdate);
         processRepository.flush();
-      } catch (ObjectOptimisticLockingFailureException e) {
-        updated = false;
+      } catch (Exception e) {
+          LOG.error("Error updating process {} ", processId, e);
+          updated = false;
       }
     }
     return updated;

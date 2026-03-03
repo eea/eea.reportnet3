@@ -43,7 +43,7 @@ import { initValidationRuleCreation } from 'views/DatasetDesigner/_components/Va
 import { resetValidationRuleCreation } from 'views/DatasetDesigner/_components/Validations/_functions/Utils/resetValidationRuleCreation';
 import { setValidationExpression } from 'views/DatasetDesigner/_components/Validations/_functions/Utils/setValidationExpression';
 
-export const FieldValidation = ({ bigData, dataflowType, datasetId, tabs }) => {
+export const FieldValidation = ({ bigData, dataflowType, datasetId, tabs, dataflowId, dataProviderGroupId }) => {
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
   const validationContext = useContext(ValidationContext);
@@ -102,7 +102,9 @@ export const FieldValidation = ({ bigData, dataflowType, datasetId, tabs }) => {
             bigData={bigData}
             componentName={componentName}
             creationFormState={creationFormState}
+            dataflowId={dataflowId}
             dataflowType={dataflowType}
+            dataProviderGroupId={dataProviderGroupId}
             datasetId={datasetId}
             onAddNewExpression={onAddNewExpression}
             onExpressionDelete={onExpressionDelete}
@@ -538,7 +540,7 @@ export const FieldValidation = ({ bigData, dataflowType, datasetId, tabs }) => {
               : resourcesContext.messages['createFieldConstraintTitle']
           }
           onHide={() => onHide()}
-          style={{ width: '975px' }}
+          style={{ width: '1200px' }}
           visible={validationContext.isVisible}>
           {children}
         </Dialog>

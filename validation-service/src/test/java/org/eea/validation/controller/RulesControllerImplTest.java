@@ -668,19 +668,19 @@ public class RulesControllerImplTest {
   public void runSqlTest() throws EEAException {
     SqlRuleVO sqlRule = new SqlRuleVO();
     sqlRule.setSqlRule("SELECT * from dataset_1.table_value");
-    rulesControllerImpl.runSqlRule(1L, sqlRule, true);
+    rulesControllerImpl.runSqlRule(1L, sqlRule, true, null);
     Mockito.verify(sqlRulesService, times(1)).runSqlRule(1L, "SELECT * from dataset_1.table_value",
-        true);
+        true, null);
   }
 
   @Test(expected = ResponseStatusException.class)
   public void runSqlEEAForbiddenSQLCommandExceptionTest() throws EEAException {
     SqlRuleVO sqlRule = new SqlRuleVO();
     sqlRule.setSqlRule("DELETE * FROM DATASET_396.TABLE1");
-    Mockito.when(sqlRulesService.runSqlRule(1L, sqlRule.getSqlRule(), true))
+    Mockito.when(sqlRulesService.runSqlRule(1L, sqlRule.getSqlRule(), true, null))
         .thenThrow(new EEAForbiddenSQLCommandException());
     try {
-      rulesControllerImpl.runSqlRule(1L, sqlRule, true);
+      rulesControllerImpl.runSqlRule(1L, sqlRule, true, null);
     } catch (ResponseStatusException e) {
       assertEquals(EEAErrorMessage.SQL_COMMAND_NOT_ALLOWED, e.getReason());
       throw e;
@@ -692,10 +692,10 @@ public class RulesControllerImplTest {
   public void runSqlEEAExceptionTest() throws EEAException {
     SqlRuleVO sqlRule = new SqlRuleVO();
     sqlRule.setSqlRule("DELETE * FROM DATASET_396.TABLE1");
-    Mockito.when(sqlRulesService.runSqlRule(1L, sqlRule.getSqlRule(), true))
+    Mockito.when(sqlRulesService.runSqlRule(1L, sqlRule.getSqlRule(), true, null))
         .thenThrow(new EEAException());
     try {
-      rulesControllerImpl.runSqlRule(1L, sqlRule, true);
+      rulesControllerImpl.runSqlRule(1L, sqlRule, true, null);
     } catch (ResponseStatusException e) {
       assertEquals(EEAErrorMessage.RUNNING_RULE, e.getReason());
       throw e;
@@ -841,11 +841,11 @@ public class RulesControllerImplTest {
   @Test(expected = ResponseStatusException.class)
   public void runSqlRuleNumberFormatExceptionTest() throws EEAException {
     Mockito.doThrow(NumberFormatException.class).when(sqlRulesService).runSqlRule(Mockito.anyLong(),
-        Mockito.any(), Mockito.anyBoolean());
+        Mockito.any(), Mockito.anyBoolean(), Mockito.any());
     try {
       SqlRuleVO sql = new SqlRuleVO();
       sql.setSqlRule("sql");
-      rulesControllerImpl.runSqlRule(1L, sql, false);
+      rulesControllerImpl.runSqlRule(1L, sql, false, null);
     } catch (NumberFormatException e) {
       assertNotNull(e);
       throw e;
@@ -855,11 +855,11 @@ public class RulesControllerImplTest {
   @Test(expected = ResponseStatusException.class)
   public void runSqlRuleStringIndexOutOfBoundsExceptionTest() throws EEAException {
     Mockito.doThrow(StringIndexOutOfBoundsException.class).when(sqlRulesService)
-        .runSqlRule(Mockito.anyLong(), Mockito.any(), Mockito.anyBoolean());
+        .runSqlRule(Mockito.anyLong(), Mockito.any(), Mockito.anyBoolean(), Mockito.any());
     try {
       SqlRuleVO sql = new SqlRuleVO();
       sql.setSqlRule("sql");
-      rulesControllerImpl.runSqlRule(1L, sql, false);
+      rulesControllerImpl.runSqlRule(1L, sql, false, null);
     } catch (StringIndexOutOfBoundsException e) {
       assertNotNull(e);
       throw e;
@@ -876,11 +876,11 @@ public class RulesControllerImplTest {
     EEAInvalidSQLException exception = new EEAInvalidSQLException("",
         new EEAException("message", new EEAException("message", new EEAException("message"))));
     Mockito.doThrow(exception).when(sqlRulesService).runSqlRule(Mockito.anyLong(), Mockito.any(),
-        Mockito.anyBoolean());
+        Mockito.anyBoolean(), Mockito.any());
     try {
       SqlRuleVO sql = new SqlRuleVO();
       sql.setSqlRule("sql");
-      rulesControllerImpl.runSqlRule(1L, sql, false);
+      rulesControllerImpl.runSqlRule(1L, sql, false, null);
     } catch (ResponseStatusException e) {
       assertNotNull(e);
       assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
@@ -898,11 +898,11 @@ public class RulesControllerImplTest {
     EEAInvalidSQLException exception = new EEAInvalidSQLException("",
         new EEAException("message", new EEAException("message", new EEAException())));
     Mockito.doThrow(exception).when(sqlRulesService).runSqlRule(Mockito.anyLong(), Mockito.any(),
-        Mockito.anyBoolean());
+        Mockito.anyBoolean(), Mockito.any());
     try {
       SqlRuleVO sql = new SqlRuleVO();
       sql.setSqlRule("sql");
-      rulesControllerImpl.runSqlRule(1L, sql, false);
+      rulesControllerImpl.runSqlRule(1L, sql, false, null);
     } catch (ResponseStatusException e) {
       assertNotNull(e);
       assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());

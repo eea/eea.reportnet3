@@ -31,8 +31,8 @@ export const ReferenceDataflowService = {
     return { ...referenceDataflowsDTO.data, dataflows: DataflowUtils.parseDataflowListDTO(referenceDataflows) };
   },
 
-  create: async (name, description, type, bigData) =>
-    ReferenceDataflowRepository.create(name, description, type, bigData),
+  create: async (name, description, type, bigData, sncData) =>
+    ReferenceDataflowRepository.create(name, description, type, bigData, sncData),
 
   update: async (dataflowId, description, name, type, bigData) =>
     ReferenceDataflowRepository.update(dataflowId, description, name, type, bigData),

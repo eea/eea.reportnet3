@@ -507,14 +507,23 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
       {job.fmeJobId}
     </a>
   );
-
   const getJobTypeTemplate = job => {
     const isRelease = job.release && job.jobType === 'VALIDATION' ? '*' : '';
+    const isSilentRelease = job.parameters.silentRelease ? (
+      <i className="pi pi-volume-off" title="silent release" />
+    ) : null;
+
+    const tooltipMessages = [];
+    if (isRelease) tooltipMessages.push(resourcesContext.messages['validationForRelease']);
+    if (isSilentRelease) tooltipMessages.push(resourcesContext.messages['silentRelease']);
+    const tooltipText = tooltipMessages.join('\n');
+
     return (
       <div className={styles.tooltip}>
         {job.jobType}
         {isRelease}
-        {isRelease && <span className={styles.tooltiptext}>Validation For Release</span>}
+        {isSilentRelease}
+        {tooltipText && <span className={styles.tooltiptext}>{tooltipText}</span>}
       </div>
     );
   };

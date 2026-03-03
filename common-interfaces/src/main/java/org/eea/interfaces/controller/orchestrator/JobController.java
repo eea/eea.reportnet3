@@ -76,7 +76,8 @@ public interface JobController {
     @PutMapping(value = "/addValidationJob/{datasetId}")
     Long addValidationJob(@PathVariable("datasetId") Long datasetId, @RequestParam(value = "dataflowId", required = false) Long dataflowId,
                           @RequestParam(value = "providerId", required = false) Long providerId, @RequestParam(value = "released", required = false) boolean released,
-                          @RequestParam(value = "createParquetWithSQL", required = false) boolean createParquetWithSQL);
+                          @RequestParam(value = "createParquetWithSQL", required = false) boolean createParquetWithSQL,
+                          @RequestParam(value = "validateAsProviderCode", required = false) String validateAsProviderCode);
 
     /**
      * Adds a release job
@@ -131,14 +132,21 @@ public interface JobController {
      * @param datasetId the id of the dataset
      * @param dataflowId the id of the dataflow
      * @param providerId the id of the provider
-     * @param jobStatus the status of the job
+     * @param replace the status of the job
+     * @param tableSchemaId the id of the provider
+     * @param delimiter the status of the job
+     * @param filePathInS3 the status of the job
      * @return the job id
      */
     @PostMapping(value = "/addEtlImport/{datasetId}")
     Long addEtlImportJob(@PathVariable("datasetId") Long datasetId,
                          @RequestParam(value = "dataflowId", required = false) Long dataflowId,
                          @RequestParam(value = "providerId", required = false) Long providerId,
-                         @RequestParam(value = "jobStatus", required = false) JobStatusEnum jobStatus);
+                         @RequestParam(value = "jobStatus", required = false) JobStatusEnum jobStatus,
+                         @RequestParam(value = "replace", required = false) Boolean replace,
+                         @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,
+                         @RequestParam(value = "delimiter", required = false) String delimiter,
+                         @RequestParam(value = "filePathInS3", required = false) String filePathInS3);
 
     /**
      * Adds a delete data job
@@ -364,6 +372,17 @@ public interface JobController {
 
     @GetMapping(value = "/private/findActiveJobsRelatedToADatasetId/{datasetId}")
     List<JobVO> findActiveJobsRelatedToADatasetId(@PathVariable("datasetId") Long datasetId, @RequestParam(value = "dataflowId", required = false) Long dataflowId, @RequestParam(value = "providerId", required = false) Long providerId);
+
+    /**
+     * Updates job status and info value
+     * @param jobId
+     * @param jobStatus
+     * @param jobInfo
+     * @param lineNumber
+     */
+    @PostMapping(value = "/private/updateJobStatusAndInfo/{jobId}")
+    void updateJobStatusAndInfo(@PathVariable("jobId") Long jobId, @RequestParam(value = "jobStatus") JobStatusEnum jobStatus, @RequestParam(value = "jobInfo") JobInfoEnum jobInfo,
+                       @RequestParam(value = "lineNumber", required = false) Integer lineNumber);
 }
 
 
