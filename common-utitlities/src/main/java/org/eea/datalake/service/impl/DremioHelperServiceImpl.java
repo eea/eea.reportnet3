@@ -96,8 +96,10 @@ public class DremioHelperServiceImpl implements DremioHelperService {
                 itemPosition = 4;
             } else if (S3_EU_SNAPSHOT_ROOT_PATH.equals(s3PathResolver.getPath())) {
                 itemPosition = 5;
+            } else if (S3_PREPARATION_TABLE_NAME_FOLDER_PATH.equals(s3PathResolver.getPath())) {
+                itemPosition = 7;
             } else {
-                itemPosition = 6;
+                itemPosition = 6; //this is for S3_TABLE_NAME_FOLDER_PATH
             }
 
             Optional<DremioDirectoryItem> itemOptional = directoryItems.getChildren().stream().filter(di -> di.getPath().get(itemPosition).equals(folderName)).findFirst();
@@ -128,8 +130,10 @@ public class DremioHelperServiceImpl implements DremioHelperService {
             directoryPath = bucketName + "/" + s3Service.getS3Path(s3PathResolver);
         } else if (S3_DATAFLOW_REFERENCE_FOLDER_PATH.equals(s3PathResolver.getPath())) {
             directoryPath = bucketName + "/" + s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_REFERENCE_FOLDER_PATH);
+        } else if (S3_PREPARATION_TABLE_NAME_FOLDER_PATH.equals(s3PathResolver.getPath())) {
+            directoryPath = bucketName + "/" + s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_PREPARATION_PROVIDER_PATH);
         } else {
-            directoryPath = bucketName + "/" + s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_PROVIDER_PATH);
+            directoryPath = bucketName + "/" + s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_PROVIDER_PATH); // this is for S3_TABLE_NAME_FOLDER_PATH
         }
         DremioDirectoryItemsResponse directoryItems = null;
         try {
@@ -165,8 +169,10 @@ public class DremioHelperServiceImpl implements DremioHelperService {
                 itemPosition = 4;
             } else if (S3_EU_SNAPSHOT_ROOT_PATH.equals(s3PathResolver.getPath())) {
                 itemPosition = 5;
+            } else if (S3_PREPARATION_TABLE_NAME_FOLDER_PATH.equals(s3PathResolver.getPath())) {
+                itemPosition = 7;
             } else {
-                itemPosition = 6;
+                itemPosition = 6; //this is for S3_TABLE_NAME_FOLDER_PATH
             }
             Optional<DremioDirectoryItem> itemOptional = directoryItems.getChildren().stream().filter(di -> di.getPath().get(itemPosition).equals(folderName)).findFirst();
             if (itemOptional.isPresent()) {
