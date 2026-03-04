@@ -306,6 +306,7 @@ public class S3ServiceImpl implements S3Service {
             case S3_PREPARATION_IMPORT_FILE_PATH:
                 return String.format(path, dataflowFolder, dataProviderFolder, datasetFolder,s3PathResolver.getPreparationCode(), s3PathResolver.getTableName(), s3PathResolver.getFilename());
             case S3_PREPARATION_IMPORT_TABLE_NAME_FOLDER_PATH:
+            case S3_PREPARATION_PROVIDER_PATH:
                 return String.format(path, dataflowFolder, dataProviderFolder, datasetFolder,s3PathResolver.getPreparationCode(), s3PathResolver.getTableName());
 
             default:

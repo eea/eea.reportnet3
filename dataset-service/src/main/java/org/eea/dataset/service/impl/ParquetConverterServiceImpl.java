@@ -401,9 +401,11 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
         //upload csv file
         uploadCsvFileAndPromoteIt(s3ImportPathResolver, tableSchemaName, s3PathForModifiedCsv, csvFileWithAddedColumns.getPath(), csvFileWithAddedColumns.getName(), dremioPathForCsvFile);
 
-        if (needToDemoteTable && !isPreparationDataset) {
+        if (needToDemoteTable) {
+          String tableNameFolderPath = S3_TABLE_NAME_FOLDER_PATH;
+          if (isPreparationDataset){tableNameFolderPath=S3_PREPARATION_TABLE_NAME_FOLDER_PATH;}
           //demote table folder
-          if (s3Helper.checkFolderExist(s3TablePathResolver, S3_TABLE_NAME_FOLDER_PATH)) {
+          if (s3Helper.checkFolderExist(s3TablePathResolver, tableNameFolderPath)) {
             dremioHelperService.demoteFolderOrFile(s3TablePathResolver, tableSchemaName);
             needToDemoteTable = false;
           }

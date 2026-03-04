@@ -564,6 +564,9 @@ public final class LiteralConstants {
   /** The Constant S3_PREPARATION_IMPORT_CSV_FILE_QUERY_PATH: {@value}. */
   public static final String S3_PREPARATION_IMPORT_CSV_FILE_QUERY_PATH = ".\"%s\".\"%s\".\"%s\".\"preparation\".\"%s\".\"import\".\"%s\".\"%s\"";
 
+  /** The Constant S3_PREPARATION_PROVIDER_PATH: {@value}. */
+  public static final String S3_PREPARATION_PROVIDER_PATH = "%s/%s/%s/preparation/%s";
+  
   /**
    * Instantiates a new literal constants.
    */
