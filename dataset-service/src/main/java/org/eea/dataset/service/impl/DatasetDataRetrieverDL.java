@@ -410,11 +410,10 @@ public class DatasetDataRetrieverDL implements DataLakeDataRetriever {
 
         if (preparationFolderExist) {
             // Try to auto promote if it’s safe and not already promoted.
-            dremioAutoPromotionService.ensureSafeFolderPromotion(dataset, s3PathResolverParentDataset);
             dremioAutoPromotionService.ensureSafeFolderPromotion(dataset, s3PathResolverPreparations);
 
             // Check for promotion again.
-            if (dremioHelperService.checkFolderPromoted(s3PathResolverParentDataset, s3PathResolverParentDataset.getTableName())) {
+            if (dremioHelperService.checkFolderPromoted(s3PathResolverPreparations, s3PathResolverPreparations.getTableName())) {
                 StringBuilder dataQuery = new StringBuilder();
                 StringBuilder recordsCountQuery = new StringBuilder();
 
