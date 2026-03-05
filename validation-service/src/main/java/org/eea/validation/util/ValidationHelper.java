@@ -464,27 +464,32 @@ public class ValidationHelper implements DisposableBean {
       }
       datasetController.updateStatistics(datasetId, true);
 
-      List<DataSetMetabaseVO> combinedDatasets = getCombinedDatasets(dataset);
-      combinedDatasets.forEach(dataSetMetabaseVO -> {
-        DataSetSchema schema;
-        try {
-          schema = schemasRepository.findByIdDataSetSchema(new ObjectId(dataSetMetabaseVO.getDatasetSchema()));
-          for (TableSchema tableSchema : schema.getTableSchemas()) {
-            dataSetControllerZuul.createEmptyTablesV2(dataSetMetabaseVO, tableSchema.getIdTableSchema().toString());
+      DataFlowVO dataflow = dataFlowControllerZuul.getMetabaseById(dataset.getDataflowId());
+      /* Add check for design dataflows #297461 In design dataflows empty tables will be created during the validation process.
+         For draft dataflows empty tables will be created during the data collection creation.*/
+      if(dataflow.getStatus().equals(TypeStatusEnum.DESIGN)) {
+        List<DataSetMetabaseVO> combinedDatasets = getCombinedDatasets(dataset);
+        combinedDatasets.forEach(dataSetMetabaseVO -> {
+          DataSetSchema schema;
+          try {
+            schema = schemasRepository.findByIdDataSetSchema(new ObjectId(dataSetMetabaseVO.getDatasetSchema()));
+            for (TableSchema tableSchema : schema.getTableSchemas()) {
+              dataSetControllerZuul.createEmptyTablesV2(dataSetMetabaseVO, tableSchema.getIdTableSchema().toString());
+            }
+          } catch (FeignException fe) {
+            String body = fe.contentUTF8();
+            LOG.error("createEmptyTablesV2 failed (422) for datasetId {}: {}", dataSetMetabaseVO.getId(), body);
+            String errorMsg = EEAErrorMessage.ERROR_ILLEGAL_HEADER_CHARACTER;
+            if (body != null && body.contains(errorMsg)) {
+              String header = extractHeaderFromMessage(body, errorMsg);
+              failedDueToIllegalCharacter(header, dataSetMetabaseVO.getDataSetName(), dataset, dataSetMetabaseVO.getId(), processId, jobId, user, released, jobVO);
+              throw fe;
+            }
+          } catch (Exception e) {
+            throw new RuntimeException(e);
           }
-        } catch (FeignException fe) {
-          String body = fe.contentUTF8();
-          LOG.error("createEmptyTablesV2 failed (422) for datasetId {}: {}", dataSetMetabaseVO.getId(), body);
-          String errorMsg = EEAErrorMessage.ERROR_ILLEGAL_HEADER_CHARACTER;
-          if (body != null && body.contains(errorMsg)) {
-            String header = extractHeaderFromMessage(body, errorMsg);
-            failedDueToIllegalCharacter(header, dataSetMetabaseVO.getDataSetName(), dataset, dataSetMetabaseVO.getId(), processId, jobId, user, released,  jobVO);
-            throw fe;
-          }
-        } catch (Exception e) {
-          throw new RuntimeException(e);
-        }
-      });
+        });
+      }
 
       DataSetSchema schema = schemasRepository.findByIdDataSetSchema(new ObjectId(dataset.getDatasetSchema()));
       List<Rule> rules = rulesRepository.findRulesEnabled(new ObjectId(dataset.getDatasetSchema()));

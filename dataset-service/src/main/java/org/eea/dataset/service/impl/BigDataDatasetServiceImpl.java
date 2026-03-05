@@ -440,7 +440,8 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             handleFmeRequest(integrationVO, importFileInDremioInfo, filesToImport.get(0), mimeType);
         } else {
             List<File> correctFilesForImport = checkCsvFiles(importFileInDremioInfo, schema, filesToImport);
-            parquetConverterService.convertCsvFilesToParquetFiles(importFileInDremioInfo, correctFilesForImport, schema);
+            DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(importFileInDremioInfo.getDatasetId());
+            parquetConverterService.convertCsvFilesToParquetFiles(importFileInDremioInfo, correctFilesForImport, schema, dataSetMetabaseVO);
 
         }
     }
@@ -557,6 +558,9 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                                 || !FileTypeEnum.CSV.getValue().equalsIgnoreCase(mimeType) || entry.isDirectory()
                                 || !filePath.startsWith(saveLocationPath + File.separator)) {
                             LOG.error("Ignored file from ZIP: {}. {}", entryName, importFileInDremioInfo);
+                            if (entry != null){
+                                zip.closeEntry();
+                            }
                             entry = zip.getNextEntry();
                             continue;
                         }
@@ -569,10 +573,15 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                             LOG.error("Unexpected error! Error in copyLarge for saveLocationPath {}. {} Message: {}", saveLocationPath, importFileInDremioInfo, e.getMessage());
                             throw e;
                         }
-
+                        if (entry != null){
+                            zip.closeEntry();
+                        }
                         entry = zip.getNextEntry();
                         files.add(file);
 
+                    }
+                    if (entry != null){
+                        zip.closeEntry();
                     }
                 } catch (Exception e) {
                     LOG.error("Unexpected error! Error in storeImportFiles {}. Message: {}", importFileInDremioInfo, e.getMessage());
@@ -643,6 +652,9 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                                 || !FileTypeEnum.CSV.getValue().equalsIgnoreCase(mimeType) || entry.isDirectory()
                                 || !filePath.startsWith(saveLocationPath + File.separator)) {
                             LOG.error("Ignored file from ZIP: {}. {}", entryName, importFileInDremioInfo);
+                            if (entry != null){
+                                zip.closeEntry();
+                            }
                             entry = zip.getNextEntry();
                             continue;
                         }
@@ -656,9 +668,15 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                             throw e;
                         }
 
+                        if (entry != null){
+                            zip.closeEntry();
+                        }
                         entry = zip.getNextEntry();
                         files.add(file);
 
+                    }
+                    if (entry != null){
+                        zip.closeEntry();
                     }
                 } catch (Exception e) {
                     LOG.error("Unexpected error! Error in storeImportFiles {}. Message: {}", importFileInDremioInfo, e.getMessage());
@@ -900,9 +918,9 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 throw new Exception("Can not delete table data because iceberg table is created");
             }
             String tableSchemaName = tableSchemaVO.getNameTableSchema();
+            DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
 
             if (providerId == null) {
-                DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
                 providerId = dataSetMetabaseVO.getDataProviderId();
             }
             if (providerId == null) {
@@ -913,7 +931,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             String s3PathForCsvFolder = s3ServicePrivate.getTableAsFolderQueryPath(s3ImportPathResolver, S3_IMPORT_TABLE_NAME_FOLDER_PATH);
 
             //remove csv files that are related to the table
-            parquetConverterService.removeCsvFilesThatWillBeReplaced(s3ImportPathResolver, tableSchemaName, s3PathForCsvFolder, datasetId);
+            parquetConverterService.removeCsvFilesThatWillBeReplaced(s3ImportPathResolver, tableSchemaName, s3PathForCsvFolder, datasetId, dataSetMetabaseVO);
 
             S3PathResolver s3TablePathResolver = new S3PathResolver(dataflowId, providerId, datasetId, tableSchemaName, tableSchemaName, S3_TABLE_NAME_FOLDER_PATH);
             //remove folders that contain the previous parquet files
@@ -940,7 +958,6 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 }
             }
             if(BooleanUtils.isTrue(createEmptyTablesBool)) {
-                DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
                 createEmptyTables.runCreationForSpecificTableSchema(dataSetMetabaseVO, tableSchemaId);
             }
 
@@ -955,10 +972,9 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 NotificationVO notificationVO = NotificationVO.builder()
                         .user(SecurityContextHolder.getContext().getAuthentication().getName()).datasetId(datasetId)
                         .tableSchemaId(tableSchemaId).build();
-                DataSetMetabaseVO datasetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
-                notificationVO.setDatasetName(datasetMetabaseVO.getDataSetName());
-                notificationVO.setDataflowId(datasetMetabaseVO.getDataflowId());
-                notificationVO.setDataflowName(dataFlowControllerZuul.getMetabaseById(datasetMetabaseVO.getDataflowId()).getName());
+                notificationVO.setDatasetName(dataSetMetabaseVO.getDataSetName());
+                notificationVO.setDataflowId(dataSetMetabaseVO.getDataflowId());
+                notificationVO.setDataflowName(dataFlowControllerZuul.getMetabaseById(dataSetMetabaseVO.getDataflowId()).getName());
 
                 value.put(LiteralConstants.DATASET_ID, datasetId);
 
@@ -1490,7 +1506,10 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         //if table does not exist or has 0 records do not do anything
         if (!icebergFolderExists || dremioJdbcTemplate.queryForObject(numberOfRecordsInIcebergTableQuery, Long.class) == 0) {
             //iceberg table does not exist and no parquet table should be created
-            LOG.info("For dataflowId {}, providerId {}, datasetId {} and table {} iceberg table does not exist or has 0 records so no parquet table will be created. LockValue: {}", dataflowId, providerId, datasetId, tableSchemaVO.getNameTableSchema(), lockValue);
+            LOG.info("For dataflowId {}, providerId {}, datasetId {} and table {} iceberg table does not exist or has 0 records so creating empty table. LockValue: {}", dataflowId, providerId, datasetId, tableSchemaVO.getNameTableSchema(), lockValue);
+            // In #297461 empty tables in parquet bucket should always exist so recreating it
+            DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
+            createEmptyTables.runCreationForSpecificTableSchema(dataSetMetabaseVO, tableSchemaVO.getIdTableSchema());
             return true;
         }
 
@@ -2996,7 +3015,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             importFileInDremioInfo.setAttachmentsExistPerTableName(attachmentsExistPerTableName);
 
             try {
-                parquetConverterService.convertCsvFilesToParquetFiles(importFileInDremioInfo, csvFiles, datasetSchema);
+                parquetConverterService.convertCsvFilesToParquetFiles(importFileInDremioInfo, csvFiles, datasetSchema, dataSetMetabaseVO);
             }
             catch(Exception e){
                 LOG.error("Error in convertCsvFilesToParquetFiles for job {} ", importFileInDremioInfo, e);
@@ -3050,90 +3069,96 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
             ZipEntry entry;
             while ((entry = zip.getNextEntry()) != null) {
+                try {
 
-                String entryName = entry.getName();
+                    String entryName = entry.getName();
 
-                if (entryName.equals(ETL_IMPORT_ATTACHMENTS_FOLDER + "/")
-                        || entryName.startsWith(ETL_IMPORT_ATTACHMENTS_FOLDER + "/")) {
+                    if (entryName.equals(ETL_IMPORT_ATTACHMENTS_FOLDER + "/")
+                            || entryName.startsWith(ETL_IMPORT_ATTACHMENTS_FOLDER + "/")) {
 
-                    if (!attachmentsFolderSeen) {
-                        attachmentsFolderSeen = true;
+                        if (!attachmentsFolderSeen) {
+                            attachmentsFolderSeen = true;
 
-                        // initialize all tables to false
-                        for (String table : tableNamesSet) {
-                            attachmentsExistPerTableName.put(table, false);
+                            // initialize all tables to false
+                            for (String table : tableNamesSet) {
+                                attachmentsExistPerTableName.put(table, false);
+                            }
                         }
                     }
-                }
 
-                File file = new File(etlImportFolder, entryName);
-                String canonicalPath = file.getCanonicalPath();
-                String basePath = etlImportFolder.getCanonicalPath() + File.separator;
+                    File file = new File(etlImportFolder, entryName);
+                    String canonicalPath = file.getCanonicalPath();
+                    String basePath = etlImportFolder.getCanonicalPath() + File.separator;
 
-                // Zip Slip protection
-                if (!canonicalPath.startsWith(basePath)) {
-                    LOG.error("Zip slip attempt: {}. jobId {}", entryName, jobId);
-                    continue;
-                }
+                    // Zip Slip protection
+                    if (!canonicalPath.startsWith(basePath)) {
+                        LOG.error("Zip slip attempt: {}. jobId {}", entryName, jobId);
+                        continue;
+                    }
 
-                boolean isDirectory = entry.isDirectory();
-                boolean isRootLevel = !entryName.contains("/");
+                    boolean isDirectory = entry.isDirectory();
+                    boolean isRootLevel = !entryName.contains("/");
 
-                boolean allowed = false;
-                boolean isCsv = false;
+                    boolean allowed = false;
+                    boolean isCsv = false;
 
-                if (isRootLevel) {
-                    if (!isDirectory) {
-                        // root-level files must be CSV
-                        String mimeType = datasetService.getMimetype(entryName);
-                        isCsv = FileTypeEnum.CSV.getValue().equalsIgnoreCase(mimeType);
-                        if (isCsv) {
-                            // extract table name from "tableName.csv"
-                            String baseName = entryName.substring(0, entryName.lastIndexOf('.')).toLowerCase();
-                            allowed = tableNamesSet.contains(baseName);
-                        } else {
-                            allowed = false;
+                    if (isRootLevel) {
+                        if (!isDirectory) {
+                            // root-level files must be CSV
+                            String mimeType = datasetService.getMimetype(entryName);
+                            isCsv = FileTypeEnum.CSV.getValue().equalsIgnoreCase(mimeType);
+                            if (isCsv) {
+                                // extract table name from "tableName.csv"
+                                String baseName = entryName.substring(0, entryName.lastIndexOf('.')).toLowerCase();
+                                allowed = tableNamesSet.contains(baseName);
+                            } else {
+                                allowed = false;
+                            }
+                        }
+                    } else {
+                        // nested entries must follow strict attachment rules
+                        allowed = isValidAttachmentEntry(entryName, isDirectory);
+                        if (allowed && !isDirectory && attachmentsFolderSeen) {
+
+                            // entryName : attachments/tableName/attachment
+                            String relative = entryName.substring((ETL_IMPORT_ATTACHMENTS_FOLDER + "/").length());
+
+                            String tableNameInZip = relative.substring(0, relative.indexOf('/')).toLowerCase();
+
+                            if (attachmentsExistPerTableName.containsKey(tableNameInZip)) {
+                                attachmentsExistPerTableName.put(tableNameInZip, true);
+                            }
                         }
                     }
-                } else {
-                    // nested entries must follow strict attachment rules
-                    allowed = isValidAttachmentEntry(entryName, isDirectory);
-                    if (allowed && !isDirectory && attachmentsFolderSeen) {
 
-                        // entryName : attachments/tableName/attachment
-                        String relative = entryName.substring((ETL_IMPORT_ATTACHMENTS_FOLDER + "/").length());
 
-                        String tableNameInZip = relative.substring(0, relative.indexOf('/')).toLowerCase();
-
-                        if (attachmentsExistPerTableName.containsKey(tableNameInZip)) {
-                            attachmentsExistPerTableName.put(tableNameInZip, true);
-                        }
+                    if (!allowed) {
+                        LOG.error("Ignored ZIP entry (invalid contract): {}. jobId {}", entryName, jobId);
+                        continue;
                     }
-                }
 
+                    // do not create directories yet because we only create them if they are not empty
+                    if (isDirectory) {
+                        continue;
+                    }
 
-                if (!allowed) {
-                    LOG.error("Ignored ZIP entry (invalid contract): {}. jobId {}", entryName, jobId);
-                    continue;
-                }
+                    // Ensure parent directories exist
+                    file.getParentFile().mkdirs();
 
-                // do not create directories yet because we only create them if they are not empty
-                if (isDirectory) {
-                    continue;
-                }
+                    // Write file
+                    try (FileOutputStream output = new FileOutputStream(file)) {
+                        IOUtils.copyLarge(zip, output);
+                        LOG.info("Stored file {}. jobId {}", file.getPath(), jobId);
+                    }
 
-                // Ensure parent directories exist
-                file.getParentFile().mkdirs();
-
-                // Write file
-                try (FileOutputStream output = new FileOutputStream(file)) {
-                    IOUtils.copyLarge(zip, output);
-                    LOG.info("Stored file {}. jobId {}", file.getPath(), jobId);
-                }
-
-                // gather root csv files for import
-                if (isCsv && isRootLevel) {
-                    files.add(file);
+                    // gather root csv files for import
+                    if (isCsv && isRootLevel) {
+                        files.add(file);
+                    }
+                } finally {
+                    if(entry != null){
+                        zip.closeEntry();
+                    }
                 }
             }
             // check if csv files for import were provided

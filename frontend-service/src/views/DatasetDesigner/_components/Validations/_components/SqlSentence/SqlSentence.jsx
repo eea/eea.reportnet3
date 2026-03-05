@@ -251,7 +251,7 @@ export const SqlSentence = ({
       return;
     }
 
-    const invalidSql = /\b(limit|offset)\s*\d*$|--.*$/i.test(creationFormState?.candidateRule?.sqlSentence?.trim());
+    const invalidSql = /\b(limit|offset)\s*\d*$/i.test(creationFormState?.candidateRule?.sqlSentence?.trim());
 
     if (invalidSql) {
       setIsSqlErrorDialogVisible(true);
@@ -335,7 +335,7 @@ export const SqlSentence = ({
                 iconClasses={styles.validateSqlSentenceIcon}
                 label={resourcesContext.messages['evaluateSql']}
                 onClick={() => {
-                  const invalidSql = /\b(limit|offset)\s*\d*$|--.*$/i.test(
+                  const invalidSql = /\b(limit|offset)\s*\d*$/i.test(
                     creationFormState?.candidateRule?.sqlSentence?.trim()
                   );
 
@@ -353,7 +353,7 @@ export const SqlSentence = ({
                 icon={isValidatingQuery ? 'spinnerAnimate' : 'play'}
                 label={resourcesContext.messages['runSql']}
                 onClick={() => {
-                  const invalidSql = /\b(limit|offset)\s*\d*$|--.*$/i.test(
+                  const invalidSql = /\b(limit|offset)\s*\d*$/i.test(
                     creationFormState?.candidateRule?.sqlSentence?.trim()
                   );
 

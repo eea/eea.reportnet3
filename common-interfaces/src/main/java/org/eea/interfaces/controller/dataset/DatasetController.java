@@ -1110,6 +1110,16 @@ public interface DatasetController {
   @PostMapping("/private/{tableSchemaId}/createEmptyTablesV2")
   void createEmptyTablesV2(@RequestBody DataSetMetabaseVO datasetMetabaseVO, @PathVariable("tableSchemaId") String tableSchemaId);
 
+  /***
+   * This endpoint was implemented as part of #297461 to create empty tables if needed via postman or curl command
+   *
+   * @param datasetId The dataset id
+   * @param tableSchemaId The table schema id
+   * @throws Exception The exception
+   */
+  @PostMapping("/{datasetId}/createEmptyTablesV3")
+  void createEmptyTablesV3(@PathVariable Long datasetId, @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId) throws Exception;
+
   /**
    * Get released dataset data info
    *

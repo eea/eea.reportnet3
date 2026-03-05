@@ -2,6 +2,10 @@ package org.eea.validation.util.datalake;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eea.validation.util.ValidationDroolsUtils;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.io.ParseException;
+import org.locationtech.jts.io.WKBReader;
 
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -115,6 +119,43 @@ public class DremioNonSQLValidationUtils {
             return true;
         }
         return ValidationDroolsUtils.validateRegExpression(value,"REG_EXP_PHONE");
+    }
+
+    public boolean isBlankPoint(byte[] byteArray) {
+      // If there is no value at all, this rule should not apply.
+      if (byteArray == null || byteArray.length == 0) {
+        return false;
+      }
+      try {
+        Geometry geometry = new WKBReader().read(byteArray);
+        // Parameter exist but can't be converted to Geometry.
+        if (geometry == null) {
+          return false;
+        }
+
+        // Empty point (GeoJSON coordinates: []).
+        if (geometry.isEmpty()) {
+          return false;
+        }
+
+        // BlankPoint invoked but not POINT type.
+        if (!"Point".equalsIgnoreCase(geometry.getGeometryType())) {
+          return false;
+        }
+
+        Coordinate coordinates = geometry.getCoordinate();
+        if (coordinates == null) {
+          return false;
+        }
+
+        double x = coordinates.getX();
+        double y = coordinates.getY();
+
+        // Blank point [0,0] coordinates.
+        return x != 0d || y != 0d;
+      } catch (Exception e) {
+        return true;
+      }
     }
 }
 
