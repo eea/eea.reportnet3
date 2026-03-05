@@ -111,10 +111,10 @@
   .datasetConfigurationButtons {
     display: flex;
     align-items: center;
-    margin-left: 0.5rem;
+    margin-left: 0.2rem;
     > div {
       display: flex;
-      margin-right: 0.5rem;
+      margin-right: 0.2rem;
     }
   }
 }
@@ -211,6 +211,10 @@
 
 .closeButton {
   margin-left: 6px !important;
+}
+
+.webformDropdown {
+  width: 100%;
 }
 
 .ButtonsBar :global(.p-toolbar-group-right) {

@@ -15,6 +15,7 @@ import org.eea.datalake.service.SpatialDataHandling;
 import org.eea.datalake.service.annotation.ImportDataLakeCommons;
 import org.eea.datalake.service.model.S3PathResolver;
 import org.eea.exception.DremioValidationException;
+import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController;
 import org.eea.interfaces.controller.dataset.DatasetSchemaController.DatasetSchemaControllerZuul;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
@@ -153,16 +154,26 @@ public class DremioNonSqlRulesExecuteServiceImpl implements DremioRulesExecuteSe
             query.append("select record_id,").append(fieldName != null ? UtilityClass.addQuotesToFieldNames(fieldName) : "").append(" from ").append(s3Service.getTableAsFolderQueryPath(dataTableResolver, path));
             SqlRowSet rs = dremioJdbcTemplate.queryForRowSet(query.toString());
 
-            Method method = null;
             List<String> classes = new ArrayList<>(Arrays.asList(DREMIO_NON_SQL_VALIDATION_UTILS, VALIDATION_DROOLS_UTILS, GEOMETRY_VALIDATION_UTILS, GEO_JSON_VALIDATION_UTILS));
             Class<?> cls = null;
+            Method method = null;
             for (String className : classes) {
                 cls = Class.forName(className);
-                method = dremioRulesService.getRuleMethodFromClass(ruleMethodName, cls);
-                if (method != null) {
+                Method foundMethod = dremioRulesService.getRuleMethodFromClass(ruleMethodName, cls);
+                if (foundMethod != null) {
+                    method = foundMethod;
                     break;
                 }
             }
+
+            // In case of an unhandled ruleMethodName or actual null value. Exception passed in
+            // ValidationTasksExecutorThread.run() to avoid npe.
+            if (method == null) {
+                LOG.error("Rule method not found. ruleId={}, shortCode={}, datasetId={}, taskId={}, whenConditionMethod={}, ruleMethodName={}, classes={}",
+                    ruleId, ruleVO.getShortCode(), datasetId, taskId, ruleVO.getWhenConditionMethod(), ruleMethodName, classes);
+                throw new DremioValidationException("Rule method not found: ruleMethodName: " + ruleMethodName);
+            }
+
             Method factoryMethod = cls.getDeclaredMethod(GET_INSTANCE);
             Object object = factoryMethod.invoke(null, null);
 
@@ -419,7 +430,13 @@ public class DremioNonSqlRulesExecuteServiceImpl implements DremioRulesExecuteSe
             int parameterLength = method.getParameters().length;
             switch (parameterLength) {
                 case 1:
-                    isValid = (boolean) method.invoke(object, getConvertedString(rs, fieldName));  //DremioNonSQLValidationUtils methods
+                    Class<?> parameterType = method.getParameters()[0].getType();
+                    // In case of isBlankPoint where the method accepts a byte[], we cast the raw bytes from the row to byte[].
+                    if (parameterType.equals(byte[].class)) {
+                        isValid = (boolean) method.invoke(object, (byte[]) rs.getObject(fieldName));
+                    } else {
+                        isValid = (boolean) method.invoke(object, getConvertedString(rs, fieldName));
+                    }
                     break;
                 case 2:
                     isValid = (boolean) method.invoke(object, getConvertedString(rs, fieldName), parameters.get(1));  //ValidationDroolsUtils methods

@@ -99,7 +99,6 @@ public class DremioSQLValidationUtils {
             //PK_QUERY_VALUES
             StringBuilder pkQuery = new StringBuilder();
             pkQuery.append("select ").append(quotedPrimaryKey).append(" from ").append(pkTablePath);
-            pkQuery.append(" limit " + maxErrors);
             List<String> pkValueList = dremioJdbcTemplate.query(pkQuery.toString(), (ResultSet rs) -> {
                 List<String> result = new ArrayList<>();
                 while (rs.next()) {
@@ -121,7 +120,6 @@ public class DremioSQLValidationUtils {
             StringBuilder fkQuery = new StringBuilder();
             fkQuery.append("select ").append("record_id").append(",").append(quotedForeignKey).append(" from ").append(fkTablePath)
                     .append(" where ").append(quotedForeignKey).append(" is not NULL and ").append(quotedForeignKey).append(" != ''");
-            fkQuery.append(" limit " + maxErrors);
             SqlRowSet fkValues = dremioJdbcTemplate.queryForRowSet(fkQuery.toString());
             while (fkValues.next()) {
                 List<String> recordValues = new ArrayList<>(Arrays.asList(fkValues.getString(foreignKey).split(";")))
@@ -267,7 +265,6 @@ public class DremioSQLValidationUtils {
             //PK_QUERY_VALUES
             StringBuilder pkQuery = new StringBuilder();
             pkQuery.append("select ").append(quotedOptionalPk).append(",").append(quotedPrimaryKey).append(" from ").append(pkTablePath);
-            pkQuery.append(" limit " + maxErrors);
             Map<String, String> pkWithOptionalMap = dremioJdbcTemplate.query(pkQuery.toString(), (ResultSet rs) -> {
                 HashMap<String,String> result = new HashMap<>();
                 while (rs.next()) {
@@ -300,7 +297,6 @@ public class DremioSQLValidationUtils {
             StringBuilder fkQuery = new StringBuilder();
             fkQuery.append("select ").append("record_id").append(",").append(quotedOptionalFk).append(",").append(quotedForeignKey).append(" from ").append(fkTablePath)
                     .append(" where ").append(quotedForeignKey).append(" is not NULL and ").append(quotedForeignKey).append(" != ''");
-            fkQuery.append(" limit " + maxErrors);
             SqlRowSet fkWithOptionalRS = dremioJdbcTemplate.queryForRowSet(fkQuery.toString());
             while (fkWithOptionalRS.next()) {
                 if (pkWithOptionalMap.get(fkWithOptionalRS.getString(optionalFk))!=null) {

@@ -29,10 +29,8 @@ import org.eea.interfaces.controller.recordstore.ProcessController.ProcessContro
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
-import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
-import org.eea.interfaces.vo.dataset.DatasetTableVO;
 import org.eea.interfaces.vo.dataset.ReferenceDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetRunningStatusEnum;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
@@ -59,7 +57,6 @@ import org.eea.lock.annotation.LockMethod;
 import org.eea.lock.service.LockService;
 import org.eea.multitenancy.TenantResolver;
 import org.eea.thread.EEADelegatingSecurityContextExecutorService;
-import org.eea.utils.LiteralConstants;
 import org.eea.validation.kafka.command.Validator;
 import org.eea.validation.mapper.TaskMapper;
 import org.eea.validation.persistence.data.domain.TableValue;
@@ -101,8 +98,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static org.eea.utils.LiteralConstants.*;
@@ -296,6 +291,10 @@ public class ValidationHelper implements DisposableBean {
       }
       else {
         LOG.info("Process {} not found in processesMap" , processId);
+        LOG.info("Processes in map");
+        for (String key : processesMap.keySet()) {
+          LOG.info("{}",processesMap.get(key));
+        }
       }
     }
     return result;
@@ -312,6 +311,7 @@ public class ValidationHelper implements DisposableBean {
         user != null ? user : processControllerZuul.findById(processId).getUser());
 
     synchronized (processesMap) {
+      LOG.info("Adding process {} in processesMap", processId);
       processesMap.put(processId, process);
     }
   }
@@ -464,27 +464,32 @@ public class ValidationHelper implements DisposableBean {
       }
       datasetController.updateStatistics(datasetId, true);
 
-      List<DataSetMetabaseVO> combinedDatasets = getCombinedDatasets(dataset);
-      combinedDatasets.forEach(dataSetMetabaseVO -> {
-        DataSetSchema schema;
-        try {
-          schema = schemasRepository.findByIdDataSetSchema(new ObjectId(dataSetMetabaseVO.getDatasetSchema()));
-          for (TableSchema tableSchema : schema.getTableSchemas()) {
-            dataSetControllerZuul.createEmptyTablesV2(dataSetMetabaseVO, tableSchema.getIdTableSchema().toString());
+      DataFlowVO dataflow = dataFlowControllerZuul.getMetabaseById(dataset.getDataflowId());
+      /* Add check for design dataflows #297461 In design dataflows empty tables will be created during the validation process.
+         For draft dataflows empty tables will be created during the data collection creation.*/
+      if(dataflow.getStatus().equals(TypeStatusEnum.DESIGN)) {
+        List<DataSetMetabaseVO> combinedDatasets = getCombinedDatasets(dataset);
+        combinedDatasets.forEach(dataSetMetabaseVO -> {
+          DataSetSchema schema;
+          try {
+            schema = schemasRepository.findByIdDataSetSchema(new ObjectId(dataSetMetabaseVO.getDatasetSchema()));
+            for (TableSchema tableSchema : schema.getTableSchemas()) {
+              dataSetControllerZuul.createEmptyTablesV2(dataSetMetabaseVO, tableSchema.getIdTableSchema().toString());
+            }
+          } catch (FeignException fe) {
+            String body = fe.contentUTF8();
+            LOG.error("createEmptyTablesV2 failed (422) for datasetId {}: {}", dataSetMetabaseVO.getId(), body);
+            String errorMsg = EEAErrorMessage.ERROR_ILLEGAL_HEADER_CHARACTER;
+            if (body != null && body.contains(errorMsg)) {
+              String header = extractHeaderFromMessage(body, errorMsg);
+              failedDueToIllegalCharacter(header, dataSetMetabaseVO.getDataSetName(), dataset, dataSetMetabaseVO.getId(), processId, jobId, user, released, jobVO);
+              throw fe;
+            }
+          } catch (Exception e) {
+            throw new RuntimeException(e);
           }
-        } catch (FeignException fe) {
-          String body = fe.contentUTF8();
-          LOG.error("createEmptyTablesV2 failed (422) for datasetId {}: {}", dataSetMetabaseVO.getId(), body);
-          String errorMsg = EEAErrorMessage.ERROR_ILLEGAL_HEADER_CHARACTER;
-          if (body != null && body.contains(errorMsg)) {
-            String header = extractHeaderFromMessage(body, errorMsg);
-            failedDueToIllegalCharacter(header, dataSetMetabaseVO.getDataSetName(), dataset, dataSetMetabaseVO.getId(), processId, jobId, user, released,  jobVO);
-            throw fe;
-          }
-        } catch (Exception e) {
-          throw new RuntimeException(e);
-        }
-      });
+        });
+      }
 
       DataSetSchema schema = schemasRepository.findByIdDataSetSchema(new ObjectId(dataset.getDatasetSchema()));
       List<Rule> rules = rulesRepository.findRulesEnabled(new ObjectId(dataset.getDatasetSchema()));
@@ -872,7 +877,7 @@ public class ValidationHelper implements DisposableBean {
         try {
           recordCountIsCorrect = recordStoreControllerZuul.recordValueCountMatchesMatViewCount(dataset, jobId);
         } catch (Exception e) {
-          LOG.error("There was an error during materialized view record comparison for jobId {} and datasetId {} Error:",
+          LOG.error("There was an error during materialized view record comparison for jobId {} and datasetId {} Error: {}",
               jobId, dataset.getId(), e.getMessage());
           jobControllerZuul.cancelJob(jobId, dataset.getDataflowId(), dataset.getId(),
               JobInfoEnum.ERROR_MATERIALIZED_VIEWS_ARE_NOT_CORRECT, true);
@@ -956,6 +961,14 @@ public class ValidationHelper implements DisposableBean {
     if (eeaEventVO.getData().get("bigData")!=null && eeaEventVO.getData().get("bigData").equals("true")) {
        validationTask = new ValidationTask(taskId, eeaEventVO, validator, datasetId,
               null, processId);
+       /*
+         Calling initializeProcess() in bigData Validation tasks to ensure all validation pods have a copy of the
+         validation process in their memory, as without it, only the pod that creased the validation process does.
+         This prevents never ending validations for bigData flows.
+        */
+        if (!processesMap.containsKey(processId)) {
+          initializeProcess(processId, null);
+        }
     } else {
        validationTask = new ValidationTask(taskId, eeaEventVO, validator, datasetId,
               getKieBase(processId, datasetId, rule), processId);
@@ -1665,7 +1678,8 @@ public class ValidationHelper implements DisposableBean {
                   executeValidation(nextProcess.getDatasetId(), nextProcess.getProcessId(), true,
                           true);
                 }
-              } else if (processControllerZuul.isProcessFinished(processId)) {
+              }
+              else if (processControllerZuul.isProcessFinished(processId)) {
                 if (jobId != null) {
                   jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FINISHED);
                 }
@@ -1676,7 +1690,8 @@ public class ValidationHelper implements DisposableBean {
                 }
               }
 
-            } else {
+            }
+            else {
               // Delete the lock to the Release process
               deleteLockToReleaseProcess(datasetId);
               checkAndPromoteFolder(s3PathResolver, dataflow);
@@ -1703,7 +1718,7 @@ public class ValidationHelper implements DisposableBean {
             LOG.info("Process {} for dataset {} ending", processId, datasetId);
             Thread.sleep(5000);
           } catch (InterruptedException eeaEx) {
-            LOG.error("interrupting the sleep because of {}", eeaEx);
+            LOG.error("interrupting the sleep because of {}", eeaEx.getMessage(), eeaEx);
           }
           /* the last tasks, which are in_progress, check if the process is ending (we don't have any more in_queue tasks).
           If so we do a timeout for 5 sec and call the same method (checkFinishedValidations) again recursively

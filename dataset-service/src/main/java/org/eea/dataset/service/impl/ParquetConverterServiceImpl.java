@@ -169,7 +169,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
   }
 
   @Override
-  public void convertCsvFilesToParquetFiles(ImportFileInDremioInfo importFileInDremioInfo, List<File> csvFiles, DataSetSchema dataSetSchema) throws Exception {
+  public void convertCsvFilesToParquetFiles(ImportFileInDremioInfo importFileInDremioInfo, List<File> csvFiles, DataSetSchema dataSetSchema, DataSetMetabaseVO dataSetMetabaseVO) throws Exception {
     boolean isPreparationDataset = StringUtils.isNotBlank(importFileInDremioInfo.getPreparationCode());
     int numberOfEmptyFiles = 0;
     int numberOfFailedImportsForFixedNumberOfRecordsWithoutReplace = 0;
@@ -181,7 +181,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
     String fileExtension = StringUtils.isNotBlank(importFileInDremioInfo.getTableSchemaId()) ? CSV : ZIP;
     DataSetMetabase dataSetMetabase = dataSetMetabaseMapper.classToEntity(datasetMetabaseService.findDatasetMetabase(importFileInDremioInfo.getDatasetId()));
     if(importFileInDremioInfo.getReplaceData()) {
-      deleteAllDataBeforeImport(importFileInDremioInfo, String.valueOf(dataSetSchema.getIdDataSetSchema())); // delete also happens for preparation data
+      deleteAllDataBeforeImport(importFileInDremioInfo, String.valueOf(dataSetSchema.getIdDataSetSchema()), dataSetMetabaseVO); // delete also happens for preparation data
     }
     if (importFileInDremioInfo.getWarningMessages() == null) {
       importFileInDremioInfo.setWarningMessages(new ArrayList<>());
@@ -193,12 +193,20 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
       } else {
         tableSchemaVO = getTableSchemaVO(csvFile.getName(), dataSetSchema, importFileInDremioInfo);
       }
-      Long numberOfRecordsToBeInserted = convertCsvToParquet(csvFile, dataSetSchema, importFileInDremioInfo, tableSchemaVO);
+      Long numberOfRecordsToBeInserted = convertCsvToParquet(csvFile, dataSetSchema, importFileInDremioInfo, tableSchemaVO, dataSetMetabaseVO);
 
       if(!isPreparationDataset){
       //update statistics
       updateImportStatistics(tableSchemaVO.getIdTableSchema(), numberOfRecordsToBeInserted.toString(), dataSetMetabase, fileExtension);
       }
+    }
+
+    // In #297461 empty tables in parquet bucket should always exist so recreating it
+    if(StringUtils.isNotBlank(importFileInDremioInfo.getTableSchemaId())){
+      createEmptyTables.runCreationForSpecificTableSchema(dataSetMetabaseVO, importFileInDremioInfo.getTableSchemaId());
+    }
+    else{
+      createEmptyTables.runCreationForOneDataset(dataSetMetabaseVO);
     }
 
     //handle warnings
@@ -274,7 +282,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
   }
 
   //returns the number of records that were inserted for a table
-  private Long convertCsvToParquet(File csvFile, DataSetSchema dataSetSchema, ImportFileInDremioInfo importFileInDremioInfo, TableSchemaVO tableSchemaVO) throws Exception {
+  private Long convertCsvToParquet(File csvFile, DataSetSchema dataSetSchema, ImportFileInDremioInfo importFileInDremioInfo, TableSchemaVO tableSchemaVO, DataSetMetabaseVO dataSetMetabaseVO) throws Exception {
     LOG.info("For job {} converting csv file {} to parquet file", importFileInDremioInfo, csvFile.getPath());
     boolean isPreparationDataset = StringUtils.isNotBlank(importFileInDremioInfo.getPreparationCode());
     Long numberOfRecordsToBeInserted = 0L;
@@ -365,7 +373,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
         String designTableQueryPath = getImportQueryPathForFolder(designImportInfo, tableSchemaName, tableSchemaName, LiteralConstants.S3_TABLE_AS_FOLDER_QUERY_PATH);
         //remove data for table
         TableSchema tableSchema = tableSchemaMapper.classToEntity(tableSchemaVO);
-        deleteTableDataBeforeImport(importFileInDremioInfo, String.valueOf(dataSetSchema.getIdDataSetSchema()), tableSchema, datasetType, true);
+        deleteTableDataBeforeImport(importFileInDremioInfo, String.valueOf(dataSetSchema.getIdDataSetSchema()), tableSchema, datasetType, true, dataSetMetabaseVO);
         if (!canImportForFixedNumberOfRecords(importFileInDremioInfo, numberOfRecordsToBeInserted, designTableQueryPath, s3DesignTablePathResolver)) {
           if (importFileInDremioInfo.getReplaceData()) {
             //restore old data from design dataset
@@ -451,8 +459,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
     if (StringUtils.isBlank(tableSchemaId)) {
       tableSchemaId = fileTreatmentHelper.getTableSchemaIdFromFileName(dataSetSchema, csvFileName, false);
     }
-    DataSetMetabaseVO dataset = datasetMetabaseService.findDatasetMetabase(importFileInDremioInfo.getDatasetId());
-    String datasetSchemaId = dataset.getDatasetSchema();
+    String datasetSchemaId = String.valueOf(dataSetSchema.getIdDataSetSchema());
     return datasetSchemaService.getTableSchemaVO(tableSchemaId, datasetSchemaId);
   }
 
@@ -540,11 +547,10 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
   }
 
   @Override
-  public void removeCsvFilesThatWillBeReplaced(S3PathResolver s3PathResolver, String tableSchemaName, String s3PathForCsvFolder, Long datasetId) {
-    DataSetMetabaseVO dataset = datasetMetabaseService.findDatasetMetabase(datasetId);
+  public void removeCsvFilesThatWillBeReplaced(S3PathResolver s3PathResolver, String tableSchemaName, String s3PathForCsvFolder, Long datasetId, DataSetMetabaseVO dataSetMetabaseVO) {
     List<ObjectIdentifier> csvFilesInS3 = s3Helper.listObjectsInBucket(s3PathForCsvFolder);
     for (ObjectIdentifier csvFileInS3 : csvFilesInS3) {
-      if (s3ConvertService.containsPath(tableSchemaName, csvFileInS3.key(), dataset.getDatasetTypeEnum())) {
+      if (s3ConvertService.containsPath(tableSchemaName, csvFileInS3.key(), dataSetMetabaseVO.getDatasetTypeEnum())) {
         String[] csvFileNameSplit = csvFileInS3.key().split("/");
         String csvFileName = csvFileNameSplit[csvFileNameSplit.length - 1];
         //set up temporary s3PathResolver fileName so that the csv file will be demoted
@@ -1270,22 +1276,22 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
   }
 
   @Override
-  public void deleteAllDataBeforeImport (ImportFileInDremioInfo importFileInDremioInfo, String datasetSchemaId) throws Exception {
+  public void deleteAllDataBeforeImport (ImportFileInDremioInfo importFileInDremioInfo, String datasetSchemaId, DataSetMetabaseVO dataSetMetabaseVO) throws Exception {
     DatasetTypeEnum datasetType = datasetMetabaseService.getDatasetType(importFileInDremioInfo.getDatasetId());
     if(StringUtils.isNotBlank(importFileInDremioInfo.getTableSchemaId())){
       TableSchema tableSchema = datasetSchemaService.getTableSchema(importFileInDremioInfo.getTableSchemaId(), datasetSchemaId);
-      deleteTableDataBeforeImport(importFileInDremioInfo, datasetSchemaId, tableSchema, datasetType, false);
+      deleteTableDataBeforeImport(importFileInDremioInfo, datasetSchemaId, tableSchema, datasetType, false, dataSetMetabaseVO);
     }
     else{
       List<TableSchemaIdNameVO> tableSchemaIdNameVOS = datasetSchemaService.getTableSchemasIds(importFileInDremioInfo.getDatasetId());
       for(TableSchemaIdNameVO tableInfo: tableSchemaIdNameVOS){
         TableSchema tableSchema = datasetSchemaService.getTableSchema(tableInfo.getIdTableSchema(), datasetSchemaId);
-        deleteTableDataBeforeImport(importFileInDremioInfo, datasetSchemaId, tableSchema, datasetType, false);
+        deleteTableDataBeforeImport(importFileInDremioInfo, datasetSchemaId, tableSchema, datasetType, false, dataSetMetabaseVO);
       }
     }
   }
 
-  private void deleteTableDataBeforeImport(ImportFileInDremioInfo importFileInDremioInfo, String datasetSchemaId, TableSchema tableSchema, DatasetTypeEnum datasetType, Boolean removeFixedNumberData) throws Exception {
+  private void deleteTableDataBeforeImport(ImportFileInDremioInfo importFileInDremioInfo, String datasetSchemaId, TableSchema tableSchema, DatasetTypeEnum datasetType, Boolean removeFixedNumberData, DataSetMetabaseVO dataSetMetabaseVO) throws Exception {
     boolean allReadOnlyFields = tableSchema.getRecordSchema().getFieldSchema().stream().allMatch(FieldSchema::getReadOnly);
     boolean isPreparationDataset =
             StringUtils.isNotBlank(importFileInDremioInfo.getPreparationCode());
@@ -1318,7 +1324,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
 
     //remove tables and folders that contain the previous csv files because data will be replaced
     LOG.info("Removing csv files for job {}", importFileInDremioInfo);
-    removeCsvFilesThatWillBeReplaced(s3ImportPathResolver, tableSchema.getNameTableSchema(), s3PathForCsvFolder, importFileInDremioInfo.getDatasetId());
+    removeCsvFilesThatWillBeReplaced(s3ImportPathResolver, tableSchema.getNameTableSchema(), s3PathForCsvFolder, importFileInDremioInfo.getDatasetId(), dataSetMetabaseVO);
 
     boolean readOnlyFieldsExist = tableSchema.getRecordSchema().getFieldSchema().stream().anyMatch(FieldSchema::getReadOnly);
     if(!datasetType.equals(DatasetTypeEnum.DESIGN) && !datasetType.equals(DatasetTypeEnum.REFERENCE) && BooleanUtils.isTrue(tableSchema.getToPrefill()) && readOnlyFieldsExist){

@@ -15,8 +15,10 @@ import org.eea.interfaces.controller.dataset.EUDatasetController.EUDatasetContro
 import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.controller.validation.ValidationController.ValidationControllerZuul;
+import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
+import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.orchestrator.JobVO;
 import org.eea.interfaces.vo.orchestrator.JobsVO;
@@ -232,16 +234,13 @@ public class JobServiceImpl implements JobService {
         if (job.getJobType() == JobTypeEnum.IMPORT && numberOfCurrentJobs < maximumNumberOfInProgressImportJobs) {
             return true;
         } else if (jobType == JobTypeEnum.VALIDATION && !job.isRelease() && numberOfCurrentJobs < maximumNumberOfInProgressValidationJobs) {
-            if (Boolean.TRUE.equals(dataFlowControllerZuul.isBigDataflow(job.getDataflowId()))) {
-                DatasetTypeEnum datasetTypeEnum = dataSetControllerZuul.getDatasetType(job.getDatasetId());
-                if (datasetTypeEnum.equals(DatasetTypeEnum.DESIGN)) {
+            DataFlowVO dataflow = dataFlowControllerZuul.getMetabaseById(job.getDataflowId());
+            /* Add check for design dataflows #297461 In design dataflows empty tables will be created during the validation process so validations for the same big data dataflow need to be serialized.
+               For draft dataflows empty tables will be created during the data collection creation so validations can run in parallel.*/
+            if(dataflow.getStatus().equals(TypeStatusEnum.DESIGN)){
+                if (Boolean.TRUE.equals(dataFlowControllerZuul.isBigDataflow(job.getDataflowId()))) {
                     int countDesignJobs = jobRepository.countByDataflowIdAndJobStatus(job.getDataflowId(), JobStatusEnum.IN_PROGRESS);
                     if (countDesignJobs >= 1) {
-                        return false;
-                    }
-                } else if (datasetTypeEnum.equals(DatasetTypeEnum.REPORTING)) {
-                    int countReportingJobs = jobRepository.countByDataflowIdAndProviderIdAndJobStatusAndRelease(job.getDataflowId(), job.getProviderId(), JobStatusEnum.IN_PROGRESS, false);
-                    if (countReportingJobs >= 1) {
                         return false;
                     }
                 }
