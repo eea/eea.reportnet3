@@ -147,7 +147,7 @@ public class PreparationDatasetControllerImplTest {
     @SneakyThrows
     @Test
     public void deletePreparationDatasetByIdTest() {
-        preparationDatasetControllerImpl.deletePreparationDatasetById(10L);
+        preparationDatasetControllerImpl.deletePreparationDatasetById(10L, 1L);
 
         Mockito.verify(preparationDatasetService, times(1))
                 .deletePreparationDatasetById(10L);

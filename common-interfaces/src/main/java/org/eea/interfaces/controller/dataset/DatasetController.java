@@ -612,7 +612,6 @@ public interface DatasetController {
    * Delete attachment.
    *
    * @param datasetId the dataset id
-   * @param fieldId the field id
    * @param dataflowId the dataflow id
    * @param providerId the provider id
    * @param tableSchemaName the table name
@@ -634,7 +633,6 @@ public interface DatasetController {
    * Delete attachment legacy.
    *
    * @param datasetId the dataset id
-   * @param fieldId the field id
    * @param dataflowId the dataflow id
    * @param providerId the provider id
    * @param tableSchemaName the table name
@@ -1110,7 +1108,6 @@ public interface DatasetController {
    * Create empty tables for each table schema of the dataflow
    *
    * @param datasetMetabaseVO The datasetMetabaseVO object
-   * @throws Exception The exception
    */
   @PostMapping("/private/{tableSchemaId}/createEmptyTablesV2")
   void createEmptyTablesV2(@RequestBody DataSetMetabaseVO datasetMetabaseVO, @PathVariable("tableSchemaId") String tableSchemaId);

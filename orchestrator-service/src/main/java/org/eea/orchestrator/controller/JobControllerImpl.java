@@ -210,7 +210,7 @@ public class JobControllerImpl implements JobController {
                 throw new ResponseStatusException(HttpStatus.LOCKED, EEAErrorMessage.DUPLICATE_JOB);
             }
         } catch (Exception e){
-            LOG.error("Unexpected error! Could not add validation job for datasetId {}, released {} and creator {}. Error: {}", datasetId, released, username, e);
+            LOG.error("Unexpected error! Could not add validation job for datasetId {}, released {} and creator {}. Error: {}", datasetId, released, username, e.getMessage());
             throw e;
         }
         return jobId;

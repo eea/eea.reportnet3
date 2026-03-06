@@ -1,7 +1,6 @@
 package org.eea.dataset.controller;
 
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
-import com.netflix.hystrix.contrib.javanica.annotation.HystrixProperty;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -12,11 +11,9 @@ import org.eea.dataset.service.DataLakeDataRetrieverFactory;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.PreparationDatasetService;
-import org.eea.interfaces.vo.orchestrator.JobPresignedUrlInfo;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.PreparationDatasetController;
-import org.eea.interfaces.controller.orchestrator.JobController.JobControllerZuul;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.PreparationDatasetResponseVO;
 import org.eea.interfaces.vo.dataset.PreparationDatasetVO;
@@ -41,8 +38,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
-
-import java.util.List;
 
 /**
  * The Class PreparationDatasetControllerImpl.
@@ -142,7 +137,9 @@ public class PreparationDatasetControllerImpl implements PreparationDatasetContr
             @ApiResponse(code = 500, message = "Unexpected error")
     })
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deletePreparationDatasetById(@PathVariable("id") Long preparationId) {
+    public void deletePreparationDatasetById(
+            @PathVariable("id") Long preparationId,
+            @RequestParam("dataflowId") Long dataflowId) {
 
         if (preparationId == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "preparationId is required");

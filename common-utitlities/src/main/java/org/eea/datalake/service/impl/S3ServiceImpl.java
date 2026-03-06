@@ -46,26 +46,22 @@ public class S3ServiceImpl implements S3Service {
 
     @Override
     public String getS3Path(S3PathResolver s3PathResolver) {
-        String s3Path = calculateS3Path(s3PathResolver);
-        return s3Path;
+        return calculateS3Path(s3PathResolver);
     }
 
     @Override
     public String getTableAsFolderQueryPath(S3PathResolver s3PathResolver, String path) {
-        String s3TableNamePath = calculateS3TableAsFolderPath(s3PathResolver, path);
-        return s3TableNamePath;
+        return calculateS3TableAsFolderPath(s3PathResolver, path);
     }
 
     @Override
     public String getTableAsFolderQueryPath(S3PathResolver s3PathResolver) {
-        String s3TableNamePath = calculateS3TableAsFolderPath(s3PathResolver);
-        return s3TableNamePath;
+        return calculateS3TableAsFolderPath(s3PathResolver);
     }
 
     @Override
     public String getTableDCAsFolderQueryPath(S3PathResolver s3PathResolver, String path) {
-        String s3TableNamePath = calculateS3TableDCAsFolderPath(s3PathResolver, path);
-        return s3TableNamePath;
+        return calculateS3TableDCAsFolderPath(s3PathResolver, path);
     }
 
     private String calculateS3Path(S3PathResolver s3PathResolver) {
@@ -113,7 +109,7 @@ public class S3ServiceImpl implements S3Service {
                     datasetFolder, s3PathResolver.getValidationId(), fileName);
                 break;
             case S3_VALIDATION_PATH:
-                String.format(path, dataflowFolder, dataProviderFolder, datasetFolder,
+                path = String.format(path, dataflowFolder, dataProviderFolder, datasetFolder,
                     s3PathResolver.getValidationId(), fileName);
                 break;
             case S3_TABLE_NAME_FOLDER_PATH:

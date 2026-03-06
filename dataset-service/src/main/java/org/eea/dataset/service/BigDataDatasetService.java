@@ -13,7 +13,6 @@ import org.eea.interfaces.vo.orchestrator.JobPresignedUrlInfo;
 import org.eea.interfaces.vo.orchestrator.JobVO;
 import org.eea.multitenancy.DatasetId;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
@@ -33,7 +32,6 @@ public interface BigDataDatasetService {
      * @param jobId the jobId
      * @param fmeJobId the fmeJobId
      * @param dataflowVO the dataflowVO
-     * @param helperMultipartFileMapper the helperMultipartFileMapper
      * @param job the job
      * @param importFileInDremioInfo the importFileInDremioInfo
      * @return
@@ -104,7 +102,6 @@ public interface BigDataDatasetService {
      * @param fileName the file name
      * @param recordId the recordId
      *
-     * @throws EEAException the EEA exception
      */
     void deleteAttachmentDL(@DatasetId Long datasetId, Long dataflowId, Long providerId, String tableSchemaName,
                             String fieldName, String fileName, String recordId);
@@ -159,7 +156,6 @@ public interface BigDataDatasetService {
      * @param tableSchemaIds the list of table ids
      * @param user the user
      * @param lockValue the lock value
-     * @return
      */
     void convertParquetToIcebergTables(Long datasetId, Long dataflowId, Long providerId, List<String> tableSchemaIds, String user, String lockValue) throws Exception;
 
@@ -172,7 +168,6 @@ public interface BigDataDatasetService {
      * @param tableSchemaIds the list of table ids
      * @param user the user
      * @param lockValue the lock value
-     * @return
      */
     void convertIcebergToParquetTables(Long datasetId, Long dataflowId, Long providerId, List<String> tableSchemaIds, String user, String lockValue) throws Exception;
 
