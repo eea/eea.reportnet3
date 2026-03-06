@@ -165,6 +165,7 @@ public interface JobController {
                           @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,
                           @RequestParam(value = "dataflowId", required = false) Long dataflowId,
                           @RequestParam(value = "providerId", required = false) Long providerId,
+                          @RequestParam(value = "preparationCode", required = false) String preparationCode,
                           @RequestParam(value = "deletePrefilledTables", defaultValue = "false",
                                   required = false) Boolean deletePrefilledTables,
                           @RequestParam(value = "jobStatus", required = false) JobStatusEnum jobStatus);
@@ -395,13 +396,3 @@ public interface JobController {
     @GetMapping(value = "/checkEligibilityForPreparation")
     JobStatusEnum checkEligibilityOfPreparationJob(@RequestParam("jobType") String jobType, @RequestParam("datasetId") Long datasetId, @RequestParam("preparationCode") String preparationCode);
 }
-
-
-
-
-
-
-
-
-
-

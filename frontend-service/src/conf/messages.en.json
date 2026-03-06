@@ -475,7 +475,7 @@
     "deleteTabHeader": "Delete table",
     "deleteTabHeaderConfirm": "Delete table reconfirmation",
     "deleteTable": "Delete table data",
-    "deleteTableCompletedEvent": "The data of table <strong title='{:tableSchemaName}'>{:shortTableSchemaName}</strong> in dataset <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a> was deleted successfully.",
+    "deleteTableCompletedEvent": "The data of table <strong title='{:tableSchemaName}'>{:shortTableSchemaName}</strong> in dataset <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>{:preparationDatasetMessagePart} was deleted successfully.",
     "deleteTableDataByIdError": "Delete <strong title='{:tableName}'>{:shortTableName}</strong> at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
     "deleteTableDataInit": "Deleting table data",
     "deleteTableSchemaCompletedEvent": "The data of table <strong title='{:tableSchemaName}'>{:shortTableSchemaName}</strong> in design dataset <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a> was deleted successfully.",

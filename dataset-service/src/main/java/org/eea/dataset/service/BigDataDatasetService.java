@@ -62,7 +62,7 @@ public interface BigDataDatasetService {
      * @param jobId the job id
      * @param createEmptyTablesBool
      */
-    void deleteTableData(Long datasetId, Long dataflowId, Long providerId, String tableSchemaId, Long jobId, Boolean createEmptyTablesBool) throws Exception;
+    void deleteTableData(Long datasetId, Long dataflowId, Long providerId, String preparationCode, String tableSchemaId, Long jobId, Boolean createEmptyTablesBool) throws Exception;
 
     /**
      * Delete dataset data

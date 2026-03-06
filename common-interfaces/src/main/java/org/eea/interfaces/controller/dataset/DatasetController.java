@@ -202,6 +202,7 @@ public interface DatasetController {
   @DeleteMapping("/v1/{datasetId}/deleteTableData/{tableSchemaId}")
   Map<String, Object> deleteTableData(@PathVariable("datasetId") Long datasetId,
       @PathVariable("tableSchemaId") String tableSchemaId,
+      @RequestParam(value = "preparationCode", required = false) String preparationCode,
       @RequestParam(value = "dataflowId", required = false) Long dataflowId,
       @RequestParam(value = "providerId", required = false) Long providerId);
 
@@ -216,6 +217,7 @@ public interface DatasetController {
   @DeleteMapping("/{datasetId}/deleteImportTable/{tableSchemaId}")
   void deleteImportTableLegacy(@PathVariable("datasetId") Long datasetId,
       @PathVariable("tableSchemaId") String tableSchemaId,
+      @RequestParam(value = "preparationCode", required = false) String preparationCode,
       @RequestParam(value = "dataflowId", required = false) Long dataflowId,
       @RequestParam(value = "providerId", required = false) Long providerId);
 

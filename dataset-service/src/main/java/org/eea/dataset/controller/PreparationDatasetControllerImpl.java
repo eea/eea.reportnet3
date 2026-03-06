@@ -66,7 +66,6 @@ public class PreparationDatasetControllerImpl implements PreparationDatasetContr
     @Autowired
     private DataLakeDataRetrieverFactory dataLakeDataRetrieverFactory;
 
-
     /**
      * List preparation datasets by dataflow id and provider id.
      */
@@ -91,7 +90,7 @@ public class PreparationDatasetControllerImpl implements PreparationDatasetContr
     @Override
     @HystrixCommand
     @PostMapping(value = "/preparations", consumes = MediaType.APPLICATION_JSON_VALUE)
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("secondLevelAuthorize(#vo.dataflowId,'DATAFLOW_LEAD_REPORTER')")
     @ApiOperation(value = "Create preparation dataset")
     @ApiResponses(value = {
             @ApiResponse(code = 201, message = "Preparation dataset created successfully"),
@@ -133,7 +132,7 @@ public class PreparationDatasetControllerImpl implements PreparationDatasetContr
     @Override
     @HystrixCommand
     @DeleteMapping("/preparations/{id}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_LEAD_REPORTER')")
     @ApiOperation(value = "Delete preparation dataset by id")
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Preparation dataset deleted successfully"),
@@ -161,7 +160,7 @@ public class PreparationDatasetControllerImpl implements PreparationDatasetContr
 
     @PostMapping("/createAllEligiblePreparationSets")
     @ApiOperation("Create all preparation sets that have 'isCreated=false'")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_LEAD_REPORTER')")
     public void createAllEligiblePreparationSets(
             @RequestParam("dataflowId") Long dataflowId,
             @RequestParam("providerId") Long providerId

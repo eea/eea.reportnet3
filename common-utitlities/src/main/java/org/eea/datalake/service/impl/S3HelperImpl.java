@@ -2,11 +2,10 @@ package org.eea.datalake.service.impl;
 
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.eea.datalake.service.DremioHelperService;
 import org.eea.datalake.service.S3Helper;
 import org.eea.datalake.service.S3Service;
+import org.eea.datalake.service.model.PreparationPathRegistry;
 import org.eea.datalake.service.model.S3PathResolver;
-import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.s3configuration.types.S3Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -121,6 +120,8 @@ public class S3HelperImpl implements S3Helper {
      */
     @Override
     public boolean checkFolderExist(S3PathResolver s3PathResolver, String path) {
+        if (StringUtils.isNotBlank(s3PathResolver.getPreparationCode())) path = PreparationPathRegistry.resolve(path, s3PathResolver.getPreparationCode());
+
         String key = s3Service.getTableAsFolderQueryPath(s3PathResolver, path);
         if(!key.endsWith("/")){
             //adding suffix to differentiate between folders with the same prefix
@@ -155,6 +156,8 @@ public class S3HelperImpl implements S3Helper {
      */
     @Override
     public void deleteFolder(S3PathResolver s3PathResolver, String folderPath) {
+        if (StringUtils.isNotBlank(s3PathResolver.getPreparationCode())) folderPath = PreparationPathRegistry.resolve(folderPath, s3PathResolver.getPreparationCode());
+
         String bucketName = (BooleanUtils.isTrue(s3PathResolver.getIsIcebergTable())) ? S3_ICEBERG_BUCKET_NAME : S3_DEFAULT_BUCKET_NAME;
         String folderName = s3Service.getTableAsFolderQueryPath(s3PathResolver, folderPath);
         if(!folderName.endsWith("/")){

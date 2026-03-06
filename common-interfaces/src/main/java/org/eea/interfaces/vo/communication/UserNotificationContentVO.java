@@ -78,4 +78,6 @@ public class UserNotificationContentVO {
   private String tableName;
 
   private String fieldName;
+
+  private String preparationCode;
 }

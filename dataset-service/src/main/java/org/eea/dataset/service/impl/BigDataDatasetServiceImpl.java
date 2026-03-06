@@ -931,7 +931,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
     }
 
     @Override
-    public void deleteTableData(Long datasetId, Long dataflowId, Long providerId, String tableSchemaId, Long jobId, Boolean createEmptyTablesBool) throws Exception {
+    public void deleteTableData(Long datasetId, Long dataflowId, Long providerId, String preparationCode, String tableSchemaId, Long jobId, Boolean createEmptyTablesBool) throws Exception {
         try {
             String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
             TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, datasetSchemaId);
@@ -948,14 +948,14 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             if (providerId == null) {
                 providerId = 0L;
             }
-            S3PathResolver s3ImportPathResolver = new S3PathResolver(dataflowId, providerId, datasetId, tableSchemaName, tableSchemaName, S3_IMPORT_FILE_PATH);
+            S3PathResolver s3ImportPathResolver = new S3PathResolver(dataflowId, providerId, datasetId, tableSchemaName, tableSchemaName, preparationCode, S3_IMPORT_FILE_PATH);
             //path in s3 for the folder that contains the stored csv files
             String s3PathForCsvFolder = s3ServicePrivate.getTableAsFolderQueryPath(s3ImportPathResolver, S3_IMPORT_TABLE_NAME_FOLDER_PATH);
 
             //remove csv files that are related to the table
             parquetConverterService.removeCsvFilesThatWillBeReplaced(s3ImportPathResolver, tableSchemaName, s3PathForCsvFolder, datasetId, dataSetMetabaseVO);
 
-            S3PathResolver s3TablePathResolver = new S3PathResolver(dataflowId, providerId, datasetId, tableSchemaName, tableSchemaName, S3_TABLE_NAME_FOLDER_PATH);
+            S3PathResolver s3TablePathResolver = new S3PathResolver(dataflowId, providerId, datasetId, tableSchemaName, tableSchemaName, preparationCode, S3_TABLE_NAME_FOLDER_PATH);
             //remove folders that contain the previous parquet files
             if (s3HelperPrivate.checkFolderExist(s3TablePathResolver, S3_TABLE_NAME_FOLDER_PATH)) {
                 //demote table folder
@@ -996,6 +996,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                         .tableSchemaId(tableSchemaId).build();
                 notificationVO.setDatasetName(dataSetMetabaseVO.getDataSetName());
                 notificationVO.setDataflowId(dataSetMetabaseVO.getDataflowId());
+                notificationVO.setPreparationCode(preparationCode);
                 notificationVO.setDataflowName(dataFlowControllerZuul.getMetabaseById(dataSetMetabaseVO.getDataflowId()).getName());
 
                 value.put(LiteralConstants.DATASET_ID, datasetId);
@@ -1008,7 +1009,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             }
 
         }
-        catch (Exception e){
+        catch (Exception e) {
             if (jobId != null) {
                 jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FAILED);
             }
@@ -1045,7 +1046,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                     }
                 }
                 //we do not pass a job id because there is a job for the whole dataset data deletion
-                deleteTableData(datasetId, dataflowId, providerId, tableSchemaIdNameVO.getIdTableSchema(), null, true);
+                deleteTableData(datasetId, dataflowId, providerId, null, tableSchemaIdNameVO.getIdTableSchema(), null, true);
             }
 
             if (jobId != null) {
