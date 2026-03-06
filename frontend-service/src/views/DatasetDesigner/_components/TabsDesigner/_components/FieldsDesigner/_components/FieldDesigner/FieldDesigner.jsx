@@ -70,6 +70,7 @@ export const FieldDesigner = ({
   isLoading = false,
   isIcebergCreated,
   isReferenceDataset,
+  isTableLockedDueToData = false,
   markedForDeletion,
   onBulkCheck,
   onCheckPkCheckbox,
@@ -917,7 +918,6 @@ export const FieldDesigner = ({
       );
     }
   };
-
   const renderCheckboxes = () => (
     <Fragment>
       <div className={`${styles.draggableFieldContentCell} ${styles.smallItems}`}>
@@ -949,7 +949,8 @@ export const FieldDesigner = ({
               isDataflowOpen ||
               isDesignDatasetEditorRead ||
               isEditingEnabled ||
-              isLoading
+              isLoading ||
+              (addField && isTableLockedDueToData)
             }
             id={`${fieldId}_check_pk`}
             inputId={`${fieldId}_check_pk`}
@@ -981,7 +982,8 @@ export const FieldDesigner = ({
               isDataflowOpen ||
               isDesignDatasetEditorRead ||
               isEditingEnabled ||
-              isLoading
+              isLoading ||
+              (addField && isTableLockedDueToData)
             }
             id={`${fieldId}_check_required`}
             inputId={`${fieldId}_check_required`}
@@ -1005,7 +1007,7 @@ export const FieldDesigner = ({
             className={`datasetSchema-readOnly-help-step ${
               isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
             } ${isDataflowOpen && isDesignDatasetEditorRead && styles.checkboxDisabled}`}
-            disabled={isDataflowOpen || isDesignDatasetEditorRead || isEditingEnabled || isLoading}
+            disabled={isDataflowOpen || isDesignDatasetEditorRead || isEditingEnabled || isLoading || (addField && isTableLockedDueToData)}
             id={`${fieldId}_check_readOnly`}
             inputId={`${fieldId}_check_readOnly`}
             label="Default"
@@ -1073,7 +1075,8 @@ export const FieldDesigner = ({
               disabled={
                 !isNil(fieldDesignerState.fieldLinkValue) &&
                 !isEmpty(fieldDesignerState.fieldLinkValue) &&
-                isNil(fieldDesignerState.fieldLinkValue.name)
+                isNil(fieldDesignerState.fieldLinkValue.name) ||
+                isEditingEnabled
               }
               icon={
                 isNil(fieldDesignerState.fieldLinkValue) || isEmpty(fieldDesignerState.fieldLinkValue)
@@ -1149,7 +1152,9 @@ export const FieldDesigner = ({
                 className={`${styles.button} ${styles.deleteButton} ${
                   fieldPKReferenced ? styles.disabledDeleteButton : ''
                 } ${isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive} ${
-                  isDataflowOpen || isDesignDatasetEditorRead || isEditingEnabled ? styles.linkDisabled : ''
+                  isDataflowOpen || isDesignDatasetEditorRead || isEditingEnabled || isTableLockedDueToData
+                    ? styles.linkDisabled
+                    : ''
                 }`}
                 draggable={true}
                 href="#"
@@ -1241,7 +1246,9 @@ export const FieldDesigner = ({
         className={styles.moveArrows}
         icon={AwesomeIcons(icon)}
         onClick={() => onMoveFieldUpDown(order)}
-        style={{ opacity: isDataflowOpen || isDesignDatasetEditorRead || isEditingEnabled ? 0.5 : 1 }}
+        style={{
+          opacity: isDataflowOpen || isDesignDatasetEditorRead || isEditingEnabled ? 0.5 : 1
+        }}
       />
     );
 
@@ -1253,7 +1260,9 @@ export const FieldDesigner = ({
             aria-label={resourcesContext.messages['moveField']}
             className={styles.dragAndDropIcon}
             icon={AwesomeIcons('move')}
-            style={{ opacity: isDataflowOpen || isDesignDatasetEditorRead || isEditingEnabled ? 0.5 : 1 }}
+            style={{
+              opacity: isDataflowOpen || isDesignDatasetEditorRead || isEditingEnabled ? 0.5 : 1
+            }}
           />
           {renderArrows('arrowUp', -1, 'moveUp')}
           {renderArrows('arrowDown', 2, 'moveDown')}
@@ -1282,7 +1291,9 @@ export const FieldDesigner = ({
               className={`${styles.button} ${styles.duplicateButton} ${
                 isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
               } ${
-                isDataflowOpen || isLoading || isDesignDatasetEditorRead || isEditingEnabled ? styles.linkDisabled : ''
+                isDataflowOpen || isLoading || isDesignDatasetEditorRead || isEditingEnabled || isTableLockedDueToData
+                  ? styles.linkDisabled
+                  : ''
               }`}
               data-for={duplicateButtonTooltipName}
               data-tip
@@ -1329,7 +1340,9 @@ export const FieldDesigner = ({
             className={`${isCodelistOrLink ? styles.withCodeListOrLink : ''} ${
               isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
             }`}
-            disabled={isDataflowOpen || isDesignDatasetEditorRead || isEditingEnabled || isLoading}
+            disabled={
+              isDataflowOpen || isDesignDatasetEditorRead || isEditingEnabled || isLoading || isTableLockedDueToData
+            }
             id={fieldName !== '' ? fieldName : 'newField'}
             maxLength={60}
             name={resourcesContext.messages['newFieldPlaceHolder']}
@@ -1365,6 +1378,7 @@ export const FieldDesigner = ({
             required={
               !isUndefined(fieldDesignerState.fieldValue) ? fieldDesignerState.fieldValue === '' : fieldName === ''
             }
+            tooltip={isTableLockedDueToData ? resourcesContext.messages['tableLockedDueToData'] : undefined}
             value={!isUndefined(fieldDesignerState.fieldValue) ? fieldDesignerState.fieldValue : fieldName}
           />
         </div>
@@ -1378,7 +1392,9 @@ export const FieldDesigner = ({
             autoFocus={false}
             className={`${isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive}`}
             collapsedHeight={33}
-            disabled={isDataflowOpen || isDesignDatasetEditorRead || isEditingEnabled || isLoading}
+            disabled={
+              isDataflowOpen || isDesignDatasetEditorRead || isEditingEnabled || isLoading || (isTableLockedDueToData && addField)
+            }
             expandableOnClick={true}
             id={`${fieldName}_description`}
             key={fieldId}
@@ -1412,7 +1428,9 @@ export const FieldDesigner = ({
             className={`${styles.dropdownFieldType} ${isCodelistOrLink ? styles.withCodeListOrLink : ''} ${
               isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
             }`}
-            disabled={isDataflowOpen || isDesignDatasetEditorRead || isEditingEnabled || isLoading}
+            disabled={
+              isDataflowOpen || isDesignDatasetEditorRead || isEditingEnabled || isLoading || isTableLockedDueToData
+            }
             inputId={`${fieldName}_fieldType`}
             itemTemplate={fieldTypeTemplate}
             name={resourcesContext.messages['newFieldTypePlaceHolder']}
@@ -1429,6 +1447,7 @@ export const FieldDesigner = ({
             required={true}
             scrollHeight="450px"
             style={{ alignSelf: !fieldDesignerState.isEditing ? 'center' : 'auto', display: 'block' }}
+            tooltip={isTableLockedDueToData ? resourcesContext.messages['tableLockedDueToData'] : undefined}
             value={
               fieldDesignerState.fieldTypeValue !== ''
                 ? fieldDesignerState.fieldTypeValue
@@ -1458,6 +1477,7 @@ export const FieldDesigner = ({
               isIcebergCreated={isIcebergCreated}
               isLinkSelectorVisible={fieldDesignerState.isLinkSelectorVisible}
               isReferenceDataset={isReferenceDataset}
+              isTableLockedDueToData={isTableLockedDueToData}
               linkedTableConditional={fieldLinkedTableConditional}
               linkedTableLabel={fieldLinkedTableLabel}
               masterTableConditional={fieldMasterTableConditional}
@@ -1630,7 +1650,9 @@ export const FieldDesigner = ({
         className={`${styles.draggableFieldDiv} ${isDragging ? styles.disablePointerEvent : ''} ${
           isDragging && styles.fieldSeparatorDragging
         } fieldRow datasetSchema-fieldDesigner-help-step`}
-        draggable={isDataflowOpen || isDesignDatasetEditorRead || isEditingEnabled ? false : !addField}
+        draggable={
+          isDataflowOpen || isDesignDatasetEditorRead || isEditingEnabled || isTableLockedDueToData ? false : !addField
+        }
         onDragEnd={onFieldDragEnd}
         onDragEnter={onFieldDragEnter}
         onDragLeave={onFieldDragLeave}

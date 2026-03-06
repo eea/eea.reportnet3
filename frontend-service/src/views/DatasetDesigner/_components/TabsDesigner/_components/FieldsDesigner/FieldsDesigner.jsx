@@ -58,6 +58,7 @@ export const FieldsDesigner = ({
   isGroupedValidationSelected,
   isIcebergCreated,
   isReferenceDataset,
+  isTableLockedDueToData = false,
   manageDialogs,
   manageUniqueConstraint,
   onChangeFields,
@@ -689,6 +690,7 @@ export const FieldsDesigner = ({
           isIcebergCreated={isIcebergCreated}
           isLoading={isLoading}
           isReferenceDataset={isReferenceDataset}
+          isTableLockedDueToData={isTableLockedDueToData}
           onCheckPkCheckbox={onCheckPk}
           onCodelistAndLinkShow={onCodelistAndLinkShow}
           onFieldDragAndDrop={onFieldDragAndDrop}
@@ -756,6 +758,7 @@ export const FieldsDesigner = ({
               isIcebergCreated={isIcebergCreated}
               isLoading={isLoading}
               isReferenceDataset={isReferenceDataset}
+              isTableLockedDueToData={isTableLockedDueToData}
               key={field.fieldId}
               markedForDeletion={markedForDeletion}
               onBulkCheck={onBulkCheck}
@@ -900,34 +903,53 @@ export const FieldsDesigner = ({
       return styles.activeDragAndDropItems;
     }
   };
-
   return (
     <Fragment>
       {isEditingEnabled && !viewType['tabularData'] && (
-        <div className={styles.icebergWarning} role="alert">
-          <strong>{resourcesContext.messages['info']}: </strong>
+        <div className={styles.disabledFieldsWarning} role="alert">
+          <Button
+            className={`${styles.disabledFieldsInfoBtn} p-button-rounded p-button-secondary-transparent`}
+            icon="infoCircle"
+          />
           {resourcesContext.messages['disableEditingBeforeSchemaChange']}
         </div>
       )}
+
+      {bigData && isTableLockedDueToData && !isEditingEnabled && !viewType['tabularData'] && (
+        <div className={styles.disabledFieldsWarning} role="alert">
+          <Button
+            className={`${styles.disabledFieldsInfoBtn} p-button-rounded p-button-secondary-transparent`}
+            icon="infoCircle"
+          />
+          {resourcesContext.messages['tableLockedDueToData']}
+        </div>
+      )}
+
       <Toolbar>
         <div className="p-toolbar-group-left">
           <Button
             className={`p-button-rounded p-button-secondary-transparent ${
-              (!isDataflowOpen && !isDesignDatasetEditorRead) || !isEditingEnabled ? 'p-button-animated-blink' : null
+              (!isDataflowOpen && !isDesignDatasetEditorRead) || !isEditingEnabled || !isTableLockedDueToData
+                ? 'p-button-animated-blink'
+                : null
             }`}
             disabled={
               (isAdmin && (!isCustodian || !isDataflowCustodian)) ||
               isDataflowOpen ||
               isDesignDatasetEditorRead ||
-              isEditingEnabled
+              isEditingEnabled ||
+              isTableLockedDueToData
             }
             icon="import"
             label={resourcesContext.messages['importTableSchema']}
             onClick={() => manageDialogs('isImportTableSchemaDialogVisible', true)}
+            tooltip={isTableLockedDueToData ? resourcesContext.messages['tableLockedDueToDataAction'] : null}
           />
           <Button
             className={`p-button-rounded p-button-secondary-transparent ${
-              (!isDataflowOpen && !isDesignDatasetEditorRead) || !isEditingEnabled ? 'p-button-animated-blink' : null
+              (!isDataflowOpen && !isDesignDatasetEditorRead) || !isEditingEnabled || !isTableLockedDueToData
+                ? 'p-button-animated-blink'
+                : null
             }`}
             disabled={isDataflowOpen || isDesignDatasetEditorRead || isEditingEnabled}
             icon="export"
@@ -936,7 +958,9 @@ export const FieldsDesigner = ({
           />
           <Button
             className={`p-button-secondary-transparent ${
-              (!isDesignDatasetEditorRead && (!isDataflowOpen || !isReferenceDataset)) || !isEditingEnabled
+              (!isDesignDatasetEditorRead && (!isDataflowOpen || !isReferenceDataset)) ||
+              !isEditingEnabled ||
+              !isTableLockedDueToData
                 ? 'p-button-animated-blink'
                 : null
             } datasetSchema-uniques-help-step`}
@@ -954,7 +978,9 @@ export const FieldsDesigner = ({
           />
           <Button
             className={`p-button-secondary-transparent ${
-              (!isDesignDatasetEditorRead && (!isDataflowOpen || !isReferenceDataset)) || !isEditingEnabled
+              (!isDesignDatasetEditorRead && (!isDataflowOpen || !isReferenceDataset)) ||
+              !isEditingEnabled ||
+              !isTableLockedDueToData
                 ? 'p-button-animated-blink'
                 : null
             } datasetSchema-rowConstraint-help-step`}
@@ -1002,7 +1028,9 @@ export const FieldsDesigner = ({
             <span
               className={styles.switchTextInput}
               id={`${table.tableSchemaId}_check_readOnly_label`}
-              style={{ opacity: isDesignDatasetEditorRead || isDataflowOpen || isEditingEnabled ? 0.5 : 1 }}>
+              style={{
+                opacity: isDesignDatasetEditorRead || isDataflowOpen || isEditingEnabled ? 0.5 : 1
+              }}>
               {resourcesContext.messages['readOnlyTable']}
             </span>
             <Checkbox
@@ -1020,7 +1048,9 @@ export const FieldsDesigner = ({
             <span
               className={styles.switchTextInput}
               id={`${table.tableSchemaId}_check_to_prefill_label`}
-              style={{ opacity: isDesignDatasetEditorRead || isDataflowOpen || isEditingEnabled ? 0.5 : 1 }}>
+              style={{
+                opacity: isDesignDatasetEditorRead || isDataflowOpen || isEditingEnabled ? 0.5 : 1
+              }}>
               {resourcesContext.messages['prefilled']}
             </span>
             <Checkbox
@@ -1045,7 +1075,9 @@ export const FieldsDesigner = ({
             <span
               className={styles.switchTextInput}
               id={`${table.tableSchemaId}_check_fixed_number_label`}
-              style={{ opacity: isDesignDatasetEditorRead || isDataflowOpen || isEditingEnabled ? 0.5 : 1 }}>
+              style={{
+                opacity: isDesignDatasetEditorRead || isDataflowOpen || isEditingEnabled ? 0.5 : 1
+              }}>
               {resourcesContext.messages['fixedNumber']}
             </span>
             <Checkbox
@@ -1066,7 +1098,9 @@ export const FieldsDesigner = ({
             <span
               className={styles.switchTextInput}
               id={`${table.tableSchemaId}_check_not_empty_label`}
-              style={{ opacity: isDesignDatasetEditorRead || isDataflowOpen || isEditingEnabled ? 0.5 : 1 }}>
+              style={{
+                opacity: isDesignDatasetEditorRead || isDataflowOpen || isEditingEnabled ? 0.5 : 1
+              }}>
               {resourcesContext.messages['notEmpty']}
             </span>
             <Checkbox
@@ -1088,7 +1122,9 @@ export const FieldsDesigner = ({
               <span
                 className={styles.switchTextInput}
                 id={`${table.tableSchemaId}_check_manual_edit_label`}
-                style={{ opacity: isDesignDatasetEditorRead || isDataflowOpen || isEditingEnabled ? 0.5 : 1 }}>
+                style={{
+                  opacity: isDesignDatasetEditorRead || isDataflowOpen || isEditingEnabled ? 0.5 : 1
+                }}>
                 {resourcesContext.messages['manualEdit']}
               </span>
               <Checkbox
