@@ -1875,7 +1875,7 @@ public class DatasetControllerImplTest {
     when(datasetService.getDataFlowIdById(1L)).thenReturn(1L);
     when(dataFlowControllerZuul.isBigDataflow(1L)).thenReturn(false);
 
-    datasetControllerImpl.deleteTableData(1L, "5cf0e9b3b793310e9ceca190", null, null);
+    datasetControllerImpl.deleteTableData(1L, "5cf0e9b3b793310e9ceca190", "SECTION_A",null, null);
     Mockito.verify(deleteHelper, times(1)).executeDeleteTableProcess(Mockito.anyLong(),
         Mockito.any(), Mockito.nullable(Long.class));
   }
@@ -1890,7 +1890,7 @@ public class DatasetControllerImplTest {
 
     when(datasetService.getDataFlowIdById(1L)).thenReturn(1L);
 
-    datasetControllerImpl.deleteImportTableLegacy(1L, "5cf0e9b3b793310e9ceca190", null, null);
+    datasetControllerImpl.deleteImportTableLegacy(1L, "5cf0e9b3b793310e9ceca190","SECTION_A", null, null);
     Mockito.verify(deleteHelper, times(1)).executeDeleteTableProcess(Mockito.anyLong(),
         Mockito.any(), Mockito.nullable(Long.class));
   }
@@ -1903,7 +1903,7 @@ public class DatasetControllerImplTest {
     when(datasetService.getDataFlowIdById(1L)).thenReturn(1L);
     when(dataFlowControllerZuul.isBigDataflow(1L)).thenReturn(false);
 
-    datasetControllerImpl.deleteTableData(1L, "5cf0e9b3b793310e9ceca190", 1L, 1L);
+    datasetControllerImpl.deleteTableData(1L, "5cf0e9b3b793310e9ceca190","SECTION_A", 1L, 1L);
     Mockito.verify(deleteHelper, times(1)).executeDeleteTableProcess(Mockito.anyLong(),
         Mockito.any(), Mockito.nullable(Long.class));
   }
@@ -1915,7 +1915,7 @@ public class DatasetControllerImplTest {
 
     Mockito.when(datasetService.getDataFlowIdById(Mockito.anyLong())).thenReturn(2L);
     try {
-      datasetControllerImpl.deleteTableData(1L, "5cf0e9b3b793310e9ceca190", 1L, null);
+      datasetControllerImpl.deleteTableData(1L, "5cf0e9b3b793310e9ceca190", "SECTION_A",1L, null);
     } catch (ResponseStatusException e) {
       Assert.assertEquals(HttpStatus.FORBIDDEN, e.getStatus());
       throw e;

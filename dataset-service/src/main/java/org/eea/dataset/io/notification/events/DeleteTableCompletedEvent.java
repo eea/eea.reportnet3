@@ -89,8 +89,10 @@ public class DeleteTableCompletedEvent implements NotificableEventHandler {
     notification.put("dataflowName", dataflowName);
     notification.put("tableSchemaName", tableSchemaName);
     notification.put("typeStatus", dataFlowVO.getStatus().toString());
-    notification.put("preparationCode", preparationCode);
-    notification.put("preparationDatasetMessagePart", preparationDatasetMessagePart);
+    if (StringUtils.isNotBlank(preparationCode)) {
+      notification.put("preparationCode", preparationCode);
+      notification.put("preparationDatasetMessagePart", preparationDatasetMessagePart);
+    }
     return notification;
   }
 }

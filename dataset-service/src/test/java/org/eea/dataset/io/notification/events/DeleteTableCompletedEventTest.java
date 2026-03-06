@@ -56,6 +56,7 @@ public class DeleteTableCompletedEventTest {
   public void getMapTest() throws EEAException {
     Mockito.when(dataflowControllerZuul.getMetabaseById(1L)).thenReturn(dataflowVO);
     Mockito.when(dataflowVO.getStatus()).thenReturn(TypeStatusEnum.DESIGN);
+
     Assert.assertEquals(8,
         deleteTableCompletedEvent.getMap(NotificationVO.builder().user("user").datasetId(1L)
             .dataflowId(1L).datasetName("datasetName").dataflowName("dataflowName")
@@ -75,6 +76,7 @@ public class DeleteTableCompletedEventTest {
     Mockito.when(datasetMetabaseVO.getDataSetName()).thenReturn("datasetName");
     Mockito.when(dataflowVO.getName()).thenReturn("dataflowName");
     Mockito.when(dataflowVO.getStatus()).thenReturn(TypeStatusEnum.DESIGN);
+
     Assert.assertEquals(8, deleteTableCompletedEvent
         .getMap(NotificationVO.builder().user("user").datasetId(1L).build()).size());
   }
