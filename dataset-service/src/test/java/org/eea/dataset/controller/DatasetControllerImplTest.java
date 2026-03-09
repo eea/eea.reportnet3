@@ -1795,7 +1795,6 @@ public class DatasetControllerImplTest {
         .createUserNotificationPrivate(Mockito.anyString(), Mockito.any());
 
     when(datasetService.getDataFlowIdById(1L)).thenReturn(1L);
-    when(dataFlowControllerZuul.isBigDataflow(1L)).thenReturn(false);
 
     datasetControllerImpl.deleteImportDataLegacy(1L, null, null,"SECTION_A", false);
     Mockito.verify(deleteHelper, times(1)).executeDeleteDatasetProcess(Mockito.anyLong(),

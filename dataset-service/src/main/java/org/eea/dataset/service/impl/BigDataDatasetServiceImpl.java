@@ -1018,7 +1018,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
     }
 
     @Override
-    public void deleteDatasetData(Long datasetId, Long dataflowId, Long providerId, Boolean deletePrefilledTables, Boolean technicallyAccepted, Long jobId) throws Exception {
+    public void deleteDatasetData(Long datasetId, Long dataflowId, Long providerId, String preparationCode, Boolean deletePrefilledTables, Boolean technicallyAccepted, Long jobId) throws Exception {
 
         try {
             String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
