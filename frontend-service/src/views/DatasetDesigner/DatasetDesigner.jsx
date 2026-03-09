@@ -807,7 +807,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
     actionsContext.testProcess(datasetId, action);
     try {
       notificationContext.add({ type: 'DELETE_DATASET_DATA_INIT' });
-      await DatasetService.deleteData(datasetId, arePrefilledTablesDeleted);
+      await DatasetService.deleteData({ datasetId, arePrefilledTablesDeleted });
       onResetDelete();
     } catch (error) {
       if (error.response.status === 423) {

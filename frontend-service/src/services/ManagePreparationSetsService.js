@@ -14,7 +14,8 @@ export const ManagePreparationSetsService = {
   createPreparationSets: async ({ dataflowId, providerId }) =>
     await ManagePreparationSetsRepository.createPreparationSets({ dataflowId, providerId }),
 
-  deletePreparationSet: async ({ id }) => await ManagePreparationSetsRepository.deletePreparationSet({ id }),
+  deletePreparationSet: async ({ id, dataflowId }) =>
+    await ManagePreparationSetsRepository.deletePreparationSet({ id, dataflowId }),
 
   getPreparationSets: async ({ dataflowId, providerId, code }) => {
     const response = await ManagePreparationSetsRepository.getPreparationSets({

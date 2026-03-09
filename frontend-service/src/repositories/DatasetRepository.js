@@ -46,8 +46,10 @@ export const DatasetRepository = {
       data: { nameTableSchema: tableSchemaName, notEmpty: true }
     }),
 
-  deleteData: async (datasetId, deletePrefilledTables) =>
-    await HTTPRequester.delete({ url: getUrl(DatasetConfig.deleteData, { datasetId, deletePrefilledTables }) }),
+  deleteData: async ({ datasetId, deletePrefilledTables, preparationCode }) =>
+    await HTTPRequester.delete({
+      url: getUrl(DatasetConfig.deleteData, { datasetId, deletePrefilledTables, preparationCode })
+    }),
 
   deleteAttachment: async ({
     dataflowId,
@@ -95,8 +97,8 @@ export const DatasetRepository = {
   deleteSchema: async datasetId =>
     await HTTPRequester.delete({ url: getUrl(DatasetConfig.deleteSchema, { datasetId }) }),
 
-  deleteTableData: async (datasetId, tableId) =>
-    await HTTPRequester.delete({ url: getUrl(DatasetConfig.deleteTableData, { datasetId, tableId }) }),
+  deleteTableData: async ({ datasetId, tableId, preparationCode }) =>
+    await HTTPRequester.delete({ url: getUrl(DatasetConfig.deleteTableData, { datasetId, tableId, preparationCode }) }),
 
   deleteTableDesign: async (datasetId, tableSchemaId) =>
     await HTTPRequester.delete({ url: getUrl(DatasetConfig.deleteTableDesign, { datasetId, tableSchemaId }) }),
