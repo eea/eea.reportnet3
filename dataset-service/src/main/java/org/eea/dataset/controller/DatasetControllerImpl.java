@@ -1184,6 +1184,8 @@ public class DatasetControllerImpl implements DatasetController {
                   example = "0") @RequestParam(value = "dataflowId", required = false) Long dataflowId,
           @ApiParam(type = "Long", value = "Provider id",
                   example = "0") @RequestParam(value = "providerId", required = false) Long providerId,
+          @ApiParam(type = "String", value = "Preparation Code",
+                  example = "section_a") @RequestParam(value = "preparationCode", required = false) String preparationCode,
           @ApiParam(type = "boolean", value = "Delete prefilled tables",
                   example = "true") @RequestParam(value = "deletePrefilledTables", defaultValue = "false",
                   required = false) Boolean deletePrefilledTables) {
@@ -1192,6 +1194,7 @@ public class DatasetControllerImpl implements DatasetController {
     userNotificationContentVO.setDataflowId(dataflowId);
     userNotificationContentVO.setDatasetId(datasetId);
     userNotificationContentVO.setProviderId(providerId);
+    userNotificationContentVO.setPreparationCode(preparationCode);
     notificationControllerZuul.createUserNotificationPrivate("DELETE_DATASET_DATA_INIT",
             userNotificationContentVO);
 
@@ -1334,10 +1337,12 @@ public class DatasetControllerImpl implements DatasetController {
                   example = "0") @RequestParam(value = "dataflowId", required = false) Long dataflowId,
           @ApiParam(type = "Long", value = "Provider id",
                   example = "0") @RequestParam(value = "providerId", required = false) Long providerId,
+          @ApiParam(type = "String", value = "Preparation Code",
+                  example = "section_a") @RequestParam(value = "preparationCode", required = false) String preparationCode,
           @ApiParam(type = "boolean", value = "Delete prefilled tables",
                   example = "true") @RequestParam(value = "deletePrefilledTables", defaultValue = "false",
                   required = false) Boolean deletePrefilledTables) {
-    this.deleteDatasetData(datasetId, dataflowId, providerId, deletePrefilledTables);
+    this.deleteDatasetData(datasetId, dataflowId, providerId, preparationCode, deletePrefilledTables);
   }
 
   /**
@@ -1366,12 +1371,12 @@ public class DatasetControllerImpl implements DatasetController {
           @ApiParam(type = "String", value = "Table schema id",
                   example = "5cf0e9b3b793310e9ceca190") @LockCriteria(
                   name = "tableSchemaId") @PathVariable("tableSchemaId") String tableSchemaId,
-          @ApiParam(type = "String", value = "Preparation Code",
-                  example = "section_a") @RequestParam(value = "preparationCode", required = false) String preparationCode,
           @ApiParam(type = "Long", value = "Dataflow id",
                   example = "0") @RequestParam(value = "dataflowId", required = false) Long dataflowId,
           @ApiParam(type = "Long", value = "Provider id",
-                  example = "0") @RequestParam(value = "providerId", required = false) Long providerId) {
+                  example = "0") @RequestParam(value = "providerId", required = false) Long providerId,
+          @ApiParam(type = "String", value = "Preparation Code",
+                  example = "section_a") @RequestParam(value = "preparationCode", required = false) String preparationCode) {
 
     boolean isPreparationDataset = StringUtils.isNotBlank(preparationCode);
 
@@ -1479,13 +1484,13 @@ public class DatasetControllerImpl implements DatasetController {
           @ApiParam(type = "String", value = "Table schema id",
                   example = "5cf0e9b3b793310e9ceca190") @LockCriteria(
                   name = "tableSchemaId") @PathVariable("tableSchemaId") String tableSchemaId,
-          @ApiParam(type = "String", value = "Preparation Code",
-                  example = "section_a") @RequestParam(value = "preparationCode", required = false) String preparationCode,
           @ApiParam(type = "Long", value = "Dataflow id",
                   example = "0") @RequestParam(value = "dataflowId", required = false) Long dataflowId,
           @ApiParam(type = "Long", value = "Provider id",
-                  example = "0") @RequestParam(value = "providerId", required = false) Long providerId) {
-    this.deleteTableData(datasetId, tableSchemaId, preparationCode, dataflowId, providerId);
+                  example = "0") @RequestParam(value = "providerId", required = false) Long providerId,
+          @ApiParam(type = "String", value = "Preparation Code",
+                  example = "section_a") @RequestParam(value = "preparationCode", required = false) String preparationCode) {
+    this.deleteTableData(datasetId, tableSchemaId, dataflowId, providerId, preparationCode);
   }
 
   /**

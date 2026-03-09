@@ -161,6 +161,7 @@ public interface DatasetController {
   Map<String, Object> deleteDatasetData(@PathVariable("datasetId") Long datasetId,
       @RequestParam(value = "dataflowId", required = false) Long dataflowId,
       @RequestParam(value = "providerId", required = false) Long providerId,
+      @RequestParam(value = "preparationCode", required = false) String preparationCode,
       @RequestParam(value = "deletePrefilledTables", defaultValue = "false",
           required = false) Boolean deletePrefilledTables);
 
@@ -188,6 +189,7 @@ public interface DatasetController {
   void deleteImportDataLegacy(@PathVariable("datasetId") Long datasetId,
       @RequestParam(value = "dataflowId", required = false) Long dataflowId,
       @RequestParam(value = "providerId", required = false) Long providerId,
+      @RequestParam(value = "preparationCode", required = false) String preparationCode,
       @RequestParam(value = "deletePrefilledTables", defaultValue = "false",
           required = false) Boolean deletePrefilledTables);
 
@@ -202,9 +204,9 @@ public interface DatasetController {
   @DeleteMapping("/v1/{datasetId}/deleteTableData/{tableSchemaId}")
   Map<String, Object> deleteTableData(@PathVariable("datasetId") Long datasetId,
       @PathVariable("tableSchemaId") String tableSchemaId,
-      @RequestParam(value = "preparationCode", required = false) String preparationCode,
       @RequestParam(value = "dataflowId", required = false) Long dataflowId,
-      @RequestParam(value = "providerId", required = false) Long providerId);
+      @RequestParam(value = "providerId", required = false) Long providerId,
+      @RequestParam(value = "preparationCode", required = false) String preparationCode);
 
   /**
    * Delete import table legacy.
@@ -217,9 +219,9 @@ public interface DatasetController {
   @DeleteMapping("/{datasetId}/deleteImportTable/{tableSchemaId}")
   void deleteImportTableLegacy(@PathVariable("datasetId") Long datasetId,
       @PathVariable("tableSchemaId") String tableSchemaId,
-      @RequestParam(value = "preparationCode", required = false) String preparationCode,
       @RequestParam(value = "dataflowId", required = false) Long dataflowId,
-      @RequestParam(value = "providerId", required = false) Long providerId);
+      @RequestParam(value = "providerId", required = false) Long providerId,
+      @RequestParam(value = "preparationCode", required = false) String preparationCode);
 
 
   /**
