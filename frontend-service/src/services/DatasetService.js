@@ -125,8 +125,8 @@ export const DatasetService = {
   createTableDesign: async (datasetId, tableSchemaName) =>
     await DatasetRepository.createTableDesign(datasetId, tableSchemaName),
 
-  deleteData: async (datasetId, arePrefilledTablesDeleted) =>
-    await DatasetRepository.deleteData(datasetId, arePrefilledTablesDeleted),
+  deleteData: async ({ datasetId, arePrefilledTablesDeleted, isReferenceDataset, preparationCode }) =>
+    await DatasetRepository.deleteData({ datasetId, arePrefilledTablesDeleted, isReferenceDataset, preparationCode }),
 
   deleteAttachment: async ({
     dataflowId,
@@ -158,7 +158,8 @@ export const DatasetService = {
 
   deleteSchema: async datasetId => await DatasetRepository.deleteSchema(datasetId),
 
-  deleteTableData: async (datasetId, tableId) => await DatasetRepository.deleteTableData(datasetId, tableId),
+  deleteTableData: async ({ datasetId, tableId, preparationCode }) =>
+    await DatasetRepository.deleteTableData({ datasetId, tableId, preparationCode }),
 
   deleteTableDesign: async (datasetId, tableSchemaId) =>
     await DatasetRepository.deleteTableDesign(datasetId, tableSchemaId),
@@ -962,7 +963,8 @@ export const DatasetService = {
 
   validate: async datasetId => await DatasetRepository.validate(datasetId),
 
-  validateAsProvider: async (datasetId, dataflowId, providerId) => await DatasetRepository.validateAsProvider(datasetId, dataflowId, providerId),
+  validateAsProvider: async (datasetId, dataflowId, providerId) =>
+    await DatasetRepository.validateAsProvider(datasetId, dataflowId, providerId),
 
   validateAllSql: async datasetId => await DatasetRepository.validateAllSql(datasetId),
 

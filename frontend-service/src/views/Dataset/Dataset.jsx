@@ -697,7 +697,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
     actionsContext.testProcess(datasetId, action);
     try {
       notificationContext.add({ type: 'DELETE_DATASET_DATA_INIT' });
-      await DatasetService.deleteData(datasetId, isReferenceDataset);
+      await DatasetService.deleteData({ datasetId, isReferenceDataset, preparationCode: code });
     } catch (error) {
       if (error.response.status === 423) {
         notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' }, true);
