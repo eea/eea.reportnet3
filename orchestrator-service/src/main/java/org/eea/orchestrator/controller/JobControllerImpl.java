@@ -162,7 +162,9 @@ public class JobControllerImpl implements JobController {
                                  @ApiParam(value = "Provider id related to the dataset that will be validated", example = "15") @RequestParam(value = "providerId", required = false) Long providerId,
                                  @ApiParam(value = "Is the dataset released?", example = "true", required = false) @RequestParam(value = "released", required = false) boolean released,
                                  @RequestParam(value = "createParquetWithSQL", required = false) boolean createParquetWithSQL,
-                                 @RequestParam(value = "validateAsProviderCode", required = false) String validateAsProviderCode) {
+                                 @RequestParam(value = "validateAsProviderCode", required = false) String validateAsProviderCode,
+                                 @ApiParam(type = "String", value = "Preparation Code", example = "0")
+                                 @RequestParam(value = "code", required = false) String preparationCode) {
         Long jobId;
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         // Set the username on the thread
@@ -173,7 +175,7 @@ public class JobControllerImpl implements JobController {
         try {
             DataSetMetabaseVO dataset = dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
             String dataflowName = null;
-            try{
+            try {
                 dataflowName = dataFlowControllerZuul.findDataflowNameById(dataset.getDataflowId());
             }
             catch (Exception e) {
@@ -189,6 +191,7 @@ public class JobControllerImpl implements JobController {
             parameters.put("datasetId", datasetId);
             parameters.put("released", released);
             parameters.put("createParquetWithSQL", createParquetWithSQL);
+            parameters.put("preparationCode", preparationCode);
 
             // Validate as a provider only for Design and Test datasets and if we receive a validateAsProviderCode.
             if ((DatasetTypeEnum.DESIGN.equals(dataset.getDatasetTypeEnum()) || DatasetTypeEnum.TEST.equals(dataset.getDatasetTypeEnum()))
@@ -199,10 +202,16 @@ public class JobControllerImpl implements JobController {
 
             String userId = ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails()).get(AuthenticationDetails.USER_ID);
             parameters.put("userId", userId);
-            JobStatusEnum statusToInsert = jobService.checkEligibilityOfJob(JobTypeEnum.VALIDATION.toString(), dataset.getDataflowId(), dataProvider, Arrays.asList(datasetId), false);
-            LOG.info("Adding validation job for datasetId {} and released {} for creator {} with status {}", datasetId, released, username, statusToInsert);
-            jobId = jobService.addJob(dataset.getDataflowId(), dataProvider, datasetId, parameters, JobTypeEnum.VALIDATION, statusToInsert, released, null, dataflowName, dataset.getDataSetName(), null);
-            LOG.info("Successfully added validation job for datasetId {}, released {} and creator {} with status {}", datasetId, released, username, statusToInsert);
+            JobStatusEnum statusToInsert;
+            if (StringUtils.isNotBlank(preparationCode)) {
+                statusToInsert = jobService.checkEligibilityOfPreparationJob(JobTypeEnum.VALIDATION.toString(), dataset.getId(), preparationCode);
+            }
+            else {
+                statusToInsert = jobService.checkEligibilityOfJob(JobTypeEnum.VALIDATION.toString(), dataset.getDataflowId(), dataProvider, Arrays.asList(datasetId), false);
+            }
+            LOG.info("Adding validation job for datasetId {}, preparationCode {} and released {} for creator {} with status {}", datasetId, preparationCode, released, username, statusToInsert);
+            jobId = jobService.addJob(dataset.getDataflowId(), dataProvider, datasetId, parameters, JobTypeEnum.VALIDATION, statusToInsert, released, null, dataflowName, dataset.getDataSetName(), preparationCode);
+            LOG.info("Successfully added validation job for datasetId {}, preparationCode {} and released {} for creator {} with status {}", datasetId, preparationCode, released, username, statusToInsert);
             if (statusToInsert == JobStatusEnum.REFUSED) {
                 //send Refused notification
                 LOG.info("Added validation job with id {} for datasetId {} with status REFUSED", jobId, datasetId);

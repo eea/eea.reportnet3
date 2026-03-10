@@ -8,6 +8,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.parquet.avro.AvroParquetWriter;
 import org.apache.parquet.hadoop.ParquetWriter;
 import org.apache.parquet.hadoop.metadata.CompressionCodecName;
+import org.codehaus.plexus.util.StringUtils;
 import org.eea.datalake.service.DremioHelperService;
 import org.eea.datalake.service.S3Helper;
 import org.eea.datalake.service.S3Service;
@@ -28,6 +29,7 @@ import org.eea.validation.service.RulesService;
 import org.eea.validation.util.GeoJsonValidationUtils;
 import org.eea.validation.util.GeometryValidationUtils;
 import org.eea.validation.util.ValidationHelper;
+import org.jsoup.helper.StringUtil;
 import org.locationtech.jts.io.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -104,15 +106,20 @@ public class DremioNonSqlRulesExecuteServiceImpl implements DremioRulesExecuteSe
 
     @Override
     public void execute(Long dataflowId, Long datasetId, String datasetSchemaId, String tableName, String tableSchemaId, String ruleId, Long dataProviderId,
-                        Long taskId, boolean createParquetWithSQL) throws DremioValidationException {
+                        Long taskId, boolean createParquetWithSQL, String preparationCode) throws DremioValidationException {
         try {
             //if the dataset to validate is of reference type, then the table path should be changed
             S3PathResolver dataTableResolver = new S3PathResolver(dataflowId, dataProviderId != null ? dataProviderId : 0, datasetId, tableName);
+            dataTableResolver.setPreparationCode(preparationCode);
             DataSetMetabaseVO dataset = dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
             String path;
             if (dataset.getDatasetTypeEnum().equals(DatasetTypeEnum.REFERENCE)) {
                 path = S3_DATAFLOW_REFERENCE_QUERY_PATH;
-            } else {
+            }
+            else if (StringUtils.isNotBlank(preparationCode)) {
+                path = S3_PREPARATION_TABLE_AS_FOLDER_QUERY_PATH;
+            }
+            else {
                 path = S3_TABLE_AS_FOLDER_QUERY_PATH;
             }
             String tablePath = s3Service.getTableAsFolderQueryPath(dataTableResolver, path);
@@ -123,10 +130,11 @@ public class DremioNonSqlRulesExecuteServiceImpl implements DremioRulesExecuteSe
                 return;
             }
             S3PathResolver validationResolver = new S3PathResolver(dataflowId, dataProviderId != null ? dataProviderId : 0, datasetId, S3_VALIDATION);
+            validationResolver.setPreparationCode(preparationCode);
 
             StringBuilder query = new StringBuilder();
             RuleVO ruleVO = rulesService.findRule(datasetSchemaId, ruleId);
-            deleteRuleFolderIfExists(validationResolver, ruleVO);
+            deleteRuleFolderIfExists(validationResolver, ruleVO, preparationCode);
             int startIndex = ruleVO.getWhenConditionMethod().indexOf(OPEN_PARENTHESIS);
             int endIndex = ruleVO.getWhenConditionMethod().indexOf(CLOSE_PARENTHESIS);
             String ruleMethodName = ruleVO.getWhenConditionMethod().substring(0, startIndex);
@@ -189,11 +197,18 @@ public class DremioNonSqlRulesExecuteServiceImpl implements DremioRulesExecuteSe
      * @param validationResolver
      * @param ruleVO
      */
-    private void deleteRuleFolderIfExists(S3PathResolver validationResolver, RuleVO ruleVO) {
+    private void deleteRuleFolderIfExists(S3PathResolver validationResolver, RuleVO ruleVO, String preparationCode) {
         int ruleIdLength = ruleVO.getRuleId().length();
         String ruleFolderName = ruleVO.getShortCode() + DASH + ruleVO.getRuleId().substring(ruleIdLength-3, ruleIdLength);
         validationResolver.setFilename(ruleFolderName);
-        s3Helper.deleteFolder(validationResolver, S3_TABLE_NAME_PATH);
+
+        //TODO CHECK THIS PATH
+        if (StringUtils.isNotBlank(preparationCode)) {
+            s3Helper.deleteFolder(validationResolver, S3_PREPARATION_TABLE_NAME_PATH);
+        }
+        else {
+            s3Helper.deleteFolder(validationResolver, S3_TABLE_NAME_PATH);
+        }
     }
 
     /**

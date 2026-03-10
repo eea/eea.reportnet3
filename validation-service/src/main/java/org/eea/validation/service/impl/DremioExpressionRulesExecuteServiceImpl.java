@@ -1,5 +1,6 @@
 package org.eea.validation.service.impl;
 
+import cdjd.org.apache.commons.lang3.StringUtils;
 import com.google.common.collect.Lists;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
@@ -32,6 +33,7 @@ import org.eea.validation.service.DremioRulesService;
 import org.eea.validation.service.RulesService;
 import org.eea.validation.util.RuleOperators;
 import org.eea.validation.util.ValidationHelper;
+import org.jsoup.helper.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -114,14 +116,18 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
 
     @Override
     public void execute(Long dataflowId, Long datasetId, String datasetSchemaId, String tableName, String tableSchemaId, String ruleId, Long dataProviderId,
-                        Long taskId, boolean createParquetWithSQL) throws DremioValidationException {
+                        Long taskId, boolean createParquetWithSQL, String preparationCode) throws DremioValidationException {
         try {
+            //TODO Fix preparationCode
             //if the dataset to validate is of reference type, then the table path should be changed
             S3PathResolver dataTableResolver = new S3PathResolver(dataflowId, dataProviderId != null ? dataProviderId : 0, datasetId, tableName);
+            dataTableResolver.setPreparationCode(preparationCode);
             DataSetMetabaseVO dataset = dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
             String path;
             if (dataset.getDatasetTypeEnum().equals(DatasetTypeEnum.REFERENCE)) {
                 path = S3_DATAFLOW_REFERENCE_QUERY_PATH;
+            } else if (StringUtils.isNotBlank(preparationCode)) {
+                path = S3_PREPARATION_TABLE_AS_FOLDER_QUERY_PATH;
             } else {
                 path = S3_TABLE_AS_FOLDER_QUERY_PATH;
             }
@@ -133,6 +139,7 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
             }
 
             S3PathResolver validationResolver = new S3PathResolver(dataflowId, dataProviderId != null ? dataProviderId : 0, datasetId, S3_VALIDATION);
+            validationResolver.setPreparationCode(preparationCode);
 
             String providerCode = getProviderCode(dataset);
             StringBuilder query = new StringBuilder();
@@ -171,7 +178,14 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
         int ruleIdLength = ruleVO.getRuleId().length();
         String ruleFolderName = ruleVO.getShortCode() + DASH + ruleVO.getRuleId().substring(ruleIdLength-3, ruleIdLength);
         validationResolver.setFilename(ruleFolderName);
-        s3Helper.deleteFolder(validationResolver, S3_TABLE_NAME_PATH);
+        //TODO Check what happens with this path
+        if (StringUtils.isNotBlank(validationResolver.getPreparationCode())) {
+            s3Helper.deleteFolder(validationResolver, S3_PREPARATION_TABLE_NAME_PATH);
+        }
+        else {
+            s3Helper.deleteFolder(validationResolver, S3_TABLE_NAME_PATH);
+        }
+
     }
 
     /**

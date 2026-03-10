@@ -54,12 +54,13 @@ public class SaveStatisticsCommand extends AbstractEEAEventHandlerCommand {
     try {
       final Long datasetId = Long.parseLong(String.valueOf(eeaEventVO.getData().get("dataset_id")));
       final boolean bigData = (boolean) eeaEventVO.getData().get("bigData");
+      final String preparationCode = (String) eeaEventVO.getData().get("preparationCode");
       new Thread(new Runnable() {
 
         @Override
         public void run() {
           try {
-            datasetService.saveStatistics(datasetId, bigData);
+            datasetService.saveStatistics(datasetId, bigData, preparationCode);
           } catch (EEAException e) {
             LOG_ERROR.error("Error saving statistics. Error message: {}", e.getMessage(), e);
           } catch (Exception e) {

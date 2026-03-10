@@ -499,7 +499,7 @@ public class DatasetServiceImpl implements DatasetService {
     }
 
     try {
-      saveStatistics(datasetId, bigData);
+      saveStatistics(datasetId, bigData, null);
     } catch (EEAException e) {
       LOG.error(
           "Error saving statistics after deleting all the dataset values. Error message: {}",
@@ -625,7 +625,7 @@ public class DatasetServiceImpl implements DatasetService {
    */
   @Override
   @Transactional
-  public void saveStatistics(final Long datasetId, boolean bigData) throws EEAException {
+  public void saveStatistics(final Long datasetId, boolean bigData, String preparationCode) throws EEAException {
 
       if (datasetId == null) {
           LOG.error("Error, datasetId is null");
@@ -649,10 +649,17 @@ public class DatasetServiceImpl implements DatasetService {
 
       if (bigData) {
           final S3PathResolver s3PathResolver = new S3PathResolver(datasetMb.getDataflowId(), datasetMb.getDataProviderId() != null ? datasetMb.getDataProviderId() : 0, datasetId, S3_VALIDATION);
-          if (s3Helper.checkFolderExist(s3PathResolver, S3_VALIDATION_TABLE_PATH)) {
+          final String s3path;
+          if (StringUtils.isNotBlank(preparationCode)) {
+            s3PathResolver.setPreparationCode(preparationCode);
+            s3path = S3_PREPARATION_VALIDATION_TABLE_PATH;
+          } else {
+            s3path = S3_VALIDATION_TABLE_PATH;
+          }
+          if (s3Helper.checkFolderExist(s3PathResolver, s3path)) {
               datasetErrors = true;
           }
-          schema.getTableSchemas().parallelStream().forEach(tableSchema -> statsList.addAll(processTableStatsDL(tableSchema, datasetMb)));
+          schema.getTableSchemas().parallelStream().forEach(tableSchema -> statsList.addAll(processTableStatsDL(tableSchema, datasetMb, preparationCode)));
       } else {
           final DatasetValue dataset = datasetRepository.findById(datasetId).orElse(new DatasetValue());
           if (dataset.getId() == null || StringUtils.isBlank(dataset.getIdDatasetSchema())) {
@@ -2231,23 +2238,38 @@ public class DatasetServiceImpl implements DatasetService {
     return stats;
   }
 
-  private List<Statistics> processTableStatsDL(final TableSchema tableSchema, final DataSetMetabase dataset) {
+  private List<Statistics> processTableStatsDL(final TableSchema tableSchema, final DataSetMetabase dataset, final String preparationCode) {
     Long datasetId = dataset.getId();
     List<Statistics> stats = new ArrayList<>();
     S3PathResolver s3PathResolver = new S3PathResolver(dataset.getDataflowId(), dataset.getDataProviderId()!=null ? dataset.getDataProviderId() : 0, datasetId, tableSchema.getNameTableSchema());
+    final String folderPath;
+    final String validationPath;
+    final String tableAsFolderPath;
+    if (StringUtils.isNotBlank(preparationCode)) {
+      s3PathResolver.setPreparationCode(preparationCode);
+      folderPath = S3_PREPARATION_TABLE_NAME_FOLDER_PATH;
+      validationPath = S3_PREPARATION_VALIDATION_TABLE_PATH;
+      tableAsFolderPath = S3_PREPARATION_TABLE_AS_FOLDER_QUERY_PATH;
+    }
+    else {
+      folderPath = S3_TABLE_NAME_FOLDER_PATH;
+      validationPath = S3_VALIDATION_TABLE_PATH;
+      tableAsFolderPath = S3_TABLE_AS_FOLDER_QUERY_PATH;
+    }
     Long totalRecords = 0L;
     Long totalRecordsWithBlockers = 0L;
     Long totalRecordsWithErrors = 0L;
     Long totalRecordsWithWarnings = 0L;
     Long totalRecordsWithInfos = 0L;
     Long tableErrors = 0L;
-    if (s3Helper.checkFolderExist(s3PathResolver, S3_TABLE_NAME_FOLDER_PATH)) {
+    if (s3Helper.checkFolderExist(s3PathResolver, folderPath)) {
       totalRecords = dremioJdbcTemplate.queryForObject(s3Helper.buildRecordsCountQuery(s3PathResolver), Long.class);
     }
-    if (s3Helper.checkFolderExist(s3PathResolver, S3_VALIDATION_TABLE_PATH)) {
+    if (s3Helper.checkFolderExist(s3PathResolver, validationPath)) {
       StringBuilder validationQuery = new StringBuilder();
       S3PathResolver validationPathResolver = new S3PathResolver(dataset.getDataflowId(), dataset.getDataProviderId()!=null ? dataset.getDataProviderId() : 0, datasetId, S3_VALIDATION);
-      validationQuery.append("select count(distinct record_id) from ").append(s3Service.getTableAsFolderQueryPath(validationPathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH)).append(" where table_name='")
+      validationPathResolver.setPreparationCode(preparationCode);
+      validationQuery.append("select count(distinct record_id) from ").append(s3Service.getTableAsFolderQueryPath(validationPathResolver, tableAsFolderPath)).append(" where table_name='")
               .append(tableSchema.getNameTableSchema()).append("'");
       totalRecordsWithBlockers = dremioJdbcTemplate.queryForObject(validationQuery+" and validation_level='BLOCKER'", Long.class);
       totalRecordsWithErrors = dremioJdbcTemplate.queryForObject(validationQuery+" and validation_level='ERROR'", Long.class);

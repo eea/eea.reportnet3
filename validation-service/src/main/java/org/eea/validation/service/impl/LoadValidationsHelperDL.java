@@ -1,5 +1,6 @@
 package org.eea.validation.service.impl;
 
+import org.apache.commons.lang.StringUtils;
 import org.eea.datalake.service.DremioHelperService;
 import org.eea.datalake.service.S3Helper;
 import org.eea.datalake.service.annotation.ImportDataLakeCommons;
@@ -76,7 +77,7 @@ public class LoadValidationsHelperDL {
     private static final Logger LOG = LoggerFactory.getLogger(LoadValidationsHelperDL.class);
 
     public FailedValidationsDatasetVO getListGroupValidationsDL(Long datasetId, Pageable pageable, List<ErrorTypeEnum> levelErrorsFilter, List<EntityTypeEnum> typeEntitiesFilter,
-                                                                String tableFilter, String fieldValueFilter, String shortCode, String headerField, Boolean asc) throws EEAException {
+                                                                String tableFilter, String fieldValueFilter, String shortCode, String headerField, Boolean asc, String preparationCode) throws EEAException {
         DataSetMetabaseVO dataset = dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
         FailedValidationsDatasetVO validation = new FailedValidationsDatasetVO();
         validation.setErrors(new ArrayList<>());
@@ -89,8 +90,15 @@ public class LoadValidationsHelperDL {
             dataset.getDataProviderId() != null ? dataset.getDataProviderId() : 0,
             dataset.getId(),
             S3_VALIDATION);
+        s3PathResolver.setPreparationCode(preparationCode);
 
-        boolean validationFolderExists = s3Helper.checkFolderExist(s3PathResolver, S3_VALIDATION_TABLE_PATH);
+        boolean validationFolderExists;
+        if (StringUtils.isNotBlank(preparationCode)) {
+            validationFolderExists = s3Helper.checkFolderExist(s3PathResolver, S3_PREPARATION_VALIDATION_TABLE_PATH);
+        }
+        else {
+            validationFolderExists = s3Helper.checkFolderExist(s3PathResolver, S3_VALIDATION_TABLE_PATH);
+        }
         // First folder check.
         if (validationFolderExists && dremioHelperService.checkFolderPromoted(s3PathResolver, s3PathResolver.getTableName())) {
             // Load schema once
@@ -111,9 +119,17 @@ public class LoadValidationsHelperDL {
             AtomicReference<Long> totalRecords = new AtomicReference<>(0L);
             tableNames.forEach(name -> {
                 s3PathResolver.setTableName(name);
-                if (s3Helper.checkFolderExist(s3PathResolver, S3_TABLE_NAME_FOLDER_PATH)) {
-                    Long tableRecords = dremioJdbcTemplate.queryForObject(s3Helper.buildRecordsCountQuery(s3PathResolver), Long.class);
-                    totalRecords.set(Long.sum(totalRecords.get(),tableRecords));
+                if (StringUtils.isNotBlank(preparationCode)) {
+                    if (s3Helper.checkFolderExist(s3PathResolver, S3_PREPARATION_TABLE_NAME_FOLDER_PATH)) {
+                        Long tableRecords = dremioJdbcTemplate.queryForObject(s3Helper.buildRecordsCountQuery(s3PathResolver), Long.class);
+                        totalRecords.set(Long.sum(totalRecords.get(),tableRecords));
+                    }
+                }
+                else {
+                    if (s3Helper.checkFolderExist(s3PathResolver, S3_TABLE_NAME_FOLDER_PATH)) {
+                        Long tableRecords = dremioJdbcTemplate.queryForObject(s3Helper.buildRecordsCountQuery(s3PathResolver), Long.class);
+                        totalRecords.set(Long.sum(totalRecords.get(),tableRecords));
+                    }
                 }
             });
             validation.setTotalRecords(totalRecords.get());

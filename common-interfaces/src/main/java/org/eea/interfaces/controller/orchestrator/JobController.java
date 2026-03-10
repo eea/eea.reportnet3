@@ -77,7 +77,8 @@ public interface JobController {
     Long addValidationJob(@PathVariable("datasetId") Long datasetId, @RequestParam(value = "dataflowId", required = false) Long dataflowId,
                           @RequestParam(value = "providerId", required = false) Long providerId, @RequestParam(value = "released", required = false) boolean released,
                           @RequestParam(value = "createParquetWithSQL", required = false) boolean createParquetWithSQL,
-                          @RequestParam(value = "validateAsProviderCode", required = false) String validateAsProviderCode);
+                          @RequestParam(value = "validateAsProviderCode", required = false) String validateAsProviderCode,
+                          @RequestParam(value = "code", required = false) String preparationCode);
 
     /**
      * Adds a release job

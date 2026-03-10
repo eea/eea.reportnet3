@@ -1,9 +1,14 @@
 package org.eea.orchestrator.controller;
 
+import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
+import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
+import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
+import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.orchestrator.JobCanceledValidationTaskVO;
 import org.eea.interfaces.vo.orchestrator.JobHistoryVO;
 import org.eea.interfaces.vo.orchestrator.JobVO;
+import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.interfaces.vo.orchestrator.enums.JobTypeEnum;
 import org.eea.interfaces.vo.orchestrator.JobCanceledValidationTasksVO;
 import org.eea.orchestrator.service.JobHistoryService;
@@ -17,10 +22,14 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
 
@@ -46,6 +55,18 @@ public class JobControllerImplTest {
     private ProcessControllerZuul processControllerZuul;
 
     @Mock
+    private DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul;
+
+    @Mock
+    private DataFlowControllerZuul dataFlowControllerZuul;
+
+    @Mock
+    private SecurityContext securityContext;
+
+    @Mock
+    private Authentication authentication;
+
+    @Mock
     private JobUtils jobUtils;
 
     private static final Long JOB_ID = 1L;
@@ -58,6 +79,140 @@ public class JobControllerImplTest {
         UsernamePasswordAuthenticationToken auth =
                 new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(auth);
+    }
+
+    @Test
+    public void testAddValidationPreparationJob_jobCreated() {
+
+        final Long datasetId = 12345L;
+        final Long dataflowId = 1414L;
+        final Long providerId = 57L;
+        final boolean released = false;
+        final boolean createParquetWithSQL = false;
+        final String validateAsProviderCode = "57";
+        final String preparationCode = "EPEIRUS";
+        final String dataflowName = "SNR3";
+        final String datasetName = "TEST";
+        final Long jobId = 1234L;
+        final Map<String, String> authenticationDetails = new HashMap<>();
+        authenticationDetails.put("user", "testUser");
+
+        final DataSetMetabaseVO dataSetMetabaseVOMock = new DataSetMetabaseVO();
+        dataSetMetabaseVOMock.setId(datasetId);
+        dataSetMetabaseVOMock.setDataflowId(dataflowId);
+        dataSetMetabaseVOMock.setDataProviderId(providerId);
+        dataSetMetabaseVOMock.setDatasetTypeEnum(DatasetTypeEnum.PREPARATION);
+        dataSetMetabaseVOMock.setDataSetName(datasetName);
+
+        mockStatic(SecurityContextHolder.class);
+        when(SecurityContextHolder.getContext()).thenReturn(securityContext);
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.getDetails()).thenReturn(authenticationDetails);
+        mockStatic(ThreadPropertiesManager.class);
+        when(dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetId)).thenReturn(dataSetMetabaseVOMock);
+        when(dataFlowControllerZuul.findDataflowNameById(dataSetMetabaseVOMock.getDataflowId())).thenReturn(dataflowName);
+        when(jobService.checkEligibilityOfPreparationJob(JobTypeEnum.VALIDATION.toString(), datasetId, preparationCode)).thenReturn(JobStatusEnum.IN_PROGRESS);
+        when(jobService.addJob(
+                Mockito.eq(dataflowId),
+                Mockito.eq(providerId),
+                Mockito.eq(datasetId),
+                Mockito.any(),
+                Mockito.eq(JobTypeEnum.VALIDATION),
+                Mockito.eq(JobStatusEnum.IN_PROGRESS),
+                Mockito.eq(released),
+                Mockito.eq(null),
+                Mockito.eq(dataflowName),
+                Mockito.eq(datasetName),
+                Mockito.eq(preparationCode)))
+                .thenReturn(jobId);
+
+        final Long actualResult = jobController.addValidationJob(datasetId, dataflowId, providerId, released, createParquetWithSQL, validateAsProviderCode, preparationCode);
+
+        verify(dataSetMetabaseControllerZuul).findDatasetMetabaseById(datasetId);
+        verify(dataFlowControllerZuul).findDataflowNameById(dataflowId);
+        verify(jobService).checkEligibilityOfPreparationJob(JobTypeEnum.VALIDATION.toString(), datasetId, preparationCode);
+        verify(jobService).addJob(
+                Mockito.eq(dataflowId),
+                Mockito.eq(providerId),
+                Mockito.eq(datasetId),
+                Mockito.any(),
+                Mockito.eq(JobTypeEnum.VALIDATION),
+                Mockito.eq(JobStatusEnum.IN_PROGRESS),
+                Mockito.eq(released),
+                Mockito.eq(null),
+                Mockito.eq(dataflowName),
+                Mockito.eq(datasetName),
+                Mockito.eq(preparationCode));
+        verifyNoMoreInteractions(jobService);
+
+        assertNotNull(actualResult);
+        assertEquals(jobId, actualResult);
+    }
+
+    @Test(expected = ResponseStatusException.class)
+    public void testAddValidationPreparationJob_JobRefused() {
+
+        final Long datasetId = 12345L;
+        final Long dataflowId = 1414L;
+        final Long providerId = 57L;
+        final boolean released = false;
+        final boolean createParquetWithSQL = false;
+        final String validateAsProviderCode = "57";
+        final String preparationCode = "EPEIRUS";
+        final String dataflowName = "SNR3";
+        final String datasetName = "TEST";
+        final Long jobId = 1234L;
+        final Map<String, String> authenticationDetails = new HashMap<>();
+        authenticationDetails.put("user", "testUser");
+
+        final DataSetMetabaseVO dataSetMetabaseVOMock = new DataSetMetabaseVO();
+        dataSetMetabaseVOMock.setId(datasetId);
+        dataSetMetabaseVOMock.setDataflowId(dataflowId);
+        dataSetMetabaseVOMock.setDataProviderId(providerId);
+        dataSetMetabaseVOMock.setDatasetTypeEnum(DatasetTypeEnum.PREPARATION);
+        dataSetMetabaseVOMock.setDataSetName(datasetName);
+
+        mockStatic(SecurityContextHolder.class);
+        when(SecurityContextHolder.getContext()).thenReturn(securityContext);
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.getDetails()).thenReturn(authenticationDetails);
+        mockStatic(ThreadPropertiesManager.class);
+        when(dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetId)).thenReturn(dataSetMetabaseVOMock);
+        when(dataFlowControllerZuul.findDataflowNameById(dataSetMetabaseVOMock.getDataflowId())).thenReturn(dataflowName);
+        when(jobService.checkEligibilityOfPreparationJob(JobTypeEnum.VALIDATION.toString(), datasetId, preparationCode)).thenReturn(JobStatusEnum.REFUSED);
+        when(jobService.addJob(
+                Mockito.eq(dataflowId),
+                Mockito.eq(providerId),
+                Mockito.eq(datasetId),
+                Mockito.any(),
+                Mockito.eq(JobTypeEnum.VALIDATION),
+                Mockito.eq(JobStatusEnum.IN_PROGRESS),
+                Mockito.eq(released),
+                Mockito.eq(null),
+                Mockito.eq(dataflowName),
+                Mockito.eq(datasetName),
+                Mockito.eq(preparationCode)))
+                .thenReturn(jobId);
+
+        final Long actualResult = jobController.addValidationJob(datasetId, dataflowId, providerId, released, createParquetWithSQL, validateAsProviderCode, preparationCode);
+
+        verify(dataSetMetabaseControllerZuul).findDatasetMetabaseById(datasetId);
+        verify(dataFlowControllerZuul).findDataflowNameById(dataflowId);
+        verify(jobService).checkEligibilityOfPreparationJob(JobTypeEnum.VALIDATION.toString(), datasetId, preparationCode);
+        verify(jobService).addJob(
+                Mockito.eq(dataflowId),
+                Mockito.eq(providerId),
+                Mockito.eq(datasetId),
+                Mockito.any(),
+                Mockito.eq(JobTypeEnum.VALIDATION),
+                Mockito.eq(JobStatusEnum.IN_PROGRESS),
+                Mockito.eq(released),
+                Mockito.eq(null),
+                Mockito.eq(dataflowName),
+                Mockito.eq(datasetName),
+                Mockito.eq(preparationCode));
+        verify(jobService).releaseValidationRefusedNotification(jobId, "testUser", datasetId);
+        verifyNoMoreInteractions(jobService);
     }
 
     @Test

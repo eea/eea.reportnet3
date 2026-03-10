@@ -39,7 +39,9 @@ public interface ValidationController {
    */
   @PutMapping(value = "/dataset/{id}")
   void validateDataSetData(@PathVariable("id") Long datasetId,
-                           @RequestParam(value = "released", required = false) boolean released, @RequestParam(value = "jobId") Long jobId);
+                           @RequestParam(value = "released", required = false) boolean released,
+                           @RequestParam(value = "jobId") Long jobId,
+                           @RequestParam(value = "code", required = false) String preparationCode);
 
   /**
    * Gets the failed validations by id dataset.
@@ -132,7 +134,8 @@ public interface ValidationController {
           @RequestParam(value = "typeEntitiesFilter",
                   required = false) List<EntityTypeEnum> typeEntitiesFilter,
           @RequestParam(value = "tableFilter", required = false) String tableFilter,
-          @RequestParam(value = "fieldValueFilter", required = false) String fieldValueFilter);
+          @RequestParam(value = "fieldValueFilter", required = false) String fieldValueFilter,
+          @RequestParam(value = "code", required = false) String preparationCode);
 
   /**
    * Export validation data CSV.
@@ -140,7 +143,7 @@ public interface ValidationController {
    * @param datasetId the dataset id
    */
   @PostMapping(value = "/export/{datasetId}")
-  void exportValidationDataCSV(@PathVariable("datasetId") Long datasetId);
+  void exportValidationDataCSV(@PathVariable("datasetId") Long datasetId,  @RequestParam(value = "code", required = false) String preparationCode);
 
   /**
    * Download file.
@@ -150,7 +153,7 @@ public interface ValidationController {
    * @param response the response
    */
   @GetMapping("/downloadFile/{datasetId}")
-  void downloadFile(@PathVariable Long datasetId, @RequestParam String fileName,
+  void downloadFile(@PathVariable Long datasetId, @RequestParam String fileName,  @RequestParam(value = "code", required = false) String preparationCode,
       HttpServletResponse response);
 
   /**

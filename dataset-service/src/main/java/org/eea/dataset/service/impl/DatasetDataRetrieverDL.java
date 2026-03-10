@@ -262,7 +262,7 @@ public class DatasetDataRetrieverDL implements DataLakeDataRetriever {
 
         // --- Validations (PREPARATION) ---
         preparationDataResolver.setIsIcebergTable(false);
-
+        //TODO ERROR HERE
         if (s3Helper.checkFolderExist(preparationValidationResolver, S3_PREPARATION_VALIDATION_TABLE_PATH)) {
 
             if (!dremioHelperService.checkFolderPromoted(
