@@ -36,6 +36,7 @@ export const TabView = ({
   isErrorDialogVisible,
   isDataflowOpen,
   isDesignDatasetEditorRead,
+  isReordering,
   isTableLockedDueToData,
   onTabAdd,
   onTabAddCancel,
@@ -244,6 +245,7 @@ export const TabView = ({
           isEditingEnabled={isEditingEnabled}
           isIcebergCreated={isIcebergCreated}
           isNavigationHidden={isNavigationHidden}
+          isReordering={isReordering}
           isTableLockedDueToData={tab.props.isTableLockedDueToData}
           key={id}
           leftIcon={tab.props.leftIcon}
