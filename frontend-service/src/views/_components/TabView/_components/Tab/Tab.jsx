@@ -48,6 +48,7 @@ export const Tab = ({
   header,
   headerStyle,
   id,
+  isReordering,
   isDataflowOpen,
   isDesignDatasetEditorRead,
   isEditingEnabled,
@@ -100,6 +101,7 @@ export const Tab = ({
 
   let contextMenuRef = useRef();
   const tabRef = useRef();
+  const isMoving = useRef(false);
 
   useEffect(() => {
     if (!isEditingEnabled) {
@@ -283,6 +285,10 @@ export const Tab = ({
     if (editingHeader) {
       event.preventDefault();
     } else {
+      isMoving.current = true;
+      const img = new Image();
+      img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+      event.dataTransfer.setDragImage(img, 0, 0);
       const draggedTabHeader = event.target.getElementsByClassName('p-tabview-title')[0].textContent;
       event.dataTransfer.setData('text/plain', draggedTabHeader);
       if (!isUndefined(onTabDragAndDropStart)) {
@@ -298,6 +304,9 @@ export const Tab = ({
         onTabDragAndDropStart(index, tableSchemaId);
       }
     }
+    setTimeout(() => {
+      isMoving.current = false;
+    }, 50);
   };
 
   const onTabDragOver = event => {
@@ -571,7 +580,9 @@ export const Tab = ({
         <FontAwesomeIcon className={styles.dragArrow} icon={AwesomeIcons('arrowUp')} role="presentation" />
       </div>
       <li
-        className={`${className} p-tabview-nav-li datasetSchema-new-table-help-step`}
+        className={classNames(`${className} p-tabview-nav-li datasetSchema-new-table-help-step`, {
+          [styles.tabReordering]: isReordering
+        })}
         onContextMenu={e => {
           if (designMode && !isDataflowOpen && !isDesignDatasetEditorRead && !addTab) {
             const contextMenus = document.getElementsByClassName('p-contextmenu p-component');
@@ -594,6 +605,11 @@ export const Tab = ({
           id={id}
           onAuxClick={e => e.preventDefault()}
           onClick={e => {
+            if (isMoving.current) {
+              e.preventDefault();
+              e.stopPropagation();
+              return;
+            }
             if (!disabled) {
               onTabHeaderClick(e);
               !preventScrollLeft && scrollTo(tabRef.current.offsetLeft - 80, 0);

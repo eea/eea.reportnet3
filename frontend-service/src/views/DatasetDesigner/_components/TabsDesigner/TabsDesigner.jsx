@@ -84,6 +84,7 @@ export const TabsDesigner = ({
   const [tabHasErrors, setTabHasErrors] = useState(false);
   const [warningMessage, setWarningMessage] = useState();
   const [warningMessageTitle, setWarningMessageTitle] = useState();
+  const [isReordering, setIsReordering] = useState(false);
 
   useEffect(() => {
     if (!isNil(datasetSchema) && !isEmpty(datasetSchema)) {
@@ -267,11 +268,6 @@ export const TabsDesigner = ({
   const onTableDragAndDrop = (draggedTabHeader, droppedTabHeader) => reorderTable(draggedTabHeader, droppedTabHeader);
 
   const onTableDragAndDropStart = (draggedTabIdx, draggedTabId) => {
-    if (!isUndefined(draggedTabId)) {
-      setActiveTableSchemaId(draggedTabId);
-    } else {
-      setActiveTableSchemaId(tabs[0].tableSchemaId);
-    }
     setInitialTabIndexDrag(draggedTabIdx);
   };
 
@@ -479,6 +475,7 @@ export const TabsDesigner = ({
         isIcebergCreated={isIcebergCreated}
         isWarningDialogVisible={isWarningDialogVisible}
         maxLength={maxLength}
+        isReordering={isReordering}
         name="TabsDesigner"
         onTabAdd={onTabAdd}
         onTabAddCancel={onTabAddCancel}
@@ -570,6 +567,8 @@ export const TabsDesigner = ({
   };
 
   const reorderTable = async (draggedTabHeader, droppedTabHeader) => {
+    if (draggedTabHeader === droppedTabHeader) return;
+    setIsReordering(true);
     try {
       const inmTabs = [...tabs];
       const draggedTabIdx = TabsUtils.getIndexByHeader(draggedTabHeader, inmTabs);
@@ -580,13 +579,13 @@ export const TabsDesigner = ({
         await DatasetService.updateTableOrder(datasetId, index, tabs[draggedTabIdx].tableSchemaId);
 
         const shiftedTabs = arrayShift(inmTabs, draggedTabIdx, droppedTabIdx);
-
         shiftedTabs.forEach((tab, i) => (tab.index = !tab.addTab ? i : -1));
-        setActiveTableSchemaId(shiftedTabs[index].tableSchemaId);
         filterManualEdit([...shiftedTabs]);
       }
     } catch (error) {
       console.error('TabsDesigner - reorderTable.', error);
+    } finally {
+      setIsReordering(false);
     }
   };
 

@@ -114,3 +114,12 @@ input.p_tabview_input_design {
   z-index: 3003 !important;
 }
 
+.tabReordering {
+  opacity: 0.6;
+  filter: blur(1px);
+  transition: all 0.2s ease-in-out;
+  user-select: none;
+  a {
+    cursor: wait !important;
+  }
+}

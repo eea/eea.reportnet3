@@ -41,6 +41,7 @@ export const TabView = ({
   onTabBlur,
   onTabChange = null,
   onTabClick,
+  isReordering,
   onTabConfirmDelete,
   onTabDragAndDrop,
   onTabDragAndDropStart,
@@ -221,6 +222,7 @@ export const TabView = ({
         <Tab
           additionalInfo={tab.props.description}
           addTab={tab.props.addTab}
+          isReordering={isReordering}
           ariaControls={ariaControls}
           bigData={bigData}
           checkEditingTabs={checkEditingTabs}
