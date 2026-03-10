@@ -53,6 +53,7 @@ export const Tab = ({
   isEditingEnabled,
   isIcebergCreated,
   isReordering,
+  isTableLockedDueToData,
   index,
   initialTabIndexDrag,
   isNavigationHidden,
@@ -104,7 +105,7 @@ export const Tab = ({
   const isMoving = useRef(false);
 
   useEffect(() => {
-    if (!isEditingEnabled) {
+    if (!isEditingEnabled && !isTableLockedDueToData) {
       setMenu([
         {
           label: resourcesContext.messages['edit'],
@@ -127,7 +128,7 @@ export const Tab = ({
     } else {
       setMenu(undefined);
     }
-  }, [tableSchemaId, hasPKReferenced, isEditingEnabled]);
+  }, [tableSchemaId, hasPKReferenced, isEditingEnabled, isTableLockedDueToData]);
 
   useEffect(() => {
     if (!editingHeader) {
@@ -417,7 +418,7 @@ export const Tab = ({
   };
 
   const onTabDoubleClick = () => {
-    if (editable && !isEditingEnabled) {
+    if ((editable && !isEditingEnabled && !isTableLockedDueToData)) {
       if (!isUndefined(onTabEditingHeader)) {
         setEditingHeader(true);
         onTabEditingHeader(true);
