@@ -465,7 +465,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
     private void handleFmeRequest(IntegrationVO integrationVO, ImportFileInDremioInfo importFileInDremioInfo, File file, String mimeType) throws EEAException {
         try {// TODO for preparation
             fileTreatmentHelper.prepareFmeFileProcess(importFileInDremioInfo.getDatasetId(), file, integrationVO, mimeType, importFileInDremioInfo.getTableSchemaId(),
-                    false, importFileInDremioInfo.getJobId());
+                    false, importFileInDremioInfo.getJobId(), importFileInDremioInfo.getPreparationCode());
         }
         catch (Exception e){
             throw new EEAException("Could not prepare fme request for job id " + importFileInDremioInfo.getJobId());
@@ -2701,6 +2701,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
         if(job != null){
             LOG.info("For import {} found job with id {}", importFileInDremioInfo, jobId);
+
             if(job.getJobStatus().equals(JobStatusEnum.CANCELED) || job.getJobStatus().equals(JobStatusEnum.CANCELED_BY_ADMIN)) {
                 LOG.info("Job {} is cancelled. Exiting import!", job.getId());
                 return job;

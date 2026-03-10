@@ -1813,7 +1813,7 @@ public class FileTreatmentHelper implements DisposableBean {
 
             if (null != integrationVO) {
                 prepareFmeFileProcess(datasetId, files.get(0), integrationVO, mimeType, tableSchemaId,
-                        replace,jobId);
+                        replace,jobId, null);
             } else {
                 List<File> validatedNamesList = validateFileNames(tableSchemaId, schema, files, processId, datasetId, jobId, originalFileName);
                 List<File> validatedHeadersList = !validatedNamesList.isEmpty() ? validateFileHeaders(tableSchemaId, schema,originalFileName, validatedNamesList, delimiter, processId, datasetId, jobId) : new ArrayList<>();
@@ -2175,31 +2175,32 @@ public class FileTreatmentHelper implements DisposableBean {
          * @throws EEAException the EEA exception
          */
         public void prepareFmeFileProcess (Long datasetId, File file, IntegrationVO integrationVO,
-                String mimeType, String tableSchemaId, boolean replace, Long jobId) throws IOException, EEAException {
+                String mimeType, String tableSchemaId, boolean replace, Long jobId, String preparationCode) throws IOException, EEAException {
 
             LOG.info("Start FME-Import process: datasetId={}, integrationVO={}", datasetId, integrationVO);
             Map<String, String> internalParameters = integrationVO.getInternalParameters();
 
-            // Remove the lock so FME will not encounter it while calling back importFileData
-            if (!"true".equals(internalParameters.get(IntegrationParams.NOTIFICATION_REQUIRED))
-                    || IntegrationOperationTypeEnum.IMPORT_FROM_OTHER_SYSTEM
-                    .equals(integrationVO.getOperation())
-                    || "zip".equalsIgnoreCase(mimeType)) {
-                Map<String, Object> importFileData = new HashMap<>();
-                importFileData.put(LiteralConstants.SIGNATURE, LockSignature.IMPORT_FILE_DATA.getValue());
-                importFileData.put(LiteralConstants.DATASETID, datasetId);
-                lockService.removeLockByCriteria(importFileData);
-                Map<String, Object> importBigFileData = new HashMap<>();
-                importBigFileData.put(LiteralConstants.SIGNATURE,
-                        LockSignature.IMPORT_BIG_FILE_DATA.getValue());
-                importBigFileData.put(LiteralConstants.DATASETID, datasetId);
-                lockService.removeLockByCriteria(importBigFileData);
-                releaseLockReleasingProcess(datasetId);
+            if(StringUtils.isBlank(preparationCode)) {//SKIP for preparation code
+                // Remove the lock so FME will not encounter it while calling back importFileData
+                if (!"true".equals(internalParameters.get(IntegrationParams.NOTIFICATION_REQUIRED))
+                        || IntegrationOperationTypeEnum.IMPORT_FROM_OTHER_SYSTEM
+                        .equals(integrationVO.getOperation())
+                        || "zip".equalsIgnoreCase(mimeType)) {
+                    Map<String, Object> importFileData = new HashMap<>();
+                    importFileData.put(LiteralConstants.SIGNATURE, LockSignature.IMPORT_FILE_DATA.getValue());
+                    importFileData.put(LiteralConstants.DATASETID, datasetId);
+                    lockService.removeLockByCriteria(importFileData);
+                    Map<String, Object> importBigFileData = new HashMap<>();
+                    importBigFileData.put(LiteralConstants.SIGNATURE,
+                            LockSignature.IMPORT_BIG_FILE_DATA.getValue());
+                    importBigFileData.put(LiteralConstants.DATASETID, datasetId);
+                    lockService.removeLockByCriteria(importBigFileData);
+                    releaseLockReleasingProcess(datasetId);
+                }
             }
-
             // delete precious data if necessary
             if (replace) {
-                wipeDataAsync(datasetId, tableSchemaId, file, integrationVO, jobId);
+                wipeDataAsync(datasetId, tableSchemaId, file, integrationVO, jobId, preparationCode);
                 LOG.info("Data has been wiped for datasetId {}", datasetId);
             } else {
                 Map<String, Object> valuesFME = new HashMap<>();
@@ -2207,6 +2208,7 @@ public class FileTreatmentHelper implements DisposableBean {
                 valuesFME.put("fileName", file);
                 valuesFME.put("integrationId", integrationVO.getId());
                 valuesFME.put("jobId", jobId);
+                valuesFME.put("code", preparationCode);
                 kafkaSenderUtils.releaseKafkaEvent(EventType.CONTINUE_FME_PROCESS_EVENT, valuesFME);
             }
         }
@@ -2597,11 +2599,15 @@ public class FileTreatmentHelper implements DisposableBean {
          */
         @Async
         public void wipeDataAsync (Long datasetId, String tableSchemaId, File file,
-                IntegrationVO integrationVO, Long jobId){
-            if (null != tableSchemaId) {
-                datasetService.deleteTableBySchema(tableSchemaId, datasetId, false);
-            } else {
-                datasetService.deleteImportData(datasetId, true);
+                IntegrationVO integrationVO, Long jobId, String preparationCode){
+            // Skip relational wipe for preparation datasets
+            if (StringUtils.isBlank(preparationCode)) {
+
+                if (null != tableSchemaId) {
+                    datasetService.deleteTableBySchema(tableSchemaId, datasetId, false);
+                } else {
+                    datasetService.deleteImportData(datasetId, true);
+                }
             }
 
             Map<String, Object> valuesFME = new HashMap<>();
