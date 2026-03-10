@@ -471,7 +471,8 @@ export const DatasetService = {
     fieldValueFilter,
     levelErrorsFilter,
     typeEntitiesFilter,
-    tablesFilter
+    tablesFilter,
+    code
   ) => {
     const datasetErrorsDTO = await DatasetRepository.getShowValidationErrorsDL(
       datasetId,
@@ -483,7 +484,8 @@ export const DatasetService = {
       fieldValueFilter,
       levelErrorsFilter,
       typeEntitiesFilter,
-      tablesFilter
+      tablesFilter,
+      code
     );
     const dataset = new Dataset({
       datasetId: datasetErrorsDTO.data.idDataset,
@@ -965,10 +967,10 @@ export const DatasetService = {
   updateTableNameDesign: async (tableSchemaId, tableSchemaName, datasetId) =>
     await DatasetRepository.updateTableNameDesign(tableSchemaId, tableSchemaName, datasetId),
 
-  validate: async datasetId => await DatasetRepository.validate(datasetId),
+  validate: async ({ datasetId, code }) => await DatasetRepository.validate({ datasetId, code }),
 
-  validateAsProvider: async (datasetId, dataflowId, providerId) =>
-    await DatasetRepository.validateAsProvider(datasetId, dataflowId, providerId),
+  validateAsProvider: async ({ datasetId, dataflowId, providerId, code }) =>
+    await DatasetRepository.validateAsProvider({ datasetId, dataflowId, providerId, code }),
 
   validateAllSql: async datasetId => await DatasetRepository.validateAllSql(datasetId),
 

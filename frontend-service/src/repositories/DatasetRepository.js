@@ -375,7 +375,8 @@ export const DatasetRepository = {
     fieldValueFilter,
     levelErrorsFilter,
     typeEntitiesFilter,
-    tablesFilter
+    tablesFilter,
+    code
   ) => {
     if (asc === -1) {
       asc = 0;
@@ -391,7 +392,8 @@ export const DatasetRepository = {
         fieldValueFilter,
         levelErrorsFilter,
         typeEntitiesFilter,
-        tableFilter: tablesFilter
+        tableFilter: tablesFilter,
+        code
       })
     });
   },
@@ -608,11 +610,12 @@ export const DatasetRepository = {
         dataAreManuallyEditable
       }
     }),
-  validate: async datasetId => await HTTPRequester.update({ url: getUrl(DatasetConfig.validate, { datasetId }) }),
+  validate: async ({ datasetId, code }) =>
+    await HTTPRequester.update({ url: getUrl(DatasetConfig.validate, { datasetId, code }) }),
 
-  validateAsProvider: async (datasetId, dataflowId, providerId) =>
+  validateAsProvider: async ({ datasetId, dataflowId, providerId, code }) =>
     await HTTPRequester.update({
-      url: getUrl(DatasetConfig.validateAsProvider, { datasetId, dataflowId, providerId })
+      url: getUrl(DatasetConfig.validateAsProvider, { datasetId, dataflowId, providerId, code })
     }),
 
   validateAllSql: async datasetId =>

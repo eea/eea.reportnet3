@@ -722,7 +722,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
     const action = 'DATASET_VALIDATE';
     actionsContext.testProcess(datasetId, action);
     try {
-      await DatasetService.validate(datasetId);
+      await DatasetService.validate({ datasetId, code });
       notificationContext.add(
         {
           type: 'VALIDATE_DATA_INIT',
@@ -764,7 +764,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
     const action = 'DATASET_VALIDATE';
     actionsContext.testProcess(datasetId, action);
     try {
-      await DatasetService.validateAsProvider(datasetId, dataflowId, providerId);
+      await DatasetService.validateAsProvider({ datasetId, dataflowId, providerId, code });
       notificationContext.add(
         {
           type: 'VALIDATE_DATA_INIT',
@@ -1392,7 +1392,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
     setIsDownloadingValidations(true);
 
     try {
-      await ValidationService.generateShowValidationsFile(datasetId);
+      await ValidationService.generateShowValidationsFile({ datasetId, code });
       notificationContext.add({ type: 'DOWNLOAD_VALIDATIONS_START' });
     } catch (error) {
       console.error('Dataset - onDownloadValidations.', error);
@@ -1799,6 +1799,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
             isWebformView={selectedView === 'webform'}
             levelErrorTypes={levelErrorTypes}
             onSelectValidation={onSelectValidation}
+            preparationSetCode={code}
             reporting={true}
             schemaTables={schemaTables}
             switchToTabularData={() => setSelectedView('tabularData')}
