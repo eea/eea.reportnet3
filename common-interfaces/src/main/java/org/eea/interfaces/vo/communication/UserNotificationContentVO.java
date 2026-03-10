@@ -80,4 +80,6 @@ public class UserNotificationContentVO {
   private String fieldName;
 
   private String preparationCode;
+
+  private String preparationDatasetMessagePart;
 }

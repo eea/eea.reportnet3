@@ -83,9 +83,17 @@ public class UserNotification {
   @Field(value = "fileName")
   private String fileName;
 
-  /** The file name. */
+  /** Non-Latin Characters separated by comma. */
   @Field(value = "nonLatinCharacters")
   private String nonLatinCharacters;
+
+  /** The Preparation Code. */
+  @Field(value = "preparationCode")
+  private String preparationCode;
+
+  /** The Preparation Code. */
+  @Field(value = "preparationDatasetMessagePart")
+  private String preparationDatasetMessagePart;
 
   /** The short code. */
   @Field(value = "shortCode")

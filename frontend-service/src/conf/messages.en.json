@@ -420,7 +420,7 @@
     "deleteDataflowFailedEvent": "The deletion of the dataflow was unsuccessful. Please try again or contact the Service Desk if the issue persists.",
     "deleteDatasetConfirm": "Are you sure you want to delete the dataset data? You won't be able to recover it, please consider creating a copy before.",
     "deleteDatasetData": "Delete dataset data",
-    "deleteDatasetDataCompletedEvent": "Delete dataset data finished at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
+    "deleteDatasetDataCompletedEvent": "Delete dataset data finished at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a> {:preparationDatasetMessagePart}",
     "deleteDatasetDataInit": "Deleting dataset data process has started.",
     "deleteDatasetHeader": "Delete dataset data",
     "deleteDatasetSchema": "Are you sure you want to delete the dataset schema?",

@@ -933,11 +933,15 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
     @Override
     public void deleteTableData(Long datasetId, Long dataflowId, Long providerId, String preparationCode, String tableSchemaId, Long jobId, Boolean createEmptyTablesBool) throws Exception {
         try {
+            boolean isPreparationDataset = org.apache.commons.lang3.StringUtils.isNotBlank(preparationCode);
+
             String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
             TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, datasetSchemaId);
-            if (tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable())
-                    && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, tableSchemaId))) {
-                throw new Exception("Can not delete table data because iceberg table is created");
+            if (!isPreparationDataset) {
+                if (tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable())
+                        && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, tableSchemaId))) {
+                    throw new Exception("Can not delete table data because iceberg table is created");
+                }
             }
             String tableSchemaName = tableSchemaVO.getNameTableSchema();
             DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
@@ -1021,13 +1025,17 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
     public void deleteDatasetData(Long datasetId, Long dataflowId, Long providerId, String preparationCode, Boolean deletePrefilledTables, Boolean technicallyAccepted, Long jobId) throws Exception {
 
         try {
+            boolean isPreparationDataset = org.apache.commons.lang3.StringUtils.isNotBlank(preparationCode);
+
             String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
             List<TableSchemaIdNameVO> tableSchemas = datasetSchemaService.getTableSchemasIds(datasetId);
-            for (TableSchemaIdNameVO entry : tableSchemas) {
-                TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(entry.getIdTableSchema(), datasetSchemaId);
-                if (tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable())
-                        && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, tableSchemaVO.getIdTableSchema()))) {
-                    throw new Exception("Can not delete table data because iceberg table is created");
+            if (!isPreparationDataset) {
+                for (TableSchemaIdNameVO entry : tableSchemas) {
+                    TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(entry.getIdTableSchema(), datasetSchemaId);
+                    if (tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable())
+                            && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, tableSchemaVO.getIdTableSchema()))) {
+                        throw new Exception("Can not delete table data because iceberg table is created");
+                    }
                 }
             }
 
@@ -1046,7 +1054,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                     }
                 }
                 //we do not pass a job id because there is a job for the whole dataset data deletion
-                deleteTableData(datasetId, dataflowId, providerId, null, tableSchemaIdNameVO.getIdTableSchema(), null, true);
+                deleteTableData(datasetId, dataflowId, providerId, preparationCode, tableSchemaIdNameVO.getIdTableSchema(), null, true);
             }
 
             if (jobId != null) {
@@ -1061,7 +1069,9 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                     Map<String, Object> value = new HashMap<>();
                     NotificationVO notificationVO = NotificationVO.builder()
                             .user(SecurityContextHolder.getContext().getAuthentication().getName())
-                            .datasetId(datasetId).build();
+                            .datasetId(datasetId)
+                            .preparationCode(preparationCode)
+                            .build();
                     DataSetMetabaseVO datasetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
                     notificationVO.setDatasetName(datasetMetabaseVO.getDataSetName());
                     notificationVO.setDataflowId(datasetMetabaseVO.getDataflowId());
