@@ -36,12 +36,12 @@ export const TabView = ({
   isErrorDialogVisible,
   isDataflowOpen,
   isDesignDatasetEditorRead,
+  isReordering,
   onTabAdd,
   onTabAddCancel,
   onTabBlur,
   onTabChange = null,
   onTabClick,
-  isReordering,
   onTabConfirmDelete,
   onTabDragAndDrop,
   onTabDragAndDropStart,
@@ -222,7 +222,6 @@ export const TabView = ({
         <Tab
           additionalInfo={tab.props.description}
           addTab={tab.props.addTab}
-          isReordering={isReordering}
           ariaControls={ariaControls}
           bigData={bigData}
           checkEditingTabs={checkEditingTabs}
@@ -246,6 +245,7 @@ export const TabView = ({
           isEditingEnabled={isEditingEnabled}
           isIcebergCreated={isIcebergCreated}
           isNavigationHidden={isNavigationHidden}
+          isReordering={isReordering}
           key={id}
           leftIcon={tab.props.leftIcon}
           manualEdit={tab.props.manualEdit}

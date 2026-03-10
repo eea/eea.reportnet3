@@ -79,12 +79,12 @@ export const TabsDesigner = ({
   const [isEditing, setIsEditing] = useState(false);
   const [isErrorDialogVisible, setIsErrorDialogVisible] = useState(false);
   const [isWarningDialogVisible, setIsWarningDialogVisible] = useState(false);
+  const [isReordering, setIsReordering] = useState(false);
   const [scrollFn, setScrollFn] = useState();
   const [tabs, setTabs] = useState([]);
   const [tabHasErrors, setTabHasErrors] = useState(false);
   const [warningMessage, setWarningMessage] = useState();
   const [warningMessageTitle, setWarningMessageTitle] = useState();
-  const [isReordering, setIsReordering] = useState(false);
 
   useEffect(() => {
     if (!isNil(datasetSchema) && !isEmpty(datasetSchema)) {
@@ -473,9 +473,9 @@ export const TabsDesigner = ({
         isEditingEnabled={isEditingEnabled}
         isErrorDialogVisible={isErrorDialogVisible}
         isIcebergCreated={isIcebergCreated}
+        isReordering={isReordering}
         isWarningDialogVisible={isWarningDialogVisible}
         maxLength={maxLength}
-        isReordering={isReordering}
         name="TabsDesigner"
         onTabAdd={onTabAdd}
         onTabAddCancel={onTabAddCancel}
