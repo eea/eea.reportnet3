@@ -71,6 +71,14 @@ export const ActionsProvider = ({ children }) => {
       if (isEmpty(jobsInProgress.jobsList)) {
         setIsInProgress(false);
         clearInterval(timer.current);
+
+        if (jobTypeRef.current === 'DELETE') {
+          window.dispatchEvent(
+            new CustomEvent('refreshTableDataChecks', {
+              detail: { datasetId: datasetId }
+            })
+          );
+        }
       } else {
         setIsInProgress(true);
         const jobInProgress = jobsInProgress.jobsList.find(job => job.jobStatus === 'IN_PROGRESS');
