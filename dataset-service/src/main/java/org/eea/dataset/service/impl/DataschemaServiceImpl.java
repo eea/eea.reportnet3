@@ -2916,8 +2916,11 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     LOG.info("Inserting new field schema into dataset {}", datasetId);
     createFieldSchema(datasetSchema.getIdDataSetSchema().toString(), fieldSchemaVO);
     // propagate the new field to the existing records in the dataset value
-    TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, datasetId));
-    datasetService.prepareNewFieldPropagation(datasetId, fieldSchemaVO);
+    final boolean isBigData = dataFlowControllerZuul.isBigDataflowDataset(datasetId);
+    if (!isBigData) {
+      TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, datasetId));
+      datasetService.prepareNewFieldPropagation(datasetId, fieldSchemaVO);
+    }
     // with that we create the rule automatic required
 
     if (Boolean.TRUE.equals(fieldSchemaVO.getRequired())) {
