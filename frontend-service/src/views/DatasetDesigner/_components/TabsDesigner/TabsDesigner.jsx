@@ -1,4 +1,4 @@
-import { Fragment, useContext, useEffect, useState } from 'react';
+import { Fragment, useContext, useEffect, useState, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import isEmpty from 'lodash/isEmpty';
@@ -85,6 +85,7 @@ export const TabsDesigner = ({
   const [warningMessage, setWarningMessage] = useState();
   const [warningMessageTitle, setWarningMessageTitle] = useState();
   const [tableHasData, setTableHasData] = useState({});
+  const fetchingTablesRef = useRef(new Set());
 
   useEffect(() => {
     if (!isNil(datasetSchema) && !isEmpty(datasetSchema)) {
@@ -121,12 +122,42 @@ export const TabsDesigner = ({
   useEffect(() => {
     if (!isEmpty(tabs) && bigData) {
       tabs.forEach(tab => {
-        if (!tab.addTab) {
-          checkTableHasData(tab.tableSchemaId);
+        if (!tab.addTab && tableHasData[tab.tableSchemaId] === undefined) {
+          if (!fetchingTablesRef.current.has(tab.tableSchemaId)) {
+            fetchingTablesRef.current.add(tab.tableSchemaId);
+            checkTableHasData(tab.tableSchemaId);
+          }
         }
       });
     }
   }, [tabs]);
+
+
+  useEffect(() => {
+    if (!bigData) return;
+
+    const handleRefreshTableDataChecks = event => {
+      if (String(event.detail.datasetId) === String(datasetId)) {
+        tabs.forEach(tab => {
+          if (!tab.addTab) {
+            setTableHasData(prev => {
+              const updated = { ...prev };
+              delete updated[tab.tableSchemaId];
+              return updated;
+            });
+            fetchingTablesRef.current.delete(tab.tableSchemaId);
+            checkTableHasData(tab.tableSchemaId);
+          }
+        });
+      }
+    };
+
+    window.addEventListener('refreshTableDataChecks', handleRefreshTableDataChecks);
+
+    return () => {
+      window.removeEventListener('refreshTableDataChecks', handleRefreshTableDataChecks);
+    };
+  }, [bigData, datasetId, tabs]);
 
   const onChangeFields = (fields, isLinkChange, tabSchemaId) => {
     const inmTabs = [...tabs];

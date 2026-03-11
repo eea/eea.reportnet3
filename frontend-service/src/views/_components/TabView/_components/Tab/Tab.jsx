@@ -103,7 +103,6 @@ export const Tab = ({
   const tabRef = useRef();
 
   useEffect(() => {
-    if (!isEditingEnabled && !isTableLockedDueToData) {
       setMenu([
         {
           label: resourcesContext.messages['edit'],
@@ -123,10 +122,7 @@ export const Tab = ({
           disabled: hasPKReferenced
         }
       ]);
-    } else {
-      setMenu(undefined);
-    }
-  }, [tableSchemaId, hasPKReferenced, isEditingEnabled, isTableLockedDueToData]);
+  }, [tableSchemaId, hasPKReferenced]);
 
   useEffect(() => {
     if (!editingHeader) {
@@ -574,7 +570,7 @@ export const Tab = ({
       <li
         className={`${className} p-tabview-nav-li datasetSchema-new-table-help-step`}
         onContextMenu={e => {
-          if (designMode && !isDataflowOpen && !isDesignDatasetEditorRead && !addTab) {
+          if (designMode && !isDataflowOpen && !isDesignDatasetEditorRead && !addTab && !isUndefined(menu) && !isEditingEnabled && !isTableLockedDueToData) {
             const contextMenus = document.getElementsByClassName('p-contextmenu p-component');
             const inmContextMenus = [...contextMenus];
             const hideContextMenus = inmContextMenus.filter(contextMenu => contextMenu.style.display !== '');
