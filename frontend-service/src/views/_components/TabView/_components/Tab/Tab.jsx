@@ -105,7 +105,6 @@ export const Tab = ({
   const isMoving = useRef(false);
 
   useEffect(() => {
-    if (!isEditingEnabled && !isTableLockedDueToData) {
       setMenu([
         {
           label: resourcesContext.messages['edit'],
@@ -125,10 +124,7 @@ export const Tab = ({
           disabled: hasPKReferenced
         }
       ]);
-    } else {
-      setMenu(undefined);
-    }
-  }, [tableSchemaId, hasPKReferenced, isEditingEnabled, isTableLockedDueToData]);
+  }, [tableSchemaId, hasPKReferenced]);
 
   useEffect(() => {
     if (!editingHeader) {
@@ -585,7 +581,7 @@ export const Tab = ({
           [styles.tabReordering]: isReordering
         })}
         onContextMenu={e => {
-          if (designMode && !isDataflowOpen && !isDesignDatasetEditorRead && !addTab) {
+          if (designMode && !isDataflowOpen && !isDesignDatasetEditorRead && !addTab && !isUndefined(menu) && !isEditingEnabled && !isTableLockedDueToData) {
             const contextMenus = document.getElementsByClassName('p-contextmenu p-component');
             const inmContextMenus = [...contextMenus];
             const hideContextMenus = inmContextMenus.filter(contextMenu => contextMenu.style.display !== '');
