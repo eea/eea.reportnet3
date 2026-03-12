@@ -530,20 +530,10 @@ public class DatasetControllerImpl implements DatasetController {
         JobVO job = bigDataDatasetService.retrieveOrAddImportJob(importFileInDremioInfo, fmeJobId, jobId);
         jobId = job.getId();
 
-        if (StringUtils.isNotBlank(preparationCode)) {
 
-          if (StringUtils.isBlank(job.getPreparationCode())) {
-            throw new IllegalStateException(
-                    "FME sent preparationCode but job is not preparation job. JobId=" + job.getId());
-          }
+        importFileInDremioInfo.setPreparationCode(bigDataDatasetService.resolvePreparationCode(preparationCode, job));
 
-          if (!preparationCode.equals(job.getPreparationCode())) {
-            throw new IllegalStateException(
-                    "Preparation code mismatch for jobId=" + job.getId());
-          }
-        }
-
-        bigDataDatasetService.importBigData(datasetId, dataflowId, providerId, tableSchemaId, replace, integrationId, delimiter, jobId, fmeJobId, dataFlowVO, helperMultipartFileMapper, job, importFileInDremioInfo,preparationCode);
+        bigDataDatasetService.importBigData(datasetId, dataflowId, providerId, tableSchemaId, replace, integrationId, delimiter, jobId, fmeJobId, dataFlowVO, helperMultipartFileMapper, job, importFileInDremioInfo);
       } catch (Exception e) {
         LOG.error("Error when importing data to Dremio for datasetId {}", datasetId, e);
         throw e;
@@ -726,7 +716,7 @@ public class DatasetControllerImpl implements DatasetController {
         ImportFileInDremioInfo importFileInDremioInfo = new ImportFileInDremioInfo(jobId, datasetId, dataflowId, providerId, tableSchemaId, helperMultipartFileMapper.getOriginalFilename(), replace, delimiter, integrationId, null,preparationCode);
         JobVO job = bigDataDatasetService.retrieveOrAddImportJob(importFileInDremioInfo, fmeJobId, jobId);
         jobId = job.getId();
-        bigDataDatasetService.importBigData(datasetId, dataflowId, providerId, tableSchemaId, replace, integrationId, delimiter, jobId, fmeJobId, dataFlowVO, helperMultipartFileMapper, job, importFileInDremioInfo, preparationCode);
+        bigDataDatasetService.importBigData(datasetId, dataflowId, providerId, tableSchemaId, replace, integrationId, delimiter, jobId, fmeJobId, dataFlowVO, helperMultipartFileMapper, job, importFileInDremioInfo);
       } catch (Exception e) {
         LOG.error("Error when privately importing data to Dremio for datasetId {}", datasetId, e);
         throw e;

@@ -257,11 +257,13 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
     @Async
     public void importBigData(Long datasetId, Long dataflowId, Long providerId, String tableSchemaId,
                               Boolean replace, Long integrationId, String delimiter, Long jobId,
-                              String fmeJobId, DataFlowVO dataflowVO, HelperMultipartFileMapper helperMultipartFileMapper, JobVO job, ImportFileInDremioInfo importFileInDremioInfo, String preparationCode) throws Exception {
+                              String fmeJobId, DataFlowVO dataflowVO, HelperMultipartFileMapper helperMultipartFileMapper, JobVO job, ImportFileInDremioInfo importFileInDremioInfo) throws Exception {
         JobStatusEnum jobStatus = JobStatusEnum.IN_PROGRESS;
         String filePathInS3 = null;
         String fileName = helperMultipartFileMapper.getOriginalFilename();
         File s3File = null;
+        String preparationCode =importFileInDremioInfo.getPreparationCode();
+
         try {
             jobStatus = job.getJobStatus();
             if(job.getParameters().get("filePathInS3") != null) {
@@ -3316,5 +3318,41 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         }
 
         return new File(root, datasetId);
+    }
+
+    @Override
+    public String resolvePreparationCode(String requestPreparationCode, JobVO job) {
+
+        if (job == null) {
+            throw new IllegalArgumentException("Job must not be null when resolving preparation code.");
+        }
+
+        String jobPreparationCode = job.getPreparationCode();
+
+        // Request contains preparation code (FME or endpoint)
+        if (StringUtils.isNotBlank(requestPreparationCode)) {
+
+            if (StringUtils.isBlank(jobPreparationCode)) {
+                throw new IllegalStateException(
+                        "Preparation code sent but job is not a preparation job. JobId=" + job.getId());
+            }
+
+            // If codes differ → illegal
+            if (!requestPreparationCode.equals(jobPreparationCode)) {
+                throw new IllegalStateException(
+                        "Preparation code mismatch for jobId=" + job.getId());
+            }
+
+            // Valid preparation job
+            return jobPreparationCode;
+        }
+
+        //  Request has no code but job is preparation job
+        if (StringUtils.isNotBlank(jobPreparationCode)) {
+            return jobPreparationCode;
+        }
+
+        // Not a preparation job
+        return null;
     }
 }
