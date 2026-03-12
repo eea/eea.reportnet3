@@ -367,7 +367,11 @@ export const TabsDesigner = ({
   const arrayShift = (arr, fromIndex, toIndex) => {
     const result = [...arr];
     const [removed] = result.splice(fromIndex, 1);
-    result.splice(toIndex, 0, removed);
+    let target = toIndex;
+    if (fromIndex < toIndex && Math.abs(toIndex - fromIndex) > 1) {
+      target = toIndex - 1;
+    }
+    result.splice(target, 0, removed);
     return result;
   };
 
@@ -628,8 +632,11 @@ export const TabsDesigner = ({
       const inmTabs = [...tabs];
       const draggedTabIdx = TabsUtils.getIndexByHeader(draggedTabHeader, inmTabs);
       const droppedTabIdx = TabsUtils.getIndexByHeader(droppedTabHeader, inmTabs);
-      const index = draggedTabIdx > droppedTabIdx ? droppedTabIdx : droppedTabIdx - 1;
 
+      let index = droppedTabIdx;
+      if (draggedTabIdx < droppedTabIdx && Math.abs(droppedTabIdx - draggedTabIdx) > 1) {
+        index = droppedTabIdx - 1;
+      }
       if (index > -1) {
         await DatasetService.updateTableOrder(datasetId, index, tabs[draggedTabIdx].tableSchemaId);
 
