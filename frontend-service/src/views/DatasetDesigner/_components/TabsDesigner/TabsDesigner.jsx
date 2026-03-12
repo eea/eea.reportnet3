@@ -364,29 +364,11 @@ export const TabsDesigner = ({
     }
   };
 
-  const arrayShift = (arr, initialIdx, endIdx) => {
-    const element = arr[initialIdx];
-    if (Math.abs(endIdx - initialIdx) > 1) {
-      arr.splice(initialIdx, 1);
-      if (initialIdx < endIdx) {
-        arr.splice(endIdx - 1, 0, element);
-      } else {
-        arr.splice(endIdx, 0, element);
-      }
-    } else {
-      if (endIdx === 0) {
-        arr.splice(initialIdx, 1);
-        arr.splice(0, 0, element);
-      } else {
-        arr.splice(initialIdx, 1);
-        if (initialIdx < endIdx) {
-          arr.splice(endIdx - 1, 0, element);
-        } else {
-          arr.splice(endIdx, 0, element);
-        }
-      }
-    }
-    return arr;
+  const arrayShift = (arr, fromIndex, toIndex) => {
+    const result = [...arr];
+    const [removed] = result.splice(fromIndex, 1);
+    result.splice(toIndex, 0, removed);
+    return result;
   };
 
   const checkDuplicates = (header, tabIndex) => {
