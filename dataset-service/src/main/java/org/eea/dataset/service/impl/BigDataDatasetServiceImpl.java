@@ -2499,9 +2499,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 } else if (datasetType.equals(DatasetTypeEnum.EUDATASET)) {
                   path = S3_ATTACHMENTS_EU_TABLE_PATH;
                 }
-                S3PathResolver s3TablePathResolver = new S3PathResolver(dataflowId, providerId, datasetId, tableName, tableName, path);
-                s3TablePathResolver.setPreparationCode(preparationCode);
-
+                S3PathResolver s3TablePathResolver = new S3PathResolver(dataflowId, providerId, datasetId, tableName, tableName, preparationCode, path);
                 if (s3HelperPrivate.checkFolderExist(s3TablePathResolver, path)) {
                   String attachmentsPathInS3 = s3ServicePrivate.getTableAsFolderQueryPath(s3TablePathResolver, path);
                   s3HelperPrivate.getAttachmentsFromS3Locally(attachmentsPathInS3, folderToZipPath);
@@ -2527,9 +2525,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 } else if (datasetType.equals(DatasetTypeEnum.EUDATASET)) {
                   path = S3_ATTACHMENTS_PARENT_FOLDER_EU_PATH;
                 }
-                S3PathResolver s3TablePathResolver = new S3PathResolver(dataflowId, providerId, datasetId, null, null, path);
-                s3TablePathResolver.setPreparationCode(preparationCode);
-
+                S3PathResolver s3TablePathResolver = new S3PathResolver(dataflowId, providerId, datasetId, null, null, preparationCode, path);
                 if (s3HelperPrivate.checkFolderExist(s3TablePathResolver, path)) {
                   String attachmentsPathInS3 = s3ServicePrivate.getTableAsFolderQueryPath(s3TablePathResolver, path);
                   s3HelperPrivate.getAttachmentsFromS3Locally(attachmentsPathInS3, folderToZipPath);
@@ -2570,7 +2566,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
                 for (TableSchemaIdNameVO t : tables) {
                   // Build resolver with dataflowId, providerId, datasetId, and current table.
-                  S3PathResolver resolver = new S3PathResolver(dataflowId, pid, datasetId, t.getNameTableSchema(), null, tableAttachmentsConst);
+                  S3PathResolver resolver = new S3PathResolver(dataflowId, pid, datasetId, t.getNameTableSchema(), null, preparationCode, tableAttachmentsConst);
 
                   // Base prefix up to the table folder
                   String tablePrefix = s3ServicePrivate.getTableAsFolderQueryPath(resolver, tableAttachmentsConst);
