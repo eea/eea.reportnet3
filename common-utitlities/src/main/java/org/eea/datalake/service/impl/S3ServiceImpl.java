@@ -3,6 +3,7 @@ package org.eea.datalake.service.impl;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.datalake.service.S3Service;
+import org.eea.datalake.service.model.PreparationPathRegistry;
 import org.eea.datalake.service.model.S3PathResolver;
 import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
@@ -253,6 +254,8 @@ public class S3ServiceImpl implements S3Service {
 
         String preparationCode = s3PathResolver.getPreparationCode();
         String tableName = s3PathResolver.getTableName(); // TODO: rename all occurrences of this getter
+
+        if (StringUtils.isNotBlank(preparationCode)) path = PreparationPathRegistry.resolve(path, preparationCode);
 
         switch (path) {
             case S3_PREPARATION_TABLE_NAME_FOLDER_PATH:

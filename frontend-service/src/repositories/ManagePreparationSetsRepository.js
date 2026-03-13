@@ -15,9 +15,9 @@ export const ManagePreparationSetsRepository = {
       url: getUrl(ManagePreparationSetsConfig.createPreparationSets, { dataflowId, providerId })
     }),
 
-  deletePreparationSet: async ({ id }) =>
+  deletePreparationSet: async ({ id, dataflowId }) =>
     await HTTPRequester.delete({
-      url: getUrl(ManagePreparationSetsConfig.deletePreparationSet, { id })
+      url: getUrl(ManagePreparationSetsConfig.deletePreparationSet, { id, dataflowId })
     }),
 
   getPreparationSets: async ({ dataflowId, providerId, code }) => {

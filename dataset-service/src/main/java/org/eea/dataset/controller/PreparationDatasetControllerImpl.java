@@ -1,7 +1,6 @@
 package org.eea.dataset.controller;
 
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
-import com.netflix.hystrix.contrib.javanica.annotation.HystrixProperty;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -12,11 +11,9 @@ import org.eea.dataset.service.DataLakeDataRetrieverFactory;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.PreparationDatasetService;
-import org.eea.interfaces.vo.orchestrator.JobPresignedUrlInfo;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.PreparationDatasetController;
-import org.eea.interfaces.controller.orchestrator.JobController.JobControllerZuul;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.PreparationDatasetResponseVO;
 import org.eea.interfaces.vo.dataset.PreparationDatasetVO;
@@ -42,8 +39,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.List;
-
 /**
  * The Class PreparationDatasetControllerImpl.
  */
@@ -65,7 +60,6 @@ public class PreparationDatasetControllerImpl implements PreparationDatasetContr
 
     @Autowired
     private DataLakeDataRetrieverFactory dataLakeDataRetrieverFactory;
-
 
     /**
      * List preparation datasets by dataflow id and provider id.
@@ -91,7 +85,7 @@ public class PreparationDatasetControllerImpl implements PreparationDatasetContr
     @Override
     @HystrixCommand
     @PostMapping(value = "/preparations", consumes = MediaType.APPLICATION_JSON_VALUE)
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("secondLevelAuthorize(#vo.dataflowId,'DATAFLOW_LEAD_REPORTER')")
     @ApiOperation(value = "Create preparation dataset")
     @ApiResponses(value = {
             @ApiResponse(code = 201, message = "Preparation dataset created successfully"),
@@ -133,7 +127,7 @@ public class PreparationDatasetControllerImpl implements PreparationDatasetContr
     @Override
     @HystrixCommand
     @DeleteMapping("/preparations/{id}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_LEAD_REPORTER')")
     @ApiOperation(value = "Delete preparation dataset by id")
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Preparation dataset deleted successfully"),
@@ -142,7 +136,10 @@ public class PreparationDatasetControllerImpl implements PreparationDatasetContr
             @ApiResponse(code = 500, message = "Unexpected error")
     })
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deletePreparationDatasetById(@PathVariable("id") Long preparationId) {
+    public void deletePreparationDatasetById(
+            @PathVariable("id") Long preparationId,
+            @RequestParam("dataflowId") Long dataflowId
+    ) {
 
         if (preparationId == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "preparationId is required");
@@ -161,7 +158,7 @@ public class PreparationDatasetControllerImpl implements PreparationDatasetContr
 
     @PostMapping("/createAllEligiblePreparationSets")
     @ApiOperation("Create all preparation sets that have 'isCreated=false'")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_LEAD_REPORTER')")
     public void createAllEligiblePreparationSets(
             @RequestParam("dataflowId") Long dataflowId,
             @RequestParam("providerId") Long providerId

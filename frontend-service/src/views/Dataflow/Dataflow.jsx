@@ -287,7 +287,7 @@ export const Dataflow = () => {
     if (!dataProviderId || !dataflowState.data.bigData) return;
 
     getPreparationSets({ code });
-  }, [dataProviderId, dataflowState.data.bigData]);
+  }, [dataProviderId, dataflowState.data.bigData, code]);
 
   const getPreparationSets = async ({ code, showPageLoader = true } = {}) => {
     try {
@@ -299,7 +299,7 @@ export const Dataflow = () => {
       });
       setHasActiveLocks(!isEmpty(preparationList?.activeLocks));
       code && setSelectedPreparationSet(preparationList?.preparationDatasetList[0] ?? null);
-      setPreparationSetsList(preparationList?.preparationDatasetList);
+      !code && setPreparationSetsList(preparationList?.preparationDatasetList);
       return preparationList;
     } catch (error) {
       console.error(error);

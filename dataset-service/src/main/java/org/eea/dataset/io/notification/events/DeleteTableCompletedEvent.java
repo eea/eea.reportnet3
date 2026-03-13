@@ -2,6 +2,8 @@ package org.eea.dataset.io.notification.events;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import org.apache.commons.lang.StringUtils;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.exception.EEAException;
@@ -73,6 +75,10 @@ public class DeleteTableCompletedEvent implements NotificableEventHandler {
     String tableSchemaName =
         notificationVO.getTableSchemaName() != null ? notificationVO.getTableSchemaName()
             : dataschemaService.getTableSchemaName(datasetVO.getDatasetSchema(), tableSchemaId);
+    String preparationCode = notificationVO.getPreparationCode();
+    String preparationDatasetMessagePart = (StringUtils.isNotBlank(preparationCode))
+            ? " for preparation dataset " + preparationCode
+            : "";
 
     Map<String, Object> notification = new HashMap<>();
     notification.put("user", notificationVO.getUser());
@@ -83,6 +89,10 @@ public class DeleteTableCompletedEvent implements NotificableEventHandler {
     notification.put("dataflowName", dataflowName);
     notification.put("tableSchemaName", tableSchemaName);
     notification.put("typeStatus", dataFlowVO.getStatus().toString());
+    if (StringUtils.isNotBlank(preparationCode)) {
+      notification.put("preparationCode", preparationCode);
+      notification.put("preparationDatasetMessagePart", preparationDatasetMessagePart);
+    }
     return notification;
   }
 }

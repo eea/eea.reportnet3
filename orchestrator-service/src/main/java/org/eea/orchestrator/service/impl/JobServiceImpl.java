@@ -1,6 +1,5 @@
 package org.eea.orchestrator.service.impl;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.BooleanUtils;
@@ -17,7 +16,6 @@ import org.eea.interfaces.controller.ums.UserManagementController.UserManagement
 import org.eea.interfaces.controller.validation.ValidationController.ValidationControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
-import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.orchestrator.JobVO;
@@ -34,7 +32,6 @@ import org.eea.interfaces.vo.validation.TaskVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
-import org.eea.lock.annotation.LockCriteria;
 import org.eea.orchestrator.mapper.JobMapper;
 import org.eea.orchestrator.persistence.domain.Job;
 import org.eea.orchestrator.persistence.repository.JobRepository;
@@ -53,20 +50,14 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.transaction.Transactional;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigInteger;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.sql.Timestamp;
 import java.util.*;
-import java.util.stream.Stream;
 
 import static org.eea.utils.LiteralConstants.*;
 
@@ -292,7 +283,9 @@ public class JobServiceImpl implements JobService {
                     return JobStatusEnum.REFUSED;
                 }
             }
-        } else if (jobType.equals(JobTypeEnum.IMPORT.toString()) || jobType.equals(JobTypeEnum.ETL_IMPORT.toString()) || jobType.equals(JobTypeEnum.DELETE.toString())) {
+        } else if (jobType.equals(JobTypeEnum.IMPORT.toString())
+                || jobType.equals(JobTypeEnum.ETL_IMPORT.toString())
+                || jobType.equals(JobTypeEnum.DELETE.toString())) {
             //we shouldn't add the job if there is another queued or in progress import, validation or release for the same datasetId
             List<Job> jobList = jobRepository.findByJobStatusInAndJobTypeInAndDatasetId(Arrays.asList(JobStatusEnum.QUEUED, JobStatusEnum.IN_PROGRESS), Arrays.asList(JobTypeEnum.IMPORT, JobTypeEnum.ETL_IMPORT, JobTypeEnum.RELEASE, JobTypeEnum.VALIDATION, JobTypeEnum.DELETE), datasetIds.get(0));
             boolean blockingImportJobExists = false;
@@ -312,16 +305,7 @@ public class JobServiceImpl implements JobService {
             if (blockingImportJobExists) {
                 return JobStatusEnum.REFUSED;
             } else {
-                List<Job> releasesAndValidations = jobRepository.findByJobTypeInAndJobStatusInAndRelease(Arrays.asList(JobTypeEnum.RELEASE, JobTypeEnum.VALIDATION), Arrays.asList(JobStatusEnum.QUEUED, JobStatusEnum.IN_PROGRESS), true);
-                for (Job job : releasesAndValidations) {
-                    Map<String, Object> insertedParameters = job.getParameters();
-                    if (insertedParameters.get("datasetId") != null) {
-                        List<Long> insertedDatasetIds = (List<Long>) insertedParameters.get("datasetId");
-                        if (insertedDatasetIds.contains(datasetIds.get(0).intValue())) {
-                            return JobStatusEnum.REFUSED;
-                        }
-                    }
-                }
+                if (isDatasetInActiveReleaseOrValidationJob(datasetIds)) return JobStatusEnum.REFUSED;
                 return JobStatusEnum.IN_PROGRESS;
             }
         }
@@ -331,20 +315,25 @@ public class JobServiceImpl implements JobService {
             if (jobList != null && jobList.size() > 0) {
                 return JobStatusEnum.REFUSED;
             } else {
-                List<Job> releasesAndValidations = jobRepository.findByJobTypeInAndJobStatusInAndRelease(Arrays.asList(JobTypeEnum.RELEASE, JobTypeEnum.VALIDATION), Arrays.asList(JobStatusEnum.QUEUED, JobStatusEnum.IN_PROGRESS), true);
-                for (Job job : releasesAndValidations) {
-                    Map<String, Object> insertedParameters = job.getParameters();
-                    if (insertedParameters.get("datasetId") != null) {
-                        List<Long> insertedDatasetIds = (List<Long>) insertedParameters.get("datasetId");
-                        if (insertedDatasetIds.contains(datasetIds.get(0).intValue())) {
-                            return JobStatusEnum.REFUSED;
-                        }
-                    }
-                }
+                if (isDatasetInActiveReleaseOrValidationJob(datasetIds)) return JobStatusEnum.REFUSED;
                 return JobStatusEnum.QUEUED;
             }
         }
         return JobStatusEnum.QUEUED;
+    }
+
+    private boolean isDatasetInActiveReleaseOrValidationJob(List<Long> datasetIds) {
+        List<Job> releasesAndValidations = jobRepository.findByJobTypeInAndJobStatusInAndRelease(Arrays.asList(JobTypeEnum.RELEASE, JobTypeEnum.VALIDATION), Arrays.asList(JobStatusEnum.QUEUED, JobStatusEnum.IN_PROGRESS), true);
+        for (Job job : releasesAndValidations) {
+            Map<String, Object> insertedParameters = job.getParameters();
+            if (insertedParameters.get("datasetId") != null) {
+                List<Long> insertedDatasetIds = (List<Long>) insertedParameters.get("datasetId");
+                if (insertedDatasetIds.contains(datasetIds.get(0).intValue())) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     @Override

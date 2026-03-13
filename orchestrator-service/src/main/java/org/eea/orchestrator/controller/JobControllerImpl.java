@@ -436,6 +436,8 @@ public class JobControllerImpl implements JobController {
                     example = "0") @RequestParam(value = "dataflowId", required = false) Long dataflowId,
             @ApiParam(type = "Long", value = "Provider id",
                     example = "0") @RequestParam(value = "providerId", required = false) Long providerId,
+            @ApiParam(type = "String", value = "Preparation Code",
+                    example = "section_a") @RequestParam(value = "preparationCode", required = false) String preparationCode,
             @ApiParam(type = "boolean", value = "Delete prefilled tables",
                     example = "true") @RequestParam(value = "deletePrefilledTables", defaultValue = "false",
                     required = false) Boolean deletePrefilledTables,
@@ -453,6 +455,7 @@ public class JobControllerImpl implements JobController {
         parameters.put("providerId", providerId);
         parameters.put("deletePrefilledTables", deletePrefilledTables);
         parameters.put("userId", userId);
+        parameters.put("preparationCode", preparationCode);
 
         JobStatusEnum statusToInsert = jobStatus != null ? jobStatus : JobStatusEnum.IN_PROGRESS;
 
@@ -472,9 +475,9 @@ public class JobControllerImpl implements JobController {
             LOG.error("Error when trying to receive dataset name for datasetId {} ", datasetId, e);
         }
 
-        LOG.info("Adding delete data job for dataflowId={}, datasetId={}, providerId={}, tableSchemaId={} and creator={} with status {}", dataflowId, datasetId, providerId, tableSchemaId, SecurityContextHolder.getContext().getAuthentication().getName(), statusToInsert.getValue());
-        Long jobId = jobService.addJob(dataflowId, providerId, datasetId, parameters, JobTypeEnum.DELETE, statusToInsert, false, null, dataflowName, datasetName, null);
-        LOG.info("Successfully added delete data job for dataflowId={}, datasetId={}, providerId={}, tableSchemaId={} and creator={} with status {}", dataflowId, datasetId, providerId, tableSchemaId, SecurityContextHolder.getContext().getAuthentication().getName(), statusToInsert.getValue());
+        LOG.info("Adding delete data job for dataflowId={}, datasetId={}, providerId={}, preparationCode={}, tableSchemaId={} and creator={} with status {}", dataflowId, datasetId, providerId, preparationCode, tableSchemaId, SecurityContextHolder.getContext().getAuthentication().getName(), statusToInsert.getValue());
+        Long jobId = jobService.addJob(dataflowId, providerId, datasetId, parameters, JobTypeEnum.DELETE, statusToInsert, false, null, dataflowName, datasetName, preparationCode);
+        LOG.info("Successfully added delete data job for dataflowId={}, datasetId={}, providerId={}, preparationCode={}, tableSchemaId={} and creator={} with status {}", dataflowId, datasetId, providerId, preparationCode, tableSchemaId, SecurityContextHolder.getContext().getAuthentication().getName(), statusToInsert.getValue());
         return jobId;
     }
 

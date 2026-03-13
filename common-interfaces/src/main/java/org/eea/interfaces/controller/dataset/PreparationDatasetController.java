@@ -39,7 +39,9 @@ public interface PreparationDatasetController {
     void createPreparationDataset(@RequestBody PreparationDatasetVO vo);
 
     @DeleteMapping("/preparations/{id}")
-    void deletePreparationDatasetById(@PathVariable("id") Long preparationId);
+    void deletePreparationDatasetById(
+            @PathVariable("id") Long preparationId,
+            @RequestParam("dataflowId") Long dataflowId);
 
     @PostMapping("/createAllEligiblePreparationSets")
     void createAllEligiblePreparationSets(@RequestParam("dataflowId") Long dataflowId, @RequestParam("providerId") Long providerId);

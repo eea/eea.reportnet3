@@ -9,7 +9,6 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.dataset.service.model.ImportFileInDremioInfo;
-import org.eea.interfaces.vo.communication.UserNotificationVO;
 import org.eea.lock.redis.LockEnum;
 import org.eea.lock.redis.RedisLockService;
 import org.eea.utils.UtilityClass;
@@ -60,7 +59,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.io.InputStreamResource;
-import org.springframework.core.io.Resource;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
@@ -83,7 +81,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.util.*;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.stream.Collectors;
 
 import static org.eea.interfaces.vo.dataset.enums.FileTypeEnum.CSV;
@@ -1192,70 +1189,43 @@ public class DatasetControllerImpl implements DatasetController {
                   example = "0") @RequestParam(value = "dataflowId", required = false) Long dataflowId,
           @ApiParam(type = "Long", value = "Provider id",
                   example = "0") @RequestParam(value = "providerId", required = false) Long providerId,
+          @ApiParam(type = "String", value = "Preparation Code",
+                  example = "section_a") @RequestParam(value = "preparationCode", required = false) String preparationCode,
           @ApiParam(type = "boolean", value = "Delete prefilled tables",
                   example = "true") @RequestParam(value = "deletePrefilledTables", defaultValue = "false",
                   required = false) Boolean deletePrefilledTables) {
-
-    UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
-    userNotificationContentVO.setDataflowId(dataflowId);
-    userNotificationContentVO.setDatasetId(datasetId);
-    userNotificationContentVO.setProviderId(providerId);
-    notificationControllerZuul.createUserNotificationPrivate("DELETE_DATASET_DATA_INIT",
-            userNotificationContentVO);
-
+    boolean isPreparationDataset = StringUtils.isNotBlank(preparationCode);
     Long expectedDataflowId = datasetService.getDataFlowIdById(datasetId);
-    dataflowId = dataflowId != null ? dataflowId : expectedDataflowId;
+    Long resolvedDataflowId = dataflowId != null ? dataflowId : expectedDataflowId;
 
-    // Rest API only: Check if the dataflow belongs to the dataset
-    if (dataflowId == null || !dataflowId.equals(expectedDataflowId)) {
-      String errorMessage =
-              String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId);
-      LOG.error(errorMessage);
-      throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-              String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId));
-    }
+    sendDeleteInitNotification(datasetId, resolvedDataflowId, providerId, preparationCode, "DELETE_DATASET_DATA_INIT");
 
-    JobStatusEnum jobStatus = JobStatusEnum.IN_PROGRESS;
+    validateDatasetBelongsToDataflow(datasetId, resolvedDataflowId, expectedDataflowId);
+
     Long jobId = null;
-    try {
-      jobStatus = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.DELETE.getValue(),
-              false, dataflowId, providerId, Collections.singletonList(datasetId));
+    JobStatusEnum jobStatus = JobStatusEnum.IN_PROGRESS;
 
-      jobId = jobControllerZuul.addDeleteDataJob(datasetId, null, dataflowId, providerId,
-              deletePrefilledTables, jobStatus);
+    try {
+      if (isPreparationDataset) {
+        jobStatus = jobControllerZuul.checkEligibilityOfPreparationJob(JobTypeEnum.DELETE.getValue(), datasetId, preparationCode);
+      } else {
+        jobStatus = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.DELETE.getValue(), false, resolvedDataflowId, providerId, Collections.singletonList(datasetId));
+      }
+
+      jobId = jobControllerZuul.addDeleteDataJob(datasetId, null, resolvedDataflowId, providerId, null, deletePrefilledTables, jobStatus);
 
       if (JobStatusEnum.REFUSED.equals(jobStatus)) {
         throw new ResponseStatusException(HttpStatus.LOCKED, EEAErrorMessage.DELETING_DATASET_DATA_REFUSED);
       }
 
-      if (dataflowId == null) {
-        dataflowId = datasetService.getDataFlowIdById(datasetId);
-      }
-      Boolean isBigDataflow = dataFlowControllerZuul.isBigDataflow(dataflowId);
-      if(Boolean.TRUE.equals(isBigDataflow)){
-        LOG.info("Deleting dataset data for big data dataflowId {} and datasetId {} ", dataflowId, datasetId);
-        bigDataDatasetService.deleteDatasetData(datasetId, dataflowId, providerId, deletePrefilledTables, false, jobId);
-      }
-      else {
-        LOG.info("Deleting dataset data for dataflowId {} and datasetId {}", dataflowId, datasetId);
-        deleteHelper.executeDeleteDatasetProcess(datasetId, deletePrefilledTables, false, jobId);
-      }
-      LOG.info("Successfully deleted dataset data for dataflowId {} and datasetId {}", dataflowId, datasetId);
+      executeDeleteDatasetProcess(datasetId, preparationCode, resolvedDataflowId, providerId, jobId, deletePrefilledTables);
+      LOG.info("Successfully deleted dataset data for dataflowId {} and datasetId {}", resolvedDataflowId, datasetId);
 
-      Map<String, Object> result = new HashMap<>();
-      String pollingUrl = "/orchestrator/jobs/pollForJobStatus/" + jobId + "?datasetId=" + datasetId + "&dataflowId=" + dataflowId;
-      if(providerId != null){
-        pollingUrl+= "&providerId=" + providerId;
-      }
-      result.put("jobId", jobId);
-      result.put("pollingUrl", pollingUrl);
-
-      return result;
+      return buildDeleteResponse(jobId, datasetId, resolvedDataflowId, providerId);
     } catch (Exception e) {
-      LOG.error("Unexpected error! Error deleting dataset data for dataflowId {} datasetId {} and providerId {} Message: {}", dataflowId, datasetId, providerId, e.getMessage());
+      LOG.error("Unexpected error! Error deleting dataset data for dataflowId {} datasetId {} and providerId {} Message: {}", resolvedDataflowId, datasetId, providerId, e.getMessage());
       throw e;
-    }
-    finally {
+    } finally {
       // Release the lock manually
       deleteLocksToDeleteProcess(datasetId, null);
     }
@@ -1301,7 +1271,7 @@ public class DatasetControllerImpl implements DatasetController {
       Boolean isBigDataflow = dataFlowControllerZuul.isBigDataflow(dataflowId);
       if(Boolean.TRUE.equals(isBigDataflow)){
         LOG.info("Privately deleting dataset data for big data dataflowId {} and datasetId {} ", dataflowId, datasetId);
-        bigDataDatasetService.deleteDatasetData(datasetId, dataflowId, null, false, technicallyAccepted, null);
+        bigDataDatasetService.deleteDatasetData(datasetId, dataflowId, null, null, false, technicallyAccepted, null);
       }
       else {
         LOG.info("Privately deleting dataset data for dataflowId {} and datasetId {}", dataflowId, datasetId);
@@ -1342,10 +1312,12 @@ public class DatasetControllerImpl implements DatasetController {
                   example = "0") @RequestParam(value = "dataflowId", required = false) Long dataflowId,
           @ApiParam(type = "Long", value = "Provider id",
                   example = "0") @RequestParam(value = "providerId", required = false) Long providerId,
+          @ApiParam(type = "String", value = "Preparation Code",
+                  example = "section_a") @RequestParam(value = "preparationCode", required = false) String preparationCode,
           @ApiParam(type = "boolean", value = "Delete prefilled tables",
                   example = "true") @RequestParam(value = "deletePrefilledTables", defaultValue = "false",
                   required = false) Boolean deletePrefilledTables) {
-    this.deleteDatasetData(datasetId, dataflowId, providerId, deletePrefilledTables);
+    this.deleteDatasetData(datasetId, dataflowId, providerId, preparationCode, deletePrefilledTables);
   }
 
   /**
@@ -1377,75 +1349,113 @@ public class DatasetControllerImpl implements DatasetController {
           @ApiParam(type = "Long", value = "Dataflow id",
                   example = "0") @RequestParam(value = "dataflowId", required = false) Long dataflowId,
           @ApiParam(type = "Long", value = "Provider id",
-                  example = "0") @RequestParam(value = "providerId", required = false) Long providerId) {
+                  example = "0") @RequestParam(value = "providerId", required = false) Long providerId,
+          @ApiParam(type = "String", value = "Preparation Code",
+                  example = "section_a") @RequestParam(value = "preparationCode", required = false) String preparationCode) {
 
-    UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
-    userNotificationContentVO.setDataflowId(dataflowId);
-    userNotificationContentVO.setDatasetId(datasetId);
-    userNotificationContentVO.setProviderId(providerId);
-    notificationControllerZuul.createUserNotificationPrivate("DELETE_TABLE_DATA_INIT",
-            userNotificationContentVO);
+    boolean isPreparationDataset = StringUtils.isNotBlank(preparationCode);
+
+    sendDeleteInitNotification(datasetId, dataflowId, providerId, preparationCode, "DELETE_TABLE_DATA_INIT");
 
     Long expectedDataflowId = datasetService.getDataFlowIdById(datasetId);
-    dataflowId = dataflowId != null ? dataflowId : expectedDataflowId;
+    Long resolvedDataflowId = (dataflowId != null) ? dataflowId : expectedDataflowId;
 
-    // Rest API only: Check if the dataflow belongs to the dataset
-    if (dataflowId == null || !dataflowId.equals(expectedDataflowId)) {
-      String errorMessage =
-              String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId);
-      LOG.error(errorMessage);
-      throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-              String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId));
-    }
+    validateDatasetBelongsToDataflow(datasetId, resolvedDataflowId, expectedDataflowId);
 
-    JobStatusEnum jobStatus = JobStatusEnum.IN_PROGRESS;
     Long jobId = null;
-    try {
-      jobStatus = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.DELETE.getValue(),
-              false, dataflowId, providerId, Collections.singletonList(datasetId));
+    JobStatusEnum jobStatus = JobStatusEnum.IN_PROGRESS;
 
-      jobId = jobControllerZuul.addDeleteDataJob(datasetId, tableSchemaId, dataflowId, providerId,
-              null, jobStatus);
+    try {
+      if (isPreparationDataset) {
+        jobStatus = jobControllerZuul.checkEligibilityOfPreparationJob(JobTypeEnum.DELETE.getValue(), datasetId, preparationCode);
+       } else {
+        jobStatus = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.DELETE.getValue(), false, resolvedDataflowId, providerId, Collections.singletonList(datasetId));
+      }
+
+      jobId = jobControllerZuul.addDeleteDataJob(datasetId, tableSchemaId, resolvedDataflowId, providerId, preparationCode, null, jobStatus);
 
       if (JobStatusEnum.REFUSED.equals(jobStatus)) {
         throw new ResponseStatusException(HttpStatus.LOCKED, EEAErrorMessage.DELETING_TABLE_DATA_REFUSED);
       }
 
-      if (dataflowId == null) {
-        dataflowId = datasetService.getDataFlowIdById(datasetId);
-      }
-      Boolean isBigDataflow = dataFlowControllerZuul.isBigDataflow(dataflowId);
-      if(Boolean.TRUE.equals(isBigDataflow)){
-        LOG.info("Deleting table data for big data dataflowId {}, datasetId {} and tableSchemaId {}", dataflowId, datasetId, tableSchemaId);
-        bigDataDatasetService.deleteTableData(datasetId, dataflowId, providerId, tableSchemaId, jobId, true);
-      }
-      else {
-        LOG.info("Deleting table data for dataflowId {}, datasetId {} and tableSchemaId {}", dataflowId, datasetId, tableSchemaId);
-        // This method will release the lock
-        deleteHelper.executeDeleteTableProcess(datasetId, tableSchemaId, jobId);
-      }
-      LOG.info("Successfully deleted table data for dataflowId {}, datasetId {} and tableSchemaId {}", dataflowId, datasetId, tableSchemaId);
+      executeDeleteTableProcess(datasetId, tableSchemaId, preparationCode, resolvedDataflowId, providerId, jobId);
+      LOG.info("Successfully deleted table data for dataflowId {}, datasetId {}, tableSchemaId {} and preparationCode {}", resolvedDataflowId, datasetId, tableSchemaId, preparationCode);
 
-      Map<String, Object> result = new HashMap<>();
-      String pollingUrl = "/orchestrator/jobs/pollForJobStatus/" + jobId + "?datasetId=" + datasetId + "&dataflowId=" + dataflowId;
-      if(providerId != null){
-        pollingUrl+= "&providerId=" + providerId;
-      }
-      result.put("jobId", jobId);
-      result.put("pollingUrl", pollingUrl);
-
-      return result;
+      return buildDeleteResponse(jobId, datasetId, resolvedDataflowId, providerId);
     } catch (Exception e) {
-      LOG.error("Unexpected error! Error deleting table data for dataflowId {} datasetId {} tableSchemaId {} and providerId {} Message: {}", dataflowId, datasetId, tableSchemaId, providerId, e.getMessage());
+      LOG.error("Unexpected error! Error deleting table data for dataflowId {} datasetId {} tableSchemaId {} and providerId {} Message: {}", resolvedDataflowId, datasetId, tableSchemaId, providerId, e.getMessage());
       throw e;
-    }
-    finally {
+    } finally {
       // Release the lock manually
       deleteLocksToDeleteProcess(datasetId, null);
     }
   }
 
+  private void sendDeleteInitNotification(Long datasetId, Long dataflowId, Long providerId, String preparationCode, String eventType) {
 
+    UserNotificationContentVO content = new UserNotificationContentVO();
+    content.setDatasetId(datasetId);
+    content.setDataflowId(dataflowId);
+    content.setProviderId(providerId);
+    content.setPreparationCode(preparationCode);
+
+    notificationControllerZuul.createUserNotificationPrivate(eventType, content);
+  }
+
+  private void validateDatasetBelongsToDataflow(Long datasetId, Long resolvedDataflowId, Long expectedDataflowId) {
+
+    if (resolvedDataflowId == null || !resolvedDataflowId.equals(expectedDataflowId)) {
+      String errorMessage = String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, resolvedDataflowId);
+      LOG.error(errorMessage);
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, errorMessage);
+    }
+  }
+
+  private void executeDeleteTableProcess(Long datasetId, String tableSchemaId, String preparationCode, Long dataflowId, Long providerId, Long jobId) throws Exception {
+
+    Boolean isBigDataflow = dataFlowControllerZuul.isBigDataflow(dataflowId);
+    boolean isPreparationDataset = StringUtils.isNotBlank(preparationCode);
+
+    if (Boolean.TRUE.equals(isBigDataflow)) {
+      LOG.info("Deleting table data for big data dataflowId {}, datasetId {}, tableSchemaId {} and preparationCode {}", dataflowId, datasetId, tableSchemaId, preparationCode);
+      bigDataDatasetService.deleteTableData(datasetId, dataflowId, providerId, preparationCode, tableSchemaId, jobId, true);
+    } else {
+      LOG.info("Deleting table data for dataflowId {}, datasetId {} and tableSchemaId {}", dataflowId, datasetId, tableSchemaId);
+      // This method will release the lock
+      deleteHelper.executeDeleteTableProcess(datasetId, tableSchemaId, jobId);
+    }
+  }
+
+  private void executeDeleteDatasetProcess(Long datasetId, String preparationCode, Long dataflowId, Long providerId, Long jobId, Boolean deletePrefilledTables) throws Exception {
+
+    Boolean isBigDataflow = dataFlowControllerZuul.isBigDataflow(dataflowId);
+    boolean isPreparationDataset = StringUtils.isNotBlank(preparationCode);
+
+    if(Boolean.TRUE.equals(isBigDataflow)){
+      LOG.info("Deleting dataset data for big data dataflowId {}, datasetId {} and preparation code {}", dataflowId, datasetId, preparationCode);
+      bigDataDatasetService.deleteDatasetData(datasetId, dataflowId, providerId, preparationCode, deletePrefilledTables, false, jobId);
+    } else if (!isPreparationDataset && Boolean.TRUE.equals(isBigDataflow)) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Preparation dataset deletion cannot be performed for a non Big Data dataset.");
+    } else {
+      LOG.info("Deleting dataset data for dataflowId {} and datasetId {}", dataflowId, datasetId);
+      // This method will release the lock
+      deleteHelper.executeDeleteDatasetProcess(datasetId, deletePrefilledTables, false, jobId);
+    }
+  }
+
+  private Map<String, Object> buildDeleteResponse(Long jobId, Long datasetId, Long dataflowId, Long providerId) {
+    Map<String, Object> result = new HashMap<>();
+    String pollingUrl = "/orchestrator/jobs/pollForJobStatus/" + jobId + "?datasetId=" + datasetId + "&dataflowId=" + dataflowId;
+
+    if (providerId != null) {
+      pollingUrl += "&providerId=" + providerId;
+    }
+
+    result.put("jobId", jobId);
+    result.put("pollingUrl", pollingUrl);
+
+    return result;
+  }
   /**
    * Delete import table legacy.
    *
@@ -1472,8 +1482,10 @@ public class DatasetControllerImpl implements DatasetController {
           @ApiParam(type = "Long", value = "Dataflow id",
                   example = "0") @RequestParam(value = "dataflowId", required = false) Long dataflowId,
           @ApiParam(type = "Long", value = "Provider id",
-                  example = "0") @RequestParam(value = "providerId", required = false) Long providerId) {
-    this.deleteTableData(datasetId, tableSchemaId, dataflowId, providerId);
+                  example = "0") @RequestParam(value = "providerId", required = false) Long providerId,
+          @ApiParam(type = "String", value = "Preparation Code",
+                  example = "section_a") @RequestParam(value = "preparationCode", required = false) String preparationCode) {
+    this.deleteTableData(datasetId, tableSchemaId, dataflowId, providerId, preparationCode);
   }
 
   /**
@@ -3653,7 +3665,7 @@ public class DatasetControllerImpl implements DatasetController {
           @ApiParam(type = "String", value = "Preparation Code", example = "0") @RequestParam(value = "code", required = false) String preparationCode){
     JobPresignedUrlInfo info;
     JobStatusEnum jobStatus;
-    boolean isPreparationDataset =StringUtils.isNotBlank(preparationCode);
+    boolean isPreparationDataset = StringUtils.isNotBlank(preparationCode);
     try{
       if (isPreparationDataset) {
         info = bigDataDatasetService.generatePreparationImportPreSignedUrl(datasetId, dataflowId, providerId, fileName, preparationCode);

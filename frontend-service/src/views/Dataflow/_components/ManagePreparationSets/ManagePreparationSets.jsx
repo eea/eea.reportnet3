@@ -93,7 +93,8 @@ export const ManagePreparationSets = ({
       } else if (state.dialogMode === 'delete') {
         changeState({ isConfirmDeleteButtonDisabled: true });
         await ManagePreparationSetsService.deletePreparationSet({
-          id: state.actionsButtons.id
+          id: state.actionsButtons.id,
+          dataflowId
         });
       }
       closeDialog();

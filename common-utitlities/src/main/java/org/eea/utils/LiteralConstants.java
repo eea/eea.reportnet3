@@ -219,6 +219,7 @@ public final class LiteralConstants {
 
   /** The Constant S3_PROVIDER_IMPORT_PATH: {@value}. */
   public static final String S3_PROVIDER_IMPORT_PATH = "%s/%s/%s/current/provider_import/%s";
+
   public static final String S3_PROVIDER_ROOT_PATH = "%s/%s/%s/current";
 
   /** The Constant S3_ATTACHMENTS_TABLE_PATH: {@value}. */
@@ -540,13 +541,11 @@ public final class LiteralConstants {
 
   public static final String ETL_IMPORT_ATTACHMENTS_FOLDER = "attachments";
 
-  public static final String S3_PREPARATION_FOLDER_PATH = "%s/%s/%s/preparation/%s";
-
   public static final String S3_PREPARATION_TABLE_NAME_FOLDER_PATH = "%s/%s/%s/preparation/%s/%s";
 
   public static final String S3_PREPARATION_TABLE_AS_FOLDER_QUERY_PATH = ".\"%s\".\"%s\".\"%s\".\"preparation\".\"%s\".\"%s\"";
 
-  /** The Constant S3_PPREPARATION_VALIDATION_TABLE_PATH: {@value}. */
+  /** The Constant S3_PREPARATION_VALIDATION_TABLE_PATH: {@value}. */
   public static final String S3_PREPARATION_VALIDATION_TABLE_PATH = "%s/%s/%s/preparation/%s/validation";
 
   /** The Constant S3_PREPARATION_PROVIDER_IMPORT_PATH: {@value}. */

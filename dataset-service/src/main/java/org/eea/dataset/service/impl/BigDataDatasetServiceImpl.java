@@ -933,13 +933,17 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
     }
 
     @Override
-    public void deleteTableData(Long datasetId, Long dataflowId, Long providerId, String tableSchemaId, Long jobId, Boolean createEmptyTablesBool) throws Exception {
+    public void deleteTableData(Long datasetId, Long dataflowId, Long providerId, String preparationCode, String tableSchemaId, Long jobId, Boolean createEmptyTablesBool) throws Exception {
         try {
+            boolean isPreparationDataset = org.apache.commons.lang3.StringUtils.isNotBlank(preparationCode);
+
             String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
             TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, datasetSchemaId);
-            if (tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable())
-                    && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, tableSchemaId))) {
-                throw new Exception("Can not delete table data because iceberg table is created");
+            if (!isPreparationDataset) {
+                if (tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable())
+                        && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, tableSchemaId))) {
+                    throw new Exception("Can not delete table data because iceberg table is created");
+                }
             }
             String tableSchemaName = tableSchemaVO.getNameTableSchema();
             DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
@@ -950,14 +954,14 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             if (providerId == null) {
                 providerId = 0L;
             }
-            S3PathResolver s3ImportPathResolver = new S3PathResolver(dataflowId, providerId, datasetId, tableSchemaName, tableSchemaName, S3_IMPORT_FILE_PATH);
+            S3PathResolver s3ImportPathResolver = new S3PathResolver(dataflowId, providerId, datasetId, tableSchemaName, tableSchemaName, preparationCode, S3_IMPORT_FILE_PATH);
             //path in s3 for the folder that contains the stored csv files
             String s3PathForCsvFolder = s3ServicePrivate.getTableAsFolderQueryPath(s3ImportPathResolver, S3_IMPORT_TABLE_NAME_FOLDER_PATH);
 
             //remove csv files that are related to the table
             parquetConverterService.removeCsvFilesThatWillBeReplaced(s3ImportPathResolver, tableSchemaName, s3PathForCsvFolder, datasetId, dataSetMetabaseVO);
 
-            S3PathResolver s3TablePathResolver = new S3PathResolver(dataflowId, providerId, datasetId, tableSchemaName, tableSchemaName, S3_TABLE_NAME_FOLDER_PATH);
+            S3PathResolver s3TablePathResolver = new S3PathResolver(dataflowId, providerId, datasetId, tableSchemaName, tableSchemaName, preparationCode, S3_TABLE_NAME_FOLDER_PATH);
             //remove folders that contain the previous parquet files
             if (s3HelperPrivate.checkFolderExist(s3TablePathResolver, S3_TABLE_NAME_FOLDER_PATH)) {
                 //demote table folder
@@ -998,6 +1002,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                         .tableSchemaId(tableSchemaId).build();
                 notificationVO.setDatasetName(dataSetMetabaseVO.getDataSetName());
                 notificationVO.setDataflowId(dataSetMetabaseVO.getDataflowId());
+                notificationVO.setPreparationCode(preparationCode);
                 notificationVO.setDataflowName(dataFlowControllerZuul.getMetabaseById(dataSetMetabaseVO.getDataflowId()).getName());
 
                 value.put(LiteralConstants.DATASET_ID, datasetId);
@@ -1010,7 +1015,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             }
 
         }
-        catch (Exception e){
+        catch (Exception e) {
             if (jobId != null) {
                 jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FAILED);
             }
@@ -1019,16 +1024,20 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
     }
 
     @Override
-    public void deleteDatasetData(Long datasetId, Long dataflowId, Long providerId, Boolean deletePrefilledTables, Boolean technicallyAccepted, Long jobId) throws Exception {
+    public void deleteDatasetData(Long datasetId, Long dataflowId, Long providerId, String preparationCode, Boolean deletePrefilledTables, Boolean technicallyAccepted, Long jobId) throws Exception {
 
         try {
+            boolean isPreparationDataset = org.apache.commons.lang3.StringUtils.isNotBlank(preparationCode);
+
             String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
             List<TableSchemaIdNameVO> tableSchemas = datasetSchemaService.getTableSchemasIds(datasetId);
-            for (TableSchemaIdNameVO entry : tableSchemas) {
-                TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(entry.getIdTableSchema(), datasetSchemaId);
-                if (tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable())
-                        && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, tableSchemaVO.getIdTableSchema()))) {
-                    throw new Exception("Can not delete table data because iceberg table is created");
+            if (!isPreparationDataset) {
+                for (TableSchemaIdNameVO entry : tableSchemas) {
+                    TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(entry.getIdTableSchema(), datasetSchemaId);
+                    if (tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable())
+                            && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, tableSchemaVO.getIdTableSchema()))) {
+                        throw new Exception("Can not delete table data because iceberg table is created");
+                    }
                 }
             }
 
@@ -1047,7 +1056,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                     }
                 }
                 //we do not pass a job id because there is a job for the whole dataset data deletion
-                deleteTableData(datasetId, dataflowId, providerId, tableSchemaIdNameVO.getIdTableSchema(), null, true);
+                deleteTableData(datasetId, dataflowId, providerId, preparationCode, tableSchemaIdNameVO.getIdTableSchema(), null, true);
             }
 
             if (jobId != null) {
@@ -1062,7 +1071,9 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                     Map<String, Object> value = new HashMap<>();
                     NotificationVO notificationVO = NotificationVO.builder()
                             .user(SecurityContextHolder.getContext().getAuthentication().getName())
-                            .datasetId(datasetId).build();
+                            .datasetId(datasetId)
+                            .preparationCode(preparationCode)
+                            .build();
                     DataSetMetabaseVO datasetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
                     notificationVO.setDatasetName(datasetMetabaseVO.getDataSetName());
                     notificationVO.setDataflowId(datasetMetabaseVO.getDataflowId());

@@ -13,7 +13,6 @@ import org.eea.interfaces.vo.orchestrator.JobPresignedUrlInfo;
 import org.eea.interfaces.vo.orchestrator.JobVO;
 import org.eea.multitenancy.DatasetId;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
@@ -33,7 +32,6 @@ public interface BigDataDatasetService {
      * @param jobId the jobId
      * @param fmeJobId the fmeJobId
      * @param dataflowVO the dataflowVO
-     * @param helperMultipartFileMapper the helperMultipartFileMapper
      * @param job the job
      * @param importFileInDremioInfo the importFileInDremioInfo
      * @return
@@ -62,7 +60,7 @@ public interface BigDataDatasetService {
      * @param jobId the job id
      * @param createEmptyTablesBool
      */
-    void deleteTableData(Long datasetId, Long dataflowId, Long providerId, String tableSchemaId, Long jobId, Boolean createEmptyTablesBool) throws Exception;
+    void deleteTableData(Long datasetId, Long dataflowId, Long providerId, String preparationCode, String tableSchemaId, Long jobId, Boolean createEmptyTablesBool) throws Exception;
 
     /**
      * Delete dataset data
@@ -74,7 +72,7 @@ public interface BigDataDatasetService {
      * @param technicallyAccepted the technicallyAccepted
      * @param jobId the job id
      */
-    void deleteDatasetData(Long datasetId, Long dataflowId, Long providerId, Boolean deletePrefilledTables, Boolean technicallyAccepted, Long jobId) throws Exception;
+    void deleteDatasetData(Long datasetId, Long dataflowId, Long providerId, String preparationCode, Boolean deletePrefilledTables, Boolean technicallyAccepted, Long jobId) throws Exception;
 
     /**
      * Gets the attachment for big data dataflows.

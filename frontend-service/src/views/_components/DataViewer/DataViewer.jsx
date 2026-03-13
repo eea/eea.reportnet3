@@ -667,7 +667,7 @@ export const DataViewer = ({
     actionsContext.testProcess(datasetId, action);
     try {
       notificationContext.add({ type: 'DELETE_TABLE_DATA_INIT' });
-      await DatasetService.deleteTableData(datasetId, tableId);
+      await DatasetService.deleteTableData({ datasetId, tableId, preparationCode: preparationSetCode });
       setFetchedData([]);
       dispatchRecords({ type: 'RESET_TOTAL', payload: 0 });
     } catch (error) {
