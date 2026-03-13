@@ -403,7 +403,7 @@ const useBigButtonList = ({
       });
   };
 
-  const groupByRepresentativeModels = buildGroupByRepresentativeModels(dataflowState?.data?.datasets);
+  const groupByRepresentativeModels = buildGroupByRepresentativeModels(dataflowState?.data?.datasets).sort((a, b) => a.caption.localeCompare(b.caption));
 
   const checkDisabledDataCollectionButton = () =>
     isEmpty(dataflowState.data.dataCollections) &&
