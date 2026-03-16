@@ -371,7 +371,8 @@ public class JobControllerImpl implements JobController {
                                 @RequestParam(value = "replace", required = false) Boolean replace,
                                 @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,
                                 @RequestParam(value = "delimiter", required = false) String delimiter,
-                                @RequestParam(value = "filePathInS3", required = false) String filePathInS3) {
+                                @RequestParam(value = "filePathInS3", required = false) String filePathInS3,
+                                @RequestParam(value ="preparationCode",required = false) String preparationCode) {
 
         ThreadPropertiesManager.setVariable("user",
                 SecurityContextHolder.getContext().getAuthentication().getName());
@@ -384,6 +385,7 @@ public class JobControllerImpl implements JobController {
         parameters.put("replace", replace);
         parameters.put("delimiter", delimiter);
         parameters.put("filePathInS3", filePathInS3);
+        parameters.put("preparationCode", preparationCode);
         JobStatusEnum statusToInsert = JobStatusEnum.IN_PROGRESS;
         if(jobStatus != null){
             statusToInsert = jobStatus;

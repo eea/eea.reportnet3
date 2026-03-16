@@ -884,7 +884,7 @@ public class DatasetControllerImplTest {
   @Test
   public void etlImportDatasetTest() throws EEAException {
     Mockito.when(jobControllerZuul.checkEligibilityOfJob(Mockito.anyString(), Mockito.anyBoolean(), Mockito.anyLong(), Mockito.anyLong(), Mockito.anyList())).thenReturn(JobStatusEnum.IN_PROGRESS);
-    Mockito.when(jobControllerZuul.addEtlImportJob(Mockito.anyLong(), Mockito.anyLong(), Mockito.anyLong(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(1L);
+    Mockito.when(jobControllerZuul.addEtlImportJob(Mockito.anyLong(), Mockito.anyLong(), Mockito.anyLong(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(1L);
     Mockito.when(datasetService.getDataFlowIdById(Mockito.any())).thenReturn(1L);
     Mockito.when(datasetService.isDatasetReportable(Mockito.any())).thenReturn(Boolean.TRUE);
     datasetControllerImpl.etlImportDataset(1L, new ETLDatasetVO(), 1L, 1L, false);
@@ -900,7 +900,7 @@ public class DatasetControllerImplTest {
   @Test
   public void etlImportDatasetLegacyTest() throws EEAException {
     Mockito.when(jobControllerZuul.checkEligibilityOfJob(Mockito.anyString(), Mockito.anyBoolean(), Mockito.anyLong(), Mockito.anyLong(), Mockito.anyList())).thenReturn(JobStatusEnum.IN_PROGRESS);
-    Mockito.when(jobControllerZuul.addEtlImportJob(Mockito.anyLong(), Mockito.anyLong(), Mockito.anyLong(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(1L);
+    Mockito.when(jobControllerZuul.addEtlImportJob(Mockito.anyLong(), Mockito.anyLong(), Mockito.anyLong(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(1L);
     Mockito.when(datasetService.getDataFlowIdById(Mockito.any())).thenReturn(1L);
     Mockito.when(datasetService.isDatasetReportable(Mockito.any())).thenReturn(Boolean.TRUE);
     datasetControllerImpl.etlImportDatasetLegacy(1L, new ETLDatasetVO(), 1L, 1L, false);
@@ -932,7 +932,7 @@ public class DatasetControllerImplTest {
   @Test(expected = ResponseStatusException.class)
   public void etlImportDatasetExceptionTest() throws EEAException {
     Mockito.when(jobControllerZuul.checkEligibilityOfJob(Mockito.anyString(), Mockito.anyBoolean(), Mockito.anyLong(), Mockito.anyLong(), Mockito.anyList())).thenReturn(JobStatusEnum.IN_PROGRESS);
-    Mockito.when(jobControllerZuul.addEtlImportJob(Mockito.anyLong(), Mockito.anyLong(), Mockito.anyLong(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(1L);
+    Mockito.when(jobControllerZuul.addEtlImportJob(Mockito.anyLong(), Mockito.anyLong(), Mockito.anyLong(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(1L);
     Mockito.doNothing().when(jobControllerZuul).updateJobStatus(Mockito.any(), Mockito.any());
     Mockito.when(datasetService.getDataFlowIdById(Mockito.any())).thenReturn(1L);
     Mockito.when(datasetService.isDatasetReportable(Mockito.any())).thenReturn(Boolean.TRUE);
@@ -2131,7 +2131,7 @@ public class DatasetControllerImplTest {
     String filePathInS3 = "path";
 
     Mockito.when(datasetService.getDataFlowIdById(datasetId)).thenThrow(new RuntimeException());
-    datasetControllerImpl.etlImportDatasetDL(datasetId, dataflowId, providerId, replaceData, tableSchemaId, delimiter, filePathInS3);
+    datasetControllerImpl.etlImportDatasetDL(datasetId, dataflowId, providerId, replaceData, tableSchemaId, delimiter, filePathInS3, null);
   }
 
   @Test(expected = ResponseStatusException.class)
@@ -2146,7 +2146,7 @@ public class DatasetControllerImplTest {
 
     Mockito.when(datasetService.getDataFlowIdById(datasetId)).thenReturn(2L);
     try {
-      datasetControllerImpl.etlImportDatasetDL(datasetId, dataflowId, providerId, replaceData, tableSchemaId, delimiter, filePathInS3);
+      datasetControllerImpl.etlImportDatasetDL(datasetId, dataflowId, providerId, replaceData, tableSchemaId, delimiter, filePathInS3, null);
     }
     catch (ResponseStatusException e) {
       assertEquals(String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId), e.getReason());
@@ -2170,7 +2170,7 @@ public class DatasetControllerImplTest {
     Mockito.when(datasetService.getDataFlowIdById(datasetId)).thenReturn(dataflowId);
     Mockito.when(dataFlowControllerZuul.getMetabaseById(dataflowId)).thenReturn(dataFlowVO);
     try {
-      datasetControllerImpl.etlImportDatasetDL(datasetId, dataflowId, providerId, replaceData, tableSchemaId, delimiter, filePathInS3);
+      datasetControllerImpl.etlImportDatasetDL(datasetId, dataflowId, providerId, replaceData, tableSchemaId, delimiter, filePathInS3, null);
     }
     catch (ResponseStatusException e) {
       assertEquals(String.format(EEAErrorMessage.DATAFLOW_NOT_BIG_DATA, dataflowId), e.getReason());
@@ -2195,7 +2195,7 @@ public class DatasetControllerImplTest {
     Mockito.when(dataFlowControllerZuul.getMetabaseById(dataflowId)).thenReturn(dataFlowVO);
     Mockito.when(datasetService.isDatasetReportable(datasetId)).thenReturn(false);
     try {
-      datasetControllerImpl.etlImportDatasetDL(datasetId, dataflowId, providerId, replaceData, tableSchemaId, delimiter, filePathInS3);
+      datasetControllerImpl.etlImportDatasetDL(datasetId, dataflowId, providerId, replaceData, tableSchemaId, delimiter, filePathInS3, null);
     }
     catch (ResponseStatusException e) {
       assertEquals(String.format(EEAErrorMessage.DATASET_NOT_REPORTABLE, datasetId), e.getReason());
@@ -2224,7 +2224,7 @@ public class DatasetControllerImplTest {
     Mockito.when(datasetService.isDatasetReportable(datasetId)).thenReturn(true);
     Mockito.when(datasetTableService.getDatasetEditingUsernameForTable(datasetId, tableSchemaId)).thenReturn(userEditingDataset);
     try {
-      datasetControllerImpl.etlImportDatasetDL(datasetId, dataflowId, providerId, replaceData, tableSchemaId, delimiter, filePathInS3);
+      datasetControllerImpl.etlImportDatasetDL(datasetId, dataflowId, providerId, replaceData, tableSchemaId, delimiter, filePathInS3, null);
     }
     catch (ResponseStatusException e) {
       assertEquals(EEAErrorMessage.DATASET_IS_LOCKED_FOR_EDITING + userEditingDataset, e.getReason());
@@ -2253,7 +2253,7 @@ public class DatasetControllerImplTest {
     Mockito.when(datasetService.isDatasetReportable(datasetId)).thenReturn(true);
     Mockito.when(datasetTableService.getDatasetEditingUsername(datasetId)).thenReturn(userEditingDataset);
     try {
-      datasetControllerImpl.etlImportDatasetDL(datasetId, dataflowId, providerId, replaceData, tableSchemaId, delimiter, filePathInS3);
+      datasetControllerImpl.etlImportDatasetDL(datasetId, dataflowId, providerId, replaceData, tableSchemaId, delimiter, filePathInS3, null);
     }
     catch (ResponseStatusException e) {
       assertEquals(EEAErrorMessage.DATASET_IS_LOCKED_FOR_EDITING + userEditingDataset, e.getReason());
@@ -2283,7 +2283,7 @@ public class DatasetControllerImplTest {
     Mockito.when(datasetService.isDatasetReportable(datasetId)).thenReturn(true);
     Mockito.when(jobControllerZuul.checkEligibilityOfJob(jobType, false, dataflowId, providerId, datasetIds)).thenReturn(jobStatus);
     try {
-      datasetControllerImpl.etlImportDatasetDL(datasetId, dataflowId, providerId, replaceData, tableSchemaId, delimiter, filePathInS3);
+      datasetControllerImpl.etlImportDatasetDL(datasetId, dataflowId, providerId, replaceData, tableSchemaId, delimiter, filePathInS3, null);
     }
     catch (ResponseStatusException e) {
       assertEquals(EEAErrorMessage.IMPORTING_REFUSED, e.getReason());
@@ -2316,8 +2316,8 @@ public class DatasetControllerImplTest {
     Mockito.when(dataFlowControllerZuul.getMetabaseById(dataflowId)).thenReturn(dataFlowVO);
     Mockito.when(datasetService.isDatasetReportable(datasetId)).thenReturn(true);
     Mockito.when(jobControllerZuul.checkEligibilityOfJob(jobType, false, dataflowId, providerId, datasetIds)).thenReturn(jobStatus);
-    Mockito.when(jobControllerZuul.addEtlImportJob(datasetId, dataflowId, providerId, jobStatus, replaceData, tableSchemaId, delimiter, filePathInS3)).thenReturn(jobId);
-    Map<String, Object> result = datasetControllerImpl.etlImportDatasetDL(datasetId, dataflowId, providerId, replaceData, tableSchemaId, delimiter, filePathInS3);
+    Mockito.when(jobControllerZuul.addEtlImportJob(datasetId, dataflowId, providerId, jobStatus, replaceData, tableSchemaId, delimiter, filePathInS3, null)).thenReturn(jobId);
+    Map<String, Object> result = datasetControllerImpl.etlImportDatasetDL(datasetId, dataflowId, providerId, replaceData, tableSchemaId, delimiter, filePathInS3, null);
     assertEquals(result.get("jobId"), jobId);
     assertEquals(result.get("pollingUrl"), pollingUrl);
   }
