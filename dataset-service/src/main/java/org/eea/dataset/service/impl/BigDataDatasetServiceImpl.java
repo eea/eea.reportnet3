@@ -2987,7 +2987,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
      */
     @Async
     @Override
-    public void etlImportDataset(Long datasetId, Long dataflowId, Long providerId, Boolean replaceData, String tableSchemaId, String delimiter, String filePathInS3, Long jobId, DataFlowVO dataFlowVO, DataSetMetabaseVO dataSetMetabaseVO) throws Exception {
+    public void etlImportDataset(Long datasetId, Long dataflowId, Long providerId, Boolean replaceData, String tableSchemaId, String delimiter, String filePathInS3, Long jobId, DataFlowVO dataFlowVO, DataSetMetabaseVO dataSetMetabaseVO, String preparationCode) throws Exception {
         File etlImportFolder = null;
         try {
             DatasetTypeEnum datasetTypeEnum = datasetService.getDatasetType(datasetId);
@@ -3015,7 +3015,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 return;
             }
 
-            etlImportFolder = createEtlImportFolder(datasetId, jobId);
+            etlImportFolder = createEtlImportFolder(datasetId, jobId, preparationCode);
 
 
             Set<String> tableNamesSet = null;
@@ -3028,7 +3028,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             }
             Map<String, Boolean> attachmentsExistPerTableName = new HashMap();
 
-            List<File> csvFiles = storeAndUnzipEtlImportZipFile(datasetId, filePathInS3, fileExtension, jobId, etlImportFolder, tableNamesSet, attachmentsExistPerTableName);
+            List<File> csvFiles = storeAndUnzipEtlImportZipFile(datasetId, filePathInS3, fileExtension, jobId, etlImportFolder, tableNamesSet, attachmentsExistPerTableName, preparationCode);
             if(csvFiles == null){ // job has already failed
                 return;
             }
@@ -3040,7 +3040,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 providerCode = dataProviderVO.getCode();
             }
 
-            ImportFileInDremioInfo importFileInDremioInfo = new ImportFileInDremioInfo(jobId, datasetId, dataflowId, providerId, tableSchemaId, null, replaceData, delimiter, null, providerCode, null);
+            ImportFileInDremioInfo importFileInDremioInfo = new ImportFileInDremioInfo(jobId, datasetId, dataflowId, providerId, tableSchemaId, null, replaceData, delimiter, null, providerCode, preparationCode);
             if (DatasetTypeEnum.REFERENCE.equals(datasetTypeEnum) && dataFlowVO.getStatus() == TypeStatusEnum.DRAFT) {
                 importFileInDremioInfo.setUpdateReferenceFolder(true);
             }
@@ -3085,11 +3085,17 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         }
     }
 
-    protected List<File> storeAndUnzipEtlImportZipFile(Long datasetId, String filePathInS3, String fileExtension, Long jobId, File etlImportFolder, Set<String> tableNamesSet, Map<String, Boolean> attachmentsExistPerTableName) throws Exception {
+    protected List<File> storeAndUnzipEtlImportZipFile(Long datasetId, String filePathInS3, String fileExtension, Long jobId, File etlImportFolder, Set<String> tableNamesSet, Map<String, Boolean> attachmentsExistPerTableName, String preparationCode) throws Exception {
         boolean attachmentsFolderSeen = false;
         String[] filePathInS3Split = filePathInS3.split("/");
         String fileNameInS3 = filePathInS3Split[filePathInS3Split.length - 1];
-        String filePathStructure = "/" + datasetId + "/" + fileNameInS3;
+        String filePathStructure;
+
+        if (StringUtils.isNotBlank(preparationCode)) {
+            filePathStructure = "/" + datasetId + "/" + preparationCode + "/" + fileNameInS3;
+        } else {
+            filePathStructure = "/" + datasetId + "/" + fileNameInS3;
+        }
         File s3File = null;
         try {
             LOG.info("For jobId {} downloading file from s3 in path {} with fileExtension {}", jobId, filePathInS3, fileExtension);
@@ -3238,15 +3244,25 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         return parts.length == 2 && !isDirectory;
     }
 
-    protected File createEtlImportFolder(Long datasetId, Long jobId) throws Exception {
+    protected File createEtlImportFolder(Long datasetId, Long jobId, String preparationCode) throws Exception {
         //store zip file
         File importParentfolder = new File(importPath + "/" + datasetId);
         if (!importParentfolder.exists()) {
             importParentfolder.mkdir();
         }
 
+        File workingParentFolder = importParentfolder;
+
+        // Preparation
+        if (StringUtils.isNotBlank(preparationCode)) {
+            workingParentFolder = new File(importParentfolder.getCanonicalPath() + "/" + preparationCode);
+            if (!workingParentFolder.exists()) {
+                workingParentFolder.mkdir();
+            }
+        }
+
         //create etlImport folder if it doesn't exist
-        File etlImportFolder = new File(importParentfolder.getCanonicalPath() + "/" + String.format(ETL_IMPORT_FOLDER, jobId));
+        File etlImportFolder = new File(workingParentFolder.getCanonicalPath() + "/" + String.format(ETL_IMPORT_FOLDER, jobId));
         if (!etlImportFolder.exists()) {
             etlImportFolder.mkdir();
         }

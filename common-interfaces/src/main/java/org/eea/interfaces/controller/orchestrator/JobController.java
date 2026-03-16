@@ -147,7 +147,8 @@ public interface JobController {
                          @RequestParam(value = "replace", required = false) Boolean replace,
                          @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,
                          @RequestParam(value = "delimiter", required = false) String delimiter,
-                         @RequestParam(value = "filePathInS3", required = false) String filePathInS3);
+                         @RequestParam(value = "filePathInS3", required = false) String filePathInS3,
+                         @RequestParam(value = "preparationCode", required = false) String preparationCode);
 
     /**
      * Adds a delete data job

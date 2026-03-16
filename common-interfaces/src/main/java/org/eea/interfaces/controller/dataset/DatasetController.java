@@ -516,7 +516,8 @@ public interface DatasetController {
                                        @RequestParam(value = "replaceData", required = false) Boolean replaceData,
                                        @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,
                                        @RequestParam(value = "delimiter") String delimiter,
-                                       @RequestBody String filePathInS3) throws Exception;
+                                       @RequestBody String filePathInS3,
+                                       @RequestParam(value = "preparationCode", required = false) String preparationCode) throws Exception;
 
 
   /**

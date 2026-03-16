@@ -2232,7 +2232,7 @@ public class DatasetControllerImpl implements DatasetController {
         LOG.info("Added etl import job with id {} for datasetId {} with status REFUSED", jobId, datasetId);
         throw new ResponseStatusException(HttpStatus.LOCKED, EEAErrorMessage.IMPORTING_REFUSED);
       }
-      jobId = jobControllerZuul.addEtlImportJob(datasetId, dataflowId, providerId, jobStatus, replaceData, null, null, null);
+      jobId = jobControllerZuul.addEtlImportJob(datasetId, dataflowId, providerId, jobStatus, replaceData, null, null, null, null);
 
       LOG.info("Calling etlImport for jobId {} dataflowId {} datasetId {} and replaceData {}", jobId, dataflowId, datasetId, replaceData);
       fileTreatmentHelper.etlImportDataset(datasetId, etlDatasetVO, providerId, replaceData, jobId);
@@ -2311,10 +2311,11 @@ public class DatasetControllerImpl implements DatasetController {
                                          @RequestParam(value = "replaceData", required = false, defaultValue = "false") Boolean replaceData,
                                          @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,
                                          @RequestParam(value = "delimiter") String delimiter,
-                                         @RequestBody String filePathInS3) throws Exception {
+                                         @RequestBody String filePathInS3,
+                                         @RequestParam(value = "preparationCode", required = false) String preparationCode) throws Exception {
     Long jobId = null;
     try{
-      LOG.info("Called etlImportDatasetDL for dataflowId {} datasetId {} and providerId {} and filePathInS3 {}", dataflowId, datasetId, providerId, filePathInS3);
+      LOG.info("Called etlImportDatasetDL for dataflowId {} datasetId {} and providerId {} and filePathInS3 {} and preparationCode {}", dataflowId, datasetId, providerId, filePathInS3, preparationCode);
       filePathInS3 = filePathInS3.trim();
       // check if dataset belongs to dataflow
       if (!dataflowId.equals(datasetService.getDataFlowIdById(datasetId))) {
@@ -2349,21 +2350,29 @@ public class DatasetControllerImpl implements DatasetController {
         throw new ResponseStatusException(HttpStatus.CONFLICT, EEAErrorMessage.DATASET_IS_LOCKED_FOR_EDITING + userEditingDataset);
       }
 
+      JobStatusEnum jobStatus;
       //check eligibility of new job
-      List<Long> datasetIds = new ArrayList<>();
-      datasetIds.add(datasetId);
-      JobStatusEnum jobStatus = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.ETL_IMPORT.getValue(), false, dataflowId, providerId, datasetIds);
+
+      if (StringUtils.isBlank(preparationCode)) { // NOT Preparation eligibility check
+        List<Long> datasetIds = new ArrayList<>();
+        datasetIds.add(datasetId);
+        jobStatus = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.ETL_IMPORT.getValue(), false, dataflowId, providerId, datasetIds);
+      }
+      else {
+        jobStatus = jobControllerZuul.checkEligibilityOfPreparationJob(JobTypeEnum.ETL_IMPORT.getValue(),  datasetId, preparationCode);
+      }
+
       if(jobStatus.getValue().equals(JobStatusEnum.REFUSED.getValue())){
         LOG.info("Added etl import job with id {} for datasetId {} with status REFUSED", jobId, datasetId);
         throw new ResponseStatusException(HttpStatus.LOCKED, EEAErrorMessage.IMPORTING_REFUSED);
       }
-      jobId = jobControllerZuul.addEtlImportJob(datasetId, dataflowId, providerId, jobStatus, replaceData, tableSchemaId, delimiter, filePathInS3);
+      jobId = jobControllerZuul.addEtlImportJob(datasetId, dataflowId, providerId, jobStatus, replaceData, tableSchemaId, delimiter, filePathInS3, preparationCode);
 
       DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
       providerId = (providerId != null) ? providerId : dataSetMetabaseVO.getDataProviderId();
       providerId = (providerId != null) ? providerId : 0L;
       LOG.info("Calling etlImport for jobId {} dataflowId {} datasetId {} and replaceData {}", jobId, dataflowId, datasetId, replaceData);
-      bigDataDatasetService.etlImportDataset(datasetId, dataflowId, providerId, replaceData, tableSchemaId, delimiter, filePathInS3, jobId, dataFlowVO, dataSetMetabaseVO);
+      bigDataDatasetService.etlImportDataset(datasetId, dataflowId, providerId, replaceData, tableSchemaId, delimiter, filePathInS3, jobId, dataFlowVO, dataSetMetabaseVO, preparationCode);
 
       Map<String, Object> result = new HashMap<>();
       String pollingUrl = "/orchestrator/jobs/pollForJobStatus/" + jobId + "?datasetId=" + datasetId + "&dataflowId=" + dataflowId;
