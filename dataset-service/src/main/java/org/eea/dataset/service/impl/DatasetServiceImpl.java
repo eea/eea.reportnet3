@@ -1385,12 +1385,12 @@ public class DatasetServiceImpl implements DatasetService {
   @Override
   public void etlExportDataset(@DatasetId Long datasetId, OutputStream outputStream,
       String tableSchemaId, Integer limit, Integer offset, String filterValue, String columnName,
-      String dataProviderCodes) {
+      String dataProviderCodes, String preparationCode) {
     try {
       long startTime = System.currentTimeMillis();
       LOG.info("ETL Export process initiated to datasetId: {}", datasetId);
       exportDatasetETLSQL(datasetId, outputStream, tableSchemaId, limit, offset, filterValue,
-          columnName, dataProviderCodes);
+          columnName, dataProviderCodes, preparationCode);
       outputStream.flush();
       long endTime = System.currentTimeMillis() - startTime;
       LOG.info("ETL Export process completed for datasetId: {} in {} seconds", datasetId,
@@ -3272,17 +3272,25 @@ public class DatasetServiceImpl implements DatasetService {
    */
   private void exportDatasetETLSQL(Long datasetId, OutputStream outputStream, String tableSchemaId,
       Integer limit, Integer offset, String filterValue, String columnName,
-      String dataProviderCodes) throws EEAException {
+      String dataProviderCodes, String preparationCode) throws EEAException {
     try {
       Long dataflowId = getDataFlowIdById(datasetId);
       DataFlowVO dataflow = dataflowControllerZuul.getMetabaseById(dataflowId);
       if (dataflow.getBigData()) {
-        File fileFolder = new File(exportDLPath, "dataset-" + datasetId);
+        File fileFolder;
+
+        if (StringUtils.isNotBlank(preparationCode)) {
+          fileFolder = new File(exportDLPath,
+                  "dataset-" + datasetId + "/preparation/" + preparationCode);
+        } else {
+          fileFolder = new File(exportDLPath, "dataset-" + datasetId);
+        }
+
         fileFolder.mkdirs();
         File jsonFile = new File(new File(exportDLPath, "dataset-" + datasetId), tableSchemaId + "_etlExport" + JSON_TYPE);
 
         jsonFile = recordRepository.findAndGenerateETLJsonDL(datasetId, tableSchemaId, limit,
-                offset, filterValue, columnName, dataProviderCodes, jsonFile);
+                offset, filterValue, columnName, dataProviderCodes, jsonFile, preparationCode);
 
         byte[] bytes = IOUtils.toByteArray(new FileInputStream(jsonFile));
         outputStream.write(bytes);

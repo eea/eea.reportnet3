@@ -1884,7 +1884,9 @@ public class DatasetControllerImpl implements DatasetController {
           @ApiParam(type = "String", value = "Filter column name", example = "column") @RequestParam(
                   value = "columnName", required = false) String columnName,
           @ApiParam(type = "String", value = "Data provider codes", example = "BE,DK") @RequestParam(
-                  value = "dataProviderCodes", required = false) String dataProviderCodes) {
+                  value = "dataProviderCodes", required = false) String dataProviderCodes,
+          @ApiParam(type = "String", value = "Preparation code", example = "Austria_a") @RequestParam(
+                  value = "code", required = false) String preparationCode) {
 
     if (!dataflowId.equals(datasetService.getDataFlowIdById(datasetId))) {
       String errorMessage =
@@ -1896,7 +1898,7 @@ public class DatasetControllerImpl implements DatasetController {
     try {
       LOG.info("Calling etlExport for dataflowId {} and datasetId {}", dataflowId, datasetId);
       StreamingResponseBody responsebody = outputStream -> datasetService.etlExportDataset(datasetId,
-              outputStream, tableSchemaId, limit, offset, filterValue, columnName, dataProviderCodes);
+              outputStream, tableSchemaId, limit, offset, filterValue, columnName, dataProviderCodes, preparationCode);
       LOG.info("Successfully called etlExport for dataflowId {} and datasetId {}",dataflowId, datasetId);
       return ResponseEntity.ok().contentType(MediaType.APPLICATION_STREAM_JSON).body(responsebody);
     } catch (Exception e) {
@@ -1948,7 +1950,7 @@ public class DatasetControllerImpl implements DatasetController {
     try {
       LOG.info("Calling etlExport v2 for dataflowId {} and datasetId {}", dataflowId, datasetId);
       StreamingResponseBody responsebody = outputStream -> datasetService.etlExportDataset(datasetId,
-              outputStream, tableSchemaId, limit, offset, filterValue, columnName, dataProviderCodes);
+              outputStream, tableSchemaId, limit, offset, filterValue, columnName, dataProviderCodes, null);
       LOG.info("Successfully called etlExport v2 for dataflowId {} and datasetId {}", dataflowId, datasetId);
 
       return ResponseEntity.ok().contentType(MediaType.APPLICATION_STREAM_JSON).body(responsebody);
@@ -2300,7 +2302,7 @@ public class DatasetControllerImpl implements DatasetController {
                                          @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,
                                          @RequestParam(value = "delimiter") String delimiter,
                                          @RequestBody String filePathInS3,
-                                         @RequestParam(value = "preparationCode", required = false) String preparationCode) throws Exception {
+                                         @RequestParam(value = "code", required = false) String preparationCode) throws Exception {
     Long jobId = null;
     try{
       LOG.info("Called etlImportDatasetDL for dataflowId {} datasetId {} and providerId {} and filePathInS3 {} and preparationCode {}", dataflowId, datasetId, providerId, filePathInS3, preparationCode);

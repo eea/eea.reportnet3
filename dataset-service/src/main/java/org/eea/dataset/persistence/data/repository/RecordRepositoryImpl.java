@@ -668,7 +668,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
   @Override
   public File findAndGenerateETLJsonDL(Long datasetId, String tableSchemaId, Integer limit,
       Integer offset, String filterValue, String columnName, String dataProviderCodes,
-      File jsonFile) throws EEAException, IOException {
+      File jsonFile, String preparationCode) throws EEAException, IOException {
     checkSql(filterValue);
     checkSql(columnName);
     String datasetSchemaId = datasetMetabaseService.findDatasetSchemaIdById(datasetId);
@@ -692,7 +692,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
         Boolean wroteEmptyRecords = false;
         Long totalRecords;
         try {
-          totalRecords = getCountDL(totalRecordsQueryDL(datasetId, tableSchema, filterValue, columnName, dataProviderCodes, limit, offset, true));
+          totalRecords = getCountDL(totalRecordsQueryDL(datasetId, tableSchema, filterValue, columnName, dataProviderCodes, limit, offset, true, preparationCode));
         } catch (UncategorizedSQLException ex) {
           totalRecords = 0L;
           bw.write("{\"records\":[");
@@ -701,7 +701,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
         }
 
         if (totalRecords != null && totalRecords > 0L) {
-          String query = totalRecordsQueryDL(datasetId, tableSchema, filterValue, columnName, dataProviderCodes, limit, offset, false);
+          String query = totalRecordsQueryDL(datasetId, tableSchema, filterValue, columnName, dataProviderCodes, limit, offset, false, preparationCode);
           getAllRecordsDL(query, tableSchema, bw, datasetId);
           bw.write("],\"tableName\":\"" + tableSchema.getNameTableSchema() + "\"");
         }
@@ -1820,12 +1820,14 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
    * @return the string
    */
   private String totalRecordsQueryDL(Long datasetId, TableSchema tableSchema, String filterValue,
-      String columnName, String dataProviderCodes, Integer limit, Integer offset, boolean getCount) {
+      String columnName, String dataProviderCodes, Integer limit, Integer offset, boolean getCount, String preparationCode) {
 
     StringBuilder stringQuery = new StringBuilder();
 
     DataSetMetabaseVO dataset = datasetMetabaseService.findDatasetMetabase(datasetId);
     S3PathResolver s3PathResolver = new S3PathResolver(dataset.getDataflowId(), tableSchema.getNameTableSchema());
+    s3PathResolver.setPreparationCode(preparationCode);
+
     String table = setUpS3PathResolver(datasetId, dataset, s3PathResolver);
 
     if (getCount) {
@@ -1979,7 +1981,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       DataFlowVO dataFlowVO = dataflowControllerZuul.getMetabaseById(dataflowId);
       if (dataFlowVO.getBigData()) {
         findAndGenerateETLJsonDL(datasetId, tableSchemaId, limit, offset, filterValue,
-            columnName, dataProviderCodes, new File(jsonFile));
+            columnName, dataProviderCodes, new File(jsonFile), null);
 
       } else {
         if (offset == 0) {
@@ -2236,7 +2238,12 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     String path = null;
     switch (dataset.getDatasetTypeEnum()) {
       case REPORTING:
-        s3PathResolver.setPath(S3_TABLE_AS_FOLDER_QUERY_PATH);
+        if (StringUtils.isNotBlank(s3PathResolver.getPreparationCode())) {
+          s3PathResolver.setPath(S3_PREPARATION_TABLE_AS_FOLDER_QUERY_PATH);
+        }
+        else {
+          s3PathResolver.setPath(S3_TABLE_AS_FOLDER_QUERY_PATH);
+        }
         s3PathResolver.setDataProviderId(dataset.getDataProviderId());
         s3PathResolver.setDatasetId(datasetId);
         path = s3Service.getS3Path(s3PathResolver);

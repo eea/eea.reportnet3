@@ -364,7 +364,8 @@ public interface DatasetController {
       @RequestParam(value = "offset", required = false) Integer offset,
       @RequestParam(value = "filterValue", required = false) String filterValue,
       @RequestParam(value = "columnName", required = false) String columnName,
-      @RequestParam(value = "dataProviderCodes", required = false) String dataProviderCodes);
+      @RequestParam(value = "dataProviderCodes", required = false) String dataProviderCodes,
+      @RequestParam(value = "code", required = false) String preparationCode);
 
   /**
    * Etl export dataset V 2.
