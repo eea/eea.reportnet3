@@ -95,6 +95,7 @@ public class LoadValidationsHelperDL {
         boolean validationFolderExists;
         if (StringUtils.isNotBlank(preparationCode)) {
             validationFolderExists = s3Helper.checkFolderExist(s3PathResolver, S3_PREPARATION_VALIDATION_TABLE_PATH);
+            s3PathResolver.setPath(S3_PREPARATION_TABLE_NAME_FOLDER_PATH);
         }
         else {
             validationFolderExists = s3Helper.checkFolderExist(s3PathResolver, S3_VALIDATION_TABLE_PATH);

@@ -402,11 +402,9 @@ public class DatasetControllerImpl implements DatasetController {
   @HystrixCommand
   @PutMapping("/private/updateStatistics/{id}")
   public void updateStatistics(@PathVariable("id") Long datasetId,
-                               @RequestParam("isBigDataflow") Boolean isBigDataflow,
-                               @RequestParam(value = "code", required = false) String preparationCode) {
+                               @RequestParam("isBigDataflow") Boolean isBigDataflow) {
     try {
-      //TODO Check for update
-      datasetService.saveStatistics(datasetId, isBigDataflow, preparationCode);
+      datasetService.saveStatistics(datasetId, isBigDataflow);
     } catch (EEAException e) {
       LOG.error(
           "Error saving statistics. Error message: {}",

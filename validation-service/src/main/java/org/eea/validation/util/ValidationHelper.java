@@ -471,15 +471,15 @@ public class ValidationHelper implements DisposableBean {
         }
       }
 
-      //TODO Check if this is needed
       if (StringUtils.isBlank(preparationCode)) {
-        datasetController.updateStatistics(datasetId, true, preparationCode);
+        datasetController.updateStatistics(datasetId, true);
       }
 
       DataFlowVO dataflow = dataFlowControllerZuul.getMetabaseById(dataset.getDataflowId());
       /* Add check for design dataflows #297461 In design dataflows empty tables will be created during the validation process.
          For draft dataflows empty tables will be created during the data collection creation.*/
-      if(dataflow.getStatus().equals(TypeStatusEnum.DESIGN)) {
+      //TODO DO WE NEED TO CREATE EMPTY PARQUET FILES FOR VALIDATION PREPARATION DATASETS?
+      if (dataflow.getStatus().equals(TypeStatusEnum.DESIGN)) {
         List<DataSetMetabaseVO> combinedDatasets = getCombinedDatasets(dataset);
         combinedDatasets.forEach(dataSetMetabaseVO -> {
           DataSetSchema schema;
@@ -1989,8 +1989,7 @@ public class ValidationHelper implements DisposableBean {
    */
   public void uploadValidationParquetToS3(RuleVO ruleVO, S3PathResolver validationResolver, String fileName, int ruleIdLength, String parquetFile) {
     //if the dataset to validate is of reference type, then the validation path should be changed
-    //TODO CHeck this
-    String s3FilePath = this.getRuleValidationFolderName(ruleVO, validationResolver, fileName, ruleIdLength, parquetFile);
+    final String s3FilePath = this.getRuleValidationFolderName(ruleVO, validationResolver, fileName, ruleIdLength, parquetFile);
     s3Helper.uploadFileToBucket(s3FilePath, parquetFile);
   }
 }

@@ -1,5 +1,6 @@
 package org.eea.dataset.io.kafka.commands;
 
+import org.apache.commons.lang.StringUtils;
 import org.eea.dataset.service.DatasetService;
 import org.eea.exception.EEAException;
 import org.eea.kafka.commands.AbstractEEAEventHandlerCommand;
@@ -60,7 +61,9 @@ public class SaveStatisticsCommand extends AbstractEEAEventHandlerCommand {
         @Override
         public void run() {
           try {
-            datasetService.saveStatistics(datasetId, bigData, preparationCode);
+            if (StringUtils.isBlank(preparationCode)) {
+              datasetService.saveStatistics(datasetId, bigData);
+            }
           } catch (EEAException e) {
             LOG_ERROR.error("Error saving statistics. Error message: {}", e.getMessage(), e);
           } catch (Exception e) {

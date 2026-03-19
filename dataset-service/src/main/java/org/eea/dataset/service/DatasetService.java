@@ -205,7 +205,7 @@ public interface DatasetService {
    *
    * @throws EEAException the EEA exception
    */
-  void saveStatistics(@DatasetId Long datasetId, boolean bigData, String preparationCode) throws EEAException;
+  void saveStatistics(@DatasetId Long datasetId, boolean bigData) throws EEAException;
 
   /**
    * Delete table value.
