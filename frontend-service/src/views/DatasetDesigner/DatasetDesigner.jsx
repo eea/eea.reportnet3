@@ -1592,7 +1592,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
   const onDownloadValidations = async () => {
     setIsDownloadingValidations(true);
     try {
-      await ValidationService.generateShowValidationsFile(datasetId);
+      await ValidationService.generateShowValidationsFile({datasetId});
       notificationContext.add({ type: 'DOWNLOAD_VALIDATIONS_START' });
     } catch (error) {
       console.error('DatasetDesigner - onDownloadValidations.', error);
