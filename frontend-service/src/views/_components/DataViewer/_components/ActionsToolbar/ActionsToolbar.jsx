@@ -165,7 +165,7 @@ export const ActionsToolbar = ({
     });
 
     const action = 'TABLE_EXPORT';
-    actionsContext.testProcess(datasetId, action);
+    actionsContext.testProcess(datasetId, action, preparationSetCode);
     notificationContext.add({ type: 'EXPORT_TABLE_DATA_START' }, true);
     try {
       const isExportFilteredCsv = TextUtils.areEquals(type.key, 'exportFilteredCsv');

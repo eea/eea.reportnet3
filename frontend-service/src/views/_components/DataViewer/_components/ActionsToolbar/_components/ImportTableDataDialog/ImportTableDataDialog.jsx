@@ -75,7 +75,7 @@ export const ImportTableDataDialog = ({
   const onUpload = async e => {
     const action = 'TABLE_IMPORT';
     const fileName = uploadingFileName || e?.files?.[0]?.name || ' ';
-    actionsContext.testProcess(datasetId, action);
+    actionsContext.testProcess(datasetId, action, preparationSetCode);
     setImportTableDialogVisible(false);
     const {
       dataflow: { name: dataflowName },
