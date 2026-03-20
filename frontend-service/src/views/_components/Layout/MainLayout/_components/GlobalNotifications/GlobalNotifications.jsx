@@ -1,4 +1,5 @@
 import { useContext, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 
 import isNil from 'lodash/isNil';
 
@@ -17,6 +18,7 @@ import { LocalUserStorageUtils } from 'services/_utils/LocalUserStorageUtils';
 export const GlobalNotifications = ({ bigData }) => {
   const notificationContext = useContext(NotificationContext);
   const { storage: storageConfig } = config;
+  const { code } = useParams();
 
   useEffect(() => {
     downloadAllSchemasInfoFile();
@@ -256,7 +258,8 @@ export const GlobalNotifications = ({ bigData }) => {
         const { data } = bigData
           ? await DatasetService.downloadExportDatasetFileDL(
               notification.content.datasetId,
-              encodeURIComponent(downloadFileName)
+              encodeURIComponent(downloadFileName),
+              code
             )
           : await DatasetService.downloadExportDatasetFile(
               notification.content.datasetId,
@@ -294,7 +297,7 @@ export const GlobalNotifications = ({ bigData }) => {
 
         const downloadFileName = `${notification.content.fileName}.${notification.content.mimeType}`;
         const { data } = bigData
-          ? await DatasetService.downloadTableDataDL(notification.content.datasetId, downloadFileName)
+          ? await DatasetService.downloadTableDataDL(notification.content.datasetId, downloadFileName, code)
           : await DatasetService.downloadTableData(notification.content.datasetId, downloadFileName);
 
         if (data.size !== 0) {

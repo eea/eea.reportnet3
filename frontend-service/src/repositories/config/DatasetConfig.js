@@ -34,7 +34,8 @@ export const DatasetConfig = {
     '/dataset/v1/{:datasetId}/field/{:fieldId}/attachment?dataflowId={:dataflowId}&tableSchemaName={:tableSchemaName}&fieldName={:fieldName}&fileName={:fileName}&recordId={:recordId}',
   deleteAttachmentWithProviderId:
     '/dataset/v1/{:datasetId}/field/{:fieldId}/attachment?dataflowId={:dataflowId}&providerId={:providerId}&tableSchemaName={:tableSchemaName}&fieldName={:fieldName}&fileName={:fileName}&recordId={:recordId}',
-  deleteData: '/dataset/v1/{:datasetId}/deleteDatasetData?deletePrefilledTables={:deletePrefilledTables}&preparationCode={:preparationCode}',
+  deleteData:
+    '/dataset/v1/{:datasetId}/deleteDatasetData?deletePrefilledTables={:deletePrefilledTables}&preparationCode={:preparationCode}',
   deleteTableData: '/dataset/v1/{:datasetId}/deleteTableData/{:tableId}?preparationCode={:preparationCode}',
   deleteRecord:
     '/dataset/{:datasetId}/record/{:selectedRecordId}?deleteCascadePK={:updateInCascade}&tableSchemaId={:tableId}',
@@ -43,7 +44,8 @@ export const DatasetConfig = {
   downloadPublicDatasetFile:
     '/dataset/exportPublicFile/dataflow/{:dataflowId}/dataProvider/{:dataProviderId}?fileName={:fileName}',
   downloadExportDatasetFile: '/dataset/{:datasetId}/downloadFile?fileName={:fileName}',
-  downloadExportDatasetFileDL: '/dataset/{:datasetId}/downloadFileDL?fileName={:fileName}',
+  downloadExportDatasetFileDL:
+    '/dataset/{:datasetId}/downloadFileDL?fileName={:fileName}&preparationCode={:preparationCode}',
   downloadExportFile: '/fme/downloadExportFile?datasetId={:datasetId}&fileName={:fileName}',
   downloadExportFileWithProviderId:
     '/fme/downloadExportFile?datasetId={:datasetId}&fileName={:fileName}&providerId={:providerId}',
@@ -55,15 +57,17 @@ export const DatasetConfig = {
     '/dataset/v1/{:datasetId}/record/{:recordId}/geometry?fieldId={:fieldId}&dataflowId={:dataflowId}&idTableSchema={:tableSchemaId}&providerId={:providerId}',
   downloadPublicReferenceDatasetFileData: '/dataset/exportPublicFile/dataflow/{:dataflowId}?fileName={:fileName}',
   downloadTableData: '/dataset/{:datasetId}/downloadFile?fileName={:fileName}',
-  downloadTableDataDL: '/dataset/{:datasetId}/downloadFileDL?fileName={:fileName}',
+  downloadTableDataDL: '/dataset/{:datasetId}/downloadFileDL?fileName={:fileName}&preparationCode={:preparationCode}',
   downloadImportedFile:
     '/dataset/download-imported-file?fileName={:fileName}&datasetId={:datasetId}&dataflowId={:dataflowId}',
   exportDatasetData: '/dataset/{:datasetId}/exportDatasetFile?mimeType={:fileType}',
-  exportDatasetDataDL: '/dataset/{:datasetId}/exportDatasetFileDL?mimeType={:fileType}',
+  exportDatasetDataDL:
+    '/dataset/{:datasetId}/exportDatasetFileDL?mimeType={:fileType}&preparationCode={:preparationCode}',
   exportDatasetDataExternal:
-    '/dataset/exportFileThroughIntegration?datasetId={:datasetId}&integrationId={:integrationId}',
+    '/dataset/exportFileThroughIntegration?datasetId={:datasetId}&integrationId={:integrationId}&preparationCode={:preparationCode}',
   exportTableData: '/dataset/exportFile?datasetId={:datasetId}&tableSchemaId={:tableSchemaId}&mimeType={:fileType}',
-  exportTableDataDL: '/dataset/exportFileDL?datasetId={:datasetId}&tableSchemaId={:tableSchemaId}&mimeType={:fileType}',
+  exportTableDataDL:
+    '/dataset/exportFileDL?datasetId={:datasetId}&tableSchemaId={:tableSchemaId}&mimeType={:fileType}&preparationCode={:preparationCode}',
   exportTableSchema:
     '/dataschema/v1/{:datasetSchemaId}/exportFieldSchemas?datasetId={:datasetId}&tableSchemaId={:tableSchemaId}&mimeType={:fileType}',
   importFileDataset: '/dataset/v2/importFileData/{:datasetId}?delimiter={:delimiter}',

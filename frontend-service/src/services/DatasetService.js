@@ -167,8 +167,8 @@ export const DatasetService = {
   downloadExportDatasetFile: async (datasetId, fileName) =>
     await DatasetRepository.downloadExportDatasetFile(datasetId, fileName),
 
-  downloadExportDatasetFileDL: async (datasetId, fileName) =>
-    await DatasetRepository.downloadExportDatasetFileDL(datasetId, fileName),
+  downloadExportDatasetFileDL: async (datasetId, fileName, preparationCode) =>
+    await DatasetRepository.downloadExportDatasetFileDL(datasetId, fileName, preparationCode),
 
   downloadExportFile: async (datasetId, fileName, providerId) =>
     await DatasetRepository.downloadExportFile(datasetId, fileName, providerId),
@@ -207,7 +207,8 @@ export const DatasetService = {
 
   downloadTableData: async (datasetId, fileName) => await DatasetRepository.downloadTableData(datasetId, fileName),
 
-  downloadTableDataDL: async (datasetId, fileName) => await DatasetRepository.downloadTableDataDL(datasetId, fileName),
+  downloadTableDataDL: async (datasetId, fileName, preparationCode) =>
+    await DatasetRepository.downloadTableDataDL(datasetId, fileName, preparationCode),
 
   getAlignmentBetween: async (datasetId, selectedRepresentativesCode, selectedTable) =>
     await DatasetRepository.getAlignmentBetween(datasetId, selectedRepresentativesCode, selectedTable),
@@ -266,10 +267,11 @@ export const DatasetService = {
 
   exportDatasetData: async (datasetId, fileType) => await DatasetRepository.exportDatasetData(datasetId, fileType),
 
-  exportDatasetDataDL: async (datasetId, fileType) => await DatasetRepository.exportDatasetDataDL(datasetId, fileType),
+  exportDatasetDataDL: async (datasetId, fileType, preparationCode) =>
+    await DatasetRepository.exportDatasetDataDL(datasetId, fileType, preparationCode),
 
-  exportDatasetDataExternal: async (datasetId, integrationId) =>
-    await DatasetRepository.exportDatasetDataExternal(datasetId, integrationId),
+  exportDatasetDataExternal: async (datasetId, integrationId, preparationCode) =>
+    await DatasetRepository.exportDatasetDataExternal(datasetId, integrationId, preparationCode),
 
   exportTableData: async (
     datasetId,
@@ -300,7 +302,8 @@ export const DatasetService = {
     levelErrorValidations,
     selectedShortCode,
     isExportFilteredCsv,
-    isFilterValidationsActive
+    isFilterValidationsActive,
+    preparationCode
   ) =>
     await DatasetRepository.exportTableDataDL(
       datasetId,
@@ -310,7 +313,8 @@ export const DatasetService = {
       levelErrorValidations,
       selectedShortCode,
       isExportFilteredCsv,
-      isFilterValidationsActive
+      isFilterValidationsActive,
+      preparationCode
     ),
 
   exportTableSchema: async (datasetId, datasetSchemaId, tableSchemaId, fileType) =>

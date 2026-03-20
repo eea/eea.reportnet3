@@ -178,7 +178,8 @@ export const ActionsToolbar = ({
           levelErrorValidations.map(levelError => levelError.toUpperCase()),
           selectedShortCode,
           isExportFilteredCsv,
-          isFilterValidationsActive
+          isFilterValidationsActive,
+          preparationSetCode
         );
       } else {
         await DatasetService.exportTableData(
