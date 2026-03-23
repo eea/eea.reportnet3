@@ -235,7 +235,8 @@ public interface DatasetController {
   @GetMapping(value = "/exportFileDL", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
   void exportFileDL(@RequestParam("datasetId") Long datasetId,
       @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,
-      @RequestParam("mimeType") String mimeType, @RequestBody ExportFilterVO exportFilterVO);
+      @RequestParam("mimeType") String mimeType, @RequestBody ExportFilterVO exportFilterVO,
+      @RequestParam(value = "code", required = false) String preparationCode);
 
   @GetMapping(value = "/tablesUpdated")
   ResponseEntity<?> tablesUpdatedAfterRelease(@RequestParam("datasetId") Long datasetId);
@@ -839,7 +840,8 @@ public interface DatasetController {
   @GetMapping(value = "/{datasetId}/exportDatasetFile")
   void exportDatasetFileDL(
       @PathVariable("datasetId") Long datasetId,
-      @RequestParam("mimeType") String mimeType);
+      @RequestParam("mimeType") String mimeType,
+      @RequestParam(value = "code", required = false) String preparationCode);
 
 
   /**

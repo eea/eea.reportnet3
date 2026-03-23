@@ -1560,7 +1560,10 @@ public class DatasetControllerImpl implements DatasetController {
                   required = false) String tableSchemaId,
           @ApiParam(type = "String", value = "mimeType (file extension)",
                   example = "csv") @RequestParam("mimeType") String mimeType,
-          @RequestBody ExportFilterVO exportFilterVO) {
+          @RequestBody ExportFilterVO exportFilterVO,
+          @ApiParam(type = "String", value = "Preparation Code",
+                  example = "section_a") @RequestParam(value = "code", required = false) String preparationCode) {
+
     String tableName =
             null != tableSchemaId ? datasetSchemaService.getTableSchemaName(null, tableSchemaId)
                     : datasetMetabaseService.findDatasetMetabase(datasetId).getDataSetName();
@@ -1571,7 +1574,7 @@ public class DatasetControllerImpl implements DatasetController {
     }
     try {
       LOG.info("Exporting table data for datasetId {} and tableSchemaId {}", datasetId, tableSchemaId);
-      fileTreatmentHelper.exportFileDL(datasetId, mimeType, tableSchemaId, tableName, exportFilterVO);
+      fileTreatmentHelper.exportFileDL(datasetId, mimeType, tableSchemaId, tableName, exportFilterVO, preparationCode);
       LOG.info("Successfully exported table data for datasetId {} and tableSchemaId {}", datasetId, tableSchemaId);
     } catch (EEAException | IOException e) {
       LOG.error("Error exporting table data from dataset id {} and tableSchemaId {}. Message: {}", datasetId, tableSchemaId, e.getMessage());
@@ -2982,7 +2985,9 @@ public class DatasetControllerImpl implements DatasetController {
           @ApiParam(type = "Long", value = "Dataset Id", example = "0") @PathVariable("datasetId")
           Long datasetId,
           @ApiParam(type = "String", value = "mime type (extension file)", example = "csv")
-          @RequestParam("mimeType") String mimeType) {
+          @RequestParam("mimeType") String mimeType,
+          @ApiParam(type = "String", value = "Preparation Code",
+                  example = "section_a") @RequestParam(value = "preparationCode", required = false) String preparationCode) {
     LOG.info("Exporting dataset data for datasetId {}, with type {}", datasetId, mimeType);
     Long dataflowId = datasetService.getDataFlowIdById(datasetId);
     UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
@@ -2992,7 +2997,7 @@ public class DatasetControllerImpl implements DatasetController {
             userNotificationContentVO);
 
     try {
-      fileTreatmentHelper.exportDatasetFileDL(datasetId, mimeType);
+      fileTreatmentHelper.exportDatasetFileDL(datasetId, mimeType, preparationCode);
       LOG.info("Successfully exported dataset data from datasetId {}, with type {}", datasetId, mimeType);
     } catch (Exception e) {
       LOG.error("Unexpected error! Error exporting dataset file for datasetId {} Message: {}", datasetId, e.getMessage());

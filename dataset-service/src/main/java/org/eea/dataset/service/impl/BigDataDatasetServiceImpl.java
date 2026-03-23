@@ -2376,10 +2376,10 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, reportingDataset.getDatasetSchema());
         S3PathResolver s3PathResolverReporting;
         if (BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable()) && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(reportingDataset.getId(), tableSchemaVO.getIdTableSchema()))) {
-            s3PathResolverReporting = s3ServicePrivate.getS3PathResolverByDatasetType(reportingDataset, tableSchemaVO.getNameTableSchema(), true);
+            s3PathResolverReporting = s3ServicePrivate.getS3PathResolverByDatasetType(reportingDataset, tableSchemaVO.getNameTableSchema(), true, null);
             s3PathResolverReporting.setIsIcebergTable(true);
         } else {
-            s3PathResolverReporting = s3ServicePrivate.getS3PathResolverByDatasetType(reportingDataset, tableSchemaVO.getNameTableSchema(), false);
+            s3PathResolverReporting = s3ServicePrivate.getS3PathResolverByDatasetType(reportingDataset, tableSchemaVO.getNameTableSchema(), false, null);
             s3PathResolverReporting.setIsIcebergTable(false);
         }
         boolean folderExistReporting = s3HelperPrivate.checkFolderExist(s3PathResolverReporting);
@@ -2392,7 +2392,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         }
 
         //find number of records for data collection based on provider and table
-        S3PathResolver s3PathResolverCollection = s3ServicePrivate.getS3PathResolverByDatasetType(collectionDataset, tableSchemaVO.getNameTableSchema(), false);
+        S3PathResolver s3PathResolverCollection = s3ServicePrivate.getS3PathResolverByDatasetType(collectionDataset, tableSchemaVO.getNameTableSchema(), false, null);
         String dremioTableQueryPath;
         if (datasetType.equals(DatasetTypeEnum.COLLECTION)) {
             //data collection
@@ -2557,7 +2557,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
               for (TableSchemaIdNameVO t : tables) {
                 fileTreatmentHelper.convertParquetFileForProvider(
                     datasetId, pid, t.getIdTableSchema(), t.getNameTableSchema(),
-                    datasetType, true, jobId, providerFolderPath);
+                    datasetType, true, jobId, providerFolderPath, preparationCode);
               }
 
               // Provider-scoped attachments (per table)
@@ -2938,7 +2938,8 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 s3ServicePrivate.getS3PathResolverByDatasetType(
                         dataset,
                         tableSchemaVO.getNameTableSchema(),
-                        false
+                        false,
+                        null
                 );
 
         if (BooleanUtils.isTrue(

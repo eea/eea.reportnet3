@@ -842,11 +842,11 @@ public class FileTreatmentHelper implements DisposableBean {
      */
     @Async
     public void exportFileDL(Long datasetId, String mimeType, String tableSchemaId, String tableName,
-                           ExportFilterVO filters) throws Exception {
+                           ExportFilterVO filters, String preparationCode) throws Exception {
 
         String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
         TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, datasetSchemaId);
-        if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable())
+        if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable() &&!StringUtils.isBlank(preparationCode))
                 && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, tableSchemaId))) {
             throw new Exception("Can not export table data because iceberg table is created");
         }
@@ -870,7 +870,7 @@ public class FileTreatmentHelper implements DisposableBean {
                 DataSetMetabaseVO dataset = datasetMetabaseService.findDatasetMetabase(datasetId);
                 DatasetTypeEnum datasetType = datasetMetabaseService.getDatasetType(datasetId);
                 String includeCountryCode = getCode(dataset.getDataflowId(), datasetType);
-                S3PathResolver s3PathResolver = s3Service.getS3PathResolverByDatasetType(dataset, tableName, false);
+                S3PathResolver s3PathResolver = s3Service.getS3PathResolverByDatasetType(dataset, tableName, false, preparationCode);
                 boolean folderExist = s3Helper.checkFolderExist(s3PathResolver);
                 LOG.info("For datasetId {} s3PathResolver : {}", dataset.getId(), s3PathResolver);
                 LOG.info("s3Helper.checkFolderExist(s3PathResolver, S3_TABLE_NAME_FOLDER_PATH) : {}", folderExist);
@@ -883,7 +883,7 @@ public class FileTreatmentHelper implements DisposableBean {
                     createCsvWithFiltersDL(headers, csvFile, rs, includeCountryCode);
                 }
             } else {
-                convertParquetFile(datasetId, mimeType, tableSchemaId, tableName, false, null, null);
+                convertParquetFile(datasetId, mimeType, tableSchemaId, tableName, false, null, preparationCode);
             }
             kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.EXPORT_TABLE_DATA_COMPLETED_EVENT, null, notificationVO);
             LOG.info("Successfully exported table data for datasetId {} and tableSchemaId {}", datasetId, tableSchemaId);
@@ -957,12 +957,19 @@ public class FileTreatmentHelper implements DisposableBean {
         if (REFERENCE.equals(dataset.getDatasetTypeEnum())) {
             s3PathResolver.setPath(S3_DATAFLOW_REFERENCE_QUERY_PATH);
             dataQuery.append("select * from " + s3Service.getTableAsFolderQueryPath(s3PathResolver) + " t ");
+        } else if (StringUtils.isNotBlank(s3PathResolver.getPreparationCode())){
+            dataQuery.append("select * from " + s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_PREPARATION_TABLE_AS_FOLDER_QUERY_PATH) + " t ");
         } else {
             dataQuery.append("select * from " + s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH) + " t ");
         }
         S3PathResolver s3ValidationResolver = new S3PathResolver(dataset.getDataflowId(), dataset.getDataProviderId() != null ? dataset.getDataProviderId() : 0, dataset.getId(), tableName);
         s3ValidationResolver.setTableName(S3_VALIDATION);
-        String validationTablePath = s3Service.getTableAsFolderQueryPath(s3ValidationResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
+        String validationTablePath;
+        if (StringUtils.isNotBlank(s3PathResolver.getPreparationCode())){
+            validationTablePath = s3Service.getTableAsFolderQueryPath(s3ValidationResolver, S3_PREPARATION_TABLE_AS_FOLDER_QUERY_PATH);
+        } else {
+            validationTablePath = s3Service.getTableAsFolderQueryPath(s3ValidationResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
+        }
         Map<String, FieldSchemaVO> fieldIdMap = tableSchemaVO.getRecordSchema().getFieldSchema().stream().collect(Collectors.toMap(FieldSchemaVO::getId, Function.identity()));
         String[] qcCodes = null;
         if (!filters.getQcCodes().isEmpty()) {
@@ -1008,6 +1015,7 @@ public class FileTreatmentHelper implements DisposableBean {
     private void convertParquetFileZip(Long datasetId, String mimeType, String tableName, ZipOutputStream out, String tableSchemaId, DatasetTypeEnum datasetTypeEnum, Boolean etlExportV4, String preparationCode) {
         DataSetMetabaseVO dataset = datasetMetabaseService.findDatasetMetabase(datasetId);
         S3PathResolver s3PathResolver = new S3PathResolver(dataset.getDataflowId(), tableName);
+        s3PathResolver.setPreparationCode(preparationCode);
 
         try {
             setUpS3PathResolver(datasetId, dataset, s3PathResolver, preparationCode);
@@ -1339,12 +1347,12 @@ public class FileTreatmentHelper implements DisposableBean {
     }
 
     @Async
-    public void exportDatasetFileDL(Long datasetId, String mimeType) throws Exception {
+    public void exportDatasetFileDL(Long datasetId, String mimeType, String preparationCode) throws Exception {
         String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
         List<TableSchemaIdNameVO> tableSchemas = datasetSchemaService.getTableSchemasIds(datasetId);
         for(TableSchemaIdNameVO entry: tableSchemas){
             TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(entry.getIdTableSchema(), datasetSchemaId);
-            if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable())
+            if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable() && StringUtils.isBlank(preparationCode))
                     && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, tableSchemaVO.getIdTableSchema()))) {
                 throw new Exception("Can not export table data because iceberg table is created");
             }
@@ -1379,7 +1387,7 @@ public class FileTreatmentHelper implements DisposableBean {
                 try (ZipOutputStream out = new ZipOutputStream(new FileOutputStream(fileWriteZip.toString()))) {
                     for (TableSchema tableSchema : dataSetSchema.getTableSchemas()) {
                         LOG.info("Exporting tableSchema {}", tableSchema);
-                        convertParquetFileZip(datasetId, extension, tableSchema.getNameTableSchema(), out, tableSchema.getIdTableSchema().toString(), dataset.getDatasetTypeEnum(), false, null);
+                        convertParquetFileZip(datasetId, extension, tableSchema.getNameTableSchema(), out, tableSchema.getIdTableSchema().toString(), dataset.getDatasetTypeEnum(), false, preparationCode);
                     }
                     kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.EXPORT_DATASET_COMPLETED_EVENT, null, notificationVO);
                 } catch (Exception e) {
@@ -3613,15 +3621,19 @@ public class FileTreatmentHelper implements DisposableBean {
             return isProcessStarted;
         }
 
-    public void convertParquetFileForProvider(Long datasetId, Long providerId, String tableSchemaId, String tableName, DatasetTypeEnum datasetType, Boolean etlExportV4, Long jobId, String providerOutDir) throws EEAException {
+    public void convertParquetFileForProvider(Long datasetId, Long providerId, String tableSchemaId, String tableName, DatasetTypeEnum datasetType, Boolean etlExportV4, Long jobId, String providerOutDir, String preparationCode) throws EEAException {
 
       DataSetMetabaseVO dataset = datasetMetabaseService.findDatasetMetabase(datasetId);
 
       try {
-        S3PathResolver s3PathResolver = new S3PathResolver(dataset.getDataflowId(), providerId, datasetId, tableName);
+        S3PathResolver s3PathResolver = new S3PathResolver(dataset.getDataflowId(), providerId, datasetId, tableName, preparationCode);
         List<S3Object> exportFilenames;
 
-        if (DatasetTypeEnum.COLLECTION.equals(datasetType)) {
+        if (StringUtils.isBlank(preparationCode)) {
+            s3PathResolver.setPath(S3_PREPARATION_PROVIDER_PATH);
+            exportFilenames = s3Helper.getFilenamesFromTableNames(s3PathResolver);
+        }
+        else if (DatasetTypeEnum.COLLECTION.equals(datasetType)) {
           s3PathResolver.setPath(S3_TABLE_NAME_DC_PROVIDER_FOLDER_PATH);
           exportFilenames = s3Helper.getFilenamesFromTableNames(s3PathResolver);
         } else if (DatasetTypeEnum.EUDATASET.equals(datasetType)) {
