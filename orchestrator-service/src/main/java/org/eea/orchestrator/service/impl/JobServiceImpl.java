@@ -155,10 +155,11 @@ public class JobServiceImpl implements JobService {
 
     @Override
     public JobsVO getJobs(Pageable pageable, boolean asc, String sortedColumn, Long jobId, String jobTypes, Long dataflowId, String dataflowName, Long providerId,
-                          Long datasetId, String datasetName, String creatorUsername, String jobStatuses) {
+                          Long datasetId, String datasetName, String creatorUsername, String jobStatuses, String preparationCode) {
+
         String sortedTableColumn = jobUtils.getJobColumnNameByObjectName(sortedColumn);
         String remainingJobsStatusFilter = "IN_PROGRESS,QUEUED";
-        List<Job> jobs = jobRepository.findJobsPaginated(pageable, asc, sortedTableColumn, jobId, jobTypes, dataflowId, dataflowName, providerId, datasetId, datasetName, creatorUsername, jobStatuses);
+        List<Job> jobs = jobRepository.findJobsPaginated(pageable, asc, sortedTableColumn, jobId, jobTypes, dataflowId, dataflowName, providerId, datasetId, datasetName, creatorUsername, jobStatuses, preparationCode);
         List<JobVO> jobVOList = jobMapper.entityListToClass(jobs);
         JobsVO jobsVO = new JobsVO();
         jobsVO.setTotalRecords(jobRepository.count());
@@ -258,8 +259,8 @@ public class JobServiceImpl implements JobService {
             List<Job> jobsList = jobRepository.findByJobTypeInAndJobStatusIn(Arrays.asList(JobTypeEnum.VALIDATION, JobTypeEnum.RELEASE, JobTypeEnum.IMPORT, JobTypeEnum.ETL_IMPORT, JobTypeEnum.DELETE), Arrays.asList(JobStatusEnum.QUEUED, JobStatusEnum.IN_PROGRESS));
             for (Job job : jobsList) {
                 Map<String, Object> insertedParameters = job.getParameters();
-                if (job.getDatasetId()!=null) {
-                    if (datasetIds.contains(job.getDatasetId())) {
+                if (job.getDatasetId() != null) {
+                    if (datasetIds.contains(job.getDatasetId()) && StringUtils.isBlank(job.getPreparationCode())) {
                         return JobStatusEnum.REFUSED;
                     }
                 } else {

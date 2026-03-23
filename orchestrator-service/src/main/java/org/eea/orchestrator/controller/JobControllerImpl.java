@@ -122,14 +122,16 @@ public class JobControllerImpl implements JobController {
             @RequestParam(value = "datasetId", required = false) Long datasetId,
             @RequestParam(value = "datasetName", required = false) String datasetName,
             @RequestParam(value = "creatorUsername", required = false) String creatorUsername,
-            @RequestParam(value = "jobStatus", required = false) String jobStatuses){
+            @RequestParam(value = "jobStatus", required = false) String jobStatuses,
+            @RequestParam(value = "code", required = false) String preparationCode){
         try {
 
             Pageable pageable = PageRequest.of(pageNum, pageSize);
             if (!validColumns.contains(sortedColumn)) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Wrong sorting header provided.");
             }
-            return jobService.getJobs(pageable, asc, sortedColumn, jobId, jobTypes, dataflowId, dataflowName, providerId, datasetId, datasetName, creatorUsername, jobStatuses);
+            return jobService.getJobs(pageable, asc, sortedColumn, jobId, jobTypes, dataflowId, dataflowName,
+                    providerId, datasetId, datasetName, creatorUsername, jobStatuses, preparationCode);
         } catch (Exception e){
             LOG.error("Unexpected error! Could not retrieve all jobs");
             throw e;

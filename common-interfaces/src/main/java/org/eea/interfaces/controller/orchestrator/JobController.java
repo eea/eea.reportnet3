@@ -53,7 +53,8 @@ public interface JobController {
             @RequestParam(value = "datasetId", required = false) Long datasetId,
             @RequestParam(value = "datasetName", required = false) String datasetName,
             @RequestParam(value = "creatorUsername", required = false) String creatorUsername,
-            @RequestParam(value = "jobStatus", required = false) String jobStatuses);
+            @RequestParam(value = "jobStatus", required = false) String jobStatuses,
+            @RequestParam(value = "code", required = false) String preparationCode);
 
     /**
      * Get jobs based on status

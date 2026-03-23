@@ -159,7 +159,7 @@ public class ValidationControllerImpl implements ValidationController {
           @ApiParam(type = "Long", value = "Job id", example = "1")
           @RequestParam(name = "jobId", required = false) Long jobId,
           @ApiParam(type = "String", value = "Preparation Code", example = "0A2")
-          @RequestParam(name = "code", required = false) String preparationCode) {
+          @LockCriteria(name = "preparationCode") @RequestParam(name = "code", required = false) String preparationCode) {
 
     LOG.info("Called ValidationControllerImpl.validateDataSetData for datasetId {} and released {} with jobId {}", datasetId, released, jobId);
 
@@ -242,7 +242,6 @@ public class ValidationControllerImpl implements ValidationController {
       DataFlowVO dataflow = dataFlowControllerZuul.getMetabaseById(dataset.getDataflowId());
       LOG.info("Executing validation for datasetId {} with jobId {}", datasetId, jobId);
       if (dataflow!=null && dataflow.getBigData()!=null && dataflow.getBigData()) {
-        //TODO Check
         S3PathResolver s3PathResolver = new S3PathResolver(dataset.getDataflowId(), dataset.getDataProviderId()!=null ? dataset.getDataProviderId() : 0, dataset.getId(), S3_VALIDATION);
         s3PathResolver.setPreparationCode(preparationCode);
         //check if there are tables converted to Iceberg and throw error
@@ -270,7 +269,6 @@ public class ValidationControllerImpl implements ValidationController {
             throw new Exception("Can not validate for jobId " + jobId + " because there is an iceberg table");
           }
         }
-        //TODO Check
         validationHelper.executeValidationDL(datasetId, uuid, released, s3PathResolver, createParquetWithSQL, validateAsProviderCode, preparationCode);
       } else {    //check locks for Citus
 

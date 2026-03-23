@@ -431,7 +431,7 @@ public class ValidationHelper implements DisposableBean {
   @LockMethod(removeWhenFinish = true, isController = false)
   public void executeValidationDL(@LockCriteria(name = "datasetId") Long datasetId, String processId, boolean released,
                                   S3PathResolver s3PathResolver, boolean createParquetWithSQL, String validateAsProviderCode,
-                                  String preparationCode) throws EEAException {
+                                  @LockCriteria(name = "preparationCode") String preparationCode) throws EEAException {
 
     if (validateAsProviderCode != null && !validateAsProviderCode.trim().isEmpty()) {
       validateAsProviderCodeByProcessId.put(processId, validateAsProviderCode.trim());
@@ -478,7 +478,6 @@ public class ValidationHelper implements DisposableBean {
       DataFlowVO dataflow = dataFlowControllerZuul.getMetabaseById(dataset.getDataflowId());
       /* Add check for design dataflows #297461 In design dataflows empty tables will be created during the validation process.
          For draft dataflows empty tables will be created during the data collection creation.*/
-      //TODO DO WE NEED TO CREATE EMPTY PARQUET FILES FOR VALIDATION PREPARATION DATASETS?
       if (dataflow.getStatus().equals(TypeStatusEnum.DESIGN)) {
         List<DataSetMetabaseVO> combinedDatasets = getCombinedDatasets(dataset);
         combinedDatasets.forEach(dataSetMetabaseVO -> {
@@ -1640,12 +1639,18 @@ public class ValidationHelper implements DisposableBean {
           executeValidation.put(SIGNATURE,
                   LockSignature.EXECUTE_VALIDATION.getValue());
           executeValidation.put(DATASETID, datasetId);
+          if (StringUtils.isNotBlank(preparationCode)) {
+            executeValidation.put(PREPARATION_CODE, preparationCode);
+          }
           lockService.removeLockByCriteria(executeValidation);
 
           Map<String, Object> forceExecuteValidation = new HashMap<>();
           forceExecuteValidation.put(SIGNATURE,
                   LockSignature.FORCE_EXECUTE_VALIDATION.getValue());
           forceExecuteValidation.put(DATASETID, datasetId);
+          if (StringUtils.isNotBlank(preparationCode)) {
+            forceExecuteValidation.put(PREPARATION_CODE, preparationCode);
+          }
           lockService.removeLockByCriteria(forceExecuteValidation);
           datasetMetabaseControllerZuul.updateDatasetRunningStatus(datasetId,
                   DatasetRunningStatusEnum.VALIDATED);

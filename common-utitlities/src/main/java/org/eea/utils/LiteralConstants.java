@@ -50,6 +50,9 @@ public final class LiteralConstants {
   /** The Constant DATASET_ID: {@value}. */
   public static final String DATASETID = "datasetId";
 
+  /** The Constant PREPARATION_CODE: {@value}. */
+  public static final String PREPARATION_CODE = "preparationCode";
+
   /** The Constant TECH_ACCEPT_MESSAGE_SUBJECT: {@value}. */
   public static final String TECH_ACCEPT_MESSAGE_SUBJECT = "%s technical feedback for %s";
 

@@ -33,11 +33,11 @@ public class JobExtendedRepositoryImpl implements JobExtendedRepository{
      */
     @Override
     public List<Job> findJobsPaginated(Pageable pageable, boolean asc, String sortedColumn, Long jobId, String jobTypes, Long dataflowId, String dataflowName, Long providerId, Long datasetId, String datasetName,
-                                       String creatorUsername, String jobStatuses){
+                                       String creatorUsername, String jobStatuses, String preparationCode){
 
         StringBuilder stringQuery = new StringBuilder();
         List<Job> jobList = new ArrayList<>();
-        Query query = constructQuery(asc, sortedColumn, stringQuery, false, pageable, jobId, jobTypes, dataflowId, dataflowName, providerId, datasetId, datasetName, creatorUsername, jobStatuses);
+        Query query = constructQuery(asc, sortedColumn, stringQuery, false, pageable, jobId, jobTypes, dataflowId, dataflowName, providerId, datasetId, datasetName, creatorUsername, jobStatuses, preparationCode);
 
         try {
             jobList = (List<Job>) query.getResultList();
@@ -55,7 +55,7 @@ public class JobExtendedRepositoryImpl implements JobExtendedRepository{
     @Override
     public Long countJobsPaginated(boolean asc, String sortedColumn, Long jobId, String jobTypes, Long dataflowId, String dataflowName, Long providerId, Long datasetId, String datasetName, String creatorUsername, String jobStatuses) {
         StringBuilder stringQuery = new StringBuilder();
-        Query query = constructQuery(asc, sortedColumn, stringQuery, true, null, jobId, jobTypes, dataflowId, dataflowName, providerId, datasetId, datasetName, creatorUsername, jobStatuses);
+        Query query = constructQuery(asc, sortedColumn, stringQuery, true, null, jobId, jobTypes, dataflowId, dataflowName, providerId, datasetId, datasetName, creatorUsername, jobStatuses, null);
 
         return Long.valueOf(query.getSingleResult().toString());
     }
@@ -79,9 +79,9 @@ public class JobExtendedRepositoryImpl implements JobExtendedRepository{
      * @return
      */
     private Query constructQuery(boolean asc, String sortedColumn, StringBuilder stringQuery, boolean countQuery, Pageable pageable, Long jobId, String jobTypes, Long dataflowId, String dataflowName,
-                                 Long providerId, Long datasetId, String datasetName, String creatorUsername, String jobStatuses) {
+                                 Long providerId, Long datasetId, String datasetName, String creatorUsername, String jobStatuses, String preparationCode) {
         stringQuery.append(countQuery ? COUNT_JOBS_QUERY : JOBS_QUERY);
-        addFilters(stringQuery, jobId, jobTypes, dataflowId, dataflowName, providerId, datasetId, datasetName, creatorUsername, jobStatuses);
+        addFilters(stringQuery, jobId, jobTypes, dataflowId, dataflowName, providerId, datasetId, datasetName, creatorUsername, jobStatuses, preparationCode);
         if (!countQuery) {
             stringQuery.append(" order by " + sortedColumn);
             stringQuery.append(asc ? " asc" : " desc");
@@ -103,7 +103,7 @@ public class JobExtendedRepositoryImpl implements JobExtendedRepository{
         }
 
 
-        addParameters(query, jobId, jobTypes, dataflowId, dataflowName, providerId, datasetId, datasetName, creatorUsername, jobStatuses);
+        addParameters(query, jobId, jobTypes, dataflowId, dataflowName, providerId, datasetId, datasetName, creatorUsername, jobStatuses, preparationCode);
         return query;
     }
 
@@ -121,7 +121,7 @@ public class JobExtendedRepositoryImpl implements JobExtendedRepository{
      * @param creatorUsername the creatorUsername
      * @param jobStatuses the jobStatuses
      */
-    private void addFilters(StringBuilder query, Long jobId, String jobTypes, Long dataflowId, String dataflowName, Long providerId, Long datasetId, String datasetName, String creatorUsername, String jobStatuses) {
+    private void addFilters(StringBuilder query, Long jobId, String jobTypes, Long dataflowId, String dataflowName, Long providerId, Long datasetId, String datasetName, String creatorUsername, String jobStatuses, String preparationCode) {
         query.append(" where 1=1 ");
         query.append((jobId != null) ? " and jobs.id = :jobId " : "");
         query.append(StringUtils.isNotBlank(jobTypes) ? " and jobs.job_type in :jobType " : "");
@@ -132,6 +132,7 @@ public class JobExtendedRepositoryImpl implements JobExtendedRepository{
         query.append(StringUtils.isNotBlank(datasetName) ? " and LOWER(jobs.dataset_name) LIKE LOWER(CONCAT('%',:datasetName,'%')) " : "");
         query.append(StringUtils.isNotBlank(creatorUsername) ? " and LOWER(jobs.creator_username) LIKE LOWER(CONCAT('%',:creatorUsername,'%')) " : "");
         query.append(StringUtils.isNotBlank(jobStatuses) ? " and jobs.job_status in :jobStatus " : "");
+        query.append(StringUtils.isNotBlank(preparationCode) ? " and jobs.preparation_code= :preparationCode " : " and jobs.preparation_code is null ");
     }
 
     /**
@@ -148,23 +149,23 @@ public class JobExtendedRepositoryImpl implements JobExtendedRepository{
      * @param creatorUsername the creatorUsername
      * @param jobStatuses the jobStatuses
      */
-    private void addParameters(Query query, Long jobId, String jobTypes, Long dataflowId, String dataflowName, Long providerId, Long datasetId, String datasetName, String creatorUsername, String jobStatuses) {
-        if(jobId != null){
+    private void addParameters(Query query, Long jobId, String jobTypes, Long dataflowId, String dataflowName, Long providerId, Long datasetId, String datasetName, String creatorUsername, String jobStatuses, String preparationCode) {
+        if (jobId != null){
             query.setParameter("jobId", jobId);
         }
-        if(StringUtils.isNotBlank(jobTypes)){
+        if (StringUtils.isNotBlank(jobTypes)){
             query.setParameter("jobType", Arrays.asList(jobTypes.split(",")));
         }
-        if(dataflowId != null){
+        if (dataflowId != null){
             query.setParameter("dataflowId", dataflowId);
         }
         if (StringUtils.isNotBlank(dataflowName)) {
             query.setParameter("dataflowName", dataflowName);
         }
-        if(providerId != null){
+        if (providerId != null){
             query.setParameter("providerId", providerId);
         }
-        if(datasetId != null){
+        if (datasetId != null){
             query.setParameter("datasetId", datasetId);
         }
         if (StringUtils.isNotBlank(datasetName)) {
@@ -173,8 +174,11 @@ public class JobExtendedRepositoryImpl implements JobExtendedRepository{
         if (StringUtils.isNotBlank(creatorUsername)) {
             query.setParameter("creatorUsername", creatorUsername);
         }
-        if(StringUtils.isNotBlank(jobStatuses)){
+        if (StringUtils.isNotBlank(jobStatuses)){
             query.setParameter("jobStatus", Arrays.asList(jobStatuses.split(",")));
+        }
+        if (StringUtils.isNotBlank(preparationCode)) {
+            query.setParameter("preparationCode", preparationCode);
         }
     }
 
