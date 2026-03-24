@@ -1385,12 +1385,12 @@ public class DatasetServiceImpl implements DatasetService {
   @Override
   public void etlExportDataset(@DatasetId Long datasetId, OutputStream outputStream,
       String tableSchemaId, Integer limit, Integer offset, String filterValue, String columnName,
-      String dataProviderCodes) {
+      String dataProviderCodes, String preparationCode) {
     try {
       long startTime = System.currentTimeMillis();
       LOG.info("ETL Export process initiated to datasetId: {}", datasetId);
       exportDatasetETLSQL(datasetId, outputStream, tableSchemaId, limit, offset, filterValue,
-          columnName, dataProviderCodes);
+          columnName, dataProviderCodes, preparationCode);
       outputStream.flush();
       long endTime = System.currentTimeMillis() - startTime;
       LOG.info("ETL Export process completed for datasetId: {} in {} seconds", datasetId,
@@ -3272,17 +3272,25 @@ public class DatasetServiceImpl implements DatasetService {
    */
   private void exportDatasetETLSQL(Long datasetId, OutputStream outputStream, String tableSchemaId,
       Integer limit, Integer offset, String filterValue, String columnName,
-      String dataProviderCodes) throws EEAException {
+      String dataProviderCodes, String preparationCode) throws EEAException {
     try {
       Long dataflowId = getDataFlowIdById(datasetId);
       DataFlowVO dataflow = dataflowControllerZuul.getMetabaseById(dataflowId);
       if (dataflow.getBigData()) {
-        File fileFolder = new File(exportDLPath, "dataset-" + datasetId);
+        File fileFolder;
+
+        if (StringUtils.isNotBlank(preparationCode)) {
+          fileFolder = new File(exportDLPath,
+                  "dataset-" + datasetId + "/preparation/" + preparationCode);
+        } else {
+          fileFolder = new File(exportDLPath, "dataset-" + datasetId);
+        }
+
         fileFolder.mkdirs();
         File jsonFile = new File(new File(exportDLPath, "dataset-" + datasetId), tableSchemaId + "_etlExport" + JSON_TYPE);
 
         jsonFile = recordRepository.findAndGenerateETLJsonDL(datasetId, tableSchemaId, limit,
-                offset, filterValue, columnName, dataProviderCodes, jsonFile);
+                offset, filterValue, columnName, dataProviderCodes, jsonFile, preparationCode);
 
         byte[] bytes = IOUtils.toByteArray(new FileInputStream(jsonFile));
         outputStream.write(bytes);
@@ -3833,11 +3841,11 @@ public class DatasetServiceImpl implements DatasetService {
   public void createFileForEtlExport(@DatasetId Long datasetId, String tableSchemaId,
                                      Integer limit, Integer offset, String filterValue, String columnName,
                                      String dataProviderCodes, Long jobId, Long dataflowId, String user,
-                                     Boolean exportCsv, Boolean includeAttachments) throws EEAException, IOException, SQLException {
+                                     Boolean exportCsv, Boolean includeAttachments,String preparationCode) throws EEAException, IOException, SQLException {
     String processUUID = UUID.randomUUID().toString();
     try {
       LOG.info("Initiating FILE_EXPORT process for datasetId: {} and jobId {}", datasetId, jobId);
-      recordRepository.findAndGenerateETLJsonV3(datasetId, tableSchemaId, limit, offset, filterValue, columnName, dataProviderCodes, jobId, dataflowId, user, processUUID);
+      recordRepository.findAndGenerateETLJsonV3(datasetId, tableSchemaId, limit, offset, filterValue, columnName, dataProviderCodes, jobId, dataflowId, user, processUUID, preparationCode);
       LOG.info("FILE_EXPORT process submitted for datasetId: {} and jobId {}", datasetId, jobId);
     } catch (Exception e) {
       LOG.error("FILE_EXPORT process error in  Dataset {} and jobId {}. Message: {}", datasetId, jobId, e);

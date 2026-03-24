@@ -380,8 +380,9 @@ public class JobServiceImpl implements JobService {
         Boolean exportCsv = (parameters.get(EXPORT_CSV) != null) ? (Boolean) parameters.get(EXPORT_CSV) : false;
         Boolean exportParquet = (parameters.get(EXPORT_PARQUET) != null) ? (Boolean) parameters.get(EXPORT_PARQUET) : false;
         Boolean includeAttachments = (parameters.get("includeAttachments") != null) ? (Boolean) parameters.get("includeAttachments") : false;
+        String preparationCode = (parameters.get("preparationCode") != null) ? (String) parameters.get("preparationCode") : null;
 
-        dataSetControllerZuul.createFileForEtlExport(datasetId, dataflowId, dataProviderId, tableSchemaId, limit, offset, filterValue, columnName, dataProviderCodes, exportCsv, exportParquet ,includeAttachments, jobVO.getId());
+        dataSetControllerZuul.createFileForEtlExport(datasetId, dataflowId, dataProviderId, tableSchemaId, limit, offset, filterValue, columnName, dataProviderCodes, exportCsv, exportParquet ,includeAttachments, jobVO.getId(), preparationCode);
     }
 
     @Transactional

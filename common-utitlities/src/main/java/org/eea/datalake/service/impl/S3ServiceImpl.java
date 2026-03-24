@@ -89,6 +89,7 @@ public class S3ServiceImpl implements S3Service {
                 path = S3_DEFAULT_BUCKET + String.format(path, dataflowFolder, dataProviderFolder, datasetFolder,
                         preparationCode, tableName);
                 break;
+            case S3_PREPARATION_PROVIDER_PATH:
             case S3_PREPARATION_TABLE_NAME_FOLDER_PATH:
                 path = String.format(path, dataflowFolder, dataProviderFolder, datasetFolder,
                         preparationCode, tableName);
@@ -310,7 +311,10 @@ public class S3ServiceImpl implements S3Service {
                 return String.format(path, dataflowFolder, dataProviderFolder, datasetFolder,s3PathResolver.getPreparationCode(), s3PathResolver.getTableName(), s3PathResolver.getFilename());
             case S3_PREPARATION_IMPORT_TABLE_NAME_FOLDER_PATH:
             case S3_PREPARATION_PROVIDER_PATH:
+            case S3_PREPARATION_ATTACHMENTS_TABLE_PATH:
                 return String.format(path, dataflowFolder, dataProviderFolder, datasetFolder,s3PathResolver.getPreparationCode(), s3PathResolver.getTableName());
+            case S3_PREPARATION_ATTACHMENTS_PARENT_FOLDER_PATH:
+                return String.format(path, dataflowFolder, dataProviderFolder, datasetFolder, s3PathResolver.getPreparationCode());
 
             default:
                 LOG.info("Wrong type value: {}", path);

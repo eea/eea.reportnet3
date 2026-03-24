@@ -834,7 +834,7 @@ public class DatasetControllerImplTest {
   public void etlExportDatasetDataflowExceptionTest() throws EEAException {
     Mockito.when(datasetService.getDataFlowIdById(Mockito.any())).thenReturn(null);
     try {
-      datasetControllerImpl.etlExportDataset(1L, 1L, 1L, "", 1, 1, "", "", "");
+      datasetControllerImpl.etlExportDataset(1L, 1L, 1L, "", 1, 1, "", "", "", null);
     } catch (ResponseStatusException e) {
       assertEquals(HttpStatus.FORBIDDEN, e.getStatus());
       throw e;
@@ -851,7 +851,7 @@ public class DatasetControllerImplTest {
   public void etlExportDatasetDataflowLegacyTest() throws EEAException {
     Mockito.when(datasetService.getDataFlowIdById(Mockito.any())).thenReturn(null);
     try {
-      datasetControllerImpl.etlExportDatasetLegacy(1L, 1L, 1L, "", 1, 1, "", "");
+      datasetControllerImpl.etlExportDatasetLegacy(1L, 1L, 1L, "", 1, 1, "", "", null);
     } catch (ResponseStatusException e) {
       assertEquals(HttpStatus.FORBIDDEN, e.getStatus());
       throw e;

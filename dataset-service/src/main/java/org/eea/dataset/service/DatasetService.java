@@ -321,7 +321,7 @@ public interface DatasetService {
    */
   void etlExportDataset(@DatasetId Long datasetId, OutputStream outputStream, String tableSchemaId,
       Integer limit, Integer offset, String filterValue, String columnName,
-      String dataProviderCodes);
+      String dataProviderCodes, String preparationCode);
 
   /**
    * Gets the table read only.
@@ -696,7 +696,7 @@ public interface DatasetService {
    */
   void createFileForEtlExport(@DatasetId Long datasetId, String tableSchemaId,
                               Integer limit, Integer offset, String filterValue, String columnName,
-                              String dataProviderCodes, Long jobId, Long dataflowId, String user, Boolean exportCsv, Boolean includeAttachments) throws EEAException, IOException, SQLException;
+                              String dataProviderCodes, Long jobId, Long dataflowId, String user, Boolean exportCsv, Boolean includeAttachments, String preparationCode) throws EEAException, IOException, SQLException;
 
   /**
    * Fails import job

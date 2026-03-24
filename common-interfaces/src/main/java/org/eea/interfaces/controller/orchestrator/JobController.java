@@ -121,7 +121,7 @@ public interface JobController {
                        @RequestParam(value = "fileName", required = false) String fileName,
                        @RequestParam(value = "replace", required = false) boolean replace,
                        @RequestParam(value = "integrationId", required = false) Long integrationId,
-                      @RequestParam(value = "preparationCode", required = false) String preparationCode,
+                      @RequestParam(value = "code", required = false) String preparationCode,
                       @RequestParam(value = "delimiter", required = false) String delimiter,
                       @RequestParam(value = "jobStatus", required = false) JobStatusEnum jobStatus,
                       @RequestParam(value = "fmeJobId", required = false) String fmeJobId,
@@ -148,7 +148,7 @@ public interface JobController {
                          @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,
                          @RequestParam(value = "delimiter", required = false) String delimiter,
                          @RequestParam(value = "filePathInS3", required = false) String filePathInS3,
-                         @RequestParam(value = "preparationCode", required = false) String preparationCode);
+                         @RequestParam(value = "code", required = false) String preparationCode);
 
     /**
      * Adds a delete data job
@@ -195,7 +195,8 @@ public interface JobController {
                                   @RequestParam(value = "dataProviderCodes", required = false) String dataProviderCodes,
                                   @RequestParam(value = "exportCsv", required = false) Boolean exportCsv,
                                   @RequestParam(value = "exportParquet", required = false) Boolean exportParquet,
-                                  @RequestParam(value = "includeAttachments", required = false) Boolean includeAttachments);
+                                  @RequestParam(value = "includeAttachments", required = false) Boolean includeAttachments,
+                                  @RequestParam(value = "code", required = false) String preparationCode);
 
     /**
      * Update job's status

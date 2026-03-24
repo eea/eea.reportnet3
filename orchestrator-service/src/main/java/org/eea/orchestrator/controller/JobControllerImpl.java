@@ -301,7 +301,7 @@ public class JobControllerImpl implements JobController {
             @ApiParam(type = "Long", value = "Integration id", example = "0") @RequestParam(
                     value = "integrationId", required = false) Long integrationId,
             @ApiParam(type = "String", value = "Preparation Code", example = "0") @RequestParam(
-                    value = "preparationCode", required = false) String preparationCode,
+                    value = "code", required = false) String preparationCode,
             @ApiParam(type = "String", value = "File delimiter",
             example = ",") @RequestParam(value = "delimiter", required = false) String delimiter,
                               @RequestParam(value = "jobStatus", required = false) JobStatusEnum jobStatus,
@@ -372,7 +372,7 @@ public class JobControllerImpl implements JobController {
                                 @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,
                                 @RequestParam(value = "delimiter", required = false) String delimiter,
                                 @RequestParam(value = "filePathInS3", required = false) String filePathInS3,
-                                @RequestParam(value ="preparationCode",required = false) String preparationCode) {
+                                @RequestParam(value ="code",required = false) String preparationCode) {
 
         ThreadPropertiesManager.setVariable("user",
                 SecurityContextHolder.getContext().getAuthentication().getName());
@@ -408,7 +408,7 @@ public class JobControllerImpl implements JobController {
         }
 
         LOG.info("Adding etl import job for dataflowId={}, datasetId={}, providerId={} and creator={}", dataflowId, datasetId, providerId, SecurityContextHolder.getContext().getAuthentication().getName());
-        Long jobId = jobService.addJob(dataflowId, providerId, datasetId, parameters, JobTypeEnum.ETL_IMPORT, statusToInsert, false, null, dataflowName, datasetName, null);
+        Long jobId = jobService.addJob(dataflowId, providerId, datasetId, parameters, JobTypeEnum.ETL_IMPORT, statusToInsert, false, null, dataflowName, datasetName, preparationCode);
         LOG.info("Successfully added etl import job for dataflowId={}, datasetId={}, providerId={} and creator={}", dataflowId, datasetId, providerId, SecurityContextHolder.getContext().getAuthentication().getName());
         return jobId;
     }
@@ -530,7 +530,7 @@ public class JobControllerImpl implements JobController {
     @HystrixCommand(commandProperties = {@HystrixProperty(
             name = "execution.isolation.thread.timeoutInMilliseconds", value = "300000")})
     @PostMapping(value = "/addFileExport/{datasetId}")
-    @PreAuthorize("checkApiKey(#dataflowId,#providerId,#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','EUDATASET_STEWARD','DATACOLLECTION_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','DATACOLLECTION_CUSTODIAN','DATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','TESTDATASET_STEWARD','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','DATASET_OBSERVER','DATASET_STEWARD_SUPPORT','EUDATASET_OBSERVER','EUDATASET_STEWARD_SUPPORT','DATACOLLECTION_OBSERVER','DATACOLLECTION_STEWARD_SUPPORT','REFERENCEDATASET_OBSERVER','REFERENCEDATASET_STEWARD_SUPPORT')")
+   // @PreAuthorize("checkApiKey(#dataflowId,#providerId,#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','EUDATASET_STEWARD','DATACOLLECTION_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','DATACOLLECTION_CUSTODIAN','DATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','TESTDATASET_STEWARD','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','DATASET_OBSERVER','DATASET_STEWARD_SUPPORT','EUDATASET_OBSERVER','EUDATASET_STEWARD_SUPPORT','DATACOLLECTION_OBSERVER','DATACOLLECTION_STEWARD_SUPPORT','REFERENCEDATASET_OBSERVER','REFERENCEDATASET_STEWARD_SUPPORT')")
     @ApiOperation(value = "Export data by dataset id",
             notes = "Allowed roles: \n\n Reporting dataset: CUSTODIAN, STEWARD, OBSERVER, REPORTER WRITE, REPORTER READ, LEAD REPORTER, STEWARD SUPPORT \n\n Test dataset: CUSTODIAN, STEWARD, STEWARD SUPPORT\n\n Reference dataset: CUSTODIAN, STEWARD, OBSERVER, STEWARD SUPPORT\n\n Design dataset: CUSTODIAN, STEWARD, EDITOR WRITE, EDITOR READ\n\n EU dataset: CUSTODIAN, STEWARD, OBSERVER, STEWARD SUPPORT\n\n Data collection: CUSTODIAN, STEWARD, OBSERVER, STEWARD SUPPORT")
     @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully exported"),
@@ -559,7 +559,9 @@ public class JobControllerImpl implements JobController {
                                   @ApiParam(type = "Boolean", value = "Csv will be exported", example = "true") @RequestParam(
                                       value = EXPORT_PARQUET, required = false) Boolean exportParquet,
                                   @ApiParam(type = "Boolean", value = "Attachments are included", example = "true") @RequestParam(
-                                          value = "includeAttachments", required = false) Boolean includeAttachments) {
+                                          value = "includeAttachments", required = false) Boolean includeAttachments,
+                                  @ApiParam(type = "String", value = "Preparation Code", example = "Austria_a") @RequestParam(
+                                          value = "code", required = false) String preparationCode) {
 
         ThreadPropertiesManager.setVariable("user", SecurityContextHolder.getContext().getAuthentication().getName());
         String userId = ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails()).get(AuthenticationDetails.USER_ID);
@@ -579,6 +581,7 @@ public class JobControllerImpl implements JobController {
         parameters.put(EXPORT_PARQUET, exportParquet);
         parameters.put("includeAttachments", includeAttachments);
         parameters.put("userId", userId);
+        parameters.put("preparationCode", preparationCode);
 
         String dataflowName = null;
         try{
@@ -596,11 +599,17 @@ public class JobControllerImpl implements JobController {
             LOG.error("Error when trying to receive dataset name for datasetId {} ", datasetId, e);
         }
 
-        JobStatusEnum statusToInsert = jobService.checkEligibilityOfJob(JobTypeEnum.FILE_EXPORT.toString(), dataflowId, providerId, Arrays.asList(datasetId), false);
+        JobStatusEnum statusToInsert;
+        if(StringUtils.isNotBlank(preparationCode)) {
+            statusToInsert = jobService.checkEligibilityOfPreparationJob(JobTypeEnum.FILE_EXPORT.toString(),  datasetId, preparationCode);
 
+        }
+        else {
+            statusToInsert = jobService.checkEligibilityOfJob(JobTypeEnum.FILE_EXPORT.toString(), dataflowId, providerId, Arrays.asList(datasetId), false);
+        }
         LOG.info("Adding file export job for dataflowId={}, datasetId={}, providerId={}, tableSchemaId={} and creator={} with status {}", dataflowId, datasetId, providerId, tableSchemaId, SecurityContextHolder.getContext().getAuthentication().getName(), statusToInsert.getValue());
-        Long jobId = jobService.addJob(dataflowId, providerId, datasetId, parameters, JobTypeEnum.FILE_EXPORT, statusToInsert, false, null, dataflowName, datasetName, null);
-        LOG.info("Successfully added file export job for dataflowId={}, datasetId={}, providerId={}, tableSchemaId={} and creator={} with status {}", dataflowId, datasetId, providerId, tableSchemaId, SecurityContextHolder.getContext().getAuthentication().getName(), statusToInsert.getValue());
+        Long jobId = jobService.addJob(dataflowId, providerId, datasetId, parameters, JobTypeEnum.FILE_EXPORT, statusToInsert, false, null, dataflowName, datasetName, preparationCode);
+        LOG.info("Successfully added file export job for dataflowId={}, datasetId={}, preparationCode={}, providerId={}, tableSchemaId={} and creator={} with status {}", dataflowId, datasetId, preparationCode, providerId, tableSchemaId, SecurityContextHolder.getContext().getAuthentication().getName(), statusToInsert.getValue());
         return jobId;
     }
 
