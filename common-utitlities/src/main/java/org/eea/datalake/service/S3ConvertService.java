@@ -19,15 +19,15 @@ public interface S3ConvertService {
 
     void convertParquetToCSVinZIP(File csvFile, String tableName, ZipOutputStream out);
 
-    File createCSVFile(List<S3Object> exportFilenames, String tableName, Long datasetId, DatasetTypeEnum datasetTypeEnum, List<String> headers, Boolean etlExportV4, Long jobId);
+    File createCSVFile(List<S3Object> exportFilenames, String tableName, Long datasetId, DatasetTypeEnum datasetTypeEnum, List<String> headers, Boolean etlExportV4, Long jobId, String preparationCode);
 
-    File createEmptyCSVFile(String tableName, Long datasetId, List<String> headers, Boolean etlExportV4, Long jobId);
+    File createEmptyCSVFile(String tableName, Long datasetId, List<String> headers, Boolean etlExportV4, Long jobId, String preparationCode);
 
     File createCSVFileWithProviders(List<S3Object> exportFilenames, String tableName, Long datasetId, DatasetTypeEnum datasetTypeEnum, List<String> headers, Boolean etlExportV4, Long jobId, String outputRoot);
 
     File createEmptyCSVFileWithProviders(String tableName, Long datasetId, List<String> headers, Boolean etlExportV4, Long jobId, String outputRoot);
 
-    void createJsonFile(List<S3Object> exportFilenames, String tableName, Long datasetId, DatasetTypeEnum datasetTypeEnum);
+    void createJsonFile(List<S3Object> exportFilenames, String tableName, Long datasetId, DatasetTypeEnum datasetTypeEnum, String preparationCode);
 
     boolean containsPath(String tableName, String key, DatasetTypeEnum datasetTypeEnum);
 }

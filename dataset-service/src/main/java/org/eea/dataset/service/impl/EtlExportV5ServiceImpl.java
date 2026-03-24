@@ -1,5 +1,6 @@
 package org.eea.dataset.service.impl;
 
+import org.apache.commons.lang.StringUtils;
 import org.eea.datalake.service.S3Service;
 import org.eea.datalake.service.model.S3PathResolver;
 import org.eea.dataset.service.EtlExportV5Service;
@@ -69,11 +70,22 @@ public class EtlExportV5ServiceImpl implements EtlExportV5Service {
   }
 
   @Override
-  public String getS3KeyPath(DataSetMetabaseVO dataset, S3Service s3Service) {
+  public String getS3KeyPath(DataSetMetabaseVO dataset, S3Service s3Service, String preparationCode) {
     S3PathResolver s3PathResolver = new S3PathResolver(dataset.getDataflowId());
+
     switch (dataset.getDatasetTypeEnum()) {
       case REPORTING:
-        s3PathResolver.setPath(S3_PROVIDER_PATH);
+        if (StringUtils.isNotBlank(preparationCode)) {
+          s3PathResolver.setPreparationCode(preparationCode);
+        }
+
+        if (StringUtils.isNotBlank(preparationCode)) {
+          s3PathResolver.setPath(S3_PREPARATION_PROVIDER_PATH);
+        }
+        else {
+          s3PathResolver.setPath(S3_PROVIDER_PATH);
+        }
+
         s3PathResolver.setDataProviderId(dataset.getDataProviderId());
         s3PathResolver.setDatasetId(dataset.getId());
         return s3Service.getS3Path(s3PathResolver);

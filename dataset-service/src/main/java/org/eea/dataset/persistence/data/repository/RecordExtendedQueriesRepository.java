@@ -128,7 +128,7 @@ public interface RecordExtendedQueriesRepository {
 
   void findAndGenerateETLJsonV3(Long datasetId, String tableSchemaId,
                                 Integer limit, Integer offset, String filterValue, String columnName,
-                                String dataProviderCodes, Long jobId, Long dataflowId, String user, String processUUID) throws EEAException, IOException, SQLException;
+                                String dataProviderCodes, Long jobId, Long dataflowId, String user, String processUUID, String preparationCode) throws EEAException, IOException, SQLException;
 
   Long countByTableSchema(Long datasetId, String idTableSchema, String whereClause) throws SQLException;
 }

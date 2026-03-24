@@ -1937,7 +1937,9 @@ public class DatasetControllerImpl implements DatasetController {
           @ApiParam(type = "String", value = "Filter column name", example = "column") @RequestParam(
                   value = "columnName", required = false) String columnName,
           @ApiParam(type = "String", value = "Data provider codes", example = "BE,DK") @RequestParam(
-                  value = "dataProviderCodes", required = false) String dataProviderCodes) {
+                  value = "dataProviderCodes", required = false) String dataProviderCodes,
+          @ApiParam(type = "String", value = "Preparation code", example = "Austria_a") @RequestParam(
+                  value = "code", required = false) String preparationCode) {
 
     if (!dataflowId.equals(datasetService.getDataFlowIdById(datasetId))) {
       String errorMessage =
@@ -1948,10 +1950,10 @@ public class DatasetControllerImpl implements DatasetController {
     }
 
     try {
-      LOG.info("Calling etlExport v2 for dataflowId {} and datasetId {}", dataflowId, datasetId);
+      LOG.info("Calling etlExport v2 for dataflowId {} and datasetId {} and preparation code {}", dataflowId, datasetId,preparationCode);
       StreamingResponseBody responsebody = outputStream -> datasetService.etlExportDataset(datasetId,
-              outputStream, tableSchemaId, limit, offset, filterValue, columnName, dataProviderCodes, null);
-      LOG.info("Successfully called etlExport v2 for dataflowId {} and datasetId {}", dataflowId, datasetId);
+              outputStream, tableSchemaId, limit, offset, filterValue, columnName, dataProviderCodes, preparationCode);
+      LOG.info("Successfully called etlExport v2 for dataflowId {} and datasetId {} and preparation code {}", dataflowId, datasetId, preparationCode);
 
       return ResponseEntity.ok().contentType(MediaType.APPLICATION_STREAM_JSON).body(responsebody);
     } catch (Exception e) {
@@ -1999,9 +2001,11 @@ public class DatasetControllerImpl implements DatasetController {
           @ApiParam(type = "String", value = "Filter value", example = "value") @RequestParam(
                   value = "filterValue", required = false) String filterValue,
           @ApiParam(type = "String", value = "Filter column name", example = "column") @RequestParam(
-                  value = "columnName", required = false) String columnName) {
+                  value = "columnName", required = false) String columnName,
+          @ApiParam(type = "String", value = "Preparation code", example = "Austria_a") @RequestParam(
+                  value = "code", required = false) String preparationCode) {
     return this.etlExportDatasetV2(datasetId, dataflowId, providerId, tableSchemaId, limit, offset,
-            filterValue, columnName, null);
+            filterValue, columnName, null, preparationCode);
   }
 
   /**
@@ -2046,7 +2050,9 @@ public class DatasetControllerImpl implements DatasetController {
           @ApiParam(type = "String", value = "Filter column name", example = "column") @RequestParam(
                   value = "columnName", required = false) String columnName,
           @ApiParam(type = "String", value = "Data provider codes", example = "BE,DK") @RequestParam(
-                  value = "dataProviderCodes", required = false) String dataProviderCodes) {
+                  value = "dataProviderCodes", required = false) String dataProviderCodes,
+          @ApiParam(type = "String", value = "Preparation code", example = "Austria_a") @RequestParam(
+                  value = "code", required = false) String preparationCode) {
 
     if (!dataflowId.equals(datasetService.getDataFlowIdById(datasetId))) {
       String errorMessage =
@@ -2056,7 +2062,7 @@ public class DatasetControllerImpl implements DatasetController {
               String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId));
     }
     try {
-      Long jobId = jobControllerZuul.addFileExportJob(datasetId, dataflowId, providerId, tableSchemaId, limit, offset, filterValue, columnName, dataProviderCodes, false, false ,false);
+      Long jobId = jobControllerZuul.addFileExportJob(datasetId, dataflowId, providerId, tableSchemaId, limit, offset, filterValue, columnName, dataProviderCodes, false, false ,false, preparationCode);
       Map<String, Object> result = new HashMap<>();
       String pollingUrl = "/orchestrator/jobs/pollForJobStatus/" + jobId + "?datasetId=" + datasetId + "&dataflowId=" + dataflowId;
       if(providerId != null){
@@ -2102,7 +2108,10 @@ public class DatasetControllerImpl implements DatasetController {
                                               required = false) String tableSchemaId,
                                       @ApiParam(type = "String", value = "Data provider codes", example = "BE,DK") @RequestParam(
                                               value = "dataProviderCodes", required = false) String dataProviderCodes,
-  @ApiParam(type = "Boolean", value = "includeAttachments", example = "0") @RequestParam(value = "includeAttachments", required = false) Boolean includeAttachments){
+                                      @ApiParam(type = "Boolean", value = "includeAttachments", example = "0")
+                                               @RequestParam(value = "includeAttachments", required = false) Boolean includeAttachments,
+                                      @ApiParam(type = "String", value = "Preparation code", example = "Austria_a") @RequestParam(
+                                              value = "code", required = false) String preparationCode){
     if (!dataflowId.equals(datasetService.getDataFlowIdById(datasetId))) {
       String errorMessage =
               String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId);
@@ -2111,7 +2120,7 @@ public class DatasetControllerImpl implements DatasetController {
               String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId));
     }
     try {
-      Long jobId = jobControllerZuul.addFileExportJob(datasetId, dataflowId, providerId, tableSchemaId, null, null, null, null, dataProviderCodes, true, false ,includeAttachments);
+      Long jobId = jobControllerZuul.addFileExportJob(datasetId, dataflowId, providerId, tableSchemaId, null, null, null, null, dataProviderCodes, true, false ,includeAttachments, preparationCode);
       Map<String, Object> result = new HashMap<>();
       String pollingUrl = "/orchestrator/jobs/pollForJobStatus/" + jobId + "?datasetId=" + datasetId + "&dataflowId=" + dataflowId;
       if(providerId != null){
@@ -2147,7 +2156,10 @@ public class DatasetControllerImpl implements DatasetController {
                                                      required = false) String tableSchemaId,
                                                  @ApiParam(type = "String", value = "Data provider codes", example = "BE,DK") @RequestParam(
                                                      value = "dataProviderCodes", required = false) String dataProviderCodes,
-                                                 @ApiParam(type = "Boolean", value = "includeAttachments", example = "0") @RequestParam(value = "includeAttachments", required = false) Boolean includeAttachments) {
+                                                 @ApiParam(type = "Boolean", value = "includeAttachments", example = "0")
+                                                   @RequestParam(value = "includeAttachments", required = false) Boolean includeAttachments,
+                                                 @ApiParam(type = "String", value = "Preparation code", example = "Austria_a")
+                                                   @RequestParam(value = "code", required = false) String preparationCode) {
     if (!dataflowId.equals(datasetService.getDataFlowIdById(datasetId))) {
       String errorMessage =
           String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId);
@@ -2156,7 +2168,7 @@ public class DatasetControllerImpl implements DatasetController {
           String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId));
     }
     try {
-      Long jobId = jobControllerZuul.addFileExportJob(datasetId, dataflowId, providerId, tableSchemaId, null, null, null, null, dataProviderCodes, false, true ,includeAttachments);
+      Long jobId = jobControllerZuul.addFileExportJob(datasetId, dataflowId, providerId, tableSchemaId, null, null, null, null, dataProviderCodes, false, true , includeAttachments, preparationCode);
       Map<String, Object> result = new HashMap<>();
       String pollingUrl = "/orchestrator/jobs/pollForJobStatus/" + jobId + "?datasetId=" + datasetId + "&dataflowId=" + dataflowId;
       if(providerId != null){
@@ -3527,7 +3539,9 @@ public class DatasetControllerImpl implements DatasetController {
           @ApiParam(type = "Boolean", value = "Attachments are included", example = "true") @RequestParam(
                   value = "includeAttachments", required = false) Boolean includeAttachments,
           @ApiParam(type = "Long", value = "Job id", example = "1") @RequestParam(
-                  name = "jobId", required = false) Long jobId) throws Exception {
+                  name = "jobId", required = false) Long jobId,
+          @ApiParam(type = "String", value = "Preparation Code", example = "Austria_a") @RequestParam(
+                  value = "code", required = false) String preparationCode) throws Exception {
 
     JobVO jobVO = null;
     if (jobId!=null) {
@@ -3546,11 +3560,11 @@ public class DatasetControllerImpl implements DatasetController {
     }
 
     try {
-      LOG.info("Creating etlExport File for dataflowId {} and datasetId {}", dataflowId, datasetId);
+      LOG.info("Creating etlExport File for dataflowId {} and datasetId {} and preparation {}", dataflowId, datasetId, preparationCode);
       DataFlowVO dataFlowVO = dataFlowControllerZuul.getMetabaseById(dataflowId);
       if(dataFlowVO.getBigData() != null && dataFlowVO.getBigData()) {
         String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
-        if (StringUtils.isNotBlank(tableSchemaId)) {
+        if (StringUtils.isNotBlank(tableSchemaId) && (StringUtils.isBlank(preparationCode))) { //TODO check iceberg preparation
           TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, datasetSchemaId);
           if (tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable())
                   && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, tableSchemaVO.getIdTableSchema()))) {
@@ -3563,7 +3577,8 @@ public class DatasetControllerImpl implements DatasetController {
           for (TableSchemaIdNameVO tableSchemaIdNameVO : tableSchemaIdNameVOS) {
             TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaIdNameVO.getIdTableSchema(), datasetSchemaId);
             if (tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable())
-                    && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, tableSchemaVO.getIdTableSchema()))) {
+                    && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, tableSchemaVO.getIdTableSchema()))
+                    && (StringUtils.isBlank(preparationCode))) {
               LOG.error("Can not import zip file for datasetId {} because a table is iceberg", datasetId);
               jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.ERROR_ICEBERG_TABLE_EXISTS, null);
               throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.EXPORTING_FILE_ICEBERG);
@@ -3586,12 +3601,12 @@ public class DatasetControllerImpl implements DatasetController {
         try {
           if (BooleanUtils.isTrue(exportCsv)) {
             String processUUID = UUID.randomUUID().toString();
-            bigDataDatasetService.etlExportCsv(datasetId, dataflowId, tableSchemaId, jobId, user, processUUID, includeAttachments, dataProviderCodes);
+            bigDataDatasetService.etlExportCsv(datasetId, dataflowId, tableSchemaId, jobId, user, processUUID, includeAttachments, dataProviderCodes, preparationCode);
           } else if (BooleanUtils.isTrue(exportParquet)) {
             String processUUID = UUID.randomUUID().toString();
-            bigDataDatasetService.etlExportParquet(datasetId, dataflowId, tableSchemaId, jobId, user, processUUID, includeAttachments, dataProviderCodes);
+            bigDataDatasetService.etlExportParquet(datasetId, dataflowId, tableSchemaId, jobId, user, processUUID, includeAttachments, dataProviderCodes, preparationCode);
           } else {
-            datasetService.createFileForEtlExport(datasetId, tableSchemaId, limit, offset, filterValue, columnName, dataProviderCodes, jobId, dataflowId, user, exportCsv, includeAttachments);
+            datasetService.createFileForEtlExport(datasetId, tableSchemaId, limit, offset, filterValue, columnName, dataProviderCodes, jobId, dataflowId, user, exportCsv, includeAttachments, preparationCode);
           }
           LOG.info("Successfully called method for creating etlExport file for dataflowId {} and datasetId {}", dataflowId, datasetId);
         } catch (Exception e) {

@@ -1947,7 +1947,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
   @Override
   public void findAndGenerateETLJsonV3(Long datasetId, String tableSchemaId,
                                   Integer limit, Integer offset, String filterValue, String columnName,
-                                  String dataProviderCodes, Long jobId, Long dataflowId, String user, String processUUID) throws EEAException, IOException, SQLException {
+                                  String dataProviderCodes, Long jobId, Long dataflowId, String user, String processUUID, String preparationCode) throws EEAException, IOException, SQLException {
     try {
       processControllerZuul.updateProcess(datasetId,dataflowId, ProcessStatusEnum.IN_QUEUE, ProcessTypeEnum.FILE_EXPORT,
               processUUID, user, defaultFileExportProcessPriority, false);
@@ -1973,15 +1973,20 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
 
       String fileName = String.format(FILE_PATTERN_NAME_V2, jobId);
       File fileFolder = new File(importPath, "etlExport");
+
+      if (StringUtils.isNotBlank(preparationCode)) {
+        fileFolder = new File(fileFolder, preparationCode);
+      }
+
       fileFolder.mkdirs();
-      String filePath = importPath + ETL_EXPORT + fileName;
+      String filePath = fileFolder.getPath() + File.separator + fileName;
       String jsonFile = filePath + JSON;
       Integer tableCount = 0;
 
       DataFlowVO dataFlowVO = dataflowControllerZuul.getMetabaseById(dataflowId);
       if (dataFlowVO.getBigData()) {
         findAndGenerateETLJsonDL(datasetId, tableSchemaId, limit, offset, filterValue,
-            columnName, dataProviderCodes, new File(jsonFile), null);
+            columnName, dataProviderCodes, new File(jsonFile), preparationCode);
 
       } else {
         if (offset == 0) {

@@ -390,7 +390,8 @@ public interface DatasetController {
       @RequestParam(value = "offset", required = false) Integer offset,
       @RequestParam(value = "filterValue", required = false) String filterValue,
       @RequestParam(value = "columnName", required = false) String columnName,
-      @RequestParam(value = "dataProviderCodes", required = false) String dataProviderCodes);
+      @RequestParam(value = "dataProviderCodes", required = false) String dataProviderCodes,
+      @RequestParam(value = "code", required = false) String preparationCode);
 
     /**
    * Etl export dataset legacy.
@@ -413,7 +414,8 @@ public interface DatasetController {
       @RequestParam(value = "limit", required = false) Integer limit,
       @RequestParam(value = "offset", required = false) Integer offset,
       @RequestParam(value = "filterValue", required = false) String filterValue,
-      @RequestParam(value = "columnName", required = false) String columnName);
+      @RequestParam(value = "columnName", required = false) String columnName,
+      @RequestParam(value = "code", required = false) String preparationCode);
 
   /**
    * Etl export dataset.
@@ -438,7 +440,8 @@ public interface DatasetController {
                                               @RequestParam(value = "offset", required = false) Integer offset,
                                               @RequestParam(value = "filterValue", required = false) String filterValue,
                                               @RequestParam(value = "columnName", required = false) String columnName,
-                                              @RequestParam(value = "dataProviderCodes", required = false) String dataProviderCodes);
+                                              @RequestParam(value = "dataProviderCodes", required = false) String dataProviderCodes,
+                                              @RequestParam(value = "code", required = false) String preparationCode);
 
   /**
    * V4 Etl export dataset. Exports zip which include csv with record id
@@ -456,7 +459,8 @@ public interface DatasetController {
                                               @RequestParam(value = "providerId", required = false) Long providerId,
                                               @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,
                                               @RequestParam(value = "dataProviderCodes", required = false) String dataProviderCodes,
-                                              @RequestParam(value = "includeAttachments", required = false) Boolean includeAttachments);
+                                              @RequestParam(value = "includeAttachments", required = false) Boolean includeAttachments,
+                                              @RequestParam(value = "code", required = false) String preparationCode);
 
   @GetMapping("/v5/etlExport/{datasetId}")
   Map<String, Object> etlExportZipParquet(@PathVariable("datasetId") Long datasetId,
@@ -464,7 +468,8 @@ public interface DatasetController {
                                       @RequestParam(value = "providerId", required = false) Long providerId,
                                       @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,
                                       @RequestParam(value = "dataProviderCodes", required = false) String dataProviderCodes,
-                                      @RequestParam(value = "includeAttachments", required = false) Boolean includeAttachments);
+                                      @RequestParam(value = "includeAttachments", required = false) Boolean includeAttachments,
+                                      @RequestParam(value = "code", required = false) String preparationCode);
 
   /**
    * Etl import dataset.
@@ -514,7 +519,7 @@ public interface DatasetController {
                                        @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,
                                        @RequestParam(value = "delimiter") String delimiter,
                                        @RequestBody String filePathInS3,
-                                       @RequestParam(value = "preparationCode", required = false) String preparationCode) throws Exception;
+                                       @RequestParam(value = "code", required = false) String preparationCode) throws Exception;
 
 
   /**
@@ -961,7 +966,8 @@ public interface DatasetController {
           @RequestParam(value = "exportCsv", required = false) Boolean exportCsv,
           @RequestParam(value = "exportParquet", required = false) Boolean exportParquet,
           @RequestParam(value = "includeAttachments", required = false) Boolean includeAttachments,
-          @RequestParam(name = "jobId", required = false) Long jobId) throws Exception;
+          @RequestParam(name = "jobId", required = false) Long jobId,
+          @RequestParam(value = "code", required = false) String preparationCode) throws Exception;
 
   /**
    * Update geometry field

@@ -2410,10 +2410,21 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
     }
 
     @Override
-    public void etlExportCsv(Long datasetId, Long dataflowId, String tableSchemaId, Long jobId, String user, String processUUID, Boolean includeAttachments, String dataProviderCodes) throws EEAException {
+    public void etlExportCsv(Long datasetId, Long dataflowId, String tableSchemaId, Long jobId, String user, String processUUID, Boolean includeAttachments, String dataProviderCodes, String preparationCode) throws EEAException {
         try {
+            String folderToZipPath;
             // the path of the parent folder which will be zipped
-            String folderToZipPath = exportDLPath + DATASET_PREFIX_FOR_EXPORT + datasetId + "/etlExportV4_" + jobId;
+            if (StringUtils.isNotBlank(preparationCode)) {
+                folderToZipPath = exportDLPath
+                        + DATASET_PREFIX_FOR_EXPORT
+                        + datasetId
+                        + "/"
+                        + preparationCode
+                        + "/etlExportV4_" + jobId;
+            }
+            else {
+                folderToZipPath = exportDLPath + DATASET_PREFIX_FOR_EXPORT + datasetId + "/etlExportV4_" + jobId;
+            }
             DatasetTypeEnum datasetType = datasetService.getDatasetType(datasetId);
             updateJobProcess(datasetId, dataflowId, jobId, user, processUUID);
 
@@ -2442,18 +2453,25 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
           if (codes.isEmpty()) {
             if (StringUtils.isNotBlank(tableSchemaId)) {
               String tableName = datasetSchemaService.getTableSchemaName(dataSetMetabaseVO.getDatasetSchema(), tableSchemaId);
-              fileTreatmentHelper.convertParquetFile(datasetId, CSV, tableSchemaId, tableName, true, jobId);
+              fileTreatmentHelper.convertParquetFile(datasetId, CSV, tableSchemaId, tableName, true, jobId, preparationCode);
               if (includeAttachments) {
                 //get attachments if they exist
                 String path = null;
                 if (datasetType.equals(DatasetTypeEnum.DESIGN) || datasetType.equals(DatasetTypeEnum.TEST) || datasetType.equals(REPORTING) || datasetType.equals(DatasetTypeEnum.REFERENCE)) {
-                  path = S3_ATTACHMENTS_TABLE_PATH;
+                  if (StringUtils.isNotBlank(preparationCode)) {
+                    path = S3_PREPARATION_ATTACHMENTS_TABLE_PATH;
+                  }
+                  else {
+                    path = S3_ATTACHMENTS_TABLE_PATH;
+                  }
                 } else if (datasetType.equals(DatasetTypeEnum.COLLECTION)) {
                   path = S3_ATTACHMENTS_DC_TABLE_PATH;
                 } else if (datasetType.equals(DatasetTypeEnum.EUDATASET)) {
                   path = S3_ATTACHMENTS_EU_TABLE_PATH;
                 }
                 S3PathResolver s3TablePathResolver = new S3PathResolver(dataflowId, providerId, datasetId, tableName, tableName, path);
+                s3TablePathResolver.setPreparationCode(preparationCode);
+
                 if (s3HelperPrivate.checkFolderExist(s3TablePathResolver, path)) {
                   String attachmentsPathInS3 = s3ServicePrivate.getTableAsFolderQueryPath(s3TablePathResolver, path);
                   s3HelperPrivate.getAttachmentsFromS3Locally(attachmentsPathInS3, folderToZipPath);
@@ -2462,19 +2480,26 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             } else {
               List<TableSchemaIdNameVO> tableSchemaIdNameVOS = datasetSchemaService.getTableSchemasIds(datasetId);
               for (TableSchemaIdNameVO tableSchemaIdNameVO : tableSchemaIdNameVOS) {
-                fileTreatmentHelper.convertParquetFile(datasetId, CSV, tableSchemaIdNameVO.getIdTableSchema(), tableSchemaIdNameVO.getNameTableSchema(), true, jobId);
+                fileTreatmentHelper.convertParquetFile(datasetId, CSV, tableSchemaIdNameVO.getIdTableSchema(), tableSchemaIdNameVO.getNameTableSchema(), true, jobId, preparationCode);
               }
               if (includeAttachments) {
                 //get attachments if they exist
                 String path = null;
                 if (datasetType.equals(DatasetTypeEnum.DESIGN) || datasetType.equals(DatasetTypeEnum.TEST) || datasetType.equals(REPORTING) || datasetType.equals(DatasetTypeEnum.REFERENCE)) {
-                  path = S3_ATTACHMENTS_PARENT_FOLDER_PATH;
+                    if (StringUtils.isNotBlank(preparationCode)) {
+                        path = S3_PREPARATION_ATTACHMENTS_PARENT_FOLDER_PATH;
+                    }
+                    else {
+                        path = S3_ATTACHMENTS_PARENT_FOLDER_PATH;
+                    }
                 } else if (datasetType.equals(DatasetTypeEnum.COLLECTION)) {
                   path = S3_ATTACHMENTS_DC_FOLDER_PATH;
                 } else if (datasetType.equals(DatasetTypeEnum.EUDATASET)) {
                   path = S3_ATTACHMENTS_PARENT_FOLDER_EU_PATH;
                 }
                 S3PathResolver s3TablePathResolver = new S3PathResolver(dataflowId, providerId, datasetId, null, null, path);
+                s3TablePathResolver.setPreparationCode(preparationCode);
+
                 if (s3HelperPrivate.checkFolderExist(s3TablePathResolver, path)) {
                   String attachmentsPathInS3 = s3ServicePrivate.getTableAsFolderQueryPath(s3TablePathResolver, path);
                   s3HelperPrivate.getAttachmentsFromS3Locally(attachmentsPathInS3, folderToZipPath);
@@ -2592,18 +2617,34 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
   }
 
     @Override
-    public void etlExportParquet(Long datasetId, Long dataflowId, String tableSchemaId, Long jobId, String user, String processUUID, Boolean includeAttachments, String dataProviderCodes) {
+    public void etlExportParquet(Long datasetId, Long dataflowId, String tableSchemaId, Long jobId, String user, String processUUID, Boolean includeAttachments, String dataProviderCodes, String preparationCode) {
         try {
-            String folderPathStr =  exportDLPath + DATASET_PREFIX_FOR_EXPORT + datasetId;
+
+            String folderPathStr;
+
+            if (StringUtils.isNotBlank(preparationCode)) {
+                folderPathStr = exportDLPath + DATASET_PREFIX_FOR_EXPORT + datasetId + "/" + preparationCode;
+            }
+            else {
+                folderPathStr = exportDLPath + DATASET_PREFIX_FOR_EXPORT + datasetId;
+            }
+
             File folderPath = new File(folderPathStr);
 
             createLocalPathIfNotExists(jobId, folderPath);
 
-            String localPath = exportDLPath + DATASET_PREFIX_FOR_EXPORT + datasetId + PARQUET_EXPORT_NAME + jobId;
+            String localPath;
+
+            if (StringUtils.isNotBlank(preparationCode)) {
+                localPath = exportDLPath + DATASET_PREFIX_FOR_EXPORT + datasetId + "/" + preparationCode + PARQUET_EXPORT_NAME + jobId;
+            } else {
+                localPath = exportDLPath + DATASET_PREFIX_FOR_EXPORT + datasetId + PARQUET_EXPORT_NAME + jobId;
+            }
+
             updateJobProcess(datasetId, dataflowId, jobId, user, processUUID);
 
             DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
-            String s3Path = etlExportV5Service.getS3KeyPath(dataSetMetabaseVO, s3ServicePrivate);
+            String s3Path = etlExportV5Service.getS3KeyPath(dataSetMetabaseVO, s3ServicePrivate, preparationCode);
             DatasetTypeEnum datasetType = dataSetMetabaseVO.getDatasetTypeEnum();
 
             String tableName = null;
