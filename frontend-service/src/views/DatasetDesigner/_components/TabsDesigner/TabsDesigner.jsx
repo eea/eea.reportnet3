@@ -364,29 +364,15 @@ export const TabsDesigner = ({
     }
   };
 
-  const arrayShift = (arr, initialIdx, endIdx) => {
-    const element = arr[initialIdx];
-    if (Math.abs(endIdx - initialIdx) > 1) {
-      arr.splice(initialIdx, 1);
-      if (initialIdx < endIdx) {
-        arr.splice(endIdx - 1, 0, element);
-      } else {
-        arr.splice(endIdx, 0, element);
-      }
-    } else {
-      if (endIdx === 0) {
-        arr.splice(initialIdx, 1);
-        arr.splice(0, 0, element);
-      } else {
-        arr.splice(initialIdx, 1);
-        if (initialIdx < endIdx) {
-          arr.splice(endIdx - 1, 0, element);
-        } else {
-          arr.splice(endIdx, 0, element);
-        }
-      }
+  const arrayShift = (arr, fromIndex, toIndex) => {
+    const result = [...arr];
+    const [removed] = result.splice(fromIndex, 1);
+    let target = toIndex;
+    if (fromIndex < toIndex && Math.abs(toIndex - fromIndex) > 1) {
+      target = toIndex - 1;
     }
-    return arr;
+    result.splice(target, 0, removed);
+    return result;
   };
 
   const checkDuplicates = (header, tabIndex) => {
@@ -646,8 +632,11 @@ export const TabsDesigner = ({
       const inmTabs = [...tabs];
       const draggedTabIdx = TabsUtils.getIndexByHeader(draggedTabHeader, inmTabs);
       const droppedTabIdx = TabsUtils.getIndexByHeader(droppedTabHeader, inmTabs);
-      const index = draggedTabIdx > droppedTabIdx ? droppedTabIdx : droppedTabIdx - 1;
 
+      let index = droppedTabIdx;
+      if (draggedTabIdx < droppedTabIdx && Math.abs(droppedTabIdx - draggedTabIdx) > 1) {
+        index = droppedTabIdx - 1;
+      }
       if (index > -1) {
         await DatasetService.updateTableOrder(datasetId, index, tabs[draggedTabIdx].tableSchemaId);
 

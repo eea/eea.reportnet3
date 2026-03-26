@@ -139,7 +139,7 @@ public interface DatasetSchemaController {
    */
   @PutMapping("/{datasetId}/tableSchema")
   void updateTableSchema(@PathVariable("datasetId") Long datasetId,
-      @RequestBody TableSchemaVO tableSchemaVO);
+      @RequestBody TableSchemaVO tableSchemaVO) throws Exception;
 
   /**
    * Delete table schema.
