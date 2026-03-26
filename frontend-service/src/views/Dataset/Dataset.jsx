@@ -971,7 +971,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
     actionsContext.testProcess(datasetId, action);
     notificationContext.add({ type: 'EXPORT_DATASET_DATA' });
     try {
-      await DatasetService.exportDatasetDataExternal(datasetId, integrationId, code);
+      await DatasetService.exportDatasetDataExternal(datasetId, integrationId);
     } catch (error) {
       console.error('Dataset - onExportDataExternalIntegration.', error);
       notificationContext.add(
