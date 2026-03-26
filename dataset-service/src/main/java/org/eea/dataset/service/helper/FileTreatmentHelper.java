@@ -861,7 +861,14 @@ public class FileTreatmentHelper implements DisposableBean {
             .error("Error exporting table data")
             .build();
 
-        File fileFolder = new File(exportDLPath, "dataset-" + datasetId);
+        File fileFolder;
+        if (StringUtils.isNotBlank(preparationCode)) {
+            fileFolder = new File(exportDLPath,
+                    "dataset-" + datasetId + "/preparation/" + preparationCode);
+        } else {
+            fileFolder = new File(exportDLPath, "dataset-" + datasetId);
+        }
+
         fileFolder.mkdirs();
 
         try {
@@ -877,7 +884,12 @@ public class FileTreatmentHelper implements DisposableBean {
                 if (folderExist && dremioHelperService.checkFolderPromoted(s3PathResolver, s3PathResolver.getTableName())) {
                     StringBuilder dataQuery = createDataQuery(tableName, filters, dataset, s3PathResolver, tableSchemaVO);
                     List<String> headers = getHeadersForFileDL(includeCountryCode, tableSchemaVO);
-                    File csvFile = new File(new File(exportDLPath, "dataset-" + dataset.getId()), tableName + CSV_TYPE);
+                    File csvFile;
+                    if (StringUtils.isNotBlank(preparationCode)) {
+                        csvFile = new File(new File(exportDLPath, "dataset-" + dataset.getId() + "/preparation/" + preparationCode), tableName + CSV_TYPE);
+                    } else {
+                        csvFile = new File(new File(exportDLPath, "dataset-" + dataset.getId()), tableName + CSV_TYPE);
+                    }
                     LOG.info("Creating file for export: {}", csvFile);
                     SqlRowSet rs = dremioJdbcTemplate.queryForRowSet(dataQuery.toString());
                     createCsvWithFiltersDL(headers, csvFile, rs, includeCountryCode);
@@ -1379,9 +1391,21 @@ public class FileTreatmentHelper implements DisposableBean {
                         .error("Error exporting table data")
                         .build();
 
-                File datasetFolder = new File(exportDLPath, "dataset-" + datasetId);
+                File datasetFolder;
+                if (StringUtils.isNotBlank(preparationCode)) {
+                    datasetFolder = new File(exportDLPath,
+                            "dataset-" + datasetId + "/preparation/" + preparationCode);
+                } else {
+                    datasetFolder = new File(exportDLPath, "dataset-" + datasetId);
+                }
+
                 datasetFolder.mkdirs();
-                File fileWriteZip = new File(new File(exportDLPath, "dataset-" + datasetId), dataset.getDataSetName() + ZIP_TYPE);
+                File fileWriteZip;
+                if (StringUtils.isNotBlank(preparationCode)) {
+                    fileWriteZip = new File(new File(exportDLPath, "dataset-" + datasetId + "/preparation/" + preparationCode), dataset.getDataSetName() + ZIP_TYPE);
+                } else {
+                    fileWriteZip = new File(new File(exportDLPath, "dataset-" + datasetId), dataset.getDataSetName() + ZIP_TYPE);
+                }
 
                 DataSetSchema dataSetSchema = schemasRepository.findByIdDataSetSchema(new ObjectId(dataset.getDatasetSchema()));
                 try (ZipOutputStream out = new ZipOutputStream(new FileOutputStream(fileWriteZip.toString()))) {

@@ -2987,7 +2987,7 @@ public class DatasetControllerImpl implements DatasetController {
           @ApiParam(type = "String", value = "mime type (extension file)", example = "csv")
           @RequestParam("mimeType") String mimeType,
           @ApiParam(type = "String", value = "Preparation Code",
-                  example = "section_a") @RequestParam(value = "preparationCode", required = false) String preparationCode) {
+                  example = "section_a") @RequestParam(value = "code", required = false) String preparationCode) {
     LOG.info("Exporting dataset data for datasetId {}, with type {}", datasetId, mimeType);
     Long dataflowId = datasetService.getDataFlowIdById(datasetId);
     UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
