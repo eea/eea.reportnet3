@@ -649,6 +649,7 @@ public class DatasetServiceImpl implements DatasetService {
 
       if (bigData) {
           final S3PathResolver s3PathResolver = new S3PathResolver(datasetMb.getDataflowId(), datasetMb.getDataProviderId() != null ? datasetMb.getDataProviderId() : 0, datasetId, S3_VALIDATION);
+
           if (s3Helper.checkFolderExist(s3PathResolver, S3_VALIDATION_TABLE_PATH)) {
               datasetErrors = true;
           }
@@ -2235,6 +2236,7 @@ public class DatasetServiceImpl implements DatasetService {
     Long datasetId = dataset.getId();
     List<Statistics> stats = new ArrayList<>();
     S3PathResolver s3PathResolver = new S3PathResolver(dataset.getDataflowId(), dataset.getDataProviderId()!=null ? dataset.getDataProviderId() : 0, datasetId, tableSchema.getNameTableSchema());
+
     Long totalRecords = 0L;
     Long totalRecordsWithBlockers = 0L;
     Long totalRecordsWithErrors = 0L;

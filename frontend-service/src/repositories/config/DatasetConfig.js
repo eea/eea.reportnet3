@@ -85,7 +85,7 @@ export const DatasetConfig = {
   getShowValidationErrors:
     '/validation/listGroupValidations/{:datasetId}?asc={:asc}&shortCode={:shortCodeFilter}&fieldValueFilter={:fieldValueFilter}&headers={:sortField}&levelErrorsFilter={:levelErrorsFilter}&pageNum={:pageNum}&pageSize={:pageSize}&tableFilter={:tableFilter}&typeEntitiesFilter={:typeEntitiesFilter}',
   getShowValidationErrorsDL:
-    '/validation/listGroupValidationsDL/{:datasetId}?asc={:asc}&shortCode={:shortCodeFilter}&fieldValueFilter={:fieldValueFilter}&headers={:sortField}&levelErrorsFilter={:levelErrorsFilter}&pageNum={:pageNum}&pageSize={:pageSize}&tableFilter={:tableFilter}&typeEntitiesFilter={:typeEntitiesFilter}',
+    '/validation/listGroupValidationsDL/{:datasetId}?asc={:asc}&shortCode={:shortCodeFilter}&fieldValueFilter={:fieldValueFilter}&headers={:sortField}&levelErrorsFilter={:levelErrorsFilter}&pageNum={:pageNum}&pageSize={:pageSize}&tableFilter={:tableFilter}&typeEntitiesFilter={:typeEntitiesFilter}&code={:code}',
   getStatistics: '/datasetmetabase/{:datasetId}/loadStatistics',
   restorePrefilledTables: '/dataset/restorePrefilledTables/{:datasetId}?tableSchemaId={:tableSchemaId}',
   updateFieldOrder: '/dataschema/{:datasetId}/fieldSchema/order',
@@ -105,9 +105,9 @@ export const DatasetConfig = {
     '/dataset/{:datasetId}/updateWebformFields?updateCascadePK={:updateInCascade}&recordId={:recordId}&tableSchemaId={:tableSchemaId}',
   updateRecord: '/dataset/{:datasetId}/updateRecord?updateCascadePK={:updateInCascade}&tableSchemaId={:tableSchemaId}',
   updateTableDesign: '/dataschema/{:datasetId}/tableSchema',
-  validate: '/orchestrator/jobs/addValidationJob/{:datasetId}',
+  validate: '/orchestrator/jobs/addValidationJob/{:datasetId}?code={:code}',
   validateAsProvider:
-    '/orchestrator/jobs/addValidationJob/{:datasetId}?dataflowId={:dataflowId}&validateAsProviderCode={:providerId}',
+    '/orchestrator/jobs/addValidationJob/{:datasetId}?dataflowId={:dataflowId}&validateAsProviderCode={:providerId}&code={:code}',
   validateAllSql: '/rules/validateAllRules?datasetId={:datasetId}',
   validateSql: '/rules/validateSqlRules?datasetId={:datasetId}&datasetSchemaId={:datasetSchemaId}',
   validationViewer: '/dataset/findPositionFromAnyObject/{:objectId}?datasetId={:datasetId}&type={:entityType}',

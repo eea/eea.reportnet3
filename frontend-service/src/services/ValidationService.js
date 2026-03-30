@@ -96,8 +96,8 @@ export const ValidationService = {
   downloadHistoricReleaseFile: async (datasetId,dataflowId, nameFile, processId) =>
     await ValidationRepository.downloadHistoricReleaseFile(datasetId,dataflowId, nameFile,processId),
 
-  downloadShowValidationsFile: async (datasetId, fileName) =>
-    await ValidationRepository.downloadShowValidationsFile(datasetId, fileName),
+  downloadShowValidationsFile: async (datasetId, fileName, code) =>
+    await ValidationRepository.downloadShowValidationsFile(datasetId, fileName, code),
 
   getAll: async (dataflowId, datasetSchemaId, reporting = false) => {
     const validationsListDTO = await ValidationRepository.getAll(dataflowId, datasetSchemaId);
@@ -128,7 +128,8 @@ export const ValidationService = {
 
   generateHistoricDataFile: async (datasetId, dataflowId) => await ValidationRepository.generateHistoricDataFile(datasetId,dataflowId),
 
-  generateShowValidationsFile: async datasetId => await ValidationRepository.generateShowValidationsFile(datasetId),
+  generateShowValidationsFile: async ({ datasetId, code }) =>
+    await ValidationRepository.generateShowValidationsFile({ datasetId, code }),
 
   runSqlRule: async (datasetId, sqlSentence, showInternalFields) => {
     const { data } = await ValidationRepository.runSqlRule(datasetId, sqlSentence, showInternalFields);

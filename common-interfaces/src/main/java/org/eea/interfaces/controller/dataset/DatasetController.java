@@ -102,7 +102,8 @@ public interface DatasetController {
   void updateDataset(@RequestBody DataSetVO dataset);
 
   @PutMapping("/private/updateStatistics/{id}")
-  void updateStatistics(@PathVariable("id") Long datasetId, @RequestParam("isBigDataflow") Boolean isBigDataflow);
+  void updateStatistics(@PathVariable("id") Long datasetId,
+                        @RequestParam("isBigDataflow") Boolean isBigDataflow);
 
   /**
    * Gets the data flow id by id.

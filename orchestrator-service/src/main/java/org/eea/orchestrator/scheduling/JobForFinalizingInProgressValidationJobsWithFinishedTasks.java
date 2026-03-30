@@ -123,7 +123,7 @@ public class JobForFinalizingInProgressValidationJobsWithFinishedTasks {
                         if (finished && queuedProcess == null) {
                             //all processes of the provider datasets are finished, as all tasks are finished
                             LOG.info("Finalizing stuck validation job {}", jobVO.getId());
-                            Map<String, Object> value = createValue(jobVO.getId(), uuid, user, datasetId);
+                            Map<String, Object> value = createValue(jobVO.getId(), uuid, user, datasetId, null);
                             jobService.updateJobStatus(jobVO.getId(), JobStatusEnum.FINISHED);
                             kafkaSenderUtils.releaseKafkaEvent(EventType.VALIDATION_RELEASE_FINISHED_EVENT,
                                     value);
@@ -151,12 +151,17 @@ public class JobForFinalizingInProgressValidationJobsWithFinishedTasks {
                             String uuid = process.getProcessId();
                             String user = process.getUser();
                             Long datasetId = process.getDatasetId();
-                            Map<String, Object> value = createValue(jobVO.getId(), uuid, user, datasetId);
+                            Map<String, Object> value = createValue(jobVO.getId(), uuid, user, datasetId, jobVO.getPreparationCode());
                             validationControllerZuul.deleteLocksToReleaseProcess(jobVO.getDatasetId());
                             jobService.updateJobStatus(jobVO.getId(), JobStatusEnum.FINISHED);
                             kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.VALIDATION_FINISHED_EVENT,
                                     value,
-                                    NotificationVO.builder().user(user).datasetId(datasetId).build());
+                                    NotificationVO
+                                            .builder()
+                                            .user(user)
+                                            .datasetId(datasetId)
+                                            .preparationCode(jobVO.getPreparationCode())
+                                            .build());
 
                             if (validationControllerZuul.hasProcessCanceledTasks(processId)) {
                                 kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.VALIDATION_CANCELED_EVENT,
@@ -174,11 +179,12 @@ public class JobForFinalizingInProgressValidationJobsWithFinishedTasks {
         }
     }
 
-    private Map<String, Object> createValue(Long jobId, String uuid, String user, Long datasetId) {
+    private Map<String, Object> createValue(Long jobId, String uuid, String user, Long datasetId, String preparationCode) {
         Map<String, Object> value = new HashMap<>();
         value.put("uuid", uuid);
         value.put("user", user);
         value.put("validation_job_id", jobId);
+        value.put("preparationCode", preparationCode);
         value.put(LiteralConstants.DATASET_ID, datasetId);
         return value;
     }

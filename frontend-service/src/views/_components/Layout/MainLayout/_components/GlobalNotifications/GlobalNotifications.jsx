@@ -1,4 +1,5 @@
 import { useContext, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 
 import isNil from 'lodash/isNil';
 
@@ -17,6 +18,7 @@ import { LocalUserStorageUtils } from 'services/_utils/LocalUserStorageUtils';
 export const GlobalNotifications = ({ bigData }) => {
   const notificationContext = useContext(NotificationContext);
   const { storage: storageConfig } = config;
+  const { code } = useParams();
 
   useEffect(() => {
     downloadAllSchemasInfoFile();
@@ -170,7 +172,8 @@ export const GlobalNotifications = ({ bigData }) => {
     try {
       const { data } = await ValidationService.downloadShowValidationsFile(
         notification.content.datasetId,
-        notification.content.nameFile
+        notification.content.nameFile,
+        code
       );
       notificationContext.add({ type: 'AUTOMATICALLY_DOWNLOAD_VALIDATIONS_FILE' });
 

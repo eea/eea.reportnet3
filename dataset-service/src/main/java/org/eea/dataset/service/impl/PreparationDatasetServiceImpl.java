@@ -349,7 +349,7 @@ public class PreparationDatasetServiceImpl implements PreparationDatasetService 
 
             String dremioProcessId = dremioHelperService.executeSqlStatement(String.valueOf(queryToCreatePrefilledTable));
             dremioHelperService.checkIfDremioProcessFinishedSuccessfully(String.valueOf(queryToCreatePrefilledTable), dremioProcessId, null);
-            dremioHelperService.refreshTableMetadataAndPromote(null, targetPreparationTableDremioQueryPathString, targetPreparationTableDremioQueryPath, parentTableName);
+            dremioHelperService.refreshTableMetadataAndPromote(null, targetPreparationTableDremioQueryPathString, targetPreparationTableS3FolderPath, parentTableName);
         }
     }
 

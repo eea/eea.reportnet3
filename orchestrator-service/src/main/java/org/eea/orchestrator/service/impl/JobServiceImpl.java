@@ -155,10 +155,11 @@ public class JobServiceImpl implements JobService {
 
     @Override
     public JobsVO getJobs(Pageable pageable, boolean asc, String sortedColumn, Long jobId, String jobTypes, Long dataflowId, String dataflowName, Long providerId,
-                          Long datasetId, String datasetName, String creatorUsername, String jobStatuses) {
+                          Long datasetId, String datasetName, String creatorUsername, String jobStatuses, String preparationCode) {
+
         String sortedTableColumn = jobUtils.getJobColumnNameByObjectName(sortedColumn);
         String remainingJobsStatusFilter = "IN_PROGRESS,QUEUED";
-        List<Job> jobs = jobRepository.findJobsPaginated(pageable, asc, sortedTableColumn, jobId, jobTypes, dataflowId, dataflowName, providerId, datasetId, datasetName, creatorUsername, jobStatuses);
+        List<Job> jobs = jobRepository.findJobsPaginated(pageable, asc, sortedTableColumn, jobId, jobTypes, dataflowId, dataflowName, providerId, datasetId, datasetName, creatorUsername, jobStatuses, preparationCode);
         List<JobVO> jobVOList = jobMapper.entityListToClass(jobs);
         JobsVO jobsVO = new JobsVO();
         jobsVO.setTotalRecords(jobRepository.count());
@@ -258,8 +259,8 @@ public class JobServiceImpl implements JobService {
             List<Job> jobsList = jobRepository.findByJobTypeInAndJobStatusIn(Arrays.asList(JobTypeEnum.VALIDATION, JobTypeEnum.RELEASE, JobTypeEnum.IMPORT, JobTypeEnum.ETL_IMPORT, JobTypeEnum.DELETE), Arrays.asList(JobStatusEnum.QUEUED, JobStatusEnum.IN_PROGRESS));
             for (Job job : jobsList) {
                 Map<String, Object> insertedParameters = job.getParameters();
-                if (job.getDatasetId()!=null) {
-                    if (datasetIds.contains(job.getDatasetId())) {
+                if (job.getDatasetId() != null) {
+                    if (datasetIds.contains(job.getDatasetId()) && StringUtils.isBlank(job.getPreparationCode())) {
                         return JobStatusEnum.REFUSED;
                     }
                 } else {
@@ -342,7 +343,8 @@ public class JobServiceImpl implements JobService {
         Map<String, Object> parameters = job.getParameters();
         Long datasetId = Long.valueOf((Integer) parameters.get("datasetId"));
         Boolean released = (Boolean) parameters.get("released");
-        validationControllerZuul.validateDataSetData(datasetId, released, job.getId());
+        String preparationCode = jobVO.getPreparationCode();
+        validationControllerZuul.validateDataSetData(datasetId, released, job.getId(), preparationCode);
     }
 
     @Override
@@ -848,22 +850,29 @@ public class JobServiceImpl implements JobService {
             Long datasetId,
             String preparationCode) {
 
-        if (!JobTypeEnum.IMPORT.toString().equals(jobType)) {
+        if (!JobTypeEnum.IMPORT.toString().equals(jobType) &&
+            !JobTypeEnum.VALIDATION.toString().equals(jobType)) {
             return JobStatusEnum.QUEUED;
         }
 
-        boolean inProgressImportexists =
-                jobRepository.existsByJobStatusInAndJobTypeAndDatasetIdAndPreparationCode(
-                        Arrays.asList(JobStatusEnum.QUEUED, JobStatusEnum.IN_PROGRESS),
-                        JobTypeEnum.IMPORT,
-                        datasetId,
-                        preparationCode
-                );
-
-        if (inProgressImportexists) {
+        if (inProgressOrQueuedJobExists(datasetId, preparationCode, JobTypeEnum.valueOf(jobType))) {
             return JobStatusEnum.REFUSED;
         }
 
-        return JobStatusEnum.IN_PROGRESS;
+        if (JobTypeEnum.IMPORT.toString().equals(jobType)) {
+            return JobStatusEnum.IN_PROGRESS;
+        }
+        else {
+            return JobStatusEnum.QUEUED;
+        }
+    }
+
+    private boolean inProgressOrQueuedJobExists(Long datasetId, String preparationCode, JobTypeEnum jobType) {
+        return jobRepository.existsByJobStatusInAndJobTypeAndDatasetIdAndPreparationCode(
+                Arrays.asList(JobStatusEnum.QUEUED, JobStatusEnum.IN_PROGRESS),
+                jobType,
+                datasetId,
+                preparationCode
+        );
     }
 }
