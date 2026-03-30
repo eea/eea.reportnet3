@@ -210,9 +210,9 @@ export const DatasetRepository = {
       url: getUrl(DatasetConfig.downloadImportedFile, { fileName, datasetId, dataflowId })
     }),
 
-  exportDatasetDataDL: async (datasetId, fileType) =>
+  exportDatasetDataDL: async (datasetId, fileType, code) =>
     await HTTPRequester.download({
-      url: getUrl(DatasetConfig.exportDatasetDataDL, { datasetId, fileType }),
+      url: getUrl(DatasetConfig.exportDatasetDataDL, { datasetId, fileType, code }),
       headers: { 'Content-Type': 'application/octet-stream' }
     }),
 
@@ -250,10 +250,11 @@ export const DatasetRepository = {
     levelErrorValidations,
     selectedShortCode,
     isExportFilteredCsv,
-    isFilterValidationsActive
+    isFilterValidationsActive,
+    code
   ) =>
     await HTTPRequester.post({
-      url: getUrl(DatasetConfig.exportTableDataDL, { datasetId, fileType, tableSchemaId }),
+      url: getUrl(DatasetConfig.exportTableDataDL, { datasetId, fileType, tableSchemaId, code }),
       data: {
         fieldValue: isExportFilteredCsv ? filterValue : '',
         qcCodes: isExportFilteredCsv ? selectedShortCode : '',

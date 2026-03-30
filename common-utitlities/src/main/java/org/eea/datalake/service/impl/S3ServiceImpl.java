@@ -415,7 +415,7 @@ public class S3ServiceImpl implements S3Service {
     }
 
     @Override
-    public S3PathResolver getS3PathResolverByDatasetType(DataSetMetabaseVO dataset, String tableName, Boolean isIceberg) {
+    public S3PathResolver getS3PathResolverByDatasetType(DataSetMetabaseVO dataset, String tableName, Boolean isIceberg, String preparationCode) {
         S3PathResolver s3PathResolver;
 
         if(!isIceberg && dataset.getDatasetTypeEnum() == DatasetTypeEnum.REFERENCE){
@@ -433,6 +433,12 @@ public class S3ServiceImpl implements S3Service {
             s3PathResolver =
                     new S3PathResolver(dataset.getDataflowId(), dataset.getId(), tableName,
                             S3_EU_SNAPSHOT_ROOT_PATH);
+        }
+        else if (StringUtils.isNotBlank(preparationCode)) {
+            s3PathResolver = new S3PathResolver(dataset.getDataflowId(),
+                    dataset.getDataProviderId() != null ? dataset.getDataProviderId() : 0,
+                    dataset.getId(), tableName, preparationCode);
+            s3PathResolver.setPath(S3_PREPARATION_TABLE_NAME_FOLDER_PATH);
         }
         else {
             s3PathResolver = new S3PathResolver(dataset.getDataflowId(),

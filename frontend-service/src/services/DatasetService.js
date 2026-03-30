@@ -266,7 +266,8 @@ export const DatasetService = {
 
   exportDatasetData: async (datasetId, fileType) => await DatasetRepository.exportDatasetData(datasetId, fileType),
 
-  exportDatasetDataDL: async (datasetId, fileType) => await DatasetRepository.exportDatasetDataDL(datasetId, fileType),
+  exportDatasetDataDL: async (datasetId, fileType, code) =>
+    await DatasetRepository.exportDatasetDataDL(datasetId, fileType, code),
 
   exportDatasetDataExternal: async (datasetId, integrationId) =>
     await DatasetRepository.exportDatasetDataExternal(datasetId, integrationId),
@@ -300,7 +301,8 @@ export const DatasetService = {
     levelErrorValidations,
     selectedShortCode,
     isExportFilteredCsv,
-    isFilterValidationsActive
+    isFilterValidationsActive,
+    code
   ) =>
     await DatasetRepository.exportTableDataDL(
       datasetId,
@@ -310,7 +312,8 @@ export const DatasetService = {
       levelErrorValidations,
       selectedShortCode,
       isExportFilteredCsv,
-      isFilterValidationsActive
+      isFilterValidationsActive,
+      code
     ),
 
   exportTableSchema: async (datasetId, datasetSchemaId, tableSchemaId, fileType) =>

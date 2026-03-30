@@ -65,11 +65,11 @@ public class DatasetDataRetrieverDL implements DataLakeDataRetriever {
         TableVO result = new TableVO();
         S3PathResolver s3PathResolver;
         if(BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable()) && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, tableSchemaVO.getIdTableSchema()))){
-            s3PathResolver = s3Service.getS3PathResolverByDatasetType(dataset, tableSchemaVO.getNameTableSchema(), true);
+            s3PathResolver = s3Service.getS3PathResolverByDatasetType(dataset, tableSchemaVO.getNameTableSchema(), true, null);
             s3PathResolver.setIsIcebergTable(true);
         }
         else{
-            s3PathResolver = s3Service.getS3PathResolverByDatasetType(dataset, tableSchemaVO.getNameTableSchema(), false);
+            s3PathResolver = s3Service.getS3PathResolverByDatasetType(dataset, tableSchemaVO.getNameTableSchema(), false, null);
             s3PathResolver.setIsIcebergTable(false);
         }
 
@@ -383,11 +383,11 @@ public class DatasetDataRetrieverDL implements DataLakeDataRetriever {
         S3PathResolver s3PathResolverParentDataset;
         //parent dataset resolver
         if(BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable()) && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, tableSchemaVO.getIdTableSchema()))){
-            s3PathResolverParentDataset = s3Service.getS3PathResolverByDatasetType(dataset, tableSchemaVO.getNameTableSchema(), true);
+            s3PathResolverParentDataset = s3Service.getS3PathResolverByDatasetType(dataset, tableSchemaVO.getNameTableSchema(), true, null);
             s3PathResolverParentDataset.setIsIcebergTable(true);
         }
         else{
-            s3PathResolverParentDataset = s3Service.getS3PathResolverByDatasetType(dataset, tableSchemaVO.getNameTableSchema(), false);
+            s3PathResolverParentDataset = s3Service.getS3PathResolverByDatasetType(dataset, tableSchemaVO.getNameTableSchema(), false, null);
             s3PathResolverParentDataset.setIsIcebergTable(false);
         }
 

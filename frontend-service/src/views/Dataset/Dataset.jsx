@@ -994,7 +994,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
     notificationContext.add({ type: 'EXPORT_DATASET_DATA' });
     try {
       if (bigDataRef.current) {
-        await DatasetService.exportDatasetDataDL(datasetId, fileType);
+        await DatasetService.exportDatasetDataDL(datasetId, fileType, code);
       } else {
         await DatasetService.exportDatasetData(datasetId, fileType);
       }
