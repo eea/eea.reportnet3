@@ -21,7 +21,7 @@ public class ValidationDroolsUtils {
   /**
    * The Constant REG_EXP_EMAIL.
    */
-  private static final String REG_EXP_EMAIL = "^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$";
+  private static final String REG_EXP_EMAIL = "^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,12}$";
 
   /**
    * The Constant REG_EXP_PHONE.
