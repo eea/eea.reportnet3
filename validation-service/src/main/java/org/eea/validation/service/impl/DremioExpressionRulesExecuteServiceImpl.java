@@ -1,6 +1,8 @@
 package org.eea.validation.service.impl;
 
 import cdjd.org.apache.commons.lang3.StringUtils;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
@@ -25,6 +27,7 @@ import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
+import org.eea.interfaces.vo.validation.TaskVO;
 import org.eea.utils.UtilityClass;
 import org.eea.validation.persistence.data.domain.FieldValue;
 import org.eea.validation.persistence.data.domain.RecordValue;
@@ -142,6 +145,12 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
             validationResolver.setPreparationCode(preparationCode);
 
             String providerCode = getProviderCode(dataset);
+            // If validateAsProviderCode exists in task parameters, it must drive macro replacement in RuleOperators unless providerCode != null.
+            String override = resolveValidateAsProviderCodeFromTask(taskId);
+            if (override != null && (providerCode == null || providerCode.isBlank())) {
+                providerCode = override;
+            }
+
             StringBuilder query = new StringBuilder();
             RuleVO ruleVO = rulesService.findRule(datasetSchemaId, ruleId);
             deleteRuleFolderIfExists(validationResolver, ruleVO);
@@ -821,6 +830,29 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
         RuleOperators.setEntity(fieldValue);
         RuleOperators.setEntity(recordValue);
         return firstValue;
+    }
+
+    private String resolveValidateAsProviderCodeFromTask(Long taskId) {
+        if (taskId == null) return null;
+
+        TaskVO task = validationHelper.findTaskById(taskId);
+        if (task == null || task.getJson() == null || task.getJson().isBlank()) return null;
+
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode root = mapper.readTree(task.getJson());
+            JsonNode data = root.get("data");
+            if (data == null) return null;
+
+            JsonNode node = data.get("validateAsProviderCode");
+            if (node == null || node.isNull()) return null;
+
+            String code = node.asText().trim();
+            return code.isEmpty() ? null : code;
+        } catch (Exception e) {
+            LOG.warn("Could not parse validateAsProviderCode from task json for taskId {}: {}", taskId, e.getMessage());
+            return null;
+        }
     }
 
     /**

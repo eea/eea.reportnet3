@@ -466,7 +466,7 @@ const useBigButtonList = ({
     });
   };
 
-  const groupByRepresentativeModels = buildGroupByRepresentativeModels(dataflowState?.data?.datasets);
+  const groupByRepresentativeModels = buildGroupByRepresentativeModels(dataflowState?.data?.datasets).sort((a, b) => a.caption.localeCompare(b.caption));
 
   const preparationSetsModels = isEmpty(preparationSetsList) ? [] : buildPreparationSetsModels();
 
@@ -598,6 +598,7 @@ const useBigButtonList = ({
               }
             }
           ],
+          onWheel: getUrl(routes.DATA_COLLECTION, { dataflowId, datasetId: dataCollection.dataCollectionId }, true),
           visibility: true
         }))
         .sort((a, b) => a.caption.localeCompare(b.caption));
@@ -623,6 +624,7 @@ const useBigButtonList = ({
               }
             }
           ],
+          onWheel: getUrl(routes.EU_DATASET, { dataflowId, datasetId: euDataset.euDatasetId }, true),
           visibility: true
         }))
         .sort((a, b) => a.caption.localeCompare(b.caption));
@@ -749,6 +751,7 @@ const useBigButtonList = ({
         handleRedirect(getUrl(routes.DATAFLOW_REPRESENTATIVE, { dataflowId, representativeId: 0 }, true));
       },
       layout: 'defaultBigButton',
+      onWheel: getUrl(routes.DATAFLOW_REPRESENTATIVE, { dataflowId, representativeId: 0 }, true),
       visibility: buttonsVisibility.testDatasetVisibility
     }
   ];

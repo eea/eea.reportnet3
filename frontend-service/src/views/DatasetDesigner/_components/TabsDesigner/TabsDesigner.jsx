@@ -1,4 +1,4 @@
-import { Fragment, useContext, useEffect, useState } from 'react';
+import { Fragment, useContext, useEffect, useState, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import isEmpty from 'lodash/isEmpty';
@@ -79,11 +79,14 @@ export const TabsDesigner = ({
   const [isEditing, setIsEditing] = useState(false);
   const [isErrorDialogVisible, setIsErrorDialogVisible] = useState(false);
   const [isWarningDialogVisible, setIsWarningDialogVisible] = useState(false);
+  const [isReordering, setIsReordering] = useState(false);
   const [scrollFn, setScrollFn] = useState();
   const [tabs, setTabs] = useState([]);
   const [tabHasErrors, setTabHasErrors] = useState(false);
   const [warningMessage, setWarningMessage] = useState();
   const [warningMessageTitle, setWarningMessageTitle] = useState();
+  const [tableHasData, setTableHasData] = useState({});
+  const fetchingTablesRef = useRef(new Set());
 
   useEffect(() => {
     if (!isNil(datasetSchema) && !isEmpty(datasetSchema)) {
@@ -116,6 +119,46 @@ export const TabsDesigner = ({
       renderErrors(warningMessageTitle, warningMessage);
     }
   }, [isWarningDialogVisible]);
+
+  useEffect(() => {
+    if (!isEmpty(tabs) && bigData) {
+      tabs.forEach(tab => {
+        if (!tab.addTab && tableHasData[tab.tableSchemaId] === undefined) {
+          if (!fetchingTablesRef.current.has(tab.tableSchemaId)) {
+            fetchingTablesRef.current.add(tab.tableSchemaId);
+            checkTableHasData(tab.tableSchemaId);
+          }
+        }
+      });
+    }
+  }, [tabs]);
+
+
+  useEffect(() => {
+    if (!bigData) return;
+
+    const handleRefreshTableDataChecks = event => {
+      if (String(event.detail.datasetId) === String(datasetId)) {
+        tabs.forEach(tab => {
+          if (!tab.addTab) {
+            setTableHasData(prev => {
+              const updated = { ...prev };
+              delete updated[tab.tableSchemaId];
+              return updated;
+            });
+            fetchingTablesRef.current.delete(tab.tableSchemaId);
+            checkTableHasData(tab.tableSchemaId);
+          }
+        });
+      }
+    };
+
+    window.addEventListener('refreshTableDataChecks', handleRefreshTableDataChecks);
+
+    return () => {
+      window.removeEventListener('refreshTableDataChecks', handleRefreshTableDataChecks);
+    };
+  }, [bigData, datasetId, tabs]);
 
   const onChangeFields = (fields, isLinkChange, tabSchemaId) => {
     const inmTabs = [...tabs];
@@ -189,7 +232,11 @@ export const TabsDesigner = ({
 
       if (bigData) {
         checkTabs?.forEach(item => {
-          if (!item?.dataAreManuallyEditable) length -= 1;
+          const isTableLocked = tableHasData[item.tableSchemaId] === true;
+
+          if (!item?.dataAreManuallyEditable || isTableLocked) {
+            length -= 1;
+          }
         });
       }
 
@@ -267,11 +314,6 @@ export const TabsDesigner = ({
   const onTableDragAndDrop = (draggedTabHeader, droppedTabHeader) => reorderTable(draggedTabHeader, droppedTabHeader);
 
   const onTableDragAndDropStart = (draggedTabIdx, draggedTabId) => {
-    if (!isUndefined(draggedTabId)) {
-      setActiveTableSchemaId(draggedTabId);
-    } else {
-      setActiveTableSchemaId(tabs[0].tableSchemaId);
-    }
     setInitialTabIndexDrag(draggedTabIdx);
   };
 
@@ -322,29 +364,15 @@ export const TabsDesigner = ({
     }
   };
 
-  const arrayShift = (arr, initialIdx, endIdx) => {
-    const element = arr[initialIdx];
-    if (Math.abs(endIdx - initialIdx) > 1) {
-      arr.splice(initialIdx, 1);
-      if (initialIdx < endIdx) {
-        arr.splice(endIdx - 1, 0, element);
-      } else {
-        arr.splice(endIdx, 0, element);
-      }
-    } else {
-      if (endIdx === 0) {
-        arr.splice(initialIdx, 1);
-        arr.splice(0, 0, element);
-      } else {
-        arr.splice(initialIdx, 1);
-        if (initialIdx < endIdx) {
-          arr.splice(endIdx - 1, 0, element);
-        } else {
-          arr.splice(endIdx, 0, element);
-        }
-      }
+  const arrayShift = (arr, fromIndex, toIndex) => {
+    const result = [...arr];
+    const [removed] = result.splice(fromIndex, 1);
+    let target = toIndex;
+    if (fromIndex < toIndex && Math.abs(toIndex - fromIndex) > 1) {
+      target = toIndex - 1;
     }
-    return arr;
+    result.splice(target, 0, removed);
+    return result;
   };
 
   const checkDuplicates = (header, tabIndex) => {
@@ -383,6 +411,26 @@ export const TabsDesigner = ({
       filterManualEdit(inmTabs);
     } catch (error) {
       console.error('TabsDesigner - deleteTable.', error);
+    }
+  };
+
+  const checkTableHasData = async tableSchemaId => {
+    try {
+      const response = await DatasetService.getTableDataDL({
+        datasetId: datasetId,
+        tableSchemaId: tableSchemaId,
+        pageNum: 0,
+        pageSize: 1,
+        levelError: ['CORRECT', 'INFO', 'WARNING', 'ERROR', 'BLOCKER']
+      });
+
+      const hasData = response?.records?.length > 0;
+      setTableHasData(prev => ({ ...prev, [tableSchemaId]: hasData }));
+
+      return hasData;
+    } catch (error) {
+      console.error('TabsDesigner - checkTableHasData.', error);
+      return false;
     }
   };
 
@@ -477,6 +525,8 @@ export const TabsDesigner = ({
         isEditingEnabled={isEditingEnabled}
         isErrorDialogVisible={isErrorDialogVisible}
         isIcebergCreated={isIcebergCreated}
+        isReordering={isReordering}
+        isTableLockedDueToData={tableHasData[idx.tableSchemaId]}
         isWarningDialogVisible={isWarningDialogVisible}
         maxLength={maxLength}
         name="TabsDesigner"
@@ -510,6 +560,7 @@ export const TabsDesigner = ({
                   hasPKReferenced={tab.hasPKReferenced}
                   header={tab.header}
                   index={tab.index}
+                  isTableLockedDueToData={tableHasData[tab.tableSchemaId]}
                   key={tab.index}
                   manualEdit={tab.dataAreManuallyEditable}
                   newTab={tab.newTab}
@@ -520,7 +571,11 @@ export const TabsDesigner = ({
                   rightIconTooltip={getRightIconTooltip(tab)}
                   tableSchemaId={tab.tableSchemaId}
                   toPrefill={tab.toPrefill}>
-                  {(tabs.length > 0 && (isDataflowOpen || isDesignDatasetEditorRead || isEditingEnabled)) ||
+                  {(tabs.length > 0 &&
+                    (isDataflowOpen ||
+                      isDesignDatasetEditorRead ||
+                      isEditingEnabled ||
+                      tableHasData[tab.tableSchemaId])) ||
                   tabs.length > 1 ? (
                     <FieldsDesigner
                       autoFocus={false}
@@ -542,6 +597,7 @@ export const TabsDesigner = ({
                       isGroupedValidationSelected={isGroupedValidationSelected}
                       isIcebergCreated={isIcebergCreated}
                       isReferenceDataset={isReferenceDataset}
+                      isTableLockedDueToData={tableHasData[tab.tableSchemaId]}
                       key={tab.index}
                       manageDialogs={manageDialogs}
                       manageUniqueConstraint={manageUniqueConstraint}
@@ -570,23 +626,28 @@ export const TabsDesigner = ({
   };
 
   const reorderTable = async (draggedTabHeader, droppedTabHeader) => {
+    if (draggedTabHeader === droppedTabHeader) return;
+    setIsReordering(true);
     try {
       const inmTabs = [...tabs];
       const draggedTabIdx = TabsUtils.getIndexByHeader(draggedTabHeader, inmTabs);
       const droppedTabIdx = TabsUtils.getIndexByHeader(droppedTabHeader, inmTabs);
-      const index = draggedTabIdx > droppedTabIdx ? droppedTabIdx : droppedTabIdx - 1;
 
+      let index = droppedTabIdx;
+      if (draggedTabIdx < droppedTabIdx && Math.abs(droppedTabIdx - draggedTabIdx) > 1) {
+        index = droppedTabIdx - 1;
+      }
       if (index > -1) {
         await DatasetService.updateTableOrder(datasetId, index, tabs[draggedTabIdx].tableSchemaId);
 
         const shiftedTabs = arrayShift(inmTabs, draggedTabIdx, droppedTabIdx);
-
         shiftedTabs.forEach((tab, i) => (tab.index = !tab.addTab ? i : -1));
-        setActiveTableSchemaId(shiftedTabs[index].tableSchemaId);
         filterManualEdit([...shiftedTabs]);
       }
     } catch (error) {
       console.error('TabsDesigner - reorderTable.', error);
+    } finally {
+      setIsReordering(false);
     }
   };
 
