@@ -585,7 +585,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
         updateMaterializedViews = false;
       }
       if (BooleanUtils.isTrue(isBigDataFlow) && !StringUtil.isNullOrEmpty(tableSchemaVO.getIdTableSchema())) {
-        bigDataDatasetService.deleteTableData(datasetId, dataflowId, null, tableSchemaVO.getIdTableSchema(), null, false);
+        bigDataDatasetService.deleteTableData(datasetId, dataflowId, null, null, tableSchemaVO.getIdTableSchema(), null, false);
       }
       dataschemaService.updateTableSchema(datasetId, tableSchemaVO, updateMaterializedViews);
     } catch (EEAException e) {
