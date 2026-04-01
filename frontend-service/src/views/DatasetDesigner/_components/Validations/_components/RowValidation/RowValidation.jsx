@@ -634,12 +634,11 @@ export const RowValidation = ({ bigData, dataflowId, dataflowType, datasetId, ta
   };
 
   const onSetSqlSentence = value => {
-    const replacedSemicolonValue = value.replace(/;/g, 'CHR(59)');
     creationFormDispatch({
       type: 'SET_FORM_FIELD',
       payload: {
         key: 'sqlSentence',
-        value: replacedSemicolonValue
+       value: value
       }
     });
   };
