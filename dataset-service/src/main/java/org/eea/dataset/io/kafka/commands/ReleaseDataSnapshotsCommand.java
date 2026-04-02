@@ -193,12 +193,12 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
         String cetReleaseDate = LocalDateTime.parse(dateRelease, utcFormatter).atZone(ZoneOffset.UTC).format(cetFormatter);
         createSnapshotVO.setDescription("Release " + cetReleaseDate + " CET");
 
-        LOG.info("Creating release process for dataflowId {}, dataProviderId {} dataset {}, jobId {}", dataset.getDataflowId(), dataset.getDataProviderId(), nextData, jobId);
         String nextProcessId = UUID.randomUUID().toString();
+        LOG.info("Creating release process for dataflowId {}, dataProviderId {}, dataset {}, jobId {} and release processId {} with initial status IN_PROGRESS", dataset.getDataflowId(), dataset.getDataProviderId(), jobId, nextData, nextProcessId);
         processControllerZuul.updateProcess(nextData, dataset.getDataflowId(),
-                ProcessStatusEnum.IN_QUEUE, ProcessTypeEnum.RELEASE, nextProcessId,
+                ProcessStatusEnum.IN_PROGRESS, ProcessTypeEnum.RELEASE, nextProcessId,
                 user, defaultReleaseProcessPriority, true);
-        LOG.info("Created release process with processId {} for dataflowId {}, dataProviderId {} dataset {}, jobId {}", nextProcessId, dataset.getDataflowId(), dataset.getDataProviderId(), nextData, jobId);
+        LOG.info("Created release process for dataflowId {}, dataProviderId {}, dataset {}, jobId {} and release processId {} with initial status IN_PROGRESS", dataset.getDataflowId(), dataset.getDataProviderId(), jobId, nextData, nextProcessId);
 
         if (jobId!=null) {
           LOG.info("Creating jobProcess for dataflowId {}, dataProviderId {}, jobId {} and release processId {}", dataset.getDataflowId(), dataset.getDataProviderId(), jobId, nextProcessId);
@@ -206,12 +206,6 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
           jobProcessControllerZuul.save(jobProcessVO);
           LOG.info("Created jobProcess for dataflowId {}, dataProviderId {}, jobId {} and release processId {}", dataset.getDataflowId(), dataset.getDataProviderId(), jobId, nextProcessId);
         }
-
-        LOG.info("Updating release process for dataflowId {}, dataProviderId {}, dataset {}, jobId {} and release processId {} to status IN_PROGRESS", dataset.getDataflowId(), dataset.getDataProviderId(), jobId, nextData, nextProcessId);
-        processControllerZuul.updateProcess(nextData, dataset.getDataflowId(),
-                ProcessStatusEnum.IN_PROGRESS, ProcessTypeEnum.RELEASE, nextProcessId,
-                user, defaultReleaseProcessPriority, true);
-        LOG.info("Updated release process for dataflowId {}, dataProviderId {}, dataset {}, jobId {} and release processId {} to status IN_PROGRESS", dataset.getDataflowId(), dataset.getDataProviderId(), jobId, nextData, nextProcessId);
 
         datasetSnapshotService.addSnapshot(nextData, createSnapshotVO, null, dateRelease, false, nextProcessId);
       } else {
