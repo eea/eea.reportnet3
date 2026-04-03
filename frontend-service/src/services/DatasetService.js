@@ -195,7 +195,7 @@ export const DatasetService = {
       providerCode
     }),
 
-  downloadGeometry: async ({ datasetId, recordId,  fieldId, dataflowId, tableSchemaId, providerId }) =>
+  downloadGeometry: async ({ datasetId, recordId, fieldId, dataflowId, tableSchemaId, providerId }) =>
     await DatasetRepository.downloadGeometry({ datasetId, recordId, fieldId, dataflowId, tableSchemaId, providerId }),
 
   downloadPublicDatasetFile: async (dataflowId, dataProviderId, fileName) =>
@@ -238,14 +238,13 @@ export const DatasetService = {
         datasetTableDTO.totalRecordsWithBlockers
       ]);
 
-      const hasErrors = (datasetTableDTO.totalRecordsWithErrors) > 0;
+      const hasBlockers = datasetTableDTO.totalRecordsWithBlockers > 0;
 
-      const hasBlockers = (datasetTableDTO.totalRecordsWithBlockers) > 0;
+      const hasWarnings = datasetTableDTO.totalRecordsWithWarnings > 0;
 
-      const hasWarnings = (datasetTableDTO.totalRecordsWithWarnings) > 0;
+      const hasInfos = datasetTableDTO.totalRecordsWithInfos > 0;
 
-      const hasInfos = (datasetTableDTO.totalRecordsWithInfos) > 0;
-
+      const hasErrors = datasetTableDTO.totalRecordsWithErrors > 0 || (!hasBlockers && !hasWarnings && !hasInfos && datasetTableDTO.totalErrors > 0);
 
       return new DatasetTable({
         hasErrors,
