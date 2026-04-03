@@ -586,7 +586,13 @@ export const Tab = ({
             const inmContextMenus = [...contextMenus];
             const hideContextMenus = inmContextMenus.filter(contextMenu => contextMenu.style.display !== '');
             hideContextMenus.forEach(contextMenu => (contextMenu.style.display = 'none'));
-            contextMenuRef.current.show(e);
+            contextMenuRef.current.show({
+              ...e,
+              pageX: e.pageX,
+              pageY: e.pageY + 60,
+              preventDefault: () => e.preventDefault(),
+              stopPropagation: () => e.stopPropagation()
+            });
           }
         }}
         ref={tabRef}
@@ -741,7 +747,7 @@ export const Tab = ({
         </a>
       </li>
       {designMode && !isDataflowOpen && !isDesignDatasetEditorRead ? (
-        <ContextMenu model={menu} ref={contextMenuRef} />
+        <ContextMenu model={menu} ref={contextMenuRef} appendTo={document.body} />
       ) : null}
       {renderTableInfo()}
     </Fragment>
