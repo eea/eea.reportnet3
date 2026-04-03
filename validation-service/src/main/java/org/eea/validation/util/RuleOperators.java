@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.List;
+import java.util.Objects;
 import java.util.regex.PatternSyntaxException;
 
 /** The Class RuleOperators. */
@@ -19,6 +20,9 @@ public class RuleOperators {
 
   /** The country code. */
   private static String countryCode;
+
+  /** The Constant VALIDATE_AS_PROVIDER_CODE. */
+  private static final ThreadLocal<String> VALIDATE_AS_PROVIDER_CODE = new ThreadLocal<>();
 
   /** The Constant DATE_FORMAT. */
   private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd");
@@ -39,6 +43,18 @@ public class RuleOperators {
       instance = new RuleOperators();
     }
     return instance;
+  }
+
+  public static void setValidateAsProviderCodee(String code) {
+    if (code == null || code.isEmpty()) {
+      VALIDATE_AS_PROVIDER_CODE.remove();
+    } else {
+      VALIDATE_AS_PROVIDER_CODE.set(code);
+    }
+  }
+
+  public static void clearValidateAsProviderCode() {
+    VALIDATE_AS_PROVIDER_CODE.remove();
   }
 
   /**
@@ -109,16 +125,47 @@ public class RuleOperators {
    * @return the string
    */
   public static String replaceKeywords(String regex) {
+    regex = stripWrappingQuotes(regex);
+    String effectiveCode = countryCode;
+    String validateAsProviderCode = VALIDATE_AS_PROVIDER_CODE.get();
+
+    // Only override when base is XX (Design/Test/no-provider case).
+    if (validateAsProviderCode != null && !validateAsProviderCode.isBlank() && "XX".equals(effectiveCode)) {
+      effectiveCode = validateAsProviderCode.trim();
+    }
     if (regex.contains("{%R3_COUNTRY_CODE%}")) {
-      regex = regex.replace("{%R3_COUNTRY_CODE%}", countryCode);
+      regex = regex.replace("{%R3_COUNTRY_CODE%}", effectiveCode);
     }
     if (regex.contains("{%R3_COMPANY_CODE%}")) {
-      regex = regex.replace("{%R3_COMPANY_CODE%}", countryCode);
+      regex = regex.replace("{%R3_COMPANY_CODE%}", effectiveCode);
     }
     if (regex.contains("{%R3_ORGANIZATION_CODE%}")) {
-      regex = regex.replace("{%R3_ORGANIZATION_CODE%}", countryCode);
+      regex = regex.replace("{%R3_ORGANIZATION_CODE%}", effectiveCode);
     }
     return regex;
+  }
+
+  /**
+   * Clean any quotations that wrap the regex.
+   *
+   * @param regex the regex
+   * @return the string
+   */
+  private static String stripWrappingQuotes(String regex) {
+    if (regex == null) return null;
+    String trimmed = regex.trim();
+
+    // Remove one pair of wrapping quotes "..."
+    if (trimmed.length() >= 2 && trimmed.startsWith("\"") && trimmed.endsWith("\"")) {
+      trimmed = trimmed.substring(1, trimmed.length() - 1);
+    }
+
+    // Also support single quotes '...' just in case
+    if (trimmed.length() >= 2 && trimmed.startsWith("'") && trimmed.endsWith("'")) {
+      trimmed = trimmed.substring(1, trimmed.length() - 1);
+    }
+
+    return trimmed;
   }
 
   /**
