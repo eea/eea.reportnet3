@@ -195,7 +195,7 @@ export const DatasetService = {
       providerCode
     }),
 
-  downloadGeometry: async ({ datasetId, recordId,  fieldId, dataflowId, tableSchemaId, providerId }) =>
+  downloadGeometry: async ({ datasetId, recordId, fieldId, dataflowId, tableSchemaId, providerId }) =>
     await DatasetRepository.downloadGeometry({ datasetId, recordId, fieldId, dataflowId, tableSchemaId, providerId }),
 
   downloadPublicDatasetFile: async (dataflowId, dataProviderId, fileName) =>
@@ -238,8 +238,19 @@ export const DatasetService = {
         datasetTableDTO.totalRecordsWithBlockers
       ]);
 
+      const hasBlockers = datasetTableDTO.totalRecordsWithBlockers > 0;
+
+      const hasWarnings = datasetTableDTO.totalRecordsWithWarnings > 0;
+
+      const hasInfos = datasetTableDTO.totalRecordsWithInfos > 0;
+
+      const hasErrors = datasetTableDTO.totalRecordsWithErrors > 0 || (!hasBlockers && !hasWarnings && !hasInfos && datasetTableDTO.totalErrors > 0);
+
       return new DatasetTable({
-        hasErrors: datasetTableDTO.tableErrors,
+        hasErrors,
+        hasWarnings,
+        hasBlockers,
+        hasInfos,
         tableSchemaId: datasetTableDTO.idTableSchema,
         tableSchemaName: datasetTableDTO.nameTableSchema
       });
@@ -960,7 +971,8 @@ export const DatasetService = {
 
   validate: async datasetId => await DatasetRepository.validate(datasetId),
 
-  validateAsProvider: async (datasetId, dataflowId, providerId) => await DatasetRepository.validateAsProvider(datasetId, dataflowId, providerId),
+  validateAsProvider: async (datasetId, dataflowId, providerId) =>
+    await DatasetRepository.validateAsProvider(datasetId, dataflowId, providerId),
 
   validateAllSql: async datasetId => await DatasetRepository.validateAllSql(datasetId),
 

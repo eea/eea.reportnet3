@@ -1,4 +1,5 @@
 import { useContext, useReducer } from 'react';
+import { useEffect } from 'react';
 
 import themeConfig from 'conf/theme.config.json';
 
@@ -33,6 +34,11 @@ export const ThemeProvider = ({ children }) => {
     headerCollapse: false
   });
 
+  useEffect(() => {
+    document.body.classList.remove('light', 'dark');
+    document.body.classList.add(state.currentTheme);
+  }, [state.currentTheme]);
+
   return (
     <ThemeContext.Provider
       value={{
@@ -51,6 +57,9 @@ export const ThemeProvider = ({ children }) => {
             const cssValue = theme[key];
             document.body.style.setProperty(cssKey, cssValue);
           });
+
+          document.body.classList.remove('light', 'dark');
+          document.body.classList.add(newTheme);
           userContext.onToggleVisualTheme(newTheme);
         },
         setHeaderCollapse: headerCollapse => {

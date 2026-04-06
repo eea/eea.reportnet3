@@ -2,6 +2,9 @@ export class DatasetTable {
   constructor({
     dataAreManuallyEditable,
     hasErrors,
+    hasWarnings,
+    hasBlockers,
+    hasInfos,
     hasPKReferenced,
     records,
     recordSchemaId,
@@ -19,6 +22,9 @@ export class DatasetTable {
   } = {}) {
     this.dataAreManuallyEditable = dataAreManuallyEditable;
     this.hasErrors = hasErrors;
+    this.hasWarnings = hasWarnings;
+    this.hasBlockers = hasBlockers;
+    this.hasInfos = hasInfos;
     this.hasPKReferenced = hasPKReferenced;
     this.records = records;
     this.recordSchemaId = recordSchemaId;

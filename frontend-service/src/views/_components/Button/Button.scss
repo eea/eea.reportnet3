@@ -320,8 +320,34 @@ body .p-button.p-button-animated-delete span:first-child:hover {
   animation: delete 1s linear infinite;
 }
 
-.historic-release-button.historic-release-button{
-  margin-top:2rem;
+.historic-release-button.historic-release-button {
+  margin-top: 2rem;
+}
+
+body.light .p-button.dataset-deleteDataset-help-step {
+  background-color: rgba(251, 233, 234, 0.4);
+  color: #8f3a3e;
+  font-weight: 500;
+  border: none;
+}
+
+body.light .p-button.dataset-deleteDataset-help-step:hover {
+  background-color: rgba(245, 215, 216, 0.75);
+  color: #762f33;
+  border: none;
+}
+
+body.dark .p-button.dataset-deleteDataset-help-step {
+  background-color: var(--bg);
+  color: #c46a6e;
+  font-weight: 500;
+  border: none;
+}
+
+body.dark .p-button.dataset-deleteDataset-help-step:hover {
+  background-color: var(--bg-dark-16dp);
+  color: #e07b80;
+  border: none;
 }
 
 @keyframes spin {
