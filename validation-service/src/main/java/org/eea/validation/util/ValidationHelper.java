@@ -1721,7 +1721,7 @@ public class ValidationHelper implements DisposableBean {
                           true);
                 }
               }
-              else if (processControllerZuul.isProcessFinished(processId)) {
+              else {
                 if (jobId != null) {
                   jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FINISHED);
                 }

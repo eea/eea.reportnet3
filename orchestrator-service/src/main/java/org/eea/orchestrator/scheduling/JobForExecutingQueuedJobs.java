@@ -53,7 +53,7 @@ public class JobForExecutingQueuedJobs {
         ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
         scheduler.initialize();
         scheduler.schedule(() -> executeQueuedJobs(),
-                new CronTrigger("0 */1 * * * *"));
+            new CronTrigger("0 */1 * * * *"));
     }
 
     /**
@@ -62,7 +62,7 @@ public class JobForExecutingQueuedJobs {
     public void executeQueuedJobs() {
         try {
             List<JobVO> jobs = jobService.getJobsByStatus(JobStatusEnum.QUEUED);
-            if(jobs == null || jobs.size() == 0){
+            if(jobs == null || jobs.isEmpty()){
                 return;
             }
             LOG.info("Running scheduled task executeQueuedJobs");
@@ -74,18 +74,28 @@ public class JobForExecutingQueuedJobs {
                         LOG.info("Job with id {} and of type {} can not be executed right now.", job.getId(), job.getJobType().getValue());
                         continue;
                     }
+
                     LOG.info("Trying to execute job with id {} and of type {}", job.getId(), job.getJobType().getValue());
-                    if (job.getJobType() == JobTypeEnum.VALIDATION && !job.isRelease()) {
-                        LOG.info("Job with id {} and of type {} will be executed.", job.getId(), job.getJobType().getValue());
+                    if (job.getJobType() == JobTypeEnum.VALIDATION) {
+                        LOG.info("Validation job with id {} will be executed. release={}", job.getId(), job.isRelease());
                         //call validation mechanism
                         jobService.prepareAndExecuteValidationJob(job);
-                    } else if (job.getJobType() == JobTypeEnum.VALIDATION && job.isRelease()) {
-                        //check if another release is already running for the dataflow, but for another provider
-                        //TODO for #297462 remove following check because validations for release will be executed in parallel for the same dataflow id
+                    } else if (job.getJobType() == JobTypeEnum.RELEASE) {
                         if (!jobService.canExecuteReleaseOnDataflow(job.getDataflowId())) {
+                            LOG.info("Release job with id {} can not be executed because another release is already running for dataflowId {}", job.getId(), job.getDataflowId());
                             continue;
                         }
-                        LOG.info("Job with id {} and of type {} will be executed.", job.getId(), job.getJobType().getValue());
+
+                        LOG.info("Release job with id {} will be executed.", job.getId());
+                        jobService.updateJobStatus(job.getId(), JobStatusEnum.IN_PROGRESS);
+                        try {
+                            jobService.precheckReleaseJobOrThrow(job.getId());
+                        } catch (Exception e) {
+                            jobService.failReleaseAfterPrecheckException(job, e);
+                            continue;
+                        }
+
+                        LOG.info("Release job with id {} passed precheck. Starting release execution.", job.getId());
                         //call release mechanism
                         jobService.prepareAndExecuteReleaseJob(job);
                     } else if (job.getJobType() == JobTypeEnum.FILE_EXPORT) {

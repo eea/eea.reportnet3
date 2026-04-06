@@ -132,12 +132,9 @@ public class CheckBlockersDataSnapshotCommandTest {
     JobVO jobVO = new JobVO(Long.valueOf(1), JobTypeEnum.RELEASE, JobStatusEnum.QUEUED, new Timestamp(System.currentTimeMillis()), new Timestamp(System.currentTimeMillis()), null, "test", true, 1L, 1L, 1L, null, null, null, null, null, null);
     Mockito.when(jobControllerZuul.save(any(JobVO.class))).thenReturn(jobVO);
     Mockito.doNothing().when(jobHistoryControllerZuul).save(any(JobVO.class));
-    Mockito.when(validationRepository.existsByLevelError(ErrorTypeEnum.BLOCKER)).thenReturn(false);
     ProcessVO processVO = new ProcessVO();
     processVO.setProcessId("jkhiuh");
-    Mockito.when(processControllerZuul.updateProcess(anyLong(), anyLong(), any(ProcessStatusEnum.class), any(ProcessTypeEnum.class), anyString(), anyString(), anyInt(), anyBoolean())).thenReturn(true);
     JobProcessVO jobProcessVO = new JobProcessVO(Long.valueOf(1), Long.valueOf(1), "jkhiuh");
-    Mockito.when(jobProcessControllerZuul.save(any(JobProcessVO.class))).thenReturn(jobProcessVO);
 
     checkBlockersDataSnapshotCommand.execute(eeaEventVO);
     Mockito.verify(dataSetMetabaseRepository, times(1)).findById(1L);
@@ -170,12 +167,10 @@ public class CheckBlockersDataSnapshotCommandTest {
             datasetMetabase.getDataflowId(), datasetMetabase.getDataProviderId()))
         .thenReturn(datasetsId);
     Mockito.when(jobControllerZuul.checkEligibilityOfJob(anyString(), anyBoolean(), anyLong(), anyLong(), anyList())).thenReturn(JobStatusEnum.QUEUED);
-    JobVO jobVO = new JobVO(Long.valueOf(1), JobTypeEnum.RELEASE, JobStatusEnum.QUEUED, new Timestamp(System.currentTimeMillis()), new Timestamp(System.currentTimeMillis()), null, "test", true, 1L, 1L, 1L, null, null, null, null, null, null);
+    JobVO jobVO = new JobVO(Long.valueOf(1), JobTypeEnum.RELEASE, JobStatusEnum.QUEUED, new Timestamp(System.currentTimeMillis()), new Timestamp(System.currentTimeMillis()), null, "test", true, 1L, 1L, 1L, null, null, null, null, null,null);
     Mockito.when(jobControllerZuul.save(any(JobVO.class))).thenReturn(jobVO);
-    Mockito.when(validationRepository.existsByLevelError(ErrorTypeEnum.BLOCKER)).thenReturn(true);
     checkBlockersDataSnapshotCommand.execute(eeaEventVO);
-    Mockito.verify(validationRepository, times(1)).existsByLevelError(ErrorTypeEnum.BLOCKER);
-
+    Mockito.verifyNoInteractions(validationRepository);
   }
 
 }

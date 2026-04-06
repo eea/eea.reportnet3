@@ -334,4 +334,10 @@ public interface DatasetSnapshotController {
   @PutMapping("/private/rollBackSnapshotRecord/{jobId}")
   void rollBackSnapshotRecord(@PathVariable Long jobId, @RequestParam("dataflowId") Long dataflowId, @RequestParam("providerId") Long providerId);
 
+  @PostMapping(value = "/private/releasePrecheck/{jobId}")
+  void precheckReleaseJob(@PathVariable("jobId") Long jobId);
+
+  @PutMapping(value = "/private/startQueuedReleaseJob/{jobId}", produces = MediaType.APPLICATION_JSON_VALUE)
+  void startQueuedReleaseJob(@PathVariable("jobId") Long jobId);
+
 }
