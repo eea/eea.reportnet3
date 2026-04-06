@@ -2,6 +2,7 @@ package org.eea.orchestrator.scheduling;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.eea.interfaces.controller.dataflow.DataFlowController;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.ums.TokenVO;
@@ -54,6 +55,9 @@ public class JobForRestartingReleaseTasks {
     @Autowired
     private UserManagementControllerZull userManagementControllerZull;
 
+    @Autowired
+    private DataFlowController.DataFlowControllerZuul dataFlowControllerZuul;
+
     @PostConstruct
     private void init() {
         ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
@@ -63,7 +67,7 @@ public class JobForRestartingReleaseTasks {
     }
 
     /**
-     * The job runs every 30 minutes. It finds task ids for tasks that have status=IN_PROGRESS for more than maxTimeInMinutesForInProgressTasks
+     * The job runs every 30 minutes for Citus release. It finds task ids for tasks that have status=IN_PROGRESS for more than maxTimeInMinutesForInProgressTasks
      * and sets their status to status=IN_QUEUE.
      */
     public void restartReleaseTasks() {
@@ -84,6 +88,12 @@ public class JobForRestartingReleaseTasks {
                         TaskVO releaseTask = recordStoreControllerZuul.findReleaseTaskByTaskId(taskId.longValue());
                         LOG.info("Release task data {}", releaseTask);
                         JsonNode jsonNode = objectMapper.readTree(releaseTask.getJson());
+                        
+                        //if job is for big data, skip
+                        if(dataFlowControllerZuul.isBigDataflow(jsonNode.get("dataflowId").asLong())){
+                            return;
+                        }
+
                         long datasetId = jsonNode.get("datasetId").asLong();
                         long snapshotId = jsonNode.get("snapshotId").asLong();
                         int splitFileId = jsonNode.get("splitFileId").asInt();
