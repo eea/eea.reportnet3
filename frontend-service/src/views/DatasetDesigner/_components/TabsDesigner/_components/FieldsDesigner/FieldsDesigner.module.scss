@@ -185,7 +185,7 @@
   transition: 0.5s !important;
 }
 
-.icebergWarning {
+.disabledFieldsWarning {
   background: #e6f4fa;
   color: #31708f;
   border: 1px solid #bce8f1;
@@ -227,6 +227,14 @@
 .inactiveDragAndDropItems ~ div > div:first-child {
   svg {
     opacity: 0.5 !important;
+  }
+}
+
+.disabledFieldsInfoBtn {
+  color: var(--datatable-header-info-button-color) !important;
+  font-size: 12pt !important;
+  &:focus {
+    box-shadow: none !important;
   }
 }
 

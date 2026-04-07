@@ -172,7 +172,8 @@ export const GlobalNotifications = ({ bigData }) => {
     try {
       const { data } = await ValidationService.downloadShowValidationsFile(
         notification.content.datasetId,
-        notification.content.nameFile
+        notification.content.nameFile,
+        code
       );
       notificationContext.add({ type: 'AUTOMATICALLY_DOWNLOAD_VALIDATIONS_FILE' });
 
@@ -258,8 +259,7 @@ export const GlobalNotifications = ({ bigData }) => {
         const { data } = bigData
           ? await DatasetService.downloadExportDatasetFileDL(
               notification.content.datasetId,
-              encodeURIComponent(downloadFileName),
-              code
+              encodeURIComponent(downloadFileName)
             )
           : await DatasetService.downloadExportDatasetFile(
               notification.content.datasetId,
@@ -297,7 +297,7 @@ export const GlobalNotifications = ({ bigData }) => {
 
         const downloadFileName = `${notification.content.fileName}.${notification.content.mimeType}`;
         const { data } = bigData
-          ? await DatasetService.downloadTableDataDL(notification.content.datasetId, downloadFileName, code)
+          ? await DatasetService.downloadTableDataDL(notification.content.datasetId, downloadFileName)
           : await DatasetService.downloadTableData(notification.content.datasetId, downloadFileName);
 
         if (data.size !== 0) {

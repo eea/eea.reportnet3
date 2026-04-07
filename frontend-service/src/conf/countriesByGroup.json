@@ -205,6 +205,11 @@
       "flag": "XK"
     },
     {
+      "name": "Moldova",
+      "code": "MD",
+      "flag": "MD"
+    },
+    {
       "name": "Montenegro",
       "code": "ME",
       "flag": "ME"
@@ -262,11 +267,6 @@
       "flag": "KG"
     },
     {
-      "name": "Moldova",
-      "code": "MD",
-      "flag": "MD"
-    },
-    {
       "name": "Monaco",
       "code": "MC",
       "flag": "MC"
@@ -299,7 +299,7 @@
     {
       "name": "United Kingdom",
       "code": "UK",
-      "flag": "UK"
+      "flag": "GB"
     },
     {
       "name": "Uzbekistan",

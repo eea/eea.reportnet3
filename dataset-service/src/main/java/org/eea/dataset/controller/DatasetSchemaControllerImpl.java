@@ -560,7 +560,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   public void updateTableSchema(
           @ApiParam(type = "Long", value = "Dataset Id",
                   example = "0") @PathVariable("datasetId") Long datasetId,
-          @ApiParam(value = "table schema object") @RequestBody TableSchemaVO tableSchemaVO) {
+          @ApiParam(value = "table schema object") @RequestBody TableSchemaVO tableSchemaVO) throws Exception {
     boolean isSchema = false;
     if (null != tableSchemaVO.getNameTableSchema()) {
       String nameTrimmed = tableSchemaVO.getNameTableSchema().trim();
@@ -583,6 +583,9 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
       Boolean updateMaterializedViews = true;
       if(Boolean.TRUE.equals(isBigDataFlow)){
         updateMaterializedViews = false;
+      }
+      if (BooleanUtils.isTrue(isBigDataFlow) && !StringUtil.isNullOrEmpty(tableSchemaVO.getIdTableSchema())) {
+        bigDataDatasetService.deleteTableData(datasetId, dataflowId, null, null, tableSchemaVO.getIdTableSchema(), null, false);
       }
       dataschemaService.updateTableSchema(datasetId, tableSchemaVO, updateMaterializedViews);
     } catch (EEAException e) {

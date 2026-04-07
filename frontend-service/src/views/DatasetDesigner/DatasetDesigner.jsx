@@ -719,7 +719,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
     const action = 'DATASET_VALIDATE';
     actionsContext.testProcess(datasetId, action);
     try {
-      await DatasetService.validate(datasetId);
+      await DatasetService.validate({datasetId});
       notificationContext.add(
         {
           type: 'VALIDATE_DATA_INIT',
@@ -761,7 +761,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
     const action = 'DATASET_VALIDATE';
     actionsContext.testProcess(datasetId, action);
     try {
-      await DatasetService.validateAsProvider(datasetId, dataflowId, providerId);
+      await DatasetService.validateAsProvider({datasetId, dataflowId, providerId});
       notificationContext.add(
         {
           type: 'VALIDATE_DATA_INIT',
@@ -1592,7 +1592,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
   const onDownloadValidations = async () => {
     setIsDownloadingValidations(true);
     try {
-      await ValidationService.generateShowValidationsFile(datasetId);
+      await ValidationService.generateShowValidationsFile({datasetId});
       notificationContext.add({ type: 'DOWNLOAD_VALIDATIONS_START' });
     } catch (error) {
       console.error('DatasetDesigner - onDownloadValidations.', error);

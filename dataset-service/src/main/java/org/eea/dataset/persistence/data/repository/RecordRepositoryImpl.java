@@ -1367,7 +1367,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       ResultSet rs = stmt.executeQuery();
 
       final StreamReadConstraints constraints = StreamReadConstraints.builder()
-              .maxStringLength(50_000_000)
+              .maxStringLength(100_000_000)
               .build();
 
       final ObjectMapper mapper = new ObjectMapper(

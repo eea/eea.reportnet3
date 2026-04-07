@@ -38,6 +38,7 @@ export const ShowValidationsList = memo(
     isWebformView,
     levelErrorTypes,
     onSelectValidation,
+    preparationSetCode,
     reporting = false,
     schemaTables,
     switchToTabularData = () => {},
@@ -339,7 +340,8 @@ export const ShowValidationsList = memo(
             fieldValueFilter,
             levelErrorsFilter,
             typeEntitiesFilter,
-            tablesFilter
+            tablesFilter,
+            preparationSetCode
           );
         } else {
           data = await DatasetService.getShowValidationErrors(

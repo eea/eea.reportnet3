@@ -23,7 +23,7 @@ export const ActionsProvider = ({ children }) => {
   inProgressRef.current = isInProgress;
   jobTypeRef.current = jobTypeInProgress;
 
-  const testProcess = (datasetId, action) => {
+  const testProcess = (datasetId, action, code) => {
     clearInterval(timer.current);
 
     setDeleteDatasetProcessing(false);
@@ -65,12 +65,21 @@ export const ActionsProvider = ({ children }) => {
     timer.current = setInterval(async () => {
       const jobsInProgress = await JobsStatusesService.getJobsStatuses({
         datasetId: datasetId,
-        jobStatus: ['QUEUED', 'IN_PROGRESS'].join()
+        jobStatus: ['QUEUED', 'IN_PROGRESS'].join(),
+        code: code
       });
 
       if (isEmpty(jobsInProgress.jobsList)) {
         setIsInProgress(false);
         clearInterval(timer.current);
+
+        if (jobTypeRef.current === 'DELETE') {
+          window.dispatchEvent(
+            new CustomEvent('refreshTableDataChecks', {
+              detail: { datasetId: datasetId }
+            })
+          );
+        }
       } else {
         setIsInProgress(true);
         const jobInProgress = jobsInProgress.jobsList.find(job => job.jobStatus === 'IN_PROGRESS');

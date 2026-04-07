@@ -16,7 +16,8 @@ export const JobsStatusesRepository = {
     datasetId,
     datasetName,
     creatorUsername,
-    jobStatus
+    jobStatus,
+    code
   }) =>
     await HTTPRequester.get({
       url: getUrl(JobsStatusesConfig.getJobsStatuses, {
@@ -32,7 +33,8 @@ export const JobsStatusesRepository = {
         datasetId,
         datasetName,
         creatorUsername,
-        jobStatus
+        jobStatus,
+        code
       })
     }),
 

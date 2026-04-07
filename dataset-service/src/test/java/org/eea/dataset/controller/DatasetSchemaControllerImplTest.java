@@ -594,7 +594,7 @@ public class DatasetSchemaControllerImplTest {
   }
 
   @Test(expected = ResponseStatusException.class)
-  public void updateTableSchemaForbiddenTest() {
+  public void updateTableSchemaForbiddenTest() throws Exception {
     DataFlowVO dataflowVO = new DataFlowVO();
     dataflowVO.setStatus(TypeStatusEnum.DRAFT);
     Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
@@ -615,7 +615,7 @@ public class DatasetSchemaControllerImplTest {
    * @throws EEAException the EEA exception
    */
   @Test
-  public void updateTableSchemaTest() throws EEAException {
+  public void updateTableSchemaTest() throws EEAException, Exception {
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
     doNothing().when(dataschemaService).updateTableSchema(Mockito.any(), Mockito.any(), Mockito.any());
@@ -635,7 +635,7 @@ public class DatasetSchemaControllerImplTest {
    * @throws EEAException the EEA exception
    */
   @Test(expected = ResponseStatusException.class)
-  public void updateTableSchemaTestException() throws EEAException {
+  public void updateTableSchemaTestException() throws EEAException, Exception {
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
     DataFlowVO dataflowVO = new DataFlowVO();
@@ -657,7 +657,7 @@ public class DatasetSchemaControllerImplTest {
   }
 
   @Test(expected = ResponseStatusException.class)
-  public void updateTableSchemaTestException2() throws EEAException {
+  public void updateTableSchemaTestException2() throws EEAException, Exception {
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
     DataFlowVO dataflowVO = new DataFlowVO();
@@ -681,7 +681,7 @@ public class DatasetSchemaControllerImplTest {
   }
 
   @Test(expected = ResponseStatusException.class)
-  public void updateTableSchemaTestException3() throws EEAException {
+  public void updateTableSchemaTestException3() throws EEAException, Exception {
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
     DataFlowVO dataflowVO = new DataFlowVO();
@@ -704,7 +704,7 @@ public class DatasetSchemaControllerImplTest {
   }
 
   @Test
-  public void updateTableSchemaNameTableSchemaNullTest() throws EEAException {
+  public void updateTableSchemaNameTableSchemaNullTest() throws EEAException, Exception {
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
     doNothing().when(dataschemaService).updateTableSchema(Mockito.any(), Mockito.any(), Mockito.any());
@@ -719,7 +719,7 @@ public class DatasetSchemaControllerImplTest {
   }
 
   @Test(expected = ResponseStatusException.class)
-  public void updateTableSchemaTableNotFoundNotNullTest() throws EEAException {
+  public void updateTableSchemaTableNotFoundNotNullTest() throws EEAException, Exception {
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
     DataFlowVO dataflowVO = new DataFlowVO();

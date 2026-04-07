@@ -265,6 +265,7 @@ public class DatasetDataRetrieverDL implements DataLakeDataRetriever {
 
         if (s3Helper.checkFolderExist(preparationValidationResolver, S3_PREPARATION_VALIDATION_TABLE_PATH)) {
 
+            preparationValidationResolver.setPath(S3_PREPARATION_TABLE_NAME_FOLDER_PATH);
             if (!dremioHelperService.checkFolderPromoted(
                     preparationValidationResolver, S3_VALIDATION)) {
 

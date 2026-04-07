@@ -401,7 +401,8 @@ public class DatasetControllerImpl implements DatasetController {
   @Override
   @HystrixCommand
   @PutMapping("/private/updateStatistics/{id}")
-  public void updateStatistics(@PathVariable("id") Long datasetId, @RequestParam("isBigDataflow") Boolean isBigDataflow) {
+  public void updateStatistics(@PathVariable("id") Long datasetId,
+                               @RequestParam("isBigDataflow") Boolean isBigDataflow) {
     try {
       datasetService.saveStatistics(datasetId, isBigDataflow);
     } catch (EEAException e) {
@@ -1189,6 +1190,7 @@ public class DatasetControllerImpl implements DatasetController {
                   example = "0") @RequestParam(value = "dataflowId", required = false) Long dataflowId,
           @ApiParam(type = "Long", value = "Provider id",
                   example = "0") @RequestParam(value = "providerId", required = false) Long providerId,
+          @LockCriteria(name = "preparationCode")
           @ApiParam(type = "String", value = "Preparation Code",
                   example = "section_a") @RequestParam(value = "preparationCode", required = false) String preparationCode,
           @ApiParam(type = "boolean", value = "Delete prefilled tables",

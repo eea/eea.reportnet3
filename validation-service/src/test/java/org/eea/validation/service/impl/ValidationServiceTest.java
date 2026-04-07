@@ -1040,7 +1040,7 @@ public class ValidationServiceTest {
 
     when(dataSetMetabaseControllerZuul.findDatasetMetabaseById(anyLong())).thenReturn(dataSetMetabase);
     when(dataFlowControllerZuul.isBigDataflowDataset(anyLong())).thenReturn(false);
-    validationServiceImpl.exportValidationFile(1L);
+    validationServiceImpl.exportValidationFile(1L, null);
     Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());
   }

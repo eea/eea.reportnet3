@@ -113,9 +113,9 @@ export const DatasetRepository = {
       url: getUrl(DatasetConfig.downloadExportDatasetFile, { datasetId, fileName })
     }),
 
-  downloadExportDatasetFileDL: async (datasetId, fileName, preparationCode) =>
+  downloadExportDatasetFileDL: async (datasetId, fileName) =>
     await HTTPRequester.download({
-      url: getUrl(DatasetConfig.downloadExportDatasetFileDL, { datasetId, fileName, preparationCode })
+      url: getUrl(DatasetConfig.downloadExportDatasetFileDL, { datasetId, fileName })
     }),
 
   downloadExportFile: async (datasetId, fileName, providerId = null) =>
@@ -186,9 +186,9 @@ export const DatasetRepository = {
       url: getUrl(DatasetConfig.downloadTableData, { datasetId, fileName })
     }),
 
-  downloadTableDataDL: async (datasetId, fileName, preparationCode) =>
+  downloadTableDataDL: async (datasetId, fileName) =>
     await HTTPRequester.download({
-      url: getUrl(DatasetConfig.downloadTableDataDL, { datasetId, fileName, preparationCode })
+      url: getUrl(DatasetConfig.downloadTableDataDL, { datasetId, fileName })
     }),
 
   downloadTableDefinitions: async datasetSchemaId =>
@@ -210,15 +210,15 @@ export const DatasetRepository = {
       url: getUrl(DatasetConfig.downloadImportedFile, { fileName, datasetId, dataflowId })
     }),
 
-  exportDatasetDataDL: async (datasetId, fileType, preparationCode) =>
+  exportDatasetDataDL: async (datasetId, fileType, code) =>
     await HTTPRequester.download({
-      url: getUrl(DatasetConfig.exportDatasetDataDL, { datasetId, fileType, preparationCode }),
+      url: getUrl(DatasetConfig.exportDatasetDataDL, { datasetId, fileType, code }),
       headers: { 'Content-Type': 'application/octet-stream' }
     }),
 
-  exportDatasetDataExternal: async (datasetId, integrationId, preparationCode) =>
+  exportDatasetDataExternal: async (datasetId, integrationId) =>
     await HTTPRequester.download({
-      url: getUrl(DatasetConfig.exportDatasetDataExternal, { datasetId, integrationId, preparationCode }),
+      url: getUrl(DatasetConfig.exportDatasetDataExternal, { datasetId, integrationId }),
       headers: { 'Content-Type': 'application/octet-stream' }
     }),
 
@@ -251,10 +251,10 @@ export const DatasetRepository = {
     selectedShortCode,
     isExportFilteredCsv,
     isFilterValidationsActive,
-    preparationCode
+    code
   ) =>
     await HTTPRequester.post({
-      url: getUrl(DatasetConfig.exportTableDataDL, { datasetId, fileType, tableSchemaId, preparationCode }),
+      url: getUrl(DatasetConfig.exportTableDataDL, { datasetId, fileType, tableSchemaId, code }),
       data: {
         fieldValue: isExportFilteredCsv ? filterValue : '',
         qcCodes: isExportFilteredCsv ? selectedShortCode : '',
@@ -376,7 +376,8 @@ export const DatasetRepository = {
     fieldValueFilter,
     levelErrorsFilter,
     typeEntitiesFilter,
-    tablesFilter
+    tablesFilter,
+    code
   ) => {
     if (asc === -1) {
       asc = 0;
@@ -392,7 +393,8 @@ export const DatasetRepository = {
         fieldValueFilter,
         levelErrorsFilter,
         typeEntitiesFilter,
-        tableFilter: tablesFilter
+        tableFilter: tablesFilter,
+        code
       })
     });
   },
@@ -609,11 +611,12 @@ export const DatasetRepository = {
         dataAreManuallyEditable
       }
     }),
-  validate: async datasetId => await HTTPRequester.update({ url: getUrl(DatasetConfig.validate, { datasetId }) }),
+  validate: async ({ datasetId, code }) =>
+    await HTTPRequester.update({ url: getUrl(DatasetConfig.validate, { datasetId, code }) }),
 
-  validateAsProvider: async (datasetId, dataflowId, providerId) =>
+  validateAsProvider: async ({ datasetId, dataflowId, providerId, code }) =>
     await HTTPRequester.update({
-      url: getUrl(DatasetConfig.validateAsProvider, { datasetId, dataflowId, providerId })
+      url: getUrl(DatasetConfig.validateAsProvider, { datasetId, dataflowId, providerId, code })
     }),
 
   validateAllSql: async datasetId =>

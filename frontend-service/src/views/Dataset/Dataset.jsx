@@ -365,7 +365,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   } = useReporterDataset(datasetId, dataflowId);
 
   useEffect(() => {
-    actionsContext.testProcess(datasetId);
+    actionsContext.testProcess(datasetId, undefined, code);
   }, [datasetId]);
 
   useEffect(() => {
@@ -694,7 +694,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
 
   const onConfirmDelete = async () => {
     const action = 'DATASET_DELETE';
-    actionsContext.testProcess(datasetId, action);
+    actionsContext.testProcess(datasetId, action, code);
     try {
       notificationContext.add({ type: 'DELETE_DATASET_DATA_INIT' });
       await DatasetService.deleteData({ datasetId, isReferenceDataset, preparationCode: code });
@@ -720,9 +720,9 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
 
   const onConfirmValidate = async () => {
     const action = 'DATASET_VALIDATE';
-    actionsContext.testProcess(datasetId, action);
+    actionsContext.testProcess(datasetId, action, code);
     try {
-      await DatasetService.validate(datasetId);
+      await DatasetService.validate({ datasetId, code });
       notificationContext.add(
         {
           type: 'VALIDATE_DATA_INIT',
@@ -762,9 +762,9 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
 
   const onConfirmValidateAsProvider = async providerId => {
     const action = 'DATASET_VALIDATE';
-    actionsContext.testProcess(datasetId, action);
+    actionsContext.testProcess(datasetId, action, code);
     try {
-      await DatasetService.validateAsProvider(datasetId, dataflowId, providerId);
+      await DatasetService.validateAsProvider({ datasetId, dataflowId, providerId, code });
       notificationContext.add(
         {
           type: 'VALIDATE_DATA_INIT',
@@ -968,10 +968,10 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
 
   const onExportDataExternalIntegration = async integrationId => {
     const action = 'DATASET_EXPORT';
-    actionsContext.testProcess(datasetId, action);
+    actionsContext.testProcess(datasetId, action, code);
     notificationContext.add({ type: 'EXPORT_DATASET_DATA' });
     try {
-      await DatasetService.exportDatasetDataExternal(datasetId, integrationId, code);
+      await DatasetService.exportDatasetDataExternal(datasetId, integrationId);
     } catch (error) {
       console.error('Dataset - onExportDataExternalIntegration.', error);
       notificationContext.add(
@@ -990,7 +990,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
     });
 
     const action = 'DATASET_EXPORT';
-    actionsContext.testProcess(datasetId, action);
+    actionsContext.testProcess(datasetId, action, code);
     notificationContext.add({ type: 'EXPORT_DATASET_DATA' });
     try {
       if (bigDataRef.current) {
@@ -1312,7 +1312,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
 
     const action = 'DATASET_IMPORT';
     const fileName = e?.files?.[0]?.name || ' ';
-    actionsContext.testProcess(datasetId, action);
+    actionsContext.testProcess(datasetId, action, code);
 
     if (!metadata?.dataflow.bigData) {
       const {
@@ -1392,7 +1392,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
     setIsDownloadingValidations(true);
 
     try {
-      await ValidationService.generateShowValidationsFile(datasetId);
+      await ValidationService.generateShowValidationsFile({ datasetId, code });
       notificationContext.add({ type: 'DOWNLOAD_VALIDATIONS_START' });
     } catch (error) {
       console.error('Dataset - onDownloadValidations.', error);
@@ -1799,6 +1799,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
             isWebformView={selectedView === 'webform'}
             levelErrorTypes={levelErrorTypes}
             onSelectValidation={onSelectValidation}
+            preparationSetCode={code}
             reporting={true}
             schemaTables={schemaTables}
             switchToTabularData={() => setSelectedView('tabularData')}

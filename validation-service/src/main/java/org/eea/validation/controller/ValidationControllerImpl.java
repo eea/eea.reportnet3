@@ -154,10 +154,12 @@ public class ValidationControllerImpl implements ValidationController {
           @LockCriteria(name = "datasetId") @ApiParam(
           value = "Dataset id whose data is going to be validated",
           example = "15") @PathVariable("id") Long datasetId,
-          @ApiParam(value = "Is the dataset released?", example = "true",
-          required = false) @RequestParam(value = "released", required = false) boolean released,
-          @ApiParam(type = "Long", value = "Job id", example = "1") @RequestParam(
-                  name = "jobId", required = false) Long jobId) {
+          @ApiParam(value = "Is the dataset released?", example = "true", required = false)
+          @RequestParam(value = "released", required = false) boolean released,
+          @ApiParam(type = "Long", value = "Job id", example = "1")
+          @RequestParam(name = "jobId", required = false) Long jobId,
+          @ApiParam(type = "String", value = "Preparation Code", example = "0A2")
+          @LockCriteria(name = "preparationCode") @RequestParam(name = "code", required = false) String preparationCode) {
 
     LOG.info("Called ValidationControllerImpl.validateDataSetData for datasetId {} and released {} with jobId {}", datasetId, released, jobId);
 
@@ -241,6 +243,7 @@ public class ValidationControllerImpl implements ValidationController {
       LOG.info("Executing validation for datasetId {} with jobId {}", datasetId, jobId);
       if (dataflow!=null && dataflow.getBigData()!=null && dataflow.getBigData()) {
         S3PathResolver s3PathResolver = new S3PathResolver(dataset.getDataflowId(), dataset.getDataProviderId()!=null ? dataset.getDataProviderId() : 0, dataset.getId(), S3_VALIDATION);
+        s3PathResolver.setPreparationCode(preparationCode);
         //check if there are tables converted to Iceberg and throw error
         List<TableSchemaIdNameVO> tables = datasetSchemaController.getTableSchemasIds(dataset.getId(), dataflow.getId(), dataset.getDataProviderId());
         String datasetSchemaId = dataset.getDatasetSchema();
@@ -266,7 +269,7 @@ public class ValidationControllerImpl implements ValidationController {
             throw new Exception("Can not validate for jobId " + jobId + " because there is an iceberg table");
           }
         }
-        validationHelper.executeValidationDL(datasetId, uuid, released, s3PathResolver, createParquetWithSQL, validateAsProviderCode);
+        validationHelper.executeValidationDL(datasetId, uuid, released, s3PathResolver, createParquetWithSQL, validateAsProviderCode, preparationCode);
       } else {    //check locks for Citus
 
           if (dataSetControllerZuul.getEditingStatus(datasetId).getIsEditing()) {
@@ -496,7 +499,9 @@ public class ValidationControllerImpl implements ValidationController {
                   required = false) String tableFilter,
           @ApiParam(value = "The filtered field value used in the retrieval process",
                   required = false) @RequestParam(value = "fieldValueFilter",
-                  required = false) String fieldValueFilter) {
+                  required = false) String fieldValueFilter,
+          @ApiParam(type = "String", value = "Preparation Code", example = "0A2")
+          @RequestParam(value = "code", required = false) String preparationCode) {
     if (datasetId == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
               EEAErrorMessage.DATASET_INCORRECT_ID);
@@ -515,7 +520,7 @@ public class ValidationControllerImpl implements ValidationController {
     }
     try {
       validations = loadValidationsHelperDL.getListGroupValidationsDL(datasetId, pageable,
-              levelErrorsFilter, typeEntitiesFilter, tableFilter, fieldValueFilter, shortCode, headers, asc);
+              levelErrorsFilter, typeEntitiesFilter, tableFilter, fieldValueFilter, shortCode, headers, asc, preparationCode);
     } catch (EEAException e) {
       LOG.error(e.getMessage());
     } catch (Exception e) {
@@ -537,8 +542,11 @@ public class ValidationControllerImpl implements ValidationController {
   @PostMapping(value = "/export/{datasetId}")
   @ApiOperation(value = "Export all the validations for a given dataset grouped by code",
       hidden = true)
-  public void exportValidationDataCSV(@ApiParam(value = "Dataset id used in the export process",
-      example = "1") @PathVariable("datasetId") Long datasetId) {
+  public void exportValidationDataCSV(
+          @ApiParam(value = "Dataset id used in the export process", example = "1")
+          @PathVariable("datasetId") Long datasetId,
+          @ApiParam(type = "String", value = "Preparation Code", example = "0A2")
+          @RequestParam(value = "code", required = false) String preparationCode) {
     LOG.info("Export dataset validation data from datasetId {}, with type .csv", datasetId);
     UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
     userNotificationContentVO.setDatasetId(datasetId);
@@ -546,7 +554,7 @@ public class ValidationControllerImpl implements ValidationController {
         userNotificationContentVO);
 
     try {
-      validationService.exportValidationFile(datasetId);
+      validationService.exportValidationFile(datasetId, preparationCode);
     } catch (EEAException | IOException e) {
       LOG.error("Error exporting validation data from the dataset {}.  Message: {}",
           datasetId, e.getMessage());
@@ -576,12 +584,14 @@ public class ValidationControllerImpl implements ValidationController {
           example = "1") @PathVariable Long datasetId,
       @ApiParam(value = "Filename for the file that was generated during the export process.",
           example = "dataset-3-validations") @RequestParam String fileName,
+      @ApiParam(type = "String", value = "Preparation Code", example = "0A2")
+      @RequestParam(value = "code", required = false) String preparationCode,
       HttpServletResponse response) {
     try {
       LOG.info("Downloading file generated from export dataset. DatasetId {} Filename {}",
           datasetId, fileName);
       File file =
-          validationService.downloadExportedFile(datasetId, FilenameUtils.getName(fileName));
+          validationService.downloadExportedFile(datasetId, FilenameUtils.getName(fileName), preparationCode);
       response.setHeader(HttpHeaders.CONTENT_DISPOSITION,
           "attachment; filename=" + FilenameUtils.getName(fileName));
 

@@ -6,6 +6,7 @@ import com.google.common.collect.Lists;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericRecord;
+import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.fs.Path;
 import org.apache.parquet.avro.AvroParquetWriter;
 import org.apache.parquet.hadoop.ParquetWriter;
@@ -116,11 +117,13 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
 
     @Override
     public void execute(Long dataflowId, Long datasetId, String datasetSchemaId, String tableName, String tableSchemaId, String ruleId, Long dataProviderId,
-                        Long taskId, boolean createParquetWithSQL) throws DremioValidationException {
+                        Long taskId, boolean createParquetWithSQL, String preparationCode) throws DremioValidationException {
         try {
             //if the dataset to validate is of reference type, then the table path should be changed
+            //TODO Fix the resolver
             S3PathResolver dataTableResolver = new S3PathResolver(dataflowId, dataProviderId != null ? dataProviderId : 0, datasetId, tableName);
-            String path = getPath(datasetId);
+            dataTableResolver.setPreparationCode(preparationCode);
+            String path = getPath(datasetId, preparationCode);
 
             // Draw validateAsProviderCode from task json if exists.
             String validateAsProviderCode = resolveValidateAsProviderCodeFromTask(taskId);
@@ -138,6 +141,7 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
 
             String tablePath = s3Service.getTableAsFolderQueryPath(dataTableResolver, path);
             S3PathResolver validationResolver = new S3PathResolver(dataflowId, dataProviderId != null ? dataProviderId : 0, datasetId, S3_VALIDATION);
+            validationResolver.setPreparationCode(preparationCode);
             RuleVO ruleVO = rulesService.findRule(datasetSchemaId, ruleId);
             deleteRuleFolderIfExists(validationResolver, ruleVO);
             int startIndex = ruleVO.getWhenConditionMethod().indexOf(OPEN_PARENTHESIS);
@@ -199,12 +203,16 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
         }
     }
 
-    private String getPath(Long datasetId) {
+    private String getPath(Long datasetId, String preparationCode) {
         DataSetMetabaseVO dataset = dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
         String path;
         if (dataset.getDatasetTypeEnum().equals(DatasetTypeEnum.REFERENCE)) {
             path = S3_DATAFLOW_REFERENCE_QUERY_PATH;
-        } else {
+        }
+        else if (StringUtils.isNotBlank(preparationCode)) {
+            path = S3_PREPARATION_TABLE_AS_FOLDER_QUERY_PATH;
+        }
+        else {
             path = S3_TABLE_AS_FOLDER_QUERY_PATH;
         }
         return path;
@@ -252,7 +260,13 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
         int ruleIdLength = ruleVO.getRuleId().length();
         String ruleFolderName = ruleVO.getShortCode() + DASH + ruleVO.getRuleId().substring(ruleIdLength-3, ruleIdLength);
         validationResolver.setFilename(ruleFolderName);
-        s3Helper.deleteFolder(validationResolver, S3_TABLE_NAME_PATH);
+        if (StringUtils.isNotBlank(validationResolver.getPreparationCode())) {
+            s3Helper.deleteFolder(validationResolver, S3_PREPARATION_TABLE_NAME_PATH);
+        }
+        else {
+            s3Helper.deleteFolder(validationResolver, S3_TABLE_NAME_PATH);
+        }
+
     }
 
     /**
@@ -345,7 +359,7 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
     }
 
     private String getModifiedQuery(S3PathResolver dataTableResolver, String valQuery, String replace) {
-        valQuery = valQuery.replace("from " + s3Service.getTableAsFolderQueryPath(dataTableResolver, getPath(dataTableResolver.getDatasetId())) + " where record_id in " + replace, "");
+        valQuery = valQuery.replace("from " + s3Service.getTableAsFolderQueryPath(dataTableResolver, getPath(dataTableResolver.getDatasetId(), dataTableResolver.getPreparationCode())) + " where record_id in " + replace, "");
         return valQuery;
     }
 
@@ -515,7 +529,7 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
         });
         S3PathResolver origTableTableResolver = new S3PathResolver(dataflowId, dataProviderId != null ? dataProviderId : 0, datasetIdOrigin, originTableSchema.getNameTableSchema());
         //if the dataset to validate is of reference type, then the table path should be changed
-        String originTablePath = s3Service.getTableAsFolderQueryPath(origTableTableResolver, getPath(datasetId));
+        String originTablePath = s3Service.getTableAsFolderQueryPath(origTableTableResolver, getPath(datasetId, origTableTableResolver.getPreparationCode()));
         S3PathResolver referTableResolver = new S3PathResolver(dataflowId, dataProviderId != null ? dataProviderId : 0, datasetIdReferenced, referencedTableSchema.getNameTableSchema());
         String referTablePath = s3Service.getTablePathByDatasetType(dataflowId, datasetIdReferenced, referencedTableSchema.getNameTableSchema(), referTableResolver);
         recordIds =  (List<String>) method.invoke(object, originTablePath, referTablePath, origFieldNames, referFieldNames, integrityVO.getIsDoubleReferenced());  //checkIntegrityConstraint

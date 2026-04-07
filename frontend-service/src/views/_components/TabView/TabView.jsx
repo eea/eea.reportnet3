@@ -36,6 +36,8 @@ export const TabView = ({
   isErrorDialogVisible,
   isDataflowOpen,
   isDesignDatasetEditorRead,
+  isReordering,
+  isTableLockedDueToData,
   onTabAdd,
   onTabAddCancel,
   onTabBlur,
@@ -215,7 +217,6 @@ export const TabView = ({
     );
     const id = `${idx}_header_${index}`;
     const ariaControls = `${idx}_content_${index}`;
-
     return (
       !(isDataflowOpen && isDesignDatasetEditorRead && tab.props.addTab) && (
         <Tab
@@ -244,6 +245,8 @@ export const TabView = ({
           isEditingEnabled={isEditingEnabled}
           isIcebergCreated={isIcebergCreated}
           isNavigationHidden={isNavigationHidden}
+          isReordering={isReordering}
+          isTableLockedDueToData={tab.props.isTableLockedDueToData}
           key={id}
           leftIcon={tab.props.leftIcon}
           manualEdit={tab.props.manualEdit}
@@ -253,7 +256,7 @@ export const TabView = ({
           numberOfFields={tab.props.numberOfFields}
           onTabAddCancel={onTabAddCancel}
           onTabBlur={onTabBlur}
-          onTabDeleteClick={!isEditingEnabled ? onTabDeleteClicked : undefined}
+          onTabDeleteClick={!isEditingEnabled || !isTableLockedDueToData ? onTabDeleteClicked : undefined}
           onTabDragAndDrop={onTabDragAndDrop}
           onTabDragAndDropStart={onTabDragAndDropStart}
           onTabEditingHeader={onTabEditingHeader}

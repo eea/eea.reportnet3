@@ -19,8 +19,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-import static org.eea.utils.LiteralConstants.S3_TABLE_AS_FOLDER_QUERY_PATH;
-import static org.eea.utils.LiteralConstants.S3_VALIDATION;
+import static org.eea.utils.LiteralConstants.*;
 
 @ImportDataLakeCommons
 @Service
@@ -70,7 +69,13 @@ public class DataLakeValidationServiceImpl implements DataLakeValidationService 
         hasIdRuleQuery.append("SELECT count(column_name) as column_count ");
         hasIdRuleQuery.append(" FROM INFORMATION_SCHEMA.COLUMNS ");
         hasIdRuleQuery.append("        WHERE table_schema = '");
-        String s3path = s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
+        final String s3path;
+        if (StringUtils.isNotBlank(s3PathResolver.getPreparationCode())) {
+            s3path = s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_PREPARATION_TABLE_AS_FOLDER_QUERY_PATH);
+        }
+        else {
+            s3path = s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
+        }
         hasIdRuleQuery.append(s3path.replace("\"", "").replace(".validation",""));
         hasIdRuleQuery.append("' AND table_name = 'validationTest' ");
         hasIdRuleQuery.append("  AND column_name = 'id_rule'");
@@ -84,7 +89,13 @@ public class DataLakeValidationServiceImpl implements DataLakeValidationService 
         } else {
             validationQuery.append("SELECT  MIN(v.validation_level) as levelError, MIN(v.validation_area) as typeEntity, MIN(table_name) as tableName, qc_code as shortCode, MIN(field_name) as fieldName, MIN(message) as message, count(*) as numberOfRecords FROM ");
         }
-        validationQuery.append(s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH));
+
+        if (StringUtils.isNotBlank(s3PathResolver.getPreparationCode())) {
+            validationQuery.append(s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_PREPARATION_TABLE_AS_FOLDER_QUERY_PATH));
+        }
+        else {
+            validationQuery.append(s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH));
+        }
         validationQuery.append(" v where v.pk is not null ");
         String shortCodeFilter = shortCodeFilter(shortCode);
         String partLevelError = levelErrorFilterDL(levelErrorsFilter);

@@ -50,6 +50,9 @@ public final class LiteralConstants {
   /** The Constant DATASET_ID: {@value}. */
   public static final String DATASETID = "datasetId";
 
+  /** The Constant PREPARATION_CODE: {@value}. */
+  public static final String PREPARATION_CODE = "preparationCode";
+
   /** The Constant TECH_ACCEPT_MESSAGE_SUBJECT: {@value}. */
   public static final String TECH_ACCEPT_MESSAGE_SUBJECT = "%s technical feedback for %s";
 
@@ -540,6 +543,10 @@ public final class LiteralConstants {
   public static final String PUBLIC_HEADER = "Public";
 
   public static final String ETL_IMPORT_ATTACHMENTS_FOLDER = "attachments";
+
+  public static final String S3_PREPARATION_FOLDER_PATH = "%s/%s/%s/preparation/%s";
+
+  public static final String S3_PREPARATION_TABLE_NAME_PATH = "%s/%s/%s/preparation/%s/%s/%s";
 
   public static final String S3_PREPARATION_TABLE_NAME_FOLDER_PATH = "%s/%s/%s/preparation/%s/%s";
 
