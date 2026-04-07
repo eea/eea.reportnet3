@@ -317,6 +317,8 @@ public final class LiteralConstants {
   /** The Constant S3_TABLE_NAME_VALIDATE_DC_PATH: {@value}. */
   public static final String S3_TABLE_NAME_VALIDATE_DC_PATH = "%s/collections/%s/current/validation/%s/%s/%s";
 
+  public static final String S3_SNAPSHOT_TABLE_NAME_VALIDATE_DC_PATH = "%s/%s/%s/snapshots/%s/validation";
+
   /** The Constant S3_TABLE_NAME_VALIDATE_DC_QUERY_PATH: {@value}. */
   public static final String S3_TABLE_NAME_VALIDATE_DC_QUERY_PATH = ".\"%s\".\"collections\".\"%s\".\"current\".\"%s_validate\".\"%s\".\"%s\"";
 

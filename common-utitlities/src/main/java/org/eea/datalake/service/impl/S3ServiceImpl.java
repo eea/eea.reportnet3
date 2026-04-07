@@ -147,6 +147,10 @@ public class S3ServiceImpl implements S3Service {
             case S3_TABLE_NAME_VALIDATE_DC_PATH:
                 path = String.format(path, dataflowFolder, dataCollectionFolder, dataProviderFolder, parquetFolder, fileName);
                 break;
+            case S3_SNAPSHOT_TABLE_NAME_VALIDATE_DC_PATH:
+                path = String.format(path, dataflowFolder, dataProviderFolder, datasetFolder,
+                        snapshotFolder);
+                break;
             case S3_EXPORT_QUERY_PATH:
                 path = S3_DEFAULT_BUCKET + String.format(path, dataflowFolder, dataCollectionFolder,
                     fileName);
