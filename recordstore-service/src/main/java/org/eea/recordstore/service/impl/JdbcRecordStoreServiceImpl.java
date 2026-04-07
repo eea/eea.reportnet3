@@ -2181,22 +2181,18 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       } else if (processVO.getProcessType().equals(ProcessTypeEnum.COPY_REFERENCE_DATASET.toString())) {
         taskType = TaskType.COPY_REFERENCE_DATASET_TASK;
       }
-      TaskVO task = new TaskVO(null, processId, ProcessStatusEnum.IN_QUEUE, taskType, new Date(), null, null,
-              json, 0, null);
-      task = taskService.saveTask(task);
-      LOG.info("Created task with id {} with idSnapshot {} and processId {}", task.getId(), idSnapshot, processId);
 
-      task.setStartingDate(new Date());
-      task.setStatus(ProcessStatusEnum.IN_PROGRESS);
-      task.setPod(serviceInstanceId);
+      Date dateNow = new Date();
+      TaskVO task = new TaskVO(null, processId, ProcessStatusEnum.IN_PROGRESS, taskType, dateNow, dateNow, null,
+              json, 0, serviceInstanceId);
 
       try {
+        LOG.info("Creating task status of task with id {} ith idSnapshot {} and processId {} to IN_PROGRESS", task.getId(), idSnapshot, processId);
         task = taskService.saveTask(task);
-        LOG.info("Updating task status of task with id {} ith idSnapshot {} and processId {} to IN_PROGRESS", task.getId(), idSnapshot, processId);
+        LOG.info("Created task status of task with id {} ith idSnapshot {} and processId {} to IN_PROGRESS", task.getId(), idSnapshot, processId);
       } catch (Exception er) {
-        LOG.error("Error updating task {}", task.getId());
-        task = taskService.saveTask(task);
-        LOG.info("Updating task status of task with id {} ith idSnapshot {} and processId {} to IN_PROGRESS", task.getId(), idSnapshot, processId);
+        LOG.error("Error creating task {} with Exception {} ", task.getId(), er);
+        throw er;
       }
 
       datasetSchema.getTableSchemas().stream()
