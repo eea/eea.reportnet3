@@ -45,7 +45,7 @@ export const DatasetConfig = {
     '/dataset/exportPublicFile/dataflow/{:dataflowId}/dataProvider/{:dataProviderId}?fileName={:fileName}',
   downloadExportDatasetFile: '/dataset/{:datasetId}/downloadFile?fileName={:fileName}',
   downloadExportDatasetFileDL:
-    '/dataset/{:datasetId}/downloadFileDL?fileName={:fileName}&preparationCode={:preparationCode}',
+    '/dataset/{:datasetId}/downloadFileDL?fileName={:fileName}&code={:code}',
   downloadExportFile: '/fme/downloadExportFile?datasetId={:datasetId}&fileName={:fileName}',
   downloadExportFileWithProviderId:
     '/fme/downloadExportFile?datasetId={:datasetId}&fileName={:fileName}&providerId={:providerId}',
@@ -57,7 +57,7 @@ export const DatasetConfig = {
     '/dataset/v1/{:datasetId}/record/{:recordId}/geometry?fieldId={:fieldId}&dataflowId={:dataflowId}&idTableSchema={:tableSchemaId}&providerId={:providerId}',
   downloadPublicReferenceDatasetFileData: '/dataset/exportPublicFile/dataflow/{:dataflowId}?fileName={:fileName}',
   downloadTableData: '/dataset/{:datasetId}/downloadFile?fileName={:fileName}',
-  downloadTableDataDL: '/dataset/{:datasetId}/downloadFileDL?fileName={:fileName}&preparationCode={:preparationCode}',
+  downloadTableDataDL: '/dataset/{:datasetId}/downloadFileDL?fileName={:fileName}&code={:code}',
   downloadImportedFile:
     '/dataset/download-imported-file?fileName={:fileName}&datasetId={:datasetId}&dataflowId={:dataflowId}',
   exportDatasetData: '/dataset/{:datasetId}/exportDatasetFile?mimeType={:fileType}',
