@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import java.sql.ResultSet;
 import java.util.*;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -41,17 +42,31 @@ public class DremioSQLValidationUtils {
         instance = this; // 🔹 Spring will inject this instance (with @Value loaded)
     }
 
+    /**
+     * Will add a limit clause to the query unless it already utilizes one.
+     * @param sql
+     * @return String
+     */
+    private String appendLimitIfMissing(String sql) {
+        // Regex checks for a LIMIT clause at the.
+        Pattern LIMIT_PATTERN = Pattern.compile("\\blimit\\b\\s+\\d+(\\s*,\\s*\\d+)?\\s*$", Pattern.CASE_INSENSITIVE);
+        if (LIMIT_PATTERN.matcher(sql).find()) {
+            return sql;
+        }
+        return sql + " limit " + maxErrors;
+    }
+
     public List<String> isSQLSentenceWithCode(String sql) {
+        String finalSql = appendLimitIfMissing(sql);
         StringBuilder query = new StringBuilder();
-        sql = sql.concat(" limit " + maxErrors);
-        query.append("select record_id from(").append(sql).append(")");
+        query.append("select record_id from (").append(finalSql).append(")");
         return dremioJdbcTemplate.queryForList(query.toString(), String.class);
     }
 
     public List<Map<String, Object>> isSQLSentenceWithCodeMap(String sql) {
+        String finalSql = appendLimitIfMissing(sql);
         StringBuilder query = new StringBuilder();
-        sql = sql.concat(" limit " + maxErrors);
-        query.append("select * from(").append(sql).append(")");
+        query.append("select * from (").append(finalSql).append(")");
         return dremioJdbcTemplate.queryForList(query.toString());
     }
 
