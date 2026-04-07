@@ -545,7 +545,7 @@ public interface DatasetService {
    * @return the file
    * @throws EEAException the EEA exception
    */
-    File downloadExportedFileDL(Long datasetId, String fileName)
+    File downloadExportedFileDL(Long datasetId, String fileName, String preparationCode)
         throws EEAException;
 
     /**

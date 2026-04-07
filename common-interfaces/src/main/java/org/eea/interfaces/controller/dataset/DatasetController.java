@@ -877,7 +877,8 @@ public interface DatasetController {
    */
   @GetMapping(value = "/{datasetId}/downloadFileDL",
         produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
-  void downloadFileDL(@PathVariable Long datasetId, @RequestParam String fileName, HttpServletResponse response);
+  void downloadFileDL(@PathVariable Long datasetId, @RequestParam String fileName, HttpServletResponse response,
+                      @RequestParam(value = "code", required = false) String preparationCode);
 
     /**
    * Update check view.

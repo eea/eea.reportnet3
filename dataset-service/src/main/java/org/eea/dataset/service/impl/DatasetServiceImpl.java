@@ -3018,10 +3018,15 @@ public class DatasetServiceImpl implements DatasetService {
    * @throws EEAException the EEA exception
    */
   @Override
-  public File downloadExportedFileDL(Long datasetId, String fileName)
+  public File downloadExportedFileDL(Long datasetId, String fileName, String preparationCode)
       throws EEAException {
     // we compound the route and create the file
-    File file = new File(new File(exportDLPath, "dataset-" + datasetId), FilenameUtils.getName(fileName));
+    File file;
+    if (StringUtils.isNotBlank(preparationCode)) {
+      file = new File(new File(exportDLPath, "dataset-" + datasetId + "/preparation/" + preparationCode), FilenameUtils.getName(fileName));
+    } else {
+      file = new File(new File(exportDLPath, "dataset-" + datasetId), FilenameUtils.getName(fileName));
+    }
 
     LOG.info("File {} ", file);
     if (!file.exists()) {

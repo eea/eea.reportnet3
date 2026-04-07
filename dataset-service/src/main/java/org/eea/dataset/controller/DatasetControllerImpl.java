@@ -3068,11 +3068,13 @@ public class DatasetControllerImpl implements DatasetController {
   public void downloadFileDL(
           @ApiParam(type = "Long", value = "Dataset Id", example = "0") @PathVariable Long datasetId,
           @ApiParam(type = "String", value = "File name", example = "file.csv") @RequestParam
-          String fileName, @ApiParam(value = "response") HttpServletResponse response) {
+          String fileName, @ApiParam(value = "response") HttpServletResponse response,
+          @ApiParam(type = "String", value = "Preparation Code", example = "Austria_a") @RequestParam(
+                  value = "code", required = false) String preparationCode) {
     try {
       LOG.info("Downloading file generated from export dataset. DatasetId {} Filename {}",
               datasetId, fileName);
-      File file = datasetService.downloadExportedFileDL(datasetId, fileName);
+      File file = datasetService.downloadExportedFileDL(datasetId, fileName, preparationCode);
       LOG.info("Successfully downloaded file generated from export dataset. DatasetId {} Filename {}",
               datasetId, fileName);
       response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
