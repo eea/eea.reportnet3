@@ -864,7 +864,7 @@ public class FileTreatmentHelper implements DisposableBean {
         File fileFolder;
         if (StringUtils.isNotBlank(preparationCode)) {
             fileFolder = new File(exportDLPath,
-                    "dataset-" + datasetId + preparationCode);
+                    "dataset-" + datasetId + "/" + preparationCode);
         } else {
             fileFolder = new File(exportDLPath, "dataset-" + datasetId);
         }
@@ -886,7 +886,7 @@ public class FileTreatmentHelper implements DisposableBean {
                     List<String> headers = getHeadersForFileDL(includeCountryCode, tableSchemaVO);
                     File csvFile;
                     if (StringUtils.isNotBlank(preparationCode)) {
-                        csvFile = new File(new File(exportDLPath, "dataset-" + dataset.getId() + preparationCode), tableName + CSV_TYPE);
+                        csvFile = new File(new File(exportDLPath, "dataset-" + dataset.getId() + "/" + preparationCode), tableName + CSV_TYPE);
                     } else {
                         csvFile = new File(new File(exportDLPath, "dataset-" + dataset.getId()), tableName + CSV_TYPE);
                     }
@@ -1394,7 +1394,7 @@ public class FileTreatmentHelper implements DisposableBean {
                 File datasetFolder;
                 if (StringUtils.isNotBlank(preparationCode)) {
                     datasetFolder = new File(exportDLPath,
-                            "dataset-" + datasetId + preparationCode);
+                            "dataset-" + datasetId + "/" + preparationCode);
                 } else {
                     datasetFolder = new File(exportDLPath, "dataset-" + datasetId);
                 }
@@ -1402,7 +1402,7 @@ public class FileTreatmentHelper implements DisposableBean {
                 datasetFolder.mkdirs();
                 File fileWriteZip;
                 if (StringUtils.isNotBlank(preparationCode)) {
-                    fileWriteZip = new File(new File(exportDLPath, "dataset-" + datasetId  + preparationCode), dataset.getDataSetName() + ZIP_TYPE);
+                    fileWriteZip = new File(new File(exportDLPath, "dataset-" + datasetId  + "/" + preparationCode), dataset.getDataSetName() + ZIP_TYPE);
                 } else {
                     fileWriteZip = new File(new File(exportDLPath, "dataset-" + datasetId), dataset.getDataSetName() + ZIP_TYPE);
                 }
