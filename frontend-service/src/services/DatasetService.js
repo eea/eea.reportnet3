@@ -167,8 +167,8 @@ export const DatasetService = {
   downloadExportDatasetFile: async (datasetId, fileName) =>
     await DatasetRepository.downloadExportDatasetFile(datasetId, fileName),
 
-  downloadExportDatasetFileDL: async (datasetId, fileName) =>
-    await DatasetRepository.downloadExportDatasetFileDL(datasetId, fileName),
+  downloadExportDatasetFileDL: async (datasetId, fileName, code) =>
+    await DatasetRepository.downloadExportDatasetFileDL(datasetId, fileName, code),
 
   downloadExportFile: async (datasetId, fileName, providerId) =>
     await DatasetRepository.downloadExportFile(datasetId, fileName, providerId),
@@ -207,7 +207,8 @@ export const DatasetService = {
 
   downloadTableData: async (datasetId, fileName) => await DatasetRepository.downloadTableData(datasetId, fileName),
 
-  downloadTableDataDL: async (datasetId, fileName) => await DatasetRepository.downloadTableDataDL(datasetId, fileName),
+  downloadTableDataDL: async (datasetId, fileName, code) =>
+    await DatasetRepository.downloadTableDataDL(datasetId, fileName, code),
 
   getAlignmentBetween: async (datasetId, selectedRepresentativesCode, selectedTable) =>
     await DatasetRepository.getAlignmentBetween(datasetId, selectedRepresentativesCode, selectedTable),

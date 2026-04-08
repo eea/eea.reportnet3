@@ -259,7 +259,8 @@ export const GlobalNotifications = ({ bigData }) => {
         const { data } = bigData
           ? await DatasetService.downloadExportDatasetFileDL(
               notification.content.datasetId,
-              encodeURIComponent(downloadFileName)
+              encodeURIComponent(downloadFileName),
+              code
             )
           : await DatasetService.downloadExportDatasetFile(
               notification.content.datasetId,
@@ -297,7 +298,7 @@ export const GlobalNotifications = ({ bigData }) => {
 
         const downloadFileName = `${notification.content.fileName}.${notification.content.mimeType}`;
         const { data } = bigData
-          ? await DatasetService.downloadTableDataDL(notification.content.datasetId, downloadFileName)
+          ? await DatasetService.downloadTableDataDL(notification.content.datasetId, downloadFileName, code)
           : await DatasetService.downloadTableData(notification.content.datasetId, downloadFileName);
 
         if (data.size !== 0) {

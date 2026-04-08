@@ -113,9 +113,9 @@ export const DatasetRepository = {
       url: getUrl(DatasetConfig.downloadExportDatasetFile, { datasetId, fileName })
     }),
 
-  downloadExportDatasetFileDL: async (datasetId, fileName) =>
+  downloadExportDatasetFileDL: async (datasetId, fileName, code) =>
     await HTTPRequester.download({
-      url: getUrl(DatasetConfig.downloadExportDatasetFileDL, { datasetId, fileName })
+      url: getUrl(DatasetConfig.downloadExportDatasetFileDL, { datasetId, fileName, code })
     }),
 
   downloadExportFile: async (datasetId, fileName, providerId = null) =>
@@ -186,9 +186,9 @@ export const DatasetRepository = {
       url: getUrl(DatasetConfig.downloadTableData, { datasetId, fileName })
     }),
 
-  downloadTableDataDL: async (datasetId, fileName) =>
+  downloadTableDataDL: async (datasetId, fileName, code) =>
     await HTTPRequester.download({
-      url: getUrl(DatasetConfig.downloadTableDataDL, { datasetId, fileName })
+      url: getUrl(DatasetConfig.downloadTableDataDL, { datasetId, fileName, code })
     }),
 
   downloadTableDefinitions: async datasetSchemaId =>
