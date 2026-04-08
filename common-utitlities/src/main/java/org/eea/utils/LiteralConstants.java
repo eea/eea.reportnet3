@@ -297,6 +297,9 @@ public final class LiteralConstants {
   /** The Constant S3_TABLE_NAME_WITH_PARQUET_FOLDER_PATH: {@value}. */
   public static final String S3_TABLE_NAME_WITH_PARQUET_FOLDER_PATH = "%s/%s/%s/current/%s/%s/%s";
 
+  /** The Constant S3_PREPARATION_TABLE_NAME_WITH_PARQUET_FOLDER_PATH: {@value}. */
+  public static final String S3_PREPARATION_TABLE_NAME_WITH_PARQUET_FOLDER_PATH = "%s/%s/%s/preparation/%s/%s/%s";
+
   /** The Constant S3_TABLE_NAME_FOLDER_PATH: {@value}. */
   public static final String S3_TABLE_NAME_FOLDER_PATH = "%s/%s/%s/current/%s";
 

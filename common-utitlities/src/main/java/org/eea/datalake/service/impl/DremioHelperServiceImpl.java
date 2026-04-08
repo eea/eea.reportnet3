@@ -24,13 +24,11 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import  java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.Callable;
-import java.util.stream.Collectors;
 
 import static org.eea.utils.LiteralConstants.*;
 
@@ -97,7 +95,8 @@ public class DremioHelperServiceImpl implements DremioHelperService {
                 itemPosition = 4;
             } else if (S3_EU_SNAPSHOT_ROOT_PATH.equals(path)) {
                 itemPosition = 5;
-            } else if (S3_PREPARATION_TABLE_AS_FOLDER_QUERY_PATH.equals(path) || S3_PREPARATION_TABLE_NAME_FOLDER_PATH.equals(path)) {
+            } else if (S3_PREPARATION_TABLE_NAME_FOLDER_PATH.equals(path)
+            || S3_PREPARATION_TABLE_AS_FOLDER_QUERY_PATH.equals(path)) {
                 itemPosition = 7;
             } else {
                 itemPosition = 6; //this is for S3_TABLE_NAME_FOLDER_PATH
@@ -401,11 +400,13 @@ public class DremioHelperServiceImpl implements DremioHelperService {
     @Override
     public long getRowCount(String tablePath) throws Exception {
         String headerName = "myRowCount";
+
         String query = String.format(
-            "SELECT COUNT(*) AS %s FROM %s ",
-            headerName,
-            tablePath
+                "SELECT 1 AS %s FROM %s LIMIT 1",
+                headerName,
+                tablePath
         );
+
         try {
             // Extract and return the row count
             List<LinkedHashMap<String,Object>> rows =  (List<LinkedHashMap<String,Object>>) executeSqlStatementGet(query).get("rows");

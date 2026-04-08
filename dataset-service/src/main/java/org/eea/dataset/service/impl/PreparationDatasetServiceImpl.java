@@ -15,10 +15,10 @@ import org.eea.datalake.service.model.S3PathResolver;
 import org.eea.dataset.mapper.PreparationDatasetMapper;
 import org.eea.dataset.persistence.metabase.domain.PreparationDataset;
 import org.eea.dataset.persistence.metabase.repository.PreparationDatasetRepository;
+import org.eea.dataset.service.CreateEmptyTables;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.PreparationDatasetService;
-import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.RepresentativeController;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
@@ -65,6 +65,7 @@ public class PreparationDatasetServiceImpl implements PreparationDatasetService 
     private final KafkaSenderUtils kafkaSenderUtils;
     private final PreparationDatasetMapper preparationDatasetMapper;
     private final RedisLockService redisLockService;
+    private final CreateEmptyTables createEmptyTables;
 
     @Autowired
     public PreparationDatasetServiceImpl(PreparationDatasetRepository preparationDatasetRepository,
@@ -75,7 +76,9 @@ public class PreparationDatasetServiceImpl implements PreparationDatasetService 
                                          RepresentativeController.RepresentativeControllerZuul representativeControllerZuul,
                                          KafkaSenderUtils kafkaSenderUtils,
                                          PreparationDatasetMapper preparationDatasetMapper,
-                                         RedisLockService redisLockService) {
+                                         RedisLockService redisLockService,
+                                         CreateEmptyTables createEmptyTables
+    ) {
         this.preparationDatasetRepository = preparationDatasetRepository;
         this.dremioHelperService = dremioHelperService;
         this.datasetMetabaseService = datasetMetabaseService;
@@ -86,6 +89,7 @@ public class PreparationDatasetServiceImpl implements PreparationDatasetService 
         this.kafkaSenderUtils = kafkaSenderUtils;
         this.preparationDatasetMapper = preparationDatasetMapper;
         this.redisLockService = redisLockService;
+        this.createEmptyTables = createEmptyTables;
     }
 
     @Override
@@ -106,7 +110,7 @@ public class PreparationDatasetServiceImpl implements PreparationDatasetService 
         }
 
         List<PreparationDatasetVO> preparationDatasetVOS = entities.stream().map(preparationDatasetMapper::entityToClass).collect(Collectors.toList());
-        String lockKey = LockEnum.PREPERATION_DATASET_CREATION.getValue() + "_" + dataflowId + "_" + providerId;
+        String lockKey = LockEnum.PREPARATION_DATASET_CREATION.getValue() + "_" + dataflowId + "_" + providerId;
         Map<String, String> activeLocks = redisLockService.listActiveLocks(lockKey);
 
         return new PreparationDatasetResponseVO(preparationDatasetVOS, activeLocks);
@@ -204,8 +208,8 @@ public class PreparationDatasetServiceImpl implements PreparationDatasetService 
                 .providerId(providerId)
                 .build();
 
-        String lockKey = LockEnum.PREPERATION_DATASET_CREATION.getValue() + "_" + dataflowId + "_" + providerId;
-        String lockValue = LockEnum.PREPERATION_DATASET_CREATION.getValue() + "_" + dataflowId + "_" + providerId + "_" + UUID.randomUUID();
+        String lockKey = LockEnum.PREPARATION_DATASET_CREATION.getValue() + "_" + dataflowId + "_" + providerId;
+        String lockValue = LockEnum.PREPARATION_DATASET_CREATION.getValue() + "_" + dataflowId + "_" + providerId + "_" + UUID.randomUUID();
         if (!redisLockService.checkAndAcquireLock(lockKey, lockValue, prepSetCreationExpirationTimeMs)) {
             Map<String, String> activeLocks = redisLockService.listActiveLocks(lockKey);
             kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.ANOTHER_PREPARATION_DATASET_CREATION_IS_RUNNING_FAILED_EVENT, null, notificationVO);
@@ -310,6 +314,16 @@ public class PreparationDatasetServiceImpl implements PreparationDatasetService 
                 continue;
             }
 
+            // if folder exists in dremio, check how many records there are to copy
+            long rowCountOfSourceTable = dremioHelperService.getRowCount(sourceParentTableDremioQueryPathString);
+            if (rowCountOfSourceTable == 0) {
+                createEmptyTables.runCreationForSpecificTableSchema(parentDataSetMetabaseVO, parentTable.getIdTableSchema(), preparationCode);
+                // skip everything else after creating an empty table
+                continue;
+            }
+
+            // since there are data to parent dataset, proceed to copy the parent table to the preparation path
+
             DataProviderVO providerMetadata = representativeControllerZuul.findDataProviderById(providerId);
             String providerCode = "'" + providerMetadata.getCode() + "'";
 
@@ -350,6 +364,7 @@ public class PreparationDatasetServiceImpl implements PreparationDatasetService 
             String dremioProcessId = dremioHelperService.executeSqlStatement(String.valueOf(queryToCreatePrefilledTable));
             dremioHelperService.checkIfDremioProcessFinishedSuccessfully(String.valueOf(queryToCreatePrefilledTable), dremioProcessId, null);
             dremioHelperService.refreshTableMetadataAndPromote(null, targetPreparationTableDremioQueryPathString, targetPreparationTableS3FolderPath, parentTableName);
+            // TODO: put try catch if needed, when `refreshTableMetadataAndPromote` throwing exception just demote-promote from recovery again
         }
     }
 
