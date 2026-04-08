@@ -73,6 +73,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -334,21 +336,6 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   }
 
   /**
-   * Delete group and remove user.
-   *
-   * @param datasetId the dataset id
-   * @param resourceTypeEnum the resource type enum
-   */
-  @Override
-  public void deleteGroup(Long datasetId, ResourceTypeEnum resourceTypeEnum) {
-    // We find all types of data of this schema and delete it
-    List<ResourceInfoVO> resourceCustodian = resourceManagementControllerZull
-            .getGroupsByIdResourceType(datasetId, ResourceTypeEnum.DATA_SCHEMA);
-    resourceManagementControllerZull.deleteResource(resourceCustodian);
-    LOG.info("Deleted group for datasetId {}", datasetId);
-  }
-
-  /**
    * Gets the data schema by id.
    *
    * @param dataschemaId the dataschema id
@@ -356,6 +343,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * @return the data schema by id
    */
   @Override
+  @Cacheable(value = "dataSchema", key = "#dataschemaId")
   public DataSetSchemaVO getDataSchemaById(String dataschemaId) {
 
     Optional<DataSetSchema> dataschema = schemasRepository.findById(new ObjectId(dataschemaId));
@@ -368,6 +356,21 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     }
 
     return dataSchemaVO;
+  }
+
+  /**
+   * Delete group and remove user.
+   *
+   * @param datasetId the dataset id
+   * @param resourceTypeEnum the resource type enum
+   */
+  @Override
+  public void deleteGroup(Long datasetId, ResourceTypeEnum resourceTypeEnum) {
+    // We find all types of data of this schema and delete it
+    List<ResourceInfoVO> resourceCustodian = resourceManagementControllerZull
+            .getGroupsByIdResourceType(datasetId, ResourceTypeEnum.DATA_SCHEMA);
+    resourceManagementControllerZull.deleteResource(resourceCustodian);
+    LOG.info("Deleted group for datasetId {}", datasetId);
   }
 
   /**
@@ -450,6 +453,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    */
   @Override
   @Transactional
+  @CacheEvict(value = "dataSchema", key = "#schemaId")
   public void deleteDatasetSchema(String schemaId, Long datasetId) {
     // we delete the integrity rules associated with this dataset and delete the integrity in mongo
     rulesControllerZuul.deleteDatasetRuleAndIntegrityByDatasetSchemaId(schemaId, datasetId);
@@ -492,6 +496,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    */
   @Override
   @Transactional
+  @CacheEvict(value = "dataSchema", key = "#idSchema")
   public void replaceSchema(String idSchema, DataSetSchema schema, Long idDataset,
                             Long idSnapshot, String processId) {
     schemasRepository.deleteDatasetSchemaById(idSchema);
@@ -512,6 +517,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * @return the table schema VO
    */
   @Override
+  @CacheEvict(value = "dataSchema", key = "#id")  // id = datasetSchemaId here
   public TableSchemaVO createTableSchema(String id, TableSchemaVO tableSchemaVO, Long datasetId) throws EEAException {
 
     ObjectId tableSchemaId = new ObjectId();
@@ -566,6 +572,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * @throws EEAException the EEA exception
    */
   @Override
+  @CacheEvict(value = "dataSchema", allEntries = true)
   public void updateTableSchema(Long datasetId, TableSchemaVO tableSchemaVO, Boolean updateMaterializedViews) throws EEAException {
 
     String datasetSchemaId = getDatasetSchemaId(datasetId);
@@ -638,6 +645,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    */
   @Override
   @Transactional
+  @CacheEvict(value = "dataSchema", key = "#datasetSchemaId")
   public void deleteTableSchema(String datasetSchemaId, String tableSchemaId, Long datasetId)
           throws EEAException {
     TableSchema tableSchema = getTableSchema(tableSchemaId, datasetSchemaId);
@@ -687,6 +695,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * @throws EEAException the EEA exception
    */
   @Override
+  @CacheEvict(value = "dataSchema", key = "#datasetSchemaId")
   public Boolean orderTableSchema(String datasetSchemaId, String tableSchemaId, Integer position)
           throws EEAException {
     Document tableSchema = schemasRepository.findTableSchema(datasetSchemaId, tableSchemaId);
@@ -709,6 +718,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * @throws EEAException the EEA exception
    */
   @Override
+  @CacheEvict(value = "dataSchema", key = "#datasetSchemaId")
   public String createFieldSchema(String datasetSchemaId, FieldSchemaVO fieldSchemaVO)
           throws EEAException {
 
@@ -777,6 +787,8 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * @throws EEAException the EEA exception
    */
   @Override
+  @Transactional
+  @CacheEvict(value = "dataSchema", key = "#datasetSchemaId")
   public DataType updateFieldSchema(String datasetSchemaId, FieldSchemaVO fieldSchemaVO,
                                     Long datasetId, boolean cloningOrImporting) throws EEAException {
 
@@ -1099,6 +1111,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * @throws EEAException the EEA exception
    */
   @Override
+  @CacheEvict(value = "dataSchema", key = "#datasetSchemaId")
   public boolean deleteFieldSchema(String datasetSchemaId, String fieldSchemaId, Long datasetId)
           throws EEAException {
 
@@ -1126,6 +1139,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * @throws EEAException the EEA exception
    */
   @Override
+  @CacheEvict(value = "dataSchema", key = "#datasetSchemaId")
   public Boolean orderFieldSchema(String datasetSchemaId, String fieldSchemaId, Integer position)
           throws EEAException {
     Document fieldSchema = schemasRepository.findFieldSchema(datasetSchemaId, fieldSchemaId);
@@ -1144,6 +1158,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * @param description the description
    */
   @Override
+  @CacheEvict(value = "dataSchema", key = "#datasetSchemaId")
   public void updateDatasetSchemaDescription(String datasetSchemaId, String description) {
     schemasRepository.updateDatasetSchemaDescription(datasetSchemaId, description);
   }
@@ -1156,6 +1171,8 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * @param availableInPublic the available in public
    */
   @Override
+  @Transactional
+  @CacheEvict(value = "dataSchema", key = "#datasetSchemaId")
   public void updateDatasetSchemaExportable(String datasetSchemaId, boolean availableInPublic) {
     schemasRepository.updateDatasetSchemaExportable(datasetSchemaId, availableInPublic);
   }
@@ -2317,6 +2334,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * @param webformVO the webform VO
    */
   @Override
+  @CacheEvict(value = "dataSchema", key = "#datasetSchemaId")
   public void updateWebform(String datasetSchemaId, WebformVO webformVO) {
     if (webformVO != null && StringUtils.isNotBlank(webformVO.getName())
             && StringUtils.isBlank(webformVO.getType())) {
@@ -2588,6 +2606,8 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * @param referenceDataset the reference dataset
    */
   @Override
+  @Transactional
+  @CacheEvict(value = "dataSchema", key = "#datasetSchemaId", beforeInvocation = true)
   public void updateReferenceDataset(Long datasetId, String datasetSchemaId,
                                      boolean referenceDataset) {
 
