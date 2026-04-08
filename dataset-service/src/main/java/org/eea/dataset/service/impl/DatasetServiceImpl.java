@@ -3025,7 +3025,7 @@ public class DatasetServiceImpl implements DatasetService {
     // we compound the route and create the file
     File file;
     if (StringUtils.isNotBlank(preparationCode)) {
-      file = new File(new File(exportDLPath, "dataset-" + datasetId + "/preparation/" + preparationCode), FilenameUtils.getName(fileName));
+      file = new File(new File(exportDLPath, "dataset-" + datasetId + preparationCode), FilenameUtils.getName(fileName));
     } else {
       file = new File(new File(exportDLPath, "dataset-" + datasetId), FilenameUtils.getName(fileName));
     }
@@ -3288,7 +3288,7 @@ public class DatasetServiceImpl implements DatasetService {
 
         if (StringUtils.isNotBlank(preparationCode)) {
           fileFolder = new File(exportDLPath,
-                  "dataset-" + datasetId + "/preparation/" + preparationCode);
+                  "dataset-" + datasetId + preparationCode);
         } else {
           fileFolder = new File(exportDLPath, "dataset-" + datasetId);
         }
