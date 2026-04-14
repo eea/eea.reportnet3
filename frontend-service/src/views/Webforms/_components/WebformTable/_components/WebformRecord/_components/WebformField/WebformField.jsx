@@ -297,7 +297,7 @@ export const WebformField = ({
 
       //Flatten BLOCK elements before mapping
       const allFieldElements = record.elements.flatMap(el =>
-        el?.type === 'BLOCK' && Array.isArray(el.elements) ? el.elements : el
+        el?.type === 'BLOCK' && Array.isArray(el.elementsRecords[0].elements) ? el.elementsRecords[0].elements : el
       );
 
       conditionalFields = allFieldElements
