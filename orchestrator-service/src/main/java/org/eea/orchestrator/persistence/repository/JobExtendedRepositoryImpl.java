@@ -178,7 +178,7 @@ public class JobExtendedRepositoryImpl implements JobExtendedRepository{
             query.setParameter("jobStatus", Arrays.asList(jobStatuses.split(",")));
         }
         if (StringUtils.isNotBlank(preparationCode)) {
-            query.setParameter("preparationCode", preparationCode);
+            query.setParameter("preparation_code", preparationCode);
         }
     }
 
