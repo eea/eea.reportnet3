@@ -92,6 +92,12 @@ public class JobForFinalizingInProgressValidationJobsWithFinishedTasks {
             for (JobVO jobVO : jobs) {
                 try {
                     List<String> processes = jobProcessService.findProcessesByJobId(jobVO.getId());
+
+                    if (processes == null || processes.isEmpty()) {
+                        //just skip this case is handled by JobForCancellingJobsWithoutProcess
+                        continue;
+                    }
+
                     if (jobVO.isRelease()) {
                         //validation with release true
                         boolean finished = true;
