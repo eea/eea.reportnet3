@@ -81,6 +81,7 @@ public class JobExtendedRepositoryImpl implements JobExtendedRepository{
     private Query constructQuery(boolean asc, String sortedColumn, StringBuilder stringQuery, boolean countQuery, Pageable pageable, Long jobId, String jobTypes, Long dataflowId, String dataflowName,
                                  Long providerId, Long datasetId, String datasetName, String creatorUsername, String jobStatuses, String preparationCode) {
         stringQuery.append(countQuery ? COUNT_JOBS_QUERY : JOBS_QUERY);
+        LOG.info("APBO: Constructing query with preparationCode: {}", preparationCode);
         addFilters(stringQuery, jobId, jobTypes, dataflowId, dataflowName, providerId, datasetId, datasetName, creatorUsername, jobStatuses, preparationCode);
         if (!countQuery) {
             stringQuery.append(" order by " + sortedColumn);
@@ -95,6 +96,7 @@ public class JobExtendedRepositoryImpl implements JobExtendedRepository{
             }
         }
         Query query = null;
+        LOG.info("APBO: Query after filters? {}", stringQuery);
         if(countQuery){
             query = entityManager.createNativeQuery(stringQuery.toString());
         }
@@ -102,8 +104,9 @@ public class JobExtendedRepositoryImpl implements JobExtendedRepository{
             query = entityManager.createNativeQuery(stringQuery.toString(), Job.class);
         }
 
-
+        LOG.info("APBO: Native query: {}", query.toString());
         addParameters(query, jobId, jobTypes, dataflowId, dataflowName, providerId, datasetId, datasetName, creatorUsername, jobStatuses, preparationCode);
+        LOG.info("APBO: Native query with parameters: {}", query.toString());
         return query;
     }
 
@@ -131,8 +134,8 @@ public class JobExtendedRepositoryImpl implements JobExtendedRepository{
         query.append((datasetId != null) ? " and jobs.dataset_id= :datasetId " : "");
         query.append(StringUtils.isNotBlank(datasetName) ? " and LOWER(jobs.dataset_name) LIKE LOWER(CONCAT('%',:datasetName,'%')) " : "");
         query.append(StringUtils.isNotBlank(creatorUsername) ? " and LOWER(jobs.creator_username) LIKE LOWER(CONCAT('%',:creatorUsername,'%')) " : "");
+        query.append(StringUtils.isNotBlank(preparationCode) ? " and jobs.preparation_code= :preparationCode " : "");
         query.append(StringUtils.isNotBlank(jobStatuses) ? " and jobs.job_status in :jobStatus " : "");
-        query.append(StringUtils.isNotBlank(preparationCode) ? " and jobs.preparation_code= :preparationCode " : " and jobs.preparation_code is null ");
     }
 
     /**
@@ -174,11 +177,11 @@ public class JobExtendedRepositoryImpl implements JobExtendedRepository{
         if (StringUtils.isNotBlank(creatorUsername)) {
             query.setParameter("creatorUsername", creatorUsername);
         }
+        if (StringUtils.isNotBlank(preparationCode)) {
+            query.setParameter("preparationCode", preparationCode);
+        }
         if (StringUtils.isNotBlank(jobStatuses)){
             query.setParameter("jobStatus", Arrays.asList(jobStatuses.split(",")));
-        }
-        if (StringUtils.isNotBlank(preparationCode)) {
-            query.setParameter("preparation_code", preparationCode);
         }
     }
 
