@@ -137,7 +137,7 @@ public class ReceiptPDFGenerator {
     y = 3334f;
     fontSize = 40f;
     printLinePDF(contentStream, text, font, fontSize, x, y);
-    text = "Receipt date: ";
+    text = "Confirmation download date: ";
     x -= fontBold.getStringWidth(text) / 1000 * fontSize;
     printLinePDF(contentStream, text, fontBold, fontSize, x, y);
     text = receipt.getProviderAssignation();
@@ -156,7 +156,7 @@ public class ReceiptPDFGenerator {
     printLinePDF(contentStream, text, fontBold, fontSize, x, y);
     y -= spaceBetweenLines * 2 + fontSize;
     fontSize = 58f;
-    text = "This is a confirmation of receipt for national data submission under";
+    text = "This is a confirmation of delivery for national data submission under";
     printLinePDF(contentStream, text, font, fontSize, x, y);
     y -= spaceBetweenLines + fontSize;
     text = "the reporting obligation";
@@ -170,6 +170,13 @@ public class ReceiptPDFGenerator {
       printLinePDF(contentStream, line, fontBold, fontSize, x, y);
       y -= spaceBetweenLines + fontSize;
     }
+
+    // Print dataflow link
+    fontSize = 45f;
+    String dataflowLink = "https://reportnet.europa.eu/dataflow/" + receipt.getIdDataflow();
+    printLinePDF(contentStream, dataflowLink, font, fontSize, 133f, y);
+    y -= spaceBetweenLines + fontSize;
+
     fontSize = 58f;
 
     // Print obligation information

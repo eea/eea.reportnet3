@@ -206,7 +206,8 @@ export const ManageDataflow = ({
   const onDeleteInputChange = value =>
     reportingDataflowDispatch({ type: 'ON_DELETE_INPUT_CHANGE', payload: { deleteInput: value } });
 
-  const onSave = () => {
+  const onSave = async () => {
+    isEditing && await onUpdateAddUserText(addUserText);
     if (formRef.current)
       formRef.current.handleSubmit(reportingDataflowState.pinDataflow, reportingDataflowState.bigDataStorage);
     resetObligations();
@@ -438,15 +439,6 @@ export const ManageDataflow = ({
                 maxLength={config.TEXT_TO_RECEIPT_MAX_LENGTH}
                 style={{ position: 'relative', right: '0px', top: '5px' }}
               />
-              <div className={styles.addUserTextButtonWrapper}>
-                <Button
-                  className="p-button-text p-c "
-                  disabled={isUpdatingUserText}
-                  icon={!isUpdatingUserText ? 'check' : 'spinnerAnimate'}
-                  label={resourcesContext.messages['addUserTextToReceiptSaveButtonText']}
-                  onClick={() => onUpdateAddUserText(addUserText)}
-                />
-              </div>
             </>
           )}
         </Dialog>
