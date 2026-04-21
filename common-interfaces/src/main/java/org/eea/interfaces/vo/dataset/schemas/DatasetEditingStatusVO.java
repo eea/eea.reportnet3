@@ -1,5 +1,6 @@
 package org.eea.interfaces.vo.dataset.schemas;
 
+import java.util.Date;
 import java.util.Objects;
 import lombok.Getter;
 import lombok.Setter;
@@ -21,8 +22,12 @@ public class DatasetEditingStatusVO {
 
     /** The username of the editor (null if not being edited). */
     private String editor;
+
     /** Whether the dataset is locked for user */
     private Boolean isLockedForUser;
+
+    /** When the datasets lock will expire */
+    private Date lockExpirationDate;
 
     /**
      * Equals.
@@ -41,7 +46,8 @@ public class DatasetEditingStatusVO {
         DatasetEditingStatusVO other = (DatasetEditingStatusVO) obj;
         return Objects.equals(datasetId, other.datasetId)
                 && Objects.equals(isEditing, other.isEditing)
-                && Objects.equals(editor, other.editor);
+                && Objects.equals(editor, other.editor)
+                && Objects.equals(lockExpirationDate, other.lockExpirationDate);
     }
 
     /**
@@ -51,6 +57,6 @@ public class DatasetEditingStatusVO {
      */
     @Override
     public int hashCode() {
-        return Objects.hash(datasetId, isEditing, editor);
+        return Objects.hash(datasetId, isEditing, editor, lockExpirationDate);
     }
 }

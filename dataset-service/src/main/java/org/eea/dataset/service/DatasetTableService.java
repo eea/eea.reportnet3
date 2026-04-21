@@ -19,13 +19,19 @@ public interface DatasetTableService {
 
     String getDatasetEditingUsername(Long datasetId);
 
+    String getDatasetNonExpiredEditingUsername(Long datasetId);
+
     String getDatasetEditingUsernameForTable(Long datasetId, String tableSchemaId);
 
     Boolean enableEditingForDatasetTableWithUser(Long datasetId, String username,Boolean isBigData, List<String> tableSchemaIds);
 
     Boolean disableEditingForDatasetTableWithUser(Long datasetId, String username);
 
+    Boolean disableEditingForDatasetTable(Long datasetId);
+
     DatasetEditingStatusVO getEditingStatus(Long datasetId, String username);
 
     boolean isAnyDatasetBeingEdited(List<Long> datasetIds);
+
+    List<DatasetTableVO> getDatasetTablesWithExpiredEditingLocks();
 }

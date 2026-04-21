@@ -9,7 +9,6 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.dataset.service.model.ImportFileInDremioInfo;
-import org.eea.interfaces.vo.communication.UserNotificationVO;
 import org.eea.lock.redis.LockEnum;
 import org.eea.lock.redis.RedisLockService;
 import org.eea.utils.UtilityClass;
@@ -83,7 +82,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.util.*;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.stream.Collectors;
 
 import static org.eea.interfaces.vo.dataset.enums.FileTypeEnum.CSV;
@@ -3675,7 +3673,7 @@ public class DatasetControllerImpl implements DatasetController {
     DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
     String datasetName = dataSetMetabaseVO.getDataSetName();
 
-    String currentEditor = datasetTableService.getDatasetEditingUsername(datasetId);
+    String currentEditor = datasetTableService.getDatasetNonExpiredEditingUsername(datasetId);
     if (currentEditor != null && !currentEditor.equals(username)) {
       LOG.warn("User {} attempted Parquet to Iceberg conversion for dataset {} but {} is editing.",
               username, datasetId, currentEditor);
@@ -3695,7 +3693,7 @@ public class DatasetControllerImpl implements DatasetController {
     }
 
 
-    if(providerId == null){
+    if (providerId == null){
       providerId = dataSetMetabaseVO.getDataProviderId();
     }
 
@@ -3748,7 +3746,7 @@ public class DatasetControllerImpl implements DatasetController {
 
     }
 
-    String currentEditor = datasetTableService.getDatasetEditingUsername(datasetId);
+    String currentEditor = datasetTableService.getDatasetNonExpiredEditingUsername(datasetId);
     if (currentEditor != null && !currentEditor.equals(username)) {
       LOG.warn("User {} attempted Iceberg to Parquet Iceberg conversion for dataset {} but {} is editing.",
               username, datasetId, currentEditor);
@@ -4030,14 +4028,14 @@ public class DatasetControllerImpl implements DatasetController {
           @PathVariable("datasetId") Long datasetId,
           @RequestParam(value = "tableSchemaIds", required = false) List<String> tableSchemaIds) {
 
-    String username = SecurityContextHolder.getContext().getAuthentication().getName();
+    final String username = SecurityContextHolder.getContext().getAuthentication().getName();
     if (username == null || username.isBlank()) {
       throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not authenticated");
     }
 
-    DataSetMetabaseVO datasetVO = datasetMetabaseService.findDatasetMetabase(datasetId);
-    Long dataflowId = datasetVO.getDataflowId();
-    String datasetName = datasetVO.getDataSetName();
+    final DataSetMetabaseVO datasetVO = datasetMetabaseService.findDatasetMetabase(datasetId);
+    final Long dataflowId = datasetVO.getDataflowId();
+    final String datasetName = datasetVO.getDataSetName();
 
     // BigData cannot use this feature
     if (Boolean.TRUE.equals(dataFlowControllerZuul.isBigDataflow(dataflowId))) {
@@ -4048,7 +4046,7 @@ public class DatasetControllerImpl implements DatasetController {
     }
 
     // Check if another user is editing
-    String currentEditor = datasetTableService.getDatasetEditingUsername(datasetId);
+    final String currentEditor = datasetTableService.getDatasetNonExpiredEditingUsername(datasetId);
 
     if (currentEditor != null && !currentEditor.equals(username)) {
       LOG.warn("User {} attempted to enable editing for dataset {}, but {} is already editing.",
@@ -4074,12 +4072,11 @@ public class DatasetControllerImpl implements DatasetController {
 
     // Enable editing
     try {
-
-      boolean isEnableEditing = datasetTableService.enableEditingForDatasetTableWithUser(
+      final boolean editingIsEnabled = datasetTableService.enableEditingForDatasetTableWithUser(
               datasetId, username, false, tableSchemaIds
       );
 
-      if (!isEnableEditing) {
+      if (!editingIsEnabled) {
         kafkaSenderUtils.releaseNotificableKafkaEvent(
                 EventType.DATASET_ENABLE_EDITING_FAILED_ACTIVE_EDITING_BY_OTHER_USER_EVENT,
                 null,
@@ -4193,7 +4190,7 @@ public class DatasetControllerImpl implements DatasetController {
       throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not authenticated");
     }
 
-    Long dataflowId = datasetMetabaseService
+    final Long dataflowId = datasetMetabaseService
             .findDatasetMetabase(datasetId)
             .getDataflowId();
 
@@ -4205,7 +4202,7 @@ public class DatasetControllerImpl implements DatasetController {
       );
     }
 
-    String currentEditor = datasetTableService.getDatasetEditingUsername(datasetId);
+    final String currentEditor = datasetTableService.getDatasetEditingUsername(datasetId);
 
     // If no one is editing, nothing to disable
     if (currentEditor == null) {
@@ -4325,6 +4322,87 @@ public class DatasetControllerImpl implements DatasetController {
 
   }
 
+  @Override
+  @HystrixCommand
+  @GetMapping("private/expiredDatasetTables")
+  @ApiOperation(value = "Get dataset tables that have expired editing locks", hidden = true)
+  public List<DatasetTableVO> getDatasetTablesWithExpiredEditingLocks() {
+
+     return datasetTableService.getDatasetTablesWithExpiredEditingLocks();
+  }
+
+  @Override
+  @HystrixCommand
+  @PostMapping("/private/clearExpiredDatasetTableLocks")
+  @ApiOperation(value = "Clear the username and expiration date from DatasetTables with expired locks.", hidden = true)
+  public void clearExpiredDatasetTableLocks() {
+
+    final List<DatasetTableVO> expiredDatasetTables = datasetTableService.getDatasetTablesWithExpiredEditingLocks();
+
+    LOG.info("Found {} DatasetTables with expired editing locks", expiredDatasetTables.size());
+    if (expiredDatasetTables.isEmpty()) {
+      return;
+    }
+
+    for (DatasetTableVO datasetTableVO : expiredDatasetTables) {
+      try {
+        final Long datasetId = datasetTableVO.getDatasetId();
+        final DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
+        ;
+        final Long dataflowId = dataSetMetabaseVO.getDataflowId();
+        final Long providerId = dataSetMetabaseVO.getDataProviderId();
+        final boolean isBigData = dataFlowControllerZuul.isBigDataflow(dataflowId);
+        final List<String> tableSchemaIds = Collections.singletonList(datasetTableVO.getTableSchemaId());
+
+        if (!isBigData) {
+          datasetTableService.disableEditingForDatasetTable(datasetId);
+          return;
+        }
+
+        //Dataset is BigData
+        final String lockKey = LockEnum.PARQUET_CONVERSION.getValue() + "_" + datasetId;
+        final String lockValue = LockEnum.PARQUET_CONVERSION.getValue() + "_" + datasetId + "_orchestrator_" + UUID.randomUUID();
+
+        final List<JobVO> activeJobsForDatasetId = jobControllerZuul
+                .findActiveJobsRelatedToADatasetId(datasetId, dataflowId, providerId);
+
+        if (activeJobsForDatasetId != null && !activeJobsForDatasetId.isEmpty()) {
+          final List<Long> jobIds = activeJobsForDatasetId
+                  .stream()
+                  .map(JobVO::getId)
+                  .collect(Collectors.toList());
+
+          LOG.info("Cannot convert tables from iceberg to parquet for dataflowId {} datasetId {} providerId {} because there are active jobs related to the same dataset id. Job ids: {}",
+                  dataflowId, datasetId, providerId, jobIds);
+          return;
+        }
+
+        try {
+          if (redisLockService.checkAndAcquireLock(lockKey, lockValue, conversionLockExpirationInMillis)) {
+            LOG.info("Orchestrator has triggered the iceberg to parquet conversion for dataflowId {} datasetId {} providerId {} and tableSchemaIds {} LockValue {}",
+                    dataflowId, datasetId, providerId, tableSchemaIds, lockValue);
+            bigDataDatasetService.initiateIcebergToParquetConversion(
+                    datasetId,
+                    dataflowId,
+                    providerId,
+                    tableSchemaIds,
+                    lockValue);
+          } else {
+            Map<String, String> activeLocks = redisLockService.listActiveLocks(lockKey);
+            LOG.info("Orchestrator has triggered the iceberg to parquet conversion for dataflowId {} datasetId {} providerId {} and tableSchemaIds {} but another iceberg to parquet conversion for the same dataset is in progress {}",
+                    dataflowId, datasetId, providerId, tableSchemaIds, activeLocks);
+          }
+        } catch (Exception e) {
+          LOG.error("Failed to initiate Iceberg to Parquet conversion for dataflowId {} datasetId {} providerId {} tableSchemaIds {} : {} - Releasing lock with value {}",
+                  dataflowId, datasetId, providerId, tableSchemaIds, e.getMessage(), lockValue);
+          redisLockService.releaseLock(lockKey, lockValue);
+          throw e;
+        }
+      } catch (Exception e) {
+        LOG.error(e.getMessage(), e);
+      }
+    }
+  }
   /**
    * Check if there is at least one reporting dataset for the given
    * dataflow / provider that is currently enabled for editing.
@@ -4343,10 +4421,9 @@ public class DatasetControllerImpl implements DatasetController {
   @Override
   @GetMapping("/hasEnabledEditingDatasets")
   @HystrixCommand
-  @PreAuthorize("isAuthenticated()")
   @ApiOperation(value = "Get dataset editing status", hidden = true)
   public Boolean hasEnabledEditingDatasets(@RequestParam(value = "dataflowId") Long dataflowId,
-                                               @RequestParam(value = "providerId") Long providerId){
+                                               @RequestParam(value = "providerId") Long providerId) {
     try{
       List<ReportingDatasetVO> datasets = datasetMetabaseControllerImpl.findReportingDataSetIdByDataflowIdAndProviderId(dataflowId, providerId);
       List<Long> datasetIds = datasets.stream()

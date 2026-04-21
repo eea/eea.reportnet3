@@ -1164,4 +1164,10 @@ public interface DatasetController {
           @RequestParam(value = "providerId", required = false) Long providerId,
           @RequestParam("idTableSchema") String idTableSchema
   );
+
+  @GetMapping("/private/expiredDatasetTables")
+  List<DatasetTableVO> getDatasetTablesWithExpiredEditingLocks();
+
+  @PostMapping("/private/clearExpiredDatasetTableLocks")
+  void clearExpiredDatasetTableLocks();
 }
