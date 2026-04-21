@@ -49,7 +49,7 @@
     "addUniqueConstraint": "Add unique constraint",
     "addUserTextToReceipt": "Add text to receipt",
     "addUserTextToReceiptHelp": " (You can't close the popup after saving, but you can edit it after the data collection is created.)",
-    "addUserTextToReceiptEdit": "Edit text to receipt",
+    "addUserTextToReceiptEdit": "Edit text on receipt",
     "addUserTextToReceiptNew": "Text to receipt",
     "addUserTextToReceiptSaveButtonText": "Save Text",
     "addWebformConfigurationDialogHeader": "Add webform configuration",
