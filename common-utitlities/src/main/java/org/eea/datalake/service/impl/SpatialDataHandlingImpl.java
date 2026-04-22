@@ -1,8 +1,10 @@
 package org.eea.datalake.service.impl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.datalake.service.SpatialDataHandling;
 import org.eea.datalake.service.SpatialDataHelper;
+import org.eea.datalake.service.model.SpatialDataDescriptor;
 import org.eea.datalake.service.model.SpatialFieldInfo;
 import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
@@ -22,6 +24,8 @@ import org.wololo.geojson.Feature;
 import org.wololo.jts2geojson.GeoJSONWriter;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -48,12 +52,14 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
   private final WKBReader wkbReader;
   private final GeoJsonReader geoJsonReader;
   private final GeoJSONWriter geoJSONWriter;
+  private final ObjectMapper objectMapper;
 
   public SpatialDataHandlingImpl(SpatialDataHelper spatialDataHelper) {
     this.spatialDataHelper = spatialDataHelper;
     this.wkbReader = new WKBReader();
     this.geoJsonReader = new GeoJsonReader();
     this.geoJSONWriter = new GeoJSONWriter();
+    this.objectMapper = new ObjectMapper();
   }
 
   @Override
@@ -101,6 +107,22 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
         });
   }
 
+  /**
+   * Iterate to all spatial data and replace them with enums
+   * Spatial Data are heavy for front-end and we had to strip them out of the initial table payload based on #299362
+   *
+   * @param recordVOS
+   */
+  @Override
+  public void stripSpatialData(List<RecordVO> recordVOS) {
+    recordVOS.stream()
+        .flatMap(recordVO -> recordVO.getFields().stream())
+        .filter(fieldVO -> fieldVO.getByteArrayValue() != null && fieldVO.getByteArrayValue().length > 0)
+        .forEach(fieldVO -> {
+            fieldVO.setValue(stripSpatialData(fieldVO.getByteArrayValue()));
+        });
+  }
+
   @Override
   public String decodeSpatialData(byte[] byteArray) throws RuntimeException, IOException, ParseException {
     try {
@@ -123,6 +145,106 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
     return "";
   }
 
+  @Override
+  public String stripSpatialData(byte[] byteArray) {
+    final String EMPTY_JSON = "{}";
+
+    final int MIN_WKB_SIZE = 5;
+    final int SRID_OFFSET = 5;
+
+    final int TYPE_MASK = 0xFF;
+
+    final int FLAG_Z = 0x80000000;
+    final int FLAG_M = 0x40000000;
+    final int FLAG_SRID = 0x20000000;
+
+    final double BYTES_IN_MB = 1024.0 * 1024.0;
+    final int INTEGER_BYTES = 4;
+
+    if (byteArray == null || byteArray.length < MIN_WKB_SIZE) {
+      return EMPTY_JSON;
+    }
+
+    final int sizeBytes = byteArray.length;
+    final double sizeMB = sizeBytes / BYTES_IN_MB;
+
+    try {
+
+      final ByteBuffer buffer = (byteArray[0] == 0)
+              ? ByteBuffer.wrap(byteArray).order(ByteOrder.BIG_ENDIAN)
+              : ByteBuffer.wrap(byteArray).order(ByteOrder.LITTLE_ENDIAN);
+
+      final int typeInt = buffer.getInt(1);
+
+      // EWKB flag extraction
+      final boolean hasZ = (typeInt & FLAG_Z) != 0;
+      final boolean hasM = (typeInt & FLAG_M) != 0;
+      final boolean hasSRID = (typeInt & FLAG_SRID) != 0;
+
+      final int baseType = typeInt & TYPE_MASK;
+
+      final String type = mapGeometryType(baseType);
+      final String dimension = resolveDimension(hasZ, hasM);
+
+      Integer srid = null;
+
+      if (hasSRID && byteArray.length >= SRID_OFFSET + INTEGER_BYTES) {
+        srid = buffer.getInt(SRID_OFFSET);
+      }
+
+      return buildJson(srid, type, sizeMB, dimension);
+
+    } catch (Exception e) {
+      LOG.error("Failed to extract spatial metadata. sizeBytes={}", sizeBytes, e);
+      return buildJson(null, null, sizeMB, null);
+    }
+  }
+
+  /**
+   * Builds lightweight JSON descriptor.
+   */
+  private String buildJson(Integer srid, String type, Double sizeMB, String dimension) {
+
+    SpatialDataDescriptor descriptor = new SpatialDataDescriptor();
+    descriptor.setSrid(srid);
+    descriptor.setType(type != null ? type.toUpperCase() : null);
+    descriptor.setSizeMB(sizeMB);
+    descriptor.setDimension(dimension);
+
+    try {
+      return objectMapper.writeValueAsString(descriptor);
+    } catch (Exception e) {
+      LOG.error("Failed to serialize spatial descriptor JSON", e);
+      return "{}";
+    }
+  }
+
+  /**
+   * Maps WKB base geometry types.
+   */
+  private String mapGeometryType(int type) {
+    switch (type) {
+      case 1: return DataType.POINT.getValue();
+      case 2: return DataType.LINESTRING.getValue();
+      case 3: return DataType.POLYGON.getValue();
+      case 4: return DataType.MULTIPOINT.getValue();
+      case 5: return DataType.MULTILINESTRING.getValue();
+      case 6: return DataType.MULTIPOLYGON.getValue();
+      case 7: return "GEOMETRYCOLLECTION";
+      default: return "UNKNOWN";
+    }
+  }
+
+
+  /**
+   * Resolves dimensionality from EWKB flags.
+   */
+  private String resolveDimension(boolean hasZ, boolean hasM) {
+    if (hasZ && hasM) return "4D";
+    if (hasZ) return "3D";
+    if (hasM) return "2D+M";
+    return "2D";
+  }
   public StringBuilder getHeaders(TableSchemaVO tableSchemaVO) {
     List<DataType> geoJsonEnums = getGeoJsonEnums();
     StringBuilder result = new StringBuilder();

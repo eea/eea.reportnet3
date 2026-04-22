@@ -183,6 +183,7 @@ public class DatasetDataRetrieverDL implements DataLakeDataRetriever {
         }
         dataQuery.append(filteredQuery);
         List<RecordVO> recordVOS = DataLakeDataRetrieverUtils.getRecordVOS(dataset.getDatasetSchema(), tableSchemaVO, dataQuery);
+
         result.setIdTableSchema(tableSchemaVO.getIdTableSchema());
         result.setRecords(recordVOS);
 

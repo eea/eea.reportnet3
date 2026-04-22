@@ -19,7 +19,11 @@ public interface SpatialDataHandling {
 
   void decodeSpatialData(List<RecordVO> recordVOS);
 
+  void stripSpatialData(List<RecordVO> recordVOS);
+
   String decodeSpatialData(byte[] byteArray) throws IOException, ParseException;
+
+  String stripSpatialData(byte[] byteArray) throws IOException, ParseException;
 
   List<DataType> getGeoJsonEnums();
 
