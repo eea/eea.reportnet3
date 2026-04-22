@@ -114,6 +114,7 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
           providerId: filterBy.providerId,
           datasetId: filterBy.datasetId,
           datasetName: filterBy.datasetName,
+          code: filterBy.preparationCode,
           creatorUsername: filterBy.creatorUsername,
           jobStatus: filterBy.jobStatus?.join()
         });
@@ -124,8 +125,8 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
         const adminCustodianTabChange = index && page === undefined && (isCustodian || isAdmin);
         const providerTabChange = index && !page && shouldRestrictToProviderData;
 
-        if (!adminCustodianTabChange) {
-          if (providerTabChange || (!isEmpty(filterBy) && (index === undefined || page !== undefined))) {
+        if (!adminCustodianTabChange || !providerTabChange) {
+          if (!isEmpty(filterBy) && (index === undefined || page !== undefined)) {
             data = await JobsStatusesService.getJobsHistory({
               pageNum: page !== undefined ? page : pageNum,
               numberRows: rows !== undefined ? rows : numberRows,
@@ -152,7 +153,7 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
           setIsFiltered(false);
           setJobsStatusesList([]);
           if (isProvider && !isAdmin && index && !page) {
-            setProvidersTotalRecords(data.filteredRecords);
+            setProvidersTotalRecords(data?.filteredRecords);
           }
         }
       }
@@ -319,6 +320,7 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
               { key: 'dataflowName', label: resourcesContext.messages['dataflowNameTwoWords'] },
               { key: 'datasetId', label: resourcesContext.messages['datasetId'] },
               { key: 'datasetName', label: resourcesContext.messages['datasetName'] },
+              { key: 'preparationCode', label: resourcesContext.messages['setCode'] },
               { key: 'providerId', label: resourcesContext.messages['providerId'] },
               { key: 'creatorUsername', label: resourcesContext.messages['creatorUsername'] }
             ]
@@ -327,7 +329,8 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
               { key: 'dataflowId', label: resourcesContext.messages['dataflowId'] },
               { key: 'dataflowName', label: resourcesContext.messages['dataflowNameTwoWords'] },
               { key: 'datasetId', label: resourcesContext.messages['datasetId'] },
-              { key: 'datasetName', label: resourcesContext.messages['datasetName'] }
+              { key: 'datasetName', label: resourcesContext.messages['datasetName'] },
+              { key: 'preparationCode', label: resourcesContext.messages['setCode'] }
             ],
       type: 'INPUT'
     },
