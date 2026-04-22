@@ -75,6 +75,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -93,6 +94,10 @@ import java.util.regex.Pattern;
  */
 @Service("dataschemaService")
 public class DataschemaServiceImpl implements DatasetSchemaService {
+
+  @Autowired
+  @Lazy
+  private DatasetSchemaService self;
 
   /** The Constant REGEX_NAME: {@value}. */
   private static final String REGEX_NAME = "[a-zA-Z0-9\\s_-]+";
@@ -1206,7 +1211,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   public Boolean validateSchema(String datasetSchemaId, TypeDataflowEnum dataflowType) {
 
     Boolean isValid = true;
-    DataSetSchemaVO schema = getDataSchemaById(datasetSchemaId);
+    DataSetSchemaVO schema = self.getDataSchemaById(datasetSchemaId);
     for (ValidationSchemaCommand command : validationCommands) {
       isValid = Boolean.TRUE.equals(isValid) ? command.execute(schema, dataflowType) : isValid;
     }
@@ -1298,7 +1303,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     if (fieldSchemaVO.getPk() != null) {
       // Check existing PKs on the same table
       if (Boolean.TRUE.equals(fieldSchemaVO.getPk())) {
-        DataSetSchemaVO schema = this.getDataSchemaById(datasetSchemaId);
+        DataSetSchemaVO schema = self.getDataSchemaById(datasetSchemaId);
         TableSchemaVO table = null;
         for (TableSchemaVO tableVO : schema.getTableSchemas()) {
           if (tableVO.getRecordSchema() != null
@@ -1397,7 +1402,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   @Override
   public Boolean isSchemaAllowedForDeletion(String idDatasetSchema) {
     Boolean allow = true;
-    DataSetSchemaVO schema = this.getDataSchemaById(idDatasetSchema);
+    DataSetSchemaVO schema = self.getDataSchemaById(idDatasetSchema);
     if (null != schema && null != schema.getTableSchemas() && !schema.getTableSchemas().isEmpty()) {
       for (TableSchemaVO tableVO : schema.getTableSchemas()) {
         if (tableVO.getRecordSchema() != null
@@ -2456,7 +2461,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
 
       for (DataSetSchema schema : importClasses.getSchemas()) {
         String newIdDatasetSchema = createEmptyDataSetSchema(dataflowId).toString();
-        DataSetSchemaVO targetDatasetSchema = getDataSchemaById(newIdDatasetSchema);
+        DataSetSchemaVO targetDatasetSchema = self.getDataSchemaById(newIdDatasetSchema);
         dictionaryOriginTargetObjectId.put(schema.getIdDataSetSchema().toString(),
                 newIdDatasetSchema);
 
@@ -2612,7 +2617,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
                                      boolean referenceDataset) {
 
     schemasRepository.updateReferenceDataset(datasetSchemaId, referenceDataset);
-    DataSetSchemaVO schema = getDataSchemaById(datasetSchemaId);
+    DataSetSchemaVO schema = self.getDataSchemaById(datasetSchemaId);
     // Reference dataset -> readOnly=true, prefilled=true on all the tables
     // mark prefill and readOnly of all tables of the dataset
     for (TableSchemaVO table : schema.getTableSchemas()) {
@@ -2646,7 +2651,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
                                    final String tableSchemaId) throws EEAException {
     LOG.info("starting csv file writter to field schemas in datasetId {}", datasetId);
 
-    DataSetSchemaVO datasetSchema = getDataSchemaById(datasetSchemaId);
+    DataSetSchemaVO datasetSchema = self.getDataSchemaById(datasetSchemaId);
 
     // Init the writer
     StringWriter writer = new StringWriter();
@@ -3654,7 +3659,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   public String getFieldSchemaIdByDatasetIdTableNameAndFieldName(Long datasetId, String tableSchemaName, String fieldName){
     try {
       String datasetSchemaId = getDatasetSchemaId(datasetId);
-      DataSetSchemaVO datasetSchema = getDataSchemaById(datasetSchemaId);
+      DataSetSchemaVO datasetSchema = self.getDataSchemaById(datasetSchemaId);
       if (datasetSchema != null) {
         String finalTableSchemaName = tableSchemaName;
         Optional<TableSchemaVO> tableSchema = datasetSchema.getTableSchemas().stream()
@@ -3728,7 +3733,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
 
   @Override
   public boolean isReferenceSchema(String datasetSchemaId){
-    DataSetSchemaVO schema = getDataSchemaById(datasetSchemaId);
+    DataSetSchemaVO schema = self.getDataSchemaById(datasetSchemaId);
     return schema != null && Boolean.TRUE.equals(schema.getReferenceDataset());
   }
 
