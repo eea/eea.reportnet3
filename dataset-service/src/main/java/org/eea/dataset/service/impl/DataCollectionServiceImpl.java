@@ -672,8 +672,12 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         }
       }
     }
+
     S3PathResolver dataTableResolver = new S3PathResolver(dataSetMetabaseVO.getDataflowId(), dataSetMetabaseVO.getDataProviderId() != null ? dataSetMetabaseVO.getDataProviderId() : 0, dataSetMetabaseVO.getId(), tableName);
     if (!s3Helper.checkFolderExist(dataTableResolver, S3_TABLE_NAME_FOLDER_PATH)) {
+      emptyDatasetTables.add(dataset.getId());
+    }
+    else if (bigDataDatasetService.isTableEmpty(dataTableResolver)) {
       emptyDatasetTables.add(dataset.getId());
     }
   }

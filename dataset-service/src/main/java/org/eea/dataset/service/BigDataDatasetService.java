@@ -356,4 +356,10 @@ public interface BigDataDatasetService {
      * @throws EEAException the EEA exception
      */
      void etlImportDataset(Long datasetId, Long dataflowId, Long providerId, Boolean replaceData, String tableSchemaId, String delimiter, String filePathInS3, Long jobId, DataFlowVO dataFlowVO, DataSetMetabaseVO dataSetMetabaseVO) throws Exception;
+
+    /**
+     * Is table Empty.
+     * @param s3PathResolver table resolver
+     */
+     boolean isTableEmpty(S3PathResolver s3PathResolver);
 }

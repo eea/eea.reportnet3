@@ -3286,4 +3286,17 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         }
     }
 
+    @Override
+    public boolean isTableEmpty(S3PathResolver s3PathResolver) {
+        if (!s3HelperPrivate.checkFolderExist(s3PathResolver, S3_TABLE_NAME_FOLDER_PATH)) {
+            return true;
+        }
+        try {
+            Long count = dremioJdbcTemplate.queryForObject(s3HelperPrivate.buildRecordsCountQuery(s3PathResolver), Long.class);
+            return count == null || count == 0;
+        } catch (Exception e) {
+            LOG.warn("Could not query row count for table {}, treating as non-empty", s3PathResolver.getTableName(), e);
+            return false;
+        }
+    }
 }
