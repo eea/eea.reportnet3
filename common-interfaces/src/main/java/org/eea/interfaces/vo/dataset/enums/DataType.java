@@ -109,7 +109,7 @@ public enum DataType {
   /**
    * The multipolygon.
    *
-   * A String representing a GeoJSON GeometryCollection object. ObjectMapper.readTree(...) should be
+   * A String representing a GeoJSON MULTIPOLYGON object. ObjectMapper.readTree(...) should be
    * used to transform into JSON.
    */
   MULTIPOLYGON("MULTIPOLYGON", JavaType.JSON),
@@ -120,7 +120,7 @@ public enum DataType {
    * A String representing a GeoJSON GeometryCollection object. ObjectMapper.readTree(...) should be
    * used to transform into JSON.
    */
-  GEOMETRYCOLLECTION("POLYGON", JavaType.JSON),
+  GEOMETRYCOLLECTION("GEOMETRYCOLLECTION", JavaType.JSON),
 
   /**
    * The codelist.
