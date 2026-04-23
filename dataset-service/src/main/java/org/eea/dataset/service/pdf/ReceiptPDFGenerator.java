@@ -21,6 +21,7 @@ import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Value;
 
 /**
  * The Class ReceiptPDFGenerator.
@@ -30,6 +31,9 @@ public class ReceiptPDFGenerator {
 
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(ReceiptPDFGenerator.class);
+
+  @Value("${reportnet.url}")
+  private String reportneturl;
 
   /** The Constant BACKGROUND. */
   private static final String BACKGROUND = "pdf/receipt_background.png";
@@ -173,7 +177,8 @@ public class ReceiptPDFGenerator {
 
     // Print dataflow link
     fontSize = 45f;
-    String dataflowLink = "https://reportnet.europa.eu/dataflow/" + receipt.getIdDataflow();
+    x = 133f;
+    String dataflowLink = reportneturl + "/dataflow/" + receipt.getIdDataflow();
     printLinePDF(contentStream, dataflowLink, font, fontSize, 133f, y);
     y -= spaceBetweenLines + fontSize;
 
