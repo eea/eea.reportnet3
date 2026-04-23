@@ -282,33 +282,46 @@ export const WebformField = ({
     if (isConditional && ['LINK', 'CODELIST'].includes(field.fieldType)) {
       const changedElementIndex = record.elements.indexOf(field);
 
-      /**
-       * Helper to determine if a field's value should be reset
-       * - If the field has a referenceParentField, reset if its masterConditionalFieldId matches the changed field
-       * - Otherwise, reset if the element comes after the changed field and has the matching masterConditionalFieldId
-       */
+      //Helper to determine if a field's value should be reset
       const shouldResetValue = (element, index) => {
-        const masterId = element?.referencedField?.masterConditionalFieldId;
-        if (!isEmpty(field?.referenceParentField)) {
-          return masterId === field.fieldSchema || masterId === field.fieldSchemaId;
+        const parentFieldId = element?.referencedField?.masterConditionalFieldId;
+        const parentFieldName = element?.referenceParentField?.field;
+
+        const matchesParentFieldById = parentFieldId === field.fieldSchema || parentFieldId === field.fieldSchemaId;
+
+        const matchesParentFieldByName = parentFieldName === field.name;
+
+        const hasReference = element?.referenceParentField || field?.referenceParentField;
+
+        if (hasReference) {
+          return matchesParentFieldById || matchesParentFieldByName;
         }
-        return index > changedElementIndex && (masterId === field.fieldSchema || masterId === field.fieldSchemaId);
+
+        return index > changedElementIndex && (matchesParentFieldById || matchesParentFieldByName);
       };
 
       //Flatten BLOCK elements before mapping
       const allFieldElements = record.elements.flatMap(el =>
-        el?.type === 'BLOCK' && Array.isArray(el.elements) ? el.elements : el
+        el?.type === 'BLOCK' && Array.isArray(el.elementsRecords[0].elements) ? el.elementsRecords[0].elements : el
       );
 
       conditionalFields = allFieldElements
-        .map((element, index) => {
-          // If this is the changed field, update its value
+        .reduce((fieldsToChange, element, index) => {
+          // If this is the changed field add it
           if (element.fieldSchema === option || element.fieldSchemaId === option) {
-            return { ...element, value };
+            fieldsToChange.push({ ...element, value });
+            return fieldsToChange;
           }
-          // Otherwise, reset value if needed, otherwise keep existing
-          return { ...element, value: shouldResetValue(element, index) ? '' : element.value };
-        })
+
+          // If it should be reset
+          if (shouldResetValue(element, index)) {
+            fieldsToChange.push({ ...element, value: '' });
+            return fieldsToChange;
+          }
+
+          // Otherwise do nothing exclude it
+          return fieldsToChange;
+        }, [])
         .filter(el => el.type === 'FIELD' && el.pk !== true);
 
       //Parse values for specific field types
@@ -499,7 +512,9 @@ export const WebformField = ({
           <div className={styles.datetimeWrapper}>
             {isTimezoneCalendarVisible ? (
               <TimezoneCalendar
-                isDisabled={field?.readOnly || isViewMode || isLoadingData || (updatingField.isUpdating && !isEmpty(field.value))}
+                isDisabled={
+                  field?.readOnly || isViewMode || isLoadingData || (updatingField.isUpdating && !isEmpty(field.value))
+                }
                 isLoadingData={
                   !isEmpty(field.value) &&
                   updatingField.isUpdating &&
