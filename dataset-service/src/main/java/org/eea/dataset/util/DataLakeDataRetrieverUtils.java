@@ -20,7 +20,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
-import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -211,7 +210,7 @@ public class DataLakeDataRetrieverUtils {
         DremioRecordMapper recordMapper = new DremioRecordMapper(spatialDataHandling, schemasRepository);
         recordMapper.setRecordSchemaVO(tableSchemaVO.getRecordSchema()).setDatasetSchemaId(datasetSchema).setTableSchemaId(tableSchemaVO.getIdTableSchema());
         List<RecordVO> recordVOS = dremioJdbcTemplate.query(dataQuery.toString(), recordMapper);
-        spatialDataHandling.stripSpatialData(recordVOS);
+        spatialDataHandling.transformSpatialFields(recordVOS);
         return recordVOS;
     }
 }
