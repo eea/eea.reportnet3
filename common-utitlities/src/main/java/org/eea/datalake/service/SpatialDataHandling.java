@@ -17,13 +17,13 @@ public interface SpatialDataHandling {
 
   StringBuilder getHeaders(TableSchemaVO tableSchemaVO);
 
-  void decodeSpatialData(List<RecordVO> recordVOS);
+  void decodeSpatialFields(List<RecordVO> recordVOS);
 
-  void stripSpatialData(List<RecordVO> recordVOS);
+  void transformSpatialFields(List<RecordVO> recordVOS);
 
   String decodeSpatialData(byte[] byteArray) throws IOException, ParseException;
 
-  String stripSpatialData(byte[] byteArray) throws IOException, ParseException;
+  String processSpatialPayload(byte[] byteArray) throws IOException, ParseException;
 
   List<DataType> getGeoJsonEnums();
 
