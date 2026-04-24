@@ -345,8 +345,9 @@ public class DatasetServiceImpl implements DatasetService {
    */
   @Value("${exportDLPath}")
   private String exportDLPath;
-    @Autowired
-    private SpatialDataHandling spatialDataHandling;
+
+  @Autowired
+  private SpatialDataHandling spatialDataHandling;
 
   /**
    * Save all records.
