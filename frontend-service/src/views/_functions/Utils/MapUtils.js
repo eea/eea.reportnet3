@@ -161,12 +161,31 @@ const getGeometryType = json => (!isNil(json) && isValidJSON(json) ? JSON.parse(
 const getSrid = json => (!isNil(json) && json !== '' ? JSON.parse(json).properties.srid : 'EPSG:4326');
 
 const hasValidCRS = (fieldValue, crs) => {
-  if (fieldValue === '') {
+  if (fieldValue === '' || fieldValue === null || fieldValue === undefined) {
     return true;
   }
 
-  const parsedGeoJsonData = JSON.parse(fieldValue);
-  return crs.some(crsItem => crsItem.value === parsedGeoJsonData.properties.srid);
+  let parsedGeoJsonData;
+  try {
+    parsedGeoJsonData = typeof fieldValue === 'string' ? JSON.parse(fieldValue) : fieldValue;
+  } catch (e) {
+    return false;
+  }
+
+  const rawSrid =
+    parsedGeoJsonData?.properties?.srid ?? parsedGeoJsonData?.srid ?? parsedGeoJsonData?.crs?.properties?.name;
+
+  if (!rawSrid) {
+    return false;
+  }
+
+  const srid = String(rawSrid).startsWith('EPSG:')
+    ? String(rawSrid)
+    : String(rawSrid).startsWith('urn:ogc:def:crs:EPSG::')
+    ? `EPSG:${String(rawSrid).split('::').pop()}`
+    : `EPSG:${rawSrid}`;
+
+  return crs.some(crsItem => crsItem.value === srid);
 };
 
 const inBounds = ({ coord, coordType, checkProjected = false }) => {
