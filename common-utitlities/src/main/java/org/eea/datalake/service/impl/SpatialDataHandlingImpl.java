@@ -111,6 +111,7 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
             LOG.error("SpatialDataHandlingImpl.decodeSpatialData() Invalid byteArray!! Tried to decode from binary but failed, with message: {}", e.getMessage());
           }
         }
+        field.setByteArrayValue(null); // set to null after handling the value so the UI response is lighter
       }
     }
   }
@@ -129,6 +130,7 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
         if (value != null && value.length > 0) {
             field.setValue(processSpatialPayload(value));
         }
+        field.setByteArrayValue(null); // set to null after handling the value so the UI response is lighter
       }
     }
   }
