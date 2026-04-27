@@ -36,6 +36,7 @@ import { InfoTable } from './_components/InfoTable';
 import { Map } from 'views/_components/Map';
 
 import { DatasetService } from 'services/DatasetService';
+import { DatasetUtils } from 'services/_utils/DatasetUtils';
 
 import { ActionsContext } from 'views/_functions/Contexts/ActionsContext';
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
@@ -265,11 +266,94 @@ export const DataViewer = ({
 
   const onChangePointCRS = crs => dispatchRecords({ type: 'SET_MAP_CRS', payload: crs });
 
-  const onCoordinatesMoreInfoClick = (geoJson, recordId, fieldName, fieldId, dataProviderId) =>
+  const safeParseJson = value => {
+    if (isNil(value) || value === '') return null;
+    if (typeof value !== 'string') return value;
+    try {
+      return JSON.parse(value);
+    } catch {
+      return null;
+    }
+  };
+
+  const isGeometrySummaryValue = geoJson => {
+    const parsed = safeParseJson(geoJson);
+    if (isNil(parsed)) return false;
+
+    // summary-like: has type/srid, but no geometry payload
+    const hasGeometryPayload = !isNil(parsed.geometry) || !isNil(parsed.coordinates);
+    return !hasGeometryPayload && !isNil(parsed.type);
+  };
+
+  const normalizeFullGeometryResponse = (fullGeometryData, originalSummary) => {
+    const parsed = typeof fullGeometryData === 'string' ? JSON.parse(fullGeometryData) : fullGeometryData;
+    if (!parsed) return '';
+
+    if (parsed?.geometry) return JSON.stringify(parsed);
+
+    if (parsed?.type && parsed?.coordinates) {
+      const summary = typeof originalSummary === 'string' ? JSON.parse(originalSummary) : originalSummary;
+
+      const sridFromSummary = summary?.srid ?? summary?.properties?.srid;
+      const sridFromResponse = parsed?.crs?.properties?.name;
+      const rawSrid = sridFromSummary ?? sridFromResponse ?? 'EPSG:4326';
+      const srid = String(rawSrid).startsWith('EPSG:')
+        ? String(rawSrid)
+        : String(rawSrid).startsWith('urn:ogc:def:crs:EPSG::')
+        ? `EPSG:${String(rawSrid).split('::').pop()}`
+        : `EPSG:${rawSrid}`;
+
+      // remove old-style crs from geometry object
+      const { crs, ...cleanGeometry } = parsed;
+
+      return JSON.stringify({
+        type: 'Feature',
+        geometry: cleanGeometry,
+        properties: { srid }
+      });
+    }
+
+    return JSON.stringify(parsed);
+  };
+
+  const onCoordinatesMoreInfoClick = async (geoJson, recordId, fieldName, fieldId, providerIdParam) => {
+    let resolvedGeoJson = geoJson;
+    const effectiveProviderId = providerIdParam ?? dataProviderId;
+    const effectiveFieldId = !isNil(fieldId) && fieldId !== '' ? fieldId : fieldName;
+
+    try {
+      if (isGeometrySummaryValue(geoJson)) {
+        setIsLoading(true);
+        const fullGeometryResponse = await DatasetService.getFullGeometry({
+          datasetId,
+          recordId,
+          fieldId: effectiveFieldId,
+          dataflowId,
+          tableSchemaId: tableId,
+          providerId: effectiveProviderId
+        });
+
+        const fullGeometryData = fullGeometryResponse?.data ?? fullGeometryResponse;
+
+        resolvedGeoJson = normalizeFullGeometryResponse(fullGeometryData, geoJson);
+      }
+    } catch (error) {
+      console.error('DataViewer - onCoordinatesMoreInfoClick.', error);
+    } finally {
+      setIsLoading(false);
+    }
+
     dispatchRecords({
       type: 'OPEN_COORDINATES_MORE_INFO',
-      payload: { geoJson, recordId, fieldName, fieldId, dataProviderId }
+      payload: {
+        geoJson: resolvedGeoJson,
+        recordId,
+        fieldName,
+        fieldId: effectiveFieldId,
+        dataProviderId: effectiveProviderId
+      }
     });
+  };
 
   useCheckNotifications(
     ['DOWNLOAD_GEOMETRY_COMPLETED_EVENT', 'DOWNLOAD_GEOMETRY_FAILED_EVENT'],
@@ -841,8 +925,88 @@ export const DataViewer = ({
     if (onRestoreData) onRestoreData(checked);
   };
 
-  const onMapOpen = (coordinates, mapCells, fieldType, readOnly) =>
-    dispatchRecords({ type: 'OPEN_MAP', payload: { coordinates, fieldType, mapCells, readOnly } });
+
+  const normalizeMapGeoJson = (geoJson, fallbackType = '') => {
+    const parsed = safeParseJson(geoJson);
+    const geometryType = String(parsed?.geometry?.type ?? fallbackType ?? '').toUpperCase();
+
+    if (!['POINT', 'LINESTRING', 'POLYGON', 'MULTILINESTRING', 'MULTIPOLYGON', 'MULTIPOINT'].includes(geometryType)) {
+      return typeof geoJson === 'string' ? geoJson : JSON.stringify(geoJson);
+    }
+
+    const asString = typeof geoJson === 'string' ? geoJson : JSON.stringify(geoJson);
+
+    // Keep old map behavior (same conversion path as table values)
+    return DatasetUtils.parseValue({
+      type: geometryType,
+      value: asString,
+      splitSRID: false
+    });
+  };
+  const isOpeningMapRef = useRef(false);
+
+  // const onMapOpen = (coordinates, mapCells, fieldType, readOnly) =>
+  //   dispatchRecords({ type: 'OPEN_MAP', payload: { coordinates, fieldType, mapCells, readOnly } });
+  const onMapOpen = async (coordinates, mapCells, fieldType, readOnly, recordIdParam) => {
+    
+    // Prevent multiple renders on the map icon from opening multiple maps
+    if (isOpeningMapRef.current) return;
+    isOpeningMapRef.current = true;
+
+    let resolvedCoordinates = coordinates;
+    const fieldId = mapCells?.field;
+    const recordId = recordIdParam ?? records?.selectedRecord?.recordId;
+
+    try {
+      if (isGeometrySummaryValue(coordinates)) {
+        setIsLoading(true);
+
+        const fullGeometryResponse = await DatasetService.getFullGeometry({
+          datasetId,
+          recordId,
+          fieldId,
+          dataflowId,
+          tableSchemaId: tableId,
+          providerId: dataProviderId
+        });
+
+        const fullGeometryData = fullGeometryResponse?.data ?? fullGeometryResponse;
+
+        resolvedCoordinates = normalizeFullGeometryResponse(fullGeometryData, coordinates);
+      } else {
+        const parsed = safeParseJson(coordinates);
+        if (!isNil(parsed) && isNil(parsed.geometry) && !isNil(parsed.type) && !isNil(parsed.coordinates)) {
+          resolvedCoordinates = normalizeFullGeometryResponse(parsed, coordinates);
+        }
+      }
+    } catch (error) {
+      console.error('DataViewer - onMapOpen(getFullGeometry).', error);
+      return;
+    } finally {
+      setIsLoading(false);
+    }
+
+    try {
+      if (isGeometrySummaryValue(coordinates)) {
+        resolvedCoordinates = normalizeMapGeoJson(resolvedCoordinates, fieldType);
+      } else {
+        const parsed = safeParseJson(coordinates);
+        if (!isNil(parsed) && isNil(parsed.geometry) && !isNil(parsed.type) && !isNil(parsed.coordinates)) {
+          resolvedCoordinates = normalizeFullGeometryResponse(parsed, coordinates);
+        }
+        resolvedCoordinates = normalizeMapGeoJson(resolvedCoordinates, fieldType);
+      }
+    } catch (error) {
+      console.error('DataViewer - onMapOpen(getFullGeometry).', error);
+      return;
+    }
+
+    dispatchRecords({
+      type: 'OPEN_MAP',
+      payload: { coordinates: resolvedCoordinates, fieldType, mapCells, readOnly }
+    });
+    isOpeningMapRef.current = false;
+  };
 
   const onPaste = event => {
     if (event) {

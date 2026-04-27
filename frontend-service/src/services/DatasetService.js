@@ -244,7 +244,9 @@ export const DatasetService = {
 
       const hasInfos = datasetTableDTO.totalRecordsWithInfos > 0;
 
-      const hasErrors = datasetTableDTO.totalRecordsWithErrors > 0 || (!hasBlockers && !hasWarnings && !hasInfos && datasetTableDTO.totalErrors > 0);
+      const hasErrors =
+        datasetTableDTO.totalRecordsWithErrors > 0 ||
+        (!hasBlockers && !hasWarnings && !hasInfos && datasetTableDTO.totalErrors > 0);
 
       return new DatasetTable({
         hasErrors,
@@ -345,6 +347,9 @@ export const DatasetService = {
   getTableImportedMetadata: async ({ datasetId }) => {
     return await DatasetRepository.getTableImportedMetadata({ datasetId });
   },
+
+  getFullGeometry: async ({ datasetId, recordId, fieldId, dataflowId, tableSchemaId, providerId }) =>
+    await DatasetRepository.getFullGeometry({ datasetId, recordId, fieldId, dataflowId, tableSchemaId, providerId }),
 
   getMetadata: async datasetId => {
     const datasetTableDataDTO = await DatasetRepository.getMetadata(datasetId);

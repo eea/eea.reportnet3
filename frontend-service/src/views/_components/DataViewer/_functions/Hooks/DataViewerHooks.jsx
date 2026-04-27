@@ -193,25 +193,74 @@ export const useSetColumns = (
     return '';
   };
 
-  const renderComplexGeometries = (value = '', type) => {
-    if (
-      !isNil(value) &&
-      value !== '' &&
-      areEquals(JSON.parse(value).geometry.type, type) &&
-      MapUtils.checkValidJSONMultipleCoordinates(value)
-    ) {
-      const parsedGeoJson = JSON.parse(value);
-      if (!isEmpty(parsedGeoJson.geometry.coordinates)) {
-        return (
-          <span className={styles.complexGeometries}>{`${parsedGeoJson.geometry.coordinates.join(', ')} - ${
-            parsedGeoJson.properties.srid
-          }`}</span>
-        );
-      } else {
-        return '';
+  const parseGeometrySummary = value => {
+    if (isNil(value) || value === '') {
+      return {};
+    }
+
+    let parsed = value;
+    if (typeof value === 'string') {
+      try {
+        parsed = JSON.parse(value);
+      } catch (e) {
+        return {};
       }
     }
-    return '';
+
+    if (typeof parsed !== 'object' || isNil(parsed)) {
+      return {};
+    }
+    // Support both geometry summary structure with type in geometry object and the one with type in the root (for backward compatibility)
+    const geometryType = parsed?.geometry?.type ?? parsed?.type;
+    const srid = parsed?.properties?.srid ?? parsed?.srid;
+    const sizeMB = parsed?.properties?.sizeMB ?? parsed?.sizeMB;
+    const dimension = parsed?.properties?.dimension ?? parsed?.dimension;
+
+    const normalizedType =
+      !isNil(geometryType) && String(geometryType).toUpperCase() !== 'FEATURE'
+        ? String(geometryType).toUpperCase()
+        : undefined;
+
+    return {
+      type: normalizedType,
+      srid,
+      sizeMB,
+      dimension
+    };
+  };
+
+  const formatSrid = srid => {
+    if (isNil(srid) || srid === '') return '';
+    const value = String(srid).replace('EPSG:', '');
+    return `EPSG:${value}`;
+  };
+
+  const formatSizeMB = sizeMB => {
+    if (isNil(sizeMB) || sizeMB === '') return '';
+    const parsed = Number(sizeMB);
+    if (Number.isNaN(parsed)) return '';
+    return `${parsed.toFixed(3)} MB`;
+  };
+
+  const renderComplexGeometries = (value = '', fallbackType = '', fallbackSrid) => {
+    const summary = parseGeometrySummary(value);
+
+    const geometryType = summary.type || fallbackType;
+    if (isNil(geometryType) || geometryType === '') {
+      return '';
+    }
+
+    const sridLabel = formatSrid(summary.srid ?? fallbackSrid);
+    const sizeLabel = formatSizeMB(summary.sizeMB);
+    const dimensionLabel = !isNil(summary.dimension) && summary.dimension !== '' ? String(summary.dimension) : '';
+
+    return (
+      <div>
+        <span className={styles.complexGeometries}>{`Type: ${geometryType}${sridLabel ? ` | SRID: ${sridLabel}` : ''}`}</span>
+        <br />
+        <span className={styles.complexGeometries}>{`${sizeLabel ? `Size: ${sizeLabel}` : ''}${dimensionLabel ? ` | Dimensions: ${dimensionLabel}` : ''}`}</span>
+      </div>
+    );
   };
 
   const getTooltipMessage = column => {

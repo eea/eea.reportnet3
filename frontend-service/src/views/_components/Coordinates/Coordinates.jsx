@@ -166,7 +166,7 @@ export const Coordinates = ({
           />
         );
       } else {
-        return <span>{JSON.parse(initialGeoJson)?.properties?.srid?.split(':')[1]}</span>;
+        return <span>{JSON.parse(initialGeoJson)?.srid?.split(':')[1]}</span>;
       }
     };
 
@@ -175,7 +175,7 @@ export const Coordinates = ({
         return (
           <TooltipButton
             message={resourcesContext.messages['coordinatesMoreInfo']}
-            onClick={() => onCoordinatesMoreInfoClick(initialGeoJson,recordId,fieldId)}
+            onClick={() => onCoordinatesMoreInfoClick(initialGeoJson, recordId, fieldId)}
             uniqueIdentifier={uniqueId('coordinates_more_info')}></TooltipButton>
         );
       }
