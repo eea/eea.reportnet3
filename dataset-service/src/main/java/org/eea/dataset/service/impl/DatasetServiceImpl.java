@@ -10,6 +10,7 @@ import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.eea.datalake.service.S3Helper;
 import org.eea.datalake.service.S3Service;
+import org.eea.datalake.service.SpatialDataHandling;
 import org.eea.datalake.service.model.S3PathResolver;
 import org.eea.dataset.mapper.*;
 import org.eea.dataset.persistence.data.domain.*;
@@ -344,6 +345,9 @@ public class DatasetServiceImpl implements DatasetService {
    */
   @Value("${exportDLPath}")
   private String exportDLPath;
+
+  @Autowired
+  private SpatialDataHandling spatialDataHandling;
 
   /**
    * Save all records.
@@ -2062,6 +2066,7 @@ public class DatasetServiceImpl implements DatasetService {
         && (idRules == null || idRules.length == 0) && fieldSchema == null && fieldValue == null) {
       records = recordRepository.findByTableValueNoOrder(idTableSchema, pageable);
       List<RecordVO> recordVOs = recordNoValidationMapper.entityListToClass(records);
+      spatialDataHandling.transformSpatialFields(recordVOs);
       result.setTotalFilteredRecords(0L);
       result.setRecords(recordVOs);
     } else {
