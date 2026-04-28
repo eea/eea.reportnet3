@@ -1170,4 +1170,7 @@ public interface DatasetController {
 
   @PostMapping("/private/clearExpiredDatasetTableLocks")
   void clearExpiredDatasetTableLocks();
+
+  @DeleteMapping("private/clearDatasetTableForUser")
+  void clearDatasetTableForUser(@RequestParam("username") String username);
 }

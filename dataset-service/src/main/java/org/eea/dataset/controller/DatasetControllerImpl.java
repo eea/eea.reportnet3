@@ -4333,6 +4333,17 @@ public class DatasetControllerImpl implements DatasetController {
 
   @Override
   @HystrixCommand
+  @DeleteMapping("private/clearDatasetTableForUser")
+  @ApiOperation(value = "Removes the specified user from any existing DatasetTable rows and if the rows refer to " +
+          "big data dataset converts any existing Iceberg tables to Parquet.", hidden = true)
+  public void clearDatasetTableForUser(@RequestParam("username") String username) {
+
+    final List<DatasetTableVO> datasetTables = datasetTableService.getDatasetTablesByEditingUser(username);
+    datasetTables.forEach(this::disableEditing);
+  }
+
+  @Override
+  @HystrixCommand
   @PostMapping("/private/clearExpiredDatasetTableLocks")
   @ApiOperation(value = "Clear the username and expiration date from DatasetTables with expired locks.", hidden = true)
   public void clearExpiredDatasetTableLocks() {
@@ -4343,66 +4354,69 @@ public class DatasetControllerImpl implements DatasetController {
     if (expiredDatasetTables.isEmpty()) {
       return;
     }
+    expiredDatasetTables.forEach(this::disableEditing);
 
-    for (DatasetTableVO datasetTableVO : expiredDatasetTables) {
+  }
+
+  private void disableEditing(DatasetTableVO datasetTableVO) {
+    try {
+      final Long datasetId = datasetTableVO.getDatasetId();
+      final DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
+
+      final Long dataflowId = dataSetMetabaseVO.getDataflowId();
+      final Long providerId = dataSetMetabaseVO.getDataProviderId();
+      final boolean isBigData = dataFlowControllerZuul.isBigDataflow(dataflowId);
+      final List<String> tableSchemaIds = Collections.singletonList(datasetTableVO.getTableSchemaId());
+
+      if (!isBigData) {
+        datasetTableService.disableEditingForDatasetTable(datasetId);
+        return;
+      }
+
+      //Dataset is BigData
+      final String lockKey = LockEnum.PARQUET_CONVERSION.getValue() + "_" + datasetId;
+      final String lockValue = LockEnum.PARQUET_CONVERSION.getValue() + "_" + datasetId + "_orchestrator_" + UUID.randomUUID();
+
+      final List<JobVO> activeJobsForDatasetId = jobControllerZuul
+              .findActiveJobsRelatedToADatasetId(datasetId, dataflowId, providerId);
+
+      if (activeJobsForDatasetId != null && !activeJobsForDatasetId.isEmpty()) {
+        final List<Long> jobIds = activeJobsForDatasetId
+                .stream()
+                .map(JobVO::getId)
+                .collect(Collectors.toList());
+
+        LOG.info("Cannot convert tables from iceberg to parquet for dataflowId {} datasetId {} providerId {} because there are active jobs related to the same dataset id. Job ids: {}",
+                dataflowId, datasetId, providerId, jobIds);
+        return;
+      }
+
       try {
-        final Long datasetId = datasetTableVO.getDatasetId();
-        final DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
-        ;
-        final Long dataflowId = dataSetMetabaseVO.getDataflowId();
-        final Long providerId = dataSetMetabaseVO.getDataProviderId();
-        final boolean isBigData = dataFlowControllerZuul.isBigDataflow(dataflowId);
-        final List<String> tableSchemaIds = Collections.singletonList(datasetTableVO.getTableSchemaId());
-
-        if (!isBigData) {
-          datasetTableService.disableEditingForDatasetTable(datasetId);
-          return;
-        }
-
-        //Dataset is BigData
-        final String lockKey = LockEnum.PARQUET_CONVERSION.getValue() + "_" + datasetId;
-        final String lockValue = LockEnum.PARQUET_CONVERSION.getValue() + "_" + datasetId + "_orchestrator_" + UUID.randomUUID();
-
-        final List<JobVO> activeJobsForDatasetId = jobControllerZuul
-                .findActiveJobsRelatedToADatasetId(datasetId, dataflowId, providerId);
-
-        if (activeJobsForDatasetId != null && !activeJobsForDatasetId.isEmpty()) {
-          final List<Long> jobIds = activeJobsForDatasetId
-                  .stream()
-                  .map(JobVO::getId)
-                  .collect(Collectors.toList());
-
-          LOG.info("Cannot convert tables from iceberg to parquet for dataflowId {} datasetId {} providerId {} because there are active jobs related to the same dataset id. Job ids: {}",
-                  dataflowId, datasetId, providerId, jobIds);
-          return;
-        }
-
-        try {
-          if (redisLockService.checkAndAcquireLock(lockKey, lockValue, conversionLockExpirationInMillis)) {
-            LOG.info("Orchestrator has triggered the iceberg to parquet conversion for dataflowId {} datasetId {} providerId {} and tableSchemaIds {} LockValue {}",
-                    dataflowId, datasetId, providerId, tableSchemaIds, lockValue);
-            bigDataDatasetService.initiateIcebergToParquetConversion(
-                    datasetId,
-                    dataflowId,
-                    providerId,
-                    tableSchemaIds,
-                    lockValue);
-          } else {
-            Map<String, String> activeLocks = redisLockService.listActiveLocks(lockKey);
-            LOG.info("Orchestrator has triggered the iceberg to parquet conversion for dataflowId {} datasetId {} providerId {} and tableSchemaIds {} but another iceberg to parquet conversion for the same dataset is in progress {}",
-                    dataflowId, datasetId, providerId, tableSchemaIds, activeLocks);
-          }
-        } catch (Exception e) {
-          LOG.error("Failed to initiate Iceberg to Parquet conversion for dataflowId {} datasetId {} providerId {} tableSchemaIds {} : {} - Releasing lock with value {}",
-                  dataflowId, datasetId, providerId, tableSchemaIds, e.getMessage(), lockValue);
-          redisLockService.releaseLock(lockKey, lockValue);
-          throw e;
+        if (redisLockService.checkAndAcquireLock(lockKey, lockValue, conversionLockExpirationInMillis)) {
+          LOG.info("Orchestrator has triggered the iceberg to parquet conversion for dataflowId {} datasetId {} providerId {} and tableSchemaIds {} LockValue {}",
+                  dataflowId, datasetId, providerId, tableSchemaIds, lockValue);
+          bigDataDatasetService.initiateIcebergToParquetConversion(
+                  datasetId,
+                  dataflowId,
+                  providerId,
+                  tableSchemaIds,
+                  lockValue);
+        } else {
+          Map<String, String> activeLocks = redisLockService.listActiveLocks(lockKey);
+          LOG.info("Orchestrator has triggered the iceberg to parquet conversion for dataflowId {} datasetId {} providerId {} and tableSchemaIds {} but another iceberg to parquet conversion for the same dataset is in progress {}",
+                  dataflowId, datasetId, providerId, tableSchemaIds, activeLocks);
         }
       } catch (Exception e) {
-        LOG.error(e.getMessage(), e);
+        LOG.error("Failed to initiate Iceberg to Parquet conversion for dataflowId {} datasetId {} providerId {} tableSchemaIds {} : {} - Releasing lock with value {}",
+                dataflowId, datasetId, providerId, tableSchemaIds, e.getMessage(), lockValue);
+        redisLockService.releaseLock(lockKey, lockValue);
+        throw e;
       }
+    } catch (Exception e) {
+      LOG.error(e.getMessage(), e);
     }
   }
+
   /**
    * Check if there is at least one reporting dataset for the given
    * dataflow / provider that is currently enabled for editing.

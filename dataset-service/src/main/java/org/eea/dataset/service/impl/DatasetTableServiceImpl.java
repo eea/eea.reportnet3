@@ -255,4 +255,15 @@ public class DatasetTableServiceImpl implements DatasetTableService {
         return mapper.entityListToClass(datasetTables);
     }
 
+    @Override
+    public List<DatasetTableVO> getDatasetTablesByEditingUser(String username) {
+        final List<DatasetTable> datasetTables = datasetTableRepository.findDatasetTablesByEditingUsername(username);
+
+        if (datasetTables.isEmpty()) {
+            return new ArrayList<>();
+        }
+        final DatasetTableMapperImpl mapper = new DatasetTableMapperImpl();
+        return mapper.entityListToClass(datasetTables);
+    }
+
 }
