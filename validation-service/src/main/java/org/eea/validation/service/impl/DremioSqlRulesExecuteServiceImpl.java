@@ -390,7 +390,7 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
                 //checkIntegrityConstraint
                 recordIds = getDheckIntegrityConstraintRecordIds(datatableResolver.getDataflowId(), datatableResolver.getDatasetId(), datatableResolver.getDataProviderId(), parameters, object, method);
                 break;
-            case 8:
+            case 9:
                 //isfieldFK
                 recordIds = getIsFieldFKRecordIds(datatableResolver.getDataflowId(), datatableResolver.getDatasetId(), tableSchemaId, datatableResolver.getDataProviderId(), tablePath, parameters, object, method);
                 break;
@@ -463,9 +463,23 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
         String primaryKey = pkAndFkDetailsList.get(1);
         String optionalPK = pkAndFkDetailsList.get(2);
         String optionalFK = pkAndFkDetailsList.get(3);
+
+        FieldSchema masterConditionalFieldSchema = null;
+        if (fkFieldSchema.getReferencedField() != null
+                && fkFieldSchema.getReferencedField().getMasterConditionalFieldId() != null) {
+            ObjectId masterConditionalFieldId = fkFieldSchema.getReferencedField().getMasterConditionalFieldId();
+            masterConditionalFieldSchema = datasetSchemaFK.getTableSchemas().stream()
+                    .filter(t -> t.getIdTableSchema().toString().equals(tableSchemaId))
+                    .findFirst()
+                    .flatMap(t -> t.getRecordSchema().getFieldSchema().stream()
+                            .filter(f -> f.getIdFieldSchema().toString().equals(masterConditionalFieldId.toString()))
+                            .findFirst())
+                    .orElse(null);
+        }
+
         S3PathResolver pkTableResolver = new S3PathResolver(dataflowId, dataProviderId != null ? dataProviderId : 0, datasetIdRefered, pkTableName);
         String pkTablePath = s3Service.getTablePathByDatasetType(datasetSchemaPK.getIdDataFlow(), datasetIdRefered, pkTableName, pkTableResolver);
-        recordIds = (List<String>) method.invoke(object, fkFieldSchema, pkMustBeUsed, tablePath, pkTablePath, foreignKey, primaryKey, optionalFK, optionalPK);  //isfieldFK
+        recordIds = (List<String>) method.invoke(object, fkFieldSchema, pkMustBeUsed, tablePath, pkTablePath, foreignKey, primaryKey, optionalFK, optionalPK, masterConditionalFieldSchema);  //isfieldFK
         return recordIds;
     }
 
