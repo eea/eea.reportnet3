@@ -925,7 +925,6 @@ export const DataViewer = ({
     if (onRestoreData) onRestoreData(checked);
   };
 
-
   const normalizeMapGeoJson = (geoJson, fallbackType = '') => {
     const parsed = safeParseJson(geoJson);
     const geometryType = String(parsed?.geometry?.type ?? fallbackType ?? '').toUpperCase();
@@ -936,6 +935,11 @@ export const DataViewer = ({
 
     const asString = typeof geoJson === 'string' ? geoJson : JSON.stringify(geoJson);
 
+    // For POINT geometries, keep the original value as string to allow the map component to parse it.
+    if (geometryType === 'POINT') {
+      return asString;
+    }
+
     // Keep old map behavior (same conversion path as table values)
     return DatasetUtils.parseValue({
       type: geometryType,
@@ -945,10 +949,7 @@ export const DataViewer = ({
   };
   const isOpeningMapRef = useRef(false);
 
-  // const onMapOpen = (coordinates, mapCells, fieldType, readOnly) =>
-  //   dispatchRecords({ type: 'OPEN_MAP', payload: { coordinates, fieldType, mapCells, readOnly } });
   const onMapOpen = async (coordinates, mapCells, fieldType, readOnly, recordIdParam) => {
-    
     // Prevent multiple renders on the map icon from opening multiple maps
     if (isOpeningMapRef.current) return;
     isOpeningMapRef.current = true;
