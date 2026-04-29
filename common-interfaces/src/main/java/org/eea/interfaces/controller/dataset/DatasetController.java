@@ -1165,4 +1165,10 @@ public interface DatasetController {
           @RequestParam("idTableSchema") String idTableSchema,
           @RequestParam(value = "downloadFile", required = false, defaultValue = "true") boolean downloadFile
   );
+
+  @GetMapping("/private/expiredDatasetTables")
+  List<DatasetTableVO> getDatasetTablesWithExpiredEditingLocks();
+
+  @PostMapping("/private/clearExpiredDatasetTableLocks")
+  void clearExpiredDatasetTableLocks();
 }
