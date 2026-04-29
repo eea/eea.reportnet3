@@ -68,6 +68,7 @@ export const ManageBusinessDataflow = ({
   const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isOfficialReporting, setIsOfficialReporting] = useState(isEditing ? state.officialReporting : false);
   const [isSending, setIsSending] = useState(false);
   const [name, setName] = useState(isEditing ? state.name : '');
   const [selectedFmeUser, setSelectedFmeUser] = useState(null);
@@ -238,7 +239,8 @@ export const ManageBusinessDataflow = ({
           name,
           selectedGroup.dataProviderGroupId,
           selectedFmeUser.id,
-          bigData
+          bigData,
+          isOfficialReporting
         );
         manageDialogs(dialogName, false);
         onEditDataflow(name, description);
@@ -250,7 +252,8 @@ export const ManageBusinessDataflow = ({
           selectedGroup.dataProviderGroupId,
           selectedFmeUser.id,
           bigData,
-          bigData === true ? true : undefined
+          bigData === true ? true : undefined,
+          isOfficialReporting
         );
         if (pinDataflow) {
           const inmUserProperties = { ...userContext.userProps };
@@ -276,6 +279,29 @@ export const ManageBusinessDataflow = ({
     } finally {
       setIsSending(false);
     }
+  };
+
+  const renderOfficialReporting = () => {
+    return (
+      <div className={styles.checkboxWrapper}>
+        <Checkbox
+          ariaLabel={resourcesContext.messages['officialReporting']}
+          checked={isOfficialReporting}
+          id="officialReportingCheckbox"
+          inputId="officialReportingCheckbox"
+          onChange={() => setIsOfficialReporting(!isOfficialReporting)}
+          role="checkbox"
+        />
+        <label>
+          <span onClick={() => setIsOfficialReporting(!isOfficialReporting)}>
+            {resourcesContext.messages['officialReporting']}
+          </span>
+        </label>
+        <TooltipButton
+          message={resourcesContext.messages['officialReportingMessage']}
+          uniqueIdentifier="officialReporting"></TooltipButton>
+      </div>
+    );
   };
 
   const renderDialogFooter = () => {
@@ -338,7 +364,6 @@ export const ManageBusinessDataflow = ({
       }
     };
 
-
     return (
       <Fragment>
         <div className="p-toolbar-group-left">
@@ -362,7 +387,8 @@ export const ManageBusinessDataflow = ({
           {renderCheckBoxPinned()}
         </div>
         <div className="p-toolbar-group-left">{renderBigDataStorage()}</div>
-        {bigData && <div className="p-toolbar-group-left">{renderSncData && renderSncData(false,true,true)}</div>}
+        {!isEditing && <div className="p-toolbar-group-left">{renderOfficialReporting()}</div>}
+        {bigData && <div className="p-toolbar-group-left">{renderSncData && renderSncData(false, true, true)}</div>}
         <Button
           className={`p-button-primary ${
             !isEmpty(name) &&
@@ -492,6 +518,7 @@ export const ManageBusinessDataflow = ({
             {resourcesContext.messages['searchObligations']}
           </label>
         </div>
+        {isEditing && <div className={`${styles.officialReportingWrapper}`}>{renderOfficialReporting()}</div>}
       </Fragment>
     );
   };

@@ -13,6 +13,7 @@ export class ReferenceDataflow {
     isReleasable,
     manualAcceptance,
     name,
+    officialReporting,
     referenceDatasets,
     reportingDatasetsStatus,
     representatives,
@@ -37,6 +38,7 @@ export class ReferenceDataflow {
     this.isReleasable = isReleasable;
     this.manualAcceptance = manualAcceptance;
     this.name = name;
+    this.officialReporting = officialReporting;
     this.referenceDatasets = referenceDatasets;
     this.reportingDatasetsStatus = reportingDatasetsStatus;
     this.representatives = representatives;
