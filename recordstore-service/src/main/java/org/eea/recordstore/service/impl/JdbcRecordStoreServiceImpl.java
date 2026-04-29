@@ -4,8 +4,15 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.FeignException;
 import lombok.SneakyThrows;
+import org.apache.avro.Schema;
+import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.parquet.avro.AvroParquetReader;
+import org.apache.parquet.avro.AvroParquetWriter;
+import org.apache.parquet.hadoop.ParquetReader;
+import org.apache.parquet.hadoop.ParquetWriter;
 import org.eea.datalake.service.S3Helper;
 import org.eea.datalake.service.S3Service;
 import org.eea.datalake.service.impl.S3HelperImpl;
@@ -2484,7 +2491,111 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
             S3_VALIDATION_TABLE_PATH
     );
 
-    validationFiles.forEach(s3Object -> processAndUploadValidationFile(s3Object, snapshotPath, dataflowId));
+    processAndUploadAllValidations(validationFiles, snapshotPath, dataflowId);
+  }
+
+  private void processAndUploadAllValidations(List<S3Object> validationFiles,
+                                              S3PathResolver targetPath,
+                                              Long dataflowId) {
+
+    List<GenericRecord> allRecords = new ArrayList<>();
+
+    try {
+      for (S3Object s3Object : validationFiles) {
+
+        String key = s3Object.key();
+        String filename = extractFilename(key);
+
+        File parquetFile = s3Helper.getFileFromS3(
+                key,
+                filename,
+                pathSnapshot,
+                LiteralConstants.PARQUET_TYPE
+        );
+
+        allRecords.addAll(readParquet(parquetFile));
+
+        if (parquetFile.exists()) {
+          parquetFile.delete();
+        }
+      }
+
+      File mergedFile = writeParquet(allRecords);
+
+      String destinationPath = s3Service.getS3Path(targetPath);
+
+      LOG.info("Uploading merged validation file to {}", destinationPath);
+
+      if (mergedFile != null) {
+        s3Helper.uploadFileToBucket(destinationPath, mergedFile.getPath());
+
+        if (mergedFile.exists()) {
+          mergedFile.delete();
+        }
+      }
+
+      LOG.info("Upload successful: {}", destinationPath);
+
+    } catch (IOException e) {
+      LOG.error("Error processing validations for dataflowId {}", dataflowId, e);
+    }
+  }
+
+  private List<GenericRecord> readParquet(File file) throws IOException {
+
+    List<GenericRecord> records = new ArrayList<>();
+
+    ParquetReader<GenericRecord> reader =
+            AvroParquetReader.<GenericRecord>builder(new org.apache.hadoop.fs.Path(file.getAbsolutePath()))
+                    .withConf(new Configuration())
+                    .build();
+
+    GenericRecord record;
+    while ((record = reader.read()) != null) {
+      records.add(record);
+    }
+
+    reader.close();
+    return records;
+  }
+
+  private File writeParquet(List<GenericRecord> records) throws IOException {
+
+    if (records.isEmpty()) {
+      LOG.warn("No validation records found, skipping Parquet write");
+      return null;
+    }
+
+    Schema schema = records.get(0).getSchema();
+
+    // 🔥 Use unique file name to avoid collisions
+    File file = new File(
+            System.getProperty("java.io.tmpdir"),
+            "validations_" + UUID.randomUUID() + ".parquet"
+    );
+
+    // safety: ensure no leftover file exists
+    if (file.exists()) {
+      if (!file.delete()) {
+        throw new IOException("Cannot delete existing temp file: " + file.getAbsolutePath());
+      }
+    }
+
+    org.apache.hadoop.fs.Path outputPath =
+            new org.apache.hadoop.fs.Path(file.getAbsolutePath());
+
+    try (ParquetWriter<GenericRecord> writer =
+                 AvroParquetWriter.<GenericRecord>builder(outputPath)
+                         .withSchema(schema)
+                         .withConf(new Configuration())
+                         .build()) {
+
+      for (GenericRecord record : records) {
+        writer.write(record);
+      }
+    }
+
+    return file;
   }
 
   private void processAndUploadValidationFile(S3Object s3Object,
