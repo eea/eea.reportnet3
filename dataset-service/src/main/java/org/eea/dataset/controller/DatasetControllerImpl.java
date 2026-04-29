@@ -4348,7 +4348,6 @@ public class DatasetControllerImpl implements DatasetController {
       try {
         final Long datasetId = datasetTableVO.getDatasetId();
         final DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
-        ;
         final Long dataflowId = dataSetMetabaseVO.getDataflowId();
         final Long providerId = dataSetMetabaseVO.getDataProviderId();
         final boolean isBigData = dataFlowControllerZuul.isBigDataflow(dataflowId);
@@ -4356,7 +4355,7 @@ public class DatasetControllerImpl implements DatasetController {
 
         if (!isBigData) {
           datasetTableService.disableEditingForDatasetTable(datasetId);
-          return;
+          continue;
         }
 
         //Dataset is BigData
@@ -4374,7 +4373,7 @@ public class DatasetControllerImpl implements DatasetController {
 
           LOG.info("Cannot convert tables from iceberg to parquet for dataflowId {} datasetId {} providerId {} because there are active jobs related to the same dataset id. Job ids: {}",
                   dataflowId, datasetId, providerId, jobIds);
-          return;
+          continue;
         }
 
         try {
