@@ -69,7 +69,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import static org.eea.utils.LiteralConstants.S3_SNAPSHOT_TABLE_NAME_VALIDATE_DC_PATH;
+import static org.eea.utils.LiteralConstants.*;
 
 /**
  * The Class RecordStoreControllerImpl.
@@ -822,6 +822,15 @@ public class RecordStoreControllerImpl implements RecordStoreController {
       // Build S3 path
       S3PathResolver snapshotPath = new S3PathResolver(dataflowId, providerId, datasetId);
       snapshotPath.setSnapshotId(snapshotId);
+      snapshotPath.setPath(S3_SNAPSHOT_TABLE_NAME_SNAPSHOT_PATH);
+
+      if (!s3Helper.checkFolderExist(snapshotPath)) {
+        throw new ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "Did not found any snapshot with the specific id"
+        );
+      }
+
       snapshotPath.setPath(S3_SNAPSHOT_TABLE_NAME_VALIDATE_DC_PATH);
 
       String key = s3Service.getS3Path(snapshotPath);
@@ -890,7 +899,7 @@ public class RecordStoreControllerImpl implements RecordStoreController {
         }
       };
 
-      String filename = key.substring(key.lastIndexOf("/") + 1).replace(".parquet", ".csv");
+      String filename = key.substring(key.lastIndexOf("/") + 1).concat("_" + snapshotId).replace(".parquet", ".csv");
       if (!filename.contains("csv")) {
         filename = filename.concat(".csv");
       }

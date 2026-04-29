@@ -92,10 +92,10 @@ public class DataLakeDataRetrieverUtils {
         switch (sortField.getType()) {
             case NUMBER_INTEGER:
             case NUMBER_DECIMAL:
-                dataQuery.append(" order by CASE when ").append(sortField.getName()).append(" like '' THEN 0 ELSE CAST(").append(sortField.getName()).append(" as NUMERIC) END");
+                dataQuery.append(" order by CASE when \"").append(sortField.getName()).append("\" like '' THEN 0 ELSE CAST(\"").append(sortField.getName()).append("\" as NUMERIC) END");
                 break;
             case DATE:
-                dataQuery.append(" order by CASE when ").append(sortField.getName()).append(" like '' THEN '0000-00-00' ELSE CAST(").append(sortField.getName()).append(" as DATE) END");
+                dataQuery.append(" order by CASE when \"").append(sortField.getName()).append("\" like '' THEN '0000-00-00' ELSE CAST(\"").append(sortField.getName()).append("\" as DATE) END");
                 break;
             default:
                 dataQuery.append(" order by ").append(sortField.getName());
