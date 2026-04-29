@@ -545,6 +545,9 @@ public class DataflowServiceImpl implements DataflowService {
     if(dataflowVO.getSncData() == null){
       dataflowVO.setSncData(false);
     }
+    if(dataflowVO.getOfficialReporting() == null) {
+      dataflowVO.setOfficialReporting(false);
+    }
     dataflowVO.setCreationDate(new Date());
     dataflowVO.setStatus(TypeStatusEnum.DESIGN);
     dataflowVO.setReleasable(true);
