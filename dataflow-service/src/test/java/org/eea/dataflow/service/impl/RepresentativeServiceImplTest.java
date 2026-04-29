@@ -56,6 +56,7 @@ import org.eea.security.jwt.utils.EeaUserDetails;
 import org.eea.thread.ThreadPropertiesManager;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -120,6 +121,9 @@ public class RepresentativeServiceImplTest {
 
   @Mock
   private DatasetController.DataSetControllerZuul dataSetControllerZuulMock;
+
+  @Mock
+  private ReferenceDatasetControllerZuul referenceDatasetControllerZuul;
 
   @Mock
   private FMEUserMapper fmeUserMapper;
@@ -644,11 +648,14 @@ public class RepresentativeServiceImplTest {
         .thenReturn(datasets);
     Mockito.when(leadReporterMapper.classToEntity(Mockito.any())).thenReturn(leadReporter);
     Mockito.when(leadReporterRepository.save(Mockito.any())).thenReturn(leadReporter);
+    final UserRepresentationVO userRepresentationVO = new UserRepresentationVO();
+    userRepresentationVO.setUsername("username");
+    Mockito.when(userManagementControllerZull.getUserByEmail(leadReporter.getEmail()))
+            .thenReturn(userRepresentationVO);
 
     Assert.assertEquals(1L,
         representativeServiceImpl.updateLeadReporter(leadReporterVO).longValue());
   }
-
 
   @Test(expected = EEAException.class)
   public void updateLeadReporterRepresentativeNotFoundExceptionTest() throws EEAException {
