@@ -1013,8 +1013,8 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
 
     if (null != dataflow && dataflow.isReleasable()) {
       try {
-        if (!dataflow.getOfficialReporting()) {
-          restrictFromPublic = false;
+        if (dataflow.getOfficialReporting() != null && !dataflow.getOfficialReporting()) {
+          restrictFromPublic = true;
         }
         datasetSnapshotService.createReleaseSnapshots(dataflowId, dataProviderId,
                 restrictFromPublic, validate, jobId);

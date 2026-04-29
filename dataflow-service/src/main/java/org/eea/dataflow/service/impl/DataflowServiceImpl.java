@@ -617,6 +617,9 @@ public class DataflowServiceImpl implements DataflowService {
         if (null != dataflowVO.getDeadlineDate()) {
           dataflowSave.get().setDeadlineDate(dataflowVO.getDeadlineDate());
         }
+        if (null != dataflowVO.getOfficialReporting()) {
+          dataflowSave.get().setOfficialReporting(dataflowVO.getOfficialReporting());
+        }
         dataflowRepository.save(dataflowSave.get());
         LOG.info("The dataflow {} has been updated.", dataflowSave.get().getName());
       }
