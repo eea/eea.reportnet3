@@ -126,4 +126,6 @@ public interface DatasetTableRepository extends JpaRepository<DatasetTable, Long
 
     List<DatasetTable> findDatasetTableByEditLockExpirationDateBefore(Date date);
 
+    List<DatasetTable> findDatasetTablesByEditingUsername(String editingUsername);
+
 }

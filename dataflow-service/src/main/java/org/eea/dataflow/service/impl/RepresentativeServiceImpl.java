@@ -38,6 +38,8 @@ import org.eea.dataflow.persistence.repository.RepresentativeRepository;
 import org.eea.dataflow.service.RepresentativeService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataset.DatasetController;
+import org.eea.interfaces.controller.dataset.DatasetMetabaseController;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.dataset.ReferenceDatasetController.ReferenceDatasetControllerZuul;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
@@ -73,6 +75,8 @@ import org.springframework.web.multipart.MultipartFile;
 import com.opencsv.CSVWriter;
 import io.jsonwebtoken.lang.Collections;
 import org.springframework.web.server.ResponseStatusException;
+
+import static org.eea.interfaces.controller.dataset.DatasetController.*;
 
 /** The Class RepresentativeServiceImpl. */
 @Service("dataflowRepresentativeService")
@@ -132,6 +136,9 @@ public class RepresentativeServiceImpl implements RepresentativeService {
   @Autowired
   private DataSetMetabaseControllerZuul datasetMetabaseController;
 
+  @Autowired
+  private DataSetControllerZuul dataSetControllerZuul;
+
   /** The reference dataset controller zuul. */
   @Autowired
   private ReferenceDatasetControllerZuul referenceDatasetControllerZuul;
@@ -184,6 +191,8 @@ public class RepresentativeServiceImpl implements RepresentativeService {
   /** The Constant KO_REPRESENTATIVE_ALREADY_EXISTS: {@value}. */
   private static final String KO_REPRESENTATIVE_ALREADY_EXISTS =
       "KO - imported Representative already exists";
+    @Autowired
+    private DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul;
 
   /**
    * Creates the representative.
@@ -868,8 +877,13 @@ public class RepresentativeServiceImpl implements RepresentativeService {
   public void deleteLeadReporter(Long leadReporterId) throws EEAException {
     Optional<LeadReporter> leadReporter = leadReporterRepository.findById(leadReporterId);
     if (leadReporter.isPresent()) {
-      modifyLeadReporterPermissions(leadReporter.get().getEmail(),
-          leadReporter.get().getRepresentative(), true);
+      modifyLeadReporterPermissions(
+              leadReporter.get().getEmail(),
+              leadReporter.get().getRepresentative(),
+              true);
+
+      final UserRepresentationVO user = userManagementControllerZull.getUserByEmail(leadReporter.get().getEmail());
+      dataSetControllerZuul.clearDatasetTableForUser(user.getUsername());
     }
     leadReporterRepository.deleteById(leadReporterId);
   }
