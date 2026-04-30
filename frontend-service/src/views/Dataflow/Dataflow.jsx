@@ -1956,8 +1956,7 @@ export const Dataflow = () => {
               dataProviderGroupId: dataflowState.data.dataProviderGroupId,
               dataProviderGroupName: dataflowState.data.dataProviderGroupName,
               isSoftDeleteDialogVisible: dataflowState.isSoftDeleteDialogVisible,
-              isReverseSoftDeleteDialogVisible: dataflowState.isReverseSoftDeleteDialogVisible,
-              officialReporting: dataflowState.officialReporting
+              isReverseSoftDeleteDialogVisible: dataflowState.isReverseSoftDeleteDialogVisible
             }}
           />
         )}
