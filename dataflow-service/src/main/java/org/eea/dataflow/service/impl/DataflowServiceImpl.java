@@ -545,6 +545,9 @@ public class DataflowServiceImpl implements DataflowService {
     if(dataflowVO.getSncData() == null){
       dataflowVO.setSncData(false);
     }
+    if(dataflowVO.getOfficialReporting() == null) {
+      dataflowVO.setOfficialReporting(false);
+    }
     dataflowVO.setCreationDate(new Date());
     dataflowVO.setStatus(TypeStatusEnum.DESIGN);
     dataflowVO.setReleasable(true);
@@ -613,6 +616,9 @@ public class DataflowServiceImpl implements DataflowService {
         }
         if (null != dataflowVO.getDeadlineDate()) {
           dataflowSave.get().setDeadlineDate(dataflowVO.getDeadlineDate());
+        }
+        if (null != dataflowVO.getOfficialReporting()) {
+          dataflowSave.get().setOfficialReporting(dataflowVO.getOfficialReporting());
         }
         dataflowRepository.save(dataflowSave.get());
         LOG.info("The dataflow {} has been updated.", dataflowSave.get().getName());

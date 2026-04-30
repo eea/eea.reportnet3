@@ -1223,6 +1223,8 @@
     "obligationId": "Obligation id",
     "oblTitle": "Title",
     "of": "of",
+    "officialReporting": "Is official reporting",
+    "officialReportingMessage": "Check to mark new dataflow as official reporting",
     "ok": "OK",
     "onlyReadPermissions": "Read",
     "onlyReleasedCheckboxLabel": "Only released",
