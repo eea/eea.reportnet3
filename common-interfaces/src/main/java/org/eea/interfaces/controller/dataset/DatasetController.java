@@ -1165,4 +1165,7 @@ public interface DatasetController {
           @RequestParam("idTableSchema") String idTableSchema,
           @RequestParam(value = "downloadFile", required = false, defaultValue = "true") boolean downloadFile
   );
+
+  @DeleteMapping("private/clearDatasetTableForUser")
+  void clearDatasetTableForUser(@RequestParam("username") String username);
 }

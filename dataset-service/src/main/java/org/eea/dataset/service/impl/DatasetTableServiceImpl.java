@@ -3,6 +3,7 @@ package org.eea.dataset.service.impl;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.BooleanUtils;
 import org.eea.dataset.mapper.DatasetTableMapper;
+import org.eea.dataset.mapper.DatasetTableMapperImpl;
 import org.eea.dataset.persistence.metabase.domain.DatasetTable;
 import org.eea.dataset.persistence.metabase.repository.DatasetTableRepository;
 import org.eea.dataset.service.DatasetMetabaseService;
@@ -218,5 +219,22 @@ public class DatasetTableServiceImpl implements DatasetTableService {
         return false;
     }
 
+    @Override
+    public List<DatasetTableVO> getDatasetTablesByEditingUser(String username) {
+        final List<DatasetTable> datasetTables = datasetTableRepository.findDatasetTablesByEditingUsername(username);
+
+        if (datasetTables.isEmpty()) {
+            return new ArrayList<>();
+        }
+        final DatasetTableMapperImpl mapper = new DatasetTableMapperImpl();
+        return mapper.entityListToClass(datasetTables);
+    }
+
+    @Override
+    @Transactional
+    public void disableEditingForDatasetTable(Long datasetId) {
+        // Clear ALL editing locks for this dataset
+        datasetTableRepository.unlockEditingForDatasetUser(datasetId);
+    }
 
 }
