@@ -4363,7 +4363,7 @@ public class DatasetControllerImpl implements DatasetController {
       final Long datasetId = datasetTableVO.getDatasetId();
       final DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
 
-      final Long dataflowId = dataSetMetabaseVO.getDataflowId();
+      ;final Long dataflowId = dataSetMetabaseVO.getDataflowId();
       final Long providerId = dataSetMetabaseVO.getDataProviderId();
       final boolean isBigData = dataFlowControllerZuul.isBigDataflow(dataflowId);
       final List<String> tableSchemaIds = Collections.singletonList(datasetTableVO.getTableSchemaId());

@@ -23,7 +23,7 @@ public class JobForRemovingIcebergTablesWithExpiredEditingLocks {
         ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
         scheduler.initialize();
         scheduler.schedule(this::removeExpiredIcebergTables,
-                new CronTrigger("0 */5 * * * *"));
+                new CronTrigger("* */5 * * * *"));
     }
 
     /**

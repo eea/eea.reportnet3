@@ -80,7 +80,7 @@ public interface DatasetTableRepository extends JpaRepository<DatasetTable, Long
     int lockEditingForDatasetUser(
             @Param("datasetId") Long datasetId,
             @Param("username") String username,
-            @Param("expirationIntervalInHours") Long expirationIntervalInHours);
+            @Param("expirationInterval") Long expirationIntervalInHours);
 
     @Transactional
     @Modifying
