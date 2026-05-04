@@ -34,6 +34,4 @@ public interface DatasetTableService {
     boolean isAnyDatasetBeingEdited(List<Long> datasetIds);
 
     List<DatasetTableVO> getDatasetTablesWithExpiredEditingLocks();
-
-    List<DatasetTableVO> getDatasetTablesByEditingUser(String username);
 }
