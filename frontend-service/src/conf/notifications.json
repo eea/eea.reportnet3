@@ -1811,12 +1811,6 @@
           }
         }
       ]
-    },
-    {
-      "key": "warn",
-      "lifeTime": 20000,
-      "fixed": false,
-      "types": [{ "key": "YOU_ONLY_HAVE_LIMITED_TIME" }]
     }
   ],
   "hiddenNotifications": [

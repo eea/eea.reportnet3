@@ -1393,7 +1393,6 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
     } else {
       try {
         await DatasetService.enableEditing({ datasetId });
-        notificationContext.add({ type: 'YOU_ONLY_HAVE_LIMITED_TIME' }, true);
       } catch (error) {
         console.error('Dataset - toggleEditMode.', error);
       } finally {
