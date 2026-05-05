@@ -874,8 +874,20 @@ export const FieldEditor = ({
         ['POINT', 'POLYGON', 'LINESTRING', 'MULTILINESTRING', 'MULTIPOLYGON', 'MULTIPOINT'].includes(type.toUpperCase())
       ) {
         if (value !== '') {
-          const parsedJSON = JSON.parse(value);
-          return `${parsedJSON.geometry.coordinates.join(', ')} - ${parsedJSON.properties.srid}`;
+          try {
+            const parsedJSON = JSON.parse(value);
+            
+            // Handle both full geometry format and summary format
+            const coordinates = parsedJSON?.geometry?.coordinates ?? parsedJSON?.coordinates;
+            const srid = parsedJSON?.properties?.srid ?? parsedJSON?.srid;
+
+            if (!coordinates) {
+              return '';
+            }
+            return `${coordinates.join(', ')} - ${srid}`;
+          } catch (e) {
+            return '';
+          }
         } else {
           return '';
         }
@@ -890,7 +902,6 @@ export const FieldEditor = ({
   const renderMultipleCoordinatesInfo = (value, isValidJSON, differentTypes) => {
     const infoLabelClass =
       isNil(value) || value === '' || !isValidJSON || differentTypes ? styles.nonEditableData : null;
-
 
     const renderMoreInfo = () => {
       if (value !== '') {
