@@ -225,6 +225,11 @@ public class DremioHelperServiceImpl implements DremioHelperService {
                 throw new RuntimeException(e);
             }
         }
+        
+        if (folderId == null) {
+            throw new DremioApiException("Could not retrieve folder id for datasetId "
+                + s3PathResolver.getDatasetId() + " and folder " + folderName);
+        }
 
         try {
             dremioApiController.promote(token, folderId, requestBody);
