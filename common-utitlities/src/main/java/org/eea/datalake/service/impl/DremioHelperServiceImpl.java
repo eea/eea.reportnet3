@@ -85,7 +85,14 @@ public class DremioHelperServiceImpl implements DremioHelperService {
 
     @Override
     public boolean checkFolderPromoted(S3PathResolver s3PathResolver, String folderName) {
-        DremioDirectoryItemsResponse directoryItems = getDirectoryItems(s3PathResolver, folderName);
+        DremioDirectoryItemsResponse directoryItems;
+        try {
+            directoryItems = getDirectoryItems(s3PathResolver, folderName);
+        } catch (Exception e) {
+            LOG.warn("Could not get directory items for folder {}", folderName, e);
+            return false;
+        }
+
         if (directoryItems!=null) {
             Integer itemPosition;
             if (S3_IMPORT_FILE_PATH.equals(s3PathResolver.getPath())) {
@@ -149,7 +156,14 @@ public class DremioHelperServiceImpl implements DremioHelperService {
     @Override
     public String getFolderId(S3PathResolver s3PathResolver, String folderName) {
         String folderId = null;
-        DremioDirectoryItemsResponse directoryItems = getDirectoryItems(s3PathResolver, folderName);
+        DremioDirectoryItemsResponse directoryItems;
+        try {
+            directoryItems = getDirectoryItems(s3PathResolver, folderName);
+        } catch (Exception e) {
+            LOG.warn("Could not retrieve directory items for datasetId" + s3PathResolver.getDatasetId(), e);
+            return null;
+        }
+
         if (directoryItems!=null) {
             Integer itemPosition;
             if (S3_IMPORT_FILE_PATH.equals(s3PathResolver.getPath())) {
