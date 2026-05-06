@@ -343,6 +343,11 @@ export const DataViewer = ({
       setIsLoading(false);
     }
 
+    // Flip the coordinates for the map component to be compatible with Leaflet's format
+    if (isGeometrySummaryValue(geoJson)) {
+      resolvedGeoJson = normalizeMapGeoJson(resolvedGeoJson);
+    }
+
     dispatchRecords({
       type: 'OPEN_COORDINATES_MORE_INFO',
       payload: {
@@ -950,7 +955,6 @@ export const DataViewer = ({
   const isOpeningMapRef = useRef(false);
 
   const onMapOpen = async (coordinates, mapCells, fieldType, readOnly, recordIdParam) => {
-    // Prevent multiple renders on the map icon from opening multiple maps
     if (isOpeningMapRef.current) return;
     isOpeningMapRef.current = true;
 
@@ -972,13 +976,7 @@ export const DataViewer = ({
         });
 
         const fullGeometryData = fullGeometryResponse?.data ?? fullGeometryResponse;
-
         resolvedCoordinates = normalizeFullGeometryResponse(fullGeometryData, coordinates);
-      } else {
-        const parsed = safeParseJson(coordinates);
-        if (!isNil(parsed) && isNil(parsed.geometry) && !isNil(parsed.type) && !isNil(parsed.coordinates)) {
-          resolvedCoordinates = normalizeFullGeometryResponse(parsed, coordinates);
-        }
       }
     } catch (error) {
       console.error('DataViewer - onMapOpen(getFullGeometry).', error);
@@ -987,19 +985,11 @@ export const DataViewer = ({
       setIsLoading(false);
     }
 
-    try {
-      if (isGeometrySummaryValue(coordinates)) {
-        resolvedCoordinates = normalizeMapGeoJson(resolvedCoordinates, fieldType);
-      } else {
-        const parsed = safeParseJson(coordinates);
-        if (!isNil(parsed) && isNil(parsed.geometry) && !isNil(parsed.type) && !isNil(parsed.coordinates)) {
-          resolvedCoordinates = normalizeFullGeometryResponse(parsed, coordinates);
-        }
-        resolvedCoordinates = normalizeMapGeoJson(resolvedCoordinates, fieldType);
-      }
-    } catch (error) {
-      console.error('DataViewer - onMapOpen(getFullGeometry).', error);
-      return;
+    // Normalize for map display, when it's from fetching full geometry or when it's already in summary form, for backward compatibility with old map behavior
+    if (isGeometrySummaryValue(coordinates)) {
+      resolvedCoordinates = normalizeMapGeoJson(resolvedCoordinates, fieldType);
+    } else {
+      resolvedCoordinates = normalizeFullGeometryResponse(resolvedCoordinates);
     }
 
     dispatchRecords({
