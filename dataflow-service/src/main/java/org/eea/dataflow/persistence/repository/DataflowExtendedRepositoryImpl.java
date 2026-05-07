@@ -866,6 +866,7 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
     sb.append(" where " + HAS_DATASETS);
     sb.append(AND + DATAFLOW_PUBLIC);
     sb.append(AND + COUNTRY_CODE_CONDITION);
+    sb.append(AND + OFFICIAL_REPORTING);
 
     if (MapUtils.isNotEmpty(filters) && applyFilters) {
       for (String key : filters.keySet()) {
