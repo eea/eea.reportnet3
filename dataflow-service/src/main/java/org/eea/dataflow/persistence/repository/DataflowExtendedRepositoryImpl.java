@@ -222,6 +222,9 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
   /** The Constant DATAFLOW_PUBLIC. */
   private static final String DATAFLOW_PUBLIC = " show_public_info = :public ";
 
+  /** The Constant OFFICIAL_REPORTING. */
+  private static final String OFFICIAL_REPORTING = " official_reporting = true ";
+
   /** The Constant LIKE. */
   private static final String LIKE = " lower(cast(%s as text)) LIKE lower(:%s) ";
 
@@ -654,6 +657,8 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
       if (isPublic) {
         addAnd(stringQuery, addAnd);
         stringQuery.append(DATAFLOW_PUBLIC);
+        stringQuery.append(AND);
+        stringQuery.append(OFFICIAL_REPORTING);
       }
 
 
