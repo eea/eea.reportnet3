@@ -1,4 +1,4 @@
-import { Fragment, useContext, useEffect, useRef, useState } from 'react';
+import { Fragment, memo, useContext, useEffect, useRef, useState } from 'react';
 
 import ReactDOMServer from 'react-dom/server';
 
@@ -30,7 +30,19 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 import TooltipButtonRed from 'views/_components/TooltipButton/TooltipButtonRed';
 
-export const Tab = ({
+const areEqual = (prevProps, nextProps) => {
+  for (const key in nextProps) {
+    if (typeof nextProps[key] === 'function' || key === 'children') {
+      continue;
+    }
+    if (prevProps[key] !== nextProps[key]) {
+      return false;
+    }
+  }
+  return true;
+};
+
+export const Tab = memo(({
   addTab,
   ariaControls,
   bigData = false,
@@ -752,4 +764,4 @@ export const Tab = ({
       {renderTableInfo()}
     </Fragment>
   );
-};
+}, areEqual);
