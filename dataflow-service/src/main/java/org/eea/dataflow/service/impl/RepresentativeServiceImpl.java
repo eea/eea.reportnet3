@@ -38,6 +38,8 @@ import org.eea.dataflow.persistence.repository.RepresentativeRepository;
 import org.eea.dataflow.service.RepresentativeService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataset.DatasetController;
+import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.dataset.ReferenceDatasetController.ReferenceDatasetControllerZuul;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
@@ -95,6 +97,9 @@ public class RepresentativeServiceImpl implements RepresentativeService {
   /** The data provider repository. */
   @Autowired
   private DataProviderRepository dataProviderRepository;
+
+  @Autowired
+  private DataSetControllerZuul dataSetControllerZuul;
 
   /** The data provider repository. */
   @Autowired
@@ -870,6 +875,10 @@ public class RepresentativeServiceImpl implements RepresentativeService {
     if (leadReporter.isPresent()) {
       modifyLeadReporterPermissions(leadReporter.get().getEmail(),
           leadReporter.get().getRepresentative(), true);
+
+      final UserRepresentationVO user = userManagementControllerZull.getUserByEmail(leadReporter.get().getEmail());
+      dataSetControllerZuul.clearDatasetTableForUser(user.getUsername());
+
     }
     leadReporterRepository.deleteById(leadReporterId);
   }

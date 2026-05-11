@@ -343,6 +343,11 @@ export const DataViewer = ({
       setIsLoading(false);
     }
 
+    // Flip the coordinates for the map component to be compatible with Leaflet's format
+    if (isGeometrySummaryValue(geoJson)) {
+      resolvedGeoJson = normalizeMapGeoJson(resolvedGeoJson);
+    }
+
     dispatchRecords({
       type: 'OPEN_COORDINATES_MORE_INFO',
       payload: {
@@ -925,7 +930,6 @@ export const DataViewer = ({
     if (onRestoreData) onRestoreData(checked);
   };
 
-
   const normalizeMapGeoJson = (geoJson, fallbackType = '') => {
     const parsed = safeParseJson(geoJson);
     const geometryType = String(parsed?.geometry?.type ?? fallbackType ?? '').toUpperCase();
@@ -936,6 +940,11 @@ export const DataViewer = ({
 
     const asString = typeof geoJson === 'string' ? geoJson : JSON.stringify(geoJson);
 
+    // For POINT geometries, keep the original value as string to allow the map component to parse it.
+    if (geometryType === 'POINT') {
+      return asString;
+    }
+
     // Keep old map behavior (same conversion path as table values)
     return DatasetUtils.parseValue({
       type: geometryType,
@@ -945,11 +954,7 @@ export const DataViewer = ({
   };
   const isOpeningMapRef = useRef(false);
 
-  // const onMapOpen = (coordinates, mapCells, fieldType, readOnly) =>
-  //   dispatchRecords({ type: 'OPEN_MAP', payload: { coordinates, fieldType, mapCells, readOnly } });
   const onMapOpen = async (coordinates, mapCells, fieldType, readOnly, recordIdParam) => {
-    
-    // Prevent multiple renders on the map icon from opening multiple maps
     if (isOpeningMapRef.current) return;
     isOpeningMapRef.current = true;
 
@@ -971,13 +976,7 @@ export const DataViewer = ({
         });
 
         const fullGeometryData = fullGeometryResponse?.data ?? fullGeometryResponse;
-
         resolvedCoordinates = normalizeFullGeometryResponse(fullGeometryData, coordinates);
-      } else {
-        const parsed = safeParseJson(coordinates);
-        if (!isNil(parsed) && isNil(parsed.geometry) && !isNil(parsed.type) && !isNil(parsed.coordinates)) {
-          resolvedCoordinates = normalizeFullGeometryResponse(parsed, coordinates);
-        }
       }
     } catch (error) {
       console.error('DataViewer - onMapOpen(getFullGeometry).', error);
@@ -986,19 +985,11 @@ export const DataViewer = ({
       setIsLoading(false);
     }
 
-    try {
-      if (isGeometrySummaryValue(coordinates)) {
-        resolvedCoordinates = normalizeMapGeoJson(resolvedCoordinates, fieldType);
-      } else {
-        const parsed = safeParseJson(coordinates);
-        if (!isNil(parsed) && isNil(parsed.geometry) && !isNil(parsed.type) && !isNil(parsed.coordinates)) {
-          resolvedCoordinates = normalizeFullGeometryResponse(parsed, coordinates);
-        }
-        resolvedCoordinates = normalizeMapGeoJson(resolvedCoordinates, fieldType);
-      }
-    } catch (error) {
-      console.error('DataViewer - onMapOpen(getFullGeometry).', error);
-      return;
+    // Normalize for map display, when it's from fetching full geometry or when it's already in summary form, for backward compatibility with old map behavior
+    if (isGeometrySummaryValue(coordinates)) {
+      resolvedCoordinates = normalizeMapGeoJson(resolvedCoordinates, fieldType);
+    } else {
+      resolvedCoordinates = normalizeFullGeometryResponse(resolvedCoordinates);
     }
 
     dispatchRecords({

@@ -133,6 +133,9 @@ public class Dataflow {
   @Column(name = "SNC_DATA")
   private Boolean sncData;
 
+  /** The official reporting column. */
+  @Column(name = "OFFICIAL_REPORTING")
+  private Boolean officialReporting;
 
   /**
    * Equals.

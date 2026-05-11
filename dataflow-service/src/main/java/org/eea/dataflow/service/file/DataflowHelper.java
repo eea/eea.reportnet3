@@ -395,7 +395,7 @@ public class DataflowHelper {
         nColumnQC++;
         rowheadQC.createCell(nColumnQC).setCellValue("Type of QC");
         nColumnQC++;
-        rowheadQC.createCell(nColumnQC).setCellValue("Level error");
+        rowheadQC.createCell(nColumnQC).setCellValue("Severity Level");
         nColumnQC++;
         rowheadQC.createCell(nColumnQC).setCellValue("Message");
         nColumnQC++;

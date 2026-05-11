@@ -1,4 +1,4 @@
-import { Fragment, useContext, useEffect, useRef, useState } from 'react';
+import { Fragment, useContext, useEffect, useRef, useState, useMemo } from 'react';
 import isNil from 'lodash/isNil';
 import cloneDeep from 'lodash/cloneDeep';
 
@@ -162,10 +162,29 @@ export const Map = ({
     // });
   }, []);
 
+  // memoize parsed inputs to avoid repeated JSON.parse on every vertex/operation
+  const parsedInputGeoJson = useMemo(() => {
+    try {
+      return typeof geoJson === 'string' ? JSON.parse(geoJson) : geoJson;
+    } catch (e) {
+      return null;
+    }
+  }, [geoJson]);
+
+  const parsedMapGeoJson = useMemo(() => {
+    try {
+      return typeof mapGeoJson === 'string' ? JSON.parse(mapGeoJson) : mapGeoJson;
+    } catch (e) {
+      return null;
+    }
+  }, [mapGeoJson]);
+
   useEffect(() => {
-    const inmMapGeoJson = JSON.parse(cloneDeep(mapGeoJson));
+    const inmMapGeoJson = cloneDeep(
+      parsedMapGeoJson || mapGeoJson ? JSON.parse(JSON.stringify(parsedMapGeoJson || mapGeoJson)) : parsedMapGeoJson
+    );
     if (inmMapGeoJson.properties.srid !== 'EPSG:4326') {
-      inmMapGeoJson.geometry.coordinates = projectGeoJsonCoordinates(geoJson);
+      inmMapGeoJson.geometry.coordinates = projectGeoJsonCoordinates(parsedInputGeoJson || geoJson);
       setMapGeoJson(JSON.stringify(inmMapGeoJson));
     }
   }, [geoJson]);
@@ -187,20 +206,18 @@ export const Map = ({
     const defaultCenter = `{"type": "Feature", "geometry": {"type":"Point","coordinates":[55.6811608,12.5844761]}, "properties": {"srid": "EPSG:4326"}}`;
     if (TextUtils.areEquals(geometryType, 'POINT')) {
       if (MapUtils.checkValidJSONCoordinates(geoJson)) {
-        if (typeof geoJson === 'object') {
-          return JSON.stringify(geoJson);
-        } else {
-          return geoJson;
-        }
+        return parsedInputGeoJson ? JSON.stringify(parsedInputGeoJson) : geoJson;
       } else {
         return defaultCenter;
       }
     } else {
       if (MapUtils.checkValidJSONMultipleCoordinates(geoJson)) {
         return `{"type": "Feature", "geometry": {"type":"${geometryType}","coordinates":[${MapUtils.getFirstPointComplexGeometry(
-          geoJson,
+          parsedInputGeoJson ? JSON.stringify(parsedInputGeoJson) : geoJson,
           geometryType
-        ).toString()}]}, "properties": {"srid": "${MapUtils.getSrid(geoJson)}"}}`;
+        ).toString()}]}, "properties": {"srid": "${MapUtils.getSrid(
+          parsedInputGeoJson ? JSON.stringify(parsedInputGeoJson) : geoJson
+        )}"}}`;
       } else {
         return defaultCenter;
       }
@@ -328,43 +345,40 @@ export const Map = ({
 
   const projectGeoJsonCoordinates = (geoJsonData, isCenter = false) => {
     const parsedGeoJsonData = typeof geoJsonData === 'object' ? geoJsonData : JSON.parse(geoJsonData);
-    const projectPoint = coordinate => {
-      if (MapUtils.checkValidCoordinates(coordinate)) {
-        const projectedCoordinates = proj4(
-          proj4(!isNil(parsedGeoJsonData) ? getSRID(parsedGeoJsonData.properties.srid) : currentCRS.value),
-          proj4('EPSG:4326'),
-          coordinate
-        );
-        if (MapUtils.getSrid(mapGeoJson) === 'EPSG:3035') {
-          return [projectedCoordinates[1], projectedCoordinates[0]];
-        } else {
-          return projectedCoordinates;
-        }
-      } else {
-        return coordinate;
-      }
-    };
-    if (isCenter) {
-      return projectPoint(parsedGeoJsonData.geometry.coordinates);
-    } else {
-      if (TextUtils.areEquals(geometryType, 'POINT')) {
-        return projectPoint(parsedGeoJsonData.geometry.coordinates);
-      } else {
-        let projectedCoordinates = [];
-        if (['POLYGON', 'MULTILINESTRING'].includes(geometryType)) {
-          projectedCoordinates = parsedGeoJsonData.geometry.coordinates.map(ring =>
-            ring.map(coordinate => projectPoint(coordinate))
-          );
-        } else if (['MULTIPOLYGON'].includes(geometryType)) {
-          projectedCoordinates = parsedGeoJsonData.geometry.coordinates.map(polygon =>
-            polygon.map(ring => ring.map(coordinate => projectPoint(coordinate)))
-          );
-        } else {
-          projectedCoordinates = parsedGeoJsonData.geometry.coordinates.map(coordinate => projectPoint(coordinate));
-        }
-        return projectedCoordinates;
-      }
+
+    const sourceSrid = getSRID(
+      parsedGeoJsonData?.properties?.srid ?? parsedGeoJsonData?.srid ?? parsedGeoJsonData?.crs?.properties?.name
+    );
+
+    if (sourceSrid === 'EPSG:4326') {
+      return isCenter ? parsedGeoJsonData.geometry.coordinates : parsedGeoJsonData.geometry.coordinates;
     }
+
+    const sourceProj = proj4(sourceSrid);
+    const targetProj = proj4('EPSG:4326');
+    const shouldSwapProjected = sourceSrid === 'EPSG:3035';
+
+    const projectPoint = coordinate => {
+      if (!MapUtils.checkValidCoordinates(coordinate)) return coordinate;
+
+      const projectedCoordinates = proj4(sourceProj, targetProj, coordinate);
+      return shouldSwapProjected ? [projectedCoordinates[1], projectedCoordinates[0]] : projectedCoordinates;
+    };
+
+    if (isCenter || TextUtils.areEquals(geometryType, 'POINT')) {
+      return projectPoint(parsedGeoJsonData.geometry.coordinates);
+    }
+
+    if (['POLYGON', 'MULTILINESTRING'].includes(geometryType)) {
+      return parsedGeoJsonData.geometry.coordinates.map(ring => ring.map(coordinate => projectPoint(coordinate)));
+    }
+
+    if (['MULTIPOLYGON'].includes(geometryType)) {
+      return parsedGeoJsonData.geometry.coordinates.map(polygon =>
+        polygon.map(ring => ring.map(coordinate => projectPoint(coordinate)))
+      );
+    }
+    return parsedGeoJsonData.geometry.coordinates.map(coordinate => projectPoint(coordinate));
   };
 
   const projectPointCoordinates = ({ coordinates, CRS = currentCRS.value, newCRS = 'EPSG:4326' }) => {

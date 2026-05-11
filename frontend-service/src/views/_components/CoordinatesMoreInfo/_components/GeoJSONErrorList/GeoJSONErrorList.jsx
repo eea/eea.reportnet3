@@ -13,7 +13,16 @@ export const GeoJSONErrorList = ({ geoJSON }) => {
   const resourcesContext = useContext(ResourcesContext);
 
   const renderErrors = () => {
-    const errors = geojsonhint.hint(geoJSON);
+    const parsed = JSON.parse(geoJSON);
+    const srid = parsed?.properties?.srid ?? parsed?.srid ?? parsed?.crs?.properties?.name;
+    const geometryType = parsed?.geometry?.type ?? parsed?.type;
+    const is3035Polygon =
+      String(srid).includes('3035') && ['POLYGON', 'MULTIPOLYGON'].includes(String(geometryType).toUpperCase());
+
+    const errors = geojsonhint
+      .hint(geoJSON)
+      .filter(error => !(is3035Polygon && /right-hand rule/i.test(error.message)));
+
     if (errors.length > 0) {
       return (
         <div>
