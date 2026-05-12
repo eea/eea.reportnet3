@@ -75,11 +75,23 @@ export const JobsStatusesRepository = {
         jobStatus
       })
     }),
-
-  cancelJob: async jobId =>
-    await HTTPRequester.update({
-      url: getUrl(JobsStatusesConfig.cancelJob, {
-        jobId
+  getCancelledValidations: async ({ jobId, pageNum, numberRows, sortOrder, sortField = '' }) =>
+    await HTTPRequester.get({
+      url: getUrl(JobsStatusesConfig.getCancelledValidations, {
+        jobId,
+        pageNum,
+        numberRows,
+        sortOrder,
+        sortField
       })
-    })
+    }),
+
+  cancelJob: async (jobId, dataflowId, datasetId) => {
+    if (datasetId == null) {
+      const url = getUrl(JobsStatusesConfig.cancelJobNoDataset, { jobId, dataflowId });
+      return await HTTPRequester.update({ url });
+    }
+    const url = getUrl(JobsStatusesConfig.cancelJob, { jobId, dataflowId, datasetId });
+    return await HTTPRequester.update({ url });
+  }
 };
