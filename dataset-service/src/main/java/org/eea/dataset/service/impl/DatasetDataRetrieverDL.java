@@ -107,14 +107,15 @@ public class DatasetDataRetrieverDL implements DataLakeDataRetriever {
                 validationS3PathResolver.setPath(S3_TABLE_AS_FOLDER_QUERY_PATH);
 
                 String validationTablePath = s3Service.getTableAsFolderQueryPath(validationS3PathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
-                StringBuilder filteredQuery = DataLakeDataRetrieverUtils.buildFilteredQuery(dataset, fields, fieldSchemaId, fieldValue, fieldIdMap, levelError, qcCodes, validationTablePath);
+                StringBuilder filteredQuery = DataLakeDataRetrieverUtils.buildFilteredQuery(dataset, fields, fieldSchemaId, fieldValue, fieldIdMap, levelError, qcCodes, validationTablePath, false);
 
                 if (filteredQuery.toString().isEmpty() && levelError != null && levelError.length == 0) {
                     result.setTotalFilteredRecords(0L);
                     result.setTotalRecords(totalRecords);
                     result.setRecords(new ArrayList<>());
                 } else {
-                    recordsCountQuery.append(filteredQuery);
+                    StringBuilder filteredCountQuery = DataLakeDataRetrieverUtils.buildFilteredQuery(dataset, fields, fieldSchemaId, fieldValue, fieldIdMap, levelError, qcCodes, validationTablePath, true);
+                    recordsCountQuery.append(filteredCountQuery);
                     // Table path for metadata refresh and promotion.
                     String tablePathForRefresh;
                     if (REFERENCE.equals(dataset.getDatasetTypeEnum()) && !Boolean.TRUE.equals(s3PathResolver.getIsIcebergTable())) {
