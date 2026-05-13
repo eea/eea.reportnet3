@@ -1168,4 +1168,16 @@ public interface DatasetController {
 
   @DeleteMapping("private/clearDatasetTableForUser")
   void clearDatasetTableForUser(@RequestParam("username") String username);
+
+  @DeleteMapping("/private/clearExpiredDatasetTableLocks")
+  void clearExpiredDatasetTableLocks();
+
+  @GetMapping("/private/expiredDatasetTables")
+  List<DatasetTableVO> getDatasetTablesWithExpiredEditingLocks();
+
+  @DeleteMapping("/clearDatasetTableLocksByDataflow")
+  void clearDatasetTableLocksByDataflow(@RequestParam("dataflowId") Long dataflowId);
+
+  @DeleteMapping("/clearDatasetTableLocksByUser")
+  void clearDatasetTableLocksByUser(@RequestParam(value = "username") String username);
 }

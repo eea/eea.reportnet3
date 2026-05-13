@@ -67,6 +67,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.concurrent.DelegatingSecurityContextRunnable;
 import org.springframework.security.core.context.SecurityContext;
@@ -4461,7 +4462,78 @@ public class DatasetControllerImpl implements DatasetController {
   public void clearDatasetTableForUser(@RequestParam("username") String username) {
 
     final List<DatasetTableVO> datasetTables = datasetTableService.getDatasetTablesByEditingUser(username);
-    datasetTables.forEach(this::disableEditing);
+
+    LOG.info("Found {} DatasetTables for user {}", datasetTables.size(), username);
+    if (datasetTables.isEmpty()) {
+      return;
+    }
+
+    for (DatasetTableVO datasetTableVO : datasetTables) {
+      disableEditing(datasetTableVO);
+    }
+  }
+
+  @Override
+  @HystrixCommand
+  @GetMapping("private/expiredDatasetTables")
+  @ApiOperation(value = "Get dataset tables that have expired editing locks", hidden = true)
+  public List<DatasetTableVO> getDatasetTablesWithExpiredEditingLocks() {
+
+    return datasetTableService.getDatasetTablesWithExpiredEditingLocks();
+  }
+
+  @Override
+  @HystrixCommand(commandProperties = {@HystrixProperty(name = "execution.isolation.thread.timeoutInMilliseconds", value = "300000")})
+  @DeleteMapping("/private/clearExpiredDatasetTableLocks")
+  @ApiOperation(value = "Clear the username and expiration date from DatasetTables with expired locks.", hidden = true)
+  public void clearExpiredDatasetTableLocks() {
+
+    final List<DatasetTableVO> expiredDatasetTables = datasetTableService.getDatasetTablesWithExpiredEditingLocks();
+
+    LOG.info("Found {} DatasetTables with expired editing locks", expiredDatasetTables.size());
+    if (expiredDatasetTables.isEmpty()) {
+      return;
+    }
+
+    for (DatasetTableVO datasetTableVO : expiredDatasetTables) {
+      disableEditing(datasetTableVO);
+    }
+  }
+
+  @DeleteMapping("/clearDatasetTableLocksByDataflow")
+  @HystrixCommand(commandProperties = {@HystrixProperty(name = "execution.isolation.thread.timeoutInMilliseconds", value = "650000")})
+  @PreAuthorize("hasAnyRole('ADMIN')")
+  @Override
+  public void clearDatasetTableLocksByDataflow(@RequestParam("dataflowId") Long dataflowId) {
+
+    final List<DatasetTableVO> datasetTables = datasetTableService.getDatasetTablesByDataflowId(dataflowId);
+
+    LOG.info("Found {} DatasetTables in dataflow with id {}", datasetTables.size(), dataflowId);
+    if (datasetTables.isEmpty()) {
+      return;
+    }
+
+    for (DatasetTableVO datasetTableVO : datasetTables) {
+      disableEditing(datasetTableVO);
+    }
+  }
+
+  @DeleteMapping("/clearDatasetTableLocksByUser")
+  @HystrixCommand(commandProperties = {@HystrixProperty(name = "execution.isolation.thread.timeoutInMilliseconds", value = "650000")})
+  @PreAuthorize("hasAnyRole('ADMIN')")
+  @Override
+  public void clearDatasetTableLocksByUser(@RequestParam("username") String username) {
+
+    final List<DatasetTableVO> datasetTables = datasetTableService.getDatasetTablesByEditingUser(username);
+
+    LOG.info("Found {} DatasetTables for user {}", datasetTables.size(), username);
+    if (datasetTables.isEmpty()) {
+      return;
+    }
+
+    for (DatasetTableVO datasetTableVO : datasetTables) {
+      disableEditing(datasetTableVO);
+    }
   }
 
   private void disableEditing(DatasetTableVO datasetTableVO) {

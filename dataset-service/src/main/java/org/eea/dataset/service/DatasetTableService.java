@@ -32,4 +32,12 @@ public interface DatasetTableService {
     List<DatasetTableVO> getDatasetTablesByEditingUser(String username);
 
     void disableEditingForDatasetTable(Long datasetId);
+
+    List<DatasetTableVO> getDatasetTablesWithExpiredEditingLocks();
+
+    List<DatasetTableVO> getDatasetTablesByDataflowId(Long dataflowId);
+
+
+    String getDatasetNonExpiredEditingUsername(Long datasetId);
+
 }
