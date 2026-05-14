@@ -632,6 +632,8 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
     try {
       const editingStatusData = await DatasetService.getEditingStatus({ datasetId });
 
+      setIsLoadingIceberg(!!editingStatusData?.data?.isConverting);
+
       setEditingStatus({
         editor: editingStatusData?.data?.editor,
         isEditing: editingStatusData?.data?.isEditing
