@@ -1057,6 +1057,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 }
                 //we do not pass a job id because there is a job for the whole dataset data deletion
                 deleteTableData(datasetId, dataflowId, providerId, preparationCode, tableSchemaIdNameVO.getIdTableSchema(), null, true);
+                createEmptyTables.runCreationForSpecificTableSchema(dataSetMetabaseVO, tableSchemaIdNameVO.getIdTableSchema(), preparationCode);
             }
 
             if (jobId != null) {

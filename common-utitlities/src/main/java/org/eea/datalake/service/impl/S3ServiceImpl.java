@@ -124,6 +124,9 @@ public class S3ServiceImpl implements S3Service {
                 path = String.format(path, dataflowFolder, dataProviderFolder, datasetFolder,
                     tableName);
                 break;
+            case  S3_PREPARATION_TABLE_NAME_WITH_PARQUET_FOLDER_PATH:
+                path = String.format(path, dataflowFolder, dataProviderFolder, datasetFolder, preparationCode, tableName, fileName);
+                break;
             case S3_PROVIDER_IMPORT_PATH:
                 if (!s3PathResolver.isDeleteFile()) {
                     fileName = System.currentTimeMillis() + "_" + fileName; //generating unique name, avoiding conflicts
