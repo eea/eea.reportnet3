@@ -1636,11 +1636,10 @@ public class DatasetServiceImpl implements DatasetService {
    */
   @Override
   @Transactional
-  public void ensureDatasetAndTableValueExist(Long datasetId, String tableSchemaId)
-      throws EEAException {
+  public void ensureDatasetAndTableValueExist(Long datasetId, String tableSchemaId) {
 
     if (datasetId == null || StringUtils.isBlank(tableSchemaId)) {
-      throw new EEAException("Unable to repair dataset metadata because datasetId or tableSchemaId is missing");
+      throw new IllegalStateException("Unable to repair dataset metadata because datasetId or tableSchemaId is missing");
     }
 
     TenantResolver.setTenantName(String.format(DATASET_ID, datasetId));
@@ -1652,7 +1651,7 @@ public class DatasetServiceImpl implements DatasetService {
       String datasetSchemaId = dataSetMetabaseRepository.findDatasetSchemaIdById(datasetId);
 
       if (StringUtils.isBlank(datasetSchemaId)) {
-        throw new EEAException("Unable to repair dataset metadata because datasetSchemaId is missing");
+        throw new IllegalStateException("Unable to repair dataset metadata because datasetSchemaId is missing");
       }
 
       datasetValue = new DatasetValue();

@@ -428,8 +428,7 @@ public interface DatasetService {
    * @param tableSchemaId the table schema id
    * @throws EEAException if the metadata rows cannot be checked or repaired
    */
-  void ensureDatasetAndTableValueExist(@DatasetId Long datasetId, String tableSchemaId)
-      throws EEAException;
+  void ensureDatasetAndTableValueExist(@DatasetId Long datasetId, String tableSchemaId);
 
   /**
    * Gets the field by id.
