@@ -960,13 +960,14 @@ public class ValidationServiceImpl implements ValidationService {
     S3PathResolver s3PathResolver = new S3PathResolver(dataSetMetabaseVO.getDataflowId(), dataSetMetabaseVO.getDataProviderId()!=null ? dataSetMetabaseVO.getDataProviderId() : 0, dataSetMetabaseVO.getId(), S3_VALIDATION);
     s3PathResolver.setPreparationCode(preparationCode);
 
-    if (StringUtils.isNotBlank(preparationCode)) {
+    if (StringUtils.isBlank(preparationCode)) {
       if (s3Helper.checkFolderExist(s3PathResolver, S3_VALIDATION_TABLE_PATH) && dremioHelperService.checkFolderPromoted(s3PathResolver, s3PathResolver.getTableName())) {
         errors = dataLakeValidationService.findGroupRecordsByFilter(s3PathResolver, null, null, "",
                 "", "", null, "", false, false);
       }
     }
     else {
+      s3PathResolver.setPath(S3_PREPARATION_VALIDATION_TABLE_PATH);
       if (s3Helper.checkFolderExist(s3PathResolver, S3_PREPARATION_VALIDATION_TABLE_PATH) && dremioHelperService.checkFolderPromoted(s3PathResolver, s3PathResolver.getTableName())) {
         errors = dataLakeValidationService.findGroupRecordsByFilter(s3PathResolver, null, null, "",
                 "", "", null, "", false, false);
