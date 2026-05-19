@@ -25,7 +25,11 @@ public enum JobInfoEnum {
 
     ERROR_CSV_MULTIPLE_QUOTES("Multiple quotes were found in the imported file"),
 
-    ERROR_CSV_MULTIPLE_QUOTES_WITH_LINE_NUM("Multiple quotes were found in line %d");
+    ERROR_CSV_MULTIPLE_QUOTES_WITH_LINE_NUM("Multiple quotes were found in line %d"),
+
+    ERROR_RELEASE_CANCELED_BLOCKERS("There are canceled validation tasks for blocker checks. Please review and address the issues before retrying."),
+
+    WARNING_HAS_CANCELED_VALIDATION_TASKS("There are canceled validation tasks. Please review and address the issues before retrying.");
 
     /** The value. */
     private final String value;
@@ -49,5 +53,14 @@ public enum JobInfoEnum {
             return String.format(value, lineNumber);
         }
         return value;
+    }
+
+    public static JobInfoEnum fromValue(String value, Integer lineNumber) {
+        for (JobInfoEnum jobInfo : JobInfoEnum.values()) {
+            if (jobInfo.getValue(lineNumber).equals(value)) {
+                return jobInfo;
+            }
+        }
+        throw new IllegalArgumentException("No enum constant with value " + value);
     }
 }

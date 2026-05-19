@@ -1,5 +1,6 @@
 package org.eea.interfaces.controller.orchestrator;
 
+import org.eea.interfaces.vo.orchestrator.JobCanceledValidationTasksVO;
 import org.eea.interfaces.vo.orchestrator.JobVO;
 import org.eea.interfaces.vo.orchestrator.JobsVO;
 import org.eea.interfaces.vo.orchestrator.enums.JobInfoEnum;
@@ -272,6 +273,24 @@ public interface JobController {
                           @RequestParam(value = "deletePrefilledTables", defaultValue = "false",
                             required = false) Boolean deletePrefilledTables,
                           @RequestParam(value = "jobStatus", required = false) JobStatusEnum jobStatus);
+
+    /**
+     * Retrieves the canceled validation tasks for a given job, with pagination and sorting support.
+     *
+     * @param jobId the ID of the job
+     * @param pageNum the page number (0-based)
+     * @param pageSize the number of records per page
+     * @param asc whether to sort ascending
+     * @param sortedColumn the column to sort by
+     * @return a {@link JobCanceledValidationTasksVO} containing the canceled tasks and totals
+     */
+    @GetMapping(value = "/canceledValidationTasks/{jobId}")
+    JobCanceledValidationTasksVO findCanceledValidationTasksByJobId(
+            @PathVariable("jobId") Long jobId,
+            @RequestParam(value = "pageNum", defaultValue = "0", required = false) Integer pageNum,
+            @RequestParam(value = "pageSize", defaultValue = "10", required = false) Integer pageSize,
+            @RequestParam(value = "asc", defaultValue = "true", required = false) boolean asc,
+            @RequestParam(value = "sortedColumn", defaultValue = "ruleCode", required = false) String sortedColumn);
 }
 
 

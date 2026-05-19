@@ -118,6 +118,21 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
   void updateStatus(@Param("status") String status, @Param("taskId") Long taskId);
 
   Task findFirstByTaskTypeAndStatusOrderByVersionAscIdAsc(TaskType taskType, ProcessStatusEnum status);
+
+  Task findFirstByProcessIdInAndStatus(List<String> processIds, ProcessStatusEnum status);
+
+  /**
+   * Find all tasks based on status for a specific process id that were blockers or those that do not have a rule id
+   * json not like '%"ruleId":%' and (json like '%"sqlRule":null%' or json not like '%"sqlRule":%')) this means that the task is not for big data task and sqlRule is null or sqlRule does not exist
+   *
+   * @param processId the process id
+   * @param status the status
+   * @return the tasks
+   */
+  @Query(nativeQuery = true, value = "select * from task where process_id=:processId and status=:status " +
+          "and (json like '%\"ruleLevelError\":\"BLOCKER\"%' or (json not like '%\"ruleId\":%' and (json like '%\"sqlRule\":null%' or json not like '%\"sqlRule\":%')))")
+  List<Task> findAllByProcessIdAndStatusAndLevelErrorBlocker(@Param("processId") String processId, @Param("status") String status);
+
 }
 
 

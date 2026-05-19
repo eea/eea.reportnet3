@@ -1,5 +1,6 @@
 package org.eea.interfaces.controller.recordstore;
 
+import org.eea.interfaces.vo.orchestrator.JobCanceledValidationTasksVO;
 import org.eea.interfaces.vo.recordstore.ProcessVO;
 import org.eea.interfaces.vo.recordstore.ProcessesVO;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
@@ -149,5 +150,16 @@ public interface ProcessController {
    */
   @DeleteMapping(value = "/private/deleteProcess")
   void deleteProcessByProcessId(@RequestParam("processId") String processId);
+
+  /**
+   * Finds canceled tasks by processIds
+   * @param processIds
+   * @return
+   */
+  @GetMapping("/private/findCanceledTasksByProcessIds")
+  JobCanceledValidationTasksVO findTasksByProcessIdsAndStatus(
+          @RequestParam(name = "processIds") List<String> processIds,
+          @RequestParam(value = "pageNum", defaultValue = "0", required = false) Integer pageNum,
+          @RequestParam(value = "pageSize", defaultValue = "10", required = false) Integer pageSize);
 
 }
