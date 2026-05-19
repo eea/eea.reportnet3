@@ -126,6 +126,13 @@
           }
         },
         {
+          "key": "SNAPSHOT_DATE_CHANGE_FAIL_EVENT",
+          "navigateTo": {
+            "section": "DATASET",
+            "parameters": ["dataflowId", "datasetId"]
+          }
+        },
+        {
           "key": "UPLOAD_DOCUMENT_FAILED_EVENT",
           "navigateTo": {
             "section": "DOCUMENTS",

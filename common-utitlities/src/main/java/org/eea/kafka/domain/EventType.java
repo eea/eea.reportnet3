@@ -289,6 +289,10 @@ public enum EventType {
   ADD_DATASET_SCHEMA_SNAPSHOT_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "add_dataset_schema_snapshot_failed_event", true),
 
+  /** The snapshot date change through historic release view failed event. */
+  SNAPSHOT_DATE_CHANGE_FAIL_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "snapshot_date_change_failed_event", true),
+
   /** The copy data to eudataset completed event. */
   COPY_DATA_TO_EUDATASET_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "copy_data_to_eudataset_completed_event", true),
