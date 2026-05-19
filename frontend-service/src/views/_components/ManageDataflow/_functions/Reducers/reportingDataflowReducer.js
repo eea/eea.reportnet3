@@ -24,6 +24,9 @@ export const reportingDataflowReducer = (state, { type, payload }) => {
     case 'TOGGLE_BIG_DATA':
       return { ...state, bigDataStorage: payload };
 
+    case 'TOGGLE_OFFICIAL_REPORTING':
+      return { ...state, isOfficialReporting: payload };
+
     case 'TOGGLE_PIN':
       return { ...state, pinDataflow: payload };
 

@@ -4,8 +4,15 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.FeignException;
 import lombok.SneakyThrows;
+import org.apache.avro.Schema;
+import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.parquet.avro.AvroParquetReader;
+import org.apache.parquet.avro.AvroParquetWriter;
+import org.apache.parquet.hadoop.ParquetReader;
+import org.apache.parquet.hadoop.ParquetWriter;
 import org.eea.datalake.service.S3Helper;
 import org.eea.datalake.service.S3Service;
 import org.eea.datalake.service.impl.S3HelperImpl;
@@ -2181,22 +2188,18 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       } else if (processVO.getProcessType().equals(ProcessTypeEnum.COPY_REFERENCE_DATASET.toString())) {
         taskType = TaskType.COPY_REFERENCE_DATASET_TASK;
       }
-      TaskVO task = new TaskVO(null, processId, ProcessStatusEnum.IN_QUEUE, taskType, new Date(), null, null,
-              json, 0, null);
-      task = taskService.saveTask(task);
-      LOG.info("Created task with id {} with idSnapshot {} and processId {}", task.getId(), idSnapshot, processId);
 
-      task.setStartingDate(new Date());
-      task.setStatus(ProcessStatusEnum.IN_PROGRESS);
-      task.setPod(serviceInstanceId);
+      Date dateNow = new Date();
+      TaskVO task = new TaskVO(null, processId, ProcessStatusEnum.IN_PROGRESS, taskType, dateNow, dateNow, null,
+              json, 0, serviceInstanceId);
 
       try {
+        LOG.info("Creating task status of task with id {} ith idSnapshot {} and processId {} to IN_PROGRESS", task.getId(), idSnapshot, processId);
         task = taskService.saveTask(task);
-        LOG.info("Updating task status of task with id {} ith idSnapshot {} and processId {} to IN_PROGRESS", task.getId(), idSnapshot, processId);
+        LOG.info("Created task status of task with id {} ith idSnapshot {} and processId {} to IN_PROGRESS", task.getId(), idSnapshot, processId);
       } catch (Exception er) {
-        LOG.error("Error updating task {}", task.getId());
-        task = taskService.saveTask(task);
-        LOG.info("Updating task status of task with id {} ith idSnapshot {} and processId {} to IN_PROGRESS", task.getId(), idSnapshot, processId);
+        LOG.error("Error creating task {} with Exception {} ", task.getId(), er);
+        throw er;
       }
 
       datasetSchema.getTableSchemas().stream()
@@ -2362,6 +2365,16 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       if (providerId != null && taskType == TaskType.RELEASE_TASK) {
           deletePreviousValidationsFromDC(datasetId, dataflowId, providerId);
           addNewValidationsToDC(datasetId, dataflowId, providerId, finalProcessVO, finalJobId);
+
+          // NEW: snapshot history
+          addNewValidationsToSnapshot(
+                  datasetId,
+                  dataflowId,
+                  providerId,
+                  idSnapshot,
+                  finalProcessVO,
+                  finalJobId
+          );
         }
       }
 
@@ -2453,6 +2466,185 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         lockService.removeLockByCriteria(lockCriteria);
       }
     }
+  }
+
+  private void addNewValidationsToSnapshot(Long datasetId,
+                                           Long dataflowId,
+                                           Long providerId,
+                                           Long snapshotId,
+                                           ProcessVO finalProcessVO,
+                                           Long finalJobId) {
+
+    S3PathResolver snapshotPath = new S3PathResolver(dataflowId, providerId, finalProcessVO.getDatasetId());
+    snapshotPath.setSnapshotId(snapshotId);
+
+    snapshotPath.setPath(S3_SNAPSHOT_TABLE_NAME_VALIDATE_DC_PATH);
+
+    List<S3Object> validationFiles = getListOfS3Files(
+            finalProcessVO.getDatasetId(),
+            dataflowId,
+            jobControllerZuul.findProviderIdById(finalJobId),
+            S3_VALIDATION_TABLE_PATH
+    );
+
+    processAndUploadAllValidations(validationFiles, snapshotPath, dataflowId);
+  }
+
+  private void processAndUploadAllValidations(List<S3Object> validationFiles,
+                                              S3PathResolver targetPath,
+                                              Long dataflowId) {
+
+    List<GenericRecord> allRecords = new ArrayList<>();
+
+    try {
+      for (S3Object s3Object : validationFiles) {
+
+        String key = s3Object.key();
+        String filename = extractFilename(key);
+
+        File parquetFile = s3Helper.getFileFromS3(
+                key,
+                filename,
+                pathSnapshot,
+                LiteralConstants.PARQUET_TYPE
+        );
+
+        allRecords.addAll(readParquet(parquetFile));
+
+        if (parquetFile.exists()) {
+          parquetFile.delete();
+        }
+      }
+
+      File mergedFile = writeParquet(allRecords);
+
+      String destinationPath = s3Service.getS3Path(targetPath);
+
+      LOG.info("Uploading merged validation file to {}", destinationPath);
+
+      if (mergedFile != null) {
+        s3Helper.uploadFileToBucket(destinationPath, mergedFile.getPath());
+
+        if (mergedFile.exists()) {
+          mergedFile.delete();
+        }
+      }
+
+      LOG.info("Upload successful: {}", destinationPath);
+
+    } catch (IOException e) {
+      LOG.error("Error processing validations for dataflowId {}", dataflowId, e);
+    }
+  }
+
+  private List<GenericRecord> readParquet(File file) throws IOException {
+
+    List<GenericRecord> records = new ArrayList<>();
+
+    ParquetReader<GenericRecord> reader =
+            AvroParquetReader.<GenericRecord>builder(new org.apache.hadoop.fs.Path(file.getAbsolutePath()))
+                    .withConf(new Configuration())
+                    .build();
+
+    GenericRecord record;
+    while ((record = reader.read()) != null) {
+      records.add(record);
+    }
+
+    reader.close();
+    return records;
+  }
+
+  private File writeParquet(List<GenericRecord> records) throws IOException {
+
+    if (records.isEmpty()) {
+      LOG.warn("No validation records found, skipping Parquet write");
+      return null;
+    }
+
+    Schema schema = records.get(0).getSchema();
+
+    // 🔥 Use unique file name to avoid collisions
+    File file = new File(
+            System.getProperty("java.io.tmpdir"),
+            "validations_" + UUID.randomUUID() + ".parquet"
+    );
+
+    // safety: ensure no leftover file exists
+    if (file.exists()) {
+      if (!file.delete()) {
+        throw new IOException("Cannot delete existing temp file: " + file.getAbsolutePath());
+      }
+    }
+
+    org.apache.hadoop.fs.Path outputPath =
+            new org.apache.hadoop.fs.Path(file.getAbsolutePath());
+
+    try (ParquetWriter<GenericRecord> writer =
+                 AvroParquetWriter.<GenericRecord>builder(outputPath)
+                         .withSchema(schema)
+                         .withConf(new Configuration())
+                         .build()) {
+
+      for (GenericRecord record : records) {
+        writer.write(record);
+      }
+    }
+
+    return file;
+  }
+
+  private void processAndUploadValidationFile(S3Object s3Object,
+                                              S3PathResolver targetPath,
+                                              Long dataflowId) {
+
+    String key = s3Object.key();
+    String filename = extractFilename(key);
+
+    targetPath.setFilename(filename);
+    targetPath.setParquetFolder(extractParquetFolder(key));
+
+    try {
+      LOG.info("Processing validation file: key={}, filename={}", key, filename);
+
+      File parquetFile = s3Helper.getFileFromS3(
+              key,
+              filename,
+              pathSnapshot,
+              LiteralConstants.PARQUET_TYPE
+      );
+
+      String destinationPath = s3Service.getS3Path(targetPath);
+
+      LOG.info("Uploading file to {}", destinationPath);
+
+      s3Helper.uploadFileToBucket(destinationPath, parquetFile.getPath());
+
+      if (parquetFile.exists()) {
+        parquetFile.delete();
+      }
+
+      LOG.info("Upload successful: {}", destinationPath);
+
+    } catch (IOException e) {
+      LOG.error("Error processing validation file for dataflowId {}", dataflowId, e);
+    }
+  }
+
+  private String extractFilename(String key) {
+    return key.substring(key.lastIndexOf("/") + 1);
+  }
+
+  private String extractParquetFolder(String key) {
+    String[] parts = key.split("/");
+
+    // safer: check length instead of blindly accessing index
+    if (parts.length > 5) {
+      return parts[5];
+    }
+
+    LOG.warn("Unexpected S3 key format: {}", key);
+    return "unknown";
   }
 
   private void addNewValidationsToDC(Long datasetId, Long dataflowId, Long providerId, ProcessVO finalProcessVO, Long finalJobId) {

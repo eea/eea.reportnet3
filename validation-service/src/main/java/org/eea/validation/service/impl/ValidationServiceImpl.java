@@ -50,10 +50,7 @@ import org.eea.validation.persistence.schemas.rule.Rule;
 import org.eea.validation.persistence.schemas.rule.RulesSchema;
 import org.eea.validation.service.DataLakeValidationService;
 import org.eea.validation.service.ValidationService;
-import org.eea.validation.util.KieBaseManager;
-import org.eea.validation.util.RulesErrorUtils;
-import org.eea.validation.util.SQLCountryCompanyOrganizationCodeUtils;
-import org.eea.validation.util.SQLValidationUtils;
+import org.eea.validation.util.*;
 import org.joda.time.LocalDate;
 import org.kie.api.KieBase;
 import org.kie.api.runtime.KieSession;
@@ -393,6 +390,8 @@ public class ValidationServiceImpl implements ValidationService {
     KieSession session;
     try {
       TenantResolver.setTenantName(LiteralConstants.DATASET_PREFIX + datasetId);
+      String validateAsProviderCode = resolveValidateAsProviderCodeFromTask(taskId);
+      RuleOperators.setValidateAsProviderCodee(validateAsProviderCode);
       DatasetValue dataset = datasetRepository.findById(datasetId).orElse(null);
       if (dataset == null) {
         throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
@@ -404,6 +403,7 @@ public class ValidationServiceImpl implements ValidationService {
 
         validationDatasetRepository.saveAll(validations);
       } finally {
+        RuleOperators.clearValidateAsProviderCode();
         session.destroy();
         validations = null;
         dataset = null;
@@ -438,10 +438,16 @@ public class ValidationServiceImpl implements ValidationService {
         String validateAsProviderCode = resolveValidateAsProviderCodeFromTask(taskId);
         sqlValidationUtils.executeValidationSQLRule(datasetId, sqlRule, dataProviderId, validateAsProviderCode);
       } else {
-        table = tableRepository.findById(idTable).orElse(null);
-        session = kieBase.newKieSession();
-        if (table != null) {
-          tableValidationRepository.saveAll(runTableValidations(table, session));
+        String validateAsProviderCode = resolveValidateAsProviderCodeFromTask(taskId);
+        RuleOperators.setValidateAsProviderCodee(validateAsProviderCode);
+        try {
+          table = tableRepository.findById(idTable).orElse(null);
+          session = kieBase.newKieSession();
+          if (table != null) {
+            tableValidationRepository.saveAll(runTableValidations(table, session));
+          }
+        } finally {
+          RuleOperators.clearValidateAsProviderCode();
         }
       }
     } catch (EEAInvalidSQLException e) {
@@ -477,9 +483,11 @@ public class ValidationServiceImpl implements ValidationService {
   @Transactional
   public void validateRecord(Long datasetId, KieBase kieBase, Pageable pageable, Long taskId) {
     KieSession session;
+    String validateAsProviderCode = resolveValidateAsProviderCodeFromTask(taskId);
     try {
       TenantResolver.setTenantName(LiteralConstants.DATASET_PREFIX + datasetId);
       List<RecordValue> records = recordRepository.findRecordsPageable(pageable);
+      RuleOperators.setValidateAsProviderCodee(validateAsProviderCode);
       session = kieBase.newKieSession();
       try {
         for (RecordValue row : records) {
@@ -487,6 +495,7 @@ public class ValidationServiceImpl implements ValidationService {
           recordValidationRepository.saveAll(runRecordValidations(row, session));
         }
       } finally {
+        RuleOperators.clearValidateAsProviderCode();
         records = null;
         session.destroy();
         System.gc();
@@ -511,8 +520,10 @@ public class ValidationServiceImpl implements ValidationService {
   public void validateFields(Long datasetId, KieBase kieBase, Pageable pageable,
       boolean onlyEmptyFields, Long taskId) {
     KieSession session;
+    String validateAsProviderCode = resolveValidateAsProviderCodeFromTask(taskId);
     try {
       TenantResolver.setTenantName(LiteralConstants.DATASET_PREFIX + datasetId);
+      RuleOperators.setValidateAsProviderCodee(validateAsProviderCode);
       Page<FieldValue> fields = onlyEmptyFields ? fieldRepository.findEmptyFields(pageable)
           : fieldRepository.findAll(pageable);
       session = kieBase.newKieSession();
@@ -522,6 +533,7 @@ public class ValidationServiceImpl implements ValidationService {
           validationFieldRepository.saveAll(runFieldValidations(field, session));
         }
       } finally {
+        RuleOperators.clearValidateAsProviderCode();
         session.destroy();
       }
     } catch (Exception e) {

@@ -101,6 +101,6 @@ public interface DatasetTableRepository extends JpaRepository<DatasetTable, Long
     );
 
 
-
+    List<DatasetTable> findDatasetTablesByEditingUsername(String editingUsername);
 
 }

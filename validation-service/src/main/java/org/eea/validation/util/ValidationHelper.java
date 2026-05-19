@@ -1743,9 +1743,7 @@ public class ValidationHelper implements DisposableBean {
       if (s3Helper.checkFolderExist(s3PathResolver, S3_VALIDATION_TABLE_PATH)) {
         try {
           String validateTable = s3Helper.getS3Service().getTableAsFolderQueryPath(s3PathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
-          String query = "ALTER TABLE " + validateTable + " REFRESH METADATA AUTO PROMOTION";
-          String id = dremioHelperService.executeSqlStatement(query);
-          dremioHelperService.checkIfDremioProcessFinishedSuccessfully(query, id, null);
+          dremioHelperService.refreshTableMetadataAndPromote(null, validateTable, s3PathResolver, s3PathResolver.getTableName());
         } catch (Exception e) {
           throw new EEAException(e.getMessage());
         }

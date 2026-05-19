@@ -2,12 +2,21 @@ package org.eea.recordstore.controller;
 
 
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+import com.opencsv.CSVWriter;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
+import org.apache.avro.Schema;
+import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.parquet.avro.AvroParquetReader;
+import org.apache.parquet.hadoop.ParquetReader;
+import org.eea.datalake.service.S3Helper;
+import org.eea.datalake.service.S3Service;
+import org.eea.datalake.service.model.ParquetStream;
+import org.eea.datalake.service.model.S3PathResolver;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
@@ -35,20 +44,23 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
+import software.amazon.awssdk.services.s3.model.S3Object;
 import springfox.documentation.annotations.ApiIgnore;
 
 import javax.servlet.http.HttpServletResponse;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
 import java.math.BigInteger;
+import java.nio.ByteBuffer;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -56,6 +68,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+
+import static org.eea.utils.LiteralConstants.*;
 
 /**
  * The Class RecordStoreControllerImpl.
@@ -104,6 +118,14 @@ public class RecordStoreControllerImpl implements RecordStoreController {
 
   @Autowired
   private KafkaSenderUtils kafkaSenderUtils;
+
+  /** The big data dataset service */
+  @Autowired
+  private S3Helper s3Helper;
+
+  @Autowired
+  private S3Service s3Service;
+
 
   /**
    * The Constant LOG.
@@ -785,6 +807,111 @@ public class RecordStoreControllerImpl implements RecordStoreController {
     catch (Exception e){
       LOG.error("Unexpected error! Could not compare record value with materialized view for jobId {} and datasetId {}", jobId, dataset.getId(), e.getMessage());
       throw e;
+    }
+  }
+
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','EUDATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','REFERENCEDATASET_STEWARD') OR checkApiKey(#dataflowId,#providerId,#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','REFERENCEDATASET_STEWARD')")
+  @GetMapping("/downloadValidation/{snapshotId}")
+  public ResponseEntity<StreamingResponseBody> downloadParquetAsCsv(
+          @PathVariable Long snapshotId,
+          @RequestParam Long dataflowId,
+          @RequestParam Long providerId,
+          @RequestParam Long datasetId)
+  {
+    try {
+      // Build S3 path
+      S3PathResolver snapshotPath = new S3PathResolver(dataflowId, providerId, datasetId);
+      snapshotPath.setSnapshotId(snapshotId);
+      snapshotPath.setPath(S3_SNAPSHOT_TABLE_NAME_SNAPSHOT_PATH);
+
+      if (!s3Helper.checkFolderExist(snapshotPath)) {
+        throw new ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "Did not found any snapshot with the specific id"
+        );
+      }
+
+      snapshotPath.setPath(S3_SNAPSHOT_TABLE_NAME_VALIDATE_DC_PATH);
+
+      String key = s3Service.getS3Path(snapshotPath);
+
+      // List parquet files in S3 path (assuming multiple files)
+      List<S3Object> parquetFiles = s3Helper.getFilenamesFromTableNames(snapshotPath);
+
+      // Streaming response
+      StreamingResponseBody stream = outputStream -> {
+        try (OutputStreamWriter writer = new OutputStreamWriter(outputStream);
+             CSVWriter csvWriter = new CSVWriter(writer)) {
+
+          for (S3Object obj : parquetFiles) {
+            // Get file from S3 as temp File
+            File parquetFile = s3Helper.getFileFromS3Export(
+                    obj.key(),
+                    S3_SNAPSHOT_TABLE_NAME_VALIDATE_DC_PATH,
+                    "/tmp",
+                    "parquet",
+                    datasetId
+            );
+
+            // Open Parquet reader
+            try (InputStream inputStream = new FileInputStream(parquetFile);
+                 ParquetReader<GenericRecord> reader =
+                         AvroParquetReader.<GenericRecord>builder(new ParquetStream(inputStream))
+                                 .disableCompatibility()
+                                 .build()) {
+
+              GenericRecord record;
+              boolean headerWritten = false;
+
+              while ((record = reader.read()) != null) {
+                List<Schema.Field> fields = record.getSchema().getFields();
+
+                // Write header once
+                if (!headerWritten) {
+                  String[] header = fields.stream()
+                          .map(Schema.Field::name)
+                          .toArray(String[]::new);
+                  csvWriter.writeNext(header, false);
+                  headerWritten = true;
+                }
+
+                // Write row
+                String[] row = new String[fields.size()];
+                for (int i = 0; i < fields.size(); i++) {
+                  Object value = record.get(fields.get(i).name());
+                  if (value instanceof ByteBuffer) {
+                    ByteBuffer buf = (ByteBuffer) value;
+                    byte[] bytes = new byte[buf.remaining()];
+                    buf.get(bytes);
+                    row[i] = new String(bytes); // simple decoding; replace if needed
+                  } else {
+                    row[i] = value != null ? value.toString() : "";
+                  }
+                }
+                csvWriter.writeNext(row, false);
+              }
+            } finally {
+              parquetFile.delete();
+            }
+          }
+
+          csvWriter.flush();
+        }
+      };
+
+      String filename = key.substring(key.lastIndexOf("/") + 1).concat("_" + snapshotId).replace(".parquet", ".csv");
+      if (!filename.contains("csv")) {
+        filename = filename.concat(".csv");
+      }
+
+      return ResponseEntity.ok()
+              .contentType(MediaType.parseMediaType("text/csv"))
+              .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
+              .body(stream);
+
+    } catch (Exception e) {
+      e.printStackTrace();
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
   }
 }

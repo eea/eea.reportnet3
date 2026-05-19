@@ -60,6 +60,24 @@ const getTabs = ({ datasetSchema, datasetStatistics, editable, isDataflowOpen, i
             ...datasetStatistics.tables.filter(tab => tab['tableSchemaId'] === table['tableSchemaId'])[0]
           }.hasErrors
         : false;
+    table.hasWarnings =
+      !isNil(datasetStatistics) && !isEmpty(datasetStatistics)
+        ? {
+            ...datasetStatistics.tables.filter(tab => tab['tableSchemaId'] === table['tableSchemaId'])[0]
+          }.hasWarnings
+        : false;
+    table.hasBlockers =
+      !isNil(datasetStatistics) && !isEmpty(datasetStatistics)
+        ? {
+            ...datasetStatistics.tables.filter(tab => tab['tableSchemaId'] === table['tableSchemaId'])[0]
+          }.hasBlockers
+        : false;
+    table.hasInfos =
+      !isNil(datasetStatistics) && !isEmpty(datasetStatistics)
+        ? {
+            ...datasetStatistics.tables.filter(tab => tab['tableSchemaId'] === table['tableSchemaId'])[0]
+          }.hasInfos
+        : false;
     table.hasInfoTooltip = true;
     table.header = table.tableSchemaName;
     table.index = idx;

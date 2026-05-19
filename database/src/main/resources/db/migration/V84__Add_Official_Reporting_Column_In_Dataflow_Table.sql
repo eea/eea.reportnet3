@@ -1,0 +1,1 @@
+ALTER TABLE public.dataflow ADD official_reporting bool NULL;

@@ -35,7 +35,7 @@ const parseDatasetDTO = datasetDTO => {
     restrictFromPublic: datasetDTO.restrictFromPublic,
     status: datasetDTO.status,
     updatable: datasetDTO.updatable,
-    hasUpdatesAfterRelease: datasetDTO.hasUpdatesAfterRelease,
+    hasUpdatesAfterRelease: datasetDTO.hasUpdatesAfterRelease
   });
 };
 
@@ -69,6 +69,15 @@ const tableStatisticValuesWithErrors = tableStatisticValues => {
 
   return tableStatisticValuesWithSomeError;
 };
+  // Normalize SRID value to ensure consistency between different formats (e.g., "EPSG:4326" vs "4326").
+  const normalizeSrid = (srid, splitSRID) => {
+    if (isNil(srid) || srid === '') {
+      return splitSRID ? '4326' : 'EPSG:4326';
+    }
+
+    const raw = String(srid).replace('EPSG:', '');
+    return splitSRID ? raw : `EPSG:${raw}`;
+  };
 
 const parseValue = ({ type, value, splitSRID = false }) => {
   if (
@@ -79,44 +88,66 @@ const parseValue = ({ type, value, splitSRID = false }) => {
     if (!isValidJSON(value)) {
       return '';
     }
-    const inmValue = JSON.parse(cloneDeep(value));
+
     const parsedValue = JSON.parse(value);
 
-    if (parsedValue.geometry.type.toUpperCase() !== type) {
+    // NEW FORMAT: {"srid":4326,"type":"MULTIPOLYGON","sizeMB":...,"dimension":"2D"}
+    const isGeometrySummary = !isNil(parsedValue) && !isNil(parsedValue.type) && isNil(parsedValue.geometry);
+
+    if (isGeometrySummary) {
+      return JSON.stringify({
+        ...parsedValue,
+        type: String(parsedValue.type).toUpperCase(),
+        srid: normalizeSrid(parsedValue.srid, splitSRID)
+      });
+    }
+
+    // OLD FORMAT: full GeoJSON Feature
+    if (isNil(parsedValue.geometry) || isNil(parsedValue.geometry.type)) {
+      return '';
+    }
+
+    const inmValue = JSON.parse(cloneDeep(value));
+
+    const rawSrid = String(parsedValue?.properties?.srid ?? '').replace('EPSG:', '');
+    inmValue.properties.srid = splitSRID ? rawSrid : `EPSG:${rawSrid}`;
+
+    if (String(parsedValue.geometry.type).toUpperCase() !== type) {
       if (type.toUpperCase() === 'POINT') {
         return '';
       }
       inmValue.geometry.type = type;
       inmValue.geometry.coordinates = [];
     } else {
-      if (parsedValue.properties.srid !== 'EPSG:3035' && parsedValue.properties.srid !== '3035') {
+      const currentSrid = parsedValue?.properties?.srid;
+
+      if (currentSrid !== 'EPSG:3035' && currentSrid !== '3035') {
         switch (type.toUpperCase()) {
           case 'POINT':
             inmValue.geometry.coordinates =
-              !isNil(parsedValue.geometry.coordinates[0]) && !isNil(parsedValue.geometry.coordinates[1])
+              !isNil(parsedValue.geometry.coordinates?.[0]) && !isNil(parsedValue.geometry.coordinates?.[1])
                 ? [parsedValue.geometry.coordinates[1], parsedValue.geometry.coordinates[0]]
                 : [];
             break;
           case 'MULTIPOINT':
           case 'LINESTRING':
-            inmValue.geometry.coordinates = parsedValue.geometry.coordinates.map(coordinate =>
+            inmValue.geometry.coordinates = (parsedValue.geometry.coordinates || []).map(coordinate =>
               !isNil(coordinate) ? [coordinate[1], coordinate[0]] : []
             );
             break;
           case 'POLYGON':
           case 'MULTILINESTRING':
-            inmValue.geometry.coordinates = parsedValue.geometry.coordinates.map(coordinate => {
+            inmValue.geometry.coordinates = (parsedValue.geometry.coordinates || []).map(coordinate => {
               if (Array.isArray(coordinate)) {
                 return coordinate.map(innerCoordinate =>
                   !isNil(innerCoordinate) ? [innerCoordinate[1], innerCoordinate[0]] : []
                 );
-              } else {
-                return [];
               }
+              return [];
             });
             break;
           case 'MULTIPOLYGON':
-            inmValue.geometry.coordinates = parsedValue.geometry.coordinates.map(polygon => {
+            inmValue.geometry.coordinates = (parsedValue.geometry.coordinates || []).map(polygon => {
               if (Array.isArray(polygon)) {
                 return polygon.map(coordinate => {
                   if (Array.isArray(coordinate)) {
@@ -138,11 +169,11 @@ const parseValue = ({ type, value, splitSRID = false }) => {
       }
     }
 
-    if (!splitSRID) {
-      inmValue.properties.srid = `EPSG:${parsedValue.properties.srid}`;
-    } else {
-      inmValue.properties.srid = parsedValue.properties.srid.split(':')[1];
-    }
+    // if (!splitSRID) {
+    //   inmValue.properties.srid = `EPSG:${parsedValue.properties.srid}`;
+    // } else {
+    //   inmValue.properties.srid = parsedValue.properties.srid.split(':')[1];
+    // }
 
     return JSON.stringify(inmValue);
   }

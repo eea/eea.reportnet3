@@ -67,6 +67,7 @@ export const ManageReferenceDataflow = ({
   });
   const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isOfficialReporting, setIsOfficialReporting] = useState(isEditing ? metadata.officialReporting : false);
   const [isSending, setIsSending] = useState(false);
   const [name, setName] = useState(isEditing ? metadata.name : '');
   const [pinDataflow, setPinDataflow] = useState(false);
@@ -184,11 +185,18 @@ export const ManageReferenceDataflow = ({
     try {
       setIsSending(true);
       if (isEditing) {
-        await ReferenceDataflowService.update(dataflowId, description, name, 'REFERENCE', bigData);
+        await ReferenceDataflowService.update(dataflowId, description, name, 'REFERENCE', bigData, isOfficialReporting);
         manageDialogs(dialogName, false);
         onEditDataflow(name, description);
       } else {
-        const { data } = await ReferenceDataflowService.create(name, description, 'REFERENCE', bigData,sncData === true ? true : undefined);
+        const { data } = await ReferenceDataflowService.create(
+          name,
+          description,
+          'REFERENCE',
+          bigData,
+          sncData === true ? true : undefined,
+          isOfficialReporting
+        );
         if (pinDataflow) {
           const inmUserProperties = { ...userContext.userProps };
           inmUserProperties.pinnedDataflows.push(data.toString());
@@ -226,6 +234,29 @@ export const ManageReferenceDataflow = ({
         />
       );
     }
+  };
+
+  const renderOfficialReporting = () => {
+    return (
+      <div className={styles.checkboxWrapper}>
+        <Checkbox
+          ariaLabel={resourcesContext.messages['officialReporting']}
+          checked={isOfficialReporting}
+          id="officialReportingCheckbox"
+          inputId="officialReportingCheckbox"
+          onChange={() => setIsOfficialReporting(!isOfficialReporting)}
+          role="checkbox"
+        />
+        <label>
+          <span onClick={() => setIsOfficialReporting(!isOfficialReporting)}>
+            {resourcesContext.messages['officialReporting']}
+          </span>
+        </label>
+        <TooltipButton
+          message={resourcesContext.messages['officialReportingMessage']}
+          uniqueIdentifier="officialReporting"></TooltipButton>
+      </div>
+    );
   };
 
   const renderDialogFooter = () => (
@@ -287,14 +318,10 @@ export const ManageReferenceDataflow = ({
           </div>
         )}
       </div>
+      {!isEditing && <div className="p-toolbar-group-left">{renderOfficialReporting()}</div>}
       {bigData && (
         <div className="p-toolbar-group-left">
-          {renderSncData && renderSncData(
-            false,
-            sncData,
-            false,
-            () => setSncData(!sncData)
-          )}
+          {renderSncData && renderSncData(false, sncData, false, () => setSncData(!sncData))}
         </div>
       )}
       <Button
@@ -363,6 +390,7 @@ export const ManageReferenceDataflow = ({
             {!isEmpty(errors.description.message) && <ErrorMessage message={errors.description.message} />}
           </div>
         </div>
+        {isEditing && <div>{renderOfficialReporting()}</div>}
       </Dialog>
 
       {isDeleteDialogVisible && (

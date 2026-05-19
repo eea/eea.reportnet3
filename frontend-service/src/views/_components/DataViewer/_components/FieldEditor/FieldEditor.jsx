@@ -48,6 +48,18 @@ export const FieldEditor = ({
 }) => {
   const refDatetimeCalendar = useRef(null);
   const refCalendar = useRef(null);
+
+  const getGeometrySrid = value => {
+    if (isNil(value) || value === '') return 'EPSG:4326';
+    try {
+      const parsed = JSON.parse(value);
+      const raw = parsed?.properties?.srid ?? parsed?.srid ?? 'EPSG:4326';
+      const srid = String(raw);
+      return srid.startsWith('EPSG:') ? srid : `EPSG:${srid}`;
+    } catch (e) {
+      return 'EPSG:4326';
+    }
+  };
   const crs = [
     { label: 'WGS84 - 4326', value: 'EPSG:4326' },
     { label: 'ETRS89 - 4258', value: 'EPSG:4258' },
@@ -65,24 +77,34 @@ export const FieldEditor = ({
       RecordUtils.getCellInfo(colsSchema, cells.field).type
     )
       ? RecordUtils.getCellValue(cells, cells.field) !== ''
-        ? crs.find(
-            crsItem => crsItem.value === JSON.parse(RecordUtils.getCellValue(cells, cells.field)).properties.srid
-          ) || { label: 'WGS84 - 4326', value: 'EPSG:4326' }
+        ? crs.find(crsItem => crsItem.value === getGeometrySrid(RecordUtils.getCellValue(cells, cells.field))) || {
+            label: 'WGS84 - 4326',
+            value: 'EPSG:4326'
+          }
         : { label: 'WGS84 - 4326', value: 'EPSG:4326' }
       : {}
   );
   const [isCalendarVisible, setIsCalendarVisible] = useState(false);
   const [isLoadingData, setIsLoadingData] = useState(false);
-  const [isMapDisabled, setIsMapDisabled] = useState(
-    RecordUtils.getCellInfo(colsSchema, cells.field).type === 'POINT'
-      ? !MapUtils.checkValidCoordinates(
-          RecordUtils.getCellValue(cells, cells.field) !== ''
-            ? JSON.parse(RecordUtils.getCellValue(cells, cells.field)).geometry.coordinates.join(', ')
-            : '',
-          true
-        )
-      : true
-  );
+  const [isMapDisabled, setIsMapDisabled] = useState(() => {
+    if (RecordUtils.getCellInfo(colsSchema, cells.field).type !== 'POINT') return true;
+
+    const cellValue = RecordUtils.getCellValue(cells, cells.field);
+    if (isNil(cellValue) || cellValue === '') return true;
+
+    try {
+      const parsed = typeof cellValue === 'string' ? JSON.parse(cellValue) : cellValue;
+      const coordinates = parsed?.geometry?.coordinates ?? parsed?.coordinates;
+
+      if (!Array.isArray(coordinates) || coordinates.length < 2) {
+        return true;
+      }
+
+      return !MapUtils.checkValidCoordinates(coordinates, true);
+    } catch (e) {
+      return true;
+    }
+  });
   const [linkItemsOptions, setLinkItemsOptions] = useState([]);
   const [linkItemsValue, setLinkItemsValue] = useState([]);
 
@@ -435,27 +457,48 @@ export const FieldEditor = ({
     onChangePointCRS(crs.value);
   };
 
-  const renderCRS = fieldValue => {
-    const parsedGeoJsonData = JSON.parse(fieldValue);
-    const selectedCRS = crs.find(crsItem => crsItem.value === parsedGeoJsonData.properties.srid);
-    if (!isNil(selectedCRS)) {
-      return selectedCRS.label;
-    } else {
-      return parsedGeoJsonData.properties.srid.split(':')[1];
+  const parseGeoValue = value => {
+    if (isNil(value) || value === '') return null;
+    try {
+      return typeof value === 'string' ? JSON.parse(value) : value;
+    } catch {
+      return null;
     }
   };
 
-  const renderEPSGInfo = (fieldValue, differentTypes, isValidJSON) => {
-    if (!differentTypes) {
-      return (
-        <div className={styles.pointEpsgWrapper}>
-          {!isNil(fieldValue) && fieldValue !== '' && isValidJSON && (
-            <label className={styles.epsg}>{resourcesContext.messages['epsg']}: </label>
-          )}
-          {!isNil(fieldValue) && fieldValue !== '' && isValidJSON && <span>{renderCRS(fieldValue)}</span>}
-        </div>
-      );
+  const getGeometryType = value => {
+    const parsed = parseGeoValue(value);
+    return parsed?.geometry?.type ?? parsed?.type ?? null;
+  };
+
+  const getGeometrySridFromValue = value => {
+    const parsed = parseGeoValue(value);
+    const raw = parsed?.properties?.srid ?? parsed?.srid ?? parsed?.crs?.properties?.name ?? 'EPSG:4326';
+    const srid = String(raw);
+
+    if (srid.startsWith('urn:ogc:def:crs:EPSG::')) {
+      return `EPSG:${srid.split('::').pop()}`;
     }
+    return srid.startsWith('EPSG:') ? srid : `EPSG:${srid}`;
+  };
+
+  const renderCRS = fieldValue => {
+    const srid = getGeometrySridFromValue(fieldValue);
+    const selectedCRS = crs.find(crsItem => crsItem.value === srid);
+    return !isNil(selectedCRS) ? selectedCRS.label : srid.split(':').pop();
+  };
+
+  const renderEPSGInfo = (fieldValue, differentTypes, showInfo) => {
+    if (differentTypes) return null;
+
+    return (
+      <div className={styles.pointEpsgWrapper}>
+        {!isNil(fieldValue) && fieldValue !== '' && showInfo && (
+          <label className={styles.epsg}>{resourcesContext.messages['epsg']}: </label>
+        )}
+        {!isNil(fieldValue) && fieldValue !== '' && showInfo && <span>{renderCRS(fieldValue)}</span>}
+      </div>
+    );
   };
 
   const renderField = type => {
@@ -587,28 +630,39 @@ export const FieldEditor = ({
       case 'MULTIPOLYGON':
       case 'POLYGON':
         const value = RecordUtils.getCellValue(cells, cells.field);
+        const valueAsString = typeof value === 'string' ? value : JSON.stringify(value);
+
         let differentTypes = false;
         if (!isNil(value) && value !== '') {
-          differentTypes = !areEquals(JSON.parse(value).geometry.type, type);
+          const geometryType = getGeometryType(valueAsString);
+          differentTypes = isNil(geometryType)
+            ? true
+            : !areEquals(String(geometryType).toUpperCase(), String(type).toUpperCase());
         }
-        let isValidJSON = false;
-        if (!differentTypes) {
-          isValidJSON = MapUtils.checkValidJSONMultipleCoordinates(value);
-        }
+
+        const showGeometryActions = !differentTypes && !isNil(value) && value !== '';
+        const canOpenMap = mapVisibilityEnabled && showGeometryActions;
+
         return (
           <div>
             <div className={styles.pointWrapper}>
-              {renderMultipleCoordinatesInfo(value, isValidJSON, differentTypes)}
-              {renderEPSGInfo(value, differentTypes, isValidJSON)}
+              {renderMultipleCoordinatesInfo(valueAsString, showGeometryActions, differentTypes)}
+              {renderEPSGInfo(valueAsString, differentTypes, showGeometryActions)}
             </div>
-            {!isNil(value) && value !== '' && isValidJSON && MapUtils.hasValidCRS(value, crs) && (
+            {canOpenMap && (
               <Button
                 className={`p-button-secondary-transparent button ${styles.mapButton}`}
                 disabled={differentTypes}
                 icon="marker"
                 onClick={() => {
                   if (!isNil(onMapOpen)) {
-                    onMapOpen(value, cells, type);
+                    onMapOpen(
+                      valueAsString,
+                      cells,
+                      type,
+                      RecordUtils.getCellInfo(colsSchema, cells.field).readOnly,
+                      record.recordId
+                    );
                   }
                 }}
                 tooltip={resourcesContext.messages['selectGeographicalDataOnMap']}
@@ -820,8 +874,20 @@ export const FieldEditor = ({
         ['POINT', 'POLYGON', 'LINESTRING', 'MULTILINESTRING', 'MULTIPOLYGON', 'MULTIPOINT'].includes(type.toUpperCase())
       ) {
         if (value !== '') {
-          const parsedJSON = JSON.parse(value);
-          return `${parsedJSON.geometry.coordinates.join(', ')} - ${parsedJSON.properties.srid}`;
+          try {
+            const parsedJSON = JSON.parse(value);
+            
+            // Handle both full geometry format and summary format
+            const coordinates = parsedJSON?.geometry?.coordinates ?? parsedJSON?.coordinates;
+            const srid = parsedJSON?.properties?.srid ?? parsedJSON?.srid;
+
+            if (!coordinates) {
+              return '';
+            }
+            return `${coordinates.join(', ')} - ${srid}`;
+          } catch (e) {
+            return '';
+          }
         } else {
           return '';
         }
@@ -836,23 +902,6 @@ export const FieldEditor = ({
   const renderMultipleCoordinatesInfo = (value, isValidJSON, differentTypes) => {
     const infoLabelClass =
       isNil(value) || value === '' || !isValidJSON || differentTypes ? styles.nonEditableData : null;
-
-    // // Kept for possible future use.
-    // const getInfoLabelContent = () => {
-    //   if (!isNil(value) && value !== '' && isValidJSON && !differentTypes) {
-    //     return JSON.parse(value).geometry.coordinates.join(', ');
-    //   } else {
-    //     if (differentTypes) {
-    //       return resourcesContext.messages['nonEditableDataDifferentTypes'];
-    //     } else {
-    //       if (value === '') {
-    //         return resourcesContext.messages['nonEditableDataAndCantParse'];
-    //       } else {
-    //         return resourcesContext.messages['nonEditableData'];
-    //       }
-    //     }
-    //   }
-    // };
 
     const renderMoreInfo = () => {
       if (value !== '') {
@@ -873,17 +922,12 @@ export const FieldEditor = ({
       }
       return null;
     };
-    // // Commented out Complete Coordinates.It is kept for possible future use.
-    // const completeCoordinates = getInfoLabelContent();
 
     return (
       <div>
         {isNil(infoLabelClass) && <label className={styles.epsg}>{resourcesContext.messages['coordsInfo']}</label>}
-        {isNil(infoLabelClass) && renderMoreInfo()}
-        {/* <div className={styles.completeCoordinatesWrapper}>
-          <label className={infoLabelClass}>{completeCoordinates}</label>
-          {!isNil(infoLabelClass) && renderMoreInfo()}
-        </div> */}
+        {/* {isNil(infoLabelClass) && renderMoreInfo()} */}
+        {value !== '' && renderMoreInfo()}
       </div>
     );
   };

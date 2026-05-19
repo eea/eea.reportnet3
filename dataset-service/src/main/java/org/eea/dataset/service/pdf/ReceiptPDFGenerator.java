@@ -21,6 +21,7 @@ import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Value;
 
 /**
  * The Class ReceiptPDFGenerator.
@@ -30,6 +31,9 @@ public class ReceiptPDFGenerator {
 
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(ReceiptPDFGenerator.class);
+
+  @Value("${reportnet.url}")
+  private String reportneturl;
 
   /** The Constant BACKGROUND. */
   private static final String BACKGROUND = "pdf/receipt_background.png";
@@ -137,7 +141,7 @@ public class ReceiptPDFGenerator {
     y = 3334f;
     fontSize = 40f;
     printLinePDF(contentStream, text, font, fontSize, x, y);
-    text = "Receipt date: ";
+    text = "Confirmation download date: ";
     x -= fontBold.getStringWidth(text) / 1000 * fontSize;
     printLinePDF(contentStream, text, fontBold, fontSize, x, y);
     text = receipt.getProviderAssignation();
@@ -156,7 +160,7 @@ public class ReceiptPDFGenerator {
     printLinePDF(contentStream, text, fontBold, fontSize, x, y);
     y -= spaceBetweenLines * 2 + fontSize;
     fontSize = 58f;
-    text = "This is a confirmation of receipt for national data submission under";
+    text = "This is a confirmation of delivery for national data submission under";
     printLinePDF(contentStream, text, font, fontSize, x, y);
     y -= spaceBetweenLines + fontSize;
     text = "the reporting obligation";
@@ -170,6 +174,14 @@ public class ReceiptPDFGenerator {
       printLinePDF(contentStream, line, fontBold, fontSize, x, y);
       y -= spaceBetweenLines + fontSize;
     }
+
+    // Print dataflow link
+    fontSize = 45f;
+    x = 133f;
+    String dataflowLink = reportneturl + "/dataflow/" + receipt.getIdDataflow();
+    printLinePDF(contentStream, dataflowLink, font, fontSize, 133f, y);
+    y -= spaceBetweenLines + fontSize;
+
     fontSize = 58f;
 
     // Print obligation information

@@ -49,6 +49,7 @@ export const ManageDataflowForm = forwardRef(
       onSearch,
       onSubmit,
       refresh,
+      renderOfficialReporting,
       sncData
     },
     ref
@@ -140,7 +141,7 @@ export const ManageDataflowForm = forwardRef(
       return hasErrors;
     };
 
-    const onConfirm = async (pinned, bigData) => {
+    const onConfirm = async (pinned, bigData, officialReporting) => {
       checkIsCorrectInputValue(metadata.obligation.title, 'obligation');
       checkIsCorrectInputValue(name, 'name');
       checkIsCorrectInputValue(description, 'description');
@@ -152,53 +153,57 @@ export const ManageDataflowForm = forwardRef(
           if (isEditing) {
             isCitizenScienceDataflow
               ? await CitizenScienceDataflowService.update(
-                dataflowId,
-                name,
-                description,
-                metadata.obligation.id,
-                metadata.isReleasable,
-                metadata.showPublicInfo,
-                bigData,
-                selectedGroup ? selectedGroup.dataProviderGroupId : null,
-                isDataflowOpen && deliveryDate
-                  ? new Date(dayjs(deliveryDate).utc(true).endOf('day').valueOf()).getTime()
-                  : undefined
-              )
+                  dataflowId,
+                  name,
+                  description,
+                  metadata.obligation.id,
+                  metadata.isReleasable,
+                  metadata.showPublicInfo,
+                  bigData,
+                  selectedGroup ? selectedGroup.dataProviderGroupId : null,
+                  isDataflowOpen && deliveryDate
+                    ? new Date(dayjs(deliveryDate).utc(true).endOf('day').valueOf()).getTime()
+                    : undefined,
+                  officialReporting
+                )
               : await DataflowService.update(
-                dataflowId,
-                name,
-                description,
-                metadata.obligation.id,
-                metadata.isReleasable,
-                metadata.showPublicInfo,
-                bigData,
-                selectedGroup ? selectedGroup.dataProviderGroupId : null,
-                isDataflowOpen && deliveryDate
-                  ? new Date(dayjs(deliveryDate).utc(true).endOf('day').valueOf()).getTime()
-                  : undefined
-              );
+                  dataflowId,
+                  name,
+                  description,
+                  metadata.obligation.id,
+                  metadata.isReleasable,
+                  metadata.showPublicInfo,
+                  bigData,
+                  selectedGroup ? selectedGroup.dataProviderGroupId : null,
+                  isDataflowOpen && deliveryDate
+                    ? new Date(dayjs(deliveryDate).utc(true).endOf('day').valueOf()).getTime()
+                    : undefined,
+                  officialReporting
+                );
 
             onEdit(name, description, metadata.obligation.id);
           } else {
             const creationResponse = isCitizenScienceDataflow
               ? await CitizenScienceDataflowService.create(
-                name,
-                description,
-                metadata.obligation.id,
-                undefined,
-                bigData,
-                selectedGroup.dataProviderGroupId,
-                sncData === true ? true : undefined
-              )
+                  name,
+                  description,
+                  metadata.obligation.id,
+                  undefined,
+                  bigData,
+                  selectedGroup.dataProviderGroupId,
+                  sncData === true ? true : undefined,
+                  officialReporting
+                )
               : await DataflowService.create(
-                name,
-                description,
-                metadata.obligation.id,
-                undefined,
-                bigData,
-                selectedGroup.dataProviderGroupId,
-                sncData === true ? true : undefined
-              );
+                  name,
+                  description,
+                  metadata.obligation.id,
+                  undefined,
+                  bigData,
+                  selectedGroup.dataProviderGroupId,
+                  sncData === true ? true : undefined,
+                  officialReporting
+                );
 
             if (pinned) {
               const inmUserProperties = { ...userContext.userProps };
@@ -320,7 +325,9 @@ export const ManageDataflowForm = forwardRef(
                 optionLabel="label"
                 options={providerGroups}
                 placeholder={resourcesContext.messages['selectGroupOfCompanies']}
-                tooltip={isDesign && hasRepresentatives ? resourcesContext.messages['providerGroupsDisabledTooltip'] : ''}
+                tooltip={
+                  isDesign && hasRepresentatives ? resourcesContext.messages['providerGroupsDisabledTooltip'] : ''
+                }
                 value={selectedGroup ? selectedGroup : dataProviderGroup}
               />
             </div>
@@ -336,7 +343,9 @@ export const ManageDataflowForm = forwardRef(
                 optionLabel="label"
                 options={providerGroups}
                 placeholder={resourcesContext.messages['selectGroupOfReportingEntities']}
-                tooltip={isDesign && hasRepresentatives ? resourcesContext.messages['providerGroupsDisabledTooltip'] : ''}
+                tooltip={
+                  isDesign && hasRepresentatives ? resourcesContext.messages['providerGroupsDisabledTooltip'] : ''
+                }
                 value={selectedGroup ? selectedGroup : dataProviderGroup}
               />
             </div>
@@ -381,6 +390,7 @@ export const ManageDataflowForm = forwardRef(
               {resourcesContext.messages['searchObligations']}
             </label>
           </div>
+          {isEditing && <div className={`${styles.officialReportingWrapper}`}>{renderOfficialReporting()}</div>}
         </fieldset>
       </form>
     );

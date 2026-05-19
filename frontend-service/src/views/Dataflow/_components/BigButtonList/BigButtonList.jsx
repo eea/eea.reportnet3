@@ -964,10 +964,13 @@ export const BigButtonList = ({
             setIsQCsNotValidWarningVisible(false);
           }}
           visible={isQCsNotValidWarningVisible}>
-          {TextUtils.parseText(resourcesContext.messages['notValidQCWarningBody'], {
-            disabled: invalidAndDisabledRulesAmount.disabledRules,
-            invalid: invalidAndDisabledRulesAmount.invalidRules
-          })}
+          <p
+            dangerouslySetInnerHTML={{
+              __html: TextUtils.parseText(resourcesContext.messages['notValidQCWarningBody'], {
+                disabled: invalidAndDisabledRulesAmount.disabledRules,
+                invalid: invalidAndDisabledRulesAmount.invalidRules
+              })
+            }}></p>
         </ConfirmDialog>
       )}
 
@@ -983,10 +986,13 @@ export const BigButtonList = ({
             setEmptyTable(false);
           }}
           visible={isQCsNotValidWarningVisible}>
-          {TextUtils.parseText(resourcesContext.messages['notValidQCWarningAndEmptyTableBody'], {
-            disabled: invalidAndDisabledRulesAmount.disabledRules,
-            invalid: invalidAndDisabledRulesAmount.invalidRules
-          })}
+          <p
+            dangerouslySetInnerHTML={{
+              __html: TextUtils.parseText(resourcesContext.messages['notValidQCWarningAndEmptyTableBody'], {
+                disabled: invalidAndDisabledRulesAmount.disabledRules,
+                invalid: invalidAndDisabledRulesAmount.invalidRules
+              })
+            }}></p>
         </ConfirmDialog>
       )}
 

@@ -261,3 +261,12 @@ body .p-tabview .p-tabview-panels {
   border-bottom-right-radius: 3px;
   margin-bottom: 30px;
 }
+
+// Exclusive color picking for warning and info icons for the Tab View only.
+body .p-tabview .p-tabview-nav li a .p-tabview-right-icon.pi-exclamation-circle {
+  color: var(--growl-warning-icon-color) !important;
+}
+
+body .p-tabview .p-tabview-nav li a .p-tabview-right-icon.pi-info-circle {
+  color: var(--growl-info-icon-color) !important;
+}

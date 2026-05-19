@@ -20,7 +20,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
-import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -93,13 +92,13 @@ public class DataLakeDataRetrieverUtils {
         switch (sortField.getType()) {
             case NUMBER_INTEGER:
             case NUMBER_DECIMAL:
-                dataQuery.append(" order by CASE when ").append(sortField.getName()).append(" like '' THEN 0 ELSE CAST(").append(sortField.getName()).append(" as NUMERIC) END");
+                dataQuery.append(" order by CASE when \"").append(sortField.getName()).append("\" like '' THEN 0 ELSE CAST(\"").append(sortField.getName()).append("\" as NUMERIC) END");
                 break;
             case DATE:
-                dataQuery.append(" order by CASE when ").append(sortField.getName()).append(" like '' THEN '0000-00-00' ELSE CAST(").append(sortField.getName()).append(" as DATE) END");
+                dataQuery.append(" order by CASE when \"").append(sortField.getName()).append("\" like '' THEN '0000-00-00' ELSE CAST(\"").append(sortField.getName()).append("\" as DATE) END");
                 break;
             default:
-                dataQuery.append(" order by ").append(sortField.getName());
+                dataQuery.append(" order by \"").append(sortField.getName()).append("\"");
                 break;
         }
         dataQuery.append(sort[1].equals("1") ? " asc" : " desc");
@@ -139,7 +138,7 @@ public class DataLakeDataRetrieverUtils {
     }
 
     public static StringBuilder buildFilteredQuery(DataSetMetabaseVO dataset, String fields, String fieldSchemaId, String fieldValue, Map<String, FieldSchemaVO> fieldIdMap,
-                                            ErrorTypeEnum[] levelError, String[] qcCodes, String validationTablePath) {
+                                            ErrorTypeEnum[] levelError, String[] qcCodes, String validationTablePath, boolean forCount) {
         StringBuilder query = new StringBuilder();
         boolean levelErrorNotEmpty = levelError!=null && levelError.length>0 && levelError.length!=MAX_FILTERS;
         boolean qcCodesNotEmpty = qcCodes!=null && qcCodes.length>0;
@@ -155,8 +154,8 @@ public class DataLakeDataRetrieverUtils {
         if (qcCodesNotEmpty && validationTablePath!=null) {
             buildQcCodeFilterQuery(fieldValue, query, levelErrorNotEmpty, qcCodes, validationTablePath);
         }
-        //sorting
-        if (fields !=null) {
+        //sorting, do not apply for count query
+        if (fields !=null && !forCount) {
             buildSortQuery(fields, dataset.getDatasetSchema(), fieldIdMap, query);
         }
         return query;
@@ -211,7 +210,7 @@ public class DataLakeDataRetrieverUtils {
         DremioRecordMapper recordMapper = new DremioRecordMapper(spatialDataHandling, schemasRepository);
         recordMapper.setRecordSchemaVO(tableSchemaVO.getRecordSchema()).setDatasetSchemaId(datasetSchema).setTableSchemaId(tableSchemaVO.getIdTableSchema());
         List<RecordVO> recordVOS = dremioJdbcTemplate.query(dataQuery.toString(), recordMapper);
-        spatialDataHandling.decodeSpatialData(recordVOS);
+        spatialDataHandling.transformSpatialFields(recordVOS);
         return recordVOS;
     }
 }
