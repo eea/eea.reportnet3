@@ -56,4 +56,6 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
      */
     List<Task> findByTaskTypeAndStatus(TaskType taskType, ProcessStatusEnum status);
 
+    List<Task> findByProcessIdInAndStatus(List<String> processIds, ProcessStatusEnum status);
+
 }

@@ -6,11 +6,13 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.eea.interfaces.controller.recordstore.ProcessController;
+import org.eea.interfaces.vo.orchestrator.JobCanceledValidationTasksVO;
 import org.eea.interfaces.vo.recordstore.ProcessVO;
 import org.eea.interfaces.vo.recordstore.ProcessesVO;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
 import org.eea.recordstore.service.ProcessService;
+import org.eea.recordstore.service.impl.TaskServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +38,9 @@ public class ProcessControllerImpl implements ProcessController {
   /** The process service. */
   @Autowired
   private ProcessService processService;
+
+  @Autowired
+  private TaskServiceImpl taskServiceImpl;
 
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
@@ -252,6 +257,20 @@ public class ProcessControllerImpl implements ProcessController {
   @DeleteMapping(value = "/private/deleteProcess")
   public void deleteProcessByProcessId(@RequestParam("processId") String processId){
     processService.deleteProcessByProcessId(processId);
+  }
+
+  /**
+   * Finds canceled tasks by processIds
+   * @param processIds
+   * @return
+   */
+  @Override
+  @GetMapping("/private/findCanceledTasksByProcessIds")
+  public JobCanceledValidationTasksVO findTasksByProcessIdsAndStatus(
+          @RequestParam(name = "processIds") List<String> processIds,
+          @RequestParam(value = "pageNum", defaultValue = "0", required = false) Integer pageNum,
+          @RequestParam(value = "pageSize", defaultValue = "10", required = false) Integer pageSize) {
+      return taskServiceImpl.findTasksByProcessIdsAndStatus(processIds, ProcessStatusEnum.CANCELED, pageNum, pageSize);
   }
 
 }
