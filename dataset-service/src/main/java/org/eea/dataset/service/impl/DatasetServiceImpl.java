@@ -90,8 +90,7 @@ import org.springframework.transaction.annotation.Propagation;
 import javax.transaction.Transactional;
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
-import java.sql.SQLException;
-import java.sql.Timestamp;
+import java.sql.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -1619,6 +1618,66 @@ public class DatasetServiceImpl implements DatasetService {
     updateCheckView(datasetId, false);
     // delete the temporary table from etlExport
     datasetRepository.removeTempEtlExport(datasetId);
+  }
+
+  /**
+   * For #295327.
+   * Ensures that the dataset schema contains the required dataset_value and table_value
+   * rows before records are created.
+   * In Transport, some datasets can reach the record creation flow while the dataset
+   * schema is missing the expected rows in dataset_value and/or table_value. When that
+   * happens, adding records with attachments can fail before the user ever reaches the
+   * attachment upload flow.
+   * This method is intentionally idempotent: if the rows already exist, nothing is changed.
+   *
+   * @param datasetId the dataset id
+   * @param tableSchemaId the table schema id where records are being created
+   * @throws EEAException if the metadata rows cannot be checked or repaired
+   */
+  @Override
+  @Transactional
+  public void ensureDatasetAndTableValueExist(Long datasetId, String tableSchemaId) {
+
+    if (datasetId == null || StringUtils.isBlank(tableSchemaId)) {
+      throw new IllegalStateException("Unable to repair dataset metadata because datasetId or tableSchemaId is missing");
+    }
+
+    TenantResolver.setTenantName(String.format(DATASET_ID, datasetId));
+
+    DatasetValue datasetValue = datasetRepository.findById(datasetId).orElse(null);
+
+    // Checks if dataset_value has a record and if not adds the missing one.
+    if (datasetValue == null) {
+      String datasetSchemaId = dataSetMetabaseRepository.findDatasetSchemaIdById(datasetId);
+
+      if (StringUtils.isBlank(datasetSchemaId)) {
+        throw new IllegalStateException("Unable to repair dataset metadata because datasetSchemaId is missing");
+      }
+
+      datasetValue = new DatasetValue();
+      datasetValue.setId(datasetId);
+      datasetValue.setIdDatasetSchema(datasetSchemaId);
+      datasetValue.setViewUpdated(false);
+
+      datasetValue = datasetRepository.saveAndFlush(datasetValue);
+
+      LOG.info("Inserted missing dataset_value row for datasetId {} and datasetSchemaId {}",
+          datasetId, datasetSchemaId);
+    }
+
+    TableValue tableValue = tableRepository.findByIdTableSchema(tableSchemaId);
+
+    // Checks if table_value has a record and if not adds the missing one.
+    if (tableValue == null) {
+      tableValue = new TableValue();
+      tableValue.setIdTableSchema(tableSchemaId);
+      tableValue.setDatasetId(datasetValue);
+
+      tableRepository.saveAndFlush(tableValue);
+
+      LOG.info("Inserted missing table_value row for datasetId {} and tableSchemaId {}",
+          datasetId, tableSchemaId);
+    }
   }
 
   /**

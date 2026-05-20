@@ -420,6 +420,15 @@ public interface DatasetService {
   void updateAttachment(@DatasetId Long datasetId, String idField, String fileName, InputStream is)
       throws EEAException, IOException;
 
+  /**
+   * Ensures that the dataset schema contains the required dataset_value and table_value
+   * rows before records are created.
+   *
+   * @param datasetId the dataset id
+   * @param tableSchemaId the table schema id
+   * @throws EEAException if the metadata rows cannot be checked or repaired
+   */
+  void ensureDatasetAndTableValueExist(@DatasetId Long datasetId, String tableSchemaId);
 
   /**
    * Gets the field by id.
