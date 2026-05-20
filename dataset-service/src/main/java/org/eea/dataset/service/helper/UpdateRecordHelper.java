@@ -97,6 +97,8 @@ public class UpdateRecordHelper extends KafkaSenderUtils {
    */
   public void executeCreateProcess(final Long datasetId, List<RecordVO> records,
       String tableSchemaId) throws EEAException {
+    // Self-healing database records for attachments before inserting records #295327.
+    datasetService.ensureDatasetAndTableValueExist(datasetId, tableSchemaId);
     datasetService.insertRecords(datasetId, records, tableSchemaId);
     LOG.info("Records have been created for datasetId {}", datasetId);
     // now the view is not updated, update the check to false
@@ -124,6 +126,8 @@ public class UpdateRecordHelper extends KafkaSenderUtils {
   public void executeMultiCreateProcess(final Long datasetId, List<TableVO> tableRecords)
       throws EEAException {
     for (TableVO tableVO : tableRecords) {
+      // Self-healing database records for attachments before inserting records #295327.
+      datasetService.ensureDatasetAndTableValueExist(datasetId, tableVO.getIdTableSchema());
       datasetService.insertRecords(datasetId, tableVO.getRecords(), tableVO.getIdTableSchema());
     }
     LOG.info("PaM group save: Records have been created for datasetId {}", datasetId);
