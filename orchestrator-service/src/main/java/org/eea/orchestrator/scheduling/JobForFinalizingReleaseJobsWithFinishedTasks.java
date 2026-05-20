@@ -1,16 +1,16 @@
 package org.eea.orchestrator.scheduling;
 
-import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.collaboration.CollaborationController;
 import org.eea.interfaces.controller.dataflow.DataFlowController;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController;
 import org.eea.interfaces.controller.dataset.DatasetSnapshotController;
 import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
-import org.eea.interfaces.controller.validation.ValidationController.ValidationControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.MessageVO;
+import org.eea.interfaces.vo.dataset.DatasetStatusMessageVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
+import org.eea.interfaces.vo.dataset.enums.DatasetStatusEnum;
 import org.eea.interfaces.vo.metabase.SnapshotVO;
 import org.eea.interfaces.vo.orchestrator.JobVO;
 import org.eea.interfaces.vo.orchestrator.enums.JobInfoEnum;
@@ -91,7 +91,7 @@ public class JobForFinalizingReleaseJobsWithFinishedTasks {
     private void init() {
         ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
         scheduler.initialize();
-        scheduler.schedule(() -> finalizeInProgressReleaseJobsWithFinishedTasks(),
+        scheduler.schedule(this::finalizeInProgressReleaseJobsWithFinishedTasks,
                 new CronTrigger("0 */30 * * * *"));
     }
 
@@ -310,6 +310,15 @@ public class JobForFinalizingReleaseJobsWithFinishedTasks {
                     jobVO.getId(), dataflowId, providerId,
                     datasetIds.size(),
                     processIds.size());
+
+            //Set the status of all the datasets of the failed release back to PENDING
+            for (Long datasetId : datasetIds) {
+                final DatasetStatusMessageVO datasetStatusMessageVO = new DatasetStatusMessageVO();
+                datasetStatusMessageVO.setDatasetId(datasetId);
+                datasetStatusMessageVO.setDataflowId(dataflowId);
+                datasetStatusMessageVO.setStatus(DatasetStatusEnum.PENDING);
+                datasetMetabaseController.updateDatasetStatus(datasetStatusMessageVO);
+            }
 
             datasetSnapshotController.releaseLocksFromReleaseDatasets(dataflowId, providerId);
             jobService.updateJobStatus(jobVO.getId(), JobStatusEnum.FAILED);
