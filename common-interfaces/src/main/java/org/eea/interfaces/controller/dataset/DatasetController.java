@@ -923,7 +923,9 @@ public interface DatasetController {
    * @return
    */
   @DeleteMapping(value = "/private/deleteLocksToDeleteProcess/{datasetId}")
-  void deleteLocksToDeleteProcess(@PathVariable("datasetId") Long datasetId, @RequestParam(value="tableSchemaId", required = false) String tableSchemaId);
+  void deleteLocksToDeleteProcess(@PathVariable("datasetId") Long datasetId,
+                                  @RequestParam(value="tableSchemaId", required = false) String tableSchemaId,
+                                  @RequestParam(value="preparationCode", required = false) String preparationCode);
 
 
 

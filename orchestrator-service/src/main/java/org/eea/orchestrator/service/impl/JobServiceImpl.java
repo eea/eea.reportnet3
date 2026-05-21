@@ -699,7 +699,7 @@ public class JobServiceImpl implements JobService {
                 break;
             case DELETE:
                 String tableSchemaId = (jobVO.getParameters().get("tableSchemaId") != null) ? (String) jobVO.getParameters().get("tableSchemaId") : null;
-                dataSetControllerZuul.deleteLocksToDeleteProcess(jobVO.getDatasetId(), tableSchemaId);
+                dataSetControllerZuul.deleteLocksToDeleteProcess(jobVO.getDatasetId(), tableSchemaId, null);
                 break;
         }
     }
