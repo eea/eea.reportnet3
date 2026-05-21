@@ -21,6 +21,7 @@ import java.util.Optional;
 import org.apache.commons.io.FileUtils;
 import org.bson.Document;
 import org.bson.types.ObjectId;
+import org.eea.datalake.service.SpatialDataHandling;
 import org.eea.dataset.mapper.DataSetMapper;
 import org.eea.dataset.mapper.FieldNoValidationMapper;
 import org.eea.dataset.mapper.FieldValidationMapper;
@@ -269,6 +270,9 @@ DatasetServiceTest {
   /** The statistics repository. */
   @Mock
   private StatisticsService statisticsService;
+
+  @Mock
+  private SpatialDataHandling spatialDataHandling;
 
   /** The dataset metabase service. */
   @Mock

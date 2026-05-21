@@ -160,6 +160,9 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
     private TableDataRetriever tableDataRetriever;
 
+    @Value("${dataset.edit.lock.expirationInterval}")
+    private Long expirationIntervalInHours;
+
     private final S3Service s3ServicePrivate;
     private final S3Service s3ServicePublic;
     private final S3Helper s3HelperPrivate;
@@ -1282,7 +1285,9 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
             //iceberg enabled should be updated to true at the end of the conversion to ensure that all available tables were converted.
             for (TableSchemaVO table : availableForConversionTables) {
-                DatasetTable datasetTableEntry = new DatasetTable(datasetId, datasetSchemaId, table.getIdTableSchema(), true, user);
+                final Date now = new Date();
+                final Date lockExpirationDate = new Date(now.getTime() + expirationIntervalInHours * 60L * 60L * 1000L); //in milliseconds
+                DatasetTable datasetTableEntry = new DatasetTable(datasetId, datasetSchemaId, table.getIdTableSchema(), true, user, lockExpirationDate);
                 datasetTableService.saveOrUpdateDatasetTableEntry(datasetTableEntry);
             }
 
@@ -1442,7 +1447,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                     s3HelperPrivate.deleteFolder(s3IcebergTablePathResolver, S3_TABLE_NAME_FOLDER_PATH_FOR_VALID_PREFIX);
                 }
 
-                DatasetTable datasetTableEntry = new DatasetTable(datasetId, datasetSchemaId, table.getIdTableSchema(), false, null);
+                DatasetTable datasetTableEntry = new DatasetTable(datasetId, datasetSchemaId, table.getIdTableSchema(), false, null, null);
                 datasetTableService.saveOrUpdateDatasetTableEntry(datasetTableEntry);
             }
 
@@ -3445,5 +3450,18 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
         // Not a preparation job
         return null;
+    }
+    @Override
+    public boolean isTableEmpty(S3PathResolver s3PathResolver) {
+        if (!s3HelperPrivate.checkFolderExist(s3PathResolver, S3_TABLE_NAME_FOLDER_PATH)) {
+            return true;
+        }
+        try {
+            Long count = dremioJdbcTemplate.queryForObject(s3HelperPrivate.buildRecordsCountQuery(s3PathResolver), Long.class);
+            return count == null || count == 0;
+        } catch (Exception e) {
+            LOG.warn("Could not query row count for table {}, treating as non-empty", s3PathResolver.getTableName(), e);
+            return false;
+        }
     }
 }

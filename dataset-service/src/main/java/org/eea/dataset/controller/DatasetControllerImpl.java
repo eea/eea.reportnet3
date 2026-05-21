@@ -65,6 +65,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.concurrent.DelegatingSecurityContextRunnable;
 import org.springframework.security.core.context.SecurityContext;
@@ -4476,22 +4477,24 @@ public class DatasetControllerImpl implements DatasetController {
           @RequestParam(value = "fieldName", required = false) String fieldName,
           @RequestParam("dataflowId") Long dataflowId,
           @RequestParam(value = "providerId", required = false) Long providerId,
-          @RequestParam("idTableSchema") String idTableSchema
+          @RequestParam("idTableSchema") String idTableSchema,
+          @RequestParam(value = "downloadFile", required = false, defaultValue = "true") boolean downloadFile
   ) {
 
-    String username = SecurityContextHolder.getContext()
-            .getAuthentication()
-            .getName();
+    String username = SecurityContextHolder.getContext().getAuthentication().getName();
+
+    NotificationVO.NotificationVOBuilder baseNotification =
+            NotificationVO.builder()
+                    .user(username)
+                    .datasetId(datasetId)
+                    .dataflowId(dataflowId);
 
     try {
-      Boolean isBigDataflow =
-              dataFlowControllerZuul.isBigDataflow(dataflowId);
+      Boolean isBigDataflow = dataFlowControllerZuul.isBigDataflow(dataflowId);
 
       if (fieldName == null) {
-        String datasetSchemaId =
-                datasetSchemaService.getDatasetSchemaId(datasetId);
-        FieldSchemaVO fieldSchemaVO =
-                datasetSchemaService.getFieldSchema(datasetSchemaId, fieldId);
+        String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
+        FieldSchemaVO fieldSchemaVO = datasetSchemaService.getFieldSchema(datasetSchemaId, fieldId);
         fieldName = fieldSchemaVO.getName();
       }
 
@@ -4499,87 +4502,179 @@ public class DatasetControllerImpl implements DatasetController {
 
       if (Boolean.TRUE.equals(isBigDataflow)) {
 
-        DataSetMetabaseVO dataset =
-                datasetMetabaseService.findDatasetMetabase(datasetId);
-
+        DataSetMetabaseVO dataset = datasetMetabaseService.findDatasetMetabase(datasetId);
         String datasetSchemaId = dataset.getDatasetSchema();
+        TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(idTableSchema, datasetSchemaId);
 
-        TableSchemaVO tableSchemaVO =
-                datasetSchemaService.getTableSchemaVO(
-                        idTableSchema,
-                        datasetSchemaId
-                );
-
-        file = bigDataDatasetService.getGeometryAsGeoJson(
-                dataset,
-                tableSchemaVO,
-                fieldName,
-                recordId
-        );
+        file = bigDataDatasetService.getGeometryAsGeoJson(dataset, tableSchemaVO, fieldName, recordId);
 
       } else {
         // CITUS dataflows
-        file = datasetService.getGeometryAsGeoJson(
-                datasetId,
-                recordId,
-                fieldId
-        );
+        file = datasetService.getGeometryAsGeoJson(datasetId, recordId, fieldId);
       }
 
-      String filename = fieldName + "_" + recordId + ".geojson";
-
       HttpHeaders httpHeaders = new HttpHeaders();
-      httpHeaders.set(
-              HttpHeaders.CONTENT_DISPOSITION,
-              "attachment; filename=" + filename
-      );
+      if (downloadFile) {
+        String filename = fieldName + "_" + recordId + ".geojson";
+        httpHeaders.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + filename);
+        kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.DOWNLOAD_GEOMETRY_COMPLETED_EVENT, null, baseNotification.build());
+      } else {
+        httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+      }
 
-      kafkaSenderUtils.releaseNotificableKafkaEvent(
-              EventType.DOWNLOAD_GEOMETRY_COMPLETED_EVENT,
-              null,
-              NotificationVO.builder()
-                      .user(username)
-                      .datasetId(datasetId)
-                      .dataflowId(dataflowId)
-                      .build()
-      );
-
-      LOG.info(
-              "Geometry download completed for datasetId {} recordId {} field {}",
-              datasetId, recordId, fieldName
-      );
+      LOG.info("Geometry fetch or download completed for datasetId {} recordId {} field {}", datasetId, recordId, fieldName);
 
       return new ResponseEntity<>(file, httpHeaders, HttpStatus.OK);
 
     } catch (ResponseStatusException e) {
-      kafkaSenderUtils.releaseNotificableKafkaEvent(
-              EventType.DOWNLOAD_GEOMETRY_FAILED_EVENT,
-              null,
-              NotificationVO.builder()
-                      .user(username)
-                      .datasetId(datasetId)
-                      .dataflowId(dataflowId)
-                      .error(e.getReason())
-                      .build()
-      );
+      if (downloadFile) kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.DOWNLOAD_GEOMETRY_FAILED_EVENT, null, baseNotification.error(e.getReason()).build());
       throw e;
-    } catch (Exception e) {
 
-      LOG.error(
-              "Unexpected error! Error retrieving geometry for dataflowId {} datasetId {} fieldName {} recordId {} Message: {}",
-              dataflowId, datasetId, fieldName, recordId, e.getMessage()
-      );
-      kafkaSenderUtils.releaseNotificableKafkaEvent(
-              EventType.DOWNLOAD_GEOMETRY_FAILED_EVENT,
-              null,
-              NotificationVO.builder()
-                      .user(username)
-                      .datasetId(datasetId)
-                      .dataflowId(dataflowId)
-                      .error(e.getMessage())
-                      .build()
-      );
+    } catch (Exception e) {
+      LOG.error("Unexpected error! Error retrieving geometry for dataflowId {} datasetId {} fieldName {} recordId {} Message: {}", dataflowId, datasetId, fieldName, recordId, e.getMessage());
+      if (downloadFile) kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.DOWNLOAD_GEOMETRY_FAILED_EVENT, null, baseNotification.error(e.getMessage()).build());
       throw e;
+    }
+  }
+
+  @Override
+  @HystrixCommand
+  @DeleteMapping("private/clearDatasetTableForUser")
+  @ApiOperation(value = "Removes the specified user from any existing DatasetTable rows and if the rows refer to " +
+          "big data dataset converts any existing Iceberg tables to Parquet.", hidden = true)
+  public void clearDatasetTableForUser(@RequestParam("username") String username) {
+
+    final List<DatasetTableVO> datasetTables = datasetTableService.getDatasetTablesByEditingUser(username);
+
+    LOG.info("Found {} DatasetTables for user {}", datasetTables.size(), username);
+    if (datasetTables.isEmpty()) {
+      return;
+    }
+
+    for (DatasetTableVO datasetTableVO : datasetTables) {
+      disableEditing(datasetTableVO);
+    }
+  }
+
+  @Override
+  @HystrixCommand
+  @GetMapping("private/expiredDatasetTables")
+  @ApiOperation(value = "Get dataset tables that have expired editing locks", hidden = true)
+  public List<DatasetTableVO> getDatasetTablesWithExpiredEditingLocks() {
+
+    return datasetTableService.getDatasetTablesWithExpiredEditingLocks();
+  }
+
+  @Override
+  @HystrixCommand(commandProperties = {@HystrixProperty(name = "execution.isolation.thread.timeoutInMilliseconds", value = "300000")})
+  @DeleteMapping("/private/clearExpiredDatasetTableLocks")
+  @ApiOperation(value = "Clear the username and expiration date from DatasetTables with expired locks.", hidden = true)
+  public void clearExpiredDatasetTableLocks() {
+
+    final List<DatasetTableVO> expiredDatasetTables = datasetTableService.getDatasetTablesWithExpiredEditingLocks();
+
+    LOG.info("Found {} DatasetTables with expired editing locks", expiredDatasetTables.size());
+    if (expiredDatasetTables.isEmpty()) {
+      return;
+    }
+
+    for (DatasetTableVO datasetTableVO : expiredDatasetTables) {
+      disableEditing(datasetTableVO);
+    }
+  }
+
+  @DeleteMapping("/clearDatasetTableLocksByDataflow")
+  @HystrixCommand(commandProperties = {@HystrixProperty(name = "execution.isolation.thread.timeoutInMilliseconds", value = "650000")})
+  @PreAuthorize("hasAnyRole('ADMIN')")
+  @Override
+  public void clearDatasetTableLocksByDataflow(@RequestParam("dataflowId") Long dataflowId) {
+
+    final List<DatasetTableVO> datasetTables = datasetTableService.getDatasetTablesByDataflowId(dataflowId);
+
+    LOG.info("Found {} DatasetTables in dataflow with id {}", datasetTables.size(), dataflowId);
+    if (datasetTables.isEmpty()) {
+      return;
+    }
+
+    for (DatasetTableVO datasetTableVO : datasetTables) {
+      disableEditing(datasetTableVO);
+    }
+  }
+
+  @DeleteMapping("/clearDatasetTableLocksByUser")
+  @HystrixCommand(commandProperties = {@HystrixProperty(name = "execution.isolation.thread.timeoutInMilliseconds", value = "650000")})
+  @PreAuthorize("hasAnyRole('ADMIN')")
+  @Override
+  public void clearDatasetTableLocksByUser(@RequestParam("username") String username) {
+
+    final List<DatasetTableVO> datasetTables = datasetTableService.getDatasetTablesByEditingUser(username);
+
+    LOG.info("Found {} DatasetTables for user {}", datasetTables.size(), username);
+    if (datasetTables.isEmpty()) {
+      return;
+    }
+
+    for (DatasetTableVO datasetTableVO : datasetTables) {
+      disableEditing(datasetTableVO);
+    }
+  }
+
+  private void disableEditing(DatasetTableVO datasetTableVO) {
+    try {
+      final Long datasetId = datasetTableVO.getDatasetId();
+      final DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
+
+      final Long dataflowId = dataSetMetabaseVO.getDataflowId();
+      final Long providerId = dataSetMetabaseVO.getDataProviderId();
+      final boolean isBigData = dataFlowControllerZuul.isBigDataflow(dataflowId);
+      final List<String> tableSchemaIds = Collections.singletonList(datasetTableVO.getTableSchemaId());
+
+      if (!isBigData) {
+        datasetTableService.disableEditingForDatasetTable(datasetId);
+        return;
+      }
+
+      //Dataset is BigData
+      final String lockKey = LockEnum.PARQUET_CONVERSION.getValue() + "_" + datasetId;
+      final String lockValue = LockEnum.PARQUET_CONVERSION.getValue() + "_" + datasetId + "_orchestrator_" + UUID.randomUUID();
+
+      final List<JobVO> activeJobsForDatasetId = jobControllerZuul
+              .findActiveJobsRelatedToADatasetId(datasetId, dataflowId, providerId);
+
+      if (activeJobsForDatasetId != null && !activeJobsForDatasetId.isEmpty()) {
+        final List<Long> jobIds = activeJobsForDatasetId
+                .stream()
+                .map(JobVO::getId)
+                .collect(Collectors.toList());
+
+        LOG.info("Cannot convert tables from iceberg to parquet for dataflowId {} datasetId {} providerId {} because there are active jobs related to the same dataset id. Job ids: {}",
+                dataflowId, datasetId, providerId, jobIds);
+        return;
+      }
+
+      try {
+        if (redisLockService.checkAndAcquireLock(lockKey, lockValue, conversionLockExpirationInMillis)) {
+          LOG.info("Orchestrator has triggered the iceberg to parquet conversion for dataflowId {} datasetId {} providerId {} and tableSchemaIds {} LockValue {}",
+                  dataflowId, datasetId, providerId, tableSchemaIds, lockValue);
+          bigDataDatasetService.initiateIcebergToParquetConversion(
+                  datasetId,
+                  dataflowId,
+                  providerId,
+                  tableSchemaIds,
+                  lockValue);
+        } else {
+          Map<String, String> activeLocks = redisLockService.listActiveLocks(lockKey);
+          LOG.info("Orchestrator has triggered the iceberg to parquet conversion for dataflowId {} datasetId {} providerId {} and tableSchemaIds {} but another iceberg to parquet conversion for the same dataset is in progress {}",
+                  dataflowId, datasetId, providerId, tableSchemaIds, activeLocks);
+        }
+      } catch (Exception e) {
+        LOG.error("Failed to initiate Iceberg to Parquet conversion for dataflowId {} datasetId {} providerId {} tableSchemaIds {} : {} - Releasing lock with value {}",
+                dataflowId, datasetId, providerId, tableSchemaIds, e.getMessage(), lockValue);
+        redisLockService.releaseLock(lockKey, lockValue);
+        throw e;
+      }
+    } catch (Exception e) {
+      LOG.error(e.getMessage(), e);
     }
   }
 }

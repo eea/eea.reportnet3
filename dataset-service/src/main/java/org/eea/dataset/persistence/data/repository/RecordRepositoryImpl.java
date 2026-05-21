@@ -7,7 +7,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.text.StringEscapeUtils;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.eea.datalake.service.S3Service;
@@ -88,7 +87,6 @@ import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 import com.fasterxml.jackson.core.StreamReadConstraints;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import static org.eea.utils.LiteralConstants.*;
 
@@ -1001,7 +999,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     TableSchemaVO tableSchemaVO = getTableSchemaVO(tableSchema.getIdTableSchema().toString(), datasetSchemaId);
     recordMapper.setRecordSchemaVO(tableSchemaVO.getRecordSchema()).setDatasetSchemaId(datasetSchemaId).setTableSchemaId(tableSchemaVO.getIdTableSchema());
     List<RecordVO> recordVOS = dremioJdbcTemplate.query(totalRecords, recordMapper);
-    spatialDataHandling.decodeSpatialData(recordVOS);
+    spatialDataHandling.decodeSpatialFields(recordVOS);
     ObjectMapper mapper = new ObjectMapper();
     mapper.configure(JsonGenerator.Feature.ESCAPE_NON_ASCII, false);
     bw.write("{\"records\":[");

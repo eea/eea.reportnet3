@@ -28,9 +28,7 @@ export const DatasetDeleteDataDialog = ({ children, disabled = false, icon, labe
 
   const renderDeleteButton = () => (
     <Button
-      className={`p-button-rounded p-button-secondary-transparent ${
-        !disabled ? 'p-button-animated-blink' : ''
-      } dataset-deleteDataset-help-step`}
+      className={`p-button-rounded ${!disabled ? 'p-button-animated-blink' : ''} dataset-deleteDataset-help-step`}
       disabled={disabled}
       icon={icon}
       label={label}

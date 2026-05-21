@@ -35,6 +35,8 @@ import org.eea.dataflow.persistence.repository.LeadReporterRepository;
 import org.eea.dataflow.persistence.repository.RepresentativeRepository;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataset.DatasetController;
+import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetSnapshotController.DataSetSnapshotControllerZuul;
 import org.eea.interfaces.controller.dataset.ReferenceDatasetController.ReferenceDatasetControllerZuul;
@@ -143,6 +145,8 @@ public class RepresentativeServiceImplTest {
   /** The authentication. */
   private Authentication authentication;
 
+  @Mock
+  private DataSetControllerZuul dataSetControllerZuulMock;
 
   @Before
   public void initMocks() {
@@ -691,12 +695,19 @@ public class RepresentativeServiceImplTest {
 
   @Test
   public void deleteLeadReporterTest() throws EEAException {
+
+    final UserRepresentationVO userRepresentationVO = new UserRepresentationVO();
+    userRepresentationVO.setUsername("username");
+
     Mockito.when(leadReporterRepository.findById(Mockito.any()))
-        .thenReturn(Optional.of(leadReporter));
+            .thenReturn(Optional.of(leadReporter));
     doNothing().when(leadReporterRepository).deleteById(Mockito.any());
+    Mockito.when(userManagementControllerZull.getUserByEmail(leadReporter.getEmail()))
+            .thenReturn(userRepresentationVO);
 
     representativeServiceImpl.deleteLeadReporter(1L);
     Mockito.verify(leadReporterRepository, times(1)).deleteById(Mockito.any());
+    Mockito.verify(dataSetControllerZuulMock).clearDatasetTableForUser("username");
   }
 
   @Test

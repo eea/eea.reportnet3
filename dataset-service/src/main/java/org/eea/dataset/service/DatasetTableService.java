@@ -28,4 +28,16 @@ public interface DatasetTableService {
     DatasetEditingStatusVO getEditingStatus(Long datasetId, String username);
 
     boolean isAnyDatasetBeingEdited(List<Long> datasetIds);
+
+    List<DatasetTableVO> getDatasetTablesByEditingUser(String username);
+
+    void disableEditingForDatasetTable(Long datasetId);
+
+    List<DatasetTableVO> getDatasetTablesWithExpiredEditingLocks();
+
+    List<DatasetTableVO> getDatasetTablesByDataflowId(Long dataflowId);
+
+
+    String getDatasetNonExpiredEditingUsername(Long datasetId);
+
 }

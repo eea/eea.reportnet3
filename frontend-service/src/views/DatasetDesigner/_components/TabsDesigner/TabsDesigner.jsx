@@ -133,7 +133,6 @@ export const TabsDesigner = ({
     }
   }, [tabs]);
 
-
   useEffect(() => {
     if (!bigData) return;
 
@@ -469,7 +468,6 @@ export const TabsDesigner = ({
       )
     );
   };
-
   const renderWarnings = (warningTitle, warning) => {
     return (
       !tabHasErrors &&
@@ -488,15 +486,36 @@ export const TabsDesigner = ({
   };
 
   const renderTabViews = () => {
+    
+    // The priority for the Icon display is Blockers > Errors > Warnings > Infos, so if a tab has blockers, only the blockers tooltip will be shown, if it has errors but no blockers, only the errors tooltip will be shown and so on.
     const getRightIcon = tab => {
+      if (tab.hasBlockers) {
+        return config.icons['blocker'];
+      }
       if (tab.hasErrors) {
         return config.icons['warning'];
       }
+      if (tab.hasWarnings) {
+        return config.icons['warningCircle'];
+      }
+      if (tab.hasInfos) {
+        return config.icons['infoCircle'];
+      }
     };
 
+    // The priority for the tooltip is Blockers > Errors > Warnings > Infos, so if a tab has blockers, only the blockers tooltip will be shown, if it has errors but no blockers, only the errors tooltip will be shown and so on.
     const getRightIconTooltip = tab => {
+      if (tab.hasBlockers) {
+        return resourcesContext.messages['tableWithBlockersTooltip'];
+      }
       if (tab.hasErrors) {
         return resourcesContext.messages['tableWithErrorsTooltip'];
+      }
+      if (tab.hasWarnings) {
+        return resourcesContext.messages['tableWithWarningsTooltip'];
+      }
+      if (tab.hasInfos) {
+        return resourcesContext.messages['tableWithInfosTooltip'];
       }
     };
 

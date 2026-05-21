@@ -93,6 +93,9 @@ public class DataFlowVO extends GenericDataflowVO implements Serializable {
   /** The snc data. */
   private Boolean sncData;
 
+  /** The official reporting. */
+  private Boolean officialReporting;
+
 
   /**
    * Equals.

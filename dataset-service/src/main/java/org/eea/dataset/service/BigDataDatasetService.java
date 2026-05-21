@@ -365,4 +365,9 @@ public interface BigDataDatasetService {
     JobPresignedUrlInfo generatePreparationImportPreSignedUrl(Long datasetId, Long dataflowId, Long providerId, String fileName, String preparationCode);
 
     String resolvePreparationCode(String requestPreparationCode, JobVO job);
+    /**
+     * Is table Empty.
+     * @param s3PathResolver table resolver
+     */
+     boolean isTableEmpty(S3PathResolver s3PathResolver);
 }

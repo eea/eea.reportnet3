@@ -1,4 +1,4 @@
-import { Fragment, useContext, useEffect, useRef, useState } from 'react';
+import { Fragment, memo, useContext, useEffect, useRef, useState } from 'react';
 
 import ReactDOMServer from 'react-dom/server';
 
@@ -30,7 +30,19 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 import TooltipButtonRed from 'views/_components/TooltipButton/TooltipButtonRed';
 
-export const Tab = ({
+const areEqual = (prevProps, nextProps) => {
+  for (const key in nextProps) {
+    if (typeof nextProps[key] === 'function' || key === 'children') {
+      continue;
+    }
+    if (prevProps[key] !== nextProps[key]) {
+      return false;
+    }
+  }
+  return true;
+};
+
+export const Tab = memo(({
   addTab,
   ariaControls,
   bigData = false,
@@ -586,7 +598,13 @@ export const Tab = ({
             const inmContextMenus = [...contextMenus];
             const hideContextMenus = inmContextMenus.filter(contextMenu => contextMenu.style.display !== '');
             hideContextMenus.forEach(contextMenu => (contextMenu.style.display = 'none'));
-            contextMenuRef.current.show(e);
+            contextMenuRef.current.show({
+              ...e,
+              pageX: e.pageX,
+              pageY: e.pageY + 60,
+              preventDefault: () => e.preventDefault(),
+              stopPropagation: () => e.stopPropagation()
+            });
           }
         }}
         ref={tabRef}
@@ -741,9 +759,9 @@ export const Tab = ({
         </a>
       </li>
       {designMode && !isDataflowOpen && !isDesignDatasetEditorRead ? (
-        <ContextMenu model={menu} ref={contextMenuRef} />
+        <ContextMenu model={menu} ref={contextMenuRef} appendTo={document.body} />
       ) : null}
       {renderTableInfo()}
     </Fragment>
   );
-};
+}, areEqual);

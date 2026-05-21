@@ -312,7 +312,8 @@ export const WebformTable = ({
           tableData,
           data.totalRecords,
           rootTableName,
-          rootPkFieldId
+          rootPkFieldId,
+          datasetSchemaId
         );
 
         if (webform?.isOptional && isEmpty(data.records)) {

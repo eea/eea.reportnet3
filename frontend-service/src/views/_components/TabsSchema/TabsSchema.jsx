@@ -56,17 +56,37 @@ export const TabsSchema = ({
   const resourcesContext = useContext(ResourcesContext);
 
   const getRightIcon = tab => {
+    
+    // The priority for the Icon display is Blockers > Errors > Warnings > Infos, so if a tab has blockers, only the blockers tooltip will be shown, if it has errors but no blockers, only the errors tooltip will be shown and so on.
+    if (tab.hasBlockers) {
+      return config.icons['blocker'];
+    }
     if (tab.hasErrors) {
+      return config.icons['errorCircle'];
+    }
+    if (tab.hasWarnings) {
       return config.icons['warning'];
+    }
+    if (tab.hasInfos) {
+      return config.icons['info'];
     }
   };
 
+  // The priority for the tooltip is Blockers > Errors > Warnings > Infos, so if a tab has blockers, only the blockers tooltip will be shown, if it has errors but no blockers, only the errors tooltip will be shown and so on.
   const getRightIconTooltip = tab => {
+    if (tab.hasBlockers) {
+      return resourcesContext.messages['tableWithBlockersTooltip'];
+    }
     if (tab.hasErrors) {
       return resourcesContext.messages['tableWithErrorsTooltip'];
     }
+    if (tab.hasWarnings) {
+      return resourcesContext.messages['tableWithWarningsTooltip'];
+    }
+    if (tab.hasInfos) {
+      return resourcesContext.messages['tableWithInfosTooltip'];
+    }
   };
-
   let tabs =
     tables && tableSchemaColumns
       ? tables.map(table => {
@@ -118,7 +138,10 @@ export const TabsSchema = ({
                   selectedTableSchemaId={selectedTableSchemaId}
                   showWriteButtons={showWriteButtons}
                   tableFixedNumber={table.fixedNumber}
+                  tableHasBlockers={table.hasBlockers}
                   tableHasErrors={table.hasErrors}
+                  tableHasInfos={table.hasInfos}
+                  tableHasWarnings={table.hasWarnings}
                   tableId={table.id}
                   tableName={table.name}
                   tableReadOnly={table.readOnly}

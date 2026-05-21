@@ -162,6 +162,11 @@ public class S3ServiceImpl implements S3Service {
             case S3_TABLE_NAME_VALIDATE_DC_PATH:
                 path = String.format(path, dataflowFolder, dataCollectionFolder, dataProviderFolder, parquetFolder, fileName);
                 break;
+            case S3_SNAPSHOT_TABLE_NAME_SNAPSHOT_PATH:
+            case S3_SNAPSHOT_TABLE_NAME_VALIDATE_DC_PATH:
+                path = String.format(path, dataflowFolder, dataProviderFolder, datasetFolder,
+                        snapshotFolder);
+                break;
             case S3_EXPORT_QUERY_PATH:
                 path = S3_DEFAULT_BUCKET + String.format(path, dataflowFolder, dataCollectionFolder,
                     fileName);
@@ -335,6 +340,7 @@ public class S3ServiceImpl implements S3Service {
         String dataProviderFolder = formatFolderName(s3PathResolver.getDataProviderId(), S3_DATA_PROVIDER_PATTERN);
         String datasetFolder = formatFolderName(s3PathResolver.getDatasetId(), S3_DATASET_PATTERN);
         String euDatasetFolder = formatFolderName(s3PathResolver.getDatasetId(), S3_EU_DATASET_PATTERN);
+        String snapshotFolder = formatSnapshotFolder(s3PathResolver.getSnapshotId());
 
         switch (path) {
             case S3_PREPARATION_TABLE_NAME_FOLDER_PATH:
@@ -352,6 +358,10 @@ public class S3ServiceImpl implements S3Service {
             case S3_TABLE_NAME_EU_QUERY_PATH:
                 return S3_DEFAULT_BUCKET + String.format(path, dataflowFolder, euDatasetFolder,
                     s3PathResolver.getTableName());
+            case S3_SNAPSHOT_TABLE_NAME_SNAPSHOT_PATH:
+            case S3_SNAPSHOT_TABLE_NAME_VALIDATE_DC_PATH:
+                return String.format(path, dataflowFolder, dataProviderFolder, datasetFolder,
+                        snapshotFolder);
             default:
                 LOG.info("Wrong type value: {}", path);
                 break;

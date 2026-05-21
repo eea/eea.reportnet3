@@ -325,7 +325,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
         //convert old table to iceberg
         Long providerId = (importFileInDremioInfo.getProviderId() != null) ? importFileInDremioInfo.getProviderId() : 0L;
         bigDataDatasetService.convertParquetToIcebergTable(importFileInDremioInfo.getDatasetId(), importFileInDremioInfo.getDataflowId(), providerId, tableSchemaVO, dataSetSchema.getIdDataSetSchema().toString(), null);
-        DatasetTable datasetTableEntry = new DatasetTable(importFileInDremioInfo.getDatasetId(), dataSetSchema.getIdDataSetSchema().toString(), tableSchemaVO.getIdTableSchema(), true, user);
+        DatasetTable datasetTableEntry = new DatasetTable(importFileInDremioInfo.getDatasetId(), dataSetSchema.getIdDataSetSchema().toString(), tableSchemaVO.getIdTableSchema(), true, user, null);
         datasetTableService.saveOrUpdateDatasetTableEntry(datasetTableEntry);
         S3PathResolver s3IcebergTablePathResolver = new S3PathResolver(importFileInDremioInfo.getDataflowId(), providerId, importFileInDremioInfo.getDatasetId(), tableSchemaVO.getNameTableSchema(), tableSchemaVO.getNameTableSchema(), S3_TABLE_AS_FOLDER_QUERY_PATH);
         s3IcebergTablePathResolver.setIsIcebergTable(true);

@@ -1183,6 +1183,22 @@ public interface DatasetController {
           @RequestParam("fieldName") String fieldName,
           @RequestParam("dataflowId") Long dataflowId,
           @RequestParam(value = "providerId", required = false) Long providerId,
-          @RequestParam("idTableSchema") String idTableSchema
+          @RequestParam("idTableSchema") String idTableSchema,
+          @RequestParam(value = "downloadFile", required = false, defaultValue = "true") boolean downloadFile
   );
+
+  @DeleteMapping("private/clearDatasetTableForUser")
+  void clearDatasetTableForUser(@RequestParam("username") String username);
+
+  @DeleteMapping("/private/clearExpiredDatasetTableLocks")
+  void clearExpiredDatasetTableLocks();
+
+  @GetMapping("/private/expiredDatasetTables")
+  List<DatasetTableVO> getDatasetTablesWithExpiredEditingLocks();
+
+  @DeleteMapping("/clearDatasetTableLocksByDataflow")
+  void clearDatasetTableLocksByDataflow(@RequestParam("dataflowId") Long dataflowId);
+
+  @DeleteMapping("/clearDatasetTableLocksByUser")
+  void clearDatasetTableLocksByUser(@RequestParam(value = "username") String username);
 }

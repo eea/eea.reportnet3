@@ -363,7 +363,10 @@ export const WebformRecord = ({
 
         // Find reference PK field ID
         const referencePkFieldId = element.records[0]?.fields.find(
-          field => !isNil(field?.referencedField?.idPk) && field?.referencedField?.idPk !== rootPkFieldId
+          field =>
+            !isNil(field?.referencedField?.idPk) &&
+            field?.referencedField?.idPk !== rootPkFieldId &&
+            field?.referencedField?.idDatasetSchema === datasetSchemaId
         )?.referencedField?.idPk;
 
         // Find the PK value for that field ID
@@ -381,15 +384,25 @@ export const WebformRecord = ({
         // Build FK fields list
         const fkFields =
           element?.elements
-            ?.filter(el => !isNil(el.referenceParentField))
+            ?.filter(
+              ({ referencedField }) => !isEmpty(referencedField) && referencedField.idDatasetSchema === datasetSchemaId
+            )
             ?.map(field => {
-              const referencedElement = record.elements.find(recordElement =>
-                TextUtils.areEquals(field?.referenceParentField, recordElement.name)
+              const { referencedField } = field;
+
+              const referencedRecordField = record.elements.find(
+                recordElement => recordElement.fieldSchema === referencedField.idPk
               );
+
+              const rootPkField =
+                referencedField.idPk === rootPkFieldId
+                  ? record.fields.find(recordField => recordField.name === field.name)
+                  : undefined;
+
               return {
                 fieldName: field.name,
-                referenceFieldName: field?.referenceParentField,
-                value: referencedElement?.value
+                referenceFieldName: field.referenceParentField,
+                value: referencedRecordField?.value ?? rootPkField?.value
               };
             }) ?? [];
 
