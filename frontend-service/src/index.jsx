@@ -6,8 +6,14 @@ import 'primereact/resources/primereact.min.css';
 import 'primeicons/primeicons.css';
 import './index.scss';
 
-var { registerObserver } = require('react-perf-devtool');
-registerObserver();
+// var { registerObserver } = require('react-perf-devtool');
+// registerObserver();
+
+// if (import.meta.env.DEV) {
+//   import('react-perf-devtool')
+//     .then(({ registerObserver }) => registerObserver())
+//     .catch(() => {});
+// }
 
 ReactDOM.render(<App />, document.getElementById('root'));
 

@@ -2,6 +2,7 @@
   "name": "eea-reportnet-frontend",
   "version": "3.0.0",
   "private": true,
+  "type": "module",
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "1.2.36",
     "@fortawesome/free-brands-svg-icons": "5.15.4",
@@ -22,7 +23,6 @@
     "leaflet": "1.7.1",
     "leaflet-draw": "1.0.4",
     "lodash": "4.17.21",
-    "mapbox-gl": "2.7.0",
     "primeicons": "2.0.0",
     "primereact": "4.2.2",
     "prismjs": "^1.29.0",
@@ -35,7 +35,6 @@
     "react-joyride": "2.3.2",
     "react-leaflet": "2.8.0",
     "react-leaflet-draw": "0.19.8",
-    "react-mapbox-gl": "5.1.1",
     "react-query": "^3.39.3",
     "react-router-dom": "6.2.1",
     "react-simple-code-editor": "^0.14.1",
@@ -45,10 +44,9 @@
     "sass": "1.49.7"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject",
+    "start": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
     "sonar-scanner": "sonar-scanner"
   },
   "eslintConfig": {
@@ -56,10 +54,12 @@
   },
   "devDependencies": {
     "@babel/core": "7.17.2",
+    "@vitejs/plugin-react": "^5.0.0",
     "eslint-config-prettier": "8.3.0",
     "prettier": "2.5.1",
-    "react-error-overlay": "6.0.9",
     "react-perf-devtool": "3.1.8",
-    "react-scripts": "4.0.3"
+    "vite": "^6.0.0",
+    "vite-plugin-node-polyfills": "^0.28.0",
+    "vite-tsconfig-paths": "^4.3.0"
   }
 }
