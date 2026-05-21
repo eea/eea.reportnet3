@@ -3002,7 +3002,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         datasetService.deleteAttachmentByFieldSchemaId(datasetId, fieldSchemaVO.getId());
       }
 
-      DataType type = updateFieldSchema(datasetSchema.getIdDataSetSchema().toString(),
+      DataType type = self.updateFieldSchema(datasetSchema.getIdDataSetSchema().toString(),
               fieldSchemaVO, datasetId, false);
 
       // Create query view
@@ -3394,7 +3394,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
           String datasetSchemaId = self.getDatasetSchemaId(datasetId);
           updateForeignRelation(datasetId, fieldSchemaNoRulesMapper.entityToClass(field),
                   datasetSchemaId);
-          DataType type = updateFieldSchema(datasetSchemaId,
+          DataType type = self.updateFieldSchema(datasetSchemaId,
                   fieldSchemaNoRulesMapper.entityToClass(field), datasetId, true);
           propagateRulesAfterUpdateSchema(datasetSchemaId,
                   fieldSchemaNoRulesMapper.entityToClass(field), type, datasetId);
