@@ -123,8 +123,8 @@ public class CacheClientSecurityConfiguration {
   /**
    * Redis Cache Manager for local profile.
    * Uses a standalone Redis connection to manage caches for
-   * {@code dataSchema} and {@code uniqueConstraints}.
-   * TTLs are configurable via Consul keys {@code cache.dataSchema.ttl}
+   * {@code datasetSchemaId}.
+   * TTLs are configurable via Consul keys {@code cache.datasetSchemaId.ttl}
    * and {@code cache.uniqueConstraints.ttl} (in minutes).
    *
    * @param jedisConnectionFactory the standalone Redis connection factory
@@ -153,8 +153,8 @@ public class CacheClientSecurityConfiguration {
   /**
    * Redis Cache Manager for non-local profiles (dev, staging, production).
    * Uses a Redis Sentinel connection for high availability to manage caches for
-   * {@code dataSchema} and {@code uniqueConstraints}.
-   * TTLs are configurable via Consul keys {@code cache.dataSchema.ttl}
+   * {@code datasetSchemaId}.
+   * TTLs are configurable via Consul keys {@code cache.datasetSchemaId.ttl}
    * and {@code cache.uniqueConstraints.ttl} (in minutes).
    *
    * @param jedisSentinelConnectionFactory the Redis Sentinel connection factory

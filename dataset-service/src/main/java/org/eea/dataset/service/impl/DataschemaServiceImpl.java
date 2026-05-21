@@ -95,6 +95,14 @@ import java.util.regex.Pattern;
 @Service("dataschemaService")
 public class DataschemaServiceImpl implements DatasetSchemaService {
 
+  /**
+   * Self-referencing proxy of this service bean, injected to enable Spring AOP features
+   * (e.g., {@link Cacheable}, {@link CacheEvict}) on internal method calls within the same class.
+   * Direct {@code this.method()} calls bypass the Spring proxy and would not trigger cache
+   * interception; calling {@code self.method()} routes through the proxy instead.
+   *
+   * The {@link Lazy} annotation prevents circular dependency issues during bean initialization.
+   */
   @Autowired
   @Lazy
   private DatasetSchemaService self;
