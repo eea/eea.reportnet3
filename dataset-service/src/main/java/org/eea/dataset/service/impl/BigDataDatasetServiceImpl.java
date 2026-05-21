@@ -18,6 +18,7 @@ import org.eea.datalake.service.model.S3PathResolver;
 import org.eea.dataset.mapper.HelperMultipartFileMapper;
 import org.eea.dataset.persistence.metabase.domain.DatasetTable;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
+import org.eea.dataset.persistence.schemas.domain.FieldSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.persistence.schemas.domain.pkcatalogue.PkCatalogueSchema;
 import org.eea.dataset.persistence.schemas.repository.PkCatalogueRepository;
@@ -35,7 +36,6 @@ import org.eea.interfaces.controller.dataflow.RepresentativeController.Represent
 import org.eea.interfaces.controller.orchestrator.JobController.JobControllerZuul;
 import org.eea.interfaces.controller.orchestrator.JobProcessController.JobProcessControllerZuul;
 import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
-import org.eea.interfaces.vo.communication.UserNotificationContentVO;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
@@ -67,7 +67,6 @@ import org.eea.lock.redis.LockEnum;
 import org.eea.lock.redis.RedisLockService;
 import org.eea.multitenancy.DatasetId;
 import org.eea.multitenancy.TenantResolver;
-import org.eea.thread.ThreadPropertiesManager;
 import org.eea.utils.LiteralConstants;
 import org.eea.utils.UtilityClass;
 import org.slf4j.Logger;
@@ -3302,6 +3301,286 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         } catch (Exception e) {
             LOG.warn("Could not query row count for table {}, treating as non-empty", s3PathResolver.getTableName(), e);
             return false;
+        }
+    }
+
+    @Override
+    public void createTypedView(
+            Long dataflowId,
+            Long providerId,
+            Long datasetId,
+            String tableSchemaId,
+            String tableName
+    ) throws Exception {
+
+        DataSetMetabaseVO dataset =
+                datasetMetabaseService.findDatasetMetabase(datasetId);
+
+        DataSetSchema schema =
+                schemasRepository.findById(
+                        new ObjectId(dataset.getDatasetSchema())
+                ).orElseThrow();
+
+        TableSchema tableSchema =
+                schema.getTableSchemas()
+                        .stream()
+                        .filter(t ->
+                                t.getRecordSchema()
+                                        .getIdTableSchema()
+                                        .toString()
+                                        .equals(tableSchemaId)
+                        )
+                        .findFirst()
+                        .orElseThrow();
+
+        List<FieldSchema> fields =
+                tableSchema.getRecordSchema().getFieldSchema();
+
+        // SOURCE path
+        S3PathResolver currentPath = new S3PathResolver(
+                dataflowId,
+                providerId,
+                datasetId,
+                tableName
+        );
+
+        currentPath.setPath(S3_TABLE_AS_FOLDER_QUERY_PATH);
+
+        String sourcePath = s3ServicePrivate.getS3Path(currentPath);
+
+        // TARGET path
+        currentPath.setPath(S3_VIEWS_TABLE_AS_FOLDER_QUERY_PATH);
+
+        String targetPath = s3ServicePrivate.getS3Path(currentPath);
+
+        // Build select clause for populated tables
+        String selectClause =
+                fields.stream()
+                        .map(this::buildCast)
+                        .collect(Collectors.joining(",\n"));
+
+        dropViewTableIfExists(targetPath);
+        deleteViewFolderIfExists(currentPath);
+
+        Thread.sleep(3000);
+
+        // STEP 1: create schema-only table
+        String createSql =
+                buildCreateTableSql(targetPath, fields);
+
+        String processId =
+                dremioHelperService.executeSqlStatement(createSql);
+
+        dremioHelperService.checkIfDremioProcessFinishedSuccessfully(
+                createSql,
+                processId,
+                null
+        );
+
+        // STEP 2: insert data (if any exists)
+        if (sourceTableHasRows(sourcePath)) {
+
+            String insertSql =
+                    buildInsertSql(
+                            targetPath,
+                            sourcePath,
+                            selectClause
+                    );
+
+            processId =
+                    dremioHelperService.executeSqlStatement(insertSql);
+
+            dremioHelperService.checkIfDremioProcessFinishedSuccessfully(
+                    insertSql,
+                    processId,
+                    null
+            );
+        }
+    }
+
+    private boolean sourceTableHasRows(String sourcePath) {
+        try {
+            long rowCount =
+                    dremioHelperService.getRowCount(sourcePath);
+            return rowCount > 0;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    private String buildCreateTableSql(
+            String target,
+            List<FieldSchema> fields
+    ) {
+
+        String columns =
+                fields.stream()
+                        .map(field -> {
+
+                            String name =
+                                    "\"" + field.getHeaderName() + "\"";
+
+                            String type =
+                                    mapType(field);
+
+                            return name + " " + type;
+                        })
+                        .collect(Collectors.joining(",\n"));
+
+        return "CREATE TABLE " +
+                target +
+                " (\n" +
+                columns +
+                "\n)";
+    }
+
+    private String buildCast(FieldSchema field) {
+
+        String name = "\"" + field.getHeaderName() + "\"";
+        String type = mapType(field);
+
+        switch (type) {
+            case "VARCHAR":
+                return name + " AS " + name;
+            case "INTEGER":
+
+                return "CASE " +
+                        "WHEN REGEXP_LIKE(" + name + ", '^-?[0-9]+$') " +
+                        "THEN CAST(" + name + " AS INTEGER) " +
+                        "ELSE NULL END AS " + name;
+            case "DOUBLE":
+
+                return "CASE " +
+                        "WHEN REGEXP_LIKE(" + name + ", '^-?[0-9]+(\\\\.[0-9]+)?$') " +
+                        "THEN CAST(" + name + " AS DOUBLE) " +
+                        "ELSE NULL END AS " + name;
+            case "BOOLEAN":
+
+                return "CASE " +
+                        "WHEN LOWER(" + name + ") IN ('true','false') " +
+                        "THEN CAST(" + name + " AS BOOLEAN) " +
+                        "ELSE NULL END AS " + name;
+            case "DATE":
+
+                return "CASE " +
+                        "WHEN " + name + " IS NOT NULL " +
+                        "THEN CAST(" + name + " AS DATE) " +
+                        "ELSE NULL END AS " + name;
+            case "TIMESTAMP":
+
+                return "CASE " +
+                        "WHEN " + name + " IS NOT NULL " +
+                        "THEN CAST(" + name + " AS TIMESTAMP) " +
+                        "ELSE NULL END AS " + name;
+        }
+
+        return name + " AS " + name;
+    }
+
+    private String mapType(FieldSchema field) {
+
+        String t = field.getType().getValue().toUpperCase();
+
+        switch (t) {
+
+            case "NUMBER_INTEGER":
+                return "INTEGER";
+
+            case "NUMBER_DECIMAL":
+                return "DOUBLE";
+
+            case "BOOLEAN":
+                return "BOOLEAN";
+
+            case "DATE":
+                return "DATE";
+
+            case "DATETIME":
+                return "TIMESTAMP";
+
+            case "TEXT":
+            case "TEXTAREA":
+            case "LONG_TEXT":
+            case "CODELIST":
+            case "MULTISELECT_CODELIST":
+            case "LINK":
+            case "EXTERNAL_LINK":
+            case "URL":
+            case "PHONE":
+            case "EMAIL":
+            case "ATTACHMENT":
+            case "POINT":
+            case "LINESTRING":
+            case "POLYGON":
+            case "MULTIPOINT":
+            case "MULTILINESTRING":
+            case "MULTIPOLYGON":
+            case "GEOMETRYCOLLECTION":
+            default:
+                return "VARCHAR";
+        }
+    }
+
+    private String buildInsertSql(
+            String target,
+            String source,
+            String selectClause
+    ) {
+
+        return "INSERT INTO " +
+                target +
+                " SELECT " +
+                selectClause +
+                " FROM " +
+                source;
+    }
+
+    private void deleteViewFolderIfExists(
+            S3PathResolver s3PathResolver
+    ) {
+
+        try {
+
+            if (s3HelperPrivate.checkFolderExist(
+                    s3PathResolver,
+                    S3_VIEW_TABLE_NAME_FOLDER_PATH
+            )) {
+
+                s3HelperPrivate.deleteFolder(
+                        s3PathResolver,
+                        S3_VIEW_TABLE_NAME_FOLDER_PATH
+                );
+
+                Thread.sleep(3000);
+            }
+
+        } catch (Exception e) {
+
+            LOG.warn(
+                    "Could not delete existing views folder for dataset {}",
+                    s3PathResolver.getDatasetId()
+            );
+        }
+    }
+
+    private void dropViewTableIfExists(String tablePath) {
+
+        try {
+
+            String sql = "DROP TABLE IF EXISTS " + tablePath;
+
+            String processId =
+                    dremioHelperService.executeSqlStatement(sql);
+
+            dremioHelperService.checkIfDremioProcessFinishedSuccessfully(
+                    sql,
+                    processId,
+                    2000L
+            );
+
+        } catch (Exception e) {
+
+            LOG.warn("Could not drop table {}", tablePath);
         }
     }
 }
