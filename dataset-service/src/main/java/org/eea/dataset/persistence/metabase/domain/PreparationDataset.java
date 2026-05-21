@@ -31,10 +31,6 @@ public class PreparationDataset {
     @Column(name = "ID", columnDefinition = "serial")
     private Long id;
 
-    /** Parent preparation dataset. */
-    @Column(name = "PARENT_DATASET_ID")
-    private Long parentDatasetId;
-
     /** Parent dataflow id. */
     @Column(name = "DATAFLOW_ID")
     private Long dataflowId;

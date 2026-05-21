@@ -28,12 +28,10 @@ public interface PreparationDatasetService {
      * Create a new preparation dataset.
      *
      * @param dataflowId the dataflow id
-     * @param parentDatasetId the parent dataset id
      * @param preparationDatasetVO the preparation dataset data
      */
     void createPreparationDataset(
             Long dataflowId,
-            Long parentDatasetId,
             PreparationDatasetVO preparationDatasetVO) throws EEAException;
 
     /**

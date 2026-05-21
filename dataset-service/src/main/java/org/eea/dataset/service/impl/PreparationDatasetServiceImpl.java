@@ -126,7 +126,7 @@ public class PreparationDatasetServiceImpl implements PreparationDatasetService 
 
     @Override
     @Transactional
-    public void createPreparationDataset(Long dataflowId, Long parentDatasetId, PreparationDatasetVO vo) throws EEAException {
+    public void createPreparationDataset(Long dataflowId, PreparationDatasetVO vo) throws EEAException {
 
         if (preparationDatasetRepository.existsByDataflowIdAndProviderIdAndCode(dataflowId, vo.getProviderId(), vo.getCode())) {
             throw new EEAException("Preparation dataset with this code already exists");
@@ -135,7 +135,6 @@ public class PreparationDatasetServiceImpl implements PreparationDatasetService 
         PreparationDataset preparationDataset = new PreparationDataset();
         preparationDataset.setDataflowId(dataflowId);
         preparationDataset.setProviderId(vo.getProviderId());
-        preparationDataset.setParentDatasetId(parentDatasetId);
         preparationDataset.setCode(vo.getCode());
         preparationDataset.setDatasetName(vo.getDatasetName());
         preparationDataset.setIsCreated(Boolean.TRUE.equals(vo.getIsCreated()));

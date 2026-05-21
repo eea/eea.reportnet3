@@ -110,7 +110,7 @@ public class PreparationDatasetControllerImpl implements PreparationDatasetContr
         }
 
         try {
-            preparationDatasetService.createPreparationDataset(vo.getDataflowId(), vo.getParentDatasetId(), vo);
+            preparationDatasetService.createPreparationDataset(vo.getDataflowId(), vo);
         } catch (EEAException e) {
             LOG.error("Error creating preparation dataset [dataflowId={}, providerId={}, code={}]: {}", vo.getDataflowId(), vo.getProviderId(), vo.getCode(), e.getMessage(), e);
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
