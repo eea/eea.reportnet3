@@ -17,11 +17,6 @@ import java.util.Map;
 @Component
 public class SnapshotDateChangeFailEvent implements NotificableEventHandler {
 
-    /** The representative controller zuul. */
-    @Autowired
-    private RepresentativeController.RepresentativeControllerZuul representativeControllerZuul;
-
-
     /** The dataflow controller zuul. */
     @Autowired
     private DataFlowController.DataFlowControllerZuul dataFlowControllerZuul;

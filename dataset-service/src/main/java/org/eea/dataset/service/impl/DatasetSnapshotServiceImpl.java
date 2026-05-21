@@ -366,7 +366,6 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
         if (jobId != null) {
           snap.setJobId(jobId);
         }
-        // TODO Catch the null jobId.
       }
 
       //force date to UTC
