@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="shortcut icon" href="/favicon.ico" id="favicon" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#000000" />
+    <link rel="manifest" href="/manifest.json" id="manifest" />
+    <link rel="stylesheet" type="text/css" href="/css/indexStyles.css" />
+    <title>Reportnet 3</title>
+  </head>
+  <body>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <div id="root"></div>
+
+    <div id="browserNotice" style="display: none">
+      <div class="noticeBox">
+        <div class="corporate">
+          <img alt="Reportnet logo" src="/assets/img/logo.jpg" />
+          <h2>Reportnet 3</h2>
+        </div>
+        <h1>It appears that you are using an unsupported web browser.</h1>
+        <p>
+          We recommend you to use a Chromium-based browser (such as
+          <a href="https://www.google.com/chrome/index.html">Google Chrome</a>,
+          <a href="https://www.microsoft.com/edge">Microsoft Edge Chromium</a> or
+          <a href="https://www.mozilla.org/firefox/">Mozilla Firefox</a>)
+        </p>
+      </div>
+    </div>
+
+    <!-- Load env.js BEFORE the React app module -->
+    <script src="/env.js"></script>
+    <!-- Load inline script BEFORE the React app module -->
+    <script src="/js/index.js"></script>
+
+    <!-- Vite will inject the React app module here -->
+    <script type="module" src="/src/main.jsx"></script>
+
+    <script>
+      // Dynamically change favicon for system/browser light or dark mode
+      const usesDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches || false;
+      const favicon = document.getElementById('favicon');
+      const manifest = document.getElementById('manifest');
+
+      function switchIcon(usesDarkMode) {
+        if (usesDarkMode) {
+          favicon.href = '/favicon-dark.ico';
+          manifest.href = '/manifest-dark.json';
+        } else {
+          favicon.href = '/favicon.ico';
+          manifest.href = '/manifest.json';
+        }
+      }
+
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => switchIcon(e.matches));
+      switchIcon(usesDarkMode);
+    </script>
+  </body>
+</html>

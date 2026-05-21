@@ -14,7 +14,6 @@ import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import Tooltip from 'primereact/tooltip';
 
-import { relative } from 'path';
 import { Spinner } from '../Spinner';
 
 export class InputText extends Component {
@@ -161,7 +160,7 @@ export class InputText extends Component {
         )}
 
         {this.props.required ? (
-          <div style={{ position: relative, width: 0, height: 0 }}>
+          <div style={{ position: "relative", width: 0, height: 0 }}>
             <FontAwesomeIcon
               aria-label="required"
               icon={AwesomeIcons('infoCircle')}
