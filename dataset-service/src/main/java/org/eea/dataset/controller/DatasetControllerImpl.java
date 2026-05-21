@@ -1230,7 +1230,7 @@ public class DatasetControllerImpl implements DatasetController {
       throw e;
     } finally {
       // Release the lock manually
-      deleteLocksToDeleteProcess(datasetId, null);
+      deleteLocksToDeleteProcess(datasetId, null, preparationCode);
     }
   }
 
@@ -1287,7 +1287,7 @@ public class DatasetControllerImpl implements DatasetController {
     }
     finally {
       // Release the lock manually
-      deleteLocksToDeleteProcess(datasetId, null);
+      deleteLocksToDeleteProcess(datasetId, null, null);
     }
   }
 
@@ -1354,7 +1354,8 @@ public class DatasetControllerImpl implements DatasetController {
           @ApiParam(type = "Long", value = "Provider id",
                   example = "0") @RequestParam(value = "providerId", required = false) Long providerId,
           @ApiParam(type = "String", value = "Preparation Code",
-                  example = "section_a") @RequestParam(value = "preparationCode", required = false) String preparationCode) {
+                  example = "section_a") @RequestParam(value = "preparationCode", required = false) @LockCriteria(
+                  name = "preparationCode") String preparationCode) {
 
     boolean isPreparationDataset = StringUtils.isNotBlank(preparationCode);
 
@@ -1390,7 +1391,7 @@ public class DatasetControllerImpl implements DatasetController {
       throw e;
     } finally {
       // Release the lock manually
-      deleteLocksToDeleteProcess(datasetId, null);
+      deleteLocksToDeleteProcess(datasetId, tableSchemaId, preparationCode);
     }
   }
 
@@ -3425,13 +3426,18 @@ public class DatasetControllerImpl implements DatasetController {
    */
   @Override
   @DeleteMapping(value = "/private/deleteLocksToDeleteProcess/{datasetId}")
-  public void deleteLocksToDeleteProcess(@PathVariable("datasetId") Long datasetId, @RequestParam(value="tableSchemaId", required = false) String tableSchemaId){
+  public void deleteLocksToDeleteProcess(
+          @PathVariable("datasetId") Long datasetId,
+          @RequestParam(value="tableSchemaId", required = false) String tableSchemaId,
+          @RequestParam(value="preparationCode", required = false) String preparationCode
+    ){
     try {
       if(StringUtils.isNotBlank(tableSchemaId)){
         Map<String, Object> deleteImportTable = new HashMap<>();
         deleteImportTable.put(LiteralConstants.SIGNATURE, LockSignature.DELETE_IMPORT_TABLE.getValue());
         deleteImportTable.put(LiteralConstants.DATASETID, datasetId);
         deleteImportTable.put(LiteralConstants.TABLESCHEMAID, tableSchemaId);
+        deleteImportTable.put(LiteralConstants.PREPARATION_CODE, preparationCode);
         lockService.removeLockByCriteria(deleteImportTable);
       }
       else{
@@ -3439,6 +3445,7 @@ public class DatasetControllerImpl implements DatasetController {
         deleteDatasetValues.put(LiteralConstants.SIGNATURE,
                 LockSignature.DELETE_DATASET_VALUES.getValue());
         deleteDatasetValues.put(LiteralConstants.DATASETID, datasetId);
+        deleteDatasetValues.put(LiteralConstants.PREPARATION_CODE, preparationCode);
         lockService.removeLockByCriteria(deleteDatasetValues);
       }
     }
