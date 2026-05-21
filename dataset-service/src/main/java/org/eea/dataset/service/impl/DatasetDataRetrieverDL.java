@@ -444,7 +444,7 @@ public class DatasetDataRetrieverDL implements DataLakeDataRetriever {
                 validationS3PathResolverPreparations.setIsIcebergTable(false);
                 validationS3PathResolverPreparations.setPath(S3_PREPARATION_VALIDATION_TABLE_PATH);
                 String validationTablePath = s3Service.getTableAsFolderQueryPath(validationS3PathResolverPreparations, S3_PREPARATION_TABLE_AS_FOLDER_QUERY_PATH);
-                StringBuilder filteredQuery = DataLakeDataRetrieverUtils.buildFilteredQuery(dataset, fields, fieldSchemaId, fieldValue, fieldIdMap, levelError, qcCodes, validationTablePath);
+                StringBuilder filteredQuery = DataLakeDataRetrieverUtils.buildFilteredQuery(dataset, fields, fieldSchemaId, fieldValue, fieldIdMap, levelError, qcCodes, validationTablePath, false);
 
                 if (filteredQuery.toString().isEmpty() && levelError != null && levelError.length == 0) {
                     result.setTotalFilteredRecords(0L);
