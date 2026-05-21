@@ -349,7 +349,7 @@ export const WebformField = ({
         if (!isNil(conditionalFields) && !isNil(parsedValues)) {
           await DatasetService.updateConditionalFieldsWebform(
             datasetId,
-            conditionalFields,
+            parsedValues,
             record.recordId,
             bigData ? (referencedTableSchemaId ? referencedTableSchemaId : tableSchemaId) : tableSchemaId
           );
