@@ -1532,6 +1532,7 @@
     "size": "Size",
     "snapshotAllDesignerError": "Error listing copies at dataset <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>. Please try again or contact the Service Desk if the issue persists.",
     "snapshotCreationError": "Error creating copy at dataset <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>. Please try again or contact the Service Desk if the issue persists.",
+    "snapshotDateChangeFailEvent": "The historic release date could not be changed for this entry. Please try again or contact the Service Desk if the issue persists",
     "snapshotDeleteError": "Error deleting copy at dataset <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>. Please try again or contact the Service Desk if the issue persists.",
     "snapshotDescriptionValidationMax": "Description is too long",
     "snapshotDescriptionValidationMin": "Description is too short",
