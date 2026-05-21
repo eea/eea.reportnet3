@@ -19,11 +19,6 @@ public class PreparationDatasetVO implements Serializable {
     private Long id;
 
     /**
-     * Parent dataset id
-     */
-    private Long parentDatasetId;
-
-    /**
      * Parent dataflow id.
      */
     private Long dataflowId;

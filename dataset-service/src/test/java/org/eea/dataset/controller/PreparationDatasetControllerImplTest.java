@@ -104,7 +104,6 @@ public class PreparationDatasetControllerImplTest {
         PreparationDatasetVO vo = new PreparationDatasetVO();
         vo.setDataflowId(1L);
         vo.setProviderId(2L);
-        vo.setParentDatasetId(3L);
         vo.setCode("prep_code");
         vo.setDatasetName("Prep Dataset");
 
@@ -113,7 +112,6 @@ public class PreparationDatasetControllerImplTest {
         Mockito.verify(preparationDatasetService, times(1))
                 .createPreparationDataset(
                         vo.getDataflowId(),
-                        vo.getParentDatasetId(),
                         vo
                 );
     }
@@ -126,14 +124,12 @@ public class PreparationDatasetControllerImplTest {
         PreparationDatasetVO vo = new PreparationDatasetVO();
         vo.setDataflowId(1L);
         vo.setProviderId(2L);
-        vo.setParentDatasetId(3L);
         vo.setCode("prep_code");
         vo.setDatasetName("Prep Dataset");
 
         Mockito.doThrow(new EEAException("Error"))
                 .when(preparationDatasetService)
                 .createPreparationDataset(
-                        Mockito.anyLong(),
                         Mockito.anyLong(),
                         Mockito.any()
                 );

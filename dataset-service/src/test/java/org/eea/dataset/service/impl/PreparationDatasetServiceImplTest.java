@@ -135,7 +135,7 @@ public class PreparationDatasetServiceImplTest {
         Mockito.when(repository.existsByDataflowIdAndProviderIdAndCode(10L, 20L, "CODE"))
                 .thenReturn(true);
 
-        service.createPreparationDataset(10L, 5L, vo);
+        service.createPreparationDataset(10L, vo);
     }
 
     @Test
@@ -144,7 +144,7 @@ public class PreparationDatasetServiceImplTest {
         Mockito.when(repository.existsByDataflowIdAndProviderIdAndCode(10L, 20L, "CODE"))
                 .thenReturn(false);
 
-        service.createPreparationDataset(10L, 5L, vo);
+        service.createPreparationDataset(10L, vo);
 
         Mockito.verify(repository).save(Mockito.any(PreparationDataset.class));
     }
