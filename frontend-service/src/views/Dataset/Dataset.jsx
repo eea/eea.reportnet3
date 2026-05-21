@@ -1758,6 +1758,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
               <Button
                 className={styles.openWebformButton}
                 disabled={
+                  code ||
                   (editingStatus?.isEditing && editingStatus?.editor !== userName) ||
                   (isAdmin && (!isCustodian || !isDataflowCustodian)) ||
                   !hasWritePermissions ||
