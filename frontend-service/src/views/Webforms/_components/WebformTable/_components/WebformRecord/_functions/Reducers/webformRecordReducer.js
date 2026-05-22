@@ -60,7 +60,7 @@ export const webformRecordReducer = (state, { type, payload }) => {
       let dependantConditionalFieldId;
       let isDependantConditionalField = false;
 
-      if (payload.conditional && (payload.field.fieldType === 'LINK' || payload.field.fieldType === 'CODELIST')) {
+      if (payload.conditional && ['LINK', 'CODELIST', 'MULTISELECT_CODELIST'].includes(payload.field.fieldType)) {
         if (!isEmpty(payload.field?.referenceParentField)) {
           isDependantConditionalField = true;
           dependantConditionalFieldId = payload.field.fieldSchema || payload.field.fieldSchemaId;
