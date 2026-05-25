@@ -39,7 +39,3 @@ GRANT DELETE, REFERENCES, INSERT, TRUNCATE, TRIGGER, SELECT, UPDATE
 GRANT USAGE, SELECT, UPDATE
     ON SEQUENCE public.preparation_dataset_id_seq
     TO dataflow, dataset, recordstore, testuser, validation;
-
--- add preparation code to jobs
-ALTER TABLE public.jobs
-    ADD COLUMN preparation_code VARCHAR(255);
