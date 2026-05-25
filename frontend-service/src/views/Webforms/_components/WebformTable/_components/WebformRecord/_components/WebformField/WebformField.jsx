@@ -336,9 +336,7 @@ export const WebformField = ({
 
           // If it should be reset
           if (shouldReset && !isChangedField) {
-            if (field.fieldType === 'MULTISELECT_CODELIST') {
-              onFillField(element, element.fieldSchema ?? element.fieldSchemaId, '', true);
-            }
+            onFillField(element, element.fieldSchema ?? element.fieldSchemaId, '', true);
             fieldsToChange.push({ ...element, value: '' });
             return fieldsToChange;
           }
@@ -460,45 +458,6 @@ export const WebformField = ({
     }
   };
 
-  const resetFieldValue = (field, option, multipleValues, isInputText) => {
-    if (
-      isConditionalChanged &&
-      !isEmpty(field.value) &&
-      (!isEmpty(field?.referenceParentField) || !isEmpty(field.referencedField?.masterConditionalFieldId))
-    ) {
-      const emptyValue = multipleValues ? [] : '';
-      if (
-        (isDependantConditionalField && !isEmpty(dependantConditionalFieldId)) ||
-        !isEmpty(field.referencedField?.masterConditionalFieldId)
-      ) {
-        const allFieldElements = record.elements.flatMap(el =>
-          el?.type === 'BLOCK' && Array.isArray(el.elements) ? el.elements : el
-        );
-
-        const fieldIndex = allFieldElements.findIndex(
-          el => el.fieldSchema === field.fieldSchema || el.fieldId === field.fieldSchemaId
-        );
-        const changedIndex = allFieldElements.findIndex(
-          el =>
-            el.fieldSchema === changedConditionalFieldData.fieldSchema ||
-            el.fieldId === changedConditionalFieldData.fieldSchemaId
-        );
-
-        if (
-          field.referencedField?.masterConditionalFieldId === dependantConditionalFieldId ||
-          (fieldIndex > changedIndex && fieldIndex > 0 && changedIndex > 0)
-        ) {
-          onFillField(field, option, emptyValue, isConditional);
-        }
-      } else {
-        isInputText
-          ? changedConditionalFieldData?.name === field?.referenceParentField?.field &&
-            onFillField(field, option, emptyValue, isConditional)
-          : onFillField(field, option, emptyValue, isConditional);
-      }
-    }
-  };
-
   const renderTemplate = (field, option, type) => {
     switch (type) {
       case 'DATE':
@@ -588,7 +547,6 @@ export const WebformField = ({
       case 'EXTERNAL_LINK':
       case 'LINK':
         if (field.pkHasMultipleValues) {
-          resetFieldValue(field, option, field.pkHasMultipleValues);
           return (
             <MultiSelectWebform
               appendTo={document.body}
@@ -624,8 +582,6 @@ export const WebformField = ({
           );
         } else {
           const selectedValue = RecordUtils.getLinkValue(linkItemsOptions, field.value);
-
-          resetFieldValue(field, option, field?.pkHasMultipleValues);
 
           return (
             <DropdownWebform
@@ -749,7 +705,6 @@ export const WebformField = ({
       case 'PHONE':
       case 'NUMBER_INTEGER':
       case 'NUMBER_DECIMAL':
-        resetFieldValue(field, option, field?.pkHasMultipleValues, true);
         return (
           <InputText
             characterCounterStyles={{ marginBottom: 0 }}
