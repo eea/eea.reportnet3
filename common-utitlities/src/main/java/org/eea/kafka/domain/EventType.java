@@ -873,6 +873,21 @@ public enum EventType {
   DOWNLOAD_GEOMETRY_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
           "download_geometry_completed_event", true),
 
+  ANOTHER_PREPARATION_DATASET_CREATION_IS_RUNNING_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+          "another_preparation_dataset_creation_is_running_failed_event", true),
+
+  PREPARATION_DATASET_CREATION_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+          "preparation_dataset_creation_completed_event", true),
+
+  PREPARATION_DATASET_CREATION_STARTED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+          "preparation_dataset_creation_started_event", true),
+
+  PREPARATION_DATASET_CREATION_HAS_EMPTY_QUEUE_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+          "preparation_dataset_creation_has_empty_queue_event", true),
+
+  PREPARATION_DATASET_CREATION_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+          "preparation_dataset_creation_failed_event", true),
+
   DOWNLOAD_GEOMETRY_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
           "download_geometry_failed_event", true);
 

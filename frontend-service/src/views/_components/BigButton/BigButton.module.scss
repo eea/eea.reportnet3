@@ -55,6 +55,14 @@
     }
   }
 
+  .preparationSet {
+    background-color: #6b5fb5;
+
+    span:hover {
+      background-color: #5a4fa1;
+    }
+  }
+
   .technicalFeedback {
     background-color: var(--success-color);
 
@@ -89,6 +97,7 @@
   }
 
   .schemaDataset,
+  .managePreparationSets,
   .manageReporters {
     background-color: var(--c-blue-green);
 

@@ -86,15 +86,24 @@ public class S3ConvertServiceImpl implements S3ConvertService {
     }
 
     @Override
-    public File createCSVFile(List<S3Object> exportFilenames, String tableName, Long datasetId, DatasetTypeEnum datasetTypeEnum , List<String> headers, Boolean etlExportV4, Long jobId) {
+    public File createCSVFile(List<S3Object> exportFilenames, String tableName, Long datasetId, DatasetTypeEnum datasetTypeEnum , List<String> headers, Boolean etlExportV4, Long jobId, String preparationCode) {
         File csvFile = null;
-        if(BooleanUtils.isTrue(etlExportV4)){
-            String etlExportFolderName = (jobId != null) ? "etlExportV4_" + jobId : "etlExportV4";
-            csvFile = new File(new File(new File(exportDLPath, "dataset-" + datasetId), etlExportFolderName), tableName + CSV_TYPE);
+        File datasetFolder = new File(exportDLPath, "dataset-" + datasetId);
+
+        if (StringUtils.isNotBlank(preparationCode)) {
+            datasetFolder = new File(datasetFolder, preparationCode);
         }
-        else{
-            csvFile = new File(new File(exportDLPath, "dataset-" + datasetId), tableName + CSV_TYPE);
+
+        if (BooleanUtils.isTrue(etlExportV4)) {
+            String etlExportFolderName =
+                    (jobId != null) ? "etlExportV4_" + jobId : "etlExportV4";
+            csvFile = new File(
+                    new File(datasetFolder, etlExportFolderName),
+                    tableName + CSV_TYPE);
+        } else {
+            csvFile = new File(datasetFolder, tableName + CSV_TYPE);
         }
+
         // Ensure the directories exist
         csvFile.getParentFile().mkdirs();
         LOG.info("Creating file for export: {}", csvFile);
@@ -109,25 +118,47 @@ public class S3ConvertServiceImpl implements S3ConvertService {
         }
 
         if (csvFile.length() == 0) {
-            return createEmptyCSVFile(tableName, datasetId, headers, etlExportV4, jobId);
+            return createEmptyCSVFile(tableName, datasetId, headers, etlExportV4, jobId, preparationCode);
         }
 
         return csvFile;
     }
 
     @Override
-    public File createEmptyCSVFile(String tableName, Long datasetId, List<String> headers, Boolean etlExportV4, Long jobId) {
+    public File createEmptyCSVFile(String tableName, Long datasetId, List<String> headers, Boolean etlExportV4, Long jobId, String preparationCode) {
         File csvFile = null;
-        if(BooleanUtils.isTrue(etlExportV4)){
-            //we need to add the record is as a first element
-            if(!headers.contains(RECORD_ID)){
+        if (BooleanUtils.isTrue(etlExportV4)) {
+
+            // we need to add the record id as a first element
+            if (!headers.contains(RECORD_ID)) {
                 headers.add(0, RECORD_ID);
             }
-            String etlExportFolderName = (jobId != null) ? "etlExportV4_" + jobId : "etlExportV4";
-            csvFile = new File(new File(new File(exportDLPath, "dataset-" + datasetId), etlExportFolderName), tableName + CSV_TYPE);
+
+            String etlExportFolderName =
+                    (jobId != null) ? "etlExportV4_" + jobId : "etlExportV4";
+
+            File datasetFolder = new File(exportDLPath, "dataset-" + datasetId);
+
+            // preparation support
+            if (StringUtils.isNotBlank(preparationCode)) {
+                datasetFolder = new File(datasetFolder, preparationCode);
+            }
+
+            csvFile = new File(
+                    new File(datasetFolder, etlExportFolderName),
+                    tableName + CSV_TYPE);
+
         }
-        else{
-            csvFile = new File(new File(exportDLPath, "dataset-" + datasetId), tableName + CSV_TYPE);
+        else {
+
+            File datasetFolder = new File(exportDLPath, "dataset-" + datasetId);
+
+            //  preparation support for non-etlExportV4
+            if (StringUtils.isNotBlank(preparationCode)) {
+                datasetFolder = new File(datasetFolder, preparationCode);
+            }
+
+            csvFile = new File(datasetFolder, tableName + CSV_TYPE);
         }
         // Ensure the directories exist
         csvFile.getParentFile().mkdirs();
@@ -153,7 +184,7 @@ public class S3ConvertServiceImpl implements S3ConvertService {
       csvFile = new File(providerFolderPath, tableName + CSV_TYPE);
     } else {
       // fall back to your current behavior
-      csvFile = createCSVFile(exportFilenames, tableName, datasetId, datasetTypeEnum, headers, etlExportV4, jobId);
+      csvFile = createCSVFile(exportFilenames, tableName, datasetId, datasetTypeEnum, headers, etlExportV4, jobId, null);
       return csvFile;
     }
 
@@ -181,7 +212,7 @@ public class S3ConvertServiceImpl implements S3ConvertService {
     if (StringUtils.isNotBlank(outputRoot)) {
       csvFile = new File(outputRoot, tableName + CSV_TYPE);
     } else {
-      return createEmptyCSVFile(tableName, datasetId, headers, etlExportV4, jobId);
+      return createEmptyCSVFile(tableName, datasetId, headers, etlExportV4, jobId, null);
     }
     csvFile.getParentFile().mkdirs();
 
@@ -201,8 +232,17 @@ public class S3ConvertServiceImpl implements S3ConvertService {
   }
 
     @Override
-    public void createJsonFile(List<S3Object> exportFilenames, String tableName, Long datasetId, DatasetTypeEnum datasetTypeEnum) {
-        File jsonFile = new File(new File(exportDLPath, "dataset-" + datasetId), tableName + JSON_TYPE);
+    public void createJsonFile(List<S3Object> exportFilenames, String tableName, Long datasetId, DatasetTypeEnum datasetTypeEnum, String preparationCode) {
+        File datasetFolder = new File(exportDLPath, "dataset-" + datasetId);
+
+        if (StringUtils.isNotBlank(preparationCode)) {
+            datasetFolder = new File(datasetFolder, preparationCode);
+        }
+
+        File jsonFile = new File(datasetFolder, tableName + JSON_TYPE);
+        // Ensure directories exist
+        jsonFile.getParentFile().mkdirs();
+
         LOG.info("Creating file for export: {}", jsonFile);
 
         try (FileWriter fw = new FileWriter(jsonFile);
@@ -453,7 +493,9 @@ public class S3ConvertServiceImpl implements S3ConvertService {
             return key.split("/")[3].equals(tableName);
         } else if (key.contains("/import/") && datasetTypeEnum.equals(DESIGN)) {
             return key.split("/")[5].equals(tableName);
-        } else {
+        } else if (key.contains("/preparation/") && datasetTypeEnum.equals(REPORTING)) {
+            return key.split("/")[5].equals(tableName);
+        }else {
             return key.split("/")[4].equals(tableName);
         }
     }

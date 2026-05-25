@@ -50,6 +50,9 @@ public final class LiteralConstants {
   /** The Constant DATASET_ID: {@value}. */
   public static final String DATASETID = "datasetId";
 
+  /** The Constant PREPARATION_CODE: {@value}. */
+  public static final String PREPARATION_CODE = "preparationCode";
+
   /** The Constant TECH_ACCEPT_MESSAGE_SUBJECT: {@value}. */
   public static final String TECH_ACCEPT_MESSAGE_SUBJECT = "%s technical feedback for %s";
 
@@ -219,6 +222,7 @@ public final class LiteralConstants {
 
   /** The Constant S3_PROVIDER_IMPORT_PATH: {@value}. */
   public static final String S3_PROVIDER_IMPORT_PATH = "%s/%s/%s/current/provider_import/%s";
+
   public static final String S3_PROVIDER_ROOT_PATH = "%s/%s/%s/current";
 
   /** The Constant S3_ATTACHMENTS_TABLE_PATH: {@value}. */
@@ -292,6 +296,9 @@ public final class LiteralConstants {
 
   /** The Constant S3_TABLE_NAME_WITH_PARQUET_FOLDER_PATH: {@value}. */
   public static final String S3_TABLE_NAME_WITH_PARQUET_FOLDER_PATH = "%s/%s/%s/current/%s/%s/%s";
+
+  /** The Constant S3_PREPARATION_TABLE_NAME_WITH_PARQUET_FOLDER_PATH: {@value}. */
+  public static final String S3_PREPARATION_TABLE_NAME_WITH_PARQUET_FOLDER_PATH = "%s/%s/%s/preparation/%s/%s/%s";
 
   /** The Constant S3_TABLE_NAME_FOLDER_PATH: {@value}. */
   public static final String S3_TABLE_NAME_FOLDER_PATH = "%s/%s/%s/current/%s";
@@ -544,6 +551,38 @@ public final class LiteralConstants {
 
   public static final String ETL_IMPORT_ATTACHMENTS_FOLDER = "attachments";
 
+  public static final String S3_PREPARATION_FOLDER_PATH = "%s/%s/%s/preparation/%s";
+
+  public static final String S3_PREPARATION_TABLE_NAME_PATH = "%s/%s/%s/preparation/%s/%s/%s";
+
+  public static final String S3_PREPARATION_TABLE_NAME_FOLDER_PATH = "%s/%s/%s/preparation/%s/%s";
+
+  public static final String S3_PREPARATION_TABLE_AS_FOLDER_QUERY_PATH = ".\"%s\".\"%s\".\"%s\".\"preparation\".\"%s\".\"%s\"";
+
+  /** The Constant S3_PREPARATION_VALIDATION_TABLE_PATH: {@value}. */
+  public static final String S3_PREPARATION_VALIDATION_TABLE_PATH = "%s/%s/%s/preparation/%s/validation";
+
+  /** The Constant S3_PREPARATION_PROVIDER_IMPORT_PATH: {@value}. */
+  public static final String S3_PREPARATION_PROVIDER_IMPORT_PATH = "%s/%s/%s/preparation/%s/provider_import/%s";
+
+  /** The Constant S3_PREPARATION_IMPORT_FILE_PATH: {@value}. */
+  public static final String S3_PREPARATION_IMPORT_FILE_PATH = "%s/%s/%s/preparation/%s/import/%s/%s";
+
+  /** The Constant S3_PREPARATION_IMPORT_TABLE_NAME_FOLDER_PATH: {@value}. */
+  public static final String S3_PREPARATION_IMPORT_TABLE_NAME_FOLDER_PATH = "%s/%s/%s/preparation/%s/import/%s";
+
+  /** The Constant S3_PREPARATION_ATTACHMENTS_TABLE_PATH: {@value}. */
+  public static final String S3_PREPARATION_ATTACHMENTS_TABLE_PATH = "%s/%s/%s/preparation/%s/attachments/%s";
+
+  /** The Constant S3_PREPARATION_IMPORT_CSV_FILE_QUERY_PATH: {@value}. */
+  public static final String S3_PREPARATION_IMPORT_CSV_FILE_QUERY_PATH = ".\"%s\".\"%s\".\"%s\".\"preparation\".\"%s\".\"import\".\"%s\".\"%s\"";
+
+  /** The Constant S3_PREPARATION_PROVIDER_PATH: {@value}. */
+  public static final String S3_PREPARATION_PROVIDER_PATH = "%s/%s/%s/preparation/%s";
+
+  /** The Constant S3_PREPARATION_ATTACHMENTS_PARENT_FOLDER_PATH: {@value}. */
+  public static final String S3_PREPARATION_ATTACHMENTS_PARENT_FOLDER_PATH = "%s/%s/%s/preparation/%s/attachments";
+  
   /**
    * Instantiates a new literal constants.
    */

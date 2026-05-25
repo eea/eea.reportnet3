@@ -35,7 +35,6 @@ import org.eea.interfaces.controller.dataflow.RepresentativeController.Represent
 import org.eea.interfaces.controller.orchestrator.JobController.JobControllerZuul;
 import org.eea.interfaces.controller.orchestrator.JobProcessController.JobProcessControllerZuul;
 import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
-import org.eea.interfaces.vo.communication.UserNotificationContentVO;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
@@ -67,7 +66,6 @@ import org.eea.lock.redis.LockEnum;
 import org.eea.lock.redis.RedisLockService;
 import org.eea.multitenancy.DatasetId;
 import org.eea.multitenancy.TenantResolver;
-import org.eea.thread.ThreadPropertiesManager;
 import org.eea.utils.LiteralConstants;
 import org.eea.utils.UtilityClass;
 import org.slf4j.Logger;
@@ -194,13 +192,13 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
     private String ETL_IMPORT_FOLDER = "etlImport_%s";
 
-    private void deleteCsvFilesWithUuidSuffix(String datasetId) {
+    private void deleteCsvFilesWithUuidSuffix(String datasetId, String preparationCode) {
         // this method is matching and deleting all csv files that have an ending of a UUID and then `.csv` like:
         // data_550e8400-e29b-41d4-a716-446655440000.csv
         // table1_7d9f45d3-2e68-4b9e-bfe3-3a472ef4234b.csv
         // Those files have 2 columns added and therefore should be deleted, those are temporary
-        File root = new File(importPath);
-        File folder = new File(root, datasetId);
+        File folder = resolveImportFolder(datasetId, preparationCode);
+
         if (!folder.exists() || !folder.isDirectory()) {
             LOG.warn("Import path does not exist or is not a directory: {}", importPath);
             return;
@@ -267,6 +265,8 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         String filePathInS3 = null;
         String fileName = helperMultipartFileMapper.getOriginalFilename();
         File s3File = null;
+        String preparationCode =importFileInDremioInfo.getPreparationCode();
+
         try {
             jobStatus = job.getJobStatus();
             if(job.getParameters().get("filePathInS3") != null) {
@@ -281,7 +281,15 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
                 String[] filePathInS3Split = filePathInS3.split("/");
                 String fileNameInS3 = filePathInS3Split[filePathInS3Split.length - 1];
-                String filePathStructure = "/" + datasetId + "/" + fileNameInS3;
+                String filePathStructure;
+
+                if (preparationCode!=null) {
+                    //Save to preparation directory inside dataset dir
+                    filePathStructure = "/" + datasetId + "/" + preparationCode + "/" + fileNameInS3;
+                } else{
+                    filePathStructure = "/" + datasetId + "/" + fileNameInS3;
+                }
+
                 File folder = new File(importPath + "/" + datasetId);
                 if (!folder.exists()) {
                     folder.mkdir();
@@ -317,6 +325,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             importFileInDremioInfo.setDelimiter(delimiter);
             importFileInDremioInfo.setDataProviderCode(providerCode);
             importFileInDremioInfo.setIsEtlImport(false);
+            importFileInDremioInfo.setPreparationCode(preparationCode);
 
             DatasetTypeEnum datasetType = datasetService.getDatasetType(importFileInDremioInfo.getDatasetId());
             if (DatasetTypeEnum.REFERENCE.equals(datasetType) && dataflowVO.getStatus() == TypeStatusEnum.DRAFT) {
@@ -361,9 +370,16 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
     private void importDatasetDataToDremio(ImportFileInDremioInfo importFileInDremioInfo, File fileFromS3, HelperMultipartFileMapper helperMultipartFileMapper) throws Exception {
 
+        boolean isPreparationDataset = StringUtils.isNotBlank(importFileInDremioInfo.getPreparationCode());
+
         if (importFileInDremioInfo.getDelimiter() != null && importFileInDremioInfo.getDelimiter().length() > 1) {
             LOG.error("Error when importing file data to s3 {}. The size of the delimiter cannot be greater than 1", importFileInDremioInfo);
-            datasetMetabaseService.updateDatasetRunningStatus(importFileInDremioInfo.getDatasetId(), DatasetRunningStatusEnum.ERROR_IN_IMPORT);
+
+            //skip update running status for preparation
+            if(!isPreparationDataset) {
+                datasetMetabaseService.updateDatasetRunningStatus(importFileInDremioInfo.getDatasetId(), DatasetRunningStatusEnum.ERROR_IN_IMPORT);
+            }
+
             jobControllerZuul.updateJobInfo(importFileInDremioInfo.getJobId(), JobInfoEnum.ERROR_WRONG_DELIMITER_SIZE, null);
             throw new EEAException("The size of the delimiter cannot be greater than 1");
         }
@@ -401,13 +417,16 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             throw new EEAException("Dataset is not reportable: datasetId=" + importFileInDremioInfo.getDatasetId() + ", tableSchemaId=" + importFileInDremioInfo.getTableSchemaId() + ", fileName=" + importFileInDremioInfo.getFileName());
         }
 
-        // We add a lock to the Release process
-        datasetMetabaseService.updateDatasetRunningStatus(importFileInDremioInfo.getDatasetId(), DatasetRunningStatusEnum.IMPORTING);
-        Map<String, Object> mapCriteria = new HashMap<>();
-        mapCriteria.put("dataflowId", importFileInDremioInfo.getDataflowId());
-        mapCriteria.put("dataProviderId", importFileInDremioInfo.getProviderId());
-        if (importFileInDremioInfo.getProviderId() != null) {
-            datasetService.createLockWithSignature(LockSignature.RELEASE_SNAPSHOTS, mapCriteria, SecurityContextHolder.getContext().getAuthentication().getName());
+        // Skip for Preparations
+        if(!isPreparationDataset){
+            // We add a lock to the Release process
+            datasetMetabaseService.updateDatasetRunningStatus(importFileInDremioInfo.getDatasetId(), DatasetRunningStatusEnum.IMPORTING);
+            Map<String, Object> mapCriteria = new HashMap<>();
+            mapCriteria.put("dataflowId", importFileInDremioInfo.getDataflowId());
+            mapCriteria.put("dataProviderId", importFileInDremioInfo.getProviderId());
+            if (importFileInDremioInfo.getProviderId() != null) {
+                datasetService.createLockWithSignature(LockSignature.RELEASE_SNAPSHOTS, mapCriteria, SecurityContextHolder.getContext().getAuthentication().getName());
+            }
         }
         handleZipFile(importFileInDremioInfo, fileFromS3, schema, helperMultipartFileMapper);
     }
@@ -450,9 +469,9 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
     }
 
     private void handleFmeRequest(IntegrationVO integrationVO, ImportFileInDremioInfo importFileInDremioInfo, File file, String mimeType) throws EEAException {
-        try {
+        try {// TODO for preparation
             fileTreatmentHelper.prepareFmeFileProcess(importFileInDremioInfo.getDatasetId(), file, integrationVO, mimeType, importFileInDremioInfo.getTableSchemaId(),
-                    false, importFileInDremioInfo.getJobId());
+                    false, importFileInDremioInfo.getJobId(), importFileInDremioInfo.getPreparationCode());
         }
         catch (Exception e){
             throw new EEAException("Could not prepare fme request for job id " + importFileInDremioInfo.getJobId());
@@ -522,8 +541,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         List<File> files = new ArrayList<>();
 
         // Prepare the folder where files will be stored
-        File root = new File(importPath);
-        File folder = new File(root, importFileInDremioInfo.getDatasetId().toString());
+        File folder = resolveImportFolder(importFileInDremioInfo.getDatasetId().toString(), importFileInDremioInfo.getPreparationCode());
         String saveLocationPath = folder.getCanonicalPath();
         if (!folder.exists()) {
             folder.mkdir();
@@ -635,8 +653,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         String fileMimeType = datasetService.getMimetype(importFileInDremioInfo.getFileName());
 
         // Prepare the folder where files will be stored
-        File root = new File(importPath);
-        File folder = new File(root, importFileInDremioInfo.getDatasetId().toString());
+        File folder = resolveImportFolder(importFileInDremioInfo.getDatasetId().toString(), importFileInDremioInfo.getPreparationCode());
         String saveLocationPath = folder.getCanonicalPath();
 
         try (InputStream input = new FileInputStream(fileFromS3)) {
@@ -720,6 +737,8 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
     private void finishImportProcess(ImportFileInDremioInfo importFileInDremioInfo) throws EEAException {
 
+        boolean isPreparationDataset = StringUtils.isNotBlank(importFileInDremioInfo.getPreparationCode());
+
         Map<String, Object> value = new HashMap<>();
         value.put(LiteralConstants.DATASET_ID, importFileInDremioInfo.getDatasetId());
         value.put(LiteralConstants.USER,
@@ -772,8 +791,11 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                         ? EventType.IMPORT_REPORTING_DATASET_DATA_FAILED_EVENT
                         : EventType.IMPORT_DESIGN_DATASET_DATA_FAILED_EVENT;
             }
-            datasetMetabaseService.updateDatasetRunningStatus(importFileInDremioInfo.getDatasetId(),
+
+            if (!isPreparationDataset) {
+                datasetMetabaseService.updateDatasetRunningStatus(importFileInDremioInfo.getDatasetId(),
                     DatasetRunningStatusEnum.ERROR_IN_IMPORT);
+            }
             if(StringUtils.isNotBlank(importFileInDremioInfo.getProcessId())) {
                 processControllerZuul.updateProcess(importFileInDremioInfo.getDatasetId(), importFileInDremioInfo.getDataflowId(),
                         ProcessStatusEnum.CANCELED, ProcessTypeEnum.IMPORT, importFileInDremioInfo.getProcessId(),
@@ -782,8 +804,10 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
             jobStatus = JobStatusEnum.CANCELED;
         } else {
-            datasetMetabaseService.updateDatasetRunningStatus(importFileInDremioInfo.getDatasetId(),
-                    DatasetRunningStatusEnum.IMPORTED);
+            if (!isPreparationDataset) {
+                datasetMetabaseService.updateDatasetRunningStatus(importFileInDremioInfo.getDatasetId(),
+                        DatasetRunningStatusEnum.IMPORTED);
+            }
 
             if(StringUtils.isNotBlank(importFileInDremioInfo.getProcessId())) {
                 processControllerZuul.updateProcess(importFileInDremioInfo.getDatasetId(), importFileInDremioInfo.getDataflowId(),
@@ -798,10 +822,9 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             jobStatus = JobStatusEnum.FINISHED;
 
             // Delete the parquet files.
-            deleteFilesFromDirectoryWithExtension(new String[]{".parquet"}, importFileInDremioInfo.getDatasetId().toString());
-
+            deleteFilesFromDirectoryWithExtension(new String[]{".parquet"}, importFileInDremioInfo.getDatasetId().toString(), importFileInDremioInfo.getPreparationCode());
             // Delete the process generated csv files ending with a uuid
-            deleteCsvFilesWithUuidSuffix(importFileInDremioInfo.getDatasetId().toString());
+            deleteCsvFilesWithUuidSuffix(importFileInDremioInfo.getDatasetId().toString(), importFileInDremioInfo.getPreparationCode());
         }
 
         if (jobId!=null) {
@@ -885,15 +908,16 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 }
             }
         }
-
-        if (importFileInDremioInfo.getProviderId() != null) {
-            fileTreatmentHelper.releaseLockReleasingProcess(importFileInDremioInfo.getDatasetId());
+        if(!isPreparationDataset) {
+            if (importFileInDremioInfo.getProviderId() != null) {
+                fileTreatmentHelper.releaseLockReleasingProcess(importFileInDremioInfo.getDatasetId());
+            }
         }
     }
 
-    private void deleteFilesFromDirectoryWithExtension(String[] extensionsToDelete, String datasetId){
-        File root = new File(importPath);
-        File folder = new File(root, datasetId);
+    private void deleteFilesFromDirectoryWithExtension(String[] extensionsToDelete, String datasetId, String preparationCode){
+        File folder;
+        folder = resolveImportFolder(datasetId, preparationCode);
         Arrays.stream(folder.listFiles((f, p) -> StringUtils.endsWithAny(p, extensionsToDelete))).forEach(File::delete);
     }
 
@@ -912,13 +936,17 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
     }
 
     @Override
-    public void deleteTableData(Long datasetId, Long dataflowId, Long providerId, String tableSchemaId, Long jobId, Boolean createEmptyTablesBool) throws Exception {
+    public void deleteTableData(Long datasetId, Long dataflowId, Long providerId, String preparationCode, String tableSchemaId, Long jobId, Boolean createEmptyTablesBool) throws Exception {
         try {
+            boolean isPreparationDataset = org.apache.commons.lang3.StringUtils.isNotBlank(preparationCode);
+
             String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
             TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, datasetSchemaId);
-            if (tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable())
-                    && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, tableSchemaId))) {
-                throw new Exception("Can not delete table data because iceberg table is created");
+            if (!isPreparationDataset) {
+                if (tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable())
+                        && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, tableSchemaId))) {
+                    throw new Exception("Can not delete table data because iceberg table is created");
+                }
             }
             String tableSchemaName = tableSchemaVO.getNameTableSchema();
             DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
@@ -929,14 +957,14 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             if (providerId == null) {
                 providerId = 0L;
             }
-            S3PathResolver s3ImportPathResolver = new S3PathResolver(dataflowId, providerId, datasetId, tableSchemaName, tableSchemaName, S3_IMPORT_FILE_PATH);
+            S3PathResolver s3ImportPathResolver = new S3PathResolver(dataflowId, providerId, datasetId, tableSchemaName, tableSchemaName, preparationCode, S3_IMPORT_FILE_PATH);
             //path in s3 for the folder that contains the stored csv files
             String s3PathForCsvFolder = s3ServicePrivate.getTableAsFolderQueryPath(s3ImportPathResolver, S3_IMPORT_TABLE_NAME_FOLDER_PATH);
 
             //remove csv files that are related to the table
             parquetConverterService.removeCsvFilesThatWillBeReplaced(s3ImportPathResolver, tableSchemaName, s3PathForCsvFolder, datasetId, dataSetMetabaseVO);
 
-            S3PathResolver s3TablePathResolver = new S3PathResolver(dataflowId, providerId, datasetId, tableSchemaName, tableSchemaName, S3_TABLE_NAME_FOLDER_PATH);
+            S3PathResolver s3TablePathResolver = new S3PathResolver(dataflowId, providerId, datasetId, tableSchemaName, tableSchemaName, preparationCode, S3_TABLE_NAME_FOLDER_PATH);
             //remove folders that contain the previous parquet files
             if (s3HelperPrivate.checkFolderExist(s3TablePathResolver, S3_TABLE_NAME_FOLDER_PATH)) {
                 //demote table folder
@@ -977,6 +1005,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                         .tableSchemaId(tableSchemaId).build();
                 notificationVO.setDatasetName(dataSetMetabaseVO.getDataSetName());
                 notificationVO.setDataflowId(dataSetMetabaseVO.getDataflowId());
+                notificationVO.setPreparationCode(preparationCode);
                 notificationVO.setDataflowName(dataFlowControllerZuul.getMetabaseById(dataSetMetabaseVO.getDataflowId()).getName());
 
                 value.put(LiteralConstants.DATASET_ID, datasetId);
@@ -989,7 +1018,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             }
 
         }
-        catch (Exception e){
+        catch (Exception e) {
             if (jobId != null) {
                 jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FAILED);
             }
@@ -998,16 +1027,20 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
     }
 
     @Override
-    public void deleteDatasetData(Long datasetId, Long dataflowId, Long providerId, Boolean deletePrefilledTables, Boolean technicallyAccepted, Long jobId) throws Exception {
+    public void deleteDatasetData(Long datasetId, Long dataflowId, Long providerId, String preparationCode, Boolean deletePrefilledTables, Boolean technicallyAccepted, Long jobId) throws Exception {
 
         try {
+            boolean isPreparationDataset = org.apache.commons.lang3.StringUtils.isNotBlank(preparationCode);
+
             String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
             List<TableSchemaIdNameVO> tableSchemas = datasetSchemaService.getTableSchemasIds(datasetId);
-            for (TableSchemaIdNameVO entry : tableSchemas) {
-                TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(entry.getIdTableSchema(), datasetSchemaId);
-                if (tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable())
-                        && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, tableSchemaVO.getIdTableSchema()))) {
-                    throw new Exception("Can not delete table data because iceberg table is created");
+            if (!isPreparationDataset) {
+                for (TableSchemaIdNameVO entry : tableSchemas) {
+                    TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(entry.getIdTableSchema(), datasetSchemaId);
+                    if (tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable())
+                            && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, tableSchemaVO.getIdTableSchema()))) {
+                        throw new Exception("Can not delete table data because iceberg table is created");
+                    }
                 }
             }
 
@@ -1026,7 +1059,8 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                     }
                 }
                 //we do not pass a job id because there is a job for the whole dataset data deletion
-                deleteTableData(datasetId, dataflowId, providerId, tableSchemaIdNameVO.getIdTableSchema(), null, true);
+                deleteTableData(datasetId, dataflowId, providerId, preparationCode, tableSchemaIdNameVO.getIdTableSchema(), null, true);
+                createEmptyTables.runCreationForSpecificTableSchema(dataSetMetabaseVO, tableSchemaIdNameVO.getIdTableSchema(), preparationCode);
             }
 
             if (jobId != null) {
@@ -1041,7 +1075,9 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                     Map<String, Object> value = new HashMap<>();
                     NotificationVO notificationVO = NotificationVO.builder()
                             .user(SecurityContextHolder.getContext().getAuthentication().getName())
-                            .datasetId(datasetId).build();
+                            .datasetId(datasetId)
+                            .preparationCode(preparationCode)
+                            .build();
                     DataSetMetabaseVO datasetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
                     notificationVO.setDatasetName(datasetMetabaseVO.getDataSetName());
                     notificationVO.setDataflowId(datasetMetabaseVO.getDataflowId());
@@ -2346,10 +2382,10 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, reportingDataset.getDatasetSchema());
         S3PathResolver s3PathResolverReporting;
         if (BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable()) && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(reportingDataset.getId(), tableSchemaVO.getIdTableSchema()))) {
-            s3PathResolverReporting = s3ServicePrivate.getS3PathResolverByDatasetType(reportingDataset, tableSchemaVO.getNameTableSchema(), true);
+            s3PathResolverReporting = s3ServicePrivate.getS3PathResolverByDatasetType(reportingDataset, tableSchemaVO.getNameTableSchema(), true, null);
             s3PathResolverReporting.setIsIcebergTable(true);
         } else {
-            s3PathResolverReporting = s3ServicePrivate.getS3PathResolverByDatasetType(reportingDataset, tableSchemaVO.getNameTableSchema(), false);
+            s3PathResolverReporting = s3ServicePrivate.getS3PathResolverByDatasetType(reportingDataset, tableSchemaVO.getNameTableSchema(), false, null);
             s3PathResolverReporting.setIsIcebergTable(false);
         }
         boolean folderExistReporting = s3HelperPrivate.checkFolderExist(s3PathResolverReporting);
@@ -2362,7 +2398,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         }
 
         //find number of records for data collection based on provider and table
-        S3PathResolver s3PathResolverCollection = s3ServicePrivate.getS3PathResolverByDatasetType(collectionDataset, tableSchemaVO.getNameTableSchema(), false);
+        S3PathResolver s3PathResolverCollection = s3ServicePrivate.getS3PathResolverByDatasetType(collectionDataset, tableSchemaVO.getNameTableSchema(), false, null);
         String dremioTableQueryPath;
         if (datasetType.equals(DatasetTypeEnum.COLLECTION)) {
             //data collection
@@ -2410,10 +2446,21 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
     }
 
     @Override
-    public void etlExportCsv(Long datasetId, Long dataflowId, String tableSchemaId, Long jobId, String user, String processUUID, Boolean includeAttachments, String dataProviderCodes) throws EEAException {
+    public void etlExportCsv(Long datasetId, Long dataflowId, String tableSchemaId, Long jobId, String user, String processUUID, Boolean includeAttachments, String dataProviderCodes, String preparationCode) throws EEAException {
         try {
+            String folderToZipPath;
             // the path of the parent folder which will be zipped
-            String folderToZipPath = exportDLPath + DATASET_PREFIX_FOR_EXPORT + datasetId + "/etlExportV4_" + jobId;
+            if (StringUtils.isNotBlank(preparationCode)) {
+                folderToZipPath = exportDLPath
+                        + DATASET_PREFIX_FOR_EXPORT
+                        + datasetId
+                        + "/"
+                        + preparationCode
+                        + "/etlExportV4_" + jobId;
+            }
+            else {
+                folderToZipPath = exportDLPath + DATASET_PREFIX_FOR_EXPORT + datasetId + "/etlExportV4_" + jobId;
+            }
             DatasetTypeEnum datasetType = datasetService.getDatasetType(datasetId);
             updateJobProcess(datasetId, dataflowId, jobId, user, processUUID);
 
@@ -2442,18 +2489,23 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
           if (codes.isEmpty()) {
             if (StringUtils.isNotBlank(tableSchemaId)) {
               String tableName = datasetSchemaService.getTableSchemaName(dataSetMetabaseVO.getDatasetSchema(), tableSchemaId);
-              fileTreatmentHelper.convertParquetFile(datasetId, CSV, tableSchemaId, tableName, true, jobId);
+              fileTreatmentHelper.convertParquetFile(datasetId, CSV, tableSchemaId, tableName, true, jobId, preparationCode);
               if (includeAttachments) {
                 //get attachments if they exist
                 String path = null;
                 if (datasetType.equals(DatasetTypeEnum.DESIGN) || datasetType.equals(DatasetTypeEnum.TEST) || datasetType.equals(REPORTING) || datasetType.equals(DatasetTypeEnum.REFERENCE)) {
-                  path = S3_ATTACHMENTS_TABLE_PATH;
+                  if (StringUtils.isNotBlank(preparationCode)) {
+                    path = S3_PREPARATION_ATTACHMENTS_TABLE_PATH;
+                  }
+                  else {
+                    path = S3_ATTACHMENTS_TABLE_PATH;
+                  }
                 } else if (datasetType.equals(DatasetTypeEnum.COLLECTION)) {
                   path = S3_ATTACHMENTS_DC_TABLE_PATH;
                 } else if (datasetType.equals(DatasetTypeEnum.EUDATASET)) {
                   path = S3_ATTACHMENTS_EU_TABLE_PATH;
                 }
-                S3PathResolver s3TablePathResolver = new S3PathResolver(dataflowId, providerId, datasetId, tableName, tableName, path);
+                S3PathResolver s3TablePathResolver = new S3PathResolver(dataflowId, providerId, datasetId, tableName, tableName, preparationCode, path);
                 if (s3HelperPrivate.checkFolderExist(s3TablePathResolver, path)) {
                   String attachmentsPathInS3 = s3ServicePrivate.getTableAsFolderQueryPath(s3TablePathResolver, path);
                   s3HelperPrivate.getAttachmentsFromS3Locally(attachmentsPathInS3, folderToZipPath);
@@ -2462,19 +2514,24 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             } else {
               List<TableSchemaIdNameVO> tableSchemaIdNameVOS = datasetSchemaService.getTableSchemasIds(datasetId);
               for (TableSchemaIdNameVO tableSchemaIdNameVO : tableSchemaIdNameVOS) {
-                fileTreatmentHelper.convertParquetFile(datasetId, CSV, tableSchemaIdNameVO.getIdTableSchema(), tableSchemaIdNameVO.getNameTableSchema(), true, jobId);
+                fileTreatmentHelper.convertParquetFile(datasetId, CSV, tableSchemaIdNameVO.getIdTableSchema(), tableSchemaIdNameVO.getNameTableSchema(), true, jobId, preparationCode);
               }
               if (includeAttachments) {
                 //get attachments if they exist
                 String path = null;
                 if (datasetType.equals(DatasetTypeEnum.DESIGN) || datasetType.equals(DatasetTypeEnum.TEST) || datasetType.equals(REPORTING) || datasetType.equals(DatasetTypeEnum.REFERENCE)) {
-                  path = S3_ATTACHMENTS_PARENT_FOLDER_PATH;
+                    if (StringUtils.isNotBlank(preparationCode)) {
+                        path = S3_PREPARATION_ATTACHMENTS_PARENT_FOLDER_PATH;
+                    }
+                    else {
+                        path = S3_ATTACHMENTS_PARENT_FOLDER_PATH;
+                    }
                 } else if (datasetType.equals(DatasetTypeEnum.COLLECTION)) {
                   path = S3_ATTACHMENTS_DC_FOLDER_PATH;
                 } else if (datasetType.equals(DatasetTypeEnum.EUDATASET)) {
                   path = S3_ATTACHMENTS_PARENT_FOLDER_EU_PATH;
                 }
-                S3PathResolver s3TablePathResolver = new S3PathResolver(dataflowId, providerId, datasetId, null, null, path);
+                S3PathResolver s3TablePathResolver = new S3PathResolver(dataflowId, providerId, datasetId, null, null, preparationCode, path);
                 if (s3HelperPrivate.checkFolderExist(s3TablePathResolver, path)) {
                   String attachmentsPathInS3 = s3ServicePrivate.getTableAsFolderQueryPath(s3TablePathResolver, path);
                   s3HelperPrivate.getAttachmentsFromS3Locally(attachmentsPathInS3, folderToZipPath);
@@ -2506,7 +2563,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
               for (TableSchemaIdNameVO t : tables) {
                 fileTreatmentHelper.convertParquetFileForProvider(
                     datasetId, pid, t.getIdTableSchema(), t.getNameTableSchema(),
-                    datasetType, true, jobId, providerFolderPath);
+                    datasetType, true, jobId, providerFolderPath, preparationCode);
               }
 
               // Provider-scoped attachments (per table)
@@ -2515,7 +2572,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
                 for (TableSchemaIdNameVO t : tables) {
                   // Build resolver with dataflowId, providerId, datasetId, and current table.
-                  S3PathResolver resolver = new S3PathResolver(dataflowId, pid, datasetId, t.getNameTableSchema(), null, tableAttachmentsConst);
+                  S3PathResolver resolver = new S3PathResolver(dataflowId, pid, datasetId, t.getNameTableSchema(), null, preparationCode, tableAttachmentsConst);
 
                   // Base prefix up to the table folder
                   String tablePrefix = s3ServicePrivate.getTableAsFolderQueryPath(resolver, tableAttachmentsConst);
@@ -2592,18 +2649,34 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
   }
 
     @Override
-    public void etlExportParquet(Long datasetId, Long dataflowId, String tableSchemaId, Long jobId, String user, String processUUID, Boolean includeAttachments, String dataProviderCodes) {
+    public void etlExportParquet(Long datasetId, Long dataflowId, String tableSchemaId, Long jobId, String user, String processUUID, Boolean includeAttachments, String dataProviderCodes, String preparationCode) {
         try {
-            String folderPathStr =  exportDLPath + DATASET_PREFIX_FOR_EXPORT + datasetId;
+
+            String folderPathStr;
+
+            if (StringUtils.isNotBlank(preparationCode)) {
+                folderPathStr = exportDLPath + DATASET_PREFIX_FOR_EXPORT + datasetId + "/" + preparationCode;
+            }
+            else {
+                folderPathStr = exportDLPath + DATASET_PREFIX_FOR_EXPORT + datasetId;
+            }
+
             File folderPath = new File(folderPathStr);
 
             createLocalPathIfNotExists(jobId, folderPath);
 
-            String localPath = exportDLPath + DATASET_PREFIX_FOR_EXPORT + datasetId + PARQUET_EXPORT_NAME + jobId;
+            String localPath;
+
+            if (StringUtils.isNotBlank(preparationCode)) {
+                localPath = exportDLPath + DATASET_PREFIX_FOR_EXPORT + datasetId + "/" + preparationCode + PARQUET_EXPORT_NAME + jobId;
+            } else {
+                localPath = exportDLPath + DATASET_PREFIX_FOR_EXPORT + datasetId + PARQUET_EXPORT_NAME + jobId;
+            }
+
             updateJobProcess(datasetId, dataflowId, jobId, user, processUUID);
 
             DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
-            String s3Path = etlExportV5Service.getS3KeyPath(dataSetMetabaseVO, s3ServicePrivate);
+            String s3Path = etlExportV5Service.getS3KeyPath(dataSetMetabaseVO, s3ServicePrivate, preparationCode);
             DatasetTypeEnum datasetType = dataSetMetabaseVO.getDatasetTypeEnum();
 
             String tableName = null;
@@ -2673,6 +2746,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
     @Override
     public JobVO retrieveOrAddImportJob(ImportFileInDremioInfo importFileInDremioInfo, String fmeJobId, Long jobId) throws Exception {
         JobVO job = null;
+        JobStatusEnum jobStatus;
         if (fmeJobId != null || jobId != null) {
             if (fmeJobId != null){
                 jobControllerZuul.updateFmeCallbackJobParameter(fmeJobId, true);
@@ -2702,6 +2776,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
         if(job != null){
             LOG.info("For import {} found job with id {}", importFileInDremioInfo, jobId);
+
             if(job.getJobStatus().equals(JobStatusEnum.CANCELED) || job.getJobStatus().equals(JobStatusEnum.CANCELED_BY_ADMIN)) {
                 LOG.info("Job {} is cancelled. Exiting import!", job.getId());
                 return job;
@@ -2714,9 +2789,9 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             //check if there is already an import job with status IN_PROGRESS for the specific datasetId
             List<Long> datasetIds = new ArrayList<>();
             datasetIds.add(importFileInDremioInfo.getDatasetId());
-            JobStatusEnum jobStatus = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.IMPORT.getValue(), false, importFileInDremioInfo.getDataflowId(), importFileInDremioInfo.getProviderId(), datasetIds);
+            jobStatus = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.IMPORT.getValue(), false, importFileInDremioInfo.getDataflowId(), importFileInDremioInfo.getProviderId(), datasetIds);
             jobId = jobControllerZuul.addImportJob(importFileInDremioInfo.getDatasetId(), importFileInDremioInfo.getDataflowId(), importFileInDremioInfo.getProviderId(), importFileInDremioInfo.getTableSchemaId(), importFileInDremioInfo.getFileName(),
-                    importFileInDremioInfo.getReplaceData(), importFileInDremioInfo.getIntegrationId(), importFileInDremioInfo.getDelimiter(), jobStatus, fmeJobId, null);
+                    importFileInDremioInfo.getReplaceData(), importFileInDremioInfo.getIntegrationId(),importFileInDremioInfo.getPreparationCode(), importFileInDremioInfo.getDelimiter(), jobStatus, fmeJobId, null);
             importFileInDremioInfo.setJobId(jobId);
             if(jobStatus.getValue().equals(JobStatusEnum.REFUSED.getValue())){
                 LOG.info("Added import job with id {} for datasetId {} with status REFUSED", jobId, importFileInDremioInfo.getDatasetId());
@@ -2869,7 +2944,8 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 s3ServicePrivate.getS3PathResolverByDatasetType(
                         dataset,
                         tableSchemaVO.getNameTableSchema(),
-                        false
+                        false,
+                        null
                 );
 
         if (BooleanUtils.isTrue(
@@ -2955,7 +3031,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
      */
     @Async
     @Override
-    public void etlImportDataset(Long datasetId, Long dataflowId, Long providerId, Boolean replaceData, String tableSchemaId, String delimiter, String filePathInS3, Long jobId, DataFlowVO dataFlowVO, DataSetMetabaseVO dataSetMetabaseVO) throws Exception {
+    public void etlImportDataset(Long datasetId, Long dataflowId, Long providerId, Boolean replaceData, String tableSchemaId, String delimiter, String filePathInS3, Long jobId, DataFlowVO dataFlowVO, DataSetMetabaseVO dataSetMetabaseVO, String preparationCode) throws Exception {
         File etlImportFolder = null;
         try {
             DatasetTypeEnum datasetTypeEnum = datasetService.getDatasetType(datasetId);
@@ -2983,7 +3059,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 return;
             }
 
-            etlImportFolder = createEtlImportFolder(datasetId, jobId);
+            etlImportFolder = createEtlImportFolder(datasetId, jobId, preparationCode);
 
 
             Set<String> tableNamesSet = null;
@@ -2996,7 +3072,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             }
             Map<String, Boolean> attachmentsExistPerTableName = new HashMap();
 
-            List<File> csvFiles = storeAndUnzipEtlImportZipFile(datasetId, filePathInS3, fileExtension, jobId, etlImportFolder, tableNamesSet, attachmentsExistPerTableName);
+            List<File> csvFiles = storeAndUnzipEtlImportZipFile(datasetId, filePathInS3, fileExtension, jobId, etlImportFolder, tableNamesSet, attachmentsExistPerTableName, preparationCode);
             if(csvFiles == null){ // job has already failed
                 return;
             }
@@ -3008,7 +3084,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 providerCode = dataProviderVO.getCode();
             }
 
-            ImportFileInDremioInfo importFileInDremioInfo = new ImportFileInDremioInfo(jobId, datasetId, dataflowId, providerId, tableSchemaId, null, replaceData, delimiter, null, providerCode);
+            ImportFileInDremioInfo importFileInDremioInfo = new ImportFileInDremioInfo(jobId, datasetId, dataflowId, providerId, tableSchemaId, null, replaceData, delimiter, null, providerCode, preparationCode);
             if (DatasetTypeEnum.REFERENCE.equals(datasetTypeEnum) && dataFlowVO.getStatus() == TypeStatusEnum.DRAFT) {
                 importFileInDremioInfo.setUpdateReferenceFolder(true);
             }
@@ -3053,11 +3129,17 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         }
     }
 
-    protected List<File> storeAndUnzipEtlImportZipFile(Long datasetId, String filePathInS3, String fileExtension, Long jobId, File etlImportFolder, Set<String> tableNamesSet, Map<String, Boolean> attachmentsExistPerTableName) throws Exception {
+    protected List<File> storeAndUnzipEtlImportZipFile(Long datasetId, String filePathInS3, String fileExtension, Long jobId, File etlImportFolder, Set<String> tableNamesSet, Map<String, Boolean> attachmentsExistPerTableName, String preparationCode) throws Exception {
         boolean attachmentsFolderSeen = false;
         String[] filePathInS3Split = filePathInS3.split("/");
         String fileNameInS3 = filePathInS3Split[filePathInS3Split.length - 1];
-        String filePathStructure = "/" + datasetId + "/" + fileNameInS3;
+        String filePathStructure;
+
+        if (StringUtils.isNotBlank(preparationCode)) {
+            filePathStructure = "/" + datasetId + "/" + preparationCode + "/" + fileNameInS3;
+        } else {
+            filePathStructure = "/" + datasetId + "/" + fileNameInS3;
+        }
         File s3File = null;
         try {
             LOG.info("For jobId {} downloading file from s3 in path {} with fileExtension {}", jobId, filePathInS3, fileExtension);
@@ -3206,15 +3288,25 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         return parts.length == 2 && !isDirectory;
     }
 
-    protected File createEtlImportFolder(Long datasetId, Long jobId) throws Exception {
+    protected File createEtlImportFolder(Long datasetId, Long jobId, String preparationCode) throws Exception {
         //store zip file
         File importParentfolder = new File(importPath + "/" + datasetId);
         if (!importParentfolder.exists()) {
             importParentfolder.mkdir();
         }
 
+        File workingParentFolder = importParentfolder;
+
+        // Preparation
+        if (StringUtils.isNotBlank(preparationCode)) {
+            workingParentFolder = new File(importParentfolder.getCanonicalPath() + "/" + preparationCode);
+            if (!workingParentFolder.exists()) {
+                workingParentFolder.mkdir();
+            }
+        }
+
         //create etlImport folder if it doesn't exist
-        File etlImportFolder = new File(importParentfolder.getCanonicalPath() + "/" + String.format(ETL_IMPORT_FOLDER, jobId));
+        File etlImportFolder = new File(workingParentFolder.getCanonicalPath() + "/" + String.format(ETL_IMPORT_FOLDER, jobId));
         if (!etlImportFolder.exists()) {
             etlImportFolder.mkdir();
         }
@@ -3291,6 +3383,74 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         }
     }
 
+    private String getPreparationsFilePath(Long datasetId, Long dataflowId, Long providerId, String fileName, boolean deleteFile, String preparationCode) {
+        if (dataflowId == null){
+            dataflowId = datasetService.getDataFlowIdById(datasetId);
+        }
+        if (providerId == null){
+            providerId = 0L;
+        }
+        S3PathResolver s3PathResolver = new S3PathResolver(dataflowId, providerId, datasetId, null, fileName);
+        s3PathResolver.setPath(LiteralConstants.S3_PREPARATION_PROVIDER_IMPORT_PATH);
+        s3PathResolver.setDeleteFile(deleteFile);
+        s3PathResolver.setPreparationCode(preparationCode);
+        return s3ServicePublic.getS3Path(s3PathResolver);
+    }
+    @Override
+    public JobPresignedUrlInfo generatePreparationImportPreSignedUrl(Long datasetId, Long dataflowId, Long providerId, String fileName, String preparationCode) {
+        JobPresignedUrlInfo info = new JobPresignedUrlInfo();
+        String filePathInS3 = getPreparationsFilePath(datasetId, dataflowId, providerId, fileName, false, preparationCode);
+        info.setFilePathInS3(filePathInS3);
+        info.setPresignedUrl(s3HelperPublic.generatePUTPreSignedUrl(filePathInS3));
+        return info;
+    }
+
+    private File resolveImportFolder(String datasetId, String preparationCode) {
+
+        File root = new File(importPath);
+
+        if (StringUtils.isNotBlank(preparationCode)) {
+            return new File(root, datasetId + "/" + preparationCode);
+        }
+
+        return new File(root, datasetId);
+    }
+
+    @Override
+    public String resolvePreparationCode(String requestPreparationCode, JobVO job) {
+
+        if (job == null) {
+            throw new IllegalArgumentException("Job must not be null when resolving preparation code.");
+        }
+
+        String jobPreparationCode = job.getPreparationCode();
+
+        // Request contains preparation code (FME or endpoint)
+        if (StringUtils.isNotBlank(requestPreparationCode)) {
+
+            if (StringUtils.isBlank(jobPreparationCode)) {
+                throw new IllegalStateException(
+                        "Preparation code sent but job is not a preparation job. JobId=" + job.getId());
+            }
+
+            // If codes differ → illegal
+            if (!requestPreparationCode.equals(jobPreparationCode)) {
+                throw new IllegalStateException(
+                        "Preparation code mismatch for jobId=" + job.getId());
+            }
+
+            // Valid preparation job
+            return jobPreparationCode;
+        }
+
+        //  Request has no code but job is preparation job
+        if (StringUtils.isNotBlank(jobPreparationCode)) {
+            return jobPreparationCode;
+        }
+
+        // Not a preparation job
+        return null;
+    }
     @Override
     public boolean isTableEmpty(S3PathResolver s3PathResolver) {
         if (!s3HelperPrivate.checkFolderExist(s3PathResolver, S3_TABLE_NAME_FOLDER_PATH)) {

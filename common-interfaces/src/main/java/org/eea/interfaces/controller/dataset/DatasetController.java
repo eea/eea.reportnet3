@@ -102,7 +102,8 @@ public interface DatasetController {
   void updateDataset(@RequestBody DataSetVO dataset);
 
   @PutMapping("/private/updateStatistics/{id}")
-  void updateStatistics(@PathVariable("id") Long datasetId, @RequestParam("isBigDataflow") Boolean isBigDataflow);
+  void updateStatistics(@PathVariable("id") Long datasetId,
+                        @RequestParam("isBigDataflow") Boolean isBigDataflow);
 
   /**
    * Gets the data flow id by id.
@@ -161,6 +162,7 @@ public interface DatasetController {
   Map<String, Object> deleteDatasetData(@PathVariable("datasetId") Long datasetId,
       @RequestParam(value = "dataflowId", required = false) Long dataflowId,
       @RequestParam(value = "providerId", required = false) Long providerId,
+      @RequestParam(value = "preparationCode", required = false) String preparationCode,
       @RequestParam(value = "deletePrefilledTables", defaultValue = "false",
           required = false) Boolean deletePrefilledTables);
 
@@ -188,6 +190,7 @@ public interface DatasetController {
   void deleteImportDataLegacy(@PathVariable("datasetId") Long datasetId,
       @RequestParam(value = "dataflowId", required = false) Long dataflowId,
       @RequestParam(value = "providerId", required = false) Long providerId,
+      @RequestParam(value = "preparationCode", required = false) String preparationCode,
       @RequestParam(value = "deletePrefilledTables", defaultValue = "false",
           required = false) Boolean deletePrefilledTables);
 
@@ -203,7 +206,8 @@ public interface DatasetController {
   Map<String, Object> deleteTableData(@PathVariable("datasetId") Long datasetId,
       @PathVariable("tableSchemaId") String tableSchemaId,
       @RequestParam(value = "dataflowId", required = false) Long dataflowId,
-      @RequestParam(value = "providerId", required = false) Long providerId);
+      @RequestParam(value = "providerId", required = false) Long providerId,
+      @RequestParam(value = "preparationCode", required = false) String preparationCode);
 
   /**
    * Delete import table legacy.
@@ -217,7 +221,8 @@ public interface DatasetController {
   void deleteImportTableLegacy(@PathVariable("datasetId") Long datasetId,
       @PathVariable("tableSchemaId") String tableSchemaId,
       @RequestParam(value = "dataflowId", required = false) Long dataflowId,
-      @RequestParam(value = "providerId", required = false) Long providerId);
+      @RequestParam(value = "providerId", required = false) Long providerId,
+      @RequestParam(value = "preparationCode", required = false) String preparationCode);
 
 
   /**
@@ -231,7 +236,8 @@ public interface DatasetController {
   @GetMapping(value = "/exportFileDL", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
   void exportFileDL(@RequestParam("datasetId") Long datasetId,
       @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,
-      @RequestParam("mimeType") String mimeType, @RequestBody ExportFilterVO exportFilterVO);
+      @RequestParam("mimeType") String mimeType, @RequestBody ExportFilterVO exportFilterVO,
+      @RequestParam(value = "code", required = false) String preparationCode);
 
   @GetMapping(value = "/tablesUpdated")
   ResponseEntity<?> tablesUpdatedAfterRelease(@RequestParam("datasetId") Long datasetId);
@@ -364,7 +370,8 @@ public interface DatasetController {
       @RequestParam(value = "offset", required = false) Integer offset,
       @RequestParam(value = "filterValue", required = false) String filterValue,
       @RequestParam(value = "columnName", required = false) String columnName,
-      @RequestParam(value = "dataProviderCodes", required = false) String dataProviderCodes);
+      @RequestParam(value = "dataProviderCodes", required = false) String dataProviderCodes,
+      @RequestParam(value = "code", required = false) String preparationCode);
 
   /**
    * Etl export dataset V 2.
@@ -389,7 +396,8 @@ public interface DatasetController {
       @RequestParam(value = "offset", required = false) Integer offset,
       @RequestParam(value = "filterValue", required = false) String filterValue,
       @RequestParam(value = "columnName", required = false) String columnName,
-      @RequestParam(value = "dataProviderCodes", required = false) String dataProviderCodes);
+      @RequestParam(value = "dataProviderCodes", required = false) String dataProviderCodes,
+      @RequestParam(value = "code", required = false) String preparationCode);
 
     /**
    * Etl export dataset legacy.
@@ -412,7 +420,8 @@ public interface DatasetController {
       @RequestParam(value = "limit", required = false) Integer limit,
       @RequestParam(value = "offset", required = false) Integer offset,
       @RequestParam(value = "filterValue", required = false) String filterValue,
-      @RequestParam(value = "columnName", required = false) String columnName);
+      @RequestParam(value = "columnName", required = false) String columnName,
+      @RequestParam(value = "code", required = false) String preparationCode);
 
   /**
    * Etl export dataset.
@@ -437,7 +446,8 @@ public interface DatasetController {
                                               @RequestParam(value = "offset", required = false) Integer offset,
                                               @RequestParam(value = "filterValue", required = false) String filterValue,
                                               @RequestParam(value = "columnName", required = false) String columnName,
-                                              @RequestParam(value = "dataProviderCodes", required = false) String dataProviderCodes);
+                                              @RequestParam(value = "dataProviderCodes", required = false) String dataProviderCodes,
+                                              @RequestParam(value = "code", required = false) String preparationCode);
 
   /**
    * V4 Etl export dataset. Exports zip which include csv with record id
@@ -455,7 +465,8 @@ public interface DatasetController {
                                               @RequestParam(value = "providerId", required = false) Long providerId,
                                               @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,
                                               @RequestParam(value = "dataProviderCodes", required = false) String dataProviderCodes,
-                                              @RequestParam(value = "includeAttachments", required = false) Boolean includeAttachments);
+                                              @RequestParam(value = "includeAttachments", required = false) Boolean includeAttachments,
+                                              @RequestParam(value = "code", required = false) String preparationCode);
 
   @GetMapping("/v5/etlExport/{datasetId}")
   Map<String, Object> etlExportZipParquet(@PathVariable("datasetId") Long datasetId,
@@ -463,7 +474,8 @@ public interface DatasetController {
                                       @RequestParam(value = "providerId", required = false) Long providerId,
                                       @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,
                                       @RequestParam(value = "dataProviderCodes", required = false) String dataProviderCodes,
-                                      @RequestParam(value = "includeAttachments", required = false) Boolean includeAttachments);
+                                      @RequestParam(value = "includeAttachments", required = false) Boolean includeAttachments,
+                                      @RequestParam(value = "code", required = false) String preparationCode);
 
   /**
    * Etl import dataset.
@@ -512,7 +524,8 @@ public interface DatasetController {
                                        @RequestParam(value = "replaceData", required = false) Boolean replaceData,
                                        @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,
                                        @RequestParam(value = "delimiter") String delimiter,
-                                       @RequestBody String filePathInS3) throws Exception;
+                                       @RequestBody String filePathInS3,
+                                       @RequestParam(value = "code", required = false) String preparationCode) throws Exception;
 
 
   /**
@@ -699,7 +712,8 @@ public interface DatasetController {
       @RequestParam(value = "integrationId", required = false) Long integrationId,
       @RequestParam(value = "delimiter", required = false) String delimiter,
       @RequestParam(value = "jobId", required = false) Long jobId,
-      @RequestParam(value = "fmeJobId", required = false) String fmeJobId) throws Exception;
+      @RequestParam(value = "fmeJobId", required = false) String fmeJobId,
+      @RequestParam(value = "code", required = false) String preparationCode) throws Exception;
 
   /**
    * Import big file data private.
@@ -725,7 +739,8 @@ public interface DatasetController {
                          @RequestParam(value = "integrationId", required = false) Long integrationId,
                          @RequestParam(value = "delimiter", required = false) String delimiter,
                          @RequestParam(value = "jobId", required = false) Long jobId,
-                         @RequestParam(value = "fmeJobId", required = false) String fmeJobId);
+                         @RequestParam(value = "fmeJobId", required = false) String fmeJobId,
+                         @RequestParam(value = "code", required = false) String preparationCode);
 
 
   /**
@@ -752,7 +767,8 @@ public interface DatasetController {
       @RequestParam(value = "integrationId", required = false) Long integrationId,
       @RequestParam(value = "delimiter", required = false) String delimiter,
       @RequestParam(value = "jobId", required = false) Long jobId,
-      @RequestParam(value = "fmeJobId", required = false) String fmeJobId) throws Exception;
+      @RequestParam(value = "fmeJobId", required = false) String fmeJobId,
+      @RequestParam(value = "code", required = false) String preparationCode) throws Exception;
 
   /**
    * Import file data legacy.
@@ -778,7 +794,8 @@ public interface DatasetController {
       @RequestParam(value = "integrationId", required = false) Long integrationId,
       @RequestParam(value = "delimiter", required = false) String delimiter,
       @RequestParam(value = "jobId", required = false) Long jobId,
-      @RequestParam(value = "fmeJobId", required = false) String fmeJobId) throws Exception;
+      @RequestParam(value = "fmeJobId", required = false) String fmeJobId,
+      @RequestParam(value = "code", required = false) String preparationCode) throws Exception;
 
 
   /**
@@ -824,7 +841,8 @@ public interface DatasetController {
   @GetMapping(value = "/{datasetId}/exportDatasetFile")
   void exportDatasetFileDL(
       @PathVariable("datasetId") Long datasetId,
-      @RequestParam("mimeType") String mimeType);
+      @RequestParam("mimeType") String mimeType,
+      @RequestParam(value = "code", required = false) String preparationCode);
 
 
   /**
@@ -860,7 +878,8 @@ public interface DatasetController {
    */
   @GetMapping(value = "/{datasetId}/downloadFileDL",
         produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
-  void downloadFileDL(@PathVariable Long datasetId, @RequestParam String fileName, HttpServletResponse response);
+  void downloadFileDL(@PathVariable Long datasetId, @RequestParam String fileName, HttpServletResponse response,
+                      @RequestParam(value = "code", required = false) String preparationCode);
 
     /**
    * Update check view.
@@ -904,7 +923,9 @@ public interface DatasetController {
    * @return
    */
   @DeleteMapping(value = "/private/deleteLocksToDeleteProcess/{datasetId}")
-  void deleteLocksToDeleteProcess(@PathVariable("datasetId") Long datasetId, @RequestParam(value="tableSchemaId", required = false) String tableSchemaId);
+  void deleteLocksToDeleteProcess(@PathVariable("datasetId") Long datasetId,
+                                  @RequestParam(value="tableSchemaId", required = false) String tableSchemaId,
+                                  @RequestParam(value="preparationCode", required = false) String preparationCode);
 
 
 
@@ -955,7 +976,8 @@ public interface DatasetController {
           @RequestParam(value = "exportCsv", required = false) Boolean exportCsv,
           @RequestParam(value = "exportParquet", required = false) Boolean exportParquet,
           @RequestParam(value = "includeAttachments", required = false) Boolean includeAttachments,
-          @RequestParam(name = "jobId", required = false) Long jobId) throws Exception;
+          @RequestParam(name = "jobId", required = false) Long jobId,
+          @RequestParam(value = "code", required = false) String preparationCode) throws Exception;
 
   /**
    * Update geometry field
@@ -995,7 +1017,8 @@ public interface DatasetController {
            @RequestParam(value = "integrationId", required = false) Long integrationId,
            @RequestParam(value = "delimiter", required = false) String delimiter,
            @RequestParam(value = "fileName", required = false) String fileName,
-           @RequestParam(value = "etlImport", required = false) Boolean etlImport);
+           @RequestParam(value = "etlImport", required = false) Boolean etlImport,
+           @RequestParam(value = "code", required = false) String preparationCode);
 
   /**
    * Convert Parquet To Iceberg Tables

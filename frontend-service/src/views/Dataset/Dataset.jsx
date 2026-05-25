@@ -59,10 +59,11 @@ import { LocalUserStorageUtils } from 'services/_utils/LocalUserStorageUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 import dayjs from 'dayjs';
 import { ImportedFilesDialog } from 'views/DatasetDesigner/_components/ImportedFilesDialog';
+import { ManagePreparationSetsService } from 'services/ManagePreparationSetsService';
 
 export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   const navigate = useNavigate();
-  const { dataflowId, datasetId } = useParams();
+  const { dataflowId, datasetId, code } = useParams();
 
   const actionsContext = useContext(ActionsContext);
   const leftSideBarContext = useContext(LeftSideBarContext);
@@ -159,6 +160,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   const [editedTables, setEditedTables] = useState({});
   const [tableImportedMetadata, setTableImportedMetadata] = useState({});
   const [isImportedFilesDialogVisible, setIsImportedFilesDialogVisible] = useState(false);
+  const [selectedPreparationSet, setSelectedPreparationSet] = useState(null);
 
   const { resetFiltersState: resetDatasetInfoFiltersState } = useFilters('datasetInfo');
   const { resetFiltersState: resetUserListFiltersState } = useFilters('userList');
@@ -181,6 +183,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   bigDataRef.current = metadata?.dataflow.bigData;
 
   useBreadCrumbs({
+    code,
     currentPage: getCurrentPage(),
     dataflowId,
     dataflowType,
@@ -188,7 +191,8 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
     dataProviderName: metadata?.dataset.name,
     isLoading,
     metaData: metadata,
-    referenceDataflowId: dataflowId
+    referenceDataflowId: dataflowId,
+    selectedPreparationSet
   });
 
   useEffect(() => {
@@ -198,6 +202,27 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
       getWebformList();
     }
   }, []);
+
+  useEffect(() => {
+    if (!code || !metadata?.dataset.dataProviderId) return;
+
+    getPreparationSets(code);
+  }, [metadata?.dataset.dataProviderId, code]);
+
+  const getPreparationSets = async code => {
+    try {
+      const preparationList = await ManagePreparationSetsService.getPreparationSets({
+        dataflowId,
+        providerId: metadata?.dataset.dataProviderId,
+        code
+      });
+      code && setSelectedPreparationSet(preparationList?.preparationDatasetList[0] ?? null);
+      return preparationList;
+    } catch (error) {
+      console.error(error);
+      notificationContext.add({ type: 'GET_PREPARATION_SETS_ERROR' }, true);
+    }
+  };
 
   useEffect(() => {
     leftSideBarContext.removeModels();
@@ -340,7 +365,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   } = useReporterDataset(datasetId, dataflowId);
 
   useEffect(() => {
-    actionsContext.testProcess(datasetId);
+    actionsContext.testProcess(datasetId, undefined, code);
   }, [datasetId]);
 
   useEffect(() => {
@@ -669,10 +694,10 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
 
   const onConfirmDelete = async () => {
     const action = 'DATASET_DELETE';
-    actionsContext.testProcess(datasetId, action);
+    actionsContext.testProcess(datasetId, action, code);
     try {
       notificationContext.add({ type: 'DELETE_DATASET_DATA_INIT' });
-      await DatasetService.deleteData(datasetId, isReferenceDataset);
+      await DatasetService.deleteData({ datasetId, isReferenceDataset, preparationCode: code });
     } catch (error) {
       if (error.response.status === 423) {
         notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' }, true);
@@ -695,9 +720,9 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
 
   const onConfirmValidate = async () => {
     const action = 'DATASET_VALIDATE';
-    actionsContext.testProcess(datasetId, action);
+    actionsContext.testProcess(datasetId, action, code);
     try {
-      await DatasetService.validate(datasetId);
+      await DatasetService.validate({ datasetId, code });
       notificationContext.add(
         {
           type: 'VALIDATE_DATA_INIT',
@@ -737,9 +762,9 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
 
   const onConfirmValidateAsProvider = async providerId => {
     const action = 'DATASET_VALIDATE';
-    actionsContext.testProcess(datasetId, action);
+    actionsContext.testProcess(datasetId, action, code);
     try {
-      await DatasetService.validateAsProvider(datasetId, dataflowId, providerId);
+      await DatasetService.validateAsProvider({ datasetId, dataflowId, providerId, code });
       notificationContext.add(
         {
           type: 'VALIDATE_DATA_INIT',
@@ -943,7 +968,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
 
   const onExportDataExternalIntegration = async integrationId => {
     const action = 'DATASET_EXPORT';
-    actionsContext.testProcess(datasetId, action);
+    actionsContext.testProcess(datasetId, action, code);
     notificationContext.add({ type: 'EXPORT_DATASET_DATA' });
     try {
       await DatasetService.exportDatasetDataExternal(datasetId, integrationId);
@@ -965,11 +990,11 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
     });
 
     const action = 'DATASET_EXPORT';
-    actionsContext.testProcess(datasetId, action);
+    actionsContext.testProcess(datasetId, action, code);
     notificationContext.add({ type: 'EXPORT_DATASET_DATA' });
     try {
       if (bigDataRef.current) {
-        await DatasetService.exportDatasetDataDL(datasetId, fileType);
+        await DatasetService.exportDatasetDataDL(datasetId, fileType, code);
       } else {
         await DatasetService.exportDatasetData(datasetId, fileType);
       }
@@ -1287,7 +1312,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
 
     const action = 'DATASET_IMPORT';
     const fileName = e?.files?.[0]?.name || ' ';
-    actionsContext.testProcess(datasetId, action);
+    actionsContext.testProcess(datasetId, action, code);
 
     if (!metadata?.dataflow.bigData) {
       const {
@@ -1367,7 +1392,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
     setIsDownloadingValidations(true);
 
     try {
-      await ValidationService.generateShowValidationsFile(datasetId);
+      await ValidationService.generateShowValidationsFile({ datasetId, code });
       notificationContext.add({ type: 'DOWNLOAD_VALIDATIONS_START' });
     } catch (error) {
       console.error('Dataset - onDownloadValidations.', error);
@@ -1404,7 +1429,11 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
       ? metadata?.dataflow.bigData
         ? TextUtils.parseText(resourcesContext.messages['sncBigDataDataflowNamed'], {
             name: `${metadata?.dataflow.name} - ${
-              isTestDataset ? resourcesContext.messages['testDataset'] : datasetName
+              isTestDataset
+                ? resourcesContext.messages['testDataset']
+                : code
+                ? selectedPreparationSet?.datasetName || ''
+                : datasetName
             }`
           })
         : TextUtils.parseText(resourcesContext.messages['sncCitusDataflowNamed'], {
@@ -1414,7 +1443,13 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
           })
       : metadata?.dataflow.bigData
       ? TextUtils.parseText(resourcesContext.messages['bigDataDataflowNamed'], {
-          name: `${metadata?.dataflow.name} - ${isTestDataset ? resourcesContext.messages['testDataset'] : datasetName}`
+          name: `${metadata?.dataflow.name} - ${
+            isTestDataset
+              ? resourcesContext.messages['testDataset']
+              : code
+              ? selectedPreparationSet?.datasetName || ''
+              : datasetName
+          }`
         })
       : `${metadata?.dataflow.name} - ${isTestDataset ? resourcesContext.messages['testDataset'] : datasetName}`;
 
@@ -1503,6 +1538,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
         onLoadTableData={onLoadTableData}
         onRestoreData={onRestoreData}
         onTabChange={tableSchemaId => onTabChange(tableSchemaId)}
+        preparationSetCode={code}
         reporting={true}
         selectedRuleId={dataViewerOptions.selectedRuleId}
         selectedRuleLevelError={dataViewerOptions.selectedRuleLevelError}
@@ -1722,6 +1758,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
               <Button
                 className={styles.openWebformButton}
                 disabled={
+                  code ||
                   (editingStatus?.isEditing && editingStatus?.editor !== userName) ||
                   (isAdmin && (!isCustodian || !isDataflowCustodian)) ||
                   !hasWritePermissions ||
@@ -1763,6 +1800,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
             isWebformView={selectedView === 'webform'}
             levelErrorTypes={levelErrorTypes}
             onSelectValidation={onSelectValidation}
+            preparationSetCode={code}
             reporting={true}
             schemaTables={schemaTables}
             switchToTabularData={() => setSelectedView('tabularData')}
@@ -1816,6 +1854,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
           onChangeImportDialogVisibility={onChangeImportDialogVisibility}
           onError={onImportDatasetError}
           onUpload={onUpload}
+          preparationSetCode={code}
           providerId={metadata?.dataset.dataProviderId}
           replaceCheck={true}
           s3={metadata?.dataflow.bigData ? true : false}

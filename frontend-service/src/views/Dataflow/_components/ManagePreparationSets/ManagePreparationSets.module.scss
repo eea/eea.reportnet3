@@ -1,0 +1,183 @@
+@import '_styles/mixins';
+
+.dialogContent {
+  min-height: 50vh;
+  text-align: center;
+}
+
+.noDataContent {
+  height: 35vh;
+}
+
+.expandedTable {
+  margin: 10px;
+  font-size: 1.5rem;
+  color: var(--main-font-color);
+}
+
+h6 {
+  margin: 1rem 0 1rem 0;
+  font-weight: 600;
+}
+
+.noDataContent {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.2rem;
+  font-weight: bold;
+  flex-direction: column;
+  .spinnerPosition {
+    top: 0;
+    left: 0;
+  }
+}
+
+.actionsColumn {
+  width: 44px;
+}
+
+.largeColumn {
+  width: 18em;
+}
+
+.middleColumn {
+  width: 9em;
+}
+
+.smallColumn {
+  width: 8em;
+}
+
+.xSmallColumn {
+  width: 2.2em;
+  padding: 0 !important;
+}
+
+.createdCheckbox {
+  width: 14px;
+  height: 14px;
+  border: 1.5px solid var(--main-font-color);
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  background-color: transparent;
+}
+
+.checked {
+  background-color: var(--main-font-color);
+}
+
+.checked::after {
+  content: '';
+  width: 6px;
+  height: 3px;
+  border-left: 2px solid #fff;
+  border-bottom: 2px solid #fff;
+  transform: rotate(-45deg);
+  margin-top: -1px;
+}
+
+.inputHint {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--secondary-font-color);
+  margin-top: 0.25rem;
+}
+
+// .inputHintList {
+//   margin: 0.25rem 0 0 1rem;
+//   padding: 0;
+//   list-style-type: disc;
+//   font-size: 0.85rem;
+//   color: var(--secondary-font-color);
+// }
+
+.footer {
+  display: flex;
+}
+
+.buttonPushRight {
+  margin-left: auto !important;
+}
+
+.deleteRowButton {
+  border: 1px solid var(--general-border-color) !important;
+  color: var(--errors) !important;
+  @include shadow-0em;
+  margin-left: 3px !important;
+  &:enabled:hover {
+    border-color: var(--button-secondary-border-color-hover) !important;
+  }
+}
+
+.error {
+  border-color: var(--errors) !important;
+  box-shadow: inset 0px 0px 0px 1px var(--errors) !important;
+  outline: none;
+  overflow: hidden;
+}
+
+.errorText {
+  color: var(--errors);
+  font-size: 0.85rem;
+  margin-top: 0.25rem;
+  display: block;
+}
+
+.priority {
+  margin-top: 0.25rem;
+}
+
+.preparationSetsTable {
+  p {
+    margin: 0 !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .dialogContent {
+    > div:first-child > div {
+      width: 100% !important;
+    }
+  }
+}
+
+.statusBox:hover {
+  cursor: pointer;
+  filter: brightness(0.9);
+}
+
+.tooltip .tooltiptext {
+  visibility: hidden;
+  width: 120px;
+  background-color: rgb(83, 83, 83);
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 5px;
+  position: absolute;
+  z-index: 1;
+}
+
+.tooltip:hover .tooltiptext {
+  visibility: visible;
+}
+
+.addDialog {
+  display: flex;
+  flex-direction: column;
+  div {
+    padding: 0 0.5rem;
+    width: 100%;
+
+    .label {
+      font-size: 1rem;
+    }
+  }
+  .inputWrapper {
+    margin-bottom: 1rem;
+  }
+}

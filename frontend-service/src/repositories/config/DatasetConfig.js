@@ -25,6 +25,8 @@ export const DatasetConfig = {
     '/dataset/TableValueDataset/{:datasetId}?fieldSchemaId={:fieldSchemaId}&fieldValue={:value}&idTableSchema={:tableSchemaId}&pageNum={:pageNum}&pageSize={:pageSize}&fields={:fields}&levelError={:levelError}&idRules={:idRules}',
   getTableDataDL:
     '/dataset/TableValueDatasetDL/{:datasetId}?fieldSchemaId={:fieldSchemaId}&fieldValue={:value}&idTableSchema={:tableSchemaId}&pageNum={:pageNum}&pageSize={:pageSize}&fields={:fields}&levelError={:levelError}&qcCodes={:qcCodes}',
+  getPreparationsTableDataDL:
+    '/dataset/preparations/TableValueDatasetDL/{:datasetId}?code={:code}&fieldSchemaId={:fieldSchemaId}&fieldValue={:value}&idTableSchema={:tableSchemaId}&pageNum={:pageNum}&pageSize={:pageSize}&fields={:fields}&levelError={:levelError}&qcCodes={:qcCodes}',
   getImportedFiles: '/dataset/list-imported-files?datasetId={:datasetId}',
   downloadTableDefinitions: '/dataschema/v1/dataset/{:datasetSchemaId}/exportFieldSchemas',
   deleteSchema: '/dataschema/dataset/{:datasetId}',
@@ -32,8 +34,9 @@ export const DatasetConfig = {
     '/dataset/v1/{:datasetId}/field/{:fieldId}/attachment?dataflowId={:dataflowId}&tableSchemaName={:tableSchemaName}&fieldName={:fieldName}&fileName={:fileName}&recordId={:recordId}',
   deleteAttachmentWithProviderId:
     '/dataset/v1/{:datasetId}/field/{:fieldId}/attachment?dataflowId={:dataflowId}&providerId={:providerId}&tableSchemaName={:tableSchemaName}&fieldName={:fieldName}&fileName={:fileName}&recordId={:recordId}',
-  deleteData: '/dataset/v1/{:datasetId}/deleteDatasetData?deletePrefilledTables={:deletePrefilledTables}',
-  deleteTableData: '/dataset/v1/{:datasetId}/deleteTableData/{:tableId}',
+  deleteData:
+    '/dataset/v1/{:datasetId}/deleteDatasetData?deletePrefilledTables={:deletePrefilledTables}&preparationCode={:preparationCode}',
+  deleteTableData: '/dataset/v1/{:datasetId}/deleteTableData/{:tableId}?preparationCode={:preparationCode}',
   deleteRecord:
     '/dataset/{:datasetId}/record/{:selectedRecordId}?deleteCascadePK={:updateInCascade}&tableSchemaId={:tableId}',
   deleteFieldDesign: '/dataschema/{:datasetId}/fieldSchema/{:fieldSchemaId}',
@@ -41,7 +44,8 @@ export const DatasetConfig = {
   downloadPublicDatasetFile:
     '/dataset/exportPublicFile/dataflow/{:dataflowId}/dataProvider/{:dataProviderId}?fileName={:fileName}',
   downloadExportDatasetFile: '/dataset/{:datasetId}/downloadFile?fileName={:fileName}',
-  downloadExportDatasetFileDL: '/dataset/{:datasetId}/downloadFileDL?fileName={:fileName}',
+  downloadExportDatasetFileDL:
+    '/dataset/{:datasetId}/downloadFileDL?fileName={:fileName}&code={:code}',
   downloadExportFile: '/fme/downloadExportFile?datasetId={:datasetId}&fileName={:fileName}',
   downloadExportFileWithProviderId:
     '/fme/downloadExportFile?datasetId={:datasetId}&fileName={:fileName}&providerId={:providerId}',
@@ -49,18 +53,20 @@ export const DatasetConfig = {
     '/dataset/v1/{:datasetId}/field/{:fieldId}/attachment?dataflowId={:dataflowId}&tableSchemaName={:tableSchemaName}&fieldName={:fieldName}&fileName={:fileName}&recordId={:recordId}&providerCode={:providerCode}',
   downloadFileDataWithProviderId:
     '/dataset/v1/{:datasetId}/field/{:fieldId}/attachment?dataflowId={:dataflowId}&providerId={:providerId}&tableSchemaName={:tableSchemaName}&fieldName={:fieldName}&fileName={:fileName}&recordId={:recordId}&providerCode={:providerCode}',
-  downloadGeometry: '/dataset/v1/{:datasetId}/record/{:recordId}/geometry?fieldId={:fieldId}&dataflowId={:dataflowId}&idTableSchema={:tableSchemaId}&providerId={:providerId}',
+  downloadGeometry:
+    '/dataset/v1/{:datasetId}/record/{:recordId}/geometry?fieldId={:fieldId}&dataflowId={:dataflowId}&idTableSchema={:tableSchemaId}&providerId={:providerId}',
   downloadPublicReferenceDatasetFileData: '/dataset/exportPublicFile/dataflow/{:dataflowId}?fileName={:fileName}',
   downloadTableData: '/dataset/{:datasetId}/downloadFile?fileName={:fileName}',
-  downloadTableDataDL: '/dataset/{:datasetId}/downloadFileDL?fileName={:fileName}',
+  downloadTableDataDL: '/dataset/{:datasetId}/downloadFileDL?fileName={:fileName}&code={:code}',
   downloadImportedFile:
     '/dataset/download-imported-file?fileName={:fileName}&datasetId={:datasetId}&dataflowId={:dataflowId}',
   exportDatasetData: '/dataset/{:datasetId}/exportDatasetFile?mimeType={:fileType}',
-  exportDatasetDataDL: '/dataset/{:datasetId}/exportDatasetFileDL?mimeType={:fileType}',
+  exportDatasetDataDL: '/dataset/{:datasetId}/exportDatasetFileDL?mimeType={:fileType}&code={:code}',
   exportDatasetDataExternal:
     '/dataset/exportFileThroughIntegration?datasetId={:datasetId}&integrationId={:integrationId}',
   exportTableData: '/dataset/exportFile?datasetId={:datasetId}&tableSchemaId={:tableSchemaId}&mimeType={:fileType}',
-  exportTableDataDL: '/dataset/exportFileDL?datasetId={:datasetId}&tableSchemaId={:tableSchemaId}&mimeType={:fileType}',
+  exportTableDataDL:
+    '/dataset/exportFileDL?datasetId={:datasetId}&tableSchemaId={:tableSchemaId}&mimeType={:fileType}&code={:code}',
   exportTableSchema:
     '/dataschema/v1/{:datasetSchemaId}/exportFieldSchemas?datasetId={:datasetId}&tableSchemaId={:tableSchemaId}&mimeType={:fileType}',
   importFileDataset: '/dataset/v2/importFileData/{:datasetId}?delimiter={:delimiter}',
@@ -73,15 +79,15 @@ export const DatasetConfig = {
   importTableSchema:
     '/dataschema/v1/{:datasetSchemaId}/importFieldSchemas?datasetId={:datasetId}&tableSchemaId={:tableSchemaId}',
   importTableFileWithS3:
-    '/dataset/v2/importFileData/{:datasetId}?dataflowId={:dataflowId}&providerId={:providerId}&tableSchemaId={:tableSchemaId}&replace={:replace}&integrationId={:integrationId}&delimiter={:delimiter}&jobId={:jobId}',
+    '/dataset/v2/importFileData/{:datasetId}?dataflowId={:dataflowId}&providerId={:providerId}&tableSchemaId={:tableSchemaId}&replace={:replace}&integrationId={:integrationId}&delimiter={:delimiter}&jobId={:jobId}&code={:code}',
   getAddUserText: '/release-receipts/dataflow/{:dataflowId}',
   getPresignedUrl:
-    '/dataset/{:datasetId}/generateImportPresignedUrl?dataflowId={:dataflowId}&providerId={:providerId}&tableSchemaId={:tableSchemaId}&replace={:replace}&integrationId={:integrationId}&delimiter={:delimiter}&fileName={:fileName}',
+    '/dataset/{:datasetId}/generateImportPresignedUrl?dataflowId={:dataflowId}&providerId={:providerId}&tableSchemaId={:tableSchemaId}&replace={:replace}&integrationId={:integrationId}&delimiter={:delimiter}&fileName={:fileName}&code={:code}',
   getFullGeometry: '/dataset/v1/{:datasetId}/record/{:recordId}/geometry?fieldId={:fieldId}&dataflowId={:dataflowId}&idTableSchema={:tableSchemaId}&providerId={:providerId}&downloadFile=false',
   getShowValidationErrors:
     '/validation/listGroupValidations/{:datasetId}?asc={:asc}&shortCode={:shortCodeFilter}&fieldValueFilter={:fieldValueFilter}&headers={:sortField}&levelErrorsFilter={:levelErrorsFilter}&pageNum={:pageNum}&pageSize={:pageSize}&tableFilter={:tableFilter}&typeEntitiesFilter={:typeEntitiesFilter}',
   getShowValidationErrorsDL:
-    '/validation/listGroupValidationsDL/{:datasetId}?asc={:asc}&shortCode={:shortCodeFilter}&fieldValueFilter={:fieldValueFilter}&headers={:sortField}&levelErrorsFilter={:levelErrorsFilter}&pageNum={:pageNum}&pageSize={:pageSize}&tableFilter={:tableFilter}&typeEntitiesFilter={:typeEntitiesFilter}',
+    '/validation/listGroupValidationsDL/{:datasetId}?asc={:asc}&shortCode={:shortCodeFilter}&fieldValueFilter={:fieldValueFilter}&headers={:sortField}&levelErrorsFilter={:levelErrorsFilter}&pageNum={:pageNum}&pageSize={:pageSize}&tableFilter={:tableFilter}&typeEntitiesFilter={:typeEntitiesFilter}&code={:code}',
   getStatistics: '/datasetmetabase/{:datasetId}/loadStatistics',
   restorePrefilledTables: '/dataset/restorePrefilledTables/{:datasetId}?tableSchemaId={:tableSchemaId}',
   updateFieldOrder: '/dataschema/{:datasetId}/fieldSchema/order',
@@ -101,8 +107,9 @@ export const DatasetConfig = {
     '/dataset/{:datasetId}/updateWebformFields?updateCascadePK={:updateInCascade}&recordId={:recordId}&tableSchemaId={:tableSchemaId}',
   updateRecord: '/dataset/{:datasetId}/updateRecord?updateCascadePK={:updateInCascade}&tableSchemaId={:tableSchemaId}',
   updateTableDesign: '/dataschema/{:datasetId}/tableSchema',
-  validate: '/orchestrator/jobs/addValidationJob/{:datasetId}',
-  validateAsProvider: '/orchestrator/jobs/addValidationJob/{:datasetId}?dataflowId={:dataflowId}&validateAsProviderCode={:providerId}',
+  validate: '/orchestrator/jobs/addValidationJob/{:datasetId}?code={:code}',
+  validateAsProvider:
+    '/orchestrator/jobs/addValidationJob/{:datasetId}?dataflowId={:dataflowId}&validateAsProviderCode={:providerId}&code={:code}',
   validateAllSql: '/rules/validateAllRules?datasetId={:datasetId}',
   validateSql: '/rules/validateSqlRules?datasetId={:datasetId}&datasetSchemaId={:datasetSchemaId}',
   validationViewer: '/dataset/findPositionFromAnyObject/{:objectId}?datasetId={:datasetId}&type={:entityType}',

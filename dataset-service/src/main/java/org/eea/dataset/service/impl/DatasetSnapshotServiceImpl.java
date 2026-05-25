@@ -1349,7 +1349,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       }
       // if the user is admin can release without validations
       if (!isAdmin() || validate) {
-        validationControllerZuul.validateDataSetData(dataset.getId(), true, jobId);
+        validationControllerZuul.validateDataSetData(dataset.getId(), true, jobId, null);
       } else {
         if (jobId!=null) {
           jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FINISHED);

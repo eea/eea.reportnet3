@@ -17,6 +17,7 @@ import org.eea.dataset.persistence.schemas.domain.FieldSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.CreateEmptyTables;
+import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
@@ -44,6 +45,7 @@ public class CreateEmptyTablesImpl implements CreateEmptyTables {
   private final DremioHelperService dremioHelperService;
   private final SpatialDataHandling spatialDataHandling;
   private final SchemasRepository schemasRepository;
+  private final DatasetMetabaseService datasetMetabaseService;
 
   @Autowired
   private JdbcTemplate dremioJdbcTemplate;
@@ -60,7 +62,7 @@ public class CreateEmptyTablesImpl implements CreateEmptyTables {
     DataSetSchema schema = schemasRepository.findByIdDataSetSchema(new ObjectId(dataset.getDatasetSchema()));
 
     for (TableSchema tableSchema : schema.getTableSchemas()) {
-      processTableSchema(dataset, tableSchema);
+      processTableSchema(dataset, tableSchema, null);
     }
   }
 
@@ -71,24 +73,37 @@ public class CreateEmptyTablesImpl implements CreateEmptyTables {
         .filter(table -> table.getIdTableSchema().toString().equals(tableSchemaId))
         .findFirst()
         .orElseThrow(() -> new EEAException("Table schema with ID " + tableSchemaId + " not found"));
-    processTableSchema(dataset, targetTableSchema);
+    processTableSchema(dataset, targetTableSchema, null);
   }
 
-  private void processTableSchema(DataSetMetabaseVO dataset, TableSchema tableSchema) throws EEAException {
+  @Override
+  public void runCreationForSpecificTableSchema(DataSetMetabaseVO dataset, String tableSchemaId, String preparationCode) throws EEAException {
+    DataSetSchema schema = schemasRepository.findByIdDataSetSchema(new ObjectId(dataset.getDatasetSchema()));
+    dataset.setDatasetTypeEnum(datasetMetabaseService.getDatasetType(dataset.getId()));
+    TableSchema targetTableSchema = schema.getTableSchemas().stream()
+        .filter(table -> table.getIdTableSchema().toString().equals(tableSchemaId))
+        .findFirst()
+        .orElseThrow(() -> new EEAException("Table schema with ID " + tableSchemaId + " not found"));
+    processTableSchema(dataset, targetTableSchema, preparationCode);
+  }
+
+  private void processTableSchema(DataSetMetabaseVO dataset, TableSchema tableSchema, String preparationCode) throws EEAException {
+    Long dataflowId = dataset.getDataflowId();
+    long dataProviderId = dataset.getDataProviderId() != null ? dataset.getDataProviderId() : 0L;
+    Long datasetId = dataset.getId();
+    String tableSchemaName = tableSchema.getNameTableSchema();
+    String queryPath = getRightPath(dataset, true);
+    String dremioPath = getRightPath(dataset, false);
+
     S3PathResolver s3TablePathResolver = new S3PathResolver(
-        dataset.getDataflowId(),
-        dataset.getDataProviderId() != null ? dataset.getDataProviderId() : 0L,
-        dataset.getId(),
-        tableSchema.getNameTableSchema(),
-        tableSchema.getNameTableSchema(),
-        getRightPath(dataset, true)
+        dataflowId, dataProviderId, datasetId, tableSchemaName, tableSchemaName, preparationCode, queryPath
     );
 
     try {
       if (dataset.getDatasetTypeEnum().equals(DatasetTypeEnum.DESIGN)) {
-        deleteTableIfEmpty(tableSchema.getNameTableSchema(), s3TablePathResolver);
+        deleteTableIfEmpty(tableSchemaName, s3TablePathResolver);
       }
-      boolean folderExists = s3Helper.checkFolderExist(s3TablePathResolver, getRightPath(dataset, false));
+      boolean folderExists = s3Helper.checkFolderExist(s3TablePathResolver, dremioPath);
       if (!folderExists) {
 
         List<FieldSchema> fieldSchemas = tableSchema.getRecordSchema().getFieldSchema();
@@ -116,9 +131,9 @@ public class CreateEmptyTablesImpl implements CreateEmptyTables {
             }
           }
 
-          regenerateTables(dataset, tableSchema, fields);
-          LOG.info("Created empty table for dataflowId {} providerId {} datasetId {} and table {}", s3TablePathResolver.getDataflowId(), s3TablePathResolver.getDataProviderId(),
-                  s3TablePathResolver.getDatasetId(), s3TablePathResolver.getTableName());
+          regenerateTables(dataset, tableSchema, fields, preparationCode);
+          LOG.info("Created empty table for dataflowId {} providerId {} datasetId {}, table {} and preparation code {}",
+                  dataflowId, dataProviderId, datasetId, tableSchemaName, preparationCode);
         } catch (Exception e) {
           String msg = e.getMessage();
           if (msg != null && msg.contains(ILLEGAL_CHAR_MARKER)) {
@@ -130,13 +145,13 @@ public class CreateEmptyTablesImpl implements CreateEmptyTables {
     } catch (EEAException eea) {
       throw eea;
     } catch (Exception e) {
-      LOG.error("Something went wrong, trying to create empty table for dataflowId {} providerId {} datasetId {} and table {} , with exception message: {}",
-              dataset.getDataflowId(), dataset.getDataProviderId(), dataset.getId(), tableSchema.getNameTableSchema(), e.getMessage());
+      LOG.error("Something went wrong, trying to create empty table for dataflowId {} providerId {} datasetId {}, table {} and preparation code {} , with exception message: {}",
+              dataflowId, dataProviderId, datasetId, tableSchemaName, preparationCode, e.getMessage());
       throw new EEAException("Something went wrong, trying to create empty tables with message: " + e.getMessage());
     }
   }
 
-  private void regenerateTables(DataSetMetabaseVO dataset, TableSchema tableSchema, List<Schema.Field> fields) throws Exception {
+  private void regenerateTables(DataSetMetabaseVO dataset, TableSchema tableSchema, List<Schema.Field> fields, String preparationCode) throws Exception {
     Schema schema1 = Schema.createRecord("Data", null, null, false, fields);
     String file = "0_0_0.parquet";
     String parquetFile = parquetFilePath + UUID.randomUUID() + "/" + file;
@@ -154,7 +169,7 @@ public class CreateEmptyTablesImpl implements CreateEmptyTables {
         throw new EEAException(e1.getMessage());
       }
 
-      S3PathResolver s3PathResolver = getImportS3PathForParquet(dataset, tableSchema, file);
+      S3PathResolver s3PathResolver = getImportS3PathForParquet(dataset, tableSchema, file, preparationCode);
       String pathToS3ForImport = s3Helper.getS3Service().getS3Path(s3PathResolver);
       String tablePath1 = s3Helper.getS3Service().getTableAsFolderQueryPath(s3PathResolver, getRightPath(dataset, true));
 
@@ -180,9 +195,15 @@ public class CreateEmptyTablesImpl implements CreateEmptyTables {
     }
   }
 
-  private S3PathResolver getImportS3PathForParquet(DataSetMetabaseVO dataset, TableSchema tableSchema, String parquetFilename) {
-    S3PathResolver s3PathResolver = new S3PathResolver(dataset.getDataflowId(), dataset.getDataProviderId() != null ? dataset.getDataProviderId() : 0L, dataset.getId(), tableSchema.getNameTableSchema(), parquetFilename, getImportPathForParquet(dataset));
-    s3PathResolver.setParquetFolder(tableSchema.getNameTableSchema() + "_" + UUID.randomUUID());
+  private S3PathResolver getImportS3PathForParquet(DataSetMetabaseVO dataset, TableSchema tableSchema, String parquetFilename, String preparationCode) {
+    Long dataflowId = dataset.getDataflowId();
+    long dataProviderId = dataset.getDataProviderId() != null ? dataset.getDataProviderId() : 0L;
+    Long datasetId = dataset.getId();
+    String tableSchemaName = tableSchema.getNameTableSchema();
+    String path = getImportPathForParquet(dataset);
+
+    S3PathResolver s3PathResolver = new S3PathResolver(dataflowId, dataProviderId, datasetId, tableSchemaName, parquetFilename, preparationCode, path);
+    s3PathResolver.setParquetFolder(tableSchemaName + "_" + UUID.randomUUID());
     return s3PathResolver;
   }
 

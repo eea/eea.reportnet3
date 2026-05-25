@@ -1,0 +1,49 @@
+package org.eea.dataset.service;
+
+import java.util.List;
+
+import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
+import org.eea.interfaces.vo.dataset.PreparationDatasetResponseVO;
+import org.eea.interfaces.vo.dataset.PreparationDatasetVO;
+
+/**
+ * Service for preparation datasets.
+ */
+public interface PreparationDatasetService {
+
+    /**
+     * List preparation datasets by dataflow id (optionally provider scoped).
+     *
+     * @param dataflowId the dataflow id
+     * @param providerId the provider id (optional)
+     * @return list of preparation datasets
+     */
+    PreparationDatasetResponseVO findPreparationDatasets(
+            Long dataflowId,
+            Long providerId,
+            String code);
+
+    /**
+     * Create a new preparation dataset.
+     *
+     * @param dataflowId the dataflow id
+     * @param preparationDatasetVO the preparation dataset data
+     */
+    void createPreparationDataset(
+            Long dataflowId,
+            PreparationDatasetVO preparationDatasetVO) throws EEAException;
+
+    /**
+     * Delete a preparation dataset by id.
+     *
+     * @param preparationDatasetId the preparation dataset id
+     */
+    void deletePreparationDatasetById(Long preparationDatasetId) throws Exception;
+
+    List<PreparationDatasetVO> findByDataflowIdAndProviderIdAndIsCreated(Long dataflowId, Long providerId, Boolean isCreated);
+
+    void createAllEligiblePreparationSets(Long dataflowId, Long providerId) throws EEAException;
+
+    void copyParentDatasetDataToPreparationDataset(DataSetMetabaseVO parentDataset, String preparationCode) throws Exception;
+}

@@ -1,5 +1,6 @@
 package org.eea.dataset.io.kafka.commands;
 
+import org.apache.commons.lang.StringUtils;
 import org.eea.dataset.service.helper.FileTreatmentHelper;
 import org.eea.interfaces.controller.dataflow.IntegrationController.IntegrationControllerZuul;
 import org.eea.interfaces.controller.orchestrator.JobController.JobControllerZuul;
@@ -76,6 +77,10 @@ public class ReplacingDataPreviousFMECallCommand extends AbstractEEAEventHandler
     Long datasetId = Long.parseLong(String.valueOf(eeaEventVO.getData().get("datasetId")));
     String fileName = eeaEventVO.getData().get("fileName").toString();
     String jobId = eeaEventVO.getData().get("jobId").toString();
+    String preparationCode = null;
+    if (eeaEventVO.getData().get("code") != null) {
+      preparationCode = eeaEventVO.getData().get("code").toString();
+    }
 
     File file = new File(fileName);
     Long integrationId = Long.parseLong(String.valueOf(eeaEventVO.getData().get("integrationId")));
@@ -88,6 +93,11 @@ public class ReplacingDataPreviousFMECallCommand extends AbstractEEAEventHandler
 
       Map<String, String> externalParameters = new HashMap<>();
       externalParameters.put("fileIS", "");
+
+      if (StringUtils.isNotBlank(preparationCode)) {
+        externalParameters.put("code", preparationCode);
+      }
+
       integrationVO.setExternalParameters(externalParameters);
 
     ExecutionResultVO executionResultVO = integrationController

@@ -30,6 +30,7 @@ export const ImportTableDataDialog = ({
   isIcebergCreated,
   isTableDataRestorationInProgress,
   isTableFixedNumber,
+  preparationSetCode,
   showWriteButtons,
   tableId,
   tableName
@@ -74,7 +75,7 @@ export const ImportTableDataDialog = ({
   const onUpload = async e => {
     const action = 'TABLE_IMPORT';
     const fileName = uploadingFileName || e?.files?.[0]?.name || ' ';
-    actionsContext.testProcess(datasetId, action);
+    actionsContext.testProcess(datasetId, action, preparationSetCode);
     setImportTableDialogVisible(false);
     const {
       dataflow: { name: dataflowName },
@@ -176,6 +177,7 @@ export const ImportTableDataDialog = ({
           }}
           onUpload={onUpload}
           onValidateFile={onValidateFile}
+          preparationSetCode={preparationSetCode}
           replaceCheck={true}
           s3={bigData ? true : false}
           tableName={tableName}

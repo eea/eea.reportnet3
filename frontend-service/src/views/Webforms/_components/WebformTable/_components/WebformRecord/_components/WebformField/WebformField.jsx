@@ -115,6 +115,12 @@ export const WebformField = ({
   }, []);
 
   useEffect(() => {
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
+
+  useEffect(() => {
     if (element.fieldType === 'LINK' || element.fieldType === 'EXTERNAL_LINK') onFilter('', element);
   }, [newRecord, conditionalFieldChange]);
 
