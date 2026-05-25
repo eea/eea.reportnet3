@@ -98,8 +98,8 @@ public interface DatasetTableRepository extends JpaRepository<DatasetTable, Long
     @Query(
             nativeQuery = true,
             value =
-                    "INSERT INTO dataset_table (dataset_id, dataset_schema_id, table_schema_id, editing_username) " +
-                            "SELECT :datasetId, :datasetSchemaId, table_id, NULL " +
+                    "INSERT INTO dataset_table (id, dataset_id, dataset_schema_id, table_schema_id, editing_username) " +
+                            "SELECT nextval('dataset_table_id_seq'), :datasetId, :datasetSchemaId, table_id, NULL " +
                             "FROM unnest(CAST(:tableSchemaIds AS varchar[])) AS table_id " +
                             "WHERE NOT EXISTS ( " +
                             "    SELECT 1 FROM dataset_table x " +
