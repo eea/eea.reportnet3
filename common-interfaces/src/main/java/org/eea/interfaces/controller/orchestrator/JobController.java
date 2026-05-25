@@ -53,7 +53,8 @@ public interface JobController {
             @RequestParam(value = "datasetId", required = false) Long datasetId,
             @RequestParam(value = "datasetName", required = false) String datasetName,
             @RequestParam(value = "creatorUsername", required = false) String creatorUsername,
-            @RequestParam(value = "jobStatus", required = false) String jobStatuses);
+            @RequestParam(value = "jobStatus", required = false) String jobStatuses,
+            @RequestParam(value = "code", required = false) String preparationCode);
 
     /**
      * Get jobs based on status
@@ -77,7 +78,8 @@ public interface JobController {
     Long addValidationJob(@PathVariable("datasetId") Long datasetId, @RequestParam(value = "dataflowId", required = false) Long dataflowId,
                           @RequestParam(value = "providerId", required = false) Long providerId, @RequestParam(value = "released", required = false) boolean released,
                           @RequestParam(value = "createParquetWithSQL", required = false) boolean createParquetWithSQL,
-                          @RequestParam(value = "validateAsProviderCode", required = false) String validateAsProviderCode);
+                          @RequestParam(value = "validateAsProviderCode", required = false) String validateAsProviderCode,
+                          @RequestParam(value = "code", required = false) String preparationCode);
 
     /**
      * Adds a release job
@@ -121,7 +123,8 @@ public interface JobController {
                        @RequestParam(value = "fileName", required = false) String fileName,
                        @RequestParam(value = "replace", required = false) boolean replace,
                        @RequestParam(value = "integrationId", required = false) Long integrationId,
-                       @RequestParam(value = "delimiter", required = false) String delimiter,
+                      @RequestParam(value = "code", required = false) String preparationCode,
+                      @RequestParam(value = "delimiter", required = false) String delimiter,
                       @RequestParam(value = "jobStatus", required = false) JobStatusEnum jobStatus,
                       @RequestParam(value = "fmeJobId", required = false) String fmeJobId,
                       @RequestParam(value = "filePathInS3", required = false) String filePathInS3);
@@ -146,7 +149,8 @@ public interface JobController {
                          @RequestParam(value = "replace", required = false) Boolean replace,
                          @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,
                          @RequestParam(value = "delimiter", required = false) String delimiter,
-                         @RequestParam(value = "filePathInS3", required = false) String filePathInS3);
+                         @RequestParam(value = "filePathInS3", required = false) String filePathInS3,
+                         @RequestParam(value = "code", required = false) String preparationCode);
 
     /**
      * Adds a delete data job
@@ -164,6 +168,7 @@ public interface JobController {
                           @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,
                           @RequestParam(value = "dataflowId", required = false) Long dataflowId,
                           @RequestParam(value = "providerId", required = false) Long providerId,
+                          @RequestParam(value = "preparationCode", required = false) String preparationCode,
                           @RequestParam(value = "deletePrefilledTables", defaultValue = "false",
                                   required = false) Boolean deletePrefilledTables,
                           @RequestParam(value = "jobStatus", required = false) JobStatusEnum jobStatus);
@@ -192,7 +197,8 @@ public interface JobController {
                                   @RequestParam(value = "dataProviderCodes", required = false) String dataProviderCodes,
                                   @RequestParam(value = "exportCsv", required = false) Boolean exportCsv,
                                   @RequestParam(value = "exportParquet", required = false) Boolean exportParquet,
-                                  @RequestParam(value = "includeAttachments", required = false) Boolean includeAttachments);
+                                  @RequestParam(value = "includeAttachments", required = false) Boolean includeAttachments,
+                                  @RequestParam(value = "code", required = false) String preparationCode);
 
     /**
      * Update job's status
@@ -383,14 +389,14 @@ public interface JobController {
     @PostMapping(value = "/private/updateJobStatusAndInfo/{jobId}")
     void updateJobStatusAndInfo(@PathVariable("jobId") Long jobId, @RequestParam(value = "jobStatus") JobStatusEnum jobStatus, @RequestParam(value = "jobInfo") JobInfoEnum jobInfo,
                        @RequestParam(value = "lineNumber", required = false) Integer lineNumber);
+
+    /**
+     *
+     * @param jobType
+     * @param datasetId
+     * @param preparationCode
+     * @return
+     */
+    @GetMapping(value = "/checkEligibilityForPreparation")
+    JobStatusEnum checkEligibilityOfPreparationJob(@RequestParam("jobType") String jobType, @RequestParam("datasetId") Long datasetId, @RequestParam("preparationCode") String preparationCode);
 }
-
-
-
-
-
-
-
-
-
-

@@ -400,7 +400,8 @@ public class DatasetControllerImpl implements DatasetController {
   @Override
   @HystrixCommand
   @PutMapping("/private/updateStatistics/{id}")
-  public void updateStatistics(@PathVariable("id") Long datasetId, @RequestParam("isBigDataflow") Boolean isBigDataflow) {
+  public void updateStatistics(@PathVariable("id") Long datasetId,
+                               @RequestParam("isBigDataflow") Boolean isBigDataflow) {
     try {
       datasetService.saveStatistics(datasetId, isBigDataflow);
     } catch (EEAException e) {
@@ -455,25 +456,30 @@ public class DatasetControllerImpl implements DatasetController {
           @ApiParam(type = "Long", value = "Job Id",
                   example = "9706378") @RequestParam(value = "jobId", required = false) Long jobId,
           @ApiParam(type = "String", value = "Fme Job Id",
-                  example = "9706378") @RequestParam(value = "fmeJobId", required = false) String fmeJobId) throws Exception {
+                  example = "9706378") @RequestParam(value = "fmeJobId", required = false) String fmeJobId,
+          @ApiParam(type = "String", value = "Preparation Code",
+                  example = "0") @RequestParam(value = "code", required = false) String preparationCode) throws Exception {
 
     String originalFilename = (file != null) ? file.getOriginalFilename() : null;
+    boolean isPreparationDataset = StringUtils.isNotBlank(preparationCode);
     LOG.info("Import endpoint was called for datasetId {} dataflowId {} providerId {} integrationId {} delimiter {} replace {} jobId {} fmeJobId {} and file {}", datasetId, dataflowId, providerId, integrationId, delimiter, replace, jobId, fmeJobId, originalFilename);
     Map<String, Object> result = new HashMap<>();
 
-    // --- EDITING LOCK CHECK ---
-    String userEditingDataset = datasetTableService.getDatasetEditingUsername(datasetId);
+    if(!isPreparationDataset) {
+      // --- EDITING LOCK CHECK ---
+      String userEditingDataset = datasetTableService.getDatasetEditingUsername(datasetId);
 
-    if (userEditingDataset!=null) {
-      LOG.error("Can not private import for datasetId {} because the table is locked for username {} from   {} ", datasetId, userEditingDataset, userEditingDataset);
-      datasetService.failImportJob(jobId, datasetId, EventType.DATASET_ENABLE_EDITING_FAILED_ACTIVE_EDITING_BY_OTHER_USER_EVENT, JobInfoEnum.ERROR_DATASET_IS_LOCKED_FOR_EDITING);
+      if (userEditingDataset != null) {
+        LOG.error("Can not private import for datasetId {} because the table is locked for username {} from   {} ", datasetId, userEditingDataset, userEditingDataset);
+        datasetService.failImportJob(jobId, datasetId, EventType.DATASET_ENABLE_EDITING_FAILED_ACTIVE_EDITING_BY_OTHER_USER_EVENT, JobInfoEnum.ERROR_DATASET_IS_LOCKED_FOR_EDITING);
 
-      throw new ResponseStatusException(
-              HttpStatus.CONFLICT,
-              EEAErrorMessage.DATASET_IS_LOCKED_FOR_EDITING + userEditingDataset
-      );
+        throw new ResponseStatusException(
+                HttpStatus.CONFLICT,
+                EEAErrorMessage.DATASET_IS_LOCKED_FOR_EDITING + userEditingDataset
+        );
+      }
+      // --- END LOCK CHECK ---
     }
-    // --- END LOCK CHECK ---
 
     if (dataflowId == null){
       dataflowId = datasetService.getDataFlowIdById(datasetId);
@@ -483,8 +489,10 @@ public class DatasetControllerImpl implements DatasetController {
       providerId = dataSetMetabaseVO.getDataProviderId();
     }
     DataFlowVO dataFlowVO = dataFlowControllerZuul.getMetabaseById(dataflowId);
+    //Datalakes import
     if(dataFlowVO.getBigData() != null && dataFlowVO.getBigData()){
       try {
+        if(!isPreparationDataset){
         String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
         if(StringUtils.isNotBlank(tableSchemaId)){
           TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, datasetSchemaId);
@@ -506,6 +514,7 @@ public class DatasetControllerImpl implements DatasetController {
               throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.IMPORTING_FILE_ICEBERG);
             }
           }
+         }
         }
 
         HelperMultipartFileMapper helperMultipartFileMapper = new HelperMultipartFileMapper();
@@ -514,16 +523,20 @@ public class DatasetControllerImpl implements DatasetController {
           helperMultipartFileMapper.setOriginalFilename(file.getOriginalFilename());
           helperMultipartFileMapper.setFileNull(false);
         }
-        ImportFileInDremioInfo importFileInDremioInfo = new ImportFileInDremioInfo(jobId, datasetId, dataflowId, providerId, tableSchemaId, helperMultipartFileMapper.getOriginalFilename(), replace, delimiter, integrationId, null);
+        ImportFileInDremioInfo importFileInDremioInfo = new ImportFileInDremioInfo(jobId, datasetId, dataflowId, providerId, tableSchemaId, helperMultipartFileMapper.getOriginalFilename(), replace, delimiter, integrationId, null, preparationCode);
         JobVO job = bigDataDatasetService.retrieveOrAddImportJob(importFileInDremioInfo, fmeJobId, jobId);
         jobId = job.getId();
+
+
+        importFileInDremioInfo.setPreparationCode(bigDataDatasetService.resolvePreparationCode(preparationCode, job));
+
         bigDataDatasetService.importBigData(datasetId, dataflowId, providerId, tableSchemaId, replace, integrationId, delimiter, jobId, fmeJobId, dataFlowVO, helperMultipartFileMapper, job, importFileInDremioInfo);
       } catch (Exception e) {
         LOG.error("Error when importing data to Dremio for datasetId {}", datasetId, e);
         throw e;
       }
     }
-    else{
+    else{// NON-Datalakes Import
       JobStatusEnum jobStatus = JobStatusEnum.IN_PROGRESS;
       jobId = null;
       try {
@@ -554,7 +567,7 @@ public class DatasetControllerImpl implements DatasetController {
           List<Long> datasetIds = new ArrayList<>();
           datasetIds.add(datasetId);
           jobStatus = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.IMPORT.getValue(), false, dataflowId, providerId, datasetIds);
-          jobId = jobControllerZuul.addImportJob(datasetId, dataflowId, providerId, tableSchemaId, file.getOriginalFilename(), replace, integrationId, delimiter, jobStatus, fmeJobId, null);
+          jobId = jobControllerZuul.addImportJob(datasetId, dataflowId, providerId, tableSchemaId, file.getOriginalFilename(), replace, integrationId, null, delimiter, jobStatus, fmeJobId, null);
           if(jobStatus.getValue().equals(JobStatusEnum.REFUSED.getValue())){
             LOG.info("Added import job with id {} for datasetId {} with status REFUSED", jobId, datasetId);
             datasetService.releaseImportRefusedNotification(datasetId, dataflowId, tableSchemaId, file.getOriginalFilename());
@@ -651,7 +664,9 @@ public class DatasetControllerImpl implements DatasetController {
           @ApiParam(type = "Long", value = "Job Id",
                   example = "9706378") @RequestParam(value = "jobId", required = false) Long jobId,
           @ApiParam(type = "String", value = "Fme Job Id",
-                  example = "9706378") @RequestParam(value = "fmeJobId", required = false) String fmeJobId) {
+                  example = "9706378") @RequestParam(value = "fmeJobId", required = false) String fmeJobId,
+          @ApiParam(type = "String", value = "Preparation Code",
+                  example = "0") @RequestParam(value = "code", required = false) String preparationCode) {
 
     String originalFilename = (file != null) ? file.getOriginalFilename() : null;
     LOG.info("Private Import endpoint was called for datasetId {} dataflowId {} providerId {} integrationId {} delimiter {} replace {} jobId {} fmeJobId {} and file {}", datasetId, dataflowId, providerId, integrationId, delimiter, replace, jobId, fmeJobId, originalFilename);
@@ -695,9 +710,10 @@ public class DatasetControllerImpl implements DatasetController {
           helperMultipartFileMapper.setOriginalFilename(file.getOriginalFilename());
           helperMultipartFileMapper.setFileNull(false);
         }
-        ImportFileInDremioInfo importFileInDremioInfo = new ImportFileInDremioInfo(jobId, datasetId, dataflowId, providerId, tableSchemaId, helperMultipartFileMapper.getOriginalFilename(), replace, delimiter, integrationId, null);
+        ImportFileInDremioInfo importFileInDremioInfo = new ImportFileInDremioInfo(jobId, datasetId, dataflowId, providerId, tableSchemaId, helperMultipartFileMapper.getOriginalFilename(), replace, delimiter, integrationId, null, preparationCode);
         JobVO job = bigDataDatasetService.retrieveOrAddImportJob(importFileInDremioInfo, fmeJobId, jobId);
         jobId = job.getId();
+        importFileInDremioInfo.setPreparationCode(bigDataDatasetService.resolvePreparationCode(preparationCode, job));
         bigDataDatasetService.importBigData(datasetId, dataflowId, providerId, tableSchemaId, replace, integrationId, delimiter, jobId, fmeJobId, dataFlowVO, helperMultipartFileMapper, job, importFileInDremioInfo);
       } catch (Exception e) {
         LOG.error("Error when privately importing data to Dremio for datasetId {}", datasetId, e);
@@ -729,7 +745,7 @@ public class DatasetControllerImpl implements DatasetController {
           List<Long> datasetIds = new ArrayList<>();
           datasetIds.add(datasetId);
           jobStatus = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.IMPORT.getValue(), false, dataflowId, providerId, datasetIds);
-          jobId = jobControllerZuul.addImportJob(datasetId, dataflowId, providerId, tableSchemaId, file.getOriginalFilename(), replace, integrationId, delimiter, jobStatus, fmeJobId, null);
+          jobId = jobControllerZuul.addImportJob(datasetId, dataflowId, providerId, tableSchemaId, file.getOriginalFilename(), replace, integrationId, null, delimiter, jobStatus, fmeJobId, null);
           if(jobStatus.getValue().equals(JobStatusEnum.REFUSED.getValue())){
             LOG.info("Added private import job with id {} for datasetId {} with status REFUSED", jobId, datasetId);
             datasetService.releaseImportRefusedNotification(datasetId, dataflowId, tableSchemaId, file.getOriginalFilename());
@@ -814,10 +830,13 @@ public class DatasetControllerImpl implements DatasetController {
           @ApiParam(type = "Long", value = "Job Id",
                   example = "9706378") @RequestParam(value = "jobId", required = false) Long jobId,
           @ApiParam(type = "String", value = "Fme Job Id",
-                  example = ",") @RequestParam(value = "fmeJobId", required = false) String fmeJobId) throws Exception {
+                  example = ",") @RequestParam(value = "fmeJobId", required = false) String fmeJobId,
+          @ApiParam(type = "String", value = "Preparation Code",
+                  example = "0") @RequestParam(value = "code", required = false) String preparationCode
+          ) throws Exception {
 
     this.importBigFileData(datasetId, dataflowId, providerId, tableSchemaId, file, replace,
-            integrationId, delimiter, jobId, fmeJobId);
+            integrationId, delimiter, jobId, fmeJobId, preparationCode);
   }
 
   /**
@@ -864,9 +883,11 @@ public class DatasetControllerImpl implements DatasetController {
           @ApiParam(type = "Long", value = "Job Id",
                   example = "9706378") @RequestParam(value = "jobId", required = false) Long jobId,
           @ApiParam(type = "String", value = "Fme Job Id",
-                  example = ",") @RequestParam(value = "fmeJobId", required = false) String fmeJobId) throws Exception {
+                  example = ",") @RequestParam(value = "fmeJobId", required = false) String fmeJobId,
+          @ApiParam(type = "String", value = "Preparation Code",
+                  example = "0") @RequestParam(value = "code", required = false) String preparationCode) throws Exception {
     this.importBigFileData(datasetId, dataflowId, providerId, tableSchemaId, file, replace,
-            integrationId, delimiter, jobId, fmeJobId);
+            integrationId, delimiter, jobId, fmeJobId, preparationCode);
   }
 
   /**
@@ -1168,72 +1189,46 @@ public class DatasetControllerImpl implements DatasetController {
                   example = "0") @RequestParam(value = "dataflowId", required = false) Long dataflowId,
           @ApiParam(type = "Long", value = "Provider id",
                   example = "0") @RequestParam(value = "providerId", required = false) Long providerId,
+          @LockCriteria(name = "preparationCode")
+          @ApiParam(type = "String", value = "Preparation Code",
+                  example = "section_a") @RequestParam(value = "preparationCode", required = false) String preparationCode,
           @ApiParam(type = "boolean", value = "Delete prefilled tables",
                   example = "true") @RequestParam(value = "deletePrefilledTables", defaultValue = "false",
                   required = false) Boolean deletePrefilledTables) {
-
-    UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
-    userNotificationContentVO.setDataflowId(dataflowId);
-    userNotificationContentVO.setDatasetId(datasetId);
-    userNotificationContentVO.setProviderId(providerId);
-    notificationControllerZuul.createUserNotificationPrivate("DELETE_DATASET_DATA_INIT",
-            userNotificationContentVO);
-
+    boolean isPreparationDataset = StringUtils.isNotBlank(preparationCode);
     Long expectedDataflowId = datasetService.getDataFlowIdById(datasetId);
-    dataflowId = dataflowId != null ? dataflowId : expectedDataflowId;
+    Long resolvedDataflowId = dataflowId != null ? dataflowId : expectedDataflowId;
 
-    // Rest API only: Check if the dataflow belongs to the dataset
-    if (dataflowId == null || !dataflowId.equals(expectedDataflowId)) {
-      String errorMessage =
-              String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId);
-      LOG.error(errorMessage);
-      throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-              String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId));
-    }
+    sendDeleteInitNotification(datasetId, resolvedDataflowId, providerId, preparationCode, "DELETE_DATASET_DATA_INIT");
 
-    JobStatusEnum jobStatus = JobStatusEnum.IN_PROGRESS;
+    validateDatasetBelongsToDataflow(datasetId, resolvedDataflowId, expectedDataflowId);
+
     Long jobId = null;
-    try {
-      jobStatus = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.DELETE.getValue(),
-              false, dataflowId, providerId, Collections.singletonList(datasetId));
+    JobStatusEnum jobStatus = JobStatusEnum.IN_PROGRESS;
 
-      jobId = jobControllerZuul.addDeleteDataJob(datasetId, null, dataflowId, providerId,
-              deletePrefilledTables, jobStatus);
+    try {
+      if (isPreparationDataset) {
+        jobStatus = jobControllerZuul.checkEligibilityOfPreparationJob(JobTypeEnum.DELETE.getValue(), datasetId, preparationCode);
+      } else {
+        jobStatus = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.DELETE.getValue(), false, resolvedDataflowId, providerId, Collections.singletonList(datasetId));
+      }
+
+      jobId = jobControllerZuul.addDeleteDataJob(datasetId, null, resolvedDataflowId, providerId, null, deletePrefilledTables, jobStatus);
 
       if (JobStatusEnum.REFUSED.equals(jobStatus)) {
         throw new ResponseStatusException(HttpStatus.LOCKED, EEAErrorMessage.DELETING_DATASET_DATA_REFUSED);
       }
 
-      if (dataflowId == null) {
-        dataflowId = datasetService.getDataFlowIdById(datasetId);
-      }
-      Boolean isBigDataflow = dataFlowControllerZuul.isBigDataflow(dataflowId);
-      if(Boolean.TRUE.equals(isBigDataflow)){
-        LOG.info("Deleting dataset data for big data dataflowId {} and datasetId {} ", dataflowId, datasetId);
-        bigDataDatasetService.deleteDatasetData(datasetId, dataflowId, providerId, deletePrefilledTables, false, jobId);
-      }
-      else {
-        LOG.info("Deleting dataset data for dataflowId {} and datasetId {}", dataflowId, datasetId);
-        deleteHelper.executeDeleteDatasetProcess(datasetId, deletePrefilledTables, false, jobId);
-      }
-      LOG.info("Successfully deleted dataset data for dataflowId {} and datasetId {}", dataflowId, datasetId);
+      executeDeleteDatasetProcess(datasetId, preparationCode, resolvedDataflowId, providerId, jobId, deletePrefilledTables);
+      LOG.info("Successfully deleted dataset data for dataflowId {} and datasetId {}", resolvedDataflowId, datasetId);
 
-      Map<String, Object> result = new HashMap<>();
-      String pollingUrl = "/orchestrator/jobs/pollForJobStatus/" + jobId + "?datasetId=" + datasetId + "&dataflowId=" + dataflowId;
-      if(providerId != null){
-        pollingUrl+= "&providerId=" + providerId;
-      }
-      result.put("jobId", jobId);
-      result.put("pollingUrl", pollingUrl);
-
-      return result;
+      return buildDeleteResponse(jobId, datasetId, resolvedDataflowId, providerId);
     } catch (Exception e) {
-      LOG.error("Unexpected error! Error deleting dataset data for dataflowId {} datasetId {} and providerId {} Message: {}", dataflowId, datasetId, providerId, e.getMessage());
+      LOG.error("Unexpected error! Error deleting dataset data for dataflowId {} datasetId {} and providerId {} Message: {}", resolvedDataflowId, datasetId, providerId, e.getMessage());
       throw e;
-    }
-    finally {
+    } finally {
       // Release the lock manually
-      deleteLocksToDeleteProcess(datasetId, null);
+      deleteLocksToDeleteProcess(datasetId, null, preparationCode);
     }
   }
 
@@ -1277,7 +1272,7 @@ public class DatasetControllerImpl implements DatasetController {
       Boolean isBigDataflow = dataFlowControllerZuul.isBigDataflow(dataflowId);
       if(Boolean.TRUE.equals(isBigDataflow)){
         LOG.info("Privately deleting dataset data for big data dataflowId {} and datasetId {} ", dataflowId, datasetId);
-        bigDataDatasetService.deleteDatasetData(datasetId, dataflowId, null, false, technicallyAccepted, null);
+        bigDataDatasetService.deleteDatasetData(datasetId, dataflowId, null, null, false, technicallyAccepted, null);
       }
       else {
         LOG.info("Privately deleting dataset data for dataflowId {} and datasetId {}", dataflowId, datasetId);
@@ -1290,7 +1285,7 @@ public class DatasetControllerImpl implements DatasetController {
     }
     finally {
       // Release the lock manually
-      deleteLocksToDeleteProcess(datasetId, null);
+      deleteLocksToDeleteProcess(datasetId, null, null);
     }
   }
 
@@ -1318,10 +1313,12 @@ public class DatasetControllerImpl implements DatasetController {
                   example = "0") @RequestParam(value = "dataflowId", required = false) Long dataflowId,
           @ApiParam(type = "Long", value = "Provider id",
                   example = "0") @RequestParam(value = "providerId", required = false) Long providerId,
+          @ApiParam(type = "String", value = "Preparation Code",
+                  example = "section_a") @RequestParam(value = "preparationCode", required = false) String preparationCode,
           @ApiParam(type = "boolean", value = "Delete prefilled tables",
                   example = "true") @RequestParam(value = "deletePrefilledTables", defaultValue = "false",
                   required = false) Boolean deletePrefilledTables) {
-    this.deleteDatasetData(datasetId, dataflowId, providerId, deletePrefilledTables);
+    this.deleteDatasetData(datasetId, dataflowId, providerId, preparationCode, deletePrefilledTables);
   }
 
   /**
@@ -1353,75 +1350,114 @@ public class DatasetControllerImpl implements DatasetController {
           @ApiParam(type = "Long", value = "Dataflow id",
                   example = "0") @RequestParam(value = "dataflowId", required = false) Long dataflowId,
           @ApiParam(type = "Long", value = "Provider id",
-                  example = "0") @RequestParam(value = "providerId", required = false) Long providerId) {
+                  example = "0") @RequestParam(value = "providerId", required = false) Long providerId,
+          @ApiParam(type = "String", value = "Preparation Code",
+                  example = "section_a") @RequestParam(value = "preparationCode", required = false) @LockCriteria(
+                  name = "preparationCode") String preparationCode) {
 
-    UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
-    userNotificationContentVO.setDataflowId(dataflowId);
-    userNotificationContentVO.setDatasetId(datasetId);
-    userNotificationContentVO.setProviderId(providerId);
-    notificationControllerZuul.createUserNotificationPrivate("DELETE_TABLE_DATA_INIT",
-            userNotificationContentVO);
+    boolean isPreparationDataset = StringUtils.isNotBlank(preparationCode);
+
+    sendDeleteInitNotification(datasetId, dataflowId, providerId, preparationCode, "DELETE_TABLE_DATA_INIT");
 
     Long expectedDataflowId = datasetService.getDataFlowIdById(datasetId);
-    dataflowId = dataflowId != null ? dataflowId : expectedDataflowId;
+    Long resolvedDataflowId = (dataflowId != null) ? dataflowId : expectedDataflowId;
 
-    // Rest API only: Check if the dataflow belongs to the dataset
-    if (dataflowId == null || !dataflowId.equals(expectedDataflowId)) {
-      String errorMessage =
-              String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId);
-      LOG.error(errorMessage);
-      throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-              String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId));
-    }
+    validateDatasetBelongsToDataflow(datasetId, resolvedDataflowId, expectedDataflowId);
 
-    JobStatusEnum jobStatus = JobStatusEnum.IN_PROGRESS;
     Long jobId = null;
-    try {
-      jobStatus = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.DELETE.getValue(),
-              false, dataflowId, providerId, Collections.singletonList(datasetId));
+    JobStatusEnum jobStatus = JobStatusEnum.IN_PROGRESS;
 
-      jobId = jobControllerZuul.addDeleteDataJob(datasetId, tableSchemaId, dataflowId, providerId,
-              null, jobStatus);
+    try {
+      if (isPreparationDataset) {
+        jobStatus = jobControllerZuul.checkEligibilityOfPreparationJob(JobTypeEnum.DELETE.getValue(), datasetId, preparationCode);
+       } else {
+        jobStatus = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.DELETE.getValue(), false, resolvedDataflowId, providerId, Collections.singletonList(datasetId));
+      }
+
+      jobId = jobControllerZuul.addDeleteDataJob(datasetId, tableSchemaId, resolvedDataflowId, providerId, preparationCode, null, jobStatus);
 
       if (JobStatusEnum.REFUSED.equals(jobStatus)) {
         throw new ResponseStatusException(HttpStatus.LOCKED, EEAErrorMessage.DELETING_TABLE_DATA_REFUSED);
       }
 
-      if (dataflowId == null) {
-        dataflowId = datasetService.getDataFlowIdById(datasetId);
-      }
-      Boolean isBigDataflow = dataFlowControllerZuul.isBigDataflow(dataflowId);
-      if(Boolean.TRUE.equals(isBigDataflow)){
-        LOG.info("Deleting table data for big data dataflowId {}, datasetId {} and tableSchemaId {}", dataflowId, datasetId, tableSchemaId);
-        bigDataDatasetService.deleteTableData(datasetId, dataflowId, providerId, tableSchemaId, jobId, true);
-      }
-      else {
-        LOG.info("Deleting table data for dataflowId {}, datasetId {} and tableSchemaId {}", dataflowId, datasetId, tableSchemaId);
-        // This method will release the lock
-        deleteHelper.executeDeleteTableProcess(datasetId, tableSchemaId, jobId);
-      }
-      LOG.info("Successfully deleted table data for dataflowId {}, datasetId {} and tableSchemaId {}", dataflowId, datasetId, tableSchemaId);
+      executeDeleteTableProcess(datasetId, tableSchemaId, preparationCode, resolvedDataflowId, providerId, jobId);
+      LOG.info("Successfully deleted table data for dataflowId {}, datasetId {}, tableSchemaId {} and preparationCode {}", resolvedDataflowId, datasetId, tableSchemaId, preparationCode);
 
-      Map<String, Object> result = new HashMap<>();
-      String pollingUrl = "/orchestrator/jobs/pollForJobStatus/" + jobId + "?datasetId=" + datasetId + "&dataflowId=" + dataflowId;
-      if(providerId != null){
-        pollingUrl+= "&providerId=" + providerId;
-      }
-      result.put("jobId", jobId);
-      result.put("pollingUrl", pollingUrl);
-
-      return result;
+      return buildDeleteResponse(jobId, datasetId, resolvedDataflowId, providerId);
     } catch (Exception e) {
-      LOG.error("Unexpected error! Error deleting table data for dataflowId {} datasetId {} tableSchemaId {} and providerId {} Message: {}", dataflowId, datasetId, tableSchemaId, providerId, e.getMessage());
+      LOG.error("Unexpected error! Error deleting table data for dataflowId {} datasetId {} tableSchemaId {} and providerId {} Message: {}", resolvedDataflowId, datasetId, tableSchemaId, providerId, e.getMessage());
       throw e;
-    }
-    finally {
+    } finally {
       // Release the lock manually
-      deleteLocksToDeleteProcess(datasetId, null);
+      deleteLocksToDeleteProcess(datasetId, tableSchemaId, preparationCode);
     }
   }
 
+  private void sendDeleteInitNotification(Long datasetId, Long dataflowId, Long providerId, String preparationCode, String eventType) {
 
+    UserNotificationContentVO content = new UserNotificationContentVO();
+    content.setDatasetId(datasetId);
+    content.setDataflowId(dataflowId);
+    content.setProviderId(providerId);
+    content.setPreparationCode(preparationCode);
+
+    notificationControllerZuul.createUserNotificationPrivate(eventType, content);
+  }
+
+  private void validateDatasetBelongsToDataflow(Long datasetId, Long resolvedDataflowId, Long expectedDataflowId) {
+
+    if (resolvedDataflowId == null || !resolvedDataflowId.equals(expectedDataflowId)) {
+      String errorMessage = String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, resolvedDataflowId);
+      LOG.error(errorMessage);
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, errorMessage);
+    }
+  }
+
+  private void executeDeleteTableProcess(Long datasetId, String tableSchemaId, String preparationCode, Long dataflowId, Long providerId, Long jobId) throws Exception {
+
+    Boolean isBigDataflow = dataFlowControllerZuul.isBigDataflow(dataflowId);
+    boolean isPreparationDataset = StringUtils.isNotBlank(preparationCode);
+
+    if (Boolean.TRUE.equals(isBigDataflow)) {
+      LOG.info("Deleting table data for big data dataflowId {}, datasetId {}, tableSchemaId {} and preparationCode {}", dataflowId, datasetId, tableSchemaId, preparationCode);
+      bigDataDatasetService.deleteTableData(datasetId, dataflowId, providerId, preparationCode, tableSchemaId, jobId, true);
+    } else {
+      LOG.info("Deleting table data for dataflowId {}, datasetId {} and tableSchemaId {}", dataflowId, datasetId, tableSchemaId);
+      // This method will release the lock
+      deleteHelper.executeDeleteTableProcess(datasetId, tableSchemaId, jobId);
+    }
+  }
+
+  private void executeDeleteDatasetProcess(Long datasetId, String preparationCode, Long dataflowId, Long providerId, Long jobId, Boolean deletePrefilledTables) throws Exception {
+
+    Boolean isBigDataflow = dataFlowControllerZuul.isBigDataflow(dataflowId);
+    boolean isPreparationDataset = StringUtils.isNotBlank(preparationCode);
+
+    if(Boolean.TRUE.equals(isBigDataflow)){
+      LOG.info("Deleting dataset data for big data dataflowId {}, datasetId {} and preparation code {}", dataflowId, datasetId, preparationCode);
+      bigDataDatasetService.deleteDatasetData(datasetId, dataflowId, providerId, preparationCode, deletePrefilledTables, false, jobId);
+    } else if (!isPreparationDataset && Boolean.TRUE.equals(isBigDataflow)) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Preparation dataset deletion cannot be performed for a non Big Data dataset.");
+    } else {
+      LOG.info("Deleting dataset data for dataflowId {} and datasetId {}", dataflowId, datasetId);
+      // This method will release the lock
+      deleteHelper.executeDeleteDatasetProcess(datasetId, deletePrefilledTables, false, jobId);
+    }
+  }
+
+  private Map<String, Object> buildDeleteResponse(Long jobId, Long datasetId, Long dataflowId, Long providerId) {
+    Map<String, Object> result = new HashMap<>();
+    String pollingUrl = "/orchestrator/jobs/pollForJobStatus/" + jobId + "?datasetId=" + datasetId + "&dataflowId=" + dataflowId;
+
+    if (providerId != null) {
+      pollingUrl += "&providerId=" + providerId;
+    }
+
+    result.put("jobId", jobId);
+    result.put("pollingUrl", pollingUrl);
+
+    return result;
+  }
   /**
    * Delete import table legacy.
    *
@@ -1448,8 +1484,10 @@ public class DatasetControllerImpl implements DatasetController {
           @ApiParam(type = "Long", value = "Dataflow id",
                   example = "0") @RequestParam(value = "dataflowId", required = false) Long dataflowId,
           @ApiParam(type = "Long", value = "Provider id",
-                  example = "0") @RequestParam(value = "providerId", required = false) Long providerId) {
-    this.deleteTableData(datasetId, tableSchemaId, dataflowId, providerId);
+                  example = "0") @RequestParam(value = "providerId", required = false) Long providerId,
+          @ApiParam(type = "String", value = "Preparation Code",
+                  example = "section_a") @RequestParam(value = "preparationCode", required = false) String preparationCode) {
+    this.deleteTableData(datasetId, tableSchemaId, dataflowId, providerId, preparationCode);
   }
 
   /**
@@ -1524,7 +1562,10 @@ public class DatasetControllerImpl implements DatasetController {
                   required = false) String tableSchemaId,
           @ApiParam(type = "String", value = "mimeType (file extension)",
                   example = "csv") @RequestParam("mimeType") String mimeType,
-          @RequestBody ExportFilterVO exportFilterVO) {
+          @RequestBody ExportFilterVO exportFilterVO,
+          @ApiParam(type = "String", value = "Preparation Code",
+                  example = "section_a") @RequestParam(value = "code", required = false) String preparationCode) {
+
     String tableName =
             null != tableSchemaId ? datasetSchemaService.getTableSchemaName(null, tableSchemaId)
                     : datasetMetabaseService.findDatasetMetabase(datasetId).getDataSetName();
@@ -1535,7 +1576,7 @@ public class DatasetControllerImpl implements DatasetController {
     }
     try {
       LOG.info("Exporting table data for datasetId {} and tableSchemaId {}", datasetId, tableSchemaId);
-      fileTreatmentHelper.exportFileDL(datasetId, mimeType, tableSchemaId, tableName, exportFilterVO);
+      fileTreatmentHelper.exportFileDL(datasetId, mimeType, tableSchemaId, tableName, exportFilterVO, preparationCode);
       LOG.info("Successfully exported table data for datasetId {} and tableSchemaId {}", datasetId, tableSchemaId);
     } catch (EEAException | IOException e) {
       LOG.error("Error exporting table data from dataset id {} and tableSchemaId {}. Message: {}", datasetId, tableSchemaId, e.getMessage());
@@ -1860,7 +1901,9 @@ public class DatasetControllerImpl implements DatasetController {
           @ApiParam(type = "String", value = "Filter column name", example = "column") @RequestParam(
                   value = "columnName", required = false) String columnName,
           @ApiParam(type = "String", value = "Data provider codes", example = "BE,DK") @RequestParam(
-                  value = "dataProviderCodes", required = false) String dataProviderCodes) {
+                  value = "dataProviderCodes", required = false) String dataProviderCodes,
+          @ApiParam(type = "String", value = "Preparation code", example = "Austria_a") @RequestParam(
+                  value = "code", required = false) String preparationCode) {
 
     if (!dataflowId.equals(datasetService.getDataFlowIdById(datasetId))) {
       String errorMessage =
@@ -1872,7 +1915,7 @@ public class DatasetControllerImpl implements DatasetController {
     try {
       LOG.info("Calling etlExport for dataflowId {} and datasetId {}", dataflowId, datasetId);
       StreamingResponseBody responsebody = outputStream -> datasetService.etlExportDataset(datasetId,
-              outputStream, tableSchemaId, limit, offset, filterValue, columnName, dataProviderCodes);
+              outputStream, tableSchemaId, limit, offset, filterValue, columnName, dataProviderCodes, preparationCode);
       LOG.info("Successfully called etlExport for dataflowId {} and datasetId {}",dataflowId, datasetId);
       return ResponseEntity.ok().contentType(MediaType.APPLICATION_STREAM_JSON).body(responsebody);
     } catch (Exception e) {
@@ -1911,7 +1954,9 @@ public class DatasetControllerImpl implements DatasetController {
           @ApiParam(type = "String", value = "Filter column name", example = "column") @RequestParam(
                   value = "columnName", required = false) String columnName,
           @ApiParam(type = "String", value = "Data provider codes", example = "BE,DK") @RequestParam(
-                  value = "dataProviderCodes", required = false) String dataProviderCodes) {
+                  value = "dataProviderCodes", required = false) String dataProviderCodes,
+          @ApiParam(type = "String", value = "Preparation code", example = "Austria_a") @RequestParam(
+                  value = "code", required = false) String preparationCode) {
 
     if (!dataflowId.equals(datasetService.getDataFlowIdById(datasetId))) {
       String errorMessage =
@@ -1922,10 +1967,10 @@ public class DatasetControllerImpl implements DatasetController {
     }
 
     try {
-      LOG.info("Calling etlExport v2 for dataflowId {} and datasetId {}", dataflowId, datasetId);
+      LOG.info("Calling etlExport v2 for dataflowId {} and datasetId {} and preparation code {}", dataflowId, datasetId,preparationCode);
       StreamingResponseBody responsebody = outputStream -> datasetService.etlExportDataset(datasetId,
-              outputStream, tableSchemaId, limit, offset, filterValue, columnName, dataProviderCodes);
-      LOG.info("Successfully called etlExport v2 for dataflowId {} and datasetId {}", dataflowId, datasetId);
+              outputStream, tableSchemaId, limit, offset, filterValue, columnName, dataProviderCodes, preparationCode);
+      LOG.info("Successfully called etlExport v2 for dataflowId {} and datasetId {} and preparation code {}", dataflowId, datasetId, preparationCode);
 
       return ResponseEntity.ok().contentType(MediaType.APPLICATION_STREAM_JSON).body(responsebody);
     } catch (Exception e) {
@@ -1973,9 +2018,11 @@ public class DatasetControllerImpl implements DatasetController {
           @ApiParam(type = "String", value = "Filter value", example = "value") @RequestParam(
                   value = "filterValue", required = false) String filterValue,
           @ApiParam(type = "String", value = "Filter column name", example = "column") @RequestParam(
-                  value = "columnName", required = false) String columnName) {
+                  value = "columnName", required = false) String columnName,
+          @ApiParam(type = "String", value = "Preparation code", example = "Austria_a") @RequestParam(
+                  value = "code", required = false) String preparationCode) {
     return this.etlExportDatasetV2(datasetId, dataflowId, providerId, tableSchemaId, limit, offset,
-            filterValue, columnName, null);
+            filterValue, columnName, null, preparationCode);
   }
 
   /**
@@ -2020,7 +2067,9 @@ public class DatasetControllerImpl implements DatasetController {
           @ApiParam(type = "String", value = "Filter column name", example = "column") @RequestParam(
                   value = "columnName", required = false) String columnName,
           @ApiParam(type = "String", value = "Data provider codes", example = "BE,DK") @RequestParam(
-                  value = "dataProviderCodes", required = false) String dataProviderCodes) {
+                  value = "dataProviderCodes", required = false) String dataProviderCodes,
+          @ApiParam(type = "String", value = "Preparation code", example = "Austria_a") @RequestParam(
+                  value = "code", required = false) String preparationCode) {
 
     if (!dataflowId.equals(datasetService.getDataFlowIdById(datasetId))) {
       String errorMessage =
@@ -2030,7 +2079,7 @@ public class DatasetControllerImpl implements DatasetController {
               String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId));
     }
     try {
-      Long jobId = jobControllerZuul.addFileExportJob(datasetId, dataflowId, providerId, tableSchemaId, limit, offset, filterValue, columnName, dataProviderCodes, false, false ,false);
+      Long jobId = jobControllerZuul.addFileExportJob(datasetId, dataflowId, providerId, tableSchemaId, limit, offset, filterValue, columnName, dataProviderCodes, false, false ,false, preparationCode);
       Map<String, Object> result = new HashMap<>();
       String pollingUrl = "/orchestrator/jobs/pollForJobStatus/" + jobId + "?datasetId=" + datasetId + "&dataflowId=" + dataflowId;
       if(providerId != null){
@@ -2076,7 +2125,10 @@ public class DatasetControllerImpl implements DatasetController {
                                               required = false) String tableSchemaId,
                                       @ApiParam(type = "String", value = "Data provider codes", example = "BE,DK") @RequestParam(
                                               value = "dataProviderCodes", required = false) String dataProviderCodes,
-  @ApiParam(type = "Boolean", value = "includeAttachments", example = "0") @RequestParam(value = "includeAttachments", required = false) Boolean includeAttachments){
+                                      @ApiParam(type = "Boolean", value = "includeAttachments", example = "0")
+                                               @RequestParam(value = "includeAttachments", required = false) Boolean includeAttachments,
+                                      @ApiParam(type = "String", value = "Preparation code", example = "Austria_a") @RequestParam(
+                                              value = "code", required = false) String preparationCode){
     if (!dataflowId.equals(datasetService.getDataFlowIdById(datasetId))) {
       String errorMessage =
               String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId);
@@ -2085,7 +2137,7 @@ public class DatasetControllerImpl implements DatasetController {
               String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId));
     }
     try {
-      Long jobId = jobControllerZuul.addFileExportJob(datasetId, dataflowId, providerId, tableSchemaId, null, null, null, null, dataProviderCodes, true, false ,includeAttachments);
+      Long jobId = jobControllerZuul.addFileExportJob(datasetId, dataflowId, providerId, tableSchemaId, null, null, null, null, dataProviderCodes, true, false ,includeAttachments, preparationCode);
       Map<String, Object> result = new HashMap<>();
       String pollingUrl = "/orchestrator/jobs/pollForJobStatus/" + jobId + "?datasetId=" + datasetId + "&dataflowId=" + dataflowId;
       if(providerId != null){
@@ -2121,7 +2173,10 @@ public class DatasetControllerImpl implements DatasetController {
                                                      required = false) String tableSchemaId,
                                                  @ApiParam(type = "String", value = "Data provider codes", example = "BE,DK") @RequestParam(
                                                      value = "dataProviderCodes", required = false) String dataProviderCodes,
-                                                 @ApiParam(type = "Boolean", value = "includeAttachments", example = "0") @RequestParam(value = "includeAttachments", required = false) Boolean includeAttachments) {
+                                                 @ApiParam(type = "Boolean", value = "includeAttachments", example = "0")
+                                                   @RequestParam(value = "includeAttachments", required = false) Boolean includeAttachments,
+                                                 @ApiParam(type = "String", value = "Preparation code", example = "Austria_a")
+                                                   @RequestParam(value = "code", required = false) String preparationCode) {
     if (!dataflowId.equals(datasetService.getDataFlowIdById(datasetId))) {
       String errorMessage =
           String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId);
@@ -2130,7 +2185,7 @@ public class DatasetControllerImpl implements DatasetController {
           String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId));
     }
     try {
-      Long jobId = jobControllerZuul.addFileExportJob(datasetId, dataflowId, providerId, tableSchemaId, null, null, null, null, dataProviderCodes, false, true ,includeAttachments);
+      Long jobId = jobControllerZuul.addFileExportJob(datasetId, dataflowId, providerId, tableSchemaId, null, null, null, null, dataProviderCodes, false, true , includeAttachments, preparationCode);
       Map<String, Object> result = new HashMap<>();
       String pollingUrl = "/orchestrator/jobs/pollForJobStatus/" + jobId + "?datasetId=" + datasetId + "&dataflowId=" + dataflowId;
       if(providerId != null){
@@ -2196,7 +2251,7 @@ public class DatasetControllerImpl implements DatasetController {
         LOG.info("Added etl import job with id {} for datasetId {} with status REFUSED", jobId, datasetId);
         throw new ResponseStatusException(HttpStatus.LOCKED, EEAErrorMessage.IMPORTING_REFUSED);
       }
-      jobId = jobControllerZuul.addEtlImportJob(datasetId, dataflowId, providerId, jobStatus, replaceData, null, null, null);
+      jobId = jobControllerZuul.addEtlImportJob(datasetId, dataflowId, providerId, jobStatus, replaceData, null, null, null, null);
 
       LOG.info("Calling etlImport for jobId {} dataflowId {} datasetId {} and replaceData {}", jobId, dataflowId, datasetId, replaceData);
       fileTreatmentHelper.etlImportDataset(datasetId, etlDatasetVO, providerId, replaceData, jobId);
@@ -2275,10 +2330,11 @@ public class DatasetControllerImpl implements DatasetController {
                                          @RequestParam(value = "replaceData", required = false, defaultValue = "false") Boolean replaceData,
                                          @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,
                                          @RequestParam(value = "delimiter") String delimiter,
-                                         @RequestBody String filePathInS3) throws Exception {
+                                         @RequestBody String filePathInS3,
+                                         @RequestParam(value = "code", required = false) String preparationCode) throws Exception {
     Long jobId = null;
     try{
-      LOG.info("Called etlImportDatasetDL for dataflowId {} datasetId {} and providerId {} and filePathInS3 {}", dataflowId, datasetId, providerId, filePathInS3);
+      LOG.info("Called etlImportDatasetDL for dataflowId {} datasetId {} and providerId {} and filePathInS3 {} and preparationCode {}", dataflowId, datasetId, providerId, filePathInS3, preparationCode);
       filePathInS3 = filePathInS3.trim();
       // check if dataset belongs to dataflow
       if (!dataflowId.equals(datasetService.getDataFlowIdById(datasetId))) {
@@ -2313,21 +2369,29 @@ public class DatasetControllerImpl implements DatasetController {
         throw new ResponseStatusException(HttpStatus.CONFLICT, EEAErrorMessage.DATASET_IS_LOCKED_FOR_EDITING + userEditingDataset);
       }
 
+      JobStatusEnum jobStatus;
       //check eligibility of new job
-      List<Long> datasetIds = new ArrayList<>();
-      datasetIds.add(datasetId);
-      JobStatusEnum jobStatus = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.ETL_IMPORT.getValue(), false, dataflowId, providerId, datasetIds);
+
+      if (StringUtils.isBlank(preparationCode)) { // NOT Preparation eligibility check
+        List<Long> datasetIds = new ArrayList<>();
+        datasetIds.add(datasetId);
+        jobStatus = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.ETL_IMPORT.getValue(), false, dataflowId, providerId, datasetIds);
+      }
+      else {
+        jobStatus = jobControllerZuul.checkEligibilityOfPreparationJob(JobTypeEnum.ETL_IMPORT.getValue(),  datasetId, preparationCode);
+      }
+
       if(jobStatus.getValue().equals(JobStatusEnum.REFUSED.getValue())){
         LOG.info("Added etl import job with id {} for datasetId {} with status REFUSED", jobId, datasetId);
         throw new ResponseStatusException(HttpStatus.LOCKED, EEAErrorMessage.IMPORTING_REFUSED);
       }
-      jobId = jobControllerZuul.addEtlImportJob(datasetId, dataflowId, providerId, jobStatus, replaceData, tableSchemaId, delimiter, filePathInS3);
+      jobId = jobControllerZuul.addEtlImportJob(datasetId, dataflowId, providerId, jobStatus, replaceData, tableSchemaId, delimiter, filePathInS3, preparationCode);
 
       DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
       providerId = (providerId != null) ? providerId : dataSetMetabaseVO.getDataProviderId();
       providerId = (providerId != null) ? providerId : 0L;
       LOG.info("Calling etlImport for jobId {} dataflowId {} datasetId {} and replaceData {}", jobId, dataflowId, datasetId, replaceData);
-      bigDataDatasetService.etlImportDataset(datasetId, dataflowId, providerId, replaceData, tableSchemaId, delimiter, filePathInS3, jobId, dataFlowVO, dataSetMetabaseVO);
+      bigDataDatasetService.etlImportDataset(datasetId, dataflowId, providerId, replaceData, tableSchemaId, delimiter, filePathInS3, jobId, dataFlowVO, dataSetMetabaseVO, preparationCode);
 
       Map<String, Object> result = new HashMap<>();
       String pollingUrl = "/orchestrator/jobs/pollForJobStatus/" + jobId + "?datasetId=" + datasetId + "&dataflowId=" + dataflowId;
@@ -2923,7 +2987,9 @@ public class DatasetControllerImpl implements DatasetController {
           @ApiParam(type = "Long", value = "Dataset Id", example = "0") @PathVariable("datasetId")
           Long datasetId,
           @ApiParam(type = "String", value = "mime type (extension file)", example = "csv")
-          @RequestParam("mimeType") String mimeType) {
+          @RequestParam("mimeType") String mimeType,
+          @ApiParam(type = "String", value = "Preparation Code",
+                  example = "section_a") @RequestParam(value = "code", required = false) String preparationCode) {
     LOG.info("Exporting dataset data for datasetId {}, with type {}", datasetId, mimeType);
     Long dataflowId = datasetService.getDataFlowIdById(datasetId);
     UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
@@ -2933,7 +2999,7 @@ public class DatasetControllerImpl implements DatasetController {
             userNotificationContentVO);
 
     try {
-      fileTreatmentHelper.exportDatasetFileDL(datasetId, mimeType);
+      fileTreatmentHelper.exportDatasetFileDL(datasetId, mimeType, preparationCode);
       LOG.info("Successfully exported dataset data from datasetId {}, with type {}", datasetId, mimeType);
     } catch (Exception e) {
       LOG.error("Unexpected error! Error exporting dataset file for datasetId {} Message: {}", datasetId, e.getMessage());
@@ -3004,11 +3070,13 @@ public class DatasetControllerImpl implements DatasetController {
   public void downloadFileDL(
           @ApiParam(type = "Long", value = "Dataset Id", example = "0") @PathVariable Long datasetId,
           @ApiParam(type = "String", value = "File name", example = "file.csv") @RequestParam
-          String fileName, @ApiParam(value = "response") HttpServletResponse response) {
+          String fileName, @ApiParam(value = "response") HttpServletResponse response,
+          @ApiParam(type = "String", value = "Preparation Code", example = "Austria_a") @RequestParam(
+                  value = "code", required = false) String preparationCode) {
     try {
       LOG.info("Downloading file generated from export dataset. DatasetId {} Filename {}",
               datasetId, fileName);
-      File file = datasetService.downloadExportedFileDL(datasetId, fileName);
+      File file = datasetService.downloadExportedFileDL(datasetId, fileName, preparationCode);
       LOG.info("Successfully downloaded file generated from export dataset. DatasetId {} Filename {}",
               datasetId, fileName);
       response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
@@ -3356,13 +3424,18 @@ public class DatasetControllerImpl implements DatasetController {
    */
   @Override
   @DeleteMapping(value = "/private/deleteLocksToDeleteProcess/{datasetId}")
-  public void deleteLocksToDeleteProcess(@PathVariable("datasetId") Long datasetId, @RequestParam(value="tableSchemaId", required = false) String tableSchemaId){
+  public void deleteLocksToDeleteProcess(
+          @PathVariable("datasetId") Long datasetId,
+          @RequestParam(value="tableSchemaId", required = false) String tableSchemaId,
+          @RequestParam(value="preparationCode", required = false) String preparationCode
+    ){
     try {
       if(StringUtils.isNotBlank(tableSchemaId)){
         Map<String, Object> deleteImportTable = new HashMap<>();
         deleteImportTable.put(LiteralConstants.SIGNATURE, LockSignature.DELETE_IMPORT_TABLE.getValue());
         deleteImportTable.put(LiteralConstants.DATASETID, datasetId);
         deleteImportTable.put(LiteralConstants.TABLESCHEMAID, tableSchemaId);
+        deleteImportTable.put(LiteralConstants.PREPARATION_CODE, preparationCode);
         lockService.removeLockByCriteria(deleteImportTable);
       }
       else{
@@ -3370,6 +3443,7 @@ public class DatasetControllerImpl implements DatasetController {
         deleteDatasetValues.put(LiteralConstants.SIGNATURE,
                 LockSignature.DELETE_DATASET_VALUES.getValue());
         deleteDatasetValues.put(LiteralConstants.DATASETID, datasetId);
+        deleteDatasetValues.put(LiteralConstants.PREPARATION_CODE, preparationCode);
         lockService.removeLockByCriteria(deleteDatasetValues);
       }
     }
@@ -3492,7 +3566,9 @@ public class DatasetControllerImpl implements DatasetController {
           @ApiParam(type = "Boolean", value = "Attachments are included", example = "true") @RequestParam(
                   value = "includeAttachments", required = false) Boolean includeAttachments,
           @ApiParam(type = "Long", value = "Job id", example = "1") @RequestParam(
-                  name = "jobId", required = false) Long jobId) throws Exception {
+                  name = "jobId", required = false) Long jobId,
+          @ApiParam(type = "String", value = "Preparation Code", example = "Austria_a") @RequestParam(
+                  value = "code", required = false) String preparationCode) throws Exception {
 
     JobVO jobVO = null;
     if (jobId!=null) {
@@ -3511,11 +3587,11 @@ public class DatasetControllerImpl implements DatasetController {
     }
 
     try {
-      LOG.info("Creating etlExport File for dataflowId {} and datasetId {}", dataflowId, datasetId);
+      LOG.info("Creating etlExport File for dataflowId {} and datasetId {} and preparation {}", dataflowId, datasetId, preparationCode);
       DataFlowVO dataFlowVO = dataFlowControllerZuul.getMetabaseById(dataflowId);
       if(dataFlowVO.getBigData() != null && dataFlowVO.getBigData()) {
         String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
-        if (StringUtils.isNotBlank(tableSchemaId)) {
+        if (StringUtils.isNotBlank(tableSchemaId) && (StringUtils.isBlank(preparationCode))) { //TODO check iceberg preparation
           TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, datasetSchemaId);
           if (tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable())
                   && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, tableSchemaVO.getIdTableSchema()))) {
@@ -3528,7 +3604,8 @@ public class DatasetControllerImpl implements DatasetController {
           for (TableSchemaIdNameVO tableSchemaIdNameVO : tableSchemaIdNameVOS) {
             TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaIdNameVO.getIdTableSchema(), datasetSchemaId);
             if (tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable())
-                    && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, tableSchemaVO.getIdTableSchema()))) {
+                    && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, tableSchemaVO.getIdTableSchema()))
+                    && (StringUtils.isBlank(preparationCode))) {
               LOG.error("Can not import zip file for datasetId {} because a table is iceberg", datasetId);
               jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.ERROR_ICEBERG_TABLE_EXISTS, null);
               throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.EXPORTING_FILE_ICEBERG);
@@ -3551,12 +3628,12 @@ public class DatasetControllerImpl implements DatasetController {
         try {
           if (BooleanUtils.isTrue(exportCsv)) {
             String processUUID = UUID.randomUUID().toString();
-            bigDataDatasetService.etlExportCsv(datasetId, dataflowId, tableSchemaId, jobId, user, processUUID, includeAttachments, dataProviderCodes);
+            bigDataDatasetService.etlExportCsv(datasetId, dataflowId, tableSchemaId, jobId, user, processUUID, includeAttachments, dataProviderCodes, preparationCode);
           } else if (BooleanUtils.isTrue(exportParquet)) {
             String processUUID = UUID.randomUUID().toString();
-            bigDataDatasetService.etlExportParquet(datasetId, dataflowId, tableSchemaId, jobId, user, processUUID, includeAttachments, dataProviderCodes);
+            bigDataDatasetService.etlExportParquet(datasetId, dataflowId, tableSchemaId, jobId, user, processUUID, includeAttachments, dataProviderCodes, preparationCode);
           } else {
-            datasetService.createFileForEtlExport(datasetId, tableSchemaId, limit, offset, filterValue, columnName, dataProviderCodes, jobId, dataflowId, user, exportCsv, includeAttachments);
+            datasetService.createFileForEtlExport(datasetId, tableSchemaId, limit, offset, filterValue, columnName, dataProviderCodes, jobId, dataflowId, user, exportCsv, includeAttachments, preparationCode);
           }
           LOG.info("Successfully called method for creating etlExport file for dataflowId {} and datasetId {}", dataflowId, datasetId);
         } catch (Exception e) {
@@ -3625,22 +3702,38 @@ public class DatasetControllerImpl implements DatasetController {
           @ApiParam(type = "Long", value = "Integration id", example = "0") @RequestParam(value = "integrationId", required = false) Long integrationId,
           @ApiParam(type = "String", value = "File delimiter", example = ",") @RequestParam(value = "delimiter", required = false) String delimiter,
           @ApiParam(type = "String", value = "File name", example = "fileName") @RequestParam(value = "fileName", required = false) String fileName,
-          @ApiParam(type = "Boolean", value = "Etl Import", example = "false") @RequestParam(value = "etlImport", required = false, defaultValue = "false") Boolean etlImport){
+          @ApiParam(type = "Boolean", value = "Etl Import", example = "false") @RequestParam(value = "etlImport", required = false, defaultValue = "false") Boolean etlImport,
+          @ApiParam(type = "String", value = "Preparation Code", example = "0") @RequestParam(value = "code", required = false) String preparationCode){
     JobPresignedUrlInfo info;
+    JobStatusEnum jobStatus;
+    boolean isPreparationDataset = StringUtils.isNotBlank(preparationCode);
     try{
-      info = bigDataDatasetService.generateImportPreSignedUrl(datasetId, dataflowId, providerId, fileName);
-      LOG.info("Created presigned url for dataflowId {}, datasetId {} and providerId {} and etlImport {}", dataflowId, datasetId, providerId, etlImport);
+      if (isPreparationDataset) {
+        info = bigDataDatasetService.generatePreparationImportPreSignedUrl(datasetId, dataflowId, providerId, fileName, preparationCode);
+        LOG.info("Created presigned url for dataflowId {}, datasetId {} and preparation set {} and etlImport {} and preparation code {}", dataflowId, datasetId, preparationCode, etlImport, preparationCode);
+
+      } else {
+        info = bigDataDatasetService.generateImportPreSignedUrl(datasetId, dataflowId, providerId, fileName);
+        LOG.info("Created presigned url for dataflowId {}, datasetId {} and providerId {} and etlImport {}", dataflowId, datasetId, providerId, etlImport);
+      }
 
       if(!BooleanUtils.isTrue(etlImport)) {
         //check eligibility of job and add new import job
         List<Long> datasetIds = new ArrayList<>();
         datasetIds.add(datasetId);
-        JobStatusEnum jobStatus = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.IMPORT.getValue(), false, dataflowId, providerId, datasetIds);
+
+        if (isPreparationDataset) {
+          jobStatus = jobControllerZuul.checkEligibilityOfPreparationJob(JobTypeEnum.IMPORT.getValue(), datasetId, preparationCode);
+        } else {
+          jobStatus = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.IMPORT.getValue(), false, dataflowId, providerId, datasetIds);
+        }
+
         if (jobStatus == JobStatusEnum.IN_PROGRESS) {
           //if this endpoint is called we want to iniatialize an import job with status QUEUED instead of IN_PROGRESS
           jobStatus = JobStatusEnum.QUEUED;
         }
-        Long jobId = jobControllerZuul.addImportJob(datasetId, dataflowId, providerId, tableSchemaId, null, replace, integrationId, delimiter, jobStatus, null, info.getFilePathInS3());
+
+        Long jobId = jobControllerZuul.addImportJob(datasetId, dataflowId, providerId, tableSchemaId, null, replace, integrationId, preparationCode, delimiter,  jobStatus, null, info.getFilePathInS3());
         if (jobStatus.getValue().equals(JobStatusEnum.REFUSED.getValue())) {
           LOG.info("Added import job with id {} for datasetId {} with status REFUSED", jobId, datasetId);
           datasetService.releaseImportRefusedNotification(datasetId, dataflowId, tableSchemaId, null);

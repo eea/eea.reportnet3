@@ -13,7 +13,6 @@ import org.eea.interfaces.vo.orchestrator.JobPresignedUrlInfo;
 import org.eea.interfaces.vo.orchestrator.JobVO;
 import org.eea.multitenancy.DatasetId;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
@@ -33,7 +32,6 @@ public interface BigDataDatasetService {
      * @param jobId the jobId
      * @param fmeJobId the fmeJobId
      * @param dataflowVO the dataflowVO
-     * @param helperMultipartFileMapper the helperMultipartFileMapper
      * @param job the job
      * @param importFileInDremioInfo the importFileInDremioInfo
      * @return
@@ -62,7 +60,7 @@ public interface BigDataDatasetService {
      * @param jobId the job id
      * @param createEmptyTablesBool
      */
-    void deleteTableData(Long datasetId, Long dataflowId, Long providerId, String tableSchemaId, Long jobId, Boolean createEmptyTablesBool) throws Exception;
+    void deleteTableData(Long datasetId, Long dataflowId, Long providerId, String preparationCode, String tableSchemaId, Long jobId, Boolean createEmptyTablesBool) throws Exception;
 
     /**
      * Delete dataset data
@@ -74,7 +72,7 @@ public interface BigDataDatasetService {
      * @param technicallyAccepted the technicallyAccepted
      * @param jobId the job id
      */
-    void deleteDatasetData(Long datasetId, Long dataflowId, Long providerId, Boolean deletePrefilledTables, Boolean technicallyAccepted, Long jobId) throws Exception;
+    void deleteDatasetData(Long datasetId, Long dataflowId, Long providerId, String preparationCode, Boolean deletePrefilledTables, Boolean technicallyAccepted, Long jobId) throws Exception;
 
     /**
      * Gets the attachment for big data dataflows.
@@ -296,7 +294,7 @@ public interface BigDataDatasetService {
      * @param includeAttachments include attachments boolean
      * @throws EEAException The exception
      */
-    void etlExportCsv(Long datasetId, Long dataflowId ,String tableSchemaId, Long jobId, String user, String processUUID, Boolean includeAttachments, String dataProviderCodes) throws EEAException;
+    void etlExportCsv(Long datasetId, Long dataflowId ,String tableSchemaId, Long jobId, String user, String processUUID, Boolean includeAttachments, String dataProviderCodes, String preparationCode) throws EEAException;
 
     /**
      * ETL export for parquet
@@ -310,7 +308,7 @@ public interface BigDataDatasetService {
      * @param includeAttachments include attachments boolean
      * @throws EEAException The exception
      */
-    void etlExportParquet(Long datasetId, Long dataflowId, String tableSchemaId, Long jobId, String user, String processUUID, Boolean includeAttachments, String dataProviderCodes) throws EEAException;
+    void etlExportParquet(Long datasetId, Long dataflowId, String tableSchemaId, Long jobId, String user, String processUUID, Boolean includeAttachments, String dataProviderCodes, String preparationCode) throws EEAException;
 
     /**
      * If an import job is added in the db retrieve it, else create a new one
@@ -355,8 +353,18 @@ public interface BigDataDatasetService {
      * @param dataSetMetabaseVO
      * @throws EEAException the EEA exception
      */
-     void etlImportDataset(Long datasetId, Long dataflowId, Long providerId, Boolean replaceData, String tableSchemaId, String delimiter, String filePathInS3, Long jobId, DataFlowVO dataFlowVO, DataSetMetabaseVO dataSetMetabaseVO) throws Exception;
+     void etlImportDataset(Long datasetId, Long dataflowId, Long providerId, Boolean replaceData, String tableSchemaId, String delimiter, String filePathInS3, Long jobId, DataFlowVO dataFlowVO, DataSetMetabaseVO dataSetMetabaseVO, String preparationCode) throws Exception;
 
+    /**
+     * Generate s3 presigned Url for import
+     *
+     * @param datasetId the dataset id
+     * @param dataflowId the dataflow id
+     * @param providerId the provider id
+     */
+    JobPresignedUrlInfo generatePreparationImportPreSignedUrl(Long datasetId, Long dataflowId, Long providerId, String fileName, String preparationCode);
+
+    String resolvePreparationCode(String requestPreparationCode, JobVO job);
     /**
      * Is table Empty.
      * @param s3PathResolver table resolver

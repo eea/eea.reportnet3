@@ -24,5 +24,5 @@ public interface EtlExportV5Service {
    * @param dataset        The Dataset metabase object
    * @return The String S3 path
    */
-  String getS3KeyPath(DataSetMetabaseVO dataset, S3Service s3Service);
+  String getS3KeyPath(DataSetMetabaseVO dataset, S3Service s3Service, String preparationCode);
 }

@@ -122,14 +122,16 @@ public class JobControllerImpl implements JobController {
             @RequestParam(value = "datasetId", required = false) Long datasetId,
             @RequestParam(value = "datasetName", required = false) String datasetName,
             @RequestParam(value = "creatorUsername", required = false) String creatorUsername,
-            @RequestParam(value = "jobStatus", required = false) String jobStatuses){
+            @RequestParam(value = "jobStatus", required = false) String jobStatuses,
+            @RequestParam(value = "code", required = false) String preparationCode){
         try {
 
             Pageable pageable = PageRequest.of(pageNum, pageSize);
             if (!validColumns.contains(sortedColumn)) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Wrong sorting header provided.");
             }
-            return jobService.getJobs(pageable, asc, sortedColumn, jobId, jobTypes, dataflowId, dataflowName, providerId, datasetId, datasetName, creatorUsername, jobStatuses);
+            return jobService.getJobs(pageable, asc, sortedColumn, jobId, jobTypes, dataflowId, dataflowName,
+                    providerId, datasetId, datasetName, creatorUsername, jobStatuses, preparationCode);
         } catch (Exception e){
             LOG.error("Unexpected error! Could not retrieve all jobs");
             throw e;
@@ -162,7 +164,9 @@ public class JobControllerImpl implements JobController {
                                  @ApiParam(value = "Provider id related to the dataset that will be validated", example = "15") @RequestParam(value = "providerId", required = false) Long providerId,
                                  @ApiParam(value = "Is the dataset released?", example = "true", required = false) @RequestParam(value = "released", required = false) boolean released,
                                  @RequestParam(value = "createParquetWithSQL", required = false) boolean createParquetWithSQL,
-                                 @RequestParam(value = "validateAsProviderCode", required = false) String validateAsProviderCode) {
+                                 @RequestParam(value = "validateAsProviderCode", required = false) String validateAsProviderCode,
+                                 @ApiParam(type = "String", value = "Preparation Code", example = "0")
+                                 @RequestParam(value = "code", required = false) String preparationCode) {
         Long jobId;
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         // Set the username on the thread
@@ -173,7 +177,7 @@ public class JobControllerImpl implements JobController {
         try {
             DataSetMetabaseVO dataset = dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
             String dataflowName = null;
-            try{
+            try {
                 dataflowName = dataFlowControllerZuul.findDataflowNameById(dataset.getDataflowId());
             }
             catch (Exception e) {
@@ -189,6 +193,7 @@ public class JobControllerImpl implements JobController {
             parameters.put("datasetId", datasetId);
             parameters.put("released", released);
             parameters.put("createParquetWithSQL", createParquetWithSQL);
+            parameters.put("preparationCode", preparationCode);
 
             // Validate as a provider only for Design and Test datasets and if we receive a validateAsProviderCode.
             if ((DatasetTypeEnum.DESIGN.equals(dataset.getDatasetTypeEnum()) || DatasetTypeEnum.TEST.equals(dataset.getDatasetTypeEnum()))
@@ -199,10 +204,16 @@ public class JobControllerImpl implements JobController {
 
             String userId = ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails()).get(AuthenticationDetails.USER_ID);
             parameters.put("userId", userId);
-            JobStatusEnum statusToInsert = jobService.checkEligibilityOfJob(JobTypeEnum.VALIDATION.toString(), dataset.getDataflowId(), dataProvider, Arrays.asList(datasetId), false);
-            LOG.info("Adding validation job for datasetId {} and released {} for creator {} with status {}", datasetId, released, username, statusToInsert);
-            jobId = jobService.addJob(dataset.getDataflowId(), dataProvider, datasetId, parameters, JobTypeEnum.VALIDATION, statusToInsert, released, null, dataflowName, dataset.getDataSetName());
-            LOG.info("Successfully added validation job for datasetId {}, released {} and creator {} with status {}", datasetId, released, username, statusToInsert);
+            JobStatusEnum statusToInsert;
+            if (StringUtils.isNotBlank(preparationCode)) {
+                statusToInsert = jobService.checkEligibilityOfPreparationJob(JobTypeEnum.VALIDATION.toString(), dataset.getId(), preparationCode);
+            }
+            else {
+                statusToInsert = jobService.checkEligibilityOfJob(JobTypeEnum.VALIDATION.toString(), dataset.getDataflowId(), dataProvider, Arrays.asList(datasetId), false);
+            }
+            LOG.info("Adding validation job for datasetId {}, preparationCode {} and released {} for creator {} with status {}", datasetId, preparationCode, released, username, statusToInsert);
+            jobId = jobService.addJob(dataset.getDataflowId(), dataProvider, datasetId, parameters, JobTypeEnum.VALIDATION, statusToInsert, released, null, dataflowName, dataset.getDataSetName(), preparationCode);
+            LOG.info("Successfully added validation job for datasetId {}, preparationCode {} and released {} for creator {} with status {}", datasetId, preparationCode, released, username, statusToInsert);
             if (statusToInsert == JobStatusEnum.REFUSED) {
                 //send Refused notification
                 LOG.info("Added validation job with id {} for datasetId {} with status REFUSED", jobId, datasetId);
@@ -262,7 +273,7 @@ public class JobControllerImpl implements JobController {
             JobStatusEnum statusToInsert = jobService.checkEligibilityOfJob(JobTypeEnum.RELEASE.toString(), dataflowId, dataProviderId, datasetIds, true);
 
             LOG.info("Adding release job for dataflowId={}, dataProviderId={}, restrictFromPublic={}, validate={} and creator={} with status {}", dataflowId, dataProviderId, restrictFromPublic, validate, SecurityContextHolder.getContext().getAuthentication().getName(), statusToInsert);
-            Long jobId = jobService.addJob(dataflowId, dataProviderId, null, parameters, JobTypeEnum.VALIDATION, statusToInsert, true, null, dataflowName, null);
+            Long jobId = jobService.addJob(dataflowId, dataProviderId, null, parameters, JobTypeEnum.VALIDATION, statusToInsert, true, null, dataflowName, null, null);
             LOG.info("Successfully added release job for dataflowId={}, dataProviderId={}, restrictFromPublic={}, validate={} and creator={} with status {}", dataflowId, dataProviderId, restrictFromPublic, validate, SecurityContextHolder.getContext().getAuthentication().getName(), statusToInsert);
             if (statusToInsert == JobStatusEnum.REFUSED) {
                 //send Refused notification
@@ -300,6 +311,8 @@ public class JobControllerImpl implements JobController {
                     example = "true") @RequestParam(value = "replace", required = false) boolean replace,
             @ApiParam(type = "Long", value = "Integration id", example = "0") @RequestParam(
                     value = "integrationId", required = false) Long integrationId,
+            @ApiParam(type = "String", value = "Preparation Code", example = "0") @RequestParam(
+                    value = "code", required = false) String preparationCode,
             @ApiParam(type = "String", value = "File delimiter",
             example = ",") @RequestParam(value = "delimiter", required = false) String delimiter,
                               @RequestParam(value = "jobStatus", required = false) JobStatusEnum jobStatus,
@@ -323,13 +336,13 @@ public class JobControllerImpl implements JobController {
         parameters.put("fmeCallback", false);
         parameters.put("filePathInS3", filePathInS3);
         parameters.put("numOfRestarts", 0);
+        parameters.put("preparationCode", preparationCode);
         String userId = ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails()).get(AuthenticationDetails.USER_ID);
         parameters.put("userId", userId);
         JobStatusEnum statusToInsert = JobStatusEnum.IN_PROGRESS;
         if(jobStatus != null){
             statusToInsert = jobStatus;
         }
-
 
         String dataflowName = null;
         try{
@@ -348,7 +361,7 @@ public class JobControllerImpl implements JobController {
         }
 
         LOG.info("Adding import job for dataflowId={}, datasetId={}, providerId={}, tableSchemaId={}, replace={}, integrationId={} and creator={}", dataflowId, datasetId, providerId, tableSchemaId, replace, integrationId, SecurityContextHolder.getContext().getAuthentication().getName());
-        Long jobId = jobService.addJob(dataflowId, providerId, datasetId, parameters, JobTypeEnum.IMPORT, statusToInsert, false, fmeJobId, dataflowName, datasetName);
+        Long jobId = jobService.addJob(dataflowId, providerId, datasetId, parameters, JobTypeEnum.IMPORT, statusToInsert, false, fmeJobId, dataflowName, datasetName, preparationCode);
         LOG.info("Successfully added import job for dataflowId={}, datasetId={}, providerId={}, tableSchemaId={}, replace={}, integrationId={} and creator={}", dataflowId, datasetId, providerId, tableSchemaId, replace, integrationId, SecurityContextHolder.getContext().getAuthentication().getName());
         return jobId;
     }
@@ -369,7 +382,8 @@ public class JobControllerImpl implements JobController {
                                 @RequestParam(value = "replace", required = false) Boolean replace,
                                 @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,
                                 @RequestParam(value = "delimiter", required = false) String delimiter,
-                                @RequestParam(value = "filePathInS3", required = false) String filePathInS3) {
+                                @RequestParam(value = "filePathInS3", required = false) String filePathInS3,
+                                @RequestParam(value ="code",required = false) String preparationCode) {
 
         ThreadPropertiesManager.setVariable("user",
                 SecurityContextHolder.getContext().getAuthentication().getName());
@@ -382,6 +396,7 @@ public class JobControllerImpl implements JobController {
         parameters.put("replace", replace);
         parameters.put("delimiter", delimiter);
         parameters.put("filePathInS3", filePathInS3);
+        parameters.put("preparationCode", preparationCode);
         JobStatusEnum statusToInsert = JobStatusEnum.IN_PROGRESS;
         if(jobStatus != null){
             statusToInsert = jobStatus;
@@ -404,7 +419,7 @@ public class JobControllerImpl implements JobController {
         }
 
         LOG.info("Adding etl import job for dataflowId={}, datasetId={}, providerId={} and creator={}", dataflowId, datasetId, providerId, SecurityContextHolder.getContext().getAuthentication().getName());
-        Long jobId = jobService.addJob(dataflowId, providerId, datasetId, parameters, JobTypeEnum.ETL_IMPORT, statusToInsert, false, null, dataflowName, datasetName);
+        Long jobId = jobService.addJob(dataflowId, providerId, datasetId, parameters, JobTypeEnum.ETL_IMPORT, statusToInsert, false, null, dataflowName, datasetName, preparationCode);
         LOG.info("Successfully added etl import job for dataflowId={}, datasetId={}, providerId={} and creator={}", dataflowId, datasetId, providerId, SecurityContextHolder.getContext().getAuthentication().getName());
         return jobId;
     }
@@ -434,6 +449,8 @@ public class JobControllerImpl implements JobController {
                     example = "0") @RequestParam(value = "dataflowId", required = false) Long dataflowId,
             @ApiParam(type = "Long", value = "Provider id",
                     example = "0") @RequestParam(value = "providerId", required = false) Long providerId,
+            @ApiParam(type = "String", value = "Preparation Code",
+                    example = "section_a") @RequestParam(value = "preparationCode", required = false) String preparationCode,
             @ApiParam(type = "boolean", value = "Delete prefilled tables",
                     example = "true") @RequestParam(value = "deletePrefilledTables", defaultValue = "false",
                     required = false) Boolean deletePrefilledTables,
@@ -451,6 +468,7 @@ public class JobControllerImpl implements JobController {
         parameters.put("providerId", providerId);
         parameters.put("deletePrefilledTables", deletePrefilledTables);
         parameters.put("userId", userId);
+        parameters.put("preparationCode", preparationCode);
 
         JobStatusEnum statusToInsert = jobStatus != null ? jobStatus : JobStatusEnum.IN_PROGRESS;
 
@@ -470,9 +488,9 @@ public class JobControllerImpl implements JobController {
             LOG.error("Error when trying to receive dataset name for datasetId {} ", datasetId, e);
         }
 
-        LOG.info("Adding delete data job for dataflowId={}, datasetId={}, providerId={}, tableSchemaId={} and creator={} with status {}", dataflowId, datasetId, providerId, tableSchemaId, SecurityContextHolder.getContext().getAuthentication().getName(), statusToInsert.getValue());
-        Long jobId = jobService.addJob(dataflowId, providerId, datasetId, parameters, JobTypeEnum.DELETE, statusToInsert, false, null, dataflowName, datasetName);
-        LOG.info("Successfully added delete data job for dataflowId={}, datasetId={}, providerId={}, tableSchemaId={} and creator={} with status {}", dataflowId, datasetId, providerId, tableSchemaId, SecurityContextHolder.getContext().getAuthentication().getName(), statusToInsert.getValue());
+        LOG.info("Adding delete data job for dataflowId={}, datasetId={}, providerId={}, preparationCode={}, tableSchemaId={} and creator={} with status {}", dataflowId, datasetId, providerId, preparationCode, tableSchemaId, SecurityContextHolder.getContext().getAuthentication().getName(), statusToInsert.getValue());
+        Long jobId = jobService.addJob(dataflowId, providerId, datasetId, parameters, JobTypeEnum.DELETE, statusToInsert, false, null, dataflowName, datasetName, preparationCode);
+        LOG.info("Successfully added delete data job for dataflowId={}, datasetId={}, providerId={}, preparationCode={}, tableSchemaId={} and creator={} with status {}", dataflowId, datasetId, providerId, preparationCode, tableSchemaId, SecurityContextHolder.getContext().getAuthentication().getName(), statusToInsert.getValue());
         return jobId;
     }
 
@@ -505,7 +523,7 @@ public class JobControllerImpl implements JobController {
             parameters.put("userId", userId);
             JobStatusEnum statusToInsert = jobService.checkEligibilityOfJob(JobTypeEnum.COPY_TO_EU_DATASET.toString(), dataflowId, null, null, false);
             LOG.info("Adding copy to eudataset job for dataflowId={}", dataflowId);
-            Long jobId = jobService.addJob(dataflowId, null, null, parameters, JobTypeEnum.COPY_TO_EU_DATASET, statusToInsert, false, null, dataflowName, null);
+            Long jobId = jobService.addJob(dataflowId, null, null, parameters, JobTypeEnum.COPY_TO_EU_DATASET, statusToInsert, false, null, dataflowName, null, null);
             LOG.info("Successfully added copy to eudataset job with id {} for dataflowId={}", jobId, dataflowId);
             if (statusToInsert == JobStatusEnum.REFUSED) {
                 //send Refused notification
@@ -552,7 +570,9 @@ public class JobControllerImpl implements JobController {
                                   @ApiParam(type = "Boolean", value = "Csv will be exported", example = "true") @RequestParam(
                                       value = EXPORT_PARQUET, required = false) Boolean exportParquet,
                                   @ApiParam(type = "Boolean", value = "Attachments are included", example = "true") @RequestParam(
-                                          value = "includeAttachments", required = false) Boolean includeAttachments) {
+                                          value = "includeAttachments", required = false) Boolean includeAttachments,
+                                  @ApiParam(type = "String", value = "Preparation Code", example = "Austria_a") @RequestParam(
+                                          value = "code", required = false) String preparationCode) {
 
         ThreadPropertiesManager.setVariable("user", SecurityContextHolder.getContext().getAuthentication().getName());
         String userId = ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails()).get(AuthenticationDetails.USER_ID);
@@ -572,6 +592,7 @@ public class JobControllerImpl implements JobController {
         parameters.put(EXPORT_PARQUET, exportParquet);
         parameters.put("includeAttachments", includeAttachments);
         parameters.put("userId", userId);
+        parameters.put("preparationCode", preparationCode);
 
         String dataflowName = null;
         try{
@@ -589,11 +610,17 @@ public class JobControllerImpl implements JobController {
             LOG.error("Error when trying to receive dataset name for datasetId {} ", datasetId, e);
         }
 
-        JobStatusEnum statusToInsert = jobService.checkEligibilityOfJob(JobTypeEnum.FILE_EXPORT.toString(), dataflowId, providerId, Arrays.asList(datasetId), false);
+        JobStatusEnum statusToInsert;
+        if(StringUtils.isNotBlank(preparationCode)) {
+            statusToInsert = jobService.checkEligibilityOfPreparationJob(JobTypeEnum.FILE_EXPORT.toString(),  datasetId, preparationCode);
 
+        }
+        else {
+            statusToInsert = jobService.checkEligibilityOfJob(JobTypeEnum.FILE_EXPORT.toString(), dataflowId, providerId, Arrays.asList(datasetId), false);
+        }
         LOG.info("Adding file export job for dataflowId={}, datasetId={}, providerId={}, tableSchemaId={} and creator={} with status {}", dataflowId, datasetId, providerId, tableSchemaId, SecurityContextHolder.getContext().getAuthentication().getName(), statusToInsert.getValue());
-        Long jobId = jobService.addJob(dataflowId, providerId, datasetId, parameters, JobTypeEnum.FILE_EXPORT, statusToInsert, false, null, dataflowName, datasetName);
-        LOG.info("Successfully added file export job for dataflowId={}, datasetId={}, providerId={}, tableSchemaId={} and creator={} with status {}", dataflowId, datasetId, providerId, tableSchemaId, SecurityContextHolder.getContext().getAuthentication().getName(), statusToInsert.getValue());
+        Long jobId = jobService.addJob(dataflowId, providerId, datasetId, parameters, JobTypeEnum.FILE_EXPORT, statusToInsert, false, null, dataflowName, datasetName, preparationCode);
+        LOG.info("Successfully added file export job for dataflowId={}, datasetId={}, preparationCode={}, providerId={}, tableSchemaId={} and creator={} with status {}", dataflowId, datasetId, preparationCode, providerId, tableSchemaId, SecurityContextHolder.getContext().getAuthentication().getName(), statusToInsert.getValue());
         return jobId;
     }
 
@@ -1067,6 +1094,23 @@ public class JobControllerImpl implements JobController {
             LOG.error("Error while updating job status and info for jobId {} jobStatus and jobInfo {}", jobId, jobStatus, jobInfo.getValue(lineNumber), e);
             throw e;
         }
+    }
+
+    /**
+     *
+     * @param jobType
+     * @param datasetId
+     * @param preparationCode
+     * @return
+     */
+    @Override
+    @GetMapping(value = "/checkEligibilityForPreparation")
+    public JobStatusEnum checkEligibilityOfPreparationJob(@RequestParam("jobType") String jobType, @RequestParam("datasetId") Long datasetId, @RequestParam("preparationCode") String preparationCode) {
+
+        return jobService.checkEligibilityOfPreparationJob(
+                jobType,
+                datasetId,
+                preparationCode);
     }
 }
 

@@ -15,6 +15,8 @@ import { getUrl } from 'repositories/_utils/UrlUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
 const useBigButtonList = ({
+  bigData,
+  code,
   dataflowId,
   dataflowState,
   dataProviderId,
@@ -24,12 +26,15 @@ const useBigButtonList = ({
   getDeleteSchemaIndex,
   handleExportEUDataset,
   handleRedirect,
+  hasActiveLocks,
   isActiveButton,
   isCloningDataflow,
+  isCreatingPreparationSets,
   isImportingDataflow,
   isLeadReporter,
   isLeadReporterOfCountry,
   onCloneDataflow,
+  onCreatePreparationSets,
   onImportSchema,
   onLoadEUDatasetIntegration,
   onLoadReceiptData,
@@ -39,11 +44,14 @@ const useBigButtonList = ({
   onShowDataCollectionModal,
   onShowExportEUDatasetModal,
   onShowHistoricReleases,
+  onShowManagePreparationSetsDialog,
   onShowManageReportersDialog,
   onShowManualTechnicalAcceptanceDialog,
   onShowNewSchemaDialog,
   onShowUpdateDataCollectionModal,
-  setErrorDialogData
+  preparationSetsList,
+  setErrorDialogData,
+  setSelectedPreparationSet
 }) => {
   const { permissions } = config;
 
@@ -69,6 +77,8 @@ const useBigButtonList = ({
 
   const restrictFromPublicAccess = isLeadReporter && !TextUtils.areEquals(dataflowState.status, 'business');
 
+  const notCreatedSets = preparationSetsList?.filter(set => set.isCreated === false);
+
   const getButtonsVisibility = useCallback(() => {
     const isDesigner =
       isLeadDesigner ||
@@ -92,8 +102,19 @@ const useBigButtonList = ({
     const isReleased =
       !isNil(dataflowState.data.datasets) && dataflowState.data.datasets.some(dataset => dataset.isReleased);
 
+    const representativeWithSameDataProviderID = dataflowState.data?.representatives?.find(
+      representative => representative.dataProviderId === dataProviderId
+    );
+
+    const isLeadReporterOfThisCountry = !isEmpty(representativeWithSameDataProviderID)
+      ? representativeWithSameDataProviderID.leadReporters?.some(
+          leadReporter => leadReporter.account === userContext.email
+        )
+      : false;
+
     return {
       createDataCollection: !(isAdmin && !isCustodian) && isLeadDesigner && isDesignStatus,
+      createPreparationSets: isLeadReporterOfThisCountry,
       cloneSchemasFromDataflow: isLeadDesigner && isDesignStatus,
       copyDataCollectionToEUDataset: isDataflowCustodian && isLeadDesigner && isDraftStatus,
       exportEUDataset: isDataflowCustodian && isLeadDesigner && isDraftStatus,
@@ -112,6 +133,7 @@ const useBigButtonList = ({
         ((isStewardSupport || isLeadDesigner) && isDraftStatus && isManualAcceptance) ||
         (isLeadReporterOfCountry && isReleased && isManualAcceptance),
       groupByRepresentative: (isLeadDesigner || isObserver || isStewardSupport) && isDraftStatus,
+      managePreparationSets: isLeadReporterOfThisCountry,
       manageReporters: isLeadDesigner || isStewardSupport,
       manualTechnicalAcceptance: (isLeadDesigner || isStewardSupport) && isManualAcceptance,
       newSchema: isDataflowCustodian && isDesigner && isDesignStatus,
@@ -127,7 +149,9 @@ const useBigButtonList = ({
     dataflowState.status,
     isLeadDesigner,
     isLeadReporterOfCountry,
-    userContext
+    userContext,
+    code,
+    preparationSetsList
   ]);
 
   useLayoutEffect(() => {
@@ -145,6 +169,17 @@ const useBigButtonList = ({
       helpClassName: 'dataflow-big-buttons-manageReporters-help-step',
       layout: 'defaultBigButton',
       visibility: buttonsVisibility.manageReporters
+    }
+  ];
+
+  const managePreparationSetsBigButton = [
+    {
+      buttonClass: 'managePreparationSets',
+      buttonIcon: 'managePreparationSets',
+      caption: resourcesContext.messages['managePreparationSets'],
+      handleRedirect: () => onShowManagePreparationSetsDialog(true),
+      layout: 'defaultBigButton',
+      visibility: bigData && buttonsVisibility.managePreparationSets
     }
   ];
 
@@ -403,7 +438,37 @@ const useBigButtonList = ({
       });
   };
 
+  const buildPreparationSetsModels = () => {
+    return preparationSetsList?.map(set => {
+      return {
+        buttonClass: 'preparationSet',
+        buttonIcon: 'preparationSet',
+        caption: set.datasetName,
+        helpClassName: 'dataflow-dataset-help-step',
+        handleRedirect: () => {
+          setSelectedPreparationSet(set);
+          handleRedirect(
+            getUrl(
+              routes.PREPARATION_DATAFLOW_REPRESENTATIVE,
+              { dataflowId, representativeId: dataProviderId, code: set.code },
+              true
+            )
+          );
+        },
+        layout: 'defaultBigButton',
+        onWheel: getUrl(
+          routes.PREPARATION_DATAFLOW_REPRESENTATIVE,
+          { dataflowId, representativeId: dataProviderId, code: set.code },
+          true
+        ),
+        visibility: set.isCreated
+      };
+    });
+  };
+
   const groupByRepresentativeModels = buildGroupByRepresentativeModels(dataflowState?.data?.datasets).sort((a, b) => a.caption.localeCompare(b.caption));
+
+  const preparationSetsModels = isEmpty(preparationSetsList) ? [] : buildPreparationSetsModels();
 
   const checkDisabledDataCollectionButton = () =>
     isEmpty(dataflowState.data.dataCollections) &&
@@ -446,6 +511,30 @@ const useBigButtonList = ({
         ? resourcesContext.messages['disabledCreateDataCollectionNoProviders']
         : undefined,
       visibility: buttonsVisibility.createDataCollection
+    }
+  ];
+
+  const createPreparationSets = [
+    {
+      buttonClass: 'newItem',
+      buttonIcon: hasActiveLocks || isCreatingPreparationSets ? 'spinner' : 'createPreparationSets',
+      buttonIconClass: hasActiveLocks || isCreatingPreparationSets ? 'spinner' : '',
+      caption: resourcesContext.messages['createPreparationSets'],
+      enabled: !hasActiveLocks && !isEmpty(notCreatedSets) && !dataflowState.hasEnableEditingDatasets,
+      handleRedirect: () =>
+        !hasActiveLocks &&
+        !isEmpty(notCreatedSets) &&
+        !dataflowState.hasEnableEditingDatasets &&
+        onCreatePreparationSets(),
+      layout: 'defaultBigButton',
+      tooltip:
+        isEmpty(notCreatedSets) && preparationSetsList?.length > 0
+          ? resourcesContext.messages['preparationSetsCreated']
+          : !isEmpty(notCreatedSets) && dataflowState.hasEnableEditingDatasets
+          ? resourcesContext.messages['createPreparationSetsDisableEditTooltip']
+          : undefined,
+
+      visibility: bigData && !code && buttonsVisibility.createPreparationSets
     }
   ];
 
@@ -574,9 +663,9 @@ const useBigButtonList = ({
         buttonIcon: isReleasing ? 'spinner' : 'released',
         buttonIconClass: isReleasing ? 'spinner' : 'released',
         caption: resourcesContext.messages['releaseDataCollection'],
-        enabled: !dataflowState.hasIcebergTables && dataflowState.isReleasable && !isReleasing,
+        enabled: !dataflowState.hasEnableEditingDatasets && dataflowState.isReleasable && !isReleasing,
         handleRedirect:
-          !dataflowState.hasIcebergTables && dataflowState.isReleasable && !isReleasing
+          !dataflowState.hasEnableEditingDatasets && dataflowState.isReleasable && !isReleasing
             ? () => onOpenReleaseConfirmDialog()
             : () => {},
         helpClassName: 'dataflow-big-buttons-release-help-step',
@@ -672,6 +761,7 @@ const useBigButtonList = ({
   const releaseBigButton = onBuildReleaseButton();
 
   return [
+    ...managePreparationSetsBigButton,
     ...manageReportersBigButton,
     ...helpBigButton,
     ...designDatasetModels,
@@ -689,7 +779,9 @@ const useBigButtonList = ({
     ...updateDatasetsNewRepresentatives,
     ...groupByRepresentativeModels,
     ...receiptBigButton,
-    ...releaseBigButton
+    ...createPreparationSets,
+    ...releaseBigButton,
+    ...preparationSetsModels
   ];
 };
 

@@ -21,7 +21,9 @@ public enum DatasetTypeEnum {
   EUDATASET("EUDATASET"),
 
   /** The reference. */
-  REFERENCE("REFERENCE");
+  REFERENCE("REFERENCE"),
+
+  PREPARATION("PREPARATION");
 
 
   /** The value. */

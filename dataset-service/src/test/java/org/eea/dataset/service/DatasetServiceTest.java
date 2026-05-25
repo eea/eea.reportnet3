@@ -3173,7 +3173,7 @@ DatasetServiceTest {
             recordRepository.findAndGenerateETLJson(Mockito.anyLong(), Mockito.any(), Mockito.any(),
                 Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn("");
-    datasetService.etlExportDataset(0l, outputStream, id.toString(), 10, 10, "", "", "");
+    datasetService.etlExportDataset(0l, outputStream, id.toString(), 10, 10, "", "", "", null);
     Mockito.verify(outputStream, times(1)).flush();
   }
 
@@ -3206,7 +3206,7 @@ DatasetServiceTest {
             recordRepository.findAndGenerateETLJson(Mockito.anyLong(), Mockito.any(), Mockito.any(),
                 Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
         .thenThrow(EEAException.class);
-    datasetService.etlExportDataset(0l, outputStream, id.toString(), 10, 10, "", "", "");
+    datasetService.etlExportDataset(0l, outputStream, id.toString(), 10, 10, "", "", "", null);
     Mockito.verify(recordRepository, times(1)).findAndGenerateETLJson(Mockito.anyLong(),
         Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
         Mockito.any());

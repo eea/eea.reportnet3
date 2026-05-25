@@ -60,7 +60,9 @@ public class ExecuteSqlValidationCommandDL extends ExecuteValidationCommand {
         final String datasetSchemaId = String.valueOf(eeaEventVO.getData().get("datasetSchema"));
         final String tableSchemaId = String.valueOf(eeaEventVO.getData().get("tableSchemaId"));
         final boolean createParquetWithSQL = Boolean.valueOf(String.valueOf(eeaEventVO.getData().get("createParquetWithSQL")));
-        dremioRulesExecuteService.execute(dataflowId, datasetId, datasetSchemaId, tableName, tableSchemaId, ruleId, dataProviderId, taskId, createParquetWithSQL);
+        final Object tmp = eeaEventVO.getData().get("preparationCode");
+        final String preparationCode = tmp == null ? null : String.valueOf(tmp);
+        dremioRulesExecuteService.execute(dataflowId, datasetId, datasetSchemaId, tableName, tableSchemaId, ruleId, dataProviderId, taskId, createParquetWithSQL, preparationCode);
       };
     } catch (Exception e) {
       LOG.error("Unexpected error! Error executing event COMMAND_VALIDATE_DL_WITH_SQL. Message: {}", e.getMessage());
