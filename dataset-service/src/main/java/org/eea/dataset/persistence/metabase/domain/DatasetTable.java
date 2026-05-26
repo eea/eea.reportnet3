@@ -2,6 +2,7 @@ package org.eea.dataset.persistence.metabase.domain;
 
 import lombok.*;
 import javax.persistence.*;
+import java.util.Date;
 
 @Entity
 @AllArgsConstructor
@@ -33,16 +34,18 @@ public class DatasetTable {
     @Column(name = "EDITING_USERNAME")
     private String editingUsername;
 
+    @Column(name = "EDIT_LOCK_EXPIRES_AT")
+    private Date editLockExpirationDate;
+
     @Transient
     private String tableName;
 
-    public DatasetTable(Long datasetId, String datasetSchemaId, String tableSchemaId, Boolean isIcebergTableCreated, String editingUsername) {
+    public DatasetTable(Long datasetId, String datasetSchemaId, String tableSchemaId, Boolean isIcebergTableCreated, String editingUsername, Date editLockExpirationDate) {
         this.datasetId = datasetId;
         this.datasetSchemaId = datasetSchemaId;
         this.tableSchemaId = tableSchemaId;
         this.isIcebergTableCreated = isIcebergTableCreated;
         this.editingUsername = editingUsername;
-
-
+        this.editLockExpirationDate = editLockExpirationDate;
     }
 }

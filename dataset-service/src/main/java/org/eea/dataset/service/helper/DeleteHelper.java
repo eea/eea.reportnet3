@@ -274,7 +274,7 @@ public class DeleteHelper {
       DataSetMetabaseVO dataset = datasetMetabaseService.findDatasetMetabase(datasetId);
       String datasetSchemaId = dataset.getDatasetSchema();
       Long providerId = datasetService.getDataProviderIdById(datasetId);
-      ImportFileInDremioInfo importFileInDremioInfo = new ImportFileInDremioInfo(null, datasetId, dataflowId, providerId, null, null, true, null, integrationId, null);
+      ImportFileInDremioInfo importFileInDremioInfo = new ImportFileInDremioInfo(null, datasetId, dataflowId, providerId, null, null, true, null, integrationId, null, null);
       try {
         parquetConverterService.deleteAllDataBeforeImport(importFileInDremioInfo, datasetSchemaId, dataset);
       } catch (Exception e) {

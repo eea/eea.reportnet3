@@ -112,7 +112,7 @@ public class BigDataDatasetServiceImplTest {
         Mockito.when(datasetService.getDatasetType(datasetId)).thenReturn(datasetType);
         Mockito.when(datasetSchemaService.getTableSchemaVO(tableSchemaId, datasetSchemaId)).thenReturn(tableSchemaVO);
         Mockito.when(jobControllerZuul.findJobById(jobId)).thenReturn(jobVO);
-        bigDataDatasetService.etlImportDataset(datasetId, dataflowId, providerId, replaceData, tableSchemaId, delimiter, filePathInS3, jobId, dataFlowVO, dataSetMetabaseVO);
+        bigDataDatasetService.etlImportDataset(datasetId, dataflowId, providerId, replaceData, tableSchemaId, delimiter, filePathInS3, jobId, dataFlowVO, dataSetMetabaseVO, null);
         Mockito.verify(jobControllerZuul, Mockito.times(1)).updateJobStatusAndInfo(jobId, jobStatus, jobInfo, null);
     }
 
@@ -168,7 +168,7 @@ public class BigDataDatasetServiceImplTest {
         Mockito.when(datasetSchemaService.getTableSchemaVO(tableSchemaId1, datasetSchemaId)).thenReturn(tableSchemaVO1);
         Mockito.when(datasetSchemaService.getTableSchemaVO(tableSchemaId2, datasetSchemaId)).thenReturn(tableSchemaVO2);
         Mockito.when(jobControllerZuul.findJobById(jobId)).thenReturn(jobVO);
-        bigDataDatasetService.etlImportDataset(datasetId, dataflowId, providerId, replaceData, null, delimiter, filePathInS3, jobId, dataFlowVO, dataSetMetabaseVO);
+        bigDataDatasetService.etlImportDataset(datasetId, dataflowId, providerId, replaceData, null, delimiter, filePathInS3, jobId, dataFlowVO, dataSetMetabaseVO, null);
         Mockito.verify(jobControllerZuul, Mockito.times(1)).updateJobStatusAndInfo(jobId, jobStatus, jobInfo, null);
     }
 
@@ -199,7 +199,7 @@ public class BigDataDatasetServiceImplTest {
         Mockito.when(datasetService.getDatasetType(datasetId)).thenReturn(datasetType);
         Mockito.when(datasetSchemaService.getTableSchemaVO(tableSchemaId, datasetSchemaId)).thenReturn(tableSchemaVO);
         Mockito.when(jobControllerZuul.findJobById(jobId)).thenReturn(jobVO);
-        bigDataDatasetService.etlImportDataset(datasetId, dataflowId, providerId, replaceData, tableSchemaId, delimiter, filePathInS3, jobId, dataFlowVO, dataSetMetabaseVO);
+        bigDataDatasetService.etlImportDataset(datasetId, dataflowId, providerId, replaceData, tableSchemaId, delimiter, filePathInS3, jobId, dataFlowVO, dataSetMetabaseVO, null);
         Mockito.verify(jobControllerZuul, Mockito.times(1)).updateJobStatusAndInfo(jobId, jobStatus, jobInfo, null);
     }
 
@@ -235,7 +235,7 @@ public class BigDataDatasetServiceImplTest {
         Mockito.when(datasetService.getDatasetType(datasetId)).thenReturn(datasetType);
         Mockito.when(jobControllerZuul.findJobById(jobId)).thenReturn(jobVO);
         Mockito.when(datasetSchemaService.getTableSchemaVO(tableSchemaId, dataSetMetabaseVO.getDatasetSchema())).thenReturn(tableSchemaVO);
-        bigDataDatasetService.etlImportDataset(datasetId, dataflowId, providerId, replaceData, tableSchemaId, delimiter, filePathInS3, jobId, dataFlowVO, dataSetMetabaseVO);
+        bigDataDatasetService.etlImportDataset(datasetId, dataflowId, providerId, replaceData, tableSchemaId, delimiter, filePathInS3, jobId, dataFlowVO, dataSetMetabaseVO, null);
         Mockito.verify(jobControllerZuul, Mockito.times(1)).updateJobStatusAndInfo(jobId, jobStatus, jobInfo, null);
     }
 
@@ -260,7 +260,7 @@ public class BigDataDatasetServiceImplTest {
 
         Mockito.when(datasetService.getDatasetType(datasetId)).thenReturn(datasetType);
         Mockito.when(jobControllerZuul.findJobById(jobId)).thenReturn(jobVO);
-        bigDataDatasetService.etlImportDataset(datasetId, dataflowId, providerId, replaceData, tableSchemaId, delimiter, filePathInS3, jobId, dataFlowVO, dataSetMetabaseVO);
+        bigDataDatasetService.etlImportDataset(datasetId, dataflowId, providerId, replaceData, tableSchemaId, delimiter, filePathInS3, jobId, dataFlowVO, dataSetMetabaseVO, null);
         Mockito.verify(jobControllerZuul, Mockito.times(1)).updateJobStatusAndInfo(jobId, jobStatus, jobInfo, null);
     }
 
@@ -305,8 +305,8 @@ public class BigDataDatasetServiceImplTest {
         BigDataDatasetServiceImpl bigDataDatasetServiceSpy = Mockito.spy(bigDataDatasetService);
         Mockito.when(datasetSchemaService.getTableSchemasIds(datasetId)).thenReturn(tableSchemaIdNameVOS);
         Mockito.when(schemasRepository.findByIdDataSetSchema(any())).thenReturn(datasetSchema);
-        Mockito.doReturn(mockFile).when(bigDataDatasetServiceSpy).createEtlImportFolder(datasetId, jobId);
-        Mockito.doReturn(fileList).when(bigDataDatasetServiceSpy).storeAndUnzipEtlImportZipFile(datasetId, filePathInS3, fileExtension, jobId, mockFile, tableNamesSet, attachmentsExistPerTableName);
+        Mockito.doReturn(mockFile).when(bigDataDatasetServiceSpy).createEtlImportFolder(datasetId, jobId, null);
+        Mockito.doReturn(fileList).when(bigDataDatasetServiceSpy).storeAndUnzipEtlImportZipFile(datasetId, filePathInS3, fileExtension, jobId, mockFile, tableNamesSet, attachmentsExistPerTableName, null);
         Mockito.when(representativeControllerZuul.findDataProviderById(providerId)).thenReturn(dataProviderVO);
 
         Mockito.doAnswer(invocation -> {
@@ -315,7 +315,7 @@ public class BigDataDatasetServiceImplTest {
                     throw new Exception(errorMessage);
                 }).when(parquetConverterService).convertCsvFilesToParquetFiles(any(), eq(fileList), eq(datasetSchema), eq(dataSetMetabaseVO));
 
-        bigDataDatasetServiceSpy.etlImportDataset(datasetId, dataflowId, providerId, replaceData, tableSchemaId, delimiter, filePathInS3, jobId, dataFlowVO, dataSetMetabaseVO);
+        bigDataDatasetServiceSpy.etlImportDataset(datasetId, dataflowId, providerId, replaceData, tableSchemaId, delimiter, filePathInS3, jobId, dataFlowVO, dataSetMetabaseVO, null);
 
         ArgumentCaptor<ImportFileInDremioInfo> captor = ArgumentCaptor.forClass(ImportFileInDremioInfo.class);
         Mockito.verify(parquetConverterService).convertCsvFilesToParquetFiles(captor.capture(), eq(fileList), eq(datasetSchema), eq(dataSetMetabaseVO));
@@ -363,8 +363,8 @@ public class BigDataDatasetServiceImplTest {
         BigDataDatasetServiceImpl bigDataDatasetServiceSpy = Mockito.spy(bigDataDatasetService);
         Mockito.when(datasetSchemaService.getTableSchemasIds(datasetId)).thenReturn(tableSchemaIdNameVOS);
         Mockito.when(schemasRepository.findByIdDataSetSchema(any())).thenReturn(datasetSchema);
-        Mockito.doReturn(mockFile).when(bigDataDatasetServiceSpy).createEtlImportFolder(datasetId, jobId);
-        Mockito.doReturn(fileList).when(bigDataDatasetServiceSpy).storeAndUnzipEtlImportZipFile(datasetId, filePathInS3, fileExtension, jobId, mockFile, tableNamesSet, attachmentsExistPerTableName);
+        Mockito.doReturn(mockFile).when(bigDataDatasetServiceSpy).createEtlImportFolder(datasetId, jobId, null);
+        Mockito.doReturn(fileList).when(bigDataDatasetServiceSpy).storeAndUnzipEtlImportZipFile(datasetId, filePathInS3, fileExtension, jobId, mockFile, tableNamesSet, attachmentsExistPerTableName, null);
         Mockito.when(representativeControllerZuul.findDataProviderById(providerId)).thenReturn(dataProviderVO);
 
         Mockito.doAnswer(invocation -> {
@@ -373,7 +373,7 @@ public class BigDataDatasetServiceImplTest {
             throw new RuntimeException(errorMessage);
         }).when(parquetConverterService).convertCsvFilesToParquetFiles(any(), eq(fileList), eq(datasetSchema), eq(dataSetMetabaseVO));
 
-        bigDataDatasetServiceSpy.etlImportDataset(datasetId, dataflowId, providerId, replaceData, tableSchemaId, delimiter, filePathInS3, jobId, dataFlowVO, dataSetMetabaseVO);
+        bigDataDatasetServiceSpy.etlImportDataset(datasetId, dataflowId, providerId, replaceData, tableSchemaId, delimiter, filePathInS3, jobId, dataFlowVO, dataSetMetabaseVO, null);
 
         ArgumentCaptor<ImportFileInDremioInfo> captor = ArgumentCaptor.forClass(ImportFileInDremioInfo.class);
         Mockito.verify(parquetConverterService).convertCsvFilesToParquetFiles(captor.capture(), eq(fileList), eq(datasetSchema), eq(dataSetMetabaseVO));
@@ -420,11 +420,11 @@ public class BigDataDatasetServiceImplTest {
         BigDataDatasetServiceImpl bigDataDatasetServiceSpy = Mockito.spy(bigDataDatasetService);
         Mockito.when(datasetSchemaService.getTableSchemasIds(datasetId)).thenReturn(tableSchemaIdNameVOS);
         Mockito.when(schemasRepository.findByIdDataSetSchema(any())).thenReturn(datasetSchema);
-        Mockito.doReturn(mockFile).when(bigDataDatasetServiceSpy).createEtlImportFolder(datasetId, jobId);
-        Mockito.doReturn(fileList).when(bigDataDatasetServiceSpy).storeAndUnzipEtlImportZipFile(datasetId, filePathInS3, fileExtension, jobId, mockFile, tableNamesSet, attachmentsExistPerTableName);
+        Mockito.doReturn(mockFile).when(bigDataDatasetServiceSpy).createEtlImportFolder(datasetId, jobId, null);
+        Mockito.doReturn(fileList).when(bigDataDatasetServiceSpy).storeAndUnzipEtlImportZipFile(datasetId, filePathInS3, fileExtension, jobId, mockFile, tableNamesSet, attachmentsExistPerTableName, null);
         Mockito.when(representativeControllerZuul.findDataProviderById(providerId)).thenReturn(dataProviderVO);
 
-        bigDataDatasetServiceSpy.etlImportDataset(datasetId, dataflowId, providerId, replaceData, tableSchemaId, delimiter, filePathInS3, jobId, dataFlowVO, dataSetMetabaseVO);
+        bigDataDatasetServiceSpy.etlImportDataset(datasetId, dataflowId, providerId, replaceData, tableSchemaId, delimiter, filePathInS3, jobId, dataFlowVO, dataSetMetabaseVO, null);
         Mockito.verify(jobControllerZuul, Mockito.times(1)).updateJobStatus(jobId, jobStatus);
     }
 
@@ -471,8 +471,8 @@ public class BigDataDatasetServiceImplTest {
         BigDataDatasetServiceImpl bigDataDatasetServiceSpy = Mockito.spy(bigDataDatasetService);
         Mockito.when(datasetSchemaService.getTableSchemasIds(datasetId)).thenReturn(tableSchemaIdNameVOS);
         Mockito.when(schemasRepository.findByIdDataSetSchema(any())).thenReturn(datasetSchema);
-        Mockito.doReturn(mockFile).when(bigDataDatasetServiceSpy).createEtlImportFolder(datasetId, jobId);
-        Mockito.doReturn(fileList).when(bigDataDatasetServiceSpy).storeAndUnzipEtlImportZipFile(datasetId, filePathInS3, fileExtension, jobId, mockFile, tableNamesSet, attachmentsExistPerTableName);
+        Mockito.doReturn(mockFile).when(bigDataDatasetServiceSpy).createEtlImportFolder(datasetId, jobId, null);
+        Mockito.doReturn(fileList).when(bigDataDatasetServiceSpy).storeAndUnzipEtlImportZipFile(datasetId, filePathInS3, fileExtension, jobId, mockFile, tableNamesSet, attachmentsExistPerTableName, null);
         Mockito.when(representativeControllerZuul.findDataProviderById(providerId)).thenReturn(dataProviderVO);
 
         Mockito.doAnswer(invocation -> {
@@ -481,7 +481,7 @@ public class BigDataDatasetServiceImplTest {
             return null;
         }).when(parquetConverterService).convertCsvFilesToParquetFiles(any(), eq(fileList), eq(datasetSchema), eq(dataSetMetabaseVO));
 
-        bigDataDatasetServiceSpy.etlImportDataset(datasetId, dataflowId, providerId, replaceData, tableSchemaId, delimiter, filePathInS3, jobId, dataFlowVO, dataSetMetabaseVO);
+        bigDataDatasetServiceSpy.etlImportDataset(datasetId, dataflowId, providerId, replaceData, tableSchemaId, delimiter, filePathInS3, jobId, dataFlowVO, dataSetMetabaseVO, null);
 
         ArgumentCaptor<ImportFileInDremioInfo> captor = ArgumentCaptor.forClass(ImportFileInDremioInfo.class);
         Mockito.verify(parquetConverterService).convertCsvFilesToParquetFiles(captor.capture(), eq(fileList), eq(datasetSchema), eq(dataSetMetabaseVO));
@@ -530,8 +530,8 @@ public class BigDataDatasetServiceImplTest {
         BigDataDatasetServiceImpl bigDataDatasetServiceSpy = Mockito.spy(bigDataDatasetService);
         Mockito.when(datasetSchemaService.getTableSchemasIds(datasetId)).thenReturn(tableSchemaIdNameVOS);
         Mockito.when(schemasRepository.findByIdDataSetSchema(any())).thenReturn(datasetSchema);
-        Mockito.doReturn(mockFile).when(bigDataDatasetServiceSpy).createEtlImportFolder(datasetId, jobId);
-        Mockito.doReturn(fileList).when(bigDataDatasetServiceSpy).storeAndUnzipEtlImportZipFile(datasetId, filePathInS3, fileExtension, jobId, mockFile, tableNamesSet, attachmentsExistPerTableName);
+        Mockito.doReturn(mockFile).when(bigDataDatasetServiceSpy).createEtlImportFolder(datasetId, jobId, null);
+        Mockito.doReturn(fileList).when(bigDataDatasetServiceSpy).storeAndUnzipEtlImportZipFile(datasetId, filePathInS3, fileExtension, jobId, mockFile, tableNamesSet, attachmentsExistPerTableName, null);
         Mockito.when(representativeControllerZuul.findDataProviderById(providerId)).thenReturn(dataProviderVO);
 
         Mockito.doAnswer(invocation -> {
@@ -540,7 +540,7 @@ public class BigDataDatasetServiceImplTest {
             return null;
         }).when(parquetConverterService).convertCsvFilesToParquetFiles(any(), eq(fileList), eq(datasetSchema), eq(dataSetMetabaseVO));
 
-        bigDataDatasetServiceSpy.etlImportDataset(datasetId, dataflowId, providerId, replaceData, tableSchemaId, delimiter, filePathInS3, jobId, dataFlowVO, dataSetMetabaseVO);
+        bigDataDatasetServiceSpy.etlImportDataset(datasetId, dataflowId, providerId, replaceData, tableSchemaId, delimiter, filePathInS3, jobId, dataFlowVO, dataSetMetabaseVO, null);
 
         ArgumentCaptor<ImportFileInDremioInfo> captor = ArgumentCaptor.forClass(ImportFileInDremioInfo.class);
         Mockito.verify(parquetConverterService).convertCsvFilesToParquetFiles(captor.capture(), eq(fileList), eq(datasetSchema), eq(dataSetMetabaseVO));

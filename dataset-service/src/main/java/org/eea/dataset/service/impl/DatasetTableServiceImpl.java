@@ -2,6 +2,7 @@ package org.eea.dataset.service.impl;
 
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.BooleanUtils;
+import org.apache.kafka.clients.consumer.Consumer;
 import org.eea.dataset.mapper.DatasetTableMapper;
 import org.eea.dataset.mapper.DatasetTableMapperImpl;
 import org.eea.dataset.persistence.metabase.domain.DatasetTable;
@@ -14,16 +15,15 @@ import org.eea.interfaces.vo.dataset.DatasetTableVO;
 import org.eea.interfaces.vo.dataset.schemas.DatasetEditingStatusVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaIdNameVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
+import org.eea.lock.redis.LockEnum;
+import org.eea.lock.redis.RedisLockService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -42,6 +42,12 @@ public class DatasetTableServiceImpl implements DatasetTableService {
     @Autowired
     private DatasetTableMapper datasetTableMapper;
 
+    @Autowired
+    private RedisLockService redisLockService;
+
+    @Value("${dataset.edit.lock.expirationInterval}")
+    private Long expirationIntervalInHours;
+
     @Override
     public DatasetTable findEntryByDatasetIdAndTableSchemaId(Long datasetId, String tableSchemaId){
         Optional<DatasetTable> optionalDatasetTable = datasetTableRepository.findByDatasetIdAndTableSchemaId(datasetId, tableSchemaId);
@@ -58,6 +64,7 @@ public class DatasetTableServiceImpl implements DatasetTableService {
             //we need to update the existing entry
             existingEntry.setIsIcebergTableCreated(datasetTable.getIsIcebergTableCreated());
             existingEntry.setEditingUsername(datasetTable.getEditingUsername());
+            existingEntry.setEditLockExpirationDate(datasetTable.getEditLockExpirationDate());
             datasetTableRepository.save(existingEntry);
         }
         else{
@@ -162,7 +169,7 @@ public class DatasetTableServiceImpl implements DatasetTableService {
         }
 
         // Acquire lock
-        int locked = datasetTableRepository.lockEditingForDatasetUser(datasetId, username);
+        int locked = datasetTableRepository.lockEditingForDatasetUser(datasetId, username, expirationIntervalInHours);
 
         // If lock == 0, another user already holds editing lock, fail
         if (locked == 0) {
@@ -197,13 +204,17 @@ public class DatasetTableServiceImpl implements DatasetTableService {
 
     @Override
     public DatasetEditingStatusVO getEditingStatus(Long datasetId, String username) {
-        String editor = getDatasetEditingUsername(datasetId);
+        final String editor = getDatasetEditingUsername(datasetId);
 
-        DatasetEditingStatusVO vo = new DatasetEditingStatusVO();
+        final DatasetEditingStatusVO vo = new DatasetEditingStatusVO();
         vo.setDatasetId(datasetId);
         vo.setIsEditing(editor != null);
         vo.setEditor(editor);
         vo.setIsLockedForUser(editor != null && !editor.equals(username));
+
+        final String lockKey = LockEnum.PARQUET_CONVERSION.getValue() + "_" + datasetId;
+        final Map<String, String> activeLocks = redisLockService.listActiveLocks(lockKey);
+        vo.setIsConverting(!activeLocks.isEmpty());
 
         return vo;
     }
@@ -237,4 +248,39 @@ public class DatasetTableServiceImpl implements DatasetTableService {
         datasetTableRepository.unlockEditingForDatasetUser(datasetId);
     }
 
+    public Date getLockExpirationDate(Long datasetId) {
+        return datasetTableRepository.getLockExpirationDateByDatasetId(datasetId);
+    }
+
+    @Override
+    public List<DatasetTableVO> getDatasetTablesWithExpiredEditingLocks() {
+
+        final List<DatasetTable> datasetTables = datasetTableRepository.findDatasetTableByEditLockExpirationDateBefore(new Date());
+
+        if (datasetTables.isEmpty()) {
+            return new ArrayList<>();
+        }
+        final DatasetTableMapperImpl mapper = new DatasetTableMapperImpl();
+        return mapper.entityListToClass(datasetTables);
+    }
+
+    public String getDatasetNonExpiredEditingUsername(Long datasetId) {
+        final List<String> editors = datasetTableRepository.findNonExpiredEditors(datasetId);
+        return editors.stream()
+                .filter(Objects::nonNull)
+                .distinct()
+                .sorted()           // alphabetical for deterministic output
+                .findFirst()
+                .orElse(null);
+    }
+
+    public List<DatasetTableVO> getDatasetTablesByDataflowId(Long dataflowId) {
+        final List<DatasetTable> datasetTables = datasetTableRepository.findDatasetTableByDataflowId(dataflowId);
+
+        if (datasetTables.isEmpty()) {
+            return new ArrayList<>();
+        }
+        final DatasetTableMapperImpl mapper = new DatasetTableMapperImpl();
+        return mapper.entityListToClass(datasetTables);
+    }
 }

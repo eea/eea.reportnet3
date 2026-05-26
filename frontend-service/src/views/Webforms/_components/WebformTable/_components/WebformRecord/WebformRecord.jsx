@@ -90,11 +90,7 @@ export const WebformRecord = ({
   const resourcesContext = useContext(ResourcesContext);
 
   const [webformRecordState, webformRecordDispatch] = useReducer(webformRecordReducer, {
-    changedConditionalFieldData: null,
     conditionalFieldChange: false,
-    dependantConditionalFieldId: '',
-    isConditionalChanged: false,
-    isDependantConditionalField: false,
     isDialogVisible: { deleteRow: false, uploadFile: false },
     newRecord: {},
     record,
@@ -102,15 +98,7 @@ export const WebformRecord = ({
     selectedRecordId: null
   });
 
-  const {
-    changedConditionalFieldData,
-    conditionalFieldChange,
-    dependantConditionalFieldId,
-    isConditionalChanged,
-    isDependantConditionalField,
-    isDialogVisible,
-    selectedRecordId
-  } = webformRecordState;
+  const { conditionalFieldChange, isDialogVisible, selectedRecordId } = webformRecordState;
 
   const { parseMultiselect, parseNewRecordData } = WebformRecordUtils;
   const { parseRecordValidations } = WebformsUtils;
@@ -298,19 +286,15 @@ export const WebformRecord = ({
                   {
                     <WebformField
                       bigData={bigData}
-                      changedConditionalFieldData={changedConditionalFieldData}
                       columnsSchema={columnsSchema}
                       conditionalFieldChange={conditionalFieldChange}
                       dataflowId={dataflowId}
                       dataProviderId={dataProviderId}
                       datasetId={datasetId}
                       datasetSchemaId={datasetSchemaId}
-                      dependantConditionalFieldId={dependantConditionalFieldId}
                       element={element}
                       hasErrors={!isNil(element.validations)}
                       isConditional={checkIfElementIsConditional(element)}
-                      isConditionalChanged={isConditionalChanged}
-                      isDependantConditionalField={isDependantConditionalField}
                       isSubTableCreated={getCreatedSubTable(webformRecordState.record, element)}
                       isViewMode={isViewMode}
                       onFieldUpdate={onFieldUpdate}
@@ -363,7 +347,10 @@ export const WebformRecord = ({
 
         // Find reference PK field ID
         const referencePkFieldId = element.records[0]?.fields.find(
-          field => !isNil(field?.referencedField?.idPk) && field?.referencedField?.idPk !== rootPkFieldId
+          field =>
+            !isNil(field?.referencedField?.idPk) &&
+            field?.referencedField?.idPk !== rootPkFieldId &&
+            field?.referencedField?.idDatasetSchema === datasetSchemaId
         )?.referencedField?.idPk;
 
         // Find the PK value for that field ID
@@ -381,15 +368,25 @@ export const WebformRecord = ({
         // Build FK fields list
         const fkFields =
           element?.elements
-            ?.filter(el => !isNil(el.referenceParentField))
+            ?.filter(
+              ({ referencedField }) => !isEmpty(referencedField) && referencedField.idDatasetSchema === datasetSchemaId
+            )
             ?.map(field => {
-              const referencedElement = record.elements.find(recordElement =>
-                TextUtils.areEquals(field?.referenceParentField, recordElement.name)
+              const { referencedField } = field;
+
+              const referencedRecordField = record.elements.find(
+                recordElement => recordElement.fieldSchema === referencedField.idPk
               );
+
+              const rootPkField =
+                referencedField.idPk === rootPkFieldId
+                  ? record.fields.find(recordField => recordField.name === field.name)
+                  : undefined;
+
               return {
                 fieldName: field.name,
-                referenceFieldName: field?.referenceParentField,
-                value: referencedElement?.value
+                referenceFieldName: field.referenceParentField,
+                value: referencedRecordField?.value ?? rootPkField?.value
               };
             }) ?? [];
 

@@ -57,26 +57,12 @@ export const webformRecordReducer = (state, { type, payload }) => {
         }
       }
 
-      let dependantConditionalFieldId;
-      let isDependantConditionalField = false;
-
-      if (payload.conditional && (payload.field.fieldType === 'LINK' || payload.field.fieldType === 'CODELIST')) {
-        if (!isEmpty(payload.field?.referenceParentField)) {
-          isDependantConditionalField = true;
-          dependantConditionalFieldId = payload.field.fieldSchema || payload.field.fieldSchemaId;
-        }
-      }
-
       return {
         ...state,
         selectedField: payload.field,
         newRecord: inmNewRecord,
         record: inmRecord,
-        changedConditionalFieldData: payload.conditional ? payload.field : null,
-        conditionalFieldChange: payload.conditional ? !state.conditionalFieldChange : state.conditionalFieldChange,
-        isConditionalChanged: payload.conditional,
-        isDependantConditionalField,
-        dependantConditionalFieldId
+        conditionalFieldChange: payload.conditional ? !state.conditionalFieldChange : state.conditionalFieldChange
       };
 
     case 'GET_DELETE_ROW_ID':

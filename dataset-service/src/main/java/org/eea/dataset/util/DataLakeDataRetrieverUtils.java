@@ -98,7 +98,7 @@ public class DataLakeDataRetrieverUtils {
                 dataQuery.append(" order by CASE when \"").append(sortField.getName()).append("\" like '' THEN '0000-00-00' ELSE CAST(\"").append(sortField.getName()).append("\" as DATE) END");
                 break;
             default:
-                dataQuery.append(" order by ").append(sortField.getName());
+                dataQuery.append(" order by \"").append(sortField.getName()).append("\"");
                 break;
         }
         dataQuery.append(sort[1].equals("1") ? " asc" : " desc");
@@ -138,7 +138,7 @@ public class DataLakeDataRetrieverUtils {
     }
 
     public static StringBuilder buildFilteredQuery(DataSetMetabaseVO dataset, String fields, String fieldSchemaId, String fieldValue, Map<String, FieldSchemaVO> fieldIdMap,
-                                            ErrorTypeEnum[] levelError, String[] qcCodes, String validationTablePath) {
+                                            ErrorTypeEnum[] levelError, String[] qcCodes, String validationTablePath, boolean forCount) {
         StringBuilder query = new StringBuilder();
         boolean levelErrorNotEmpty = levelError!=null && levelError.length>0 && levelError.length!=MAX_FILTERS;
         boolean qcCodesNotEmpty = qcCodes!=null && qcCodes.length>0;
@@ -154,8 +154,8 @@ public class DataLakeDataRetrieverUtils {
         if (qcCodesNotEmpty && validationTablePath!=null) {
             buildQcCodeFilterQuery(fieldValue, query, levelErrorNotEmpty, qcCodes, validationTablePath);
         }
-        //sorting
-        if (fields !=null) {
+        //sorting, do not apply for count query
+        if (fields !=null && !forCount) {
             buildSortQuery(fields, dataset.getDatasetSchema(), fieldIdMap, query);
         }
         return query;

@@ -72,6 +72,7 @@ export const CustomFileUpload = ({
   onUpload = null,
   onValidateFile = null,
   operation = 'POST',
+  preparationSetCode,
   previewWidth = 50,
   providerId,
   replaceCheck = false,
@@ -388,7 +389,8 @@ export const CustomFileUpload = ({
         replace: state.replace,
         integrationId,
         delimiter: encodeURIComponent(config.IMPORT_FILE_DELIMITER),
-        jobId
+        jobId,
+        code: preparationSetCode
       });
     } catch (error) {
       if (error.response.status !== 504) {
@@ -553,7 +555,8 @@ export const CustomFileUpload = ({
         replace: state.replace,
         integrationId,
         delimiter: encodeURIComponent(config.IMPORT_FILE_DELIMITER),
-        fileName
+        fileName,
+        code: preparationSetCode
       });
       setJobId(data?.jobId);
       setPresignedUrl(data?.presignedUrl);

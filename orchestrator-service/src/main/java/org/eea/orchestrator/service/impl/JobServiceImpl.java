@@ -1,6 +1,5 @@
 package org.eea.orchestrator.service.impl;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.BooleanUtils;
@@ -17,7 +16,6 @@ import org.eea.interfaces.controller.ums.UserManagementController.UserManagement
 import org.eea.interfaces.controller.validation.ValidationController.ValidationControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
-import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.orchestrator.JobVO;
@@ -34,7 +32,6 @@ import org.eea.interfaces.vo.validation.TaskVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
-import org.eea.lock.annotation.LockCriteria;
 import org.eea.orchestrator.mapper.JobMapper;
 import org.eea.orchestrator.persistence.domain.Job;
 import org.eea.orchestrator.persistence.repository.JobRepository;
@@ -53,20 +50,14 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.transaction.Transactional;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigInteger;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.sql.Timestamp;
 import java.util.*;
-import java.util.stream.Stream;
 
 import static org.eea.utils.LiteralConstants.*;
 
@@ -164,10 +155,11 @@ public class JobServiceImpl implements JobService {
 
     @Override
     public JobsVO getJobs(Pageable pageable, boolean asc, String sortedColumn, Long jobId, String jobTypes, Long dataflowId, String dataflowName, Long providerId,
-                          Long datasetId, String datasetName, String creatorUsername, String jobStatuses) {
+                          Long datasetId, String datasetName, String creatorUsername, String jobStatuses, String preparationCode) {
+
         String sortedTableColumn = jobUtils.getJobColumnNameByObjectName(sortedColumn);
         String remainingJobsStatusFilter = "IN_PROGRESS,QUEUED";
-        List<Job> jobs = jobRepository.findJobsPaginated(pageable, asc, sortedTableColumn, jobId, jobTypes, dataflowId, dataflowName, providerId, datasetId, datasetName, creatorUsername, jobStatuses);
+        List<Job> jobs = jobRepository.findJobsPaginated(pageable, asc, sortedTableColumn, jobId, jobTypes, dataflowId, dataflowName, providerId, datasetId, datasetName, creatorUsername, jobStatuses, preparationCode);
         List<JobVO> jobVOList = jobMapper.entityListToClass(jobs);
         JobsVO jobsVO = new JobsVO();
         jobsVO.setTotalRecords(jobRepository.count());
@@ -207,9 +199,9 @@ public class JobServiceImpl implements JobService {
 
     @Transactional
     @Override
-    public Long addJob(Long dataflowId, Long dataProviderId, Long datasetId, Map<String, Object> parameters, JobTypeEnum jobType, JobStatusEnum jobStatus, boolean release, String fmeJobId, String dataflowName, String datasetName) {
+    public Long addJob(Long dataflowId, Long dataProviderId, Long datasetId, Map<String, Object> parameters, JobTypeEnum jobType, JobStatusEnum jobStatus, boolean release, String fmeJobId, String dataflowName, String datasetName, String preparationCode) {
         Timestamp ts = new Timestamp(System.currentTimeMillis());
-        Job job = new Job(null, jobType, jobStatus, ts, ts, parameters, SecurityContextHolder.getContext().getAuthentication().getName(), release, dataflowId, dataProviderId, datasetId, fmeJobId, dataflowName, datasetName, null, null);
+        Job job = new Job(null, jobType, jobStatus, ts, ts, parameters, SecurityContextHolder.getContext().getAuthentication().getName(), release, dataflowId, dataProviderId, datasetId, fmeJobId, dataflowName, datasetName, null, null, preparationCode);
         job = jobRepository.saveAndFlushJobManually(job);
         jobHistoryService.saveJobHistory(job);
         return job.getId();
@@ -267,8 +259,8 @@ public class JobServiceImpl implements JobService {
             List<Job> jobsList = jobRepository.findByJobTypeInAndJobStatusIn(Arrays.asList(JobTypeEnum.VALIDATION, JobTypeEnum.RELEASE, JobTypeEnum.IMPORT, JobTypeEnum.ETL_IMPORT, JobTypeEnum.DELETE), Arrays.asList(JobStatusEnum.QUEUED, JobStatusEnum.IN_PROGRESS));
             for (Job job : jobsList) {
                 Map<String, Object> insertedParameters = job.getParameters();
-                if (job.getDatasetId()!=null) {
-                    if (datasetIds.contains(job.getDatasetId())) {
+                if (job.getDatasetId() != null) {
+                    if (datasetIds.contains(job.getDatasetId()) && StringUtils.isBlank(job.getPreparationCode())) {
                         return JobStatusEnum.REFUSED;
                     }
                 } else {
@@ -292,22 +284,29 @@ public class JobServiceImpl implements JobService {
                     return JobStatusEnum.REFUSED;
                 }
             }
-        } else if (jobType.equals(JobTypeEnum.IMPORT.toString()) || jobType.equals(JobTypeEnum.ETL_IMPORT.toString()) || jobType.equals(JobTypeEnum.DELETE.toString())) {
+        } else if (jobType.equals(JobTypeEnum.IMPORT.toString())
+                || jobType.equals(JobTypeEnum.ETL_IMPORT.toString())
+                || jobType.equals(JobTypeEnum.DELETE.toString())) {
             //we shouldn't add the job if there is another queued or in progress import, validation or release for the same datasetId
             List<Job> jobList = jobRepository.findByJobStatusInAndJobTypeInAndDatasetId(Arrays.asList(JobStatusEnum.QUEUED, JobStatusEnum.IN_PROGRESS), Arrays.asList(JobTypeEnum.IMPORT, JobTypeEnum.ETL_IMPORT, JobTypeEnum.RELEASE, JobTypeEnum.VALIDATION, JobTypeEnum.DELETE), datasetIds.get(0));
-            if (jobList != null && jobList.size() > 0) {
+            boolean blockingImportJobExists = false;
+
+            if (jobList != null) {
+                for (Job job : jobList) {
+                    // Skip preparation jobs
+                    if (StringUtils.isNotBlank(job.getPreparationCode() )) {
+                        continue;
+                    }
+
+                    //dataset-level blocking job
+                    blockingImportJobExists = true;
+                    break;
+                }
+            }
+            if (blockingImportJobExists) {
                 return JobStatusEnum.REFUSED;
             } else {
-                List<Job> releasesAndValidations = jobRepository.findByJobTypeInAndJobStatusInAndRelease(Arrays.asList(JobTypeEnum.RELEASE, JobTypeEnum.VALIDATION), Arrays.asList(JobStatusEnum.QUEUED, JobStatusEnum.IN_PROGRESS), true);
-                for (Job job : releasesAndValidations) {
-                    Map<String, Object> insertedParameters = job.getParameters();
-                    if (insertedParameters.get("datasetId") != null) {
-                        List<Long> insertedDatasetIds = (List<Long>) insertedParameters.get("datasetId");
-                        if (insertedDatasetIds.contains(datasetIds.get(0).intValue())) {
-                            return JobStatusEnum.REFUSED;
-                        }
-                    }
-                }
+                if (isDatasetInActiveReleaseOrValidationJob(datasetIds)) return JobStatusEnum.REFUSED;
                 return JobStatusEnum.IN_PROGRESS;
             }
         }
@@ -317,20 +316,25 @@ public class JobServiceImpl implements JobService {
             if (jobList != null && jobList.size() > 0) {
                 return JobStatusEnum.REFUSED;
             } else {
-                List<Job> releasesAndValidations = jobRepository.findByJobTypeInAndJobStatusInAndRelease(Arrays.asList(JobTypeEnum.RELEASE, JobTypeEnum.VALIDATION), Arrays.asList(JobStatusEnum.QUEUED, JobStatusEnum.IN_PROGRESS), true);
-                for (Job job : releasesAndValidations) {
-                    Map<String, Object> insertedParameters = job.getParameters();
-                    if (insertedParameters.get("datasetId") != null) {
-                        List<Long> insertedDatasetIds = (List<Long>) insertedParameters.get("datasetId");
-                        if (insertedDatasetIds.contains(datasetIds.get(0).intValue())) {
-                            return JobStatusEnum.REFUSED;
-                        }
-                    }
-                }
+                if (isDatasetInActiveReleaseOrValidationJob(datasetIds)) return JobStatusEnum.REFUSED;
                 return JobStatusEnum.QUEUED;
             }
         }
         return JobStatusEnum.QUEUED;
+    }
+
+    private boolean isDatasetInActiveReleaseOrValidationJob(List<Long> datasetIds) {
+        List<Job> releasesAndValidations = jobRepository.findByJobTypeInAndJobStatusInAndRelease(Arrays.asList(JobTypeEnum.RELEASE, JobTypeEnum.VALIDATION), Arrays.asList(JobStatusEnum.QUEUED, JobStatusEnum.IN_PROGRESS), true);
+        for (Job job : releasesAndValidations) {
+            Map<String, Object> insertedParameters = job.getParameters();
+            if (insertedParameters.get("datasetId") != null) {
+                List<Long> insertedDatasetIds = (List<Long>) insertedParameters.get("datasetId");
+                if (insertedDatasetIds.contains(datasetIds.get(0).intValue())) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     @Override
@@ -339,7 +343,8 @@ public class JobServiceImpl implements JobService {
         Map<String, Object> parameters = job.getParameters();
         Long datasetId = Long.valueOf((Integer) parameters.get("datasetId"));
         Boolean released = (Boolean) parameters.get("released");
-        validationControllerZuul.validateDataSetData(datasetId, released, job.getId());
+        String preparationCode = jobVO.getPreparationCode();
+        validationControllerZuul.validateDataSetData(datasetId, released, job.getId(), preparationCode);
     }
 
     @Override
@@ -377,8 +382,9 @@ public class JobServiceImpl implements JobService {
         Boolean exportCsv = (parameters.get(EXPORT_CSV) != null) ? (Boolean) parameters.get(EXPORT_CSV) : false;
         Boolean exportParquet = (parameters.get(EXPORT_PARQUET) != null) ? (Boolean) parameters.get(EXPORT_PARQUET) : false;
         Boolean includeAttachments = (parameters.get("includeAttachments") != null) ? (Boolean) parameters.get("includeAttachments") : false;
+        String preparationCode = (parameters.get("preparationCode") != null) ? (String) parameters.get("preparationCode") : null;
 
-        dataSetControllerZuul.createFileForEtlExport(datasetId, dataflowId, dataProviderId, tableSchemaId, limit, offset, filterValue, columnName, dataProviderCodes, exportCsv, exportParquet ,includeAttachments, jobVO.getId());
+        dataSetControllerZuul.createFileForEtlExport(datasetId, dataflowId, dataProviderId, tableSchemaId, limit, offset, filterValue, columnName, dataProviderCodes, exportCsv, exportParquet ,includeAttachments, jobVO.getId(), preparationCode);
     }
 
     @Transactional
@@ -693,7 +699,7 @@ public class JobServiceImpl implements JobService {
                 break;
             case DELETE:
                 String tableSchemaId = (jobVO.getParameters().get("tableSchemaId") != null) ? (String) jobVO.getParameters().get("tableSchemaId") : null;
-                dataSetControllerZuul.deleteLocksToDeleteProcess(jobVO.getDatasetId(), tableSchemaId);
+                dataSetControllerZuul.deleteLocksToDeleteProcess(jobVO.getDatasetId(), tableSchemaId, null);
                 break;
         }
     }
@@ -795,7 +801,7 @@ public class JobServiceImpl implements JobService {
                             LOG.info("Restarting import jobId {} for big data dataflow with replace data true", jobId);
                             updateNumOfRestartsJobParameter(jobId);
                             updateJobInfo(jobId, null, null, false);
-                            dataSetControllerZuul.importBigFileDataPrivate(job.getDatasetId(), job.getDataflowId(), job.getProviderId(), tableSchemaId, null, replaceData, integrationId, delimiter, jobId, null);
+                            dataSetControllerZuul.importBigFileDataPrivate(job.getDatasetId(), job.getDataflowId(), job.getProviderId(), tableSchemaId, null, replaceData, integrationId, delimiter, jobId, null, null);
                             jobRestarted = true;
                         } else {
                             LOG.error("Can not restart import jobId {} because filePathInS3 is null", jobId);
@@ -836,5 +842,37 @@ public class JobServiceImpl implements JobService {
             jobs.addAll(jobsByDataflowAndProvider);
         }
         return jobMapper.entityListToClass(jobs);
+    }
+
+    @Override
+    public JobStatusEnum checkEligibilityOfPreparationJob(
+            String jobType,
+            Long datasetId,
+            String preparationCode) {
+
+        if (!JobTypeEnum.IMPORT.toString().equals(jobType) &&
+            !JobTypeEnum.VALIDATION.toString().equals(jobType)) {
+            return JobStatusEnum.QUEUED;
+        }
+
+        if (inProgressOrQueuedJobExists(datasetId, preparationCode, JobTypeEnum.valueOf(jobType))) {
+            return JobStatusEnum.REFUSED;
+        }
+
+        if (JobTypeEnum.IMPORT.toString().equals(jobType)) {
+            return JobStatusEnum.IN_PROGRESS;
+        }
+        else {
+            return JobStatusEnum.QUEUED;
+        }
+    }
+
+    private boolean inProgressOrQueuedJobExists(Long datasetId, String preparationCode, JobTypeEnum jobType) {
+        return jobRepository.existsByJobStatusInAndJobTypeAndDatasetIdAndPreparationCode(
+                Arrays.asList(JobStatusEnum.QUEUED, JobStatusEnum.IN_PROGRESS),
+                jobType,
+                datasetId,
+                preparationCode
+        );
     }
 }

@@ -1,0 +1,1 @@
+ALTER TABLE dataset_table ADD COLUMN edit_lock_expires_at TIMESTAMP;

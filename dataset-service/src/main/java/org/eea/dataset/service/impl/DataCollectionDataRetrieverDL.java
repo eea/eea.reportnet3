@@ -57,7 +57,7 @@ public class DataCollectionDataRetrieverDL implements DataLakeDataRetriever {
         TableVO result = new TableVO();
 
         // ROOT resolver for demoting/promoting.
-        S3PathResolver s3RootResolver = s3Service.getS3PathResolverByDatasetType(dataset, tableSchemaVO.getNameTableSchema(), false);
+        S3PathResolver s3RootResolver = s3Service.getS3PathResolverByDatasetType(dataset, tableSchemaVO.getNameTableSchema(), false, null);
         s3RootResolver.setIsIcebergTable(false);
 
         boolean folderExist = s3Helper.checkTableNameDCFolderExist(s3RootResolver);
@@ -80,6 +80,11 @@ public class DataCollectionDataRetrieverDL implements DataLakeDataRetriever {
             setEmptyResults(result);
         }
         return result;
+    }
+
+    @Override
+    public TableVO getPreparationTableResult(DataSetMetabaseVO dataset, TableSchemaVO tableSchemaVO, Pageable pageable, String fields, String fieldSchemaId, String fieldValue, ErrorTypeEnum[] levelError, String[] qcCodes, String preparationCode) throws EEAException {
+        return null; // no preparation for datacollection
     }
 
     /**
@@ -122,18 +127,21 @@ public class DataCollectionDataRetrieverDL implements DataLakeDataRetriever {
         fieldSchemaProviderCode.setName("data_provider_code");
         fieldIdMap.put("data_provider_code", fieldSchemaProviderCode);
 
-        StringBuilder filteredQuery = DataLakeDataRetrieverUtils.buildFilteredQuery(
-            dataset, fields, fieldSchemaId, fieldValue, fieldIdMap, levelError, qcCodes, null);
+        StringBuilder filteredCountQuery = DataLakeDataRetrieverUtils.buildFilteredQuery(
+            dataset, fields, fieldSchemaId, fieldValue, fieldIdMap, levelError, qcCodes, null, true);
 
         StringBuilder recordsCountQuery = new StringBuilder();
         recordsCountQuery
             .append("select count(record_id) from ")
             .append(s3Service.getTableDCAsFolderQueryPath(s3QueryResolver, S3_TABLE_NAME_DC_QUERY_PATH))
             .append(" t ")
-            .append(filteredQuery);
+            .append(filteredCountQuery);
 
         Long totalFilteredRecords = dremioJdbcTemplate.queryForObject(recordsCountQuery.toString(), Long.class);
         result.setTotalFilteredRecords(totalFilteredRecords);
+
+        StringBuilder filteredQuery = DataLakeDataRetrieverUtils.buildFilteredQuery(
+                dataset, fields, fieldSchemaId, fieldValue, fieldIdMap, levelError, qcCodes, null, false);
 
         pageable = DataLakeDataRetrieverUtils.calculatePageable(pageable, totalFilteredRecords);
         if (pageable != null) {

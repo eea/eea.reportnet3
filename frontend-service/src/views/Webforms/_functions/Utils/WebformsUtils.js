@@ -295,7 +295,15 @@ const parseOtherObjectivesRecord = (table, parentTable, pamsId, filteredRecordId
   }
 };
 
-const onParseWebformRecords = (records, webform, tableData, totalRecords, rootTableName, rootPkFieldId) => {
+const onParseWebformRecords = (
+  records,
+  webform,
+  tableData,
+  totalRecords,
+  rootTableName,
+  rootPkFieldId,
+  datasetSchemaId
+) => {
   return records.map(record => {
     const { fields } = record;
     const { elements } = webform;
@@ -336,25 +344,31 @@ const onParseWebformRecords = (records, webform, tableData, totalRecords, rootTa
       } else {
         let referencePkId;
         let referencePkValue;
-        let primaryFkId;
+        let referenceFieldSchemaId;
 
         if (rootTableName && element.tableSchemaName !== rootTableName) {
-          referencePkId = element.records[0].fields.filter(
-            field => !isEmpty(field.referencedField) && field?.referencedField?.idPk !== rootPkFieldId
-          )[0]?.referencedField?.idPk;
+          const fields = element.records[0].fields;
+          const recordFields = record.fields;
 
-          referencePkValue = record.fields.filter(field => field.fieldSchemaId === referencePkId)[0]?.value;
+          const parentReferenceField = fields.find(
+            ({ referencedField }) =>
+              !isEmpty(referencedField) &&
+              referencedField.idPk !== rootPkFieldId &&
+              referencedField.idDatasetSchema === datasetSchemaId
+          );
+
+          referencePkId = parentReferenceField?.referencedField?.idPk;
+
+          referencePkValue = recordFields.find(field => field.fieldSchemaId === referencePkId)?.value;
 
           if (isEmpty(referencePkValue)) {
-            referencePkValue = record.fields.filter(field => field.fieldSchemaId === rootPkFieldId)[0]?.value;
+            referencePkValue = recordFields.find(field => field.fieldSchemaId === rootPkFieldId)?.value;
 
-            primaryFkId = element.records[0].fields.filter(
-              field => !isEmpty(field.referencedField) && field?.referencedField?.idPk === rootPkFieldId
-            )[0]?.fieldSchema;
+            referenceFieldSchemaId = fields.find(
+              ({ referencedField }) => !isEmpty(referencedField) && referencedField.idPk === rootPkFieldId
+            )?.fieldSchema;
           } else {
-            primaryFkId = element.records[0].fields.filter(
-              field => !isEmpty(field.referencedField) && field?.referencedField?.idPk !== rootPkFieldId
-            )[0]?.fieldSchema;
+            referenceFieldSchemaId = parentReferenceField?.fieldSchema;
           }
         }
 
@@ -362,7 +376,9 @@ const onParseWebformRecords = (records, webform, tableData, totalRecords, rootTa
           const filteredTableArray =
             rootTableName && element.tableSchemaName !== rootTableName
               ? tableData[element.tableSchemaId].records.filter(record =>
-                  record.fields.some(field => field.fieldSchemaId === primaryFkId && field.value === referencePkValue)
+                  record.fields.some(
+                    field => field.fieldSchemaId === referenceFieldSchemaId && field.value === referencePkValue
+                  )
                 )
               : tableData[element.tableSchemaId].records;
 

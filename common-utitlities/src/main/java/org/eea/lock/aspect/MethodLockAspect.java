@@ -143,6 +143,11 @@ public class MethodLockAspect {
   private Object retrieveValue(String path, Object object)
       throws IntrospectionException, IllegalAccessException, InvocationTargetException {
     Object rtn = object;
+    /* object contains the value of the property specified in the name of the @LockCriteria.
+       If it is null the property is not required (e.g. preparationCode). */
+    if (object == null) {
+      return null;
+    }
     for (String variable : path.split("\\.")) {
       for (PropertyDescriptor pd : Introspector.getBeanInfo(object.getClass())
           .getPropertyDescriptors()) {

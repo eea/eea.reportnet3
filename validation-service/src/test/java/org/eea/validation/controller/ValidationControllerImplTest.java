@@ -116,7 +116,7 @@ public class ValidationControllerImplTest {
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
     try {
-      validationController.validateDataSetData(null, false, null);
+      validationController.validateDataSetData(null, false, null, null);
     } catch (ResponseStatusException e) {
       Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
       Assert.assertEquals(EEAErrorMessage.DATASET_INCORRECT_ID, e.getReason());
@@ -142,7 +142,7 @@ public class ValidationControllerImplTest {
     status.setIsEditing(false);
     Mockito.when(dataSetControllerZuul.getEditingStatus(Mockito.anyLong()))
             .thenReturn(status);
-    validationController.validateDataSetData(1L, false, null);
+    validationController.validateDataSetData(1L, false, null, null);
     Mockito.verify(validationHelper, times(1)).executeValidation(Mockito.any(), Mockito.any(),
         Mockito.anyBoolean(), Mockito.anyBoolean(), Mockito.any());
   }
@@ -167,7 +167,7 @@ public class ValidationControllerImplTest {
     Mockito.when(dataSetControllerZuul.getEditingStatus(Mockito.anyLong()))
             .thenReturn(status);
     try {
-      validationController.validateDataSetData(1L, false, null);
+      validationController.validateDataSetData(1L, false, null, null);
     } catch (ResponseStatusException e) {
       Assert.assertEquals(HttpStatus.LOCKED, e.getStatus());
       Assert.assertEquals(EEAErrorMessage.METHOD_LOCKED, e.getReason());
@@ -190,7 +190,7 @@ public class ValidationControllerImplTest {
             .thenReturn(status);
     doThrow(new EEAException("e")).when(validationHelper).executeValidation(Mockito.anyLong(),
         Mockito.any(), Mockito.anyBoolean(), Mockito.anyBoolean(), Mockito.any());
-    validationController.validateDataSetData(1L, false, null);
+    validationController.validateDataSetData(1L, false, null, null);
 
     Mockito.verify(validationHelper, times(1)).deleteLockToReleaseProcess(Mockito.any());
   }

@@ -90,6 +90,7 @@ export const DataViewer = ({
   onIsTableDataLoading,
   onLoadTableData,
   onRestoreData,
+  preparationSetCode,
   reporting,
   selectedRuleId,
   selectedRuleLevelError,
@@ -527,7 +528,8 @@ export const DataViewer = ({
           fields,
           levelError: levelErrorValidationsItems,
           qcCodes: tableId === selectedTableSchemaId ? groupedRules : undefined,
-          value: valueFilter
+          value: valueFilter,
+          code: preparationSetCode
         });
       } else {
         data = await DatasetService.getTableData({
@@ -751,10 +753,10 @@ export const DataViewer = ({
 
   const onConfirmDeleteTable = async () => {
     const action = 'TABLE_DELETE';
-    actionsContext.testProcess(datasetId, action);
+    actionsContext.testProcess(datasetId, action, preparationSetCode);
     try {
       notificationContext.add({ type: 'DELETE_TABLE_DATA_INIT' });
-      await DatasetService.deleteTableData(datasetId, tableId);
+      await DatasetService.deleteTableData({ datasetId, tableId, preparationCode: preparationSetCode });
       setFetchedData([]);
       dispatchRecords({ type: 'RESET_TOTAL', payload: 0 });
     } catch (error) {
@@ -1502,6 +1504,7 @@ export const DataViewer = ({
         onSetVisible={onSetVisible}
         onUpdateData={onUpdateData}
         originalColumns={originalColumns}
+        preparationSetCode={preparationSetCode}
         prevFilterValue={prevFilterValue}
         records={records}
         selectedRuleId={selectedRuleId}

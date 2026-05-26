@@ -53,23 +53,31 @@ import { MetadataUtils } from 'views/_functions/Utils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const BigButtonList = ({
+  bigData,
+  code,
   dataflowState,
   dataflowType,
   dataProviderId,
   handleRedirect,
+  hasActiveLocks,
+  isCreatingPreparationSets,
   isLeadReporter,
   isLeadReporterOfCountry,
   isUpdatingUserText,
   manageDialogs,
   onCleanUpReceipt,
+  onCreatePreparationSets,
   onOpenReleaseConfirmDialog,
   onSaveName,
+  onShowManagePreparationSetsDialog,
   onShowManageReportersDialog,
   onUpdateData,
   onUpdateAddUserText,
+  preparationSetsList,
   setIsCopyDataCollectionToEUDatasetLoading,
   setIsExportEUDatasetLoading,
   setIsReceiptLoading,
+  setSelectedPreparationSet,
   setSelectedRepresentative,
   setUpdatedDatasetSchema
 }) => {
@@ -652,6 +660,8 @@ export const BigButtonList = ({
     ));
 
   const renderBigButtonList = useBigButtonList({
+    bigData,
+    code,
     dataflowId,
     dataflowState,
     dataProviderId,
@@ -661,8 +671,11 @@ export const BigButtonList = ({
     getDeleteSchemaIndex,
     handleExportEUDataset,
     handleRedirect,
+    hasActiveLocks,
     isActiveButton,
     isCloningDataflow,
+    isCreatingPreparationSets,
+    onCreatePreparationSets,
     isImportingDataflow,
     isLeadReporter,
     isLeadReporterOfCountry,
@@ -676,11 +689,14 @@ export const BigButtonList = ({
     onShowDataCollectionModal,
     onShowExportEUDatasetModal,
     onShowHistoricReleases,
+    onShowManagePreparationSetsDialog,
     onShowManageReportersDialog,
     onShowManualTechnicalAcceptanceDialog,
     onShowNewSchemaDialog,
     onShowUpdateDataCollectionModal,
-    setErrorDialogData
+    preparationSetsList,
+    setErrorDialogData,
+    setSelectedPreparationSet
   })
     .filter(button => button.visibility)
     .map(button => (

@@ -67,6 +67,7 @@ export const ActionsToolbar = ({
   onHideSelectGroupedValidation,
   onUpdateData,
   originalColumns,
+  preparationSetCode,
   prevFilterValue,
   records,
   selectedRuleId,
@@ -164,7 +165,7 @@ export const ActionsToolbar = ({
     });
 
     const action = 'TABLE_EXPORT';
-    actionsContext.testProcess(datasetId, action);
+    actionsContext.testProcess(datasetId, action, preparationSetCode);
     notificationContext.add({ type: 'EXPORT_TABLE_DATA_START' }, true);
     try {
       const isExportFilteredCsv = TextUtils.areEquals(type.key, 'exportFilteredCsv');
@@ -177,7 +178,8 @@ export const ActionsToolbar = ({
           levelErrorValidations.map(levelError => levelError.toUpperCase()),
           selectedShortCode,
           isExportFilteredCsv,
-          isFilterValidationsActive
+          isFilterValidationsActive,
+          preparationSetCode
         );
       } else {
         await DatasetService.exportTableData(
@@ -423,6 +425,7 @@ export const ActionsToolbar = ({
       isIcebergCreated={isIcebergCreated && dataAreManuallyEditable}
       isTableDataRestorationInProgress={isTableDataRestorationInProgress}
       isTableFixedNumber={isTableFixedNumber}
+      preparationSetCode={preparationSetCode}
       showWriteButtons={showWriteButtons}
       tableId={tableId}
       tableName={tableName}

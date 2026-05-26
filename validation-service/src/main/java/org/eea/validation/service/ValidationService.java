@@ -240,14 +240,14 @@ public interface ValidationService {
    * @throws EEAException the EEA exception
    * @throws IOException Signals that an I/O exception has occurred.
    */
-  void exportValidationFile(@DatasetId Long datasetId) throws EEAException, IOException;
+  void exportValidationFile(@DatasetId Long datasetId, String preparationCode) throws EEAException, IOException;
 
   /**
    * Export validation file for big data.
    *
    * @param datasetId the dataset id
    */
-  void exportValidationFileDL(Long datasetId) throws EEAException;
+  void exportValidationFileDL(Long datasetId, String preparationCode) throws EEAException;
 
   /**
    * Download exported file.
@@ -257,7 +257,7 @@ public interface ValidationService {
    * @return the file
    * @throws IOException Signals that an I/O exception has occurred.
    */
-  File downloadExportedFile(Long datasetId, String fileName) throws IOException;
+  File downloadExportedFile(Long datasetId, String fileName, String preparationCode) throws IOException;
 
   /**
    * Gets the rule message.
