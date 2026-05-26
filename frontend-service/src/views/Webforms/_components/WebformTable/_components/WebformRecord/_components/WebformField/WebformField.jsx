@@ -279,42 +279,64 @@ export const WebformField = ({
     let conditionalFields;
     let parsedValues;
 
-    if (isConditional && ['LINK', 'CODELIST'].includes(field.fieldType)) {
-      const changedElementIndex = record.elements.indexOf(field);
-
-      //Helper to determine if a field's value should be reset
-      const shouldResetValue = (element, index) => {
-        const parentFieldId = element?.referencedField?.masterConditionalFieldId;
-        const parentFieldName = element?.referenceParentField?.field;
-
-        const matchesParentFieldById = parentFieldId === field.fieldSchema || parentFieldId === field.fieldSchemaId;
-
-        const matchesParentFieldByName = parentFieldName === field.name;
-
-        const hasReference = element?.referenceParentField || field?.referenceParentField;
-
-        if (hasReference) {
-          return matchesParentFieldById || matchesParentFieldByName;
-        }
-
-        return index > changedElementIndex && (matchesParentFieldById || matchesParentFieldByName);
-      };
-
+    if (isConditional && ['LINK', 'CODELIST', 'MULTISELECT_CODELIST'].includes(field.fieldType)) {
       //Flatten BLOCK elements before mapping
       const allFieldElements = record.elements.flatMap(el =>
-        el?.type === 'BLOCK' && Array.isArray(el.elementsRecords[0].elements) ? el.elementsRecords[0].elements : el
+        el?.type === 'BLOCK' && Array.isArray(el.elementsRecords?.[0]?.elements) ? el.elementsRecords[0].elements : el
       );
 
+      const fieldsToReset = new Set([field.fieldSchema, field.fieldSchemaId, field.name]);
+
+      let foundNewDependency = true;
+
+      // Discover all dependent fields
+      while (foundNewDependency) {
+        foundNewDependency = false;
+
+        for (const fieldElement of allFieldElements) {
+          const parentFieldId = fieldElement?.referencedField?.masterConditionalFieldId;
+          const parentFieldName = fieldElement?.referenceParentField?.field;
+
+          const hasParentIdMatch = fieldsToReset.has(parentFieldId);
+          const hasParentNameMatch = fieldsToReset.has(parentFieldName);
+
+          const isDependentField = hasParentIdMatch || hasParentNameMatch;
+
+          if (isDependentField) {
+            const fieldIdentifiers = [fieldElement.fieldSchema, fieldElement.fieldSchemaId, fieldElement.name];
+
+            for (const fieldIdentifier of fieldIdentifiers) {
+              if (fieldIdentifier && !fieldsToReset.has(fieldIdentifier)) {
+                fieldsToReset.add(fieldIdentifier);
+                foundNewDependency = true;
+              }
+            }
+          }
+        }
+      }
+
       conditionalFields = allFieldElements
-        .reduce((fieldsToChange, element, index) => {
+        .reduce((fieldsToChange, element) => {
           // If this is the changed field add it
           if (element.fieldSchema === option || element.fieldSchemaId === option) {
             fieldsToChange.push({ ...element, value });
             return fieldsToChange;
           }
 
+          const shouldReset =
+            fieldsToReset.has(element.fieldSchema) ||
+            fieldsToReset.has(element.fieldSchemaId) ||
+            fieldsToReset.has(element.name);
+
+          // Prevent resetting the edited field itself
+          const isChangedField =
+            element.fieldSchema === field.fieldSchema ||
+            element.fieldSchemaId === field.fieldSchemaId ||
+            element.name === field.name;
+
           // If it should be reset
-          if (shouldResetValue(element, index)) {
+          if (shouldReset && !isChangedField) {
+            onFillField(element, element.fieldSchema ?? element.fieldSchemaId, '', true);
             fieldsToChange.push({ ...element, value: '' });
             return fieldsToChange;
           }
@@ -327,19 +349,23 @@ export const WebformField = ({
       //Parse values for specific field types
       parsedValues = conditionalFields.map(conditionalField => {
         const { fieldType, value } = conditionalField;
-        if (
-          fieldType === 'MULTISELECT_CODELIST' ||
-          (['LINK', 'EXTERNAL_LINK'].includes(fieldType) && Array.isArray(value))
-        ) {
-          return { ...conditionalField, value: value.join(';') };
+
+        if (['MULTISELECT_CODELIST', 'LINK', 'EXTERNAL_LINK'].includes(fieldType) && Array.isArray(value)) {
+          return {
+            ...conditionalField,
+            value: value.join(';')
+          };
         }
+
         return { ...conditionalField };
       });
     }
 
     const parsedValue =
-      field.fieldType === 'MULTISELECT_CODELIST' ||
-      ((field.fieldType === 'LINK' || field.fieldType === 'EXTERNAL_LINK') && Array.isArray(value))
+      (field.fieldType === 'LINK' ||
+        field.fieldType === 'EXTERNAL_LINK' ||
+        field.fieldType === 'MULTISELECT_CODELIST') &&
+      Array.isArray(value)
         ? value.join(';')
         : value;
 
@@ -349,7 +375,7 @@ export const WebformField = ({
         if (!isNil(conditionalFields) && !isNil(parsedValues)) {
           await DatasetService.updateConditionalFieldsWebform(
             datasetId,
-            conditionalFields,
+            parsedValues,
             record.recordId,
             bigData ? (referencedTableSchemaId ? referencedTableSchemaId : tableSchemaId) : tableSchemaId
           );
@@ -429,45 +455,6 @@ export const WebformField = ({
     for (let index = 0; index < datePickerElements.length; index++) {
       const datePicker = datePickerElements[index];
       datePicker.style.left = `${inputLeftPosition}px`;
-    }
-  };
-
-  const resetFieldValue = (field, option, multipleValues, isInputText) => {
-    if (
-      isConditionalChanged &&
-      !isEmpty(field.value) &&
-      (!isEmpty(field?.referenceParentField) || !isEmpty(field.referencedField?.masterConditionalFieldId))
-    ) {
-      const emptyValue = multipleValues ? [] : '';
-      if (
-        (isDependantConditionalField && !isEmpty(dependantConditionalFieldId)) ||
-        !isEmpty(field.referencedField?.masterConditionalFieldId)
-      ) {
-        const allFieldElements = record.elements.flatMap(el =>
-          el?.type === 'BLOCK' && Array.isArray(el.elements) ? el.elements : el
-        );
-
-        const fieldIndex = allFieldElements.findIndex(
-          el => el.fieldSchema === field.fieldSchema || el.fieldId === field.fieldSchemaId
-        );
-        const changedIndex = allFieldElements.findIndex(
-          el =>
-            el.fieldSchema === changedConditionalFieldData.fieldSchema ||
-            el.fieldId === changedConditionalFieldData.fieldSchemaId
-        );
-
-        if (
-          field.referencedField?.masterConditionalFieldId === dependantConditionalFieldId ||
-          (fieldIndex > changedIndex && fieldIndex > 0 && changedIndex > 0)
-        ) {
-          onFillField(field, option, emptyValue, isConditional);
-        }
-      } else {
-        isInputText
-          ? changedConditionalFieldData?.name === field?.referenceParentField?.field &&
-            onFillField(field, option, emptyValue, isConditional)
-          : onFillField(field, option, emptyValue, isConditional);
-      }
     }
   };
 
@@ -560,7 +547,6 @@ export const WebformField = ({
       case 'EXTERNAL_LINK':
       case 'LINK':
         if (field.pkHasMultipleValues) {
-          resetFieldValue(field, option, field.pkHasMultipleValues);
           return (
             <MultiSelectWebform
               appendTo={document.body}
@@ -596,8 +582,6 @@ export const WebformField = ({
           );
         } else {
           const selectedValue = RecordUtils.getLinkValue(linkItemsOptions, field.value);
-
-          resetFieldValue(field, option, field?.pkHasMultipleValues);
 
           return (
             <DropdownWebform
@@ -656,8 +640,13 @@ export const WebformField = ({
             }
             maxSelectedLabels={10}
             onChange={() => {
-              if (isNil(field.recordId)) onSaveField(option, field.value);
-              else onEditorSubmitValue(field, option, field.value);
+              onFillField(field, option, field.value, isConditional);
+
+              if (isNil(field.recordId)) {
+                onSaveField(option, field.value);
+              } else {
+                onEditorSubmitValue(field, option, field.value);
+              }
             }}
             onUpdate={event => {
               onFillField(field, option, event.target.value);
@@ -716,7 +705,6 @@ export const WebformField = ({
       case 'PHONE':
       case 'NUMBER_INTEGER':
       case 'NUMBER_DECIMAL':
-        resetFieldValue(field, option, field?.pkHasMultipleValues, true);
         return (
           <InputText
             characterCounterStyles={{ marginBottom: 0 }}
