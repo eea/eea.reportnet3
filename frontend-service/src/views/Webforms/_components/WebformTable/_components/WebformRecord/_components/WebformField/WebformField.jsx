@@ -36,7 +36,6 @@ import { isEmpty } from 'lodash';
 
 export const WebformField = ({
   bigData = false,
-  changedConditionalFieldData,
   onFieldUpdate,
   columnsSchema,
   conditionalFieldChange,
@@ -44,12 +43,9 @@ export const WebformField = ({
   dataflowId,
   datasetId,
   datasetSchemaId,
-  dependantConditionalFieldId,
   element,
   hasErrors,
   isConditional,
-  isConditionalChanged,
-  isDependantConditionalField,
   isSubTableCreated,
   isViewMode,
   updatingField,
