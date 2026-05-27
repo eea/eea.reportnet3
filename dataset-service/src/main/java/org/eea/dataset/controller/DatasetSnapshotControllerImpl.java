@@ -9,10 +9,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.eea.dataset.persistence.metabase.domain.ReportingDataset;
 import org.eea.dataset.persistence.metabase.repository.ReportingDatasetRepository;
-import org.eea.dataset.service.DatasetSchemaService;
-import org.eea.dataset.service.DatasetSnapshotService;
-import org.eea.dataset.service.DatasetTableService;
-import org.eea.dataset.service.ResolveSnapshotTable;
+import org.eea.dataset.service.*;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.communication.NotificationController.NotificationControllerZuul;
@@ -129,6 +126,8 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
   @Autowired
   private KafkaSenderUtils kafkaSenderUtils;
 
+  @Autowired
+  private ReleasePrecheckService releasePrecheckService;
 
   @Value("${eea.authorization.key}")
   private String eeaAuthorizationKey;
@@ -1250,4 +1249,22 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
     resolveSnapshotTable.rollBackSnapshotTableValues(jobId, dataflowId, providerId);
   }
 
+  @Override
+  @PostMapping(value = "/private/releasePrecheck/{jobId}")
+  public void precheckReleaseJob(@PathVariable("jobId") Long jobId) {
+    releasePrecheckService.precheckOrThrow(jobId);
+  }
+
+  @Override
+  @HystrixCommand
+  @PutMapping(value = "/private/startQueuedReleaseJob/{jobId}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @ApiOperation(value = "Start queued release job", hidden = true)
+  @PreAuthorize("isAuthenticated()")
+  public void startQueuedReleaseJob(@PathVariable("jobId") Long jobId) {
+    try {
+      releasePrecheckService.startQueuedReleaseJob(jobId);
+    } catch (EEAException e) {
+      throw new RuntimeException(e);
+    }
+  }
 }

@@ -153,7 +153,9 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
         if(jobId != null){
           JobVO jobVO = jobControllerZuul.findJobById(jobId);
           if(jobVO != null) {
-            if (!jobVO.getJobStatus().equals(JobStatusEnum.IN_PROGRESS)) {
+            JobStatusEnum status = jobVO.getJobStatus();
+            // Skip only terminal failure/cancel cases. Allow QUEUED, IN_PROGRESS and FINISHED to proceed and run cleanups.
+            if (JobStatusEnum.FAILED.equals(status) || JobStatusEnum.CANCELED.equals(status) || JobStatusEnum.CANCELED_BY_ADMIN.equals(status)) {
               return;
             } else {
               Map<String, Object> parameters = jobVO.getParameters();
