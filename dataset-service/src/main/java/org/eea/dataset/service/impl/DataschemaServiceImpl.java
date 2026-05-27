@@ -2607,7 +2607,6 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * @param referenceDataset the reference dataset
    */
   @Override
-  @Transactional
   public void updateReferenceDataset(Long datasetId, String datasetSchemaId,
                                      boolean referenceDataset) {
 
@@ -2619,7 +2618,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       table.setToPrefill(referenceDataset);
       table.setReadOnly(referenceDataset);
       try {
-        updateTableSchema(datasetId, table, true);
+        self.updateTableSchema(datasetId, table, true);
       } catch (EEAException e) {
         LOG.error(
                 "Error updating the mandatory properties when a dataset becomes Reference. DatasetId {}. Message: {} ",
