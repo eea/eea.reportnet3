@@ -391,7 +391,9 @@ export const WebformRecord = ({
               const { referencedField } = field;
 
               const referencedRecordField = record.elements.find(
-                recordElement => recordElement.fieldSchema === referencedField.idPk
+                recordElement =>
+                  recordElement.fieldSchema === referencedField.idPk ||
+                  recordElement?.referencedField?.idPk === referencedField.idPk
               );
 
               const rootPkField =
