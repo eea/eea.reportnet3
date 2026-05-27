@@ -218,7 +218,13 @@ export const WebformField = ({
 
       queryClient
         .fetchQuery(
-          ['referencedFieldValues', datasetSchemaId, conditionalField, element, filter],
+          [
+            'referencedFieldValues',
+            datasetSchemaId,
+            element.fieldSchemaId ?? element.fieldSchema,
+            conditionalValue,
+            filter
+          ],
           async () => {
             const referencedFieldValues = await DatasetService.getReferencedFieldValues(
               datasetId,
@@ -573,7 +579,7 @@ export const WebformField = ({
               }}
               onFilterInputChangeBackend={filter => onFilter(filter, field)}
               onUpdate={event => {
-                onFillField(field, option, event.target.value, isConditional);
+                onFillField(field, option, event.target.value);
               }}
               optionLabel="itemType"
               options={linkItemsOptions}
@@ -609,7 +615,7 @@ export const WebformField = ({
                     : event.target?.value;
 
                 if (value !== field.value) {
-                  onFillField(field, option, value, isConditional);
+                  onFillField(field, option, value);
                   if (isNil(field.recordId)) onSaveField(option, value);
                   else if (!(event.target.action === 'arrowKeys')) onEditorSubmitValue(field, option, value);
                 }
@@ -642,7 +648,7 @@ export const WebformField = ({
             }
             maxSelectedLabels={10}
             onChange={() => {
-              onFillField(field, option, field.value, isConditional);
+              onFillField(field, option, field.value);
 
               if (isNil(field.recordId)) {
                 onSaveField(option, field.value);
@@ -685,7 +691,7 @@ export const WebformField = ({
                   ? event.target?.value?.value
                   : event.target?.value;
               if (value !== field.value) {
-                onFillField(field, option, value, isConditional);
+                onFillField(field, option, value);
                 if (isNil(field.recordId)) onSaveField(option, value);
                 else if (!(event.target.action === 'arrowKeys')) onEditorSubmitValue(field, option, value);
               }
