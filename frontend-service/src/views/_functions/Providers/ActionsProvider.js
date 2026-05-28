@@ -7,7 +7,6 @@ import { isEmpty } from 'lodash';
 
 export const ActionsProvider = ({ children }) => {
   const [deleteDatasetProcessing, setDeleteDatasetProcessing] = useState(false);
-  const [deleteDatasetCode, setDeleteDatasetCode] = useState(null);
   const [deleteTableProcessing, setDeleteTableProcessing] = useState(false);
   const [exportDatasetProcessing, setExportDatasetProcessing] = useState(false);
   const [exportTableProcessing, setExportTableProcessing] = useState(false);
@@ -28,7 +27,6 @@ export const ActionsProvider = ({ children }) => {
     clearInterval(timer.current);
 
     setDeleteDatasetProcessing(false);
-    setDeleteDatasetCode(null);
     setDeleteTableProcessing(false);
     setImportDatasetProcessing(false);
     setImportTableProcessing(false);
@@ -53,7 +51,6 @@ export const ActionsProvider = ({ children }) => {
         break;
       case 'DATASET_DELETE':
         setDeleteDatasetProcessing(true);
-        setDeleteDatasetCode(code ?? null);
         break;
       case 'TABLE_DELETE':
         setDeleteTableProcessing(true);
@@ -84,7 +81,15 @@ export const ActionsProvider = ({ children }) => {
           );
         }
       } else {
-        setIsInProgress(true);
+        const relevantJobs = jobsInProgress.jobsList.filter(job => ['QUEUED', 'IN_PROGRESS'].includes(job.jobStatus));
+
+        const canSetInProgress = relevantJobs.some(job => {
+          const preparationCode = job.preparationCode;
+          return !preparationCode || preparationCode === code;
+        });
+
+        setIsInProgress(canSetInProgress);
+
         const jobInProgress = jobsInProgress.jobsList.find(job => job.jobStatus === 'IN_PROGRESS');
         const jobInQueue = jobsInProgress.jobsList.find(job => job.jobStatus === 'QUEUED');
         setJobTypeInProgress(jobInProgress ? jobInProgress?.jobType : jobInQueue?.jobType);
@@ -118,7 +123,6 @@ export const ActionsProvider = ({ children }) => {
       value={{
         changeExportDatasetState,
         changeExportTableState,
-        deleteDatasetCode,
         deleteDatasetProcessing,
         deleteTableProcessing,
         exportDatasetProcessing,
