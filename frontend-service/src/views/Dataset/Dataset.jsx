@@ -1428,27 +1428,27 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
     let subtitle = metadata?.dataflow.sncData
       ? metadata?.dataflow.bigData
         ? TextUtils.parseText(resourcesContext.messages['sncBigDataDataflowNamed'], {
-            name: `${metadata?.dataflow.name} - ${
+            name: `${metadata?.dataflow.name} ${
               isTestDataset
-                ? resourcesContext.messages['testDataset']
+                ? ` - ${resourcesContext.messages['testDataset']}`
                 : code
-                ? selectedPreparationSet?.datasetName || ''
-                : datasetName
+                ? ` - ${selectedPreparationSet?.datasetName || ''}`
+                : ''
             }`
           })
         : TextUtils.parseText(resourcesContext.messages['sncCitusDataflowNamed'], {
-            name: `${metadata?.dataflow.name} - ${
-              isTestDataset ? resourcesContext.messages['testDataset'] : datasetName
+            name: `${metadata?.dataflow.name} ${
+              isTestDataset ? ` - ${resourcesContext.messages['testDataset']}` : datasetName
             }`
           })
       : metadata?.dataflow.bigData
       ? TextUtils.parseText(resourcesContext.messages['bigDataDataflowNamed'], {
-          name: `${metadata?.dataflow.name} - ${
+          name: `${metadata?.dataflow.name} ${
             isTestDataset
-              ? resourcesContext.messages['testDataset']
+              ? ` - ${resourcesContext.messages['testDataset']}`
               : code
-              ? selectedPreparationSet?.datasetName || ''
-              : datasetName
+              ? ` - ${selectedPreparationSet?.datasetName || ''}`
+              : ''
           }`
         })
       : `${metadata?.dataflow.name} - ${isTestDataset ? resourcesContext.messages['testDataset'] : datasetName}`;
@@ -1583,7 +1583,6 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
     }
     return null;
   };
-
   return layout(
     <SnapshotContext.Provider
       value={{
