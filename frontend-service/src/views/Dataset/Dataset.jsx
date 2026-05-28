@@ -1670,17 +1670,13 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
                   editingStatus?.isEditing ||
                   !hasWritePermissions ||
                   isTableDataRestorationInProgress ||
-                  (actionsContext.deleteDatasetProcessing && actionsContext.deleteDatasetCode !== null)
+                  actionsContext.isInProgress
                 }
                 icon={
-                  (actionsContext.isInProgress && actionsContext.deleteDatasetProcessing) ||
-                  (actionsContext.isInProgress && actionsContext.deleteDatasetCode !== null)
-                    ? 'spinnerAnimate'
-                    : 'trash'
+                  actionsContext.isInProgress && actionsContext.deleteDatasetProcessing ? 'spinnerAnimate' : 'trash'
                 }
                 label={
-                  (actionsContext.isInProgress && actionsContext.deleteDatasetProcessing) ||
-                  (actionsContext.isInProgress && actionsContext.deleteDatasetCode !== null)
+                  actionsContext.isInProgress && actionsContext.deleteDatasetProcessing
                     ? resourcesContext.messages['deleteInProgress']
                     : resourcesContext.messages['deleteDatasetData']
                 }
