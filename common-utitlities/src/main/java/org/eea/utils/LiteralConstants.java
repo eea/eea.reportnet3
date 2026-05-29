@@ -332,6 +332,8 @@ public final class LiteralConstants {
 
   public static final String S3_VIEW_TABLE_NAME_FOLDER_PATH = "%s/%s/%s/views/%s";
 
+  public static final String S3_TABLE_ROOT_FOLDER_PATH = "%s/%s/%s/";
+
   /** The Constant S3_TABLE_NAME_VALIDATE_DC_QUERY_PATH: {@value}. */
   public static final String S3_TABLE_NAME_VALIDATE_DC_QUERY_PATH = ".\"%s\".\"collections\".\"%s\".\"current\".\"%s_validate\".\"%s\".\"%s\"";
 
