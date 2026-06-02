@@ -75,6 +75,19 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
   void updateStatus(@Param("taskId") Long taskId, @Param("status") String status);
 
   /**
+   * Claim validation task
+   * @param taskId
+   * @param pod
+   * @param startDate
+   */
+  @Modifying
+  @Transactional
+  @Query(nativeQuery = true, value = "update task set status='IN_PROGRESS', date_start=:startDate, pod=:pod where id=:taskId and status='IN_QUEUE'")
+  int claimValidationTask(@Param("taskId") Long taskId,
+                          @Param("pod") String pod,
+                          @Param("startDate") Date startDate);
+
+  /**
    * Update status and finish date.
    *
    * @param taskId the task id
