@@ -96,6 +96,7 @@ public class S3ServiceImpl implements S3Service {
                 break;
             case S3_IMPORT_QUERY_PATH:
             case S3_TABLE_AS_FOLDER_QUERY_PATH:
+            case S3_VIEWS_TABLE_AS_FOLDER_QUERY_PATH:
             case S3_TABLE_NAME_QUERY_PATH:
             case S3_IMPORT_CSV_FILE_QUERY_PATH:
             case S3_TABLE_NAME_VALIDATE_QUERY_PATH:
@@ -119,6 +120,7 @@ public class S3ServiceImpl implements S3Service {
                     s3PathResolver.getValidationId(), fileName);
                 break;
             case S3_TABLE_NAME_FOLDER_PATH:
+            case S3_VIEW_TABLE_NAME_FOLDER_PATH:
             case S3_ATTACHMENTS_TABLE_PATH:
             case S3_TABLE_NAME_FOLDER_PATH_FOR_VALID_PREFIX:
                 path = String.format(path, dataflowFolder, dataProviderFolder, datasetFolder,
@@ -140,6 +142,7 @@ public class S3ServiceImpl implements S3Service {
                 path = String.format(path, dataflowFolder, dataProviderFolder, datasetFolder, preparationCode, fileName);
                 break;
             case S3_PROVIDER_PATH:
+            case S3_VIEWS_FOLDER_PATH:
             case S3_SNAPSHOT_FOLDER_PATH:
             case S3_VALIDATION_TABLE_PATH:
                 path = String.format(path, dataflowFolder, dataProviderFolder, datasetFolder);
@@ -283,6 +286,7 @@ public class S3ServiceImpl implements S3Service {
                 return S3_DEFAULT_BUCKET + String.format(path, dataflowFolder, s3PathResolver.getTableName());
             case S3_EXPORT_PREFILLED_TABLE_AS_FOLDER_QUERY_PATH:
             case S3_TABLE_AS_FOLDER_QUERY_PATH:
+            case S3_VIEWS_TABLE_AS_FOLDER_QUERY_PATH:
                 if(BooleanUtils.isTrue(s3PathResolver.getIsIcebergTable())){
                     return S3_ICEBERG_BUCKET + String.format(path, dataflowFolder, dataProviderFolder, datasetFolder, s3PathResolver.getTableName());
                 }
@@ -295,9 +299,11 @@ public class S3ServiceImpl implements S3Service {
             case S3_IMPORT_TABLE_NAME_FOLDER_PATH:
             case S3_VALIDATION_TABLE_PATH:
             case S3_TABLE_NAME_FOLDER_PATH:
+            case S3_VIEW_TABLE_NAME_FOLDER_PATH:
             case S3_TABLE_NAME_FOLDER_PATH_FOR_VALID_PREFIX:
             case S3_ATTACHMENTS_TABLE_PATH:
             case S3_PROVIDER_PATH:
+            case S3_VIEWS_FOLDER_PATH:
                 return String.format(path, dataflowFolder, dataProviderFolder, datasetFolder, s3PathResolver.getTableName());
             case S3_ROOT_DATAFLOW_FOLDER_PATH:
                 return String.format(path, dataflowFolder);
@@ -352,6 +358,7 @@ public class S3ServiceImpl implements S3Service {
                 return S3_DEFAULT_BUCKET + String.format(path, dataflowFolder,
                     s3PathResolver.getTableName());
             case S3_TABLE_NAME_FOLDER_PATH:
+            case S3_VIEW_TABLE_NAME_FOLDER_PATH:
             case S3_TABLE_NAME_FOLDER_PATH_FOR_VALID_PREFIX:
                 return String.format(path, dataflowFolder, dataProviderFolder, datasetFolder,
                     s3PathResolver.getTableName());
@@ -388,6 +395,7 @@ public class S3ServiceImpl implements S3Service {
                 return S3_DEFAULT_BUCKET + String.format(path, dataflowFolder,
                     s3PathResolver.getTableName());
             case S3_TABLE_AS_FOLDER_QUERY_PATH:
+            case S3_VIEWS_TABLE_AS_FOLDER_QUERY_PATH:
                 return S3_DEFAULT_BUCKET + String.format(path, dataflowFolder, dataProviderId,
                     datasetId, s3PathResolver.getTableName());
             case S3_TABLE_NAME_EU_QUERY_PATH:

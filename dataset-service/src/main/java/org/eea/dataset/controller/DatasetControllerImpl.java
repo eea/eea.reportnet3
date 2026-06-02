@@ -65,7 +65,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.concurrent.DelegatingSecurityContextRunnable;
 import org.springframework.security.core.context.SecurityContext;
@@ -85,8 +84,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.eea.interfaces.vo.dataset.enums.FileTypeEnum.CSV;
-import static org.eea.utils.LiteralConstants.EXPORT_CSV;
-import static org.eea.utils.LiteralConstants.EXPORT_PARQUET;
+import static org.eea.utils.LiteralConstants.*;
 
 /**
  * The Class DatasetControllerImpl.
@@ -4682,5 +4680,39 @@ public class DatasetControllerImpl implements DatasetController {
     } catch (Exception e) {
       LOG.error(e.getMessage(), e);
     }
+  }
+
+
+  @PostMapping("/createView")
+  public ResponseEntity<Void> createTypedView(
+          @RequestParam Long dataflowId,
+          @RequestParam Long providerId,
+          @RequestParam Long datasetId,
+          @RequestParam String tableName,
+          @RequestParam String tableSchemaId)
+  {
+
+    Boolean isBigDataflow = dataFlowControllerZuul.isBigDataflow(dataflowId);
+
+    if (!isBigDataflow) {
+      return ResponseEntity.badRequest().build();
+    }
+
+    try {
+      bigDataDatasetService.createTypedView(
+              dataflowId,
+              providerId,
+              datasetId,
+              tableSchemaId,
+              tableName
+      );
+
+      return ResponseEntity.ok().build();
+
+    } catch (Exception e) {
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    }
+
+
   }
 }
