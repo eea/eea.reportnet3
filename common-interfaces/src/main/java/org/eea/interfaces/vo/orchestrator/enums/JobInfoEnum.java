@@ -53,6 +53,8 @@ public enum JobInfoEnum {
 
     WARNING_SOME_IMPORT_FILES_CONTAIN_WRONG_HEADERS("Some import files have headers that do not exactly match the field names of the reportnet tables. As a result those files were not imported."),
 
+    WARNING_GEOSPATIAL_DATA_FAILED_TO_BE_CONVERTED("Some geospatial data failed to be converted."),
+
     ERROR_IMPORT_FILES_CONTAIN_WRONG_HEADERS("Import files contain incorrect headers. Please ensure the headers in your files exactly match the field names of the corresponding tables."),
 
     ERROR_ETL_EXPORT_V4_CITUS("ETL Export v4 isn’t compatible with non–big data dataflows. Please use a supported export version."),
