@@ -944,6 +944,10 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
     false
   );
 
+  useCheckNotifications(['PARQUET_TO_ICEBERG_CONVERSION_COMPLETED_EVENT'], () =>
+    notificationContext.add({ type: 'YOU_ONLY_HAVE_LIMITED_TIME' }, true)
+  );
+
   const onLoadTableData = hasData => {
     setDatasetHasData(hasData);
   };
