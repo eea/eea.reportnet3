@@ -3857,7 +3857,11 @@ public class DatasetControllerImpl implements DatasetController {
       return;
     }
 
-    List<JobVO> activeJobsForDatasetId = jobControllerZuul.findActiveJobsRelatedToADatasetId(datasetId, dataflowId, providerId);
+    List<JobVO> activeJobsForDatasetId = jobControllerZuul.findActiveJobsRelatedToADatasetId(datasetId, dataflowId, providerId)
+            .stream()
+            .filter(jobVO -> StringUtils.isBlank(jobVO.getPreparationCode()))
+            .collect(Collectors.toList());
+
     if(activeJobsForDatasetId != null && !activeJobsForDatasetId.isEmpty()){
       List<Long> jobIds = activeJobsForDatasetId.stream().map(JobVO::getId).collect(Collectors.toList());
       LOG.info("Can not convert tables from iceberg to parquet for dataflowId {} datasetId {} providerId {} and user {} because there are active jobs related to the same dataset id. Job ids: {}", dataflowId, datasetId, providerId, username, jobIds);
