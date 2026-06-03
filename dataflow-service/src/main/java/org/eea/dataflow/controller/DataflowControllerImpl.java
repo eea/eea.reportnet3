@@ -1556,4 +1556,22 @@ public class DataflowControllerImpl implements DataFlowController {
       throw e;
     }
   }
+
+  /**
+   * Endpoint to trigger the cleanup of a specific dataflow by ID.
+   *
+   * @return a response indicating the success or failure of the operation.
+   */
+  @Override
+  @PreAuthorize("hasAnyRole('ADMIN')")
+  @GetMapping("/deleteDataflowById")
+  public ResponseEntity<String> cleanupDataflow(@RequestParam("dataflowId") Long dataflowId) throws Exception {
+    try {
+      dataflowCleanupService.cleanupDataflow(dataflowId);
+      return ResponseEntity.ok("Cleanup done for dataflow: " + dataflowId );
+    } catch (Exception e) {
+      LOG.error("Unexpected error! Could not cleanup dataflow Error: {}", e.getMessage());
+      throw e;
+    }
+  }
 }
