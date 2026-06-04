@@ -3517,9 +3517,11 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
         // Build select clause for populated tables
         String selectClause =
+            Stream.concat(
+                Stream.of("\"record_id\" AS \"record_id\""),
                 fields.stream()
-                        .map(this::buildCast)
-                        .collect(Collectors.joining(",\n"));
+                    .map(this::buildCast))
+            .collect(Collectors.joining(",\n"));
 
         dropViewTableIfExists(targetPath);
         deleteViewFolderIfExists(currentPath);
@@ -3575,19 +3577,11 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             List<FieldSchema> fields
     ) {
 
-        String columns =
-                fields.stream()
-                        .map(field -> {
-
-                            String name =
-                                    "\"" + field.getHeaderName() + "\"";
-
-                            String type =
-                                    mapType(field);
-
-                            return name + " " + type;
-                        })
-                        .collect(Collectors.joining(",\n"));
+        String columns = Stream.concat(
+                Stream.of("\"record_id\" VARCHAR"),
+                fields.stream().map(field ->
+                        "\"" + field.getHeaderName() + "\" " + mapType(field))
+        ).collect(Collectors.joining(",\n"));
 
         return "CREATE TABLE " +
                 target +

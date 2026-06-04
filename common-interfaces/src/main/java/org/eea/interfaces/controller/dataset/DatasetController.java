@@ -1203,4 +1203,12 @@ public interface DatasetController {
 
   @DeleteMapping("/clearDatasetTableLocksByUser")
   void clearDatasetTableLocksByUser(@RequestParam(value = "username") String username);
+
+  @PostMapping("/createView")
+  ResponseEntity<Void> createTypedView(
+          @RequestParam Long dataflowId,
+          @RequestParam Long providerId,
+          @RequestParam Long datasetId,
+          @RequestParam String tableName,
+          @RequestParam String tableSchemaId);
 }
