@@ -422,6 +422,7 @@ export const BigButtonList = ({
     ) {
       setEmptyTable(true);
       setIsQCsNotValidWarningVisible(false);
+      changeIsActiveButtonState(true);
       setIsActiveButton(true);
     }
   }, [dataflowId, notificationContext]);
