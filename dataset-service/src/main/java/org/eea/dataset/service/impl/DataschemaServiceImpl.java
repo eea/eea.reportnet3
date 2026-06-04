@@ -426,13 +426,31 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   }
 
   /**
-   * Gets the dataset schema id.
+   * Returns the dataset schema ID for the given dataset ID.
    *
-   * @param datasetId the dataset id
+   * <p>This method is cached using Spring's {@code @Cacheable} annotation with the
+   * cache name {@code "datasetSchemaId"} and the dataset ID as the cache key.
+   * The cache is managed by Spring Boot's auto-configured RedisCacheManager,
+   * which uses {@code JdkSerializationRedisSerializer} - compatible with {@link String}
+   * since it natively implements {@link java.io.Serializable}.
    *
-   * @return the dataset schema id
+   * <p>On a cache miss, the method fetches the schema ID from the metabase repository
+   * and populates the cache. On subsequent calls with the same {@code datasetId},
+   * the cached value is returned directly from Redis without hitting the database.
    *
-   * @throws EEAException the EEA exception
+   * <p>The cache is evicted by {@link #deleteDatasetSchema(String, Long)} when
+   * the dataset schema is deleted, ensuring cache consistency.
+   *
+   * <p><b>Self-invocation note:</b> Internal calls to this method within
+   * {@code DataschemaServiceImpl} use {@code self.getDatasetSchemaId()} instead of
+   * {@code this.getDatasetSchemaId()} to ensure the call goes through the Spring AOP
+   * proxy, which is required for {@code @Cacheable} to work. Direct {@code this} calls
+   * bypass the proxy and would skip cache interception entirely.
+   * See {@link #self} for details.
+   *
+   * @param datasetId the dataset ID
+   * @return the dataset schema ID string
+   * @throws EEAException if the dataset is not found
    */
   @Override
   @Cacheable(value = "datasetSchemaId", key = "#datasetId")
@@ -459,10 +477,15 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   }
 
   /**
-   * Delete dataset schema.
+   * Deletes the dataset schema for the given schema ID and dataset ID.
    *
-   * @param schemaId the schema id
-   * @param datasetId the dataset id
+   * <p>This method evicts the {@code "datasetSchemaId"} cache entry for the given
+   * {@code datasetId} to ensure that subsequent calls to
+   * {@link #getDatasetSchemaId(Long)} fetch fresh data from the database
+   * rather than serving a stale cached value after deletion.
+   *
+   * @param schemaId  the schema ID to delete
+   * @param datasetId the dataset ID whose cache entry should be evicted
    */
   @Override
   @Transactional
