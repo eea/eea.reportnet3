@@ -82,7 +82,7 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
    */
   @Modifying
   @Transactional
-  @Query(nativeQuery = true, value = "update task set status='IN_PROGRESS', date_start=:startDate, pod=:pod where id=:taskId and status='IN_QUEUE'")
+  @Query(nativeQuery = true, value = "update task set status='IN_PROGRESS', date_start=:startDate, pod=:pod, version = version + 1 where id=:taskId and status='IN_QUEUE'")
   int claimValidationTask(@Param("taskId") Long taskId,
                           @Param("pod") String pod,
                           @Param("startDate") Date startDate);

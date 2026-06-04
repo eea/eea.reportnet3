@@ -103,14 +103,14 @@ public class ValidationScheduler extends MessageReceiver {
           LOG.info("ValidationScheduler current iteration token: {}",token);
           boolean acquired = false;
           try {
-            if (!redisLockService.checkAndAcquireLock(lockKey, token, lockExpirationInMillis)) {
+            acquired = redisLockService.checkAndAcquireLock(lockKey, token, lockExpirationInMillis);
+            if (!acquired) {
               // Task is already being handled.
               continue;
             }
-
+            
             // CAS claim in DB instead of repo save for safety.
             int claimed = taskRepository.claimValidationTask(task.getId(), serviceInstanceId, new Date());
-            LOG.info("Task with id {} claimed value {}", task.getId(), claimed);
             if (claimed == 0) {
               continue;
             }
@@ -118,11 +118,9 @@ public class ValidationScheduler extends MessageReceiver {
             ObjectMapper objectMapper = new ObjectMapper();
             objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
             EEAEventVO event = objectMapper.readValue(task.getJson(), EEAEventVO.class);
-
             Message<EEAEventVO> message = MessageBuilder.withPayload(event).build();
             message.getPayload().getData().put("task_id", task.getId());
             consumeMessage(message);
-
           } catch (EEAException | JsonProcessingException e) {
             LOG.error("failed the validation task schedule because of {}", e.toString(), e);
           } catch (ObjectOptimisticLockingFailureException e) {
