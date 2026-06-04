@@ -466,7 +466,9 @@ const useBigButtonList = ({
     });
   };
 
-  const groupByRepresentativeModels = buildGroupByRepresentativeModels(dataflowState?.data?.datasets).sort((a, b) => a.caption.localeCompare(b.caption));
+  const groupByRepresentativeModels = buildGroupByRepresentativeModels(dataflowState?.data?.datasets).sort((a, b) =>
+    a.caption.localeCompare(b.caption)
+  );
 
   const preparationSetsModels = isEmpty(preparationSetsList) ? [] : buildPreparationSetsModels();
 
@@ -761,7 +763,6 @@ const useBigButtonList = ({
   const releaseBigButton = onBuildReleaseButton();
 
   return [
-    ...managePreparationSetsBigButton,
     ...manageReportersBigButton,
     ...helpBigButton,
     ...designDatasetModels,
@@ -779,9 +780,10 @@ const useBigButtonList = ({
     ...updateDatasetsNewRepresentatives,
     ...groupByRepresentativeModels,
     ...receiptBigButton,
+    ...managePreparationSetsBigButton,
     ...createPreparationSets,
-    ...releaseBigButton,
-    ...preparationSetsModels
+    ...preparationSetsModels,
+    ...releaseBigButton
   ];
 };
 
