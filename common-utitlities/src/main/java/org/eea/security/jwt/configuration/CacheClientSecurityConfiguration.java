@@ -4,6 +4,11 @@ import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import org.eea.security.jwt.data.CacheTokenVO;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -89,7 +94,7 @@ public class CacheClientSecurityConfiguration {
   }
 
   /**
-   * Security redis template redis template.
+   * Security redis template.
    *
    * @param jedisConnectionFactory the jedis connection factory
    *
@@ -124,8 +129,7 @@ public class CacheClientSecurityConfiguration {
    * Redis Cache Manager for local profile.
    * Uses a standalone Redis connection to manage caches for
    * {@code datasetSchemaId}.
-   * TTLs are configurable via Consul keys {@code cache.datasetSchemaId.ttl}
-   * and {@code cache.uniqueConstraints.ttl} (in minutes).
+   * TTLs are configurable via Consul key {@code cache.datasetSchemaId.ttl} (in minutes).
    *
    * @param jedisConnectionFactory the standalone Redis connection factory
    * @return the Redis cache manager
@@ -139,7 +143,7 @@ public class CacheClientSecurityConfiguration {
                             new StringRedisSerializer()))
             .serializeValuesWith(
                     RedisSerializationContext.SerializationPair.fromSerializer(
-                            new GenericJackson2JsonRedisSerializer()));
+                            new GenericJackson2JsonRedisSerializer(buildCacheObjectMapper())));
 
     Map<String, RedisCacheConfiguration> cacheConfigs = new HashMap<>();
     cacheConfigs.put("datasetSchemaId", defaultConfig.entryTtl(Duration.ofMinutes(datasetSchemaIdTtl)));
@@ -154,8 +158,7 @@ public class CacheClientSecurityConfiguration {
    * Redis Cache Manager for non-local profiles (dev, staging, production).
    * Uses a Redis Sentinel connection for high availability to manage caches for
    * {@code datasetSchemaId}.
-   * TTLs are configurable via Consul keys {@code cache.datasetSchemaId.ttl}
-   * and {@code cache.uniqueConstraints.ttl} (in minutes).
+   * TTLs are configurable via Consul key {@code cache.datasetSchemaId.ttl} (in minutes).
    *
    * @param jedisSentinelConnectionFactory the Redis Sentinel connection factory
    * @return the Redis cache manager
@@ -169,7 +172,7 @@ public class CacheClientSecurityConfiguration {
                             new StringRedisSerializer()))
             .serializeValuesWith(
                     RedisSerializationContext.SerializationPair.fromSerializer(
-                            new GenericJackson2JsonRedisSerializer()));
+                            new GenericJackson2JsonRedisSerializer(buildCacheObjectMapper())));
 
     Map<String, RedisCacheConfiguration> cacheConfigs = new HashMap<>();
     cacheConfigs.put("datasetSchemaId", defaultConfig.entryTtl(Duration.ofMinutes(datasetSchemaIdTtl)));
@@ -178,6 +181,50 @@ public class CacheClientSecurityConfiguration {
             .cacheDefaults(defaultConfig)
             .withInitialCacheConfigurations(cacheConfigs)
             .build();
+  }
+
+  /**
+   * Creates an ObjectMapper configured specifically for Redis cache serialization.
+   * This ObjectMapper is only used for @Cacheable/@CacheEvict operations
+   * and does NOT affect other Redis templates or operations.
+   *
+   * <p>Configuration details:
+   * <ul>
+   *   <li><b>enableDefaultTyping</b>: Embeds Java class type information as a JSON
+   *       property (@class) during serialization, for example:
+   *       {"@class": "org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO", ...}.
+   *       This ensures correct deserialization back to the exact Java type,
+   *       preventing ClassCastException errors such as Integer cannot be cast to Long.
+   *       Applies to all non-final classes (NON_FINAL) and stores type info
+   *       as a JSON property (JsonTypeInfo.As.PROPERTY).</li>
+   *
+   *   <li><b>USE_LONG_FOR_INTS</b>: Forces all JSON integer numbers to deserialize
+   *       as Long instead of Integer, directly preventing
+   *       ClassCastException: Integer cannot be cast to Long errors
+   *       on numeric ID fields in cached VOs.</li>
+   *
+   *   <li><b>FAIL_ON_UNKNOWN_PROPERTIES false</b>: Prevents deserialization errors
+   *       when cached objects contain fields that no longer exist in the current
+   *       version of the class. Ensures forward and backward compatibility
+   *       when VO fields are added or removed after data is already cached.</li>
+   *
+   *   <li><b>FAIL_ON_EMPTY_BEANS false</b>: Prevents serialization errors on objects
+   *       that have no serializable properties, avoiding exceptions on empty
+   *       or minimal objects that may appear in the object graph.</li>
+   * </ul>
+   *
+   * @return a configured {@link ObjectMapper} instance for Redis cache serialization
+   */
+  private ObjectMapper buildCacheObjectMapper() {
+    ObjectMapper objectMapper = new ObjectMapper();
+    objectMapper.enableDefaultTyping(
+            ObjectMapper.DefaultTyping.NON_FINAL,
+            JsonTypeInfo.As.PROPERTY
+    );
+    objectMapper.configure(DeserializationFeature.USE_LONG_FOR_INTS, true);
+    objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    objectMapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+    return objectMapper;
   }
 
 }
