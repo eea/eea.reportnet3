@@ -3524,21 +3524,47 @@ public class FileTreatmentHelper implements DisposableBean {
         }
     }
 
+    /**
+     * This method retrieves the real filename of an attachment from S3.
+     * @param s3Object this is the S3 object that contains the attachment's data. The key of the object is of the format
+     *                 rn3-dataset/rn3-dataset/{dataflowId}/{dataProviderId}/{datasetId}/current/attachments/{tableName}/{columnName}-UUID
+     *                 example: rn3-dataset/rn3-dataset/df-0000072/dp-0000001/ds-0000264/current/attachments/Document/attachment_1ae19988-c9b9-4ec1-8cd3-8cc00ca0e25e.txt
+     * @param dataset the dataset object
+     * @param tableName the name of table
+     * @return will return the real filename of the attachment stored in the S3 parquet file e.g. HabitatsSpecies.txt
+     */
     private String getRealFileName(S3Object s3Object, DataSetMetabase dataset, String tableName) {
 
         final String[] keyParts = s3Object.key().split("/");
+
+        /* I need the filename which is the last part of the split
+           e.g. attachment_1ae19988-c9b9-4ec1-8cd3-8cc00ca0e25e.txt
+         */
         final String fileName = keyParts[keyParts.length - 1];
-        final String[] fileNameParts = fileName.split("_");
-        final String fieldName = fileNameParts[0];
-        final String recordId = fileNameParts[1].split("\\.")[0];
-        S3PathResolver s3TablePathResolver = new S3PathResolver(
+
+        /* I need the filename without the suffix.
+           e.g. attachment_1ae19988-c9b9-4ec1-8cd3-8cc00ca0e25e from attachment_1ae19988-c9b9-4ec1-8cd3-8cc00ca0e25e.txt
+        */
+        final String fileNameWithoutSuffix = fileName.split("\\.")[0];
+
+        /* I need the fieldName (column of the table) which is the first part of the split
+           e.g. attachment from attachment_1ae19988-c9b9-4ec1-8cd3-8cc00ca0e25e
+           and also the record id which is the last part. Since the field name can contain
+           space characters I cant split it by space, so I must split it by the length of the
+           recordId which is always 36 (UUID)
+         */
+        int uuidLength = 36;
+        final String recordId = fileNameWithoutSuffix.substring(fileNameWithoutSuffix.length() - uuidLength);
+        final String fieldName = fileNameWithoutSuffix.substring(0, fileNameWithoutSuffix.length() - uuidLength - 1);
+
+        final S3PathResolver s3TablePathResolver = new S3PathResolver(
                 dataset.getDataflowId(), dataset.getDataProviderId(),
                 dataset.getId(),
                 tableName,
                 tableName,
                 S3_TABLE_AS_FOLDER_QUERY_PATH);
         s3TablePathResolver.setIsIcebergTable(false);
-        String tablePath = s3Service.getTableAsFolderQueryPath(s3TablePathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
+        final String tablePath = s3Service.getTableAsFolderQueryPath(s3TablePathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
 
         final String escapedTableName = UtilityClass.addQuotesToFieldNames(tableName);
         final String escapedFieldName = UtilityClass.addQuotesToFieldNames(fieldName);
