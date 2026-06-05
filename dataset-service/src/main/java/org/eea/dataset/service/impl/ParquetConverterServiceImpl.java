@@ -905,8 +905,17 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
       } else if (expectedHeaderName.equals(LiteralConstants.PARQUET_PROVIDER_CODE_COLUMN_HEADER)) {
         row.add(importFileInDremioInfo.getDataProviderCode() != null ? importFileInDremioInfo.getDataProviderCode() : "");
       } else if (csvRecord.isMapped(expectedHeaderName)) {
-        row.add(spatialDataHandling.getGeoJsonEnums().contains(fieldType) ?
-            spatialDataHandling.convertToHEX(csvRecord.get(expectedHeaderName), lineNumber, spatialFieldInfo, expectedHeaderName) : csvRecord.get(expectedHeaderName));
+
+        if (spatialDataHandling.getGeoJsonEnums().contains(fieldType)) {
+          final String hexGeoJsonValue = spatialDataHandling.convertToHEX(csvRecord.get(expectedHeaderName), lineNumber, spatialFieldInfo, expectedHeaderName);
+          if (StringUtils.isBlank(hexGeoJsonValue)) {
+            importFileInDremioInfo.addDistinctWarningMessage(JobInfoEnum.WARNING_GEOSPATIAL_DATA_FAILED_TO_BE_CONVERTED.getValue(null));
+          }
+          row.add(hexGeoJsonValue);
+        }
+        else {
+          row.add(csvRecord.get(expectedHeaderName));
+        }
       } else {
         String headerWithBom = "\uFEFF" + expectedHeaderName;
         if(csvRecord.isMapped(headerWithBom)){

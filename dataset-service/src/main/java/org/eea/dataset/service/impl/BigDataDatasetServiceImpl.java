@@ -803,7 +803,8 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             }
 
             jobStatus = JobStatusEnum.CANCELED;
-        } else {
+        }
+        else {
             if (!isPreparationDataset) {
                 datasetMetabaseService.updateDatasetRunningStatus(importFileInDremioInfo.getDatasetId(),
                         DatasetRunningStatusEnum.IMPORTED);
@@ -905,6 +906,10 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                             .datasetId(importFileInDremioInfo.getDatasetId()).fileName(importFileInDremioInfo.getFileName()).build();
                     kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.IMPORT_WRONG_HEADERS_WARNING_EVENT,
                             value, notificationWarning);
+                }
+                if(warningMessage.equals(JobInfoEnum.WARNING_GEOSPATIAL_DATA_FAILED_TO_BE_CONVERTED.getValue(null))
+                        && !EEAErrorMessage.ERROR_IMPORT_EMPTY_FILES.equals(importFileInDremioInfo.getErrorMessage())){
+                    jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.WARNING_GEOSPATIAL_DATA_FAILED_TO_BE_CONVERTED, null);
                 }
             }
         }
