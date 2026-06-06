@@ -1252,6 +1252,7 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
   @Override
   @PostMapping(value = "/private/releasePrecheck/{jobId}")
   public void precheckReleaseJob(@PathVariable("jobId") Long jobId) {
+    LOG.info("PRECHECK HIT jobId={}", jobId);
     releasePrecheckService.precheckOrThrow(jobId);
   }
 
