@@ -124,8 +124,9 @@ public class ReleasePrecheckService {
       } else {
         // For non-bigdata, validationRepository reads from the dataset_id schema.
         setTenant(datasetId);
-        if (validationRepository.existsByLevelError(ErrorTypeEnum.BLOCKER)) {
-          LOG.info("existsByLevelError(BLOCKER) for datasetId={} -> {}", datasetId, validationRepository.existsByLevelError(ErrorTypeEnum.BLOCKER));
+        boolean hasBlockers = validationRepository.existsByLevelError(ErrorTypeEnum.BLOCKER);
+        LOG.info("Precheck blockers datasetId={} -> {}", datasetId, hasBlockers);
+        if (hasBlockers) {
           haveBlockers = true;
           break;
         }
