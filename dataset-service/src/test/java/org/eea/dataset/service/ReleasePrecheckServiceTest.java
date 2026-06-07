@@ -53,6 +53,9 @@ public class ReleasePrecheckServiceTest {
   @Mock
   private org.eea.datalake.service.S3Service s3Service;
 
+  @Mock
+  private DatasetService datasetService;
+
   private Map<String, Object> parameters;
 
   @Before
@@ -71,8 +74,7 @@ public class ReleasePrecheckServiceTest {
 
   @Test
   public void testWithBlockers() {
-    Mockito.when(validationRepository.existsByLevelError(ErrorTypeEnum.BLOCKER)).thenReturn(true);
-
+    Mockito.when(datasetService.hasBlockersInCurrentTenant()).thenReturn(true);
     try {
       releasePrecheckService.precheckOrThrow(1947L);
       fail("Expected ResponseStatusException to be thrown");
@@ -80,14 +82,13 @@ public class ReleasePrecheckServiceTest {
       // expected
     }
 
-    Mockito.verify(validationRepository, times(1)).existsByLevelError(ErrorTypeEnum.BLOCKER);
+    verify(datasetService, times(1)).hasBlockersInCurrentTenant();
     Mockito.verifyNoInteractions(jobProcessControllerZuul);
     Mockito.verify(jobControllerZuul, never()).updateJobInfo(anyLong(), any(), any());
   }
 
   @Test
   public void testWithCanceledBlockerTasks() {
-    Mockito.when(validationRepository.existsByLevelError(ErrorTypeEnum.BLOCKER)).thenReturn(false);
     Mockito.when(jobProcessControllerZuul.findProcessesByJobId(1892L)).thenReturn(Collections.singletonList("proc-1"));
 
     Task canceledBlockerTask = new Task();
@@ -105,7 +106,6 @@ public class ReleasePrecheckServiceTest {
 
   @Test
   public void testWithCanceledNonBlockerTasks() {
-    Mockito.when(validationRepository.existsByLevelError(ErrorTypeEnum.BLOCKER)).thenReturn(false);
     Mockito.when(jobProcessControllerZuul.findProcessesByJobId(1892L)).thenReturn(Collections.singletonList("proc-1"));
 
     Mockito.when(taskRepository.findAllByProcessIdAndStatusAndLevelErrorBlocker("proc-1", ProcessStatusEnum.CANCELED.toString())).thenReturn(Collections.emptyList());
@@ -120,7 +120,7 @@ public class ReleasePrecheckServiceTest {
 
   @Test
   public void testWithoutIssues() {
-    Mockito.when(validationRepository.existsByLevelError(ErrorTypeEnum.BLOCKER)).thenReturn(false);
+    Mockito.when(datasetService.hasBlockersInCurrentTenant()).thenReturn(false);
     Mockito.when(jobProcessControllerZuul.findProcessesByJobId(1892L)).thenReturn(Collections.singletonList("proc-1"));
 
     Mockito.when(taskRepository.findAllByProcessIdAndStatusAndLevelErrorBlocker("proc-1", ProcessStatusEnum.CANCELED.toString())).thenReturn(Collections.emptyList());
