@@ -86,8 +86,8 @@ import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.transaction.Transactional;
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.StandardCharsets;
@@ -3979,5 +3979,14 @@ public class DatasetServiceImpl implements DatasetService {
 
     // 3. Return as bytes
     return geoJson.getBytes(StandardCharsets.UTF_8);
+  }
+
+  @Transactional(
+      propagation = Propagation.REQUIRES_NEW,
+      readOnly = true,
+      transactionManager = "dataSetsTransactionManager"
+  )
+  public boolean hasBlockersInCurrentTenant() {
+    return validationRepository.existsByLevelError(ErrorTypeEnum.BLOCKER);
   }
 }

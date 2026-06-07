@@ -753,4 +753,6 @@ public interface DatasetService {
           String recordId,
           String fieldId
   ) throws EEAException;
+
+  boolean hasBlockersInCurrentTenant();
 }

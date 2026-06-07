@@ -82,6 +82,9 @@ public class ReleasePrecheckService {
   @Autowired
   private S3Service s3Service;
 
+  @Autowired
+  private DatasetService datasetService;
+
   // Default priority used when the first real RELEASE process is created.
   private int defaultReleaseProcessPriority = 20;
 
@@ -115,7 +118,6 @@ public class ReleasePrecheckService {
     LOG.info("Release precheck jobId={} dataflowId={} providerId={} datasets={}", releaseJobId, dataflowId, dataProviderId, datasets);
     boolean haveBlockers = false;
     for (Long datasetId : datasets) {
-      LOG.info("Checking blockers for datasetId={} tenant={}", datasetId, TenantResolver.getTenantName());
       if (isBigData) {
         if (hasBigDataBlockers(dataflowId, dataProviderId, datasetId)) {
           haveBlockers = true;
@@ -123,12 +125,18 @@ public class ReleasePrecheckService {
         }
       } else {
         // For non-bigdata, validationRepository reads from the dataset_id schema.
-        setTenant(datasetId);
-        boolean hasBlockers = validationRepository.existsByLevelError(ErrorTypeEnum.BLOCKER);
-        LOG.info("Precheck blockers datasetId={} -> {}", datasetId, hasBlockers);
-        if (hasBlockers) {
-          haveBlockers = true;
-          break;
+        String tenant = String.format(DATASET_FORMAT_NAME, datasetId);
+        try{
+          TenantResolver.setTenantName(tenant);
+          LOG.info("Checking blockers for datasetId={} tenant={}", datasetId, TenantResolver.getTenantName());
+          boolean hasBlockers = datasetService.hasBlockersInCurrentTenant();
+          LOG.info("Precheck blockers datasetId={} -> {}", datasetId, hasBlockers);
+          if (hasBlockers) {
+            haveBlockers = true;
+            break;
+          }
+        } finally {
+          TenantResolver.clean();
         }
       }
     }
