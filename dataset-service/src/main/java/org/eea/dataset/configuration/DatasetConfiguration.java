@@ -18,6 +18,7 @@ import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.JpaVendorAdapter;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
@@ -131,7 +132,11 @@ public class DatasetConfiguration  {
     return dataSource;
   }
 
-
+  @Bean
+  @Qualifier("dataSetsJdbcTemplate")
+  public JdbcTemplate dataSetsJdbcTemplate(@Autowired @Qualifier("datasetDataSource") DataSource ds) {
+    return new JdbcTemplate(ds);
+  }
 
   /**
    * Data sets entity manager factory.

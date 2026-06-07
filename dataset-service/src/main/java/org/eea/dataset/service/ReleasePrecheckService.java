@@ -77,6 +77,10 @@ public class ReleasePrecheckService {
   private JdbcTemplate dremioJdbcTemplate;
 
   @Autowired
+  @Qualifier("dataSetsJdbcTemplate")
+  private JdbcTemplate dataSetsJdbcTemplate;
+
+  @Autowired
   private S3Helper s3Helper;
 
   @Autowired
@@ -128,8 +132,13 @@ public class ReleasePrecheckService {
         String tenant = String.format(DATASET_FORMAT_NAME, datasetId);
         try{
           TenantResolver.setTenantName(tenant);
-          LOG.info("Checking blockers for datasetId={} tenant={}", datasetId, TenantResolver.getTenantName());
+          String fullTenant = TenantResolver.getTenantName();
+          String sqlQuery = "select count(*) from " + fullTenant +".validation where level_error='BLOCKER'";
+          Integer count = dataSetsJdbcTemplate.queryForObject(sqlQuery,Integer.class);
           boolean hasBlockers = datasetService.hasBlockersInCurrentTenant();
+          LOG.info("Raw SQL query{} -> ", sqlQuery);
+          LOG.info("Raw SQL blocker count datasetId={} -> {}", datasetId, count);
+          LOG.info("Checking blockers for datasetId={} tenant={}", datasetId, TenantResolver.getTenantName());
           LOG.info("Precheck blockers datasetId={} -> {}", datasetId, hasBlockers);
           if (hasBlockers) {
             haveBlockers = true;
