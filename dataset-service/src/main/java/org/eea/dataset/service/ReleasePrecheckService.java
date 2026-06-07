@@ -112,9 +112,10 @@ public class ReleasePrecheckService {
     // For bigData dataflows we cannot use the normal validationRepository check because
     // blocker information lives in parquet validation output and must be read through Dremio.
     final boolean isBigData = dataFlowControllerZuul.isBigDataflow(dataflowId);
-
+    LOG.info("Release precheck jobId={} dataflowId={} providerId={} datasets={}", releaseJobId, dataflowId, dataProviderId, datasets);
     boolean haveBlockers = false;
     for (Long datasetId : datasets) {
+      LOG.info("Checking blockers for datasetId={} tenant={}", datasetId, TenantResolver.getTenantName());
       if (isBigData) {
         if (hasBigDataBlockers(dataflowId, dataProviderId, datasetId)) {
           haveBlockers = true;
@@ -124,6 +125,7 @@ public class ReleasePrecheckService {
         // For non-bigdata, validationRepository reads from the dataset_id schema.
         setTenant(datasetId);
         if (validationRepository.existsByLevelError(ErrorTypeEnum.BLOCKER)) {
+          LOG.info("existsByLevelError(BLOCKER) for datasetId={} -> {}", datasetId, validationRepository.existsByLevelError(ErrorTypeEnum.BLOCKER));
           haveBlockers = true;
           break;
         }
