@@ -3992,6 +3992,7 @@ public class DatasetServiceImpl implements DatasetService {
    *
    * @return true, if BLOCKERS exist
    */
+  @Override
   public boolean hasBlockersForDataset(Long datasetId) {
     String schema = String.format(DATASET_FORMAT_NAME, datasetId); // "dataset_%d"
     String sql = "select exists (select 1 from " + schema + ".validation where level_error='BLOCKER' limit 1)";
