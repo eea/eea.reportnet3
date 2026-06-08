@@ -119,7 +119,6 @@ public class ReleasePrecheckService {
     // For bigData dataflows we cannot use the normal validationRepository check because
     // blocker information lives in parquet validation output and must be read through Dremio.
     final boolean isBigData = dataFlowControllerZuul.isBigDataflow(dataflowId);
-    LOG.info("Release precheck jobId={} dataflowId={} providerId={} datasets={}", releaseJobId, dataflowId, dataProviderId, datasets);
     boolean haveBlockers = false;
     for (Long datasetId : datasets) {
       if (isBigData) {
@@ -129,23 +128,11 @@ public class ReleasePrecheckService {
         }
       } else {
         // For non-bigdata, validationRepository reads from the dataset_id schema.
-        String tenant = String.format(DATASET_FORMAT_NAME, datasetId);
-        try{
-          TenantResolver.setTenantName(tenant);
-          String fullTenant = TenantResolver.getTenantName();
-          String sqlQuery = "select count(*) from " + fullTenant +".validation where level_error='BLOCKER'";
-          Integer count = dataSetsJdbcTemplate.queryForObject(sqlQuery,Integer.class);
-          boolean hasBlockers = datasetService.hasBlockersInCurrentTenant();
-          LOG.info("Raw SQL query{} -> ", sqlQuery);
-          LOG.info("Raw SQL blocker count datasetId={} -> {}", datasetId, count);
-          LOG.info("Checking blockers for datasetId={} tenant={}", datasetId, TenantResolver.getTenantName());
-          LOG.info("Precheck blockers datasetId={} -> {}", datasetId, hasBlockers);
-          if (hasBlockers) {
-            haveBlockers = true;
-            break;
-          }
-        } finally {
-          TenantResolver.clean();
+        boolean hasBlockers = datasetService.hasBlockersForDataset(datasetId);
+        LOG.info("Precheck blockers datasetId={} -> {}", datasetId, hasBlockers);
+        if (hasBlockers) {
+          haveBlockers = true;
+          break;
         }
       }
     }
@@ -292,13 +279,5 @@ public class ReleasePrecheckService {
         .append(" where validation_level='BLOCKER' limit 1");
     SqlRowSet blockersRowSet = dremioJdbcTemplate.queryForRowSet(blockersQueryBuilder.toString());
     return blockersRowSet.next();
-  }
-
-  /**
-   * Switches tenant to the dataset schema so validationRepository points to the correct
-   * dataset_<id> validation tables.
-   */
-  private void setTenant(Long idDataset) {
-    TenantResolver.setTenantName(String.format(DATASET_FORMAT_NAME, idDataset));
   }
 }

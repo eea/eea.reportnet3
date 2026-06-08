@@ -754,5 +754,5 @@ public interface DatasetService {
           String fieldId
   ) throws EEAException;
 
-  boolean hasBlockersInCurrentTenant();
+  boolean hasBlockersForDataset(Long datasetId);
 }
