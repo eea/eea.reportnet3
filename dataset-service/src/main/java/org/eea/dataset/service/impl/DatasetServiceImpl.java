@@ -329,6 +329,10 @@ public class DatasetServiceImpl implements DatasetService {
   JdbcTemplate dremioJdbcTemplate;
 
   @Autowired
+  @Qualifier("dataSetsJdbcTemplate")
+  private JdbcTemplate dataSetsJdbcTemplate;
+
+  @Autowired
   private StatisticsService statisticsService;
 
   /** The import path. */
@@ -3981,12 +3985,17 @@ public class DatasetServiceImpl implements DatasetService {
     return geoJson.getBytes(StandardCharsets.UTF_8);
   }
 
-  @Transactional(
-      propagation = Propagation.REQUIRES_NEW,
-      readOnly = true,
-      transactionManager = "dataSetsTransactionManager"
-  )
-  public boolean hasBlockersInCurrentTenant() {
-    return validationRepository.existsByLevelError(ErrorTypeEnum.BLOCKER);
+  /**
+   * For Citus, for the current tenant/dataset_id, checks if the validationtable has any BLOCKER records.
+   *
+   * @param datasetId the dataset id
+   *
+   * @return true, if BLOCKERS exist
+   */
+  public boolean hasBlockersForDataset(Long datasetId) {
+    String schema = String.format(DATASET_FORMAT_NAME, datasetId); // "dataset_%d"
+    String sql = "select exists (select 1 from " + schema + ".validation where level_error='BLOCKER' limit 1)";
+    Boolean exists = dataSetsJdbcTemplate.queryForObject(sql, Boolean.class);
+    return Boolean.TRUE.equals(exists);
   }
 }

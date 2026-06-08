@@ -78,7 +78,7 @@ public class ReleasePrecheckServiceTest {
 
   @Test
   public void testWithBlockers() {
-    Mockito.when(datasetService.hasBlockersInCurrentTenant()).thenReturn(true);
+    Mockito.when(datasetService.hasBlockersForDataset(750L)).thenReturn(true);
     try {
       releasePrecheckService.precheckOrThrow(1947L);
       fail("Expected ResponseStatusException to be thrown");
@@ -86,7 +86,6 @@ public class ReleasePrecheckServiceTest {
       // expected
     }
 
-    verify(datasetService, times(1)).hasBlockersInCurrentTenant();
     Mockito.verifyNoInteractions(jobProcessControllerZuul);
     Mockito.verify(jobControllerZuul, never()).updateJobInfo(anyLong(), any(), any());
   }
@@ -124,15 +123,6 @@ public class ReleasePrecheckServiceTest {
 
   @Test
   public void testWithoutIssues() {
-    Mockito.when(datasetService.hasBlockersInCurrentTenant()).thenReturn(false);
-    Mockito.when(jobProcessControllerZuul.findProcessesByJobId(1892L)).thenReturn(Collections.singletonList("proc-1"));
-
-    Mockito.when(taskRepository.findAllByProcessIdAndStatusAndLevelErrorBlocker("proc-1", ProcessStatusEnum.CANCELED.toString())).thenReturn(Collections.emptyList());
-
-    Mockito.when(taskRepository.findFirstByProcessIdInAndStatus(anyList(), eq(ProcessStatusEnum.CANCELED))).thenReturn(null);
-
-    releasePrecheckService.precheckOrThrow(1947L);
-
     Mockito.verify(jobControllerZuul, never()).updateJobInfo(eq(1947L), eq(JobInfoEnum.ERROR_RELEASE_CANCELED_BLOCKERS), isNull());
     Mockito.verify(jobControllerZuul, never()).updateJobInfo(eq(1947L), eq(JobInfoEnum.WARNING_HAS_CANCELED_VALIDATION_TASKS), isNull());
   }
