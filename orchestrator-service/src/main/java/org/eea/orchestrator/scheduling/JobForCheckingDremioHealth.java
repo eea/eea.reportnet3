@@ -65,7 +65,7 @@ import java.util.Map;
  *
  * <p>Optional configuration properties (with defaults):
  * <ul>
- *   <li>{@code dremio.health-check.slow-threshold-ms} - maximum acceptable cycle duration
+ *   <li>{@code dremio.healthCheck.slowThresholdMs} - maximum acceptable cycle duration
  *       in ms before a slowness warning is raised (default: {@code 5000})</li>
  * </ul>
  *
@@ -86,7 +86,7 @@ public class JobForCheckingDremioHealth {
      * If the combined time of both checks exceeds this value, a slowness warning is raised.
      * Defaults to 5000 ms (5 seconds).
      */
-    @Value("${dremio.health-check.slow-threshold-ms:5000}")
+    @Value("${dremio.healthCheck.slowThresholdMs:5000}")
     private long slowThresholdMs;
 
     /**
