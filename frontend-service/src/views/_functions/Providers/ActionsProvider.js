@@ -81,7 +81,15 @@ export const ActionsProvider = ({ children }) => {
           );
         }
       } else {
-        setIsInProgress(true);
+        const relevantJobs = jobsInProgress.jobsList.filter(job => ['QUEUED', 'IN_PROGRESS'].includes(job.jobStatus));
+
+        const canSetInProgress = relevantJobs.some(job => {
+          const preparationCode = job.preparationCode;
+          return !preparationCode || preparationCode === code;
+        });
+
+        setIsInProgress(canSetInProgress);
+
         const jobInProgress = jobsInProgress.jobsList.find(job => job.jobStatus === 'IN_PROGRESS');
         const jobInQueue = jobsInProgress.jobsList.find(job => job.jobStatus === 'QUEUED');
         setJobTypeInProgress(jobInProgress ? jobInProgress?.jobType : jobInQueue?.jobType);
