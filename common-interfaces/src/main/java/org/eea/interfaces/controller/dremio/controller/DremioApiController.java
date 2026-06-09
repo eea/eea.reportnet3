@@ -2,9 +2,11 @@ package org.eea.interfaces.controller.dremio.controller;
 
 import org.eea.interfaces.vo.dremio.*;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.ws.rs.core.MediaType;
+import java.util.Map;
 
 @FeignClient(name = "dremioClient", url = "${spring.cloud.openfeign.client.config.dremioClient.url}")
 public interface DremioApiController {
@@ -32,4 +34,19 @@ public interface DremioApiController {
 
     @GetMapping(value = "/api/v3/job/{id}/results", produces = MediaType.APPLICATION_JSON)
     Object sqlApiResults(@RequestHeader(value = "Authorization") String token, @PathVariable("id") String id);
+
+    /**
+     * Checks the Dremio server status.
+     *
+     * <p>Calls {@code GET apiv2/server_status} to verify that the Dremio HTTP server
+     * is reachable and operational. A successful response returns HTTP 200 with a
+     * JSON-quoted string body of {@code "\"OK\""}.
+     *
+     * @return a {@link ResponseEntity} containing the response body as a quoted JSON
+     *         string; HTTP 200 with body {@code "OK"} (after unquoting) indicates
+     *         healthy, any other status or body value indicates a problem
+     */
+    @GetMapping(value = "apiv2/server_status", produces = MediaType.APPLICATION_JSON)
+    ResponseEntity<String> getServerStatus();
+
 }
