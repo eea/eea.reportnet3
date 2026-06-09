@@ -361,11 +361,11 @@ const useBigButtonListRepresentative = ({
     feedbackButton,
     ...getReferenceDatasetModels(),
     ...groupByRepresentativeModels,
-    ...receiptBigButton,
     ...testDatasetsModels,
     ...managePreparationSetsBigButton,
     ...createPreparationSets,
     ...preparationSetsModels,
+    ...receiptBigButton,
     ...releaseBigButton,
     ...(isAdmin ? silentReleaseButton : [])
   ];
