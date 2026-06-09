@@ -779,10 +779,10 @@ const useBigButtonList = ({
     ...createDataCollection,
     ...updateDatasetsNewRepresentatives,
     ...groupByRepresentativeModels,
-    ...receiptBigButton,
     ...managePreparationSetsBigButton,
     ...createPreparationSets,
     ...preparationSetsModels,
+    ...receiptBigButton,
     ...releaseBigButton
   ];
 };
