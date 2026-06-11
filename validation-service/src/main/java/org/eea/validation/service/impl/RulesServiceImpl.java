@@ -2466,7 +2466,7 @@ public class RulesServiceImpl implements RulesService {
   }
 
   /**
-   * Checks if the given data is of geometry type.
+   * Checks whether a field type is one of the spatial geometry types.
    *
    * @param type the data type
    * @return true, if geometry
