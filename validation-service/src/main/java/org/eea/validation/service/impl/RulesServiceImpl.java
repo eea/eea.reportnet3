@@ -2351,6 +2351,136 @@ public class RulesServiceImpl implements RulesService {
   public RuleVO findRule(String datasetSchemaId, String ruleId) {
     return ruleMapper.entityToClass(rulesRepository.findRule(new ObjectId(datasetSchemaId), new ObjectId(ruleId)));
   }
+
+  /**
+   * Update Big Data geometry rule sql sentence.
+   *
+   * @param datasetSchemaId
+   * @param datasetId
+   * @param tableSchemaId
+   * @param fieldSchemaId
+   */
+  @Override
+  public void updateBigDataGeometryRulesSql(String datasetSchemaId, Long datasetId, String tableSchemaId, String fieldSchemaId) {
+    if (StringUtils.isBlank(datasetSchemaId) || datasetId == null) {
+      LOG.warn("Skipping QC SQL update. DatasetSchemaId or datasetId empty or missing. datasetSchemaId={}, datasetId={}", datasetSchemaId, datasetId);
+      return;
+    }
+    ObjectId datasetSchemaObjectId = new ObjectId(datasetSchemaId);
+    DataSetSchema dataSetSchema = schemasRepository.findByIdDataSetSchema(datasetSchemaObjectId);
+
+    if (dataSetSchema == null || dataSetSchema.getTableSchemas() == null) {
+      LOG.warn("Skipping QC SQL update. DatasetSchema not found. datasetSchemaId={}", datasetSchemaId);
+      return;
+    }
+
+    RulesSchema rulesSchema = rulesRepository.findByIdDatasetSchema(datasetSchemaObjectId);
+
+    if (rulesSchema == null || rulesSchema.getRules() == null || rulesSchema.getRules().isEmpty()) {
+      LOG.warn("Skipping QC SQL update. Rules schema empty or missing. datasetSchemaId={}", datasetSchemaId);
+      return;
+    }
+
+    // Table ObjectId null if tableSchemaId doesn't exist.
+    ObjectId tableObjectId = StringUtils.isNotBlank(tableSchemaId) ? new ObjectId(tableSchemaId) : null;
+    // Field ObjectId null if fieldSchemaId doesn't exist.
+    ObjectId fieldObjectId = StringUtils.isNotBlank(fieldSchemaId) ? new ObjectId(fieldSchemaId) : null;
+
+    // Iterate through all dataset tables and table fields to find the geometry rule that we want to change it's sentence.
+    for (TableSchema tableSchema : dataSetSchema.getTableSchemas()) {
+      if (tableSchema == null || tableSchema.getRecordSchema() == null || tableSchema.getRecordSchema().getFieldSchema() == null) {
+        continue;
+      }
+
+      if (tableObjectId != null && !tableObjectId.equals(tableSchema.getIdTableSchema())) {
+        continue;
+      }
+
+      for (FieldSchema fieldSchema : tableSchema.getRecordSchema().getFieldSchema()) {
+        if (fieldSchema == null) {
+          continue;
+        }
+
+        if (fieldObjectId != null && !fieldObjectId.equals(fieldSchema.getIdFieldSchema())) {
+          continue;
+        }
+
+        if (!isGeometryDataType(fieldSchema.getType())) {
+          continue;
+        }
+
+        // Get the Rule with the given rule schema.
+        Rule geometrySqlRule = findGeometrySqlRule(rulesSchema, fieldSchema.getIdFieldSchema());
+
+        if (geometrySqlRule == null) {
+          LOG.warn("No rule was found with fieldSchemaId: {}", fieldSchema.getIdFieldSchema());
+          continue;
+        }
+
+        // Constract the new sql sentence with the new name.
+        String newSqlSentence = buildBigDataGeometrySqlSentence(datasetId, tableSchema.getNameTableSchema(), fieldSchema.getHeaderName());
+
+        // Continue if the old sentence is the same with the new one.
+        if (StringUtils.equals(geometrySqlRule.getSqlSentence(), newSqlSentence)) {
+          LOG.info("New SQL sentence is the same as the previous one for ruleId: {}, fieldName: {}", geometrySqlRule.getRuleId(), fieldSchema.getHeaderName());
+          continue;
+        }
+
+        // Set the new sql sentence and update the Rule.
+        LOG.info("Updating Big Data geometry QC SQL rule for fieldName: {} and ruleId:{}", fieldSchema.getHeaderName(), geometrySqlRule.getRuleId());
+        geometrySqlRule.setSqlSentence(newSqlSentence);
+        rulesRepository.updateRule(datasetSchemaObjectId, geometrySqlRule);
+      }
+    }
+    LOG.info("Finished Big Data geometry QC SQL update for datasetId={} and fieldSchemaId: {}", datasetId, fieldSchemaId);
+  }
+
+  /**
+   * Gets the Rule from the given rules and field schemas.
+   *
+   * @param rulesSchema the rule schema
+   * @param fieldSchemaId the field schema id
+   * @return the found Rule
+   */
+  private Rule findGeometrySqlRule(RulesSchema rulesSchema, ObjectId fieldSchemaId) {
+    return rulesSchema.getRules().stream()
+        .filter(rule -> fieldSchemaId.equals(rule.getReferenceId()))
+        .filter(Rule::isAutomatic)
+        .filter(rule -> AutomaticRuleTypeEnum.FIELD_SQL_TYPE.equals(rule.getAutomaticType()))
+        .filter(rule -> StringUtils.isNotBlank(rule.getSqlSentence()))
+        .findFirst()
+        .orElse(null);
+  }
+
+  /**
+   * Gets the Rule from the given rules and field schemas.
+   *
+   * @param datasetId the dataset id
+   * @param tableName the table name
+   * @param fieldName the field name
+   * @return the SQL sentence
+   */
+  private String buildBigDataGeometrySqlSentence(Long datasetId, String tableName, String fieldName) {
+    String fromClause = String.format(FROM_CLAUSE_STATEMENT, datasetId, tableName);
+    return String.format(SPATIAL_DATA_NEW_AUTOMATIC_QC_RULE_SENTENCE, fieldName, fromClause, fieldName, fieldName);
+  }
+
+  /**
+   * Checks whether a field type is one of the spatial geometry types.
+   *
+   * @param type the data type
+   * @return true, if geometry
+   */
+  private boolean isGeometryDataType(DataType type) {
+    return DataType.POINT.equals(type)
+        || DataType.MULTIPOINT.equals(type)
+        || DataType.LINESTRING.equals(type)
+        || DataType.MULTILINESTRING.equals(type)
+        || DataType.POLYGON.equals(type)
+        || DataType.MULTIPOLYGON.equals(type)
+        || DataType.GEOMETRYCOLLECTION.equals(type);
+  }
+
   /**
    * Update rule state.
    *
