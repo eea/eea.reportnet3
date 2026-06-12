@@ -1511,7 +1511,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
           isReporting
           options={webformOptions}
           state={{
-            datasetSchema: { tables: datasetSchemaAllTables },
+            datasetSchema: { datasetSchemaId: metadata?.dataset.datasetSchemaId, tables: datasetSchemaAllTables },
             schemaTables,
             datasetStatistics: datasetStatisticsInState
           }}
