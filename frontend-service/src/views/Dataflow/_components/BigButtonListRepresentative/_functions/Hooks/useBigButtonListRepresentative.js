@@ -357,17 +357,17 @@ const useBigButtonListRepresentative = ({
   const silentReleaseButton = onBuildReleaseButton(true);
 
   return [
-    ...managePreparationSetsBigButton,
     helpButton,
     feedbackButton,
     ...getReferenceDatasetModels(),
     ...groupByRepresentativeModels,
-    ...receiptBigButton,
-    ...createPreparationSets,
-    ...releaseBigButton,
-    ...(isAdmin ? silentReleaseButton : []),
     ...testDatasetsModels,
-    ...preparationSetsModels
+    ...managePreparationSetsBigButton,
+    ...createPreparationSets,
+    ...preparationSetsModels,
+    ...receiptBigButton,
+    ...releaseBigButton,
+    ...(isAdmin ? silentReleaseButton : [])
   ];
 };
 

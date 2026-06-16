@@ -1191,9 +1191,8 @@ public class DatasetControllerImpl implements DatasetController {
                   example = "0") @RequestParam(value = "dataflowId", required = false) Long dataflowId,
           @ApiParam(type = "Long", value = "Provider id",
                   example = "0") @RequestParam(value = "providerId", required = false) Long providerId,
-          @LockCriteria(name = "preparationCode")
-          @ApiParam(type = "String", value = "Preparation Code",
-                  example = "section_a") @RequestParam(value = "preparationCode", required = false) String preparationCode,
+          @ApiParam(type = "String", value = "Preparation Code", example = "section_a") @LockCriteria(
+                  name = "preparationCode") @RequestParam(value = "preparationCode", required = false)  String preparationCode,
           @ApiParam(type = "boolean", value = "Delete prefilled tables",
                   example = "true") @RequestParam(value = "deletePrefilledTables", defaultValue = "false",
                   required = false) Boolean deletePrefilledTables) {
@@ -1215,7 +1214,7 @@ public class DatasetControllerImpl implements DatasetController {
         jobStatus = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.DELETE.getValue(), false, resolvedDataflowId, providerId, Collections.singletonList(datasetId));
       }
 
-      jobId = jobControllerZuul.addDeleteDataJob(datasetId, null, resolvedDataflowId, providerId, null, deletePrefilledTables, jobStatus);
+      jobId = jobControllerZuul.addDeleteDataJob(datasetId, null, resolvedDataflowId, providerId, preparationCode, deletePrefilledTables, jobStatus);
 
       if (JobStatusEnum.REFUSED.equals(jobStatus)) {
         throw new ResponseStatusException(HttpStatus.LOCKED, EEAErrorMessage.DELETING_DATASET_DATA_REFUSED);
@@ -3790,7 +3789,12 @@ public class DatasetControllerImpl implements DatasetController {
       providerId = dataSetMetabaseVO.getDataProviderId();
     }
 
-    List<JobVO> activeJobsForDatasetId = jobControllerZuul.findActiveJobsRelatedToADatasetId(datasetId, dataflowId, providerId);
+    final List<JobVO> activeJobsForDatasetId = jobControllerZuul
+            .findActiveJobsRelatedToADatasetId(datasetId, dataflowId, providerId)
+            .stream()
+            .filter(jobVO -> StringUtils.isBlank(jobVO.getPreparationCode()))
+            .collect(Collectors.toList());;
+
     if(activeJobsForDatasetId != null && !activeJobsForDatasetId.isEmpty()){
       List<Long> jobIds = activeJobsForDatasetId.stream().map(JobVO::getId).collect(Collectors.toList());
       LOG.info("Can not convert tables from parquet to iceberg for dataflowId {} datasetId {} providerId {} and user {} because there are active jobs related to the same dataset id. Job ids: {}", dataflowId, datasetId, providerId, username, jobIds);
@@ -3858,7 +3862,11 @@ public class DatasetControllerImpl implements DatasetController {
       return;
     }
 
-    List<JobVO> activeJobsForDatasetId = jobControllerZuul.findActiveJobsRelatedToADatasetId(datasetId, dataflowId, providerId);
+    final List<JobVO> activeJobsForDatasetId = jobControllerZuul.findActiveJobsRelatedToADatasetId(datasetId, dataflowId, providerId)
+            .stream()
+            .filter(jobVO -> StringUtils.isBlank(jobVO.getPreparationCode()))
+            .collect(Collectors.toList());
+
     if(activeJobsForDatasetId != null && !activeJobsForDatasetId.isEmpty()){
       List<Long> jobIds = activeJobsForDatasetId.stream().map(JobVO::getId).collect(Collectors.toList());
       LOG.info("Can not convert tables from iceberg to parquet for dataflowId {} datasetId {} providerId {} and user {} because there are active jobs related to the same dataset id. Job ids: {}", dataflowId, datasetId, providerId, username, jobIds);
