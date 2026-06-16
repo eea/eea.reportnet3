@@ -853,7 +853,7 @@ public class RulesServiceImpl implements RulesService {
       }
     }
     if (!ruleList.isEmpty()) {
-      // to be deleted
+      //TODO: to be deleted
       LOG.info("Creating automatic rules for datasetSchemaId {}\n referenceId {}\n typeData {}\n typeEntityEnum {}\n datasetId {}\n required {}\n automaticQCDefaultLevelError {}\n",
               datasetSchemaId, referenceId, typeData, typeEntityEnum, datasetId, required, automaticQCDefaultLevelError);
       ruleList.stream()
