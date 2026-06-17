@@ -403,6 +403,7 @@ public class ValidationServiceImpl implements ValidationService {
         validationDatasetRepository.saveAll(validations);
       } finally {
         RuleOperators.clearValidateAsProviderCode();
+        RuleOperators.clearFields();
         session.destroy();
         validations = null;
         dataset = null;
@@ -447,6 +448,7 @@ public class ValidationServiceImpl implements ValidationService {
           }
         } finally {
           RuleOperators.clearValidateAsProviderCode();
+          RuleOperators.clearFields();
         }
       }
     } catch (EEAInvalidSQLException e) {
@@ -495,6 +497,7 @@ public class ValidationServiceImpl implements ValidationService {
         }
       } finally {
         RuleOperators.clearValidateAsProviderCode();
+        RuleOperators.clearFields();
         records = null;
         session.destroy();
         System.gc();
@@ -533,6 +536,7 @@ public class ValidationServiceImpl implements ValidationService {
         }
       } finally {
         RuleOperators.clearValidateAsProviderCode();
+        RuleOperators.clearFields();
         session.destroy();
       }
     } catch (Exception e) {
