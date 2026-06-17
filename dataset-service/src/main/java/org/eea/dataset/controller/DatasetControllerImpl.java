@@ -1790,9 +1790,7 @@ public class DatasetControllerImpl implements DatasetController {
         TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, datasetSchemaId);
         if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable())
             && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, tableSchemaVO.getIdTableSchema()))) {
-          for (FieldVO field : fields) {
-            bigDataDatasetService.updateField(dataflowId, providerId, datasetId, field, recordId, tableSchemaVO, updateCascadePK);
-          }
+          bigDataDatasetService.updateFields(dataflowId, providerId, datasetId, fields, recordId, tableSchemaVO, updateCascadePK);
         }
         else{
           throw new Exception("The table data are not manually editable or the iceberg table has not been created");
