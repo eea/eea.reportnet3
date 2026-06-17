@@ -422,7 +422,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         for (TableSchemaIdNameVO table : tables) {
           TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(table.getIdTableSchema(), datasetSchemaId);
           if (tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable())
-                  && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(dataset.getId(), tableSchemaVO.getIdTableSchema()))) {
+                  && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(dataset.getId(), null, tableSchemaVO.getIdTableSchema()))) {
             releaseLockAndNotification(dataflowId, EEAErrorMessage.DATA_COLLECTION_FAILED_ICEBERG_EXISTS, true, false);
             throw new Exception("Can not create data collection for dataflowId " + dataflowId + " because there is an iceberg table");
           }
@@ -1936,16 +1936,4 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     }
     return null;
   }
-
-  public boolean isAnyDatasetBeingEdited(List<Long> datasetIds, String username) {
-    for (Long datasetId : datasetIds) {
-      String editor = datasetTableService.getDatasetEditingUsername(datasetId);
-      if (editor != null && !editor.equals(username)) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-
 }

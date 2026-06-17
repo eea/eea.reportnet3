@@ -1669,6 +1669,7 @@ public class ValidationHelper implements DisposableBean {
                   dataset.getDataProviderId() != null ? dataset.getDataProviderId() : 0,
                   datasetId, S3_VALIDATION);
           s3PathResolver.setPreparationCode(preparationCode);
+          s3PathResolver.setPath(S3_VALIDATION_TABLE_PATH);
           DataFlowVO dataflow = dataFlowControllerZuul.getMetabaseById(dataset.getDataflowId());
           if (dataflow.getBigData() != null) {
             value.put("bigData", dataflow.getBigData());
@@ -1788,10 +1789,7 @@ public class ValidationHelper implements DisposableBean {
    */
   private void checkAndPromoteFolder(S3PathResolver s3PathResolver, DataFlowVO dataflow) throws EEAException {
     if (dataflow.getBigData()!=null && dataflow.getBigData()) {
-      final String preparationCode = s3PathResolver.getPreparationCode();
-      final String validationTablePath = preparationCode.isBlank() ? S3_VALIDATION_TABLE_PATH : S3_PREPARATION_VALIDATION_TABLE_PATH;
-      final String validationFolderPath = preparationCode.isBlank() ? S3_TABLE_AS_FOLDER_QUERY_PATH : S3_PREPARATION_TABLE_AS_FOLDER_QUERY_PATH;
-      if (s3Helper.checkFolderExist(s3PathResolver, validationTablePath)) {
+      if (s3Helper.checkFolderExist(s3PathResolver, S3_VALIDATION_TABLE_PATH)) {
         try {
           String validateTable = s3Helper.getS3Service().getTableAsFolderQueryPath(s3PathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
           dremioHelperService.refreshTableMetadataAndPromote(null, validateTable, s3PathResolver, s3PathResolver.getTableName());

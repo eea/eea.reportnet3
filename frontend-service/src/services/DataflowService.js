@@ -446,8 +446,8 @@ export const DataflowService = {
     return dataflow;
   },
 
-  getIcebergTables: async ({ dataflowId, providerId, datasetId }) => {
-    const icebergTables = await DataflowRepository.getIcebergTables({ dataflowId, providerId, datasetId });
+  getIcebergTables: async ({ dataflowId, providerId, datasetId, preparationCode }) => {
+    const icebergTables = await DataflowRepository.getIcebergTables({ dataflowId, providerId, datasetId, preparationCode });
 
     return icebergTables;
   },

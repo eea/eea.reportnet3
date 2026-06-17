@@ -8,6 +8,7 @@ import org.eea.datalake.service.DremioHelperService;
 import org.eea.datalake.service.S3Service;
 import org.eea.datalake.service.model.DremioApiJob;
 import org.eea.datalake.service.model.DremioItemTypeEnum;
+import org.eea.datalake.service.model.PreparationPathRegistry;
 import org.eea.datalake.service.model.S3PathResolver;
 import org.eea.exception.DremioApiException;
 import org.eea.exception.EEAException;
@@ -84,7 +85,7 @@ public class DremioHelperServiceImpl implements DremioHelperService {
     @Override
     public boolean checkFolderPromoted(S3PathResolver s3PathResolver, String folderName) {
         DremioDirectoryItemsResponse directoryItems = getDirectoryItems(s3PathResolver, folderName);
-        String path = s3PathResolver.getPath();
+        String path = PreparationPathRegistry.resolve(s3PathResolver.getPath(), s3PathResolver.getPreparationCode());
         if (directoryItems != null) {
             Integer itemPosition;
             if (S3_IMPORT_FILE_PATH.equals(path)) {
