@@ -1735,33 +1735,36 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
     @Override
     public void updateField(Long dataflowId, Long providerId, Long datasetId, FieldVO field, String recordId, TableSchemaVO tableSchemaVO, boolean updateCascadePK) throws Exception {
+        updateFields(dataflowId, providerId, datasetId, Arrays.asList(field), recordId, tableSchemaVO, updateCascadePK);
+    }
+
+    @Override
+    public void updateFields(Long dataflowId, Long providerId, Long datasetId, List<FieldVO> fields, String recordId, TableSchemaVO tableSchemaVO, boolean updateCascadePK) throws Exception {
         providerId = providerId != null ? providerId : 0L;
         S3PathResolver s3IcebergTablePathResolver = new S3PathResolver(
-            dataflowId,
-            providerId,
-            datasetId,
-            tableSchemaVO.getNameTableSchema(),
-            tableSchemaVO.getNameTableSchema(),
+            dataflowId, providerId, datasetId,
+            tableSchemaVO.getNameTableSchema(), tableSchemaVO.getNameTableSchema(),
             S3_TABLE_AS_FOLDER_QUERY_PATH
         );
         s3IcebergTablePathResolver.setIsIcebergTable(true);
 
         String icebergTablePath = s3ServicePrivate.getTableAsFolderQueryPath(s3IcebergTablePathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
 
-        // Create update query for the record
         StringBuilder updateQueryBuilder = new StringBuilder().append("UPDATE ").append(icebergTablePath).append(" SET ");
 
-        // Wrap field name in double quotes
-        String fieldName = UtilityClass.addQuotesToFieldNames(field.getName());
-        String fieldValue = (field.getValue() != null) ? field.getValue().replace("'", "''") : "";
-        updateQueryBuilder.append(fieldName).append(" = '").append(fieldValue).append("'");
+        for (int i = 0; i < fields.size(); i++) {
+            FieldVO field = fields.get(i);
+            String fieldName  = UtilityClass.addQuotesToFieldNames(field.getName());
+            String fieldValue = (field.getValue() != null) ? field.getValue().replace("'", "''") : "";
+            if (i > 0) {
+                updateQueryBuilder.append(", ");
+            }
+            updateQueryBuilder.append(fieldName).append(" = '").append(fieldValue).append("'");
+        }
 
-        // Wrap PARQUET_RECORD_ID_COLUMN_HEADER in double quotes
         updateQueryBuilder.append(" WHERE ")
             .append(UtilityClass.addQuotesToFieldNames(PARQUET_RECORD_ID_COLUMN_HEADER))
-            .append(" = '")
-            .append(recordId)
-            .append("'");
+            .append(" = '").append(recordId).append("'");
 
         if (spatialDataHandling.geoJsonHeadersAreNotEmpty(tableSchemaVO)) {
             updateQueryBuilder = spatialDataHandling.fixQueryForUpdateSpatialData(updateQueryBuilder.toString(), true, tableSchemaVO, 0);
