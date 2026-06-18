@@ -506,7 +506,16 @@
   }
 }
 
-.content :global  {
+//previous version trying the below
+/*.content :global  {
+  .webformCharacterCount {
+    position: absolute;
+    bottom: -21px;
+    right: 0;
+  }
+}*/
+
+.fieldsBlock :global  {
   .webformCharacterCount {
     position: absolute;
     bottom: -21px;
