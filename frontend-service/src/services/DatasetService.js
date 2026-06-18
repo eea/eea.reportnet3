@@ -333,8 +333,8 @@ export const DatasetService = {
   exportTableSchema: async (datasetId, datasetSchemaId, tableSchemaId, fileType) =>
     await DatasetRepository.exportTableSchema(datasetId, datasetSchemaId, tableSchemaId, fileType),
 
-  getEditingStatus: async ({ datasetId }) => {
-    return await DatasetRepository.getEditingStatus({ datasetId });
+  getEditingStatus: async ({ datasetId, preparationCode }) => {
+    return await DatasetRepository.getEditingStatus({ datasetId, preparationCode });
   },
 
   getIsIcebergTableCreated: async ({ datasetId, tableSchemaId }) => {

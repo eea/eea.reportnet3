@@ -281,8 +281,8 @@ export const DatasetRepository = {
       headers: { 'Content-Type': 'application/octet-stream' }
     }),
 
-  getEditingStatus: async ({ datasetId }) =>
-    await HTTPRequester.get({ url: getUrl(DatasetConfig.getEditingStatus, { datasetId }) }),
+  getEditingStatus: async ({ datasetId, preparationCode }) =>
+    await HTTPRequester.get({ url: getUrl(DatasetConfig.getEditingStatus, { datasetId, preparationCode }) }),
 
   getMetadata: async datasetId => await HTTPRequester.get({ url: getUrl(DatasetConfig.getMetadata, { datasetId }) }),
 

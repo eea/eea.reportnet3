@@ -62,7 +62,7 @@ public class DeleteHelperTest {
         .setAuthentication(new UsernamePasswordAuthenticationToken("user", "password"));
     ThreadPropertiesManager.setVariable("user", "user");
     MockitoAnnotations.openMocks(this);
-    Mockito.when(datasetTableService.getDatasetEditingUsername(Mockito.anyLong()))
+    Mockito.when(datasetTableService.getDatasetEditingUsername(Mockito.anyLong(), Mockito.isNull()))
             .thenReturn(null);
 
   }
@@ -93,7 +93,7 @@ public class DeleteHelperTest {
 
     Long datasetId = 1L;
     // 🔹 NEW: no editing lock for this dataset
-    Mockito.when(datasetTableService.getDatasetEditingUsername(datasetId))
+    Mockito.when(datasetTableService.getDatasetEditingUsername(datasetId, null))
             .thenReturn(null);
     Mockito.when(lockService.removeLockByCriteria(Mockito.any())).thenReturn(true);
     Mockito.doNothing().when(kafkaSenderUtils).releaseNotificableKafkaEvent(Mockito.any(),

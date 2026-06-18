@@ -250,7 +250,7 @@ public class ValidationControllerImpl implements ValidationController {
         for(TableSchemaIdNameVO table: tables){
           TableSchemaVO tableSchemaVO = datasetSchemaController.getTableSchemaVO(table.getIdTableSchema(), datasetSchemaId);
           if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable())
-                  && BooleanUtils.isTrue(dataSetControllerZuul.isIcebergTableCreated(datasetId, tableSchemaVO.getIdTableSchema()))) {
+                  && BooleanUtils.isTrue(dataSetControllerZuul.isIcebergTableCreated(datasetId, preparationCode, tableSchemaVO.getIdTableSchema()))) {
             if (jobId != null) {
                 jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.ERROR_ICEBERG_TABLE_EXISTS, null);
                 jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FAILED);
@@ -272,7 +272,7 @@ public class ValidationControllerImpl implements ValidationController {
         validationHelper.executeValidationDL(datasetId, uuid, released, s3PathResolver, createParquetWithSQL, validateAsProviderCode, preparationCode);
       } else {    //check locks for Citus
 
-          if (dataSetControllerZuul.getEditingStatus(datasetId).getIsEditing()) {
+          if (dataSetControllerZuul.getEditingStatus(datasetId, null).getIsEditing()) {
             if (jobId != null) {
               jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.ERROR_DATASET_IS_LOCKED_FOR_EDITING, null);
               jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FAILED);

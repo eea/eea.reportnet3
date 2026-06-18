@@ -37,7 +37,9 @@ public class IcebergToParquetFailedActiveEditingByOtherUser implements Notificab
             datasetName = datasetVO.getDataSetName();
         }
 
-        String currentEditor = datasetTableService.getDatasetEditingUsername(notificationVO.getDatasetId());
+        String currentEditor = datasetTableService.getDatasetEditingUsername(
+                notificationVO.getDatasetId(),
+                notificationVO.getPreparationCode());
         String message= "Iceberg το Parquet conversion failed.";
 
         if (!(currentEditor == null)) {
@@ -47,6 +49,7 @@ public class IcebergToParquetFailedActiveEditingByOtherUser implements Notificab
         Map<String, Object> notification = new HashMap<>();
         notification.put("user", notificationVO.getUser());
         notification.put("datasetId", notificationVO.getDatasetId());
+        notification.put("preparationCode", notificationVO.getPreparationCode());
         notification.put("dataflowId", notificationVO.getDataflowId());
         notification.put("datasetName", datasetName);
         notification.put("message", message);

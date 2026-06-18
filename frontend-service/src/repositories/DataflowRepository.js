@@ -145,8 +145,8 @@ export const DataflowRepository = {
 
   get: async dataflowId => await HTTPRequester.get({ url: getUrl(DataflowConfig.get, { dataflowId }) }),
 
-  getIcebergTables: async ({ dataflowId, providerId, datasetId }) =>
-    await HTTPRequester.get({ url: getUrl(DataflowConfig.getIcebergTables, { dataflowId, providerId, datasetId }) }),
+  getIcebergTables: async ({ dataflowId, providerId, datasetId, preparationCode }) =>
+    await HTTPRequester.get({ url: getUrl(DataflowConfig.getIcebergTables, { dataflowId, providerId, datasetId, preparationCode }) }),
 
   getEditStatus: async ({ dataflowId, providerId }) => {
     return await HTTPRequester.get({
