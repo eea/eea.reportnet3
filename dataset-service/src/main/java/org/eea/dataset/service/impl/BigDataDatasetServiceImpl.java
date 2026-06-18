@@ -993,9 +993,8 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                     s3HelperPrivate.deleteFolder(s3ReferenceTablePathResolver, S3_DATAFLOW_REFERENCE_FOLDER_PATH);
                 }
             }
-            if(BooleanUtils.isTrue(createEmptyTablesBool)) {
-                createEmptyTables.runCreationForSpecificTableSchema(dataSetMetabaseVO, tableSchemaId);
-            }
+
+            createEmptyTables.runCreationForSpecificTableSchema(dataSetMetabaseVO, tableSchemaId, preparationCode);
 
             if (jobId != null) {
                 jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FINISHED);
@@ -1018,7 +1017,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 try {
                     kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, value, notificationVO);
                 } catch (EEAException e) {
-                    LOG.error("Error releasing notification for datasetId {} and tableSchemaId {} Message: {}", datasetId, tableSchemaId, e.getMessage(), e);
+                    LOG.error("Error releasing notification for datasetId {} preparationCode {} and tableSchemaId {} Message: {}", datasetId, preparationCode, tableSchemaId, e.getMessage(), e);
                 }
             }
 
