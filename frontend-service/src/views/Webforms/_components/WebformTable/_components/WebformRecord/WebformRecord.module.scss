@@ -517,8 +517,8 @@
 
 .fieldsBlock :global  {
   .webformCharacterCount {
-    position: absolute;
-    bottom: -21px;
-    right: 0;
+    position: absolute!important;
+    bottom: -33px;
+    top:auto!important;
   }
 }
