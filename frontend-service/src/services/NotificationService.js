@@ -92,7 +92,7 @@ export const NotificationService = {
           }
         });
 
-        notificationDTO.message = TextUtils.parseText(notificationDTO.message, content);
+        notificationDTO.message = TextUtils.parseText(notificationDTO.message, content, true);
         notificationDTO.date = new Date(date);
       }
     });

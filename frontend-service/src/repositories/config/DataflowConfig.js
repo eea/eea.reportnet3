@@ -28,7 +28,7 @@ export const DataflowConfig = {
     '/datasetmetabase/globalStatistics/dataflow/{:dataflowId}/dataSchema/{:datasetSchemaId}',
   getDetails: '/dataflow/v1/{:dataflowId}/getmetabase',
   getIcebergTables:
-    '/dataset/getIcebergTables?dataflowId={:dataflowId}&providerId={:providerId}&datasetId={:datasetId}',
+    '/dataset/getIcebergTables?dataflowId={:dataflowId}&providerId={:providerId}&datasetId={:datasetId}&preparationCode={:preparationCode}',
   getEditStatus: '/dataset/hasEnabledEditingDatasets?dataflowId={:dataflowId}&providerId={:providerId}',
   getPublicObligations:
     '/dataflow/getPublicDataflowsByObligation?asc={:isAsc}&pageNum={:pageNum}&orderHeader={:sortBy}&pageSize={:numberRows}',

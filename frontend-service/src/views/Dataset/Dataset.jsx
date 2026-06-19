@@ -513,7 +513,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   };
 
   const onGetIcebergTables = async () => {
-    const icebergTables = await DataflowService.getIcebergTables({ dataflowId, datasetId });
+    const icebergTables = await DataflowService.getIcebergTables({ dataflowId, datasetId, preparationCode: code });
     setIsIcebergCreated(!isEmpty(icebergTables?.data));
   };
 
@@ -655,7 +655,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
 
   const getEditingStatus = async () => {
     try {
-      const editingStatusData = await DatasetService.getEditingStatus({ datasetId });
+      const editingStatusData = await DatasetService.getEditingStatus({ datasetId, preparationCode: code });
 
       setEditingStatus({
         editor: editingStatusData?.data?.editor,

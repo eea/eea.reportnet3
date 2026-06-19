@@ -2,7 +2,7 @@ package org.eea.dataset.service.impl;
 
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.BooleanUtils;
-import org.apache.kafka.clients.consumer.Consumer;
+import org.apache.commons.lang3.StringUtils;
 import org.eea.dataset.mapper.DatasetTableMapper;
 import org.eea.dataset.mapper.DatasetTableMapperImpl;
 import org.eea.dataset.persistence.metabase.domain.DatasetTable;
@@ -49,57 +49,68 @@ public class DatasetTableServiceImpl implements DatasetTableService {
     private Long expirationIntervalInHours;
 
     @Override
-    public DatasetTable findEntryByDatasetIdAndTableSchemaId(Long datasetId, String tableSchemaId){
-        Optional<DatasetTable> optionalDatasetTable = datasetTableRepository.findByDatasetIdAndTableSchemaId(datasetId, tableSchemaId);
-        if(optionalDatasetTable.isPresent()){
-            return optionalDatasetTable.get();
+    public DatasetTable findEntryByDatasetIdAndPreparationCodeAndTableSchemaId(Long datasetId, String preparationCode, String tableSchemaId){
+        final Optional<DatasetTable> optionalDatasetTable;
+        if (StringUtils.isBlank(preparationCode)) {
+            optionalDatasetTable = datasetTableRepository.findByDatasetIdAndTableSchemaId(
+                    datasetId,
+                    tableSchemaId);
         }
-        return null;
+        else {
+            optionalDatasetTable = datasetTableRepository.findByDatasetIdAndPreparationCodeAndTableSchemaId(
+                    datasetId,
+                    preparationCode,
+                    tableSchemaId);
+        }
+        return optionalDatasetTable.orElse(null);
     }
 
     @Override
     public void saveOrUpdateDatasetTableEntry(DatasetTable datasetTable){
-        DatasetTable existingEntry = findEntryByDatasetIdAndTableSchemaId(datasetTable.getDatasetId(), datasetTable.getTableSchemaId());
-        if(existingEntry != null){
+        final DatasetTable existingEntry = findEntryByDatasetIdAndPreparationCodeAndTableSchemaId(
+                datasetTable.getDatasetId(),
+                datasetTable.getPreparationCode(),
+                datasetTable.getTableSchemaId());
+        if (existingEntry != null){
             //we need to update the existing entry
             existingEntry.setIsIcebergTableCreated(datasetTable.getIsIcebergTableCreated());
             existingEntry.setEditingUsername(datasetTable.getEditingUsername());
             existingEntry.setEditLockExpirationDate(datasetTable.getEditLockExpirationDate());
             datasetTableRepository.save(existingEntry);
         }
-        else{
+        else {
             //we need to save a new entry
             datasetTableRepository.save(datasetTable);
         }
     }
 
     @Override
-    public Boolean icebergTableIsCreated(Long datasetId, String tableSchemaId){
-        DatasetTable existingEntry = findEntryByDatasetIdAndTableSchemaId(datasetId, tableSchemaId);
-        if(existingEntry != null && BooleanUtils.isTrue(existingEntry.getIsIcebergTableCreated())){
-            return true;
-        }
-        return false;
+    public Boolean icebergTableIsCreated(Long datasetId, String preparationCode, String tableSchemaId){
+        final DatasetTable existingEntry = findEntryByDatasetIdAndPreparationCodeAndTableSchemaId(
+                datasetId,
+                preparationCode,
+                tableSchemaId);
+        return existingEntry != null && BooleanUtils.isTrue(existingEntry.getIsIcebergTableCreated());
     }
 
     @Override
-    public List<DatasetTable> getIcebergTablesByDatasetId(Long datasetId){
-        List<DatasetTable> datasetTables = datasetTableRepository.findByDatasetIdAndIsIcebergTableCreated(datasetId, true);
-        for(DatasetTable table: datasetTables){
-            TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(table.getTableSchemaId(), table.getDatasetSchemaId());
-            //need to check for null because custodian might have created iceberg tables and then delete them, so they do not exist in mongo anymore
-            if(tableSchemaVO != null && tableSchemaVO.getNameTableSchema() != null){
-                table.setTableName(tableSchemaVO.getNameTableSchema());
-            }
+    public List<DatasetTable> getIcebergTablesByDatasetId(Long datasetId, String preparationCode){
+        final List<DatasetTable> datasetTables = datasetTableRepository.findByDatasetIdAndPreparationCodeAndIsIcebergTableCreated(datasetId, preparationCode, true);
+        for (DatasetTable table: datasetTables) {
+               final TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(table.getTableSchemaId(), table.getDatasetSchemaId());
+                //need to check for null because custodian might have created iceberg tables and then delete them, so they do not exist in mongo anymore
+                if (tableSchemaVO != null && tableSchemaVO.getNameTableSchema() != null){
+                    table.setTableName(tableSchemaVO.getNameTableSchema());
+                }
         }
         return datasetTables;
     }
 
     @Override
-    public List<DatasetTableVO> getIcebergTablesForDataflow(Long dataflowId, Long providerId, Long datasetId){
+    public List<DatasetTableVO> getIcebergTablesForDataflow(Long dataflowId, Long providerId, Long datasetId, String preparationCode){
         List<DatasetTable> icebergTables = new ArrayList<>();
         if(datasetId != null){
-            icebergTables = getIcebergTablesByDatasetId(datasetId);
+            icebergTables = getIcebergTablesByDatasetId(datasetId, preparationCode);
         }
         else{
             List<DataSetMetabaseVO> dataSetMetabaseList;
@@ -110,7 +121,7 @@ public class DatasetTableServiceImpl implements DatasetTableService {
                 dataSetMetabaseList = datasetMetabaseService.findDataSetByDataflowIds(Collections.singletonList(dataflowId));
             }
             for(DataSetMetabaseVO dataset: dataSetMetabaseList){
-                List<DatasetTable> tablesByDatasetId = getIcebergTablesByDatasetId(dataset.getId());
+                List<DatasetTable> tablesByDatasetId = getIcebergTablesByDatasetId(dataset.getId(), null);
                 icebergTables.addAll(tablesByDatasetId);
             }
         }
@@ -118,8 +129,14 @@ public class DatasetTableServiceImpl implements DatasetTableService {
     }
 
     @Override
-    public String getDatasetEditingUsername(Long datasetId) {
-        List<String> editors = datasetTableRepository.findEditors(datasetId);
+    public String getDatasetEditingUsername(Long datasetId, String preparationCode) {
+        final List<String> editors;
+        if (StringUtils.isBlank(preparationCode)) {
+            editors = datasetTableRepository.findEditors(datasetId);
+        }
+        else {
+            editors = datasetTableRepository.findEditors(datasetId, preparationCode);
+        }
         return editors.stream()
                 .filter(Objects::nonNull)
                 .distinct()
@@ -129,8 +146,14 @@ public class DatasetTableServiceImpl implements DatasetTableService {
     }
 
     @Override
-    public String getDatasetEditingUsernameForTable(Long datasetId, String tableSchemaId){
-        List<String> editors = datasetTableRepository.findEditorsOfTable(datasetId, tableSchemaId);
+    public String getDatasetEditingUsernameForTable(Long datasetId, String preparationCode, String tableSchemaId) {
+        final List<String> editors;
+        if (StringUtils.isBlank(preparationCode)) {
+            editors = datasetTableRepository.findEditorsOfTable(datasetId, tableSchemaId);
+        }
+        else {
+            editors = datasetTableRepository.findEditorsOfTable(datasetId, preparationCode, tableSchemaId);
+        }
         return editors.stream()
                 .filter(Objects::nonNull)
                 .distinct()
@@ -172,11 +195,7 @@ public class DatasetTableServiceImpl implements DatasetTableService {
         int locked = datasetTableRepository.lockEditingForDatasetUser(datasetId, username, expirationIntervalInHours);
 
         // If lock == 0, another user already holds editing lock, fail
-        if (locked == 0) {
-            return false;
-        }
-
-        return true;
+        return locked != 0;
     }
 
     @Override
@@ -203,8 +222,8 @@ public class DatasetTableServiceImpl implements DatasetTableService {
     }
 
     @Override
-    public DatasetEditingStatusVO getEditingStatus(Long datasetId, String username) {
-        final String editor = getDatasetEditingUsername(datasetId);
+    public DatasetEditingStatusVO getEditingStatus(Long datasetId, String preparationCode, String username) {
+        final String editor = getDatasetEditingUsername(datasetId, preparationCode);
 
         final DatasetEditingStatusVO vo = new DatasetEditingStatusVO();
         vo.setDatasetId(datasetId);
@@ -222,7 +241,8 @@ public class DatasetTableServiceImpl implements DatasetTableService {
     @Override
     public boolean isAnyDatasetBeingEdited(List<Long> datasetIds) {
         for (Long datasetId : datasetIds) {
-            String editor = getDatasetEditingUsername(datasetId);
+            //TODO APBO Preparation code should be added here when edit functionality is implemented for prep sets.
+            String editor = getDatasetEditingUsername(datasetId, null);
             if (editor != null ) {
                 return true;
             }

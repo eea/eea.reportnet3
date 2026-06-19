@@ -64,7 +64,7 @@ public class DatasetDataRetrieverDL implements DataLakeDataRetriever {
         Long datasetId = dataset.getId();
         TableVO result = new TableVO();
         S3PathResolver s3PathResolver;
-        if(BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable()) && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, tableSchemaVO.getIdTableSchema()))){
+        if(BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable()) && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, null, tableSchemaVO.getIdTableSchema()))){
             s3PathResolver = s3Service.getS3PathResolverByDatasetType(dataset, tableSchemaVO.getNameTableSchema(), true, null);
             s3PathResolver.setIsIcebergTable(true);
         }
@@ -385,7 +385,7 @@ public class DatasetDataRetrieverDL implements DataLakeDataRetriever {
         TableVO result = new TableVO();
         S3PathResolver s3PathResolverParentDataset;
         //parent dataset resolver
-        if(BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable()) && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, tableSchemaVO.getIdTableSchema()))){
+        if(BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable()) && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, preparationCode, tableSchemaVO.getIdTableSchema()))){
             s3PathResolverParentDataset = s3Service.getS3PathResolverByDatasetType(dataset, tableSchemaVO.getNameTableSchema(), true, null);
             s3PathResolverParentDataset.setIsIcebergTable(true);
         }

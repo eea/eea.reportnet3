@@ -196,6 +196,8 @@ export const Dataflow = () => {
 
   const isLeadDesigner = isSteward || isCustodian;
 
+  const rolesLoaded = dataflowState.userRoles.length > 0;
+
   const isStewardSupport = userContext.hasContextAccessPermission(config.permissions.prefixes.DATAFLOW, dataflowId, [
     config.permissions.roles.STEWARD_SUPPORT.key
   ]);
@@ -207,7 +209,7 @@ export const Dataflow = () => {
   const isDesign = dataflowState.status === config.dataflowStatus.DESIGN;
 
   const isInsideACountry =
-    !isNil(representativeId) || (uniqDataProviders.length === 1 && !isLeadDesigner && !isObserver);
+    rolesLoaded && (!isNil(representativeId) || (uniqDataProviders.length === 1 && !isLeadDesigner && !isObserver));
 
   const isOpenStatus = dataflowState.status === config.dataflowStatus.OPEN;
 

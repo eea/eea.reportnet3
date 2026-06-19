@@ -169,7 +169,7 @@ public class DatasetControllerImplTest {
     SecurityContextHolder.setContext(securityContext);
     fileMock = new MockMultipartFile("file", "fileOriginal", "cvs", "content".getBytes());
     MockitoAnnotations.openMocks(this);
-    Mockito.when(datasetTableService.getDatasetEditingUsername(Mockito.anyLong()))
+    Mockito.when(datasetTableService.getDatasetEditingUsername(Mockito.anyLong(), Mockito.isNull()))
             .thenReturn(null);
 
   }
@@ -2221,7 +2221,7 @@ public class DatasetControllerImplTest {
     Mockito.when(datasetService.getDataFlowIdById(datasetId)).thenReturn(dataflowId);
     Mockito.when(dataFlowControllerZuul.getMetabaseById(dataflowId)).thenReturn(dataFlowVO);
     Mockito.when(datasetService.isDatasetReportable(datasetId)).thenReturn(true);
-    Mockito.when(datasetTableService.getDatasetEditingUsernameForTable(datasetId, tableSchemaId)).thenReturn(userEditingDataset);
+    Mockito.when(datasetTableService.getDatasetEditingUsernameForTable(datasetId, null, tableSchemaId)).thenReturn(userEditingDataset);
     try {
       datasetControllerImpl.etlImportDatasetDL(datasetId, dataflowId, providerId, replaceData, tableSchemaId, delimiter, filePathInS3, null);
     }
@@ -2250,7 +2250,7 @@ public class DatasetControllerImplTest {
     Mockito.when(datasetService.getDataFlowIdById(datasetId)).thenReturn(dataflowId);
     Mockito.when(dataFlowControllerZuul.getMetabaseById(dataflowId)).thenReturn(dataFlowVO);
     Mockito.when(datasetService.isDatasetReportable(datasetId)).thenReturn(true);
-    Mockito.when(datasetTableService.getDatasetEditingUsername(datasetId)).thenReturn(userEditingDataset);
+    Mockito.when(datasetTableService.getDatasetEditingUsername(datasetId, null)).thenReturn(userEditingDataset);
     try {
       datasetControllerImpl.etlImportDatasetDL(datasetId, dataflowId, providerId, replaceData, tableSchemaId, delimiter, filePathInS3, null);
     }

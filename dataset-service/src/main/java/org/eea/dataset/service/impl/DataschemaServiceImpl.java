@@ -599,6 +599,12 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    */
   private void tableSchemaAddAtributes(Long datasetId, TableSchemaVO tableSchemaVO,
                                        String datasetSchemaId, Document tableSchema) throws EEAException {
+    String oldTableName = tableSchema.getString("nameTableSchema");
+    String newTableName = tableSchemaVO.getNameTableSchema();
+
+    boolean tableNameChanged = StringUtils.isNotBlank(newTableName) && !StringUtils.equals(oldTableName, newTableName);
+
+
     if (tableSchemaVO.getDescription() != null) {
       tableSchema.put("description", tableSchemaVO.getDescription());
     }
@@ -624,7 +630,15 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       tableSchema.put("notEmpty", newValue);
       updateNotEmptyRule(oldValue, newValue, tableSchemaVO.getIdTableSchema(), datasetId);
     }
-    schemasRepository.updateTableSchema(datasetSchemaId, tableSchema);
+
+    UpdateResult updateResult = schemasRepository.updateTableSchema(datasetSchemaId, tableSchema);
+
+    if (updateResult.getMatchedCount() == 1 && updateResult.getModifiedCount() == 1 && tableNameChanged && isBigDataDataset(datasetId)) {
+      LOG.info("Requested Big Data geometry QC SQL update after table rename from {} to {} for tableSchemaId {} and datasetId {}",
+          oldTableName, newTableName, tableSchemaVO.getIdTableSchema(), datasetId);
+
+      rulesControllerZuul.updateBigDataGeometryRulesSql(datasetSchemaId, datasetId, tableSchemaVO.getIdTableSchema(), null);
+    }
   }
 
   /**

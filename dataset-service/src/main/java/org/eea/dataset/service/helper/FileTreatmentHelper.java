@@ -847,7 +847,7 @@ public class FileTreatmentHelper implements DisposableBean {
         String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
         TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, datasetSchemaId);
         if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable() &&!StringUtils.isBlank(preparationCode))
-                && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, tableSchemaId))) {
+                && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, preparationCode, tableSchemaId))) {
             throw new Exception("Can not export table data because iceberg table is created");
         }
 
@@ -1365,7 +1365,7 @@ public class FileTreatmentHelper implements DisposableBean {
         for(TableSchemaIdNameVO entry: tableSchemas){
             TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(entry.getIdTableSchema(), datasetSchemaId);
             if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable() && StringUtils.isBlank(preparationCode))
-                    && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, tableSchemaVO.getIdTableSchema()))) {
+                    && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, preparationCode, tableSchemaVO.getIdTableSchema()))) {
                 throw new Exception("Can not export table data because iceberg table is created");
             }
         }
@@ -3494,7 +3494,7 @@ public class FileTreatmentHelper implements DisposableBean {
             for (TableSchemaIdNameVO entry : tableSchemas) {
                 TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(entry.getIdTableSchema(), datasetSchemaId);
                 if (tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable())
-                        && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(dataset.getId(), tableSchemaVO.getIdTableSchema()))) {
+                        && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(dataset.getId(), null, tableSchemaVO.getIdTableSchema()))) {
                     throw new EEAException("Cannot export table data because iceberg table is created");
                 }
             }

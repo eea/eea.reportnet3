@@ -234,6 +234,8 @@ public interface BigDataDatasetService {
      */
     void updateField(Long dataflowId, Long providerId, Long datasetId, FieldVO field, String recordId, TableSchemaVO tableSchemaVO, boolean updateCascadePK) throws Exception;
 
+    void updateFields(Long dataflowId, Long providerId, Long datasetId, List<FieldVO> fields, String recordId, TableSchemaVO tableSchemaVO, boolean updateCascadePK) throws Exception;
+
     /**
      * Delete record manually
      *

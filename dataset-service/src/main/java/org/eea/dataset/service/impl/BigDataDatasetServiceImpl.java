@@ -949,7 +949,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, datasetSchemaId);
             if (!isPreparationDataset) {
                 if (tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable())
-                        && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, tableSchemaId))) {
+                        && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, preparationCode, tableSchemaId))) {
                     throw new Exception("Can not delete table data because iceberg table is created");
                 }
             }
@@ -993,9 +993,8 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                     s3HelperPrivate.deleteFolder(s3ReferenceTablePathResolver, S3_DATAFLOW_REFERENCE_FOLDER_PATH);
                 }
             }
-            if(BooleanUtils.isTrue(createEmptyTablesBool)) {
-                createEmptyTables.runCreationForSpecificTableSchema(dataSetMetabaseVO, tableSchemaId);
-            }
+
+            createEmptyTables.runCreationForSpecificTableSchema(dataSetMetabaseVO, tableSchemaId, preparationCode);
 
             if (jobId != null) {
                 jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FINISHED);
@@ -1018,7 +1017,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 try {
                     kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, value, notificationVO);
                 } catch (EEAException e) {
-                    LOG.error("Error releasing notification for datasetId {} and tableSchemaId {} Message: {}", datasetId, tableSchemaId, e.getMessage(), e);
+                    LOG.error("Error releasing notification for datasetId {} preparationCode {} and tableSchemaId {} Message: {}", datasetId, preparationCode, tableSchemaId, e.getMessage(), e);
                 }
             }
 
@@ -1043,7 +1042,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 for (TableSchemaIdNameVO entry : tableSchemas) {
                     TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(entry.getIdTableSchema(), datasetSchemaId);
                     if (tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable())
-                            && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, tableSchemaVO.getIdTableSchema()))) {
+                            && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, preparationCode, tableSchemaVO.getIdTableSchema()))) {
                         throw new Exception("Can not delete table data because iceberg table is created");
                     }
                 }
@@ -1292,7 +1291,8 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             for (TableSchemaVO table : availableForConversionTables) {
                 final Date now = new Date();
                 final Date lockExpirationDate = new Date(now.getTime() + expirationIntervalInHours * 60L * 60L * 1000L); //in milliseconds
-                DatasetTable datasetTableEntry = new DatasetTable(datasetId, datasetSchemaId, table.getIdTableSchema(), true, user, lockExpirationDate);
+                //TODO APBO Preparation code should be added here when edit functionality is implemented for prep sets.
+                DatasetTable datasetTableEntry = new DatasetTable(datasetId, null, datasetSchemaId, table.getIdTableSchema(), true, user, lockExpirationDate);
                 datasetTableService.saveOrUpdateDatasetTableEntry(datasetTableEntry);
             }
 
@@ -1344,7 +1344,8 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         }
         providerId = providerId != null ? providerId : 0L;
 
-        if(tableSchemaVO == null || !BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable()) || BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, tableSchemaVO.getIdTableSchema()))) {
+        //TODO APBO Preparation code should be added here when edit functionality is implemented for prep sets.
+        if(tableSchemaVO == null || !BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable()) || BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, null, tableSchemaVO.getIdTableSchema()))) {
             LOG.info("Can not convert parquet to iceberg table for dataflowId {}, providerId {}, datasetId {} and tableSchemaId {} " +
                     "because table data are not manually editable or the parquet table has not been created. LockValue: {}", dataflowId, providerId, datasetId, tableSchemaVO.getIdTableSchema(), lockValue);
             return false;
@@ -1452,7 +1453,8 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                     s3HelperPrivate.deleteFolder(s3IcebergTablePathResolver, S3_TABLE_NAME_FOLDER_PATH_FOR_VALID_PREFIX);
                 }
 
-                DatasetTable datasetTableEntry = new DatasetTable(datasetId, datasetSchemaId, table.getIdTableSchema(), false, null, null);
+                //TODO APBO Preparation code should be added here when edit functionality is implemented for prep sets.
+                DatasetTable datasetTableEntry = new DatasetTable(datasetId, null, datasetSchemaId, table.getIdTableSchema(), false, null, null);
                 datasetTableService.saveOrUpdateDatasetTableEntry(datasetTableEntry);
             }
 
@@ -1504,7 +1506,8 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         }
         providerId = providerId != null ? providerId : 0L;
 
-        if(tableSchemaVO == null || !BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable()) || !BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, tableSchemaVO.getIdTableSchema()))) {
+        //TODO APBO Preparation code should be added here when edit functionality is implemented for prep sets.
+        if(tableSchemaVO == null || !BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable()) || !BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, null, tableSchemaVO.getIdTableSchema()))) {
             LOG.info("Can not convert iceberg table to parquet for dataflowId {}, providerId {}, datasetId {} and tableSchemaId {} " +
                     "because table data are not manually editable or the iceberg table has not been created. LockValue: {}", dataflowId, providerId, datasetId, tableSchemaVO.getIdTableSchema(), lockValue);
             return false;
@@ -1781,33 +1784,36 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
     @Override
     public void updateField(Long dataflowId, Long providerId, Long datasetId, FieldVO field, String recordId, TableSchemaVO tableSchemaVO, boolean updateCascadePK) throws Exception {
+        updateFields(dataflowId, providerId, datasetId, Arrays.asList(field), recordId, tableSchemaVO, updateCascadePK);
+    }
+
+    @Override
+    public void updateFields(Long dataflowId, Long providerId, Long datasetId, List<FieldVO> fields, String recordId, TableSchemaVO tableSchemaVO, boolean updateCascadePK) throws Exception {
         providerId = providerId != null ? providerId : 0L;
         S3PathResolver s3IcebergTablePathResolver = new S3PathResolver(
-            dataflowId,
-            providerId,
-            datasetId,
-            tableSchemaVO.getNameTableSchema(),
-            tableSchemaVO.getNameTableSchema(),
+            dataflowId, providerId, datasetId,
+            tableSchemaVO.getNameTableSchema(), tableSchemaVO.getNameTableSchema(),
             S3_TABLE_AS_FOLDER_QUERY_PATH
         );
         s3IcebergTablePathResolver.setIsIcebergTable(true);
 
         String icebergTablePath = s3ServicePrivate.getTableAsFolderQueryPath(s3IcebergTablePathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
 
-        // Create update query for the record
         StringBuilder updateQueryBuilder = new StringBuilder().append("UPDATE ").append(icebergTablePath).append(" SET ");
 
-        // Wrap field name in double quotes
-        String fieldName = UtilityClass.addQuotesToFieldNames(field.getName());
-        String fieldValue = (field.getValue() != null) ? field.getValue().replace("'", "''") : "";
-        updateQueryBuilder.append(fieldName).append(" = '").append(fieldValue).append("'");
+        for (int i = 0; i < fields.size(); i++) {
+            FieldVO field = fields.get(i);
+            String fieldName  = UtilityClass.addQuotesToFieldNames(field.getName());
+            String fieldValue = (field.getValue() != null) ? field.getValue().replace("'", "''") : "";
+            if (i > 0) {
+                updateQueryBuilder.append(", ");
+            }
+            updateQueryBuilder.append(fieldName).append(" = '").append(fieldValue).append("'");
+        }
 
-        // Wrap PARQUET_RECORD_ID_COLUMN_HEADER in double quotes
         updateQueryBuilder.append(" WHERE ")
             .append(UtilityClass.addQuotesToFieldNames(PARQUET_RECORD_ID_COLUMN_HEADER))
-            .append(" = '")
-            .append(recordId)
-            .append("'");
+            .append(" = '").append(recordId).append("'");
 
         if (spatialDataHandling.geoJsonHeadersAreNotEmpty(tableSchemaVO)) {
             updateQueryBuilder = spatialDataHandling.fixQueryForUpdateSpatialData(updateQueryBuilder.toString(), true, tableSchemaVO, 0);
@@ -2206,13 +2212,13 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
         String tablePathInDremio = null;
 
-        if(dataSetMetabaseVO.getDatasetTypeEnum().equals(DatasetTypeEnum.REFERENCE) && !BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, tableSchemaId))){
+        if(dataSetMetabaseVO.getDatasetTypeEnum().equals(DatasetTypeEnum.REFERENCE) && !BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, null, tableSchemaId))){
             S3PathResolver s3PathResolver = new S3PathResolver(dataflowId, providerId, datasetId, tableName, tableName, S3_DATAFLOW_REFERENCE_QUERY_PATH);
             tablePathInDremio = s3ServicePrivate.getTableAsFolderQueryPath(s3PathResolver, S3_DATAFLOW_REFERENCE_QUERY_PATH);
         }
         else{
             S3PathResolver s3PathResolver = new S3PathResolver(dataflowId, providerId, datasetId, tableName, tableName, S3_DATAFLOW_REFERENCE_QUERY_PATH);
-            if(BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, tableSchemaId))){
+            if(BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, null, tableSchemaId))){
                 s3PathResolver.setIsIcebergTable(true);
             }
             tablePathInDremio = s3ServicePrivate.getTableAsFolderQueryPath(s3PathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
@@ -2386,7 +2392,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         //find number of records for reporting dataset
         TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, reportingDataset.getDatasetSchema());
         S3PathResolver s3PathResolverReporting;
-        if (BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable()) && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(reportingDataset.getId(), tableSchemaVO.getIdTableSchema()))) {
+        if (BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable()) && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(reportingDataset.getId(), null, tableSchemaVO.getIdTableSchema()))) {
             s3PathResolverReporting = s3ServicePrivate.getS3PathResolverByDatasetType(reportingDataset, tableSchemaVO.getNameTableSchema(), true, null);
             s3PathResolverReporting.setIsIcebergTable(true);
         } else {
@@ -2954,8 +2960,10 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 );
 
         if (BooleanUtils.isTrue(
+                //TODO APBO Check to see if we need the prep code here
                 datasetTableService.icebergTableIsCreated(
                         dataset.getId(),
+                        null,
                         tableSchemaVO.getIdTableSchema()
                 )
         )) {
