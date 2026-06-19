@@ -524,3 +524,10 @@
     top:auto!important;
   }
 }
+
+.fieldsBlock:has(> div:nth-child(2)) :global(.p-inputtext) {
+  max-height: 51px;
+  min-height:0;
+}
+
+

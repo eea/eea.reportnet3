@@ -107,6 +107,10 @@
     > div:has(.label3){
       align-self: flex-start;
     }
+    &:has(> div:nth-child(2)) :global(.p-inputtext) {
+      max-height: 51px;
+      min-height:0;
+    }
     :global(.webformCharacterCount) {
       position: absolute !important;
       bottom: -21px;
