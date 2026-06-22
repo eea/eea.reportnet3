@@ -101,7 +101,7 @@
   .fieldsBlock {
     display: flex;
     justify-content: space-between;
-    max-width: 90%;
+    max-width: 100%;
     align-items: flex-end;
     position:relative;
     > div:has(.label3){
@@ -213,7 +213,7 @@
     }
 
     .template {
-      width: 90%;
+      width: 100%;
 
       .nonExistField {
         color: var(--errors);
@@ -324,7 +324,7 @@
     }
 
     .template {
-      width: 90%;
+      width: 100%;
 
       .nonExistField {
         color: var(--errors);
