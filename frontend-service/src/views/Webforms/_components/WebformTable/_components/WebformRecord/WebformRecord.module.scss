@@ -486,6 +486,9 @@
   display: flex;
   line-height:1;
   position:relative;
+  textarea{
+    min-height:150px;
+  }
 }
 
 
@@ -525,9 +528,7 @@
   }
 }
 
-textarea{
-  min-height:150px;
-}
+
 
 .fieldsBlock:has(> div:nth-child(2)) :global(.p-inputtext) {
   max-height: 51px;
