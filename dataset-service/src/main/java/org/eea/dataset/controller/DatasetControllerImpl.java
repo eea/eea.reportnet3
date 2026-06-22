@@ -3915,7 +3915,7 @@ public class DatasetControllerImpl implements DatasetController {
   @GetMapping("/isIcebergTableCreated/{datasetId}/{tableSchemaId}")
   public Boolean isIcebergTableCreated(@PathVariable("datasetId") Long datasetId,
                              @PathVariable("tableSchemaId") String tableSchemaId,
-                             @RequestParam("preparationCode") String preparationCode){
+                             @RequestParam(value = "preparationCode", required = false) String preparationCode){
     try {
       return datasetTableService.icebergTableIsCreated(datasetId, tableSchemaId, preparationCode);
     }
