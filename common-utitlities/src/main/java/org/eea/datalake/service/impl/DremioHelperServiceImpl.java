@@ -98,7 +98,8 @@ public class DremioHelperServiceImpl implements DremioHelperService {
                 itemPosition = 5;
             } else if (S3_PREPARATION_TABLE_NAME_FOLDER_PATH.equals(path)
             || S3_PREPARATION_TABLE_AS_FOLDER_QUERY_PATH.equals(path)
-            || S3_PREPARATION_VALIDATION_TABLE_PATH.equals(path)) {
+            || S3_PREPARATION_VALIDATION_TABLE_PATH.equals(path)
+            || S3_PREPARATION_TABLE_NAME_WITH_PARQUET_FOLDER_PATH.equals(path)) {
                 itemPosition = 7;
             } else {
                 itemPosition = 6; //this is for S3_TABLE_NAME_FOLDER_PATH
