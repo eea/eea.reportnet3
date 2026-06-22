@@ -250,7 +250,7 @@ public class ValidationControllerImpl implements ValidationController {
         for(TableSchemaIdNameVO table: tables){
           TableSchemaVO tableSchemaVO = datasetSchemaController.getTableSchemaVO(table.getIdTableSchema(), datasetSchemaId);
           if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable())
-                  && BooleanUtils.isTrue(dataSetControllerZuul.isIcebergTableCreated(datasetId, preparationCode, tableSchemaVO.getIdTableSchema()))) {
+                  && BooleanUtils.isTrue(dataSetControllerZuul.isIcebergTableCreated(datasetId, tableSchemaVO.getIdTableSchema(), preparationCode))) {
             if (jobId != null) {
                 jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.ERROR_ICEBERG_TABLE_EXISTS, null);
                 jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FAILED);
