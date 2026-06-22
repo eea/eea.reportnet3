@@ -1,7 +1,7 @@
 FROM node:22 AS builder
 RUN mkdir /usr/src/app
 WORKDIR /usr/src/app
-ENV PATH /usr/src/app/node_modules/.bin:$PATH
+ENV PATH=/usr/src/app/node_modules/.bin:$PATH
 COPY package*.json ./
 RUN npm install --silent
 COPY . /usr/src/app
