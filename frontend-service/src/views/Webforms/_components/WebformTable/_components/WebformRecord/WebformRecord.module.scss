@@ -525,9 +525,13 @@
   }
 }
 
+textarea{
+  min-height:150px;
+}
+
 .fieldsBlock:has(> div:nth-child(2)) :global(.p-inputtext) {
   max-height: 51px;
-  min-height:0;
+  min-height:51px!important;
 }
 
 
