@@ -192,7 +192,7 @@ public class ValidationControllerImplTest {
         Mockito.any(), Mockito.anyBoolean(), Mockito.anyBoolean(), Mockito.any());
     validationController.validateDataSetData(1L, false, null, null);
 
-    Mockito.verify(validationHelper, times(1)).deleteLockToReleaseProcess(Mockito.any());
+    Mockito.verify(validationHelper, times(1)).deleteLockToReleaseProcess(Mockito.any(), Mockito.isNull());
   }
 
   /**

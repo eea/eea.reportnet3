@@ -385,7 +385,7 @@ public class ValidationHelper implements DisposableBean {
           //if updateViews is false it means that the materialized views have already been updated, so we must compare the number of records
           executeValidationProcess(dataset, processId, !updateViews, validateAsProviderCode);
         } else {
-          deleteLockToReleaseProcess(datasetId);
+          deleteLockToReleaseProcess(datasetId, null);
           Map<String, Object> values = new HashMap<>();
           values.put(DATASET_ID, datasetId);
           values.put("released", released);
@@ -493,7 +493,7 @@ public class ValidationHelper implements DisposableBean {
             String errorMsg = EEAErrorMessage.ERROR_ILLEGAL_HEADER_CHARACTER;
             if (body != null && body.contains(errorMsg)) {
               String header = extractHeaderFromMessage(body, errorMsg);
-              failedDueToIllegalCharacter(header, dataSetMetabaseVO.getDataSetName(), dataset, dataSetMetabaseVO.getId(), processId, jobId, user, released, jobVO);
+              failedDueToIllegalCharacter(header, dataSetMetabaseVO.getDataSetName(), dataset, dataSetMetabaseVO.getId(), processId, jobId, user, released, jobVO, preparationCode);
               throw fe;
             }
           } catch (Exception e) {
@@ -653,12 +653,12 @@ public class ValidationHelper implements DisposableBean {
       }
 
       if (!failedToPromoteTables.isEmpty()) {
-        failDueToPromotionError(dataset, datasetId, processId, jobId, user, released,  jobVO);
+        failDueToPromotionError(dataset, datasetId, processId, jobId, user, released,  jobVO, preparationCode);
       }
     }
   }
 
-  private void failDueToPromotionError(DataSetMetabaseVO dataset, Long datasetId, String processId, Long jobId, String user, boolean released, JobVO jobVO) throws EEAException {
+  private void failDueToPromotionError(DataSetMetabaseVO dataset, Long datasetId, String processId, Long jobId, String user, boolean released, JobVO jobVO, String preparationCode) throws EEAException {
     if (jobId != null) {
       try {
         jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.ERROR_VALIDATION_FAILURE, null);
@@ -671,7 +671,7 @@ public class ValidationHelper implements DisposableBean {
       }
     }
 
-    deleteLockToReleaseProcess(datasetId);
+    deleteLockToReleaseProcess(datasetId, preparationCode);
 
     try {
       kafkaSenderUtils.releaseNotificableKafkaEvent(
@@ -689,7 +689,7 @@ public class ValidationHelper implements DisposableBean {
     throw new EEAException("Can not validate for jobId " + jobId + ". Error while promoting dataset tables.");
   }
 
-  private void failedDueToIllegalCharacter (String header, String currentTableName, DataSetMetabaseVO dataset, Long datasetId, String processId, Long jobId, String user, boolean released, JobVO jobVO){
+  private void failedDueToIllegalCharacter (String header, String currentTableName, DataSetMetabaseVO dataset, Long datasetId, String processId, Long jobId, String user, boolean released, JobVO jobVO, String preparationCode){
     if (jobId != null) {
       try {
         jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.ERROR_ILLEGAL_HEADER_CHARACTER, null);
@@ -702,7 +702,7 @@ public class ValidationHelper implements DisposableBean {
       }
     }
 
-    deleteLockToReleaseProcess(datasetId);
+    deleteLockToReleaseProcess(datasetId, preparationCode);
 
     try {
       kafkaSenderUtils.releaseNotificableKafkaEvent(
@@ -1042,29 +1042,33 @@ public class ValidationHelper implements DisposableBean {
    * @param datasetId the dataset id
    * @throws EEAException the EEA exception
    */
-  public void addLockToReleaseProcess(Long datasetId) throws EEAException {
+  public void addLockToReleaseProcess(Long datasetId, String preparationCode) throws EEAException {
     try {
       DataSetMetabaseVO datasetMetabaseVO =
           datasetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
-      Map<String, Object> mapCriteria = new HashMap<>();
-      mapCriteria.put("dataflowId", datasetMetabaseVO.getDataflowId());
-      mapCriteria.put("dataProviderId", datasetMetabaseVO.getDataProviderId());
 
-      Map<String, Object> mapCriteriaRestoreSnapshot = new HashMap<>();
-      mapCriteriaRestoreSnapshot.put("datasetId", datasetId);
-      if (datasetMetabaseVO.getDataProviderId() != null) {
-        createLockWithSignature(LockSignature.RELEASE_SNAPSHOTS, mapCriteria,
-            SecurityContextHolder.getContext().getAuthentication().getName());
-        createLockWithSignature(LockSignature.RESTORE_SNAPSHOT, mapCriteriaRestoreSnapshot,
-            SecurityContextHolder.getContext().getAuthentication().getName());
-      } else {
-        createLockWithSignature(LockSignature.RESTORE_SCHEMA_SNAPSHOT, mapCriteriaRestoreSnapshot,
-            SecurityContextHolder.getContext().getAuthentication().getName());
+
+      if (StringUtils.isBlank(preparationCode)) {
+        Map<String, Object> mapCriteria = new HashMap<>();
+        mapCriteria.put("dataflowId", datasetMetabaseVO.getDataflowId());
+        mapCriteria.put("dataProviderId", datasetMetabaseVO.getDataProviderId());
+
+        Map<String, Object> mapCriteriaRestoreSnapshot = new HashMap<>();
+        mapCriteriaRestoreSnapshot.put("datasetId", datasetId);
+        if (datasetMetabaseVO.getDataProviderId() != null) {
+          createLockWithSignature(LockSignature.RELEASE_SNAPSHOTS, mapCriteria,
+                  SecurityContextHolder.getContext().getAuthentication().getName());
+          createLockWithSignature(LockSignature.RESTORE_SNAPSHOT, mapCriteriaRestoreSnapshot,
+                  SecurityContextHolder.getContext().getAuthentication().getName());
+        } else {
+          createLockWithSignature(LockSignature.RESTORE_SCHEMA_SNAPSHOT, mapCriteriaRestoreSnapshot,
+                  SecurityContextHolder.getContext().getAuthentication().getName());
+        }
       }
-
       // Avoid delete the table or dataset data while validating
       Map<String, Object> mapCriteriaDeleteDataset = new HashMap<>();
       mapCriteriaDeleteDataset.put(DATASETID, datasetId);
+      mapCriteriaDeleteDataset.put(PREPARATION_CODE, preparationCode);
       createLockWithSignature(LockSignature.DELETE_DATASET_VALUES, mapCriteriaDeleteDataset,
           SecurityContextHolder.getContext().getAuthentication().getName());
 
@@ -1079,19 +1083,21 @@ public class ValidationHelper implements DisposableBean {
         Map<String, Object> mapCriteriaDeleteTable = new HashMap<>();
         mapCriteriaDeleteTable.put(DATASETID, datasetId);
         mapCriteriaDeleteTable.put(TABLESCHEMAID, table.getIdTableSchema());
+        mapCriteriaDeleteTable.put(PREPARATION_CODE, preparationCode);
         createLockWithSignature(LockSignature.DELETE_IMPORT_TABLE, mapCriteriaDeleteTable,
             SecurityContextHolder.getContext().getAuthentication().getName());
       }
       // We add a lock to the validation process itself.
       Map<String, Object> mapCriteriaValidation = new HashMap<>();
       mapCriteriaValidation.put(DATASETID, datasetId);
+      mapCriteriaValidation.put(PREPARATION_CODE, preparationCode);
       createLockWithSignature(LockSignature.FORCE_EXECUTE_VALIDATION, mapCriteriaValidation,
           SecurityContextHolder.getContext().getAuthentication().getName());
 
     } catch (Exception e) {
       LOG.error("There's an error putting the lock to validation process in dataset {}",
           datasetId);
-      deleteLockToReleaseProcess(datasetId);
+      deleteLockToReleaseProcess(datasetId, preparationCode);
     }
 
   }
@@ -1101,7 +1107,7 @@ public class ValidationHelper implements DisposableBean {
    *
    * @param datasetId the dataset id
    */
-  public void deleteLockToReleaseProcess(Long datasetId) {
+  public void deleteLockToReleaseProcess(Long datasetId, String preparationCode) {
     DataSetMetabaseVO datasetMetabaseVO =
         datasetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
     Map<String, Object> mapCriteriaRestoreSnapshot = new HashMap<>();
@@ -1126,6 +1132,7 @@ public class ValidationHelper implements DisposableBean {
     mapCriteriaDeleteDataset.put(SIGNATURE,
         LockSignature.DELETE_DATASET_VALUES.getValue());
     mapCriteriaDeleteDataset.put(DATASETID, datasetId);
+    mapCriteriaDeleteDataset.put(PREPARATION_CODE, preparationCode);
     lockService.removeLockByCriteria(mapCriteriaDeleteDataset);
 
     TenantResolver.setTenantName(DATASET_PREFIX + datasetId);
@@ -1142,6 +1149,7 @@ public class ValidationHelper implements DisposableBean {
           LockSignature.DELETE_IMPORT_TABLE.getValue());
       mapCriteriaDeleteTable.put(DATASETID, datasetId);
       mapCriteriaDeleteTable.put(TABLESCHEMAID, table.getIdTableSchema());
+      mapCriteriaDeleteTable.put(PREPARATION_CODE, preparationCode);
       lockService.removeLockByCriteria(mapCriteriaDeleteTable);
     }
 
@@ -1149,12 +1157,14 @@ public class ValidationHelper implements DisposableBean {
     mapCriteriaValidation.put(SIGNATURE,
         LockSignature.EXECUTE_VALIDATION.getValue());
     mapCriteriaValidation.put(DATASETID, datasetId);
+    mapCriteriaValidation.put(PREPARATION_CODE, preparationCode);
     lockService.removeLockByCriteria(mapCriteriaValidation);
 
     Map<String, Object> mapCriteriaValidationDataset = new HashMap<>();
     mapCriteriaValidationDataset.put(SIGNATURE,
         LockSignature.FORCE_EXECUTE_VALIDATION.getValue());
     mapCriteriaValidationDataset.put(DATASETID, datasetId);
+    mapCriteriaValidationDataset.put(PREPARATION_CODE, preparationCode);
     lockService.removeLockByCriteria(mapCriteriaValidationDataset);
   }
 
@@ -1606,7 +1616,8 @@ public class ValidationHelper implements DisposableBean {
           try {
             Thread.sleep(1000);
             LOG.info("Checking status of process {} for dataset {}. taskId {}", validationTask.processId, validationTask.datasetId, validationTask.taskId);
-            final String preparationCode = String.valueOf(validationTask.eeaEventVO.getData().get("preparationCode"));
+            final Object value = validationTask.eeaEventVO.getData().get("preparationCode");
+            final String preparationCode = value == null ? null : String.valueOf(value);
             checkFinishedValidations(validationTask.datasetId, validationTask.processId, validationTask.taskId, preparationCode);
           } catch (EEAException | InterruptedException eeaEx) {
             LOG.error("Error finishing validations for dataset {} due to exception {}",
@@ -1736,7 +1747,7 @@ public class ValidationHelper implements DisposableBean {
             }
             else {
               // Delete the lock to the Release process
-              deleteLockToReleaseProcess(datasetId);
+              deleteLockToReleaseProcess(datasetId, preparationCode);
               checkAndPromoteFolder(s3PathResolver, dataflow);
               if (jobId != null) {
                 jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FINISHED);
