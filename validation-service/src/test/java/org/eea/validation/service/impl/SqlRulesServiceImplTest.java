@@ -263,8 +263,6 @@ public class SqlRulesServiceImplTest {
         .thenReturn(datasetMetabaseVO);
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("name");
-    Mockito.when(datasetRepository.evaluateSqlRule(Mockito.anyLong(), Mockito.anyString()))
-        .thenReturn("");
     Mockito.when(dataFlowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataFlowVO);
     Mockito.when(sqlCountryCompanyOrganizationCodeUtils.replaceCodesIfNeeded(
                     Mockito.anyLong(),
@@ -317,8 +315,6 @@ public class SqlRulesServiceImplTest {
         .thenReturn(datasetMetabaseVO);
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("name");
-    Mockito.when(datasetRepository.evaluateSqlRule(Mockito.anyLong(), Mockito.anyString()))
-        .thenReturn("");
     Mockito.when(dataFlowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataFlowVO);
     Mockito.when(sqlCountryCompanyOrganizationCodeUtils.replaceCodesIfNeeded(
                     Mockito.anyLong(),
@@ -392,8 +388,6 @@ public class SqlRulesServiceImplTest {
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("name");
 
-    Mockito.when(datasetRepository.evaluateSqlRule(Mockito.anyLong(), Mockito.anyString()))
-        .thenReturn("");
     Mockito.when(dataFlowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataFlowVO);
     Mockito.when(sqlCountryCompanyOrganizationCodeUtils.replaceCodesIfNeeded(
                     Mockito.anyLong(),
