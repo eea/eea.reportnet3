@@ -6,6 +6,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.eea.interfaces.controller.recordstore.ProcessController;
+import org.eea.interfaces.vo.orchestrator.AdminProcessInfoVO;
 import org.eea.interfaces.vo.recordstore.ProcessVO;
 import org.eea.interfaces.vo.recordstore.ProcessesVO;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
@@ -294,5 +295,13 @@ public class ProcessControllerImpl implements ProcessController {
     return taskServiceImpl.findTaskByProcessId(processId);
   }
 
-
+  @Override
+  @PostMapping("/private/findProcessesAndRelatedTasks")
+  public List<AdminProcessInfoVO> findProcessesAndRelatedTasks(@RequestBody List<String> processIds) {
+    try {
+      return processService.findProcessesAndRelatedTasks(processIds);
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
 }

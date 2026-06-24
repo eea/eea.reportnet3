@@ -6,6 +6,8 @@ import java.util.List;
 
 public interface JobProcessService {
 
+    List<JobProcessVO> findJobProcessByJobIdIn(List<Long> jobIds);
+
     JobProcessVO saveJobProcess(JobProcessVO jobProcessVO);
 
     Long findJobIdByProcessId(String processId);

@@ -3,29 +3,35 @@ package org.eea.recordstore.service.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
+import org.eea.interfaces.vo.orchestrator.AdminProcessInfoVO;
+import org.eea.interfaces.vo.orchestrator.AdminTaskInfoAnalytics;
+import org.eea.interfaces.vo.orchestrator.AdminTaskInfoVO;
 import org.eea.interfaces.vo.recordstore.ProcessVO;
 import org.eea.interfaces.vo.recordstore.ProcessesVO;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
+import org.eea.interfaces.vo.validation.TaskVO;
 import org.eea.recordstore.mapper.ProcessMapper;
 import org.eea.recordstore.persistence.domain.EEAProcess;
 import org.eea.recordstore.persistence.repository.ProcessRepository;
 import org.eea.recordstore.service.ProcessService;
+import org.eea.recordstore.service.TaskService;
+import org.eea.utils.UtilityClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
-import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.transaction.Transactional;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
+import java.util.stream.Collectors;
 
 
 /**
@@ -49,6 +55,9 @@ public class ProcessServiceImpl implements ProcessService {
   @Autowired
   private DataSetMetabaseControllerZuul datasetMetabaseControllerZuul;
 
+
+  @Autowired
+  private TaskService taskService;
 
   /**
    * Gets the processes.
@@ -275,6 +284,144 @@ public class ProcessServiceImpl implements ProcessService {
   @Override
   public void deleteProcessByProcessId(String processId){
     processRepository.deleteByProcessId(processId);
+  }
+
+  @Override
+  public List<AdminProcessInfoVO> findProcessesAndRelatedTasks(List<String> processIds) {
+    List<AdminProcessInfoVO> adminJobInfoVOResponse = new ArrayList<>();
+
+    List<ProcessVO> processVOList = getByProcessIds(processIds);
+    List<TaskVO> taskVOList = taskService.findByProcessIds(processIds);
+
+    for (ProcessVO processVO : processVOList) {
+      List<TaskVO> relatedTasks = taskVOList.stream().filter(taskVO -> taskVO.getProcessId().equals(processVO.getProcessId())).collect(Collectors.toList());
+
+      Duration processDuration = UtilityClass.calculateDuration(processVO.getProcessStartingDate().toInstant(), processVO.getProcessFinishingDate().toInstant());
+      Long processDurationMs = processDuration.toMillis();
+      String processDurationFormatted = UtilityClass.formatDuration(processDuration);
+
+      AdminProcessInfoVO adminProcessInfoVO = new AdminProcessInfoVO();
+      adminProcessInfoVO.setProcessVO(processVO);
+      adminProcessInfoVO.setProcessDurationMs(processDurationMs);
+      adminProcessInfoVO.setProcessDurationFormatted(processDurationFormatted);
+      adminProcessInfoVO.setAdminTaskInfoVOS(new ArrayList<>());
+      adminProcessInfoVO.setAdminTaskInfoAnalytics(new AdminTaskInfoAnalytics());
+
+      relatedTasks.forEach(taskVO -> {
+
+        Duration taskDuration = UtilityClass.calculateDuration(taskVO.getStartingDate().toInstant(), taskVO.getFinishDate().toInstant());
+        Long taskDurationMs = taskDuration.toMillis();
+        String taskDurationFormatted = UtilityClass.formatDuration(taskDuration);
+
+        AdminTaskInfoVO adminTaskInfoVO = new AdminTaskInfoVO();
+        adminTaskInfoVO.setTaskVO(taskVO);
+        adminTaskInfoVO.setTaskDurationMs(taskDurationMs);
+        adminTaskInfoVO.setTaskDurationFormatted(taskDurationFormatted);
+
+        adminProcessInfoVO.getAdminTaskInfoVOS().add(adminTaskInfoVO);
+      });
+      AdminTaskInfoAnalytics adminTaskInfoAnalytics = calculateAllTaskAnalytics(adminProcessInfoVO);
+      adminProcessInfoVO.setAdminTaskInfoAnalytics(adminTaskInfoAnalytics);
+      adminJobInfoVOResponse.add(adminProcessInfoVO);
+    }
+    return adminJobInfoVOResponse;
+  }
+
+  private AdminTaskInfoAnalytics calculateAllTaskAnalytics(AdminProcessInfoVO adminProcessInfoVO) {
+
+    AdminTaskInfoAnalytics analytics = new AdminTaskInfoAnalytics();
+    ProcessVO process = adminProcessInfoVO.getProcessVO();
+    analytics.setProcessId(process.getProcessId());
+    analytics.setProcessType(process.getProcessType());
+    analytics.setDataflowId(process.getDataflowId());
+    analytics.setDatasetId(process.getDatasetId());
+    analytics.setStatus(process.getStatus());
+
+    int totalTasks = 0;
+    int queuedTasks = 0;
+    int inProgressTasks = 0;
+    int canceledTasks = 0;
+    int finishedTasks = 0;
+    long minFinishedDuration = Long.MAX_VALUE;
+    long maxFinishedDuration = 0L;
+    long finishedDurationSum = 0L;
+    long minInProgressDuration = Long.MAX_VALUE;
+    long maxInProgressDuration = 0L;
+    int maxVersion = 0;
+
+    List<AdminTaskInfoVO> tasks = adminProcessInfoVO.getAdminTaskInfoVOS();
+
+    if (tasks != null) {
+
+      for (AdminTaskInfoVO adminTask : tasks) {
+
+        TaskVO task = adminTask.getTaskVO();
+
+        if (task == null) {
+          continue;
+        }
+
+        totalTasks++;
+
+        ProcessStatusEnum status = task.getStatus();
+
+        long duration = adminTask.getTaskDurationMs() != null
+                ? adminTask.getTaskDurationMs()
+                : 0L;
+
+        int version = task.getVersion();
+        if (version > maxVersion) {
+          maxVersion = version;
+        }
+
+        switch (status) {
+
+          case IN_QUEUE:
+            queuedTasks++;
+            break;
+          case IN_PROGRESS:
+            inProgressTasks++;
+            if (duration < minInProgressDuration) minInProgressDuration = duration;
+            if (duration > maxInProgressDuration) maxInProgressDuration = duration;
+            break;
+          case CANCELED:
+            canceledTasks++;
+            break;
+          case FINISHED:
+            finishedTasks++;
+            if (duration < minFinishedDuration) minFinishedDuration = duration;
+            if (duration > maxFinishedDuration) maxFinishedDuration = duration;
+            finishedDurationSum += duration;
+            break;
+          default:
+            break;
+        }
+      }
+    }
+
+    long averageFinishedDuration = finishedTasks > 0
+            ? finishedDurationSum / finishedTasks
+            : 0;
+
+    if (minFinishedDuration == Long.MAX_VALUE) minFinishedDuration = 0;
+    if (minInProgressDuration == Long.MAX_VALUE) minInProgressDuration = 0;
+
+    analytics.setTotalTasks(totalTasks);
+    analytics.setQueuedTasks(queuedTasks);
+    analytics.setInProgressTasks(inProgressTasks);
+    analytics.setCanceledTasks(canceledTasks);
+    analytics.setFinishedTasks(finishedTasks);
+
+    analytics.setMinimumFinishedTaskDurationMs(minFinishedDuration);
+    analytics.setMaximumFinishedTaskDurationMs(maxFinishedDuration);
+    analytics.setAverageFinishedTaskDurationMs(averageFinishedDuration);
+
+    analytics.setMinimumInProgressTaskDurationMs(minInProgressDuration);
+    analytics.setMaximumInProgressTaskDurationMs(maxInProgressDuration);
+
+    analytics.setMaximumVersionOfAnyTask(maxVersion);
+
+    return analytics;
   }
 
 }

@@ -27,6 +27,13 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
     List<Task> findByProcessId(String processId);
 
     /**
+     * Finds tasks by processId
+     * @param processIds
+     * @return list of related tasks
+     */
+    List<Task> findByProcessIdIn(List<String> processIds);
+
+    /**
      * Finds task by json
      * @param splitFileName
      * @return

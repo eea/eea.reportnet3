@@ -13,6 +13,8 @@ import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMe
 import org.eea.interfaces.controller.orchestrator.JobController;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
+import org.eea.interfaces.vo.orchestrator.AdminJobInfoRequest;
+import org.eea.interfaces.vo.orchestrator.AdminJobInfoResponse;
 import org.eea.interfaces.vo.orchestrator.JobVO;
 import org.eea.interfaces.vo.orchestrator.JobsVO;
 import org.eea.interfaces.vo.orchestrator.JobHistoryVO;
@@ -98,11 +100,23 @@ public class JobControllerImpl implements JobController {
     @Autowired
     private JobProcessServiceImpl jobProcessServiceImpl;
 
-
-
     private static final String FILE_PATTERN_NAME_V4 = "etlExportV4_%s";
     private static final String FILE_PATTERN_NAME_V5 = "etlExportV5_%s";
 
+
+    @Override
+    @PostMapping("/admin/info")
+    public AdminJobInfoResponse getAdminJobInfo(@RequestBody AdminJobInfoRequest adminJobInfoRequest){
+        try{
+            LOG.info("Requests an admin info request about job ids: {}", adminJobInfoRequest.getRequestJobIds());
+            return jobService.getAdminJobInfo(adminJobInfoRequest);
+        } catch (Exception e){
+            LOG.error("Unexpected error! Could not retrieve all info about job ids: {} ", adminJobInfoRequest.getRequestJobIds(), e);
+            AdminJobInfoResponse adminJobInfoResponse = new AdminJobInfoResponse();
+            adminJobInfoResponse.setInfo(e.getMessage());
+            return adminJobInfoResponse;
+        }
+    }
 
     @Override
     @HystrixCommand

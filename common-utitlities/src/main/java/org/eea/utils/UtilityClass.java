@@ -10,6 +10,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
@@ -21,6 +23,33 @@ public final class UtilityClass {
     throw new java.lang.UnsupportedOperationException("This is a utility class and cannot be instantiated");
   }
 
+  public static Duration calculateDuration(Instant instantStart, Instant instantFinish) {
+    if (instantStart == null
+    || instantFinish == null) return Duration.ZERO;
+
+    return Duration.between(instantStart, instantFinish);
+  }
+
+  public static String formatDuration(Duration duration) {
+    long days = duration.toDays();
+
+    duration = duration.minusDays(days);
+    long hours = duration.toHours();
+
+    duration = duration.minusHours(hours);
+    long minutes = duration.toMinutes();
+
+    duration = duration.minusMinutes(minutes);
+    long seconds = duration.getSeconds();
+
+    return String.format(
+            "%dd %02dh %02dm %02ds",
+            days,
+            hours,
+            minutes,
+            seconds
+    );
+  }
   /**
    * Adding quotes to fields for dremio usage to avoid reserved keywords exception on the query
    *

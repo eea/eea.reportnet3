@@ -1,5 +1,6 @@
 package org.eea.interfaces.controller.recordstore;
 
+import org.eea.interfaces.vo.orchestrator.AdminProcessInfoVO;
 import org.eea.interfaces.vo.recordstore.ProcessVO;
 import org.eea.interfaces.vo.recordstore.ProcessesVO;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
@@ -179,4 +180,8 @@ public interface ProcessController {
    */
   @GetMapping("/private/findTasksByProcessId")
   List<TaskVO> findTasksByProcessId(@RequestParam(name = "processId") String processIds);
-}
+
+  @PostMapping("/private/findProcessesAndRelatedTasks")
+  List<AdminProcessInfoVO> findProcessesAndRelatedTasks(@RequestBody List<String> processIds);
+
+  }

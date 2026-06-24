@@ -1,5 +1,7 @@
 package org.eea.interfaces.controller.orchestrator;
 
+import org.eea.interfaces.vo.orchestrator.AdminJobInfoRequest;
+import org.eea.interfaces.vo.orchestrator.AdminJobInfoResponse;
 import org.eea.interfaces.vo.orchestrator.JobVO;
 import org.eea.interfaces.vo.orchestrator.JobsVO;
 import org.eea.interfaces.vo.orchestrator.enums.JobInfoEnum;
@@ -21,6 +23,9 @@ public interface JobController {
     @FeignClient(value = "orchestrator", contextId = "jobs", path = "/jobs")
     interface JobControllerZuul extends JobController {
     }
+
+    @PostMapping("/admin/info")
+    AdminJobInfoResponse getAdminJobInfo(@RequestBody AdminJobInfoRequest adminJobInfoRequest);
 
     /**
      * Get jobs

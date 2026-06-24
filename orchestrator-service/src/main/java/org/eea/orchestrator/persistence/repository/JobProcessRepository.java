@@ -19,6 +19,8 @@ public interface JobProcessRepository extends JpaRepository<JobProcess, Long> {
     @Query(nativeQuery = true, value = "select jp.process_id from job_process jp where jp.job_id= :jobId")
     List<String> findProcessesByJobId(@Param("jobId") Long jobId);
 
+    List<JobProcess> findByJobIdIn(List<Long> jobIds);
+
     @Transactional
     @Modifying
     @Query(nativeQuery = true, value = "delete from job_process where process_id = :processId")

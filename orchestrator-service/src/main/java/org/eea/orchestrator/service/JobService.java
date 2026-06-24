@@ -1,6 +1,8 @@
 package org.eea.orchestrator.service;
 
 import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.orchestrator.AdminJobInfoRequest;
+import org.eea.interfaces.vo.orchestrator.AdminJobInfoResponse;
 import org.eea.interfaces.vo.orchestrator.JobVO;
 import org.eea.interfaces.vo.orchestrator.JobsVO;
 import org.eea.interfaces.vo.orchestrator.enums.FmeJobStatusEnum;
@@ -19,6 +21,9 @@ import java.util.List;
 import java.util.Map;
 
 public interface JobService {
+
+    AdminJobInfoResponse getAdminJobInfo(AdminJobInfoRequest adminJobInfoRequest);
+
     JobsVO getJobs(Pageable pageable, boolean asc, String sortedColumn, Long jobId, String jobTypes, Long dataflowId, String dataflowName, Long providerId,
                    Long datasetId, String datasetName, String creatorUsername, String jobStatuses, String preparationCode);
 

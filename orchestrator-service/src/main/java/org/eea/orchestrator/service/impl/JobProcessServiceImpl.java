@@ -25,6 +25,10 @@ public class JobProcessServiceImpl implements JobProcessService {
         this.jobRepository = jobRepository;
     }
 
+    public List<JobProcessVO> findJobProcessByJobIdIn(List<Long> jobIds) {
+        return jobProcessMapper.entityListToClass(jobProcessRepository.findByJobIdIn(jobIds));
+    }
+
     /**
      * Saves jobProcessVO
      * @param jobProcessVO

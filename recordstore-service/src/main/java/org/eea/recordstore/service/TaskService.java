@@ -9,6 +9,8 @@ import java.util.List;
 
 public interface TaskService {
 
+    List<TaskVO> findByProcessIds(List<String> processIds);
+
     /**
      * Saves task
      * @param taskVO

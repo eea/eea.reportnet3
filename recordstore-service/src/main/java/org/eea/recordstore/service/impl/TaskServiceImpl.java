@@ -36,6 +36,10 @@ public class TaskServiceImpl implements TaskService {
         this.taskMapper = taskMapper;
     }
 
+    public List<TaskVO> findByProcessIds(List<String> processIds) {
+        return taskMapper.entityListToClass(taskRepository.findByProcessIdIn(processIds));
+    }
+
     @Transactional
     @Override
     public TaskVO saveTask(TaskVO taskVO) {

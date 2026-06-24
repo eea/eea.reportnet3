@@ -1,5 +1,6 @@
 package org.eea.recordstore.service;
 
+import org.eea.interfaces.vo.orchestrator.AdminProcessInfoVO;
 import org.eea.interfaces.vo.recordstore.ProcessVO;
 import org.eea.interfaces.vo.recordstore.ProcessesVO;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
@@ -120,6 +121,8 @@ public interface ProcessService {
    * @return
    */
   List<String> findProcessIdsByTypeAndStatusAndTaskStatus(String type, String status, String taskStatus);
+
+  List<AdminProcessInfoVO> findProcessesAndRelatedTasks(List<String> processIds);
 }
 
 

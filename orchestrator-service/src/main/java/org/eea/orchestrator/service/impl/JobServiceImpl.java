@@ -17,7 +17,12 @@ import org.eea.interfaces.controller.validation.ValidationController.ValidationC
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
-import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
+import org.eea.interfaces.vo.orchestrator.AdminJobInfoRequest;
+import org.eea.interfaces.vo.orchestrator.AdminJobInfoResponse;
+import org.eea.interfaces.vo.orchestrator.AdminJobInfoVO;
+import org.eea.interfaces.vo.orchestrator.AdminProcessInfoAnalytics;
+import org.eea.interfaces.vo.orchestrator.AdminProcessInfoVO;
+import org.eea.interfaces.vo.orchestrator.JobProcessVO;
 import org.eea.interfaces.vo.orchestrator.JobVO;
 import org.eea.interfaces.vo.orchestrator.JobsVO;
 import org.eea.interfaces.vo.orchestrator.enums.FmeJobStatusEnum;
@@ -40,6 +45,7 @@ import org.eea.orchestrator.service.JobProcessService;
 import org.eea.orchestrator.service.JobService;
 import org.eea.orchestrator.utils.JobUtils;
 import org.eea.utils.LiteralConstants;
+import org.eea.utils.UtilityClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,7 +63,9 @@ import java.io.File;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.sql.Timestamp;
+import java.time.Duration;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.eea.utils.LiteralConstants.*;
 
@@ -152,6 +160,138 @@ public class JobServiceImpl implements JobService {
 
     private static final String BEARER = "Bearer ";
     private static final String CANCELED_BY_ADMIN_ERROR = "cancelled by admin";
+
+    @Override
+    public AdminJobInfoResponse getAdminJobInfo(AdminJobInfoRequest adminJobInfoRequest) {
+
+        AdminJobInfoResponse adminJobInfoResponse = new AdminJobInfoResponse();
+        adminJobInfoResponse.setAdminJobInfoVOs(new ArrayList<>());
+        adminJobInfoResponse.setRequestedJobIds(adminJobInfoRequest.getRequestJobIds());
+        // get all `job_process` querying with job ids
+        List<JobProcessVO> jobProcessVOList = jobProcessService.findJobProcessByJobIdIn(adminJobInfoRequest.getRequestJobIds());
+
+        for (Long jobId : adminJobInfoRequest.getRequestJobIds()) {
+
+            // get the job based on the provided id
+            Optional<Job> optionalJob = jobRepository.findById(jobId);
+            if (optionalJob.isPresent()) {
+
+                JobVO jobVO = jobMapper.entityToClass(optionalJob.get());
+                List<String> jobProcessIds = jobProcessVOList.stream().filter(jobProcessVO -> jobProcessVO.getJobId().equals(jobVO.getId())).map(JobProcessVO::getProcessId).collect(Collectors.toList());
+
+                Duration jobDuration = UtilityClass.calculateDuration(jobVO.getDateAdded().toInstant(), jobVO.getDateStatusChanged().toInstant());
+                Long jobDurationMs = jobDuration.toMillis();
+                String jobDurationFormatted = UtilityClass.formatDuration(jobDuration);
+                List<AdminProcessInfoVO> processVOListToRelatedTaskVOLists = processControllerZuul.findProcessesAndRelatedTasks(jobProcessIds);
+                processVOListToRelatedTaskVOLists.forEach(adminProcessInfoVO -> adminProcessInfoVO.setJobId(jobId));
+                AdminProcessInfoAnalytics adminProcessInfoAnalytics = calculateAllProcessAnalytics(processVOListToRelatedTaskVOLists);
+
+                AdminJobInfoVO adminJobInfoVO = new AdminJobInfoVO();
+                adminJobInfoVO.setJobVO(jobVO);
+                adminJobInfoVO.setJobDurationMs(jobDurationMs);
+                adminJobInfoVO.setJobDurationFormatted(jobDurationFormatted);
+                adminJobInfoVO.setAdminProcessInfoVOS(processVOListToRelatedTaskVOLists);
+                adminJobInfoVO.setAdminProcessInfoAnalytics(adminProcessInfoAnalytics);
+
+
+
+                adminJobInfoResponse.getAdminJobInfoVOs().add(adminJobInfoVO);
+
+            } else {
+                AdminJobInfoVO adminJobInfoVO = new AdminJobInfoVO();
+                adminJobInfoVO.setComment("Cannot retrieve job with id " + jobId + "from database, make sure that is valid");
+                adminJobInfoResponse.getAdminJobInfoVOs().add(adminJobInfoVO);
+            }
+        }
+
+        return adminJobInfoResponse;
+    }
+
+    private AdminProcessInfoAnalytics calculateAllProcessAnalytics(List<AdminProcessInfoVO> processes) {
+
+        AdminProcessInfoAnalytics analytics = new AdminProcessInfoAnalytics();
+
+        long totalProcesses = 0;
+        long queuedProcesses = 0;
+        long inProgressProcesses = 0;
+        long canceledProcesses = 0;
+        long finishedProcesses = 0;
+        long minFinishedDuration = Long.MAX_VALUE;
+        long maxFinishedDuration = 0;
+        long finishedDurationSum = 0;
+        long minInProgressDuration = Long.MAX_VALUE;
+        long maxInProgressDuration = 0;
+
+        List<Long> datasetIds = new ArrayList<>();
+
+        if (processes == null) processes = List.of();
+
+        for (AdminProcessInfoVO adminProcessInfoVO : processes) {
+
+            ProcessVO processVO = adminProcessInfoVO.getProcessVO();
+            if (processVO == null) continue;
+
+            totalProcesses++;
+
+            datasetIds.add(processVO.getDatasetId());
+
+            long duration = adminProcessInfoVO.getProcessDurationMs() != null
+                    ? adminProcessInfoVO.getProcessDurationMs()
+                    : 0L;
+
+            ProcessStatusEnum status = ProcessStatusEnum.valueOf(processVO.getStatus());
+
+            if (status == null) {
+                continue;
+            }
+
+            switch (status) {
+                case IN_QUEUE:
+                    queuedProcesses++;
+                    break;
+                case IN_PROGRESS:
+                    inProgressProcesses++;
+                    minInProgressDuration = Math.min(minInProgressDuration, duration);
+                    maxInProgressDuration = Math.max(maxInProgressDuration, duration);
+                    break;
+                case CANCELED:
+                    canceledProcesses++;
+                    break;
+                case FINISHED:
+                    finishedProcesses++;
+                    minFinishedDuration = Math.min(minFinishedDuration, duration);
+                    maxFinishedDuration = Math.max(maxFinishedDuration, duration);
+                    finishedDurationSum += duration;
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        long avgFinished = finishedProcesses > 0
+                ? finishedDurationSum / finishedProcesses
+                : 0;
+
+        if (minFinishedDuration == Long.MAX_VALUE) minFinishedDuration = 0;
+        if (minInProgressDuration == Long.MAX_VALUE) minInProgressDuration = 0;
+
+        analytics.setDatasetId(datasetIds);
+
+        analytics.setTotalProcesses(totalProcesses);
+        analytics.setQueuedProcesses(queuedProcesses);
+        analytics.setInProgressProcesses(inProgressProcesses);
+        analytics.setCanceledProcesses(canceledProcesses);
+        analytics.setFinishedProcesses(finishedProcesses);
+
+        analytics.setMinimumFinishedProcessDurationMs(minFinishedDuration);
+        analytics.setMaximumFinishedProcessDurationMs(maxFinishedDuration);
+        analytics.setAverageFinishedProcessDurationMs(avgFinished);
+
+        analytics.setMinimumInProgressProcessDurationMs(minInProgressDuration);
+        analytics.setMaximumInProgressProcessDurationMs(maxInProgressDuration);
+
+        return analytics;
+    }
 
     @Override
     public JobsVO getJobs(Pageable pageable, boolean asc, String sortedColumn, Long jobId, String jobTypes, Long dataflowId, String dataflowName, Long providerId,
