@@ -1822,7 +1822,7 @@
     "validationFailedIllegalCharacterEvent": "Invalid character in field name <strong>{:fieldName}</strong> was found in dataset <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a> and table <strong>{:tableName}</strong>. Please correct it and retry to validate.",
     "validationFailedSystemErrorEvent": "Validation for dataset <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a> failed due to system error. Please contact the Service Desk for support.",
     "validationFilter": "Validation filter",
-    "validationFinishedEvent": "Validation finished at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName} ({:dataProviderName})</a>. Click <strong>Refresh</strong> to view the data.",
+    "validationFinishedEvent": "Validation finished at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName} ({:dataProviderName})</a> {:preparationDatasetMessagePart}. Click <strong>Refresh</strong> to view the data.",
     "validationInProgress": "Validation in progress",
     "validationRemoveQueueDialogContent": "Are you sure you want to remove this validation from queue?",
     "validationRemoveQueueDialogHeader": "Remove from queue",

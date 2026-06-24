@@ -868,9 +868,21 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
     const isNotification = notificationContext.toShow.find(
       notification => notification.key === 'VALIDATION_FINISHED_EVENT'
     );
-    if (isNotification && isNotification.content.datasetId?.toString() === datasetId.toString()) {
+    if (
+      isNotification &&
+      isNotification.content.datasetId?.toString() === datasetId.toString() &&
+      isNotification.content.preparationCode === code
+    ) {
       onHighlightRefresh(true);
       changeProgressStepBar({ step: 1, currentStep: 2, isRunning: false, completed: false, withError: false });
+    } else if (
+      isNotification &&
+      isNotification.content.datasetId?.toString() === datasetId.toString() &&
+      code === undefined &&
+      isNotification.content.preparationCode === null
+    ) {
+      onHighlightRefresh(true);
+      changeProgressStepBar({ step: 1, currentStep: 2, isRunning: false, completed: false, withError: true });
     }
 
     const validationFinishedWithError = notificationContext.toShow.find(notification =>
