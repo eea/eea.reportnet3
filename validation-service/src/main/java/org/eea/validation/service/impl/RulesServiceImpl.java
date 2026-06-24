@@ -2679,6 +2679,7 @@ public class RulesServiceImpl implements RulesService {
   private boolean checkQuerySyntax(String query) {
     boolean queryContainsKeyword = true;
 
+    // usage of semicolon is prohibited for queries in custom SQL as from #300397
     if (query.contains(";")) {
       return false;
     }
