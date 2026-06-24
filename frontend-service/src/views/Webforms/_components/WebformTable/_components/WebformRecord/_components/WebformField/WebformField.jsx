@@ -110,10 +110,6 @@ export const WebformField = ({
     };
   }, []);
 
-  useEffect(() => {
-    if (element.fieldType === 'LINK' || element.fieldType === 'EXTERNAL_LINK') onFilter('', element);
-  }, [newRecord, conditionalFieldChange]);
-
   const onAttach = async value => {
     onFillField(record, selectedFieldSchemaId, `${value.files[0].name}`);
     onToggleDialogVisible(false);
@@ -215,6 +211,7 @@ export const WebformField = ({
           [
             'referencedFieldValues',
             datasetSchemaId,
+            record.recordId,
             element.fieldSchemaId ?? element.fieldSchema,
             conditionalValue,
             filter
@@ -263,6 +260,21 @@ export const WebformField = ({
       notificationContext
     ]
   );
+
+  useEffect(() => {
+    if (element.fieldType === 'LINK' || element.fieldType === 'EXTERNAL_LINK') {
+      onFilter('', element);
+    }
+  }, [
+    record?.recordId,
+    record?.elements,
+    element?.fieldSchemaId,
+    element?.fieldSchema,
+    element?.value,
+    newRecord,
+    conditionalFieldChange,
+    onFilter
+  ]);
 
   const onFocusField = value => {
     webformFieldDispatch({ type: 'SET_INITIAL_FIELD_VALUE', payload: value });
@@ -566,6 +578,7 @@ export const WebformField = ({
                       updatingField.field?.fieldId
                   ))
               }
+              key={`${record.recordId}-${field.fieldSchemaId || field.fieldSchema || field.fieldId}-${field.value}`}
               maxSelectedLabels={10}
               onChange={() => {
                 if (isNil(field.recordId)) onSaveField(option, field.value);
@@ -602,6 +615,7 @@ export const WebformField = ({
                       updatingField.field?.fieldId
                   ))
               }
+              key={`${record.recordId}-${field.fieldSchemaId || field.fieldSchema || field.fieldId}-${field.value}`}
               onChange={event => {
                 const value =
                   typeof event.target?.value === 'object' && !Array.isArray(event.target.value)
