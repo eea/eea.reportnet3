@@ -282,6 +282,12 @@ public class ValidationServiceHelper {
    */
   private boolean checkQuerySyntax(String query) {
     boolean queryContainsKeyword = true;
+
+    // usage of semicolon is prohibited for queries in custom SQL as from #300397
+    if (query.contains(";")) {
+      return false;
+    }
+
     String[] queryKeywords = KEYWORDS.split(",");
     for (String word : queryKeywords) {
       if (query.toLowerCase().contains(word.toLowerCase())) {

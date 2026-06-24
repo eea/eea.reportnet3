@@ -1062,7 +1062,7 @@ public interface DatasetController {
   @GetMapping("/isIcebergTableCreated/{datasetId}/{tableSchemaId}")
   Boolean isIcebergTableCreated(@PathVariable("datasetId") Long datasetId,
                                 @PathVariable("tableSchemaId") String tableSchemaId,
-                                @RequestParam("preparationCode") String preparationCode);
+                                @RequestParam(value = "preparationCode", required = false) String preparationCode);
 
   /**
    * Get iceberg tables in dataflow

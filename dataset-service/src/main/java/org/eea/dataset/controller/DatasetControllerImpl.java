@@ -1177,7 +1177,8 @@ public class DatasetControllerImpl implements DatasetController {
    */
   @SneakyThrows
   @Override
-  @HystrixCommand
+  @HystrixCommand(commandProperties = {@HystrixProperty(
+          name = "execution.isolation.thread.timeoutInMilliseconds", value = "7200000")})
   @LockMethod(removeWhenFinish = false)
   @DeleteMapping("/v1/{datasetId}/deleteDatasetData")
   @PreAuthorize("secondLevelAuthorize(#datasetId, 'DATASCHEMA_CUSTODIAN', 'DATASCHEMA_STEWARD', 'DATASCHEMA_EDITOR_WRITE', 'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE', 'EUDATASET_CUSTODIAN','EUDATASET_STEWARD','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','REFERENCEDATASET_STEWARD') OR checkApiKey(#dataflowId,#providerId, #datasetId, 'DATASCHEMA_CUSTODIAN', 'DATASCHEMA_STEWARD', 'DATASCHEMA_EDITOR_WRITE', 'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE', 'EUDATASET_CUSTODIAN','EUDATASET_STEWARD','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','REFERENCEDATASET_STEWARD')")
@@ -3914,7 +3915,7 @@ public class DatasetControllerImpl implements DatasetController {
   @GetMapping("/isIcebergTableCreated/{datasetId}/{tableSchemaId}")
   public Boolean isIcebergTableCreated(@PathVariable("datasetId") Long datasetId,
                              @PathVariable("tableSchemaId") String tableSchemaId,
-                             @RequestParam("preparationCode") String preparationCode){
+                             @RequestParam(value = "preparationCode", required = false) String preparationCode){
     try {
       return datasetTableService.icebergTableIsCreated(datasetId, tableSchemaId, preparationCode);
     }

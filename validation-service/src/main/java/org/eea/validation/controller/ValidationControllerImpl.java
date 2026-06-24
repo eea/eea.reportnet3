@@ -211,7 +211,8 @@ public class ValidationControllerImpl implements ValidationController {
 
       }
 
-    } else {
+    }
+    else {
       // obtain datasets to be released
       List<Long> datasets =
           datasetMetabaseControllerZuul.getDatasetIdsByDataflowIdAndDataProviderId(
@@ -238,6 +239,7 @@ public class ValidationControllerImpl implements ValidationController {
         }
       }
     }
+
     try {
       DataFlowVO dataflow = dataFlowControllerZuul.getMetabaseById(dataset.getDataflowId());
       LOG.info("Executing validation for datasetId {} with jobId {}", datasetId, jobId);
@@ -250,7 +252,7 @@ public class ValidationControllerImpl implements ValidationController {
         for(TableSchemaIdNameVO table: tables){
           TableSchemaVO tableSchemaVO = datasetSchemaController.getTableSchemaVO(table.getIdTableSchema(), datasetSchemaId);
           if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable())
-                  && BooleanUtils.isTrue(dataSetControllerZuul.isIcebergTableCreated(datasetId, preparationCode, tableSchemaVO.getIdTableSchema()))) {
+                  && BooleanUtils.isTrue(dataSetControllerZuul.isIcebergTableCreated(datasetId, tableSchemaVO.getIdTableSchema(), preparationCode))) {
             if (jobId != null) {
                 jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.ERROR_ICEBERG_TABLE_EXISTS, null);
                 jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FAILED);
@@ -258,7 +260,7 @@ public class ValidationControllerImpl implements ValidationController {
                         ProcessStatusEnum.CANCELED, ProcessTypeEnum.VALIDATION, uuid, user, priority, released);
             }
 
-            validationHelper.deleteLockToReleaseProcess(datasetId);
+            validationHelper.deleteLockToReleaseProcess(datasetId, preparationCode);
             kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.VALIDATION_FAILED_ICEBERG_EXISTS_EVENT, null,
                     NotificationVO.builder()
                             .user(jobVO.getCreatorUsername())
@@ -270,7 +272,8 @@ public class ValidationControllerImpl implements ValidationController {
           }
         }
         validationHelper.executeValidationDL(datasetId, uuid, released, s3PathResolver, createParquetWithSQL, validateAsProviderCode, preparationCode);
-      } else {    //check locks for Citus
+      }
+      else {    //check locks for Citus
 
           if (dataSetControllerZuul.getEditingStatus(datasetId, null).getIsEditing()) {
             if (jobId != null) {
@@ -278,7 +281,7 @@ public class ValidationControllerImpl implements ValidationController {
               jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FAILED);
               processControllerZuul.updateProcess(datasetId, dataset.getDataflowId(),
                       ProcessStatusEnum.CANCELED, ProcessTypeEnum.VALIDATION, uuid, user, priority, released);
-              validationHelper.deleteLockToReleaseProcess(datasetId);
+              validationHelper.deleteLockToReleaseProcess(datasetId, preparationCode);
               kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.VALIDATION_FAILED_DATASET_LOCKED_FOR_EDITING_EXISTS_EVENT, null,
                       NotificationVO.builder()
                               .user(jobVO.getCreatorUsername())
@@ -292,14 +295,14 @@ public class ValidationControllerImpl implements ValidationController {
       }
 
       // Add lock to the release process if necessary
-      validationHelper.addLockToReleaseProcess(datasetId);
+      validationHelper.addLockToReleaseProcess(datasetId, preparationCode);
     } catch (EEAException e) {
       datasetMetabaseControllerZuul.updateDatasetRunningStatus(datasetId,
           DatasetRunningStatusEnum.ERROR_IN_VALIDATION);
       LOG.error("Error validating datasetId {} with jobId {}. Message {}", datasetId, jobId, e.getMessage(), e);
-      validationHelper.deleteLockToReleaseProcess(datasetId);
+      validationHelper.deleteLockToReleaseProcess(datasetId, preparationCode);
     } catch (Exception e) {
-      validationHelper.deleteLockToReleaseProcess(datasetId);
+      validationHelper.deleteLockToReleaseProcess(datasetId, preparationCode);
       LOG.error("Unexpected error! Error validating dataset data for datasetId {} with jobId {}. Message: {}", datasetId, jobId, e.getMessage());
       throw e;
     }
@@ -654,7 +657,8 @@ public class ValidationControllerImpl implements ValidationController {
   @ApiOperation(value = "Deletes the locks related to release", hidden = true)
   public void deleteLocksToReleaseProcess(@ApiParam(value = "Dataset id from which locks should be removed",
           example = "15") @PathVariable("datasetId") Long datasetId) {
-    validationHelper.deleteLockToReleaseProcess(datasetId);
+    //TODO Checkhere prep code
+    validationHelper.deleteLockToReleaseProcess(datasetId, null);
   }
 
   /**

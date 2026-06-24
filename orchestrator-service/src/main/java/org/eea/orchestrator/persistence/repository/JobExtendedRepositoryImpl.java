@@ -81,7 +81,6 @@ public class JobExtendedRepositoryImpl implements JobExtendedRepository{
     private Query constructQuery(boolean asc, String sortedColumn, StringBuilder stringQuery, boolean countQuery, Pageable pageable, Long jobId, String jobTypes, Long dataflowId, String dataflowName,
                                  Long providerId, Long datasetId, String datasetName, String creatorUsername, String jobStatuses, String preparationCode) {
         stringQuery.append(countQuery ? COUNT_JOBS_QUERY : JOBS_QUERY);
-        LOG.info("APBO: Constructing query with preparationCode: {}", preparationCode);
         addFilters(stringQuery, jobId, jobTypes, dataflowId, dataflowName, providerId, datasetId, datasetName, creatorUsername, jobStatuses, preparationCode);
         if (!countQuery) {
             stringQuery.append(" order by " + sortedColumn);
@@ -96,7 +95,6 @@ public class JobExtendedRepositoryImpl implements JobExtendedRepository{
             }
         }
         Query query = null;
-        LOG.info("APBO: Query after filters? {}", stringQuery);
         if(countQuery){
             query = entityManager.createNativeQuery(stringQuery.toString());
         }
@@ -104,9 +102,7 @@ public class JobExtendedRepositoryImpl implements JobExtendedRepository{
             query = entityManager.createNativeQuery(stringQuery.toString(), Job.class);
         }
 
-        LOG.info("APBO: Native query: {}", query.toString());
         addParameters(query, jobId, jobTypes, dataflowId, dataflowName, providerId, datasetId, datasetName, creatorUsername, jobStatuses, preparationCode);
-        LOG.info("APBO: Native query with parameters: {}", query.toString());
         return query;
     }
 

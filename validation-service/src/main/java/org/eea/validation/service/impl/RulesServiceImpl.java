@@ -2678,6 +2678,11 @@ public class RulesServiceImpl implements RulesService {
    */
   private boolean checkQuerySyntax(String query) {
     boolean queryContainsKeyword = true;
+
+    if (query.contains(";")) {
+      return false;
+    }
+
     String[] queryKeywords = KEYWORDS.split(",");
     for (String word : queryKeywords) {
       String regex = "\\b" + word + "\\b";

@@ -56,10 +56,11 @@ public class ExecuteValidationProcessCommand extends AbstractEEAEventHandlerComm
       boolean updateViews = !(aux instanceof Boolean) || (boolean) aux;
       aux = eeaEventVO.getData().get("released");
       boolean released = aux instanceof Boolean && (boolean) aux;
-
+      Object value = eeaEventVO.getData().get("preparationCode");
+      String preparationCode = value == null ? null : String.valueOf(value);
       // Add lock to the release process if necessary
       validationHelper.executeValidation(datasetId, processId, released, updateViews);
-      validationHelper.addLockToReleaseProcess(datasetId);
+      validationHelper.addLockToReleaseProcess(datasetId, preparationCode);
     } catch (Exception e) {
       LOG_ERROR.error("Unexpected error! Error executing event {}. Message: {}", eeaEventVO, e.getMessage());
       throw e;
