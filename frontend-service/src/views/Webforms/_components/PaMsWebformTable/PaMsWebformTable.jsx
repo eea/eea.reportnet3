@@ -328,6 +328,7 @@ export const PaMsWebformTable = ({
       record={record}
       tableId={webformData.tableSchemaId}
       tableName={webformData.title}
+      tableSchemaName={webformData.name}
       webformType={webformType}
     />
   );

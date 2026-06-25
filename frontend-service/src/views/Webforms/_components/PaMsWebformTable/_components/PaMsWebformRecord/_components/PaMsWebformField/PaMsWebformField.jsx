@@ -57,7 +57,8 @@ export const PaMsWebformField = ({
   pamsRecords,
   record,
   referencedTableSchemaId,
-  tableSchemaId
+  tableSchemaId,
+  tableSchemaName
 }) => {
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
@@ -127,7 +128,7 @@ export const PaMsWebformField = ({
         datasetId,
         fieldId: selectedFieldId,
         dataProviderId,
-        tableSchemaName: undefined,
+        tableSchemaName,
         fieldName: selectedFieldName,
         fileName: selectedFileName,
         recordId: selectedRecordId
@@ -148,7 +149,7 @@ export const PaMsWebformField = ({
         providerId: dataProviderId,
         fileName,
         recordId,
-        tableSchemaName: undefined,
+        tableSchemaName,
         fieldName
       });
       DownloadFile(data, fileName);
@@ -804,7 +805,7 @@ export const PaMsWebformField = ({
                   dataflowId,
                   datasetId,
                   fieldId: selectedFieldId,
-                  tableSchemaName: undefined,
+                  tableSchemaName,
                   fieldName: selectedFieldName,
                   recordId: selectedRecordId,
                   previousFileName: undefined
@@ -813,7 +814,7 @@ export const PaMsWebformField = ({
                   dataflowId,
                   datasetId,
                   fieldId: selectedFieldId,
-                  tableSchemaName: undefined,
+                  tableSchemaName,
                   fieldName: selectedFieldName,
                   recordId: selectedRecordId,
                   previousFileName: undefined,
