@@ -131,6 +131,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -3405,83 +3406,58 @@ public class FileTreatmentHelper implements DisposableBean {
         }
     }
 
-        private void createFilesAndZip (Long dataflowId, Long dataProviderId,
-                DataSetMetabase datasetToFile,byte[] file, String nameFileUnique, String nameFileScape)
-      throws IOException {
+    private void createFilesAndZip(Long dataflowId, Long dataProviderId, DataSetMetabase datasetToFile,
+                                   byte[] file, String nameFileUnique, String nameFileScape) throws IOException {
+        // we create folder to save the file.zip
+        File fileFolderProvider;
+        if (dataProviderId != null) {
+            fileFolderProvider = new File((new File(pathPublicFile, "dataflow-" + dataflowId.toString())),
+                "dataProvider-" + dataProviderId.toString());
+        } else {
+            fileFolderProvider = new File(pathPublicFile, "dataflow-" + dataflowId.toString());
+        }
+        fileFolderProvider.mkdirs();
 
-            // we create folder to save the file.zip
-            File fileFolderProvider = null;
-            if (dataProviderId != null) {
-                fileFolderProvider = new File((new File(pathPublicFile, "dataflow-" + dataflowId.toString())),
-                        "dataProvider-" + dataProviderId.toString());
-            } else {
-                fileFolderProvider = new File(pathPublicFile, "dataflow-" + dataflowId.toString());
-            }
-            fileFolderProvider.mkdirs();
+        // we create the file.zip
+        File fileWriteZip = new File(fileFolderProvider, nameFileUnique + ".zip");
 
-            // we create the file.zip
-            File fileWriteZip = null;
-            if (dataProviderId != null) {
-                fileWriteZip =
-                        new File(new File(new File(pathPublicFile, "dataflow-" + dataflowId.toString()),
-                                "dataProvider-" + dataProviderId.toString()), nameFileUnique + ".zip");
-            } else {
-                fileWriteZip = new File(new File(pathPublicFile, "dataflow-" + dataflowId.toString()),
-                        nameFileUnique + ".zip");
-            }
-            // create the context to add all files in a treemap inside to attachment and file information
-            try (ZipOutputStream out = new ZipOutputStream(new FileOutputStream(fileWriteZip.toString()))) {
-                // we get the dataschema and check every table to see if find any field attachemnt
-                DataSetSchema dataSetSchema =
-                        schemasRepository.findByIdDataSetSchema(new ObjectId(datasetToFile.getDatasetSchema()));
-                for (TableSchema tableSchema : dataSetSchema.getTableSchemas()) {
+        // create the context to add all files in a treemap inside to attachment and file information
+        try (ZipOutputStream out = new ZipOutputStream(new FileOutputStream(fileWriteZip.toString()))) {
+            // we get the dataschema and check every table to see if find any field attachemnt
+            DataSetSchema dataSetSchema =
+                schemasRepository.findByIdDataSetSchema(new ObjectId(datasetToFile.getDatasetSchema()));
+            for (TableSchema tableSchema : dataSetSchema.getTableSchemas()) {
 
-                    // we find if in any table have one field type ATTACHMENT
-                    List<FieldSchema> fieldSchemaAttachment = tableSchema.getRecordSchema().getFieldSchema()
-                            .stream().filter(field -> DataType.ATTACHMENT.equals(field.getType()))
-                            .collect(Collectors.toList());
-                    if (!CollectionUtils.isEmpty(fieldSchemaAttachment)) {
-
-                        LOG.info("We  are in tableSchema with id {} looking if we have attachments",
-                                tableSchema.getIdTableSchema());
-                        // We took every field for every table
-                        for (FieldSchema fieldAttach : fieldSchemaAttachment) {
-                            List<AttachmentValue> attachmentValue = attachmentRepository
-                                    .findAllByIdFieldSchemaAndValueIsNotNull(fieldAttach.getIdFieldSchema().toString());
-
-                            // if there are filled we create a folder and inside of any folder we create the fields
-                            if (!CollectionUtils.isEmpty(attachmentValue)) {
-                                LOG.info(
-                                        "We  are in tableSchema with id {}, checking field {} and we have attachments files",
-                                        tableSchema.getIdTableSchema(), fieldAttach.getIdFieldSchema());
-
-                                for (AttachmentValue attachment : attachmentValue) {
-                                    try {
-                                        ZipEntry eFieldAttach = new ZipEntry(
-                                                tableSchema.getNameTableSchema() + "/" + attachment.getFileName());
-                                        out.putNextEntry(eFieldAttach);
-                                        out.write(attachment.getContent(), 0, attachment.getContent().length);
-                                    } catch (ZipException e) {
-                                        LOG.info("Error creating file {} because already exist", attachment.getFileName(),
-                                                e);
-                                    }
-                                    out.closeEntry();
-                                }
-                            }
-                        }
-                    }
+                // we find if in any table have one field type ATTACHMENT
+                List<FieldSchema> fieldSchemaAttachment = tableSchema.getRecordSchema().getFieldSchema()
+                    .stream().filter(field -> DataType.ATTACHMENT.equals(field.getType()))
+                    .collect(Collectors.toList());
+                if (CollectionUtils.isEmpty(fieldSchemaAttachment)) {
+                    continue;
                 }
 
-                ZipEntry e = new ZipEntry(nameFileScape);
-                out.putNextEntry(e);
-                out.write(file, 0, file.length);
-                out.closeEntry();
-                LOG.info("We create file {} in the route ", fileWriteZip);
-            } catch (Exception e) {
-                LOG.error("Unexpected error! Error in createFilesAndZip for dataflowId {} and dataProviderId {}. Message: {}", dataflowId, dataProviderId, e.getMessage());
-                throw e;
+                LOG.info("We  are in tableSchema with id {} looking if we have attachments", tableSchema.getIdTableSchema());
+                // We took every field for every table
+                for (FieldSchema fieldAttach : fieldSchemaAttachment) {
+                    datasetService.writeAttachmentsToZip(
+                        datasetToFile.getId(),
+                        fieldAttach.getIdFieldSchema().toString(),
+                        tableSchema.getIdTableSchema().toString(),
+                        tableSchema.getNameTableSchema(),
+                        out);
+                }
             }
+
+            ZipEntry e = new ZipEntry(nameFileScape);
+            out.putNextEntry(e);
+            out.write(file, 0, file.length);
+            out.closeEntry();
+            LOG.info("We create file {} in the route ", fileWriteZip);
+        } catch (Exception e) {
+            LOG.error("Unexpected error! Error in createFilesAndZip for dataflowId {} and dataProviderId {}. Message: {}", dataflowId, dataProviderId, e.getMessage());
+            throw e;
         }
+    }
 
     private void createFilesAndZipDL(DataSetMetabase dataset, String zipDestinationPath, String nameFileUnique) throws EEAException {
         try {
