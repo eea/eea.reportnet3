@@ -34,6 +34,7 @@ import java.io.OutputStream;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
+import java.util.zip.ZipOutputStream;
 
 /**
  * The interface Dataset service.
@@ -753,4 +754,19 @@ public interface DatasetService {
           String recordId,
           String fieldId
   ) throws EEAException;
+
+  /**
+   * Streams attachments for the given field schema and writes them to the ZIP output stream. We were originally constracting
+   * a List instead of a Stream and it caused java heap exception that was discovered in ticket #305064. The process was moved
+   * in the service to be transactional with readOnly without changing the callers that managed insert and delete actions.
+   *
+   * @param datasetId The dataset id
+   * @param fieldSchemaId The field schema id
+   * @param tableSchemaId The table schema id
+   * @param tableName The table name
+   * @param out the ZIP output stream
+   * @throws IOException if an attachment cannot be written
+   */
+  void writeAttachmentsToZip(@DatasetId Long datasetId, String fieldSchemaId, String tableSchemaId, String tableName, ZipOutputStream out) throws IOException;
+
 }

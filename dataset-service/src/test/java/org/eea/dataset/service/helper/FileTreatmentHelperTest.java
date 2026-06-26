@@ -1147,8 +1147,6 @@ public class FileTreatmentHelperTest {
     when(contextExport.fileWriter(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
         Mockito.anyBoolean(), Mockito.any())).thenReturn(expectedResult);
     attachment.setContent(expectedResult);
-    when(attachmentRepository.findAllByIdFieldSchemaAndValueIsNotNull(Mockito.anyString()))
-        .thenReturn(Arrays.asList(attachment));
 
 
     fileTreatmentHelper.createReferenceDatasetFiles(dataset);
