@@ -71,6 +71,7 @@ export const PaMsWebformField = ({
     initialFieldValue: '',
     isDeleteAttachmentVisible: false,
     isDeleteRowVisible: false,
+    isDeletingAttachment: false,
     isDeletingRow: false,
     isDialogVisible: { deleteRow: false, uploadFile: false },
     isFileDialogVisible: false,
@@ -90,6 +91,7 @@ export const PaMsWebformField = ({
   const {
     initialFieldValue,
     isDeleteAttachmentVisible,
+    isDeletingAttachment,
     isFileDialogVisible,
     isLoadingData,
     isSubmiting,
@@ -122,6 +124,7 @@ export const PaMsWebformField = ({
   };
 
   const onConfirmDeleteAttachment = async () => {
+    pamsWebformFieldDispatch({ type: 'SET_IS_DELETING_ATTACHMENT', payload: true });
     try {
       await DatasetService.deleteAttachment({
         dataflowId,
@@ -137,6 +140,8 @@ export const PaMsWebformField = ({
       onToggleDeleteAttachmentDialogVisible(false);
     } catch (error) {
       console.error('PaMsWebformField - onConfirmDeleteAttachment.', error);
+    } finally {
+      pamsWebformFieldDispatch({ type: 'SET_IS_DELETING_ATTACHMENT', payload: false });
     }
   };
 
@@ -345,8 +350,11 @@ export const PaMsWebformField = ({
     }
   };
 
-  const onFileDeleteVisible = (fileName, fieldId, fieldSchemaId) => {
-    pamsWebformFieldDispatch({ type: 'ON_FILE_DELETE_OPENED', payload: { fileName, fieldId, fieldSchemaId } });
+  const onFileDeleteVisible = (fileName, fieldName, recordId, fieldId, fieldSchemaId) => {
+    pamsWebformFieldDispatch({
+      type: 'ON_FILE_DELETE_OPENED',
+      payload: { fileName, fieldName, recordId, fieldId, fieldSchemaId }
+    });
   };
 
   const onFileUploadVisible = (fieldName, recordId, fieldId, fieldSchemaId, validExtensions, maxSize) => {
@@ -767,7 +775,9 @@ export const PaMsWebformField = ({
             <Button
               className="p-button-animated-blink p-button-primary-transparent"
               icon="trash"
-              onClick={() => onFileDeleteVisible(field.value, field.fieldId, field.fieldSchemaId)}
+              onClick={() =>
+                onFileDeleteVisible(field.value, field.name, field.recordId, field.fieldId, field.fieldSchemaId)
+              }
             />
           </div>
         );
@@ -826,7 +836,9 @@ export const PaMsWebformField = ({
       {isDeleteAttachmentVisible && (
         <ConfirmDialog
           classNameConfirm={'p-button-danger'}
+          disabledConfirm={isDeletingAttachment}
           header={`${resourcesContext.messages['deleteAttachmentHeader']}`}
+          iconConfirm={isDeletingAttachment ? 'spinnerAnimate' : 'check'}
           labelCancel={resourcesContext.messages['no']}
           labelConfirm={resourcesContext.messages['yes']}
           onConfirm={onConfirmDeleteAttachment}

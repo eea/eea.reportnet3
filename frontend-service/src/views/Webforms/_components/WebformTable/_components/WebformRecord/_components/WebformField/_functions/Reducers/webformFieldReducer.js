@@ -12,7 +12,9 @@ export const webformFieldReducer = (state, { type, payload }) => {
         isDeleteAttachmentVisible: true,
         selectedFieldId: payload.fieldId || payload.fieldSchemaId,
         selectedFieldSchemaId: payload.fieldSchemaId,
-        selectedFileName: payload.fileName
+        selectedFileName: payload.fileName,
+        selectedRecordId: payload.recordId,
+        selectedFieldName: payload.fieldName
       };
 
     case 'ON_FILE_UPLOAD_SET_FIELDS':
