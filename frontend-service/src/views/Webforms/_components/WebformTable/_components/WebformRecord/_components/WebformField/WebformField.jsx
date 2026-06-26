@@ -421,8 +421,11 @@ export const WebformField = ({
     }
   };
 
-  const onFileDeleteVisible = (fileName, fieldId, fieldSchemaId) => {
-    webformFieldDispatch({ type: 'ON_FILE_DELETE_OPENED', payload: { fileName, fieldId, fieldSchemaId } });
+  const onFileDeleteVisible = (fileName, fieldName, recordId, fieldId, fieldSchemaId) => {
+    webformFieldDispatch({
+      type: 'ON_FILE_DELETE_OPENED',
+      payload: { fileName, fieldName, recordId, fieldId, fieldSchemaId }
+    });
   };
 
   const onFileUploadVisible = (fieldName, recordId, fieldId, fieldSchemaId, validExtensions, maxSize) => {
@@ -862,7 +865,9 @@ export const WebformField = ({
               className="p-button-animated-blink p-button-primary-transparent"
               disabled={isViewMode || updatingField.isUpdating}
               icon="trash"
-              onClick={() => onFileDeleteVisible(field.value, field.fieldId, field.fieldSchemaId)}
+              onClick={() =>
+                onFileDeleteVisible(field.value, field.name, field.recordId, field.fieldId, field.fieldSchemaId)
+              }
             />
           </div>
         );
