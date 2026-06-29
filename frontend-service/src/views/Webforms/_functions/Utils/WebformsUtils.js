@@ -304,91 +304,114 @@ const onParseWebformRecords = (
   rootPkFieldId,
   datasetSchemaId
 ) => {
-  return records.map(record => {
+  const parseElement = (element, record) => {
     const { fields } = record;
+
+    if (element.type === 'FIELD') {
+      return {
+        fieldType: 'EMPTY',
+        ...element,
+        ...fields.find(field => field['fieldSchemaId'] === element['fieldSchema']),
+        autoIncrement: element.autoIncrement,
+        codelistItems: element.codelistItems || [],
+        description: element.description || '',
+        isDisabled: isNil(element.fieldSchema),
+        maxSize: element.maxSize,
+        name: element.name,
+        pk: element.pk,
+        pkHasMultipleValues: element.pkHasMultipleValues,
+        pkMustBeUsed: element.pkMustBeUsed,
+        pkReferenced: element.pkReferenced,
+        recordId: record.recordId,
+        readOnly: element.readOnly,
+        referencedField: element.referencedField,
+        required: element.required,
+        type: element.type,
+        validExtensions: element.validExtensions
+      };
+    }
+
+    if (element.type === 'BLOCK') {
+      return {
+        ...element,
+        elementsRecords: onParseWebformRecords(
+          records,
+          { elements: element.elements },
+          tableData,
+          totalRecords,
+          rootTableName,
+          rootPkFieldId,
+          datasetSchemaId
+        )
+      };
+    }
+
+    if (element.type === 'SECTION') {
+      return {
+        ...element,
+        elements: element.elements.map(child => parseElement(child, record))
+      };
+    }
+
+    if (element.type === 'LABEL' && rootTableName) {
+      return { ...element };
+    }
+
+    let referencePkId;
+    let referencePkValue;
+    let referenceFieldSchemaId;
+
+    if (rootTableName && element.tableSchemaName !== rootTableName) {
+      const fields = element.records[0].fields;
+      const recordFields = record.fields;
+
+      const parentReferenceField = fields.find(
+        ({ referencedField }) =>
+          !isEmpty(referencedField) &&
+          referencedField.idPk !== rootPkFieldId &&
+          referencedField.idDatasetSchema === datasetSchemaId
+      );
+
+      referencePkId = parentReferenceField?.referencedField?.idPk;
+
+      referencePkValue = recordFields.find(field => field.fieldSchemaId === referencePkId)?.value;
+
+      if (isEmpty(referencePkValue)) {
+        referencePkValue = recordFields.find(field => field.fieldSchemaId === rootPkFieldId)?.value;
+
+        referenceFieldSchemaId = fields.find(
+          ({ referencedField }) => !isEmpty(referencedField) && referencedField.idPk === rootPkFieldId
+        )?.fieldSchema;
+      } else {
+        referenceFieldSchemaId = parentReferenceField?.fieldSchema;
+      }
+    }
+
+    if (tableData[element.tableSchemaId]) {
+      const filteredTableArray =
+        rootTableName && element.tableSchemaName !== rootTableName
+          ? tableData[element.tableSchemaId].records.filter(record =>
+              record.fields.some(
+                field => field.fieldSchemaId === referenceFieldSchemaId && field.value === referencePkValue
+              )
+            )
+          : tableData[element.tableSchemaId].records;
+
+      const tableElementsRecords = onParseWebformRecords(filteredTableArray, element, tableData, totalRecords);
+
+      return { ...element, elementsRecords: tableElementsRecords };
+    }
+
+    return { ...element, tableNotCreated: true, elementsRecords: [] };
+  };
+
+  return records.map(record => {
     const { elements } = webform;
 
     const result = [];
 
     for (let index = 0; index < elements.length; index++) {
-      const element = elements[index];
-      if (element.type === 'FIELD') {
-        result.push({
-          fieldType: 'EMPTY',
-          ...element,
-          ...fields.find(field => field['fieldSchemaId'] === element['fieldSchema']),
-          autoIncrement: element.autoIncrement,
-          codelistItems: element.codelistItems || [],
-          description: element.description || '',
-          isDisabled: isNil(element.fieldSchema),
-          maxSize: element.maxSize,
-          name: element.name,
-          pk: element.pk,
-          pkHasMultipleValues: element.pkHasMultipleValues,
-          pkMustBeUsed: element.pkMustBeUsed,
-          pkReferenced: element.pkReferenced,
-          recordId: record.recordId,
-          readOnly: element.readOnly,
-          referencedField: element.referencedField,
-          required: element.required,
-          type: element.type,
-          validExtensions: element.validExtensions
-        });
-      } else if (element.type === 'BLOCK') {
-        result.push({
-          ...element,
-          elementsRecords: onParseWebformRecords(records, { elements: element.elements }, tableData, totalRecords)
-        });
-      } else if (element.type === 'LABEL' && rootTableName) {
-        result.push({ ...element });
-      } else {
-        let referencePkId;
-        let referencePkValue;
-        let referenceFieldSchemaId;
-
-        if (rootTableName && element.tableSchemaName !== rootTableName) {
-          const fields = element.records[0].fields;
-          const recordFields = record.fields;
-
-          const parentReferenceField = fields.find(
-            ({ referencedField }) =>
-              !isEmpty(referencedField) &&
-              referencedField.idPk !== rootPkFieldId &&
-              referencedField.idDatasetSchema === datasetSchemaId
-          );
-
-          referencePkId = parentReferenceField?.referencedField?.idPk;
-
-          referencePkValue = recordFields.find(field => field.fieldSchemaId === referencePkId)?.value;
-
-          if (isEmpty(referencePkValue)) {
-            referencePkValue = recordFields.find(field => field.fieldSchemaId === rootPkFieldId)?.value;
-
-            referenceFieldSchemaId = fields.find(
-              ({ referencedField }) => !isEmpty(referencedField) && referencedField.idPk === rootPkFieldId
-            )?.fieldSchema;
-          } else {
-            referenceFieldSchemaId = parentReferenceField?.fieldSchema;
-          }
-        }
-
-        if (tableData[element.tableSchemaId]) {
-          const filteredTableArray =
-            rootTableName && element.tableSchemaName !== rootTableName
-              ? tableData[element.tableSchemaId].records.filter(record =>
-                  record.fields.some(
-                    field => field.fieldSchemaId === referenceFieldSchemaId && field.value === referencePkValue
-                  )
-                )
-              : tableData[element.tableSchemaId].records;
-
-          const tableElementsRecords = onParseWebformRecords(filteredTableArray, element, tableData, totalRecords);
-
-          result.push({ ...element, elementsRecords: tableElementsRecords });
-        } else {
-          result.push({ ...element, tableNotCreated: true, elementsRecords: [] });
-        }
-      }
+      result.push(parseElement(elements[index], record));
     }
 
     return { ...record, elements: result, totalRecords };
@@ -414,6 +437,54 @@ const onParseWebformData = (datasetSchema, allTables, schemaTables, datasetStati
     }
   });
 
+  const parseElement = (element, records) => {
+    if (TextUtils.areEquals(element.type, 'FIELD')) {
+      return {
+        ...element,
+        ...records[0].fields.find(field => TextUtils.areEquals(field.name, element.name)),
+        type: element.type
+      };
+    }
+
+    if (TextUtils.areEquals(element.type, 'LABEL')) {
+      return { ...element };
+    }
+
+    if (TextUtils.areEquals(element.type, 'TABLE')) {
+      const filteredTable = datasetSchema.tables.filter(table =>
+        TextUtils.areEquals(table.tableSchemaName, element.name)
+      );
+
+      const parsedTable = onParseWebformData(datasetSchema, [element], filteredTable);
+
+      return {
+        ...element,
+        ...parsedTable[0],
+        type: element.type
+      };
+    }
+
+    if (TextUtils.areEquals(element.type, 'BLOCK')) {
+      return {
+        ...element,
+        elements: element.elements.map(child => parseElement(child, records)),
+        records,
+        type: element.type
+      };
+    }
+
+    if (TextUtils.areEquals(element.type, 'SECTION')) {
+      return {
+        ...element,
+        elements: element.elements.map(child => parseElement(child, records)),
+        records,
+        type: element.type
+      };
+    }
+
+    return element;
+  };
+
   for (let index = 0; index < data.length; index++) {
     const table = data[index];
 
@@ -421,41 +492,9 @@ const onParseWebformData = (datasetSchema, allTables, schemaTables, datasetStati
       const { elements, records } = table;
 
       const result = [];
+
       for (let index = 0; index < elements.length; index++) {
-        if (TextUtils.areEquals(elements[index].type, 'FIELD')) {
-          result.push({
-            ...elements[index],
-            ...records[0].fields.find(element => TextUtils.areEquals(element['name'], elements[index]['name'])),
-            type: elements[index].type
-          });
-        }
-
-        if (elements[index].type === 'TABLE') {
-          const filteredTable = datasetSchema.tables.filter(table =>
-            TextUtils.areEquals(table.tableSchemaName, elements[index].name)
-          );
-          const parsedTable = onParseWebformData(datasetSchema, [elements[index]], filteredTable);
-
-          result.push({ ...elements[index], ...parsedTable[0], type: elements[index].type });
-        }
-
-        if (TextUtils.areEquals(elements[index].type, 'LABEL')) {
-          result.push({ ...elements[index] });
-        }
-
-        if (TextUtils.areEquals(elements[index].type, 'BLOCK')) {
-          const blockedElements = [];
-
-          for (const field of elements[index].elements) {
-            blockedElements.push({
-              ...field,
-              ...records[0].fields.find(element => TextUtils.areEquals(element['name'], field['name'])),
-              type: field.type
-            });
-          }
-
-          result.push({ ...elements[index], elements: blockedElements, records, type: elements[index].type });
-        }
+        result.push(parseElement(elements[index], records));
       }
 
       table.elements = result;
@@ -464,6 +503,76 @@ const onParseWebformData = (datasetSchema, allTables, schemaTables, datasetStati
 
   return data;
 };
+
+// const onParseWebformData = (datasetSchema, allTables, schemaTables, datasetStatistics) => {
+//   const data = mergeArrays(allTables, schemaTables, 'name', 'tableSchemaName');
+
+//   data.forEach(table => {
+//     table.hasErrors =
+//       !isNil(datasetStatistics) && !isEmpty(datasetStatistics)
+//         ? {
+//             ...datasetStatistics.tables.filter(tab => tab['tableSchemaId'] === table['tableSchemaId'])[0]
+//           }.hasErrors
+//         : false;
+
+//     if (table.records) {
+//       table.records[0].fields = table.records[0].fields.map(field => {
+//         const { fieldId, recordId, type } = field;
+//         return { fieldSchema: fieldId, fieldType: type, recordSchemaId: recordId, ...field };
+//       });
+//     }
+//   });
+
+//   for (let index = 0; index < data.length; index++) {
+//     const table = data[index];
+
+//     if (table.records) {
+//       const { elements, records } = table;
+
+//       const result = [];
+//       for (let index = 0; index < elements.length; index++) {
+//         if (TextUtils.areEquals(elements[index].type, 'FIELD')) {
+//           result.push({
+//             ...elements[index],
+//             ...records[0].fields.find(element => TextUtils.areEquals(element['name'], elements[index]['name'])),
+//             type: elements[index].type
+//           });
+//         }
+
+//         if (elements[index].type === 'TABLE') {
+//           const filteredTable = datasetSchema.tables.filter(table =>
+//             TextUtils.areEquals(table.tableSchemaName, elements[index].name)
+//           );
+//           const parsedTable = onParseWebformData(datasetSchema, [elements[index]], filteredTable);
+
+//           result.push({ ...elements[index], ...parsedTable[0], type: elements[index].type });
+//         }
+
+//         if (TextUtils.areEquals(elements[index].type, 'LABEL')) {
+//           result.push({ ...elements[index] });
+//         }
+
+//         if (TextUtils.areEquals(elements[index].type, 'BLOCK')) {
+//           const blockedElements = [];
+
+//           for (const field of elements[index].elements) {
+//             blockedElements.push({
+//               ...field,
+//               ...records[0].fields.find(element => TextUtils.areEquals(element['name'], field['name'])),
+//               type: field.type
+//             });
+//           }
+
+//           result.push({ ...elements[index], elements: blockedElements, records, type: elements[index].type });
+//         }
+//       }
+
+//       table.elements = result;
+//     }
+//   }
+
+//   return data;
+// };
 
 const parsePamsRecords = records =>
   records.map(record => {
