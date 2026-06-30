@@ -83,6 +83,7 @@ export const PaMsWebformRecord = ({
   selectedTableId,
   tableId,
   tableName,
+  tableSchemaName,
   webformType
 }) => {
   const notificationContext = useContext(NotificationContext);
@@ -337,6 +338,7 @@ export const PaMsWebformRecord = ({
                       record={record}
                       referencedTableSchemaId={referencedTableSchemaId}
                       tableSchemaId={tableId}
+                      tableSchemaName={tableSchemaName}
                     />
                   )}
                 </div>

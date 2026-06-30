@@ -241,6 +241,20 @@ export const WebformRecord = ({
         );
       }
 
+      if (element.type === 'SECTION') {
+        const isSectionVisible = element.referenceParentField
+          ? onToggleFieldVisibility(element.referenceParentField, elements)
+          : true;
+
+        return (
+          isSectionVisible && (
+            <div className={styles.section} key={`SECTION_${i}`}>
+              {renderElements(element.elements)}
+            </div>
+          )
+        );
+      }
+
       if (element.type === 'FIELD') {
         const fieldStyle = { width: '100%' };
         if (isLabelFieldBlock) {
@@ -300,7 +314,7 @@ export const WebformRecord = ({
                       onFieldUpdate={onFieldUpdate}
                       onFillField={onFillField}
                       onSaveField={onSaveField}
-                      record={record}
+                      record={webformRecordState.record}
                       referencedTableSchemaId={referencedTableSchemaId}
                       rootPkFieldId={rootPkFieldId}
                       tableSchemaId={tableId}

@@ -32,6 +32,7 @@ export const WebformTable = ({
   getFieldSchemaId = () => ({ fieldSchema: undefined, fieldId: undefined }),
   isEditor,
   isIcebergCreated,
+  isLoadingTableData,
   isLoadingIceberg,
   isRefresh,
   isReporting,
@@ -461,7 +462,7 @@ export const WebformTable = ({
       <div className={styles.overlay}>
         <div
           style={
-            bigData && (isLoadingIceberg || !allManualCheck)
+            bigData && (isLoadingIceberg || isLoadingTableData || !allManualCheck)
               ? { opacity: 0.5, pointerEvents: 'none' }
               : isEditor || isViewMode || updatingField.isUpdating
               ? { opacity: 1 }
