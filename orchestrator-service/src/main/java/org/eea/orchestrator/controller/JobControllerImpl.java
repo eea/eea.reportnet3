@@ -209,7 +209,7 @@ public class JobControllerImpl implements JobController {
                 statusToInsert = jobService.checkEligibilityOfPreparationJob(JobTypeEnum.VALIDATION.toString(), dataset.getId(), preparationCode);
             }
             else {
-                statusToInsert = jobService.checkEligibilityOfJob(JobTypeEnum.VALIDATION.toString(), dataset.getDataflowId(), dataProvider, Arrays.asList(datasetId), false);
+                statusToInsert = jobService.checkEligibilityOfJob(JobTypeEnum.VALIDATION.toString(), dataset.getDataflowId(), dataProvider, Arrays.asList(datasetId), false, null);
             }
             LOG.info("Adding validation job for datasetId {}, preparationCode {} and released {} for creator {} with status {}", datasetId, preparationCode, released, username, statusToInsert);
             jobId = jobService.addJob(dataset.getDataflowId(), dataProvider, datasetId, parameters, JobTypeEnum.VALIDATION, statusToInsert, released, null, dataflowName, dataset.getDataSetName(), preparationCode);
@@ -270,7 +270,7 @@ public class JobControllerImpl implements JobController {
             String userId = ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails()).get(AuthenticationDetails.USER_ID);
             parameters.put("userId", userId);
             parameters.put("createParquetWithSQL", createParquetWithSQL);
-            JobStatusEnum statusToInsert = jobService.checkEligibilityOfJob(JobTypeEnum.RELEASE.toString(), dataflowId, dataProviderId, datasetIds, true);
+            JobStatusEnum statusToInsert = jobService.checkEligibilityOfJob(JobTypeEnum.RELEASE.toString(), dataflowId, dataProviderId, datasetIds, true, null);
 
             LOG.info("Adding release job for dataflowId={}, dataProviderId={}, restrictFromPublic={}, validate={} and creator={} with status {}", dataflowId, dataProviderId, restrictFromPublic, validate, SecurityContextHolder.getContext().getAuthentication().getName(), statusToInsert);
             Long jobId = jobService.addJob(dataflowId, dataProviderId, null, parameters, JobTypeEnum.VALIDATION, statusToInsert, true, null, dataflowName, null, null);
@@ -521,7 +521,7 @@ public class JobControllerImpl implements JobController {
             parameters.put("dataflowId", dataflowId);
             String userId = ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails()).get(AuthenticationDetails.USER_ID);
             parameters.put("userId", userId);
-            JobStatusEnum statusToInsert = jobService.checkEligibilityOfJob(JobTypeEnum.COPY_TO_EU_DATASET.toString(), dataflowId, null, null, false);
+            JobStatusEnum statusToInsert = jobService.checkEligibilityOfJob(JobTypeEnum.COPY_TO_EU_DATASET.toString(), dataflowId, null, null, false, null);
             LOG.info("Adding copy to eudataset job for dataflowId={}", dataflowId);
             Long jobId = jobService.addJob(dataflowId, null, null, parameters, JobTypeEnum.COPY_TO_EU_DATASET, statusToInsert, false, null, dataflowName, null, null);
             LOG.info("Successfully added copy to eudataset job with id {} for dataflowId={}", jobId, dataflowId);
@@ -616,7 +616,7 @@ public class JobControllerImpl implements JobController {
 
         }
         else {
-            statusToInsert = jobService.checkEligibilityOfJob(JobTypeEnum.FILE_EXPORT.toString(), dataflowId, providerId, Arrays.asList(datasetId), false);
+            statusToInsert = jobService.checkEligibilityOfJob(JobTypeEnum.FILE_EXPORT.toString(), dataflowId, providerId, Arrays.asList(datasetId), false, null);
         }
         LOG.info("Adding file export job for dataflowId={}, datasetId={}, providerId={}, tableSchemaId={} and creator={} with status {}", dataflowId, datasetId, providerId, tableSchemaId, SecurityContextHolder.getContext().getAuthentication().getName(), statusToInsert.getValue());
         Long jobId = jobService.addJob(dataflowId, providerId, datasetId, parameters, JobTypeEnum.FILE_EXPORT, statusToInsert, false, null, dataflowName, datasetName, preparationCode);
@@ -669,8 +669,9 @@ public class JobControllerImpl implements JobController {
                                                @RequestParam("release") boolean release,
                                                @RequestParam("dataflowId") Long dataflowId,
                                                @RequestParam(value="dataProviderID", required = false) Long dataProviderId,
-                                               @RequestParam("datasets") List<Long> datasets) {
-        return jobService.checkEligibilityOfJob(jobType, dataflowId, dataProviderId, datasets, release);
+                                               @RequestParam("datasets") List<Long> datasets,
+                                               @RequestParam(value="excludeCallerJobId", required = false) Long excludeCallerJobId) {
+        return jobService.checkEligibilityOfJob(jobType, dataflowId, dataProviderId, datasets, release, excludeCallerJobId);
     }
 
     /**

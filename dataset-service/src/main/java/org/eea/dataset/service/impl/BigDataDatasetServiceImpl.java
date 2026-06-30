@@ -2800,7 +2800,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             //check if there is already an import job with status IN_PROGRESS for the specific datasetId
             List<Long> datasetIds = new ArrayList<>();
             datasetIds.add(importFileInDremioInfo.getDatasetId());
-            jobStatus = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.IMPORT.getValue(), false, importFileInDremioInfo.getDataflowId(), importFileInDremioInfo.getProviderId(), datasetIds);
+            jobStatus = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.IMPORT.getValue(), false, importFileInDremioInfo.getDataflowId(), importFileInDremioInfo.getProviderId(), datasetIds, null);
             jobId = jobControllerZuul.addImportJob(importFileInDremioInfo.getDatasetId(), importFileInDremioInfo.getDataflowId(), importFileInDremioInfo.getProviderId(), importFileInDremioInfo.getTableSchemaId(), importFileInDremioInfo.getFileName(),
                     importFileInDremioInfo.getReplaceData(), importFileInDremioInfo.getIntegrationId(),importFileInDremioInfo.getPreparationCode(), importFileInDremioInfo.getDelimiter(), jobStatus, fmeJobId, null);
             importFileInDremioInfo.setJobId(jobId);
