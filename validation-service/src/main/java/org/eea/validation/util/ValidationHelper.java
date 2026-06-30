@@ -54,6 +54,7 @@ import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
+import org.eea.lock.redis.RedisLockService;
 import org.eea.lock.service.LockService;
 import org.eea.multitenancy.TenantResolver;
 import org.eea.thread.EEADelegatingSecurityContextExecutorService;
@@ -217,6 +218,9 @@ public class ValidationHelper implements DisposableBean {
 
   @Autowired
   private RepresentativeControllerZuul representativeControllerZuul;
+
+  @Autowired
+  private RedisLockService redisLockService;
 
   private final S3Service s3ServicePrivate;
 
@@ -485,9 +489,17 @@ public class ValidationHelper implements DisposableBean {
           try {
             schema = schemasRepository.findByIdDataSetSchema(new ObjectId(dataSetMetabaseVO.getDatasetSchema()));
             for (TableSchema tableSchema : schema.getTableSchemas()) {
+              long start = System.currentTimeMillis();
+
+              LOG.info("Calling Dataset createEmptyTablesV2. tableSchemaId={}, start={}",
+                      tableSchema.getIdTableSchema(), start);
               dataSetControllerZuul.createEmptyTablesV2(dataSetMetabaseVO, tableSchema.getIdTableSchema().toString());
+              LOG.info("Dataset createEmptyTablesV2 completed successfully in {} ms",
+                      System.currentTimeMillis() - start);
             }
           } catch (FeignException fe) {
+            LOG.error("Dataset createEmptyTablesV2 failed {} ms.",
+                    System.currentTimeMillis());
             String body = fe.contentUTF8();
             LOG.error("createEmptyTablesV2 failed (422) for datasetId {}: {}", dataSetMetabaseVO.getId(), body);
             String errorMsg = EEAErrorMessage.ERROR_ILLEGAL_HEADER_CHARACTER;
@@ -1583,8 +1595,15 @@ public class ValidationHelper implements DisposableBean {
           validationTask.eeaEventVO, workingThreads, maxRunningTasks - workingThreads);
 
       try {
-        validationTask.validator.performValidation(validationTask.eeaEventVO,
-            validationTask.datasetId, validationTask.kieBase, validationTask.taskId);
+        LOG.info("MIKETEST Task id" + validationTask.taskId);
+        LOG.info("MIKETEST has blocker" + redisLockService.hasBlocker(validationTask.datasetId));
+        if (redisLockService.hasBlocker(validationTask.datasetId)) {
+          status = ProcessStatusEnum.SKIPPED;
+        }
+        else{
+          validationTask.validator.performValidation(validationTask.eeaEventVO,
+                  validationTask.datasetId, validationTask.kieBase, validationTask.taskId);
+        }
       } catch (Exception e) {
         LOG.error("Error processing validations for dataset {} due to exception {}",
             validationTask.datasetId, e.getMessage(), e);
@@ -1757,6 +1776,7 @@ public class ValidationHelper implements DisposableBean {
               }
             }
           }
+          redisLockService.removeBlocker(datasetId);
           isFinished = true;
         }
       }

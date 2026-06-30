@@ -21,12 +21,16 @@ import org.eea.interfaces.controller.dataset.DatasetSchemaController.DatasetSche
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
+import org.eea.lock.redis.RedisLockService;
 import org.eea.utils.UtilityClass;
+import org.eea.validation.persistence.data.metabase.domain.Task;
+import org.eea.validation.persistence.data.metabase.repository.TaskRepository;
 import org.eea.validation.service.DremioRulesExecuteService;
 import org.eea.validation.service.DremioRulesService;
 import org.eea.validation.service.RulesService;
 import org.eea.validation.util.GeoJsonValidationUtils;
 import org.eea.validation.util.GeometryValidationUtils;
+import org.eea.validation.util.TaskJsonUtils;
 import org.eea.validation.util.ValidationHelper;
 import org.jsoup.helper.StringUtil;
 import org.locationtech.jts.io.ParseException;
@@ -71,6 +75,8 @@ public class DremioNonSqlRulesExecuteServiceImpl implements DremioRulesExecuteSe
     private final ValidationHelper validationHelper;
     private final SpatialDataHandling spatialDataHandling;
     private final DatasetMetabaseController.DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul;
+    private final TaskRepository taskRepository;
+    private final RedisLockService redisLockService;
 
     private static final String DREMIO_NON_SQL_VALIDATION_UTILS = "org.eea.validation.util.datalake.DremioNonSQLValidationUtils";
     private static final String VALIDATION_DROOLS_UTILS = "org.eea.validation.util.ValidationDroolsUtils";
@@ -90,7 +96,8 @@ public class DremioNonSqlRulesExecuteServiceImpl implements DremioRulesExecuteSe
     @Autowired
     public DremioNonSqlRulesExecuteServiceImpl(@Qualifier("dremioJdbcTemplate") JdbcTemplate dremioJdbcTemplate, S3Service s3Service, RulesService rulesService,
                                                DatasetSchemaControllerZuul datasetSchemaControllerZuul, DremioRulesService dremioRulesService, S3Helper s3Helper,
-                                               DremioHelperService dremioHelperService, ValidationHelper validationHelper, SpatialDataHandling spatialDataHandling, DatasetMetabaseController.DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul) {
+                                               DremioHelperService dremioHelperService, ValidationHelper validationHelper, SpatialDataHandling spatialDataHandling, DatasetMetabaseController.DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul,
+                                               TaskRepository taskRepository, RedisLockService redisLockService) {
         this.dremioJdbcTemplate = dremioJdbcTemplate;
         this.s3Service = s3Service;
         this.rulesService = rulesService;
@@ -101,6 +108,8 @@ public class DremioNonSqlRulesExecuteServiceImpl implements DremioRulesExecuteSe
         this.validationHelper = validationHelper;
         this.spatialDataHandling = spatialDataHandling;
         this.dataSetMetabaseControllerZuul = dataSetMetabaseControllerZuul;
+        this.taskRepository = taskRepository;
+        this.redisLockService = redisLockService;
     }
 
     @Override
@@ -184,7 +193,9 @@ public class DremioNonSqlRulesExecuteServiceImpl implements DremioRulesExecuteSe
             Method factoryMethod = cls.getDeclaredMethod(GET_INSTANCE);
             Object object = factoryMethod.invoke(null, null);
 
-            runRuleAndCreateParquet(createParquetWithSQL, parameters, fieldName, fileName, rs, dataTableResolver, validationResolver, ruleVO, method, object);
+            Task task = taskRepository.findById(taskId).orElse(null);
+
+            runRuleAndCreateParquet(createParquetWithSQL, parameters, fieldName, fileName, rs, dataTableResolver, validationResolver, ruleVO, method, object, task);
         } catch (Exception e1) {
             LOG.error("Error creating validation folder for ruleId {}, datasetId {} and taskId {},{}", ruleId, datasetId, taskId, e1.getMessage());
             throw new DremioValidationException(e1.getMessage());
@@ -226,7 +237,7 @@ public class DremioNonSqlRulesExecuteServiceImpl implements DremioRulesExecuteSe
      * @throws IOException
      */
     private void runRuleAndCreateParquet(boolean createParquetWithSQL, List<String> parameters, String fieldName, String fileName, SqlRowSet rs,
-                                        S3PathResolver dataTableResolver, S3PathResolver validationResolver, RuleVO ruleVO, Method method, Object object) throws Exception {
+                                        S3PathResolver dataTableResolver, S3PathResolver validationResolver, RuleVO ruleVO, Method method, Object object, Task task) throws Exception {
         if (createParquetWithSQL) {
             int count = 0;
             boolean createRuleFolder = false;
@@ -246,6 +257,11 @@ public class DremioNonSqlRulesExecuteServiceImpl implements DremioRulesExecuteSe
                 }
             }
             if (createRuleFolder) {
+                boolean blocker = TaskJsonUtils.isBlockerTask(task.getJson());
+                if (blocker) {
+                    LOG.info("MIKETEST Adding blocker for dataset " + TaskJsonUtils.getDatasetId(task.getJson()));
+                    redisLockService.setBlocker(TaskJsonUtils.getDatasetId(task.getJson()));
+                }
                 validationQuery.append("))");
                 dremioHelperService.executeSqlStatement(validationQuery.toString());
             }
