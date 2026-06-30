@@ -63,4 +63,22 @@ public class RedisLockServiceImpl implements RedisLockService {
     }
     return activeLocks;
   }
+
+  @Override
+  public void setBlocker(Long datasetId) {
+    String key = "BLOCKER_" + datasetId;
+    redisTemplate.opsForValue().set(key, "BLOCKER");
+  }
+
+  @Override
+  public boolean hasBlocker(Long datasetId) {
+    String key = "BLOCKER_" + datasetId;
+    return Boolean.TRUE.equals(redisTemplate.hasKey(key));
+  }
+
+  @Override
+  public void removeBlocker(Long datasetId) {
+    String key = "BLOCKER_" + datasetId;
+    redisTemplate.delete(key);
+  }
 }

@@ -7,4 +7,8 @@ public interface RedisLockService {
   void releaseLock(String lockKey, String value);
 
   Map<String, String> listActiveLocks(String prefix);
+
+  void setBlocker(Long datasetId);
+  boolean hasBlocker(Long datasetId);
+  public void removeBlocker(Long datasetId);
 }
