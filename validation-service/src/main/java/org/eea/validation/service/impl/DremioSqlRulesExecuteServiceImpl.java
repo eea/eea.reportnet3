@@ -228,7 +228,7 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
             path = S3_PREPARATION_TABLE_AS_FOLDER_QUERY_PATH;
         }
         else {
-            path = S3_TABLE_AS_FOLDER_QUERY_PATH;
+            path = S3_VIEWS_TABLE_AS_FOLDER_QUERY_PATH;
         }
         return path;
     }
