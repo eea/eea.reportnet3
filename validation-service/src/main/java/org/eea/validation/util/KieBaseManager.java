@@ -97,6 +97,14 @@ public class KieBaseManager {
           .filter(rule -> !rule.getWhenCondition().startsWith("isSQL"))
           .collect(Collectors.toList());
 
+      // Collect all the filtered rule IDs and reset the error count map from ValidationRuleDrools so it can hold the new rules.
+      List<String> savedRuleIds =  new ArrayList<>();
+      for (Rule rule : filteredRules) {
+        savedRuleIds.add(rule.getRuleId().toString());
+      }
+
+      ValidationRuleDrools.resetRuleCallCount(savedRuleIds);
+
       schemaRules.setRules(filteredRules);
       // Get enabled and verified rules
 
