@@ -611,6 +611,12 @@ public class DatasetControllerImpl implements DatasetController {
       if (providerId != null) {
         pollingUrl += "&providerId=" + providerId;
       }
+
+      // Append the preparationCode as 'code' if it is present
+      if (preparationCode != null && !preparationCode.isEmpty()) {
+        pollingUrl += "&code=" + preparationCode;
+      }
+
       result.put("jobId", jobId);
       result.put("pollingUrl", pollingUrl);
     }
