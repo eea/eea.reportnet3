@@ -911,6 +911,10 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                         && !EEAErrorMessage.ERROR_IMPORT_EMPTY_FILES.equals(importFileInDremioInfo.getErrorMessage())){
                     jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.WARNING_GEOSPATIAL_DATA_FAILED_TO_BE_CONVERTED, null);
                 }
+                if(warningMessage.equals(JobInfoEnum.WARNING_SRID_FAILED_TO_BE_CONVERTED.getValue(null))
+                        && !EEAErrorMessage.ERROR_IMPORT_EMPTY_FILES.equals(importFileInDremioInfo.getErrorMessage())){
+                    jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.WARNING_SRID_FAILED_TO_BE_CONVERTED, null);
+                }
             }
         }
         if(!isPreparationDataset) {
