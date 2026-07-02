@@ -331,7 +331,7 @@ export const DataViewer = ({
           fieldId: effectiveFieldId,
           dataflowId,
           tableSchemaId: tableId,
-          providerId: effectiveProviderId
+          providerId: effectiveProviderId ?? 0
         });
 
         const fullGeometryData = fullGeometryResponse?.data ?? fullGeometryResponse;
