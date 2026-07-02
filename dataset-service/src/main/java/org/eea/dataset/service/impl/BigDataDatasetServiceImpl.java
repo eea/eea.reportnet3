@@ -2950,6 +2950,8 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             String recordId
     ) throws EEAException {
 
+
+
         // 1. ROOT resolve
         S3PathResolver s3RootResolver =
                 s3ServicePrivate.getS3PathResolverByDatasetType(
@@ -2997,7 +2999,8 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         String tablePath =
                 s3ServicePrivate.getTableAsFolderQueryPath(
                         s3RootResolver,
-                        S3_TABLE_AS_FOLDER_QUERY_PATH
+                        S3_DATAFLOW_REFERENCE_FOLDER_PATH.equals(s3RootResolver.getPath()) ?
+                                S3_DATAFLOW_REFERENCE_QUERY_PATH : S3_TABLE_AS_FOLDER_QUERY_PATH
                 );
 
         // 3. Build Dremio SQL
