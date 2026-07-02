@@ -242,7 +242,8 @@ public interface JobController {
      */
     @GetMapping(value = "/checkEligibility")
     JobStatusEnum checkEligibilityOfJob(@RequestParam("jobType") String jobType, @RequestParam("release") boolean release, @RequestParam("dataflowId") Long dataflowId,
-                                        @RequestParam(value="dataProviderID", required = false) Long dataProviderId, @RequestParam("datasets") List<Long> datasets);
+                                        @RequestParam(value="dataProviderID", required = false) Long dataProviderId, @RequestParam("datasets") List<Long> datasets,
+                                        @RequestParam(value="excludeCallerJobId", required = false) Long excludeCallerJobId);
 
     /**
      * Finds job by id

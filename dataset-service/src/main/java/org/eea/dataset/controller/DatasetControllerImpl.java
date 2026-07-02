@@ -568,7 +568,7 @@ public class DatasetControllerImpl implements DatasetController {
           //check if there is already an import job with status IN_PROGRESS for the specific datasetId
           List<Long> datasetIds = new ArrayList<>();
           datasetIds.add(datasetId);
-          jobStatus = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.IMPORT.getValue(), false, dataflowId, providerId, datasetIds);
+          jobStatus = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.IMPORT.getValue(), false, dataflowId, providerId, datasetIds, null);
           jobId = jobControllerZuul.addImportJob(datasetId, dataflowId, providerId, tableSchemaId, file.getOriginalFilename(), replace, integrationId, null, delimiter, jobStatus, fmeJobId, null);
           if(jobStatus.getValue().equals(JobStatusEnum.REFUSED.getValue())){
             LOG.info("Added import job with id {} for datasetId {} with status REFUSED", jobId, datasetId);
@@ -746,7 +746,7 @@ public class DatasetControllerImpl implements DatasetController {
           //check if there is already an import job with status IN_PROGRESS for the specific datasetId
           List<Long> datasetIds = new ArrayList<>();
           datasetIds.add(datasetId);
-          jobStatus = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.IMPORT.getValue(), false, dataflowId, providerId, datasetIds);
+          jobStatus = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.IMPORT.getValue(), false, dataflowId, providerId, datasetIds, null);
           jobId = jobControllerZuul.addImportJob(datasetId, dataflowId, providerId, tableSchemaId, file.getOriginalFilename(), replace, integrationId, null, delimiter, jobStatus, fmeJobId, null);
           if(jobStatus.getValue().equals(JobStatusEnum.REFUSED.getValue())){
             LOG.info("Added private import job with id {} for datasetId {} with status REFUSED", jobId, datasetId);
@@ -1215,7 +1215,7 @@ public class DatasetControllerImpl implements DatasetController {
       if (isPreparationDataset) {
         jobStatus = jobControllerZuul.checkEligibilityOfPreparationJob(JobTypeEnum.DELETE.getValue(), datasetId, preparationCode);
       } else {
-        jobStatus = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.DELETE.getValue(), false, resolvedDataflowId, providerId, Collections.singletonList(datasetId));
+        jobStatus = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.DELETE.getValue(), false, resolvedDataflowId, providerId, Collections.singletonList(datasetId), null);
       }
 
       jobId = jobControllerZuul.addDeleteDataJob(datasetId, null, resolvedDataflowId, providerId, preparationCode, deletePrefilledTables, jobStatus);
@@ -1376,7 +1376,7 @@ public class DatasetControllerImpl implements DatasetController {
       if (isPreparationDataset) {
         jobStatus = jobControllerZuul.checkEligibilityOfPreparationJob(JobTypeEnum.DELETE.getValue(), datasetId, preparationCode);
        } else {
-        jobStatus = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.DELETE.getValue(), false, resolvedDataflowId, providerId, Collections.singletonList(datasetId));
+        jobStatus = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.DELETE.getValue(), false, resolvedDataflowId, providerId, Collections.singletonList(datasetId), null);
       }
 
       jobId = jobControllerZuul.addDeleteDataJob(datasetId, tableSchemaId, resolvedDataflowId, providerId, preparationCode, null, jobStatus);
@@ -2251,7 +2251,7 @@ public class DatasetControllerImpl implements DatasetController {
       //check eligibility of new job
       List<Long> datasetIds = new ArrayList<>();
       datasetIds.add(datasetId);
-      JobStatusEnum jobStatus = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.ETL_IMPORT.getValue(), false, dataflowId, providerId, datasetIds);
+      JobStatusEnum jobStatus = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.ETL_IMPORT.getValue(), false, dataflowId, providerId, datasetIds, null);
       if(jobStatus.getValue().equals(JobStatusEnum.REFUSED.getValue())){
         LOG.info("Added etl import job with id {} for datasetId {} with status REFUSED", jobId, datasetId);
         throw new ResponseStatusException(HttpStatus.LOCKED, EEAErrorMessage.IMPORTING_REFUSED);
@@ -2380,7 +2380,7 @@ public class DatasetControllerImpl implements DatasetController {
       if (StringUtils.isBlank(preparationCode)) { // NOT Preparation eligibility check
         List<Long> datasetIds = new ArrayList<>();
         datasetIds.add(datasetId);
-        jobStatus = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.ETL_IMPORT.getValue(), false, dataflowId, providerId, datasetIds);
+        jobStatus = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.ETL_IMPORT.getValue(), false, dataflowId, providerId, datasetIds, null);
       }
       else {
         jobStatus = jobControllerZuul.checkEligibilityOfPreparationJob(JobTypeEnum.ETL_IMPORT.getValue(),  datasetId, preparationCode);
@@ -3731,7 +3731,7 @@ public class DatasetControllerImpl implements DatasetController {
         if (isPreparationDataset) {
           jobStatus = jobControllerZuul.checkEligibilityOfPreparationJob(JobTypeEnum.IMPORT.getValue(), datasetId, preparationCode);
         } else {
-          jobStatus = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.IMPORT.getValue(), false, dataflowId, providerId, datasetIds);
+          jobStatus = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.IMPORT.getValue(), false, dataflowId, providerId, datasetIds, null);
         }
 
         if (jobStatus == JobStatusEnum.IN_PROGRESS) {

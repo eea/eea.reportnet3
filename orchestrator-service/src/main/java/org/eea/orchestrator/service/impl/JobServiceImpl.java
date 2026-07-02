@@ -254,10 +254,13 @@ public class JobServiceImpl implements JobService {
     }
 
     @Override
-    public JobStatusEnum checkEligibilityOfJob(String jobType, Long dataflowId, Long dataProviderId, List<Long> datasetIds, boolean release) {
+    public JobStatusEnum checkEligibilityOfJob(String jobType, Long dataflowId, Long dataProviderId, List<Long> datasetIds, boolean release, Long excludeCallerJobId) {
         if (jobType.equals(JobTypeEnum.VALIDATION.toString()) || jobType.equals(JobTypeEnum.RELEASE.toString())) {
             List<Job> jobsList = jobRepository.findByJobTypeInAndJobStatusIn(Arrays.asList(JobTypeEnum.VALIDATION, JobTypeEnum.RELEASE, JobTypeEnum.IMPORT, JobTypeEnum.ETL_IMPORT, JobTypeEnum.DELETE), Arrays.asList(JobStatusEnum.QUEUED, JobStatusEnum.IN_PROGRESS));
             for (Job job : jobsList) {
+                if (excludeCallerJobId != null && excludeCallerJobId.equals(job.getId())) {
+                    continue;
+                }
                 Map<String, Object> insertedParameters = job.getParameters();
                 if (job.getDatasetId() != null) {
                     if (datasetIds.contains(job.getDatasetId()) && StringUtils.isBlank(job.getPreparationCode())) {

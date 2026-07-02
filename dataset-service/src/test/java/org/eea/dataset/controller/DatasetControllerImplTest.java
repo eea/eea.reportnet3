@@ -482,7 +482,7 @@ public class DatasetControllerImplTest {
     Mockito.when(dataFlowControllerZuul.getMetabaseById(anyLong())).thenReturn(mockDataflow);
     MultipartFile multipartFile =
         new MockMultipartFile("multipartFile", "multipartFile".getBytes());
-    Mockito.when(jobControllerZuul.checkEligibilityOfJob(anyString(), anyBoolean(), anyLong(), anyLong(), anyList())).thenReturn(JobStatusEnum.IN_PROGRESS);
+    Mockito.when(jobControllerZuul.checkEligibilityOfJob(anyString(), anyBoolean(), anyLong(), anyLong(), anyList(), any())).thenReturn(JobStatusEnum.IN_PROGRESS);
     doNothing().when(fileTreatmentHelper).importFileData(1L,2L, "tableSchemaId", multipartFile, true,
         1L, "delimiter", 0L);
     datasetControllerImpl.importBigFileData(1L, 2L, 1L, "tableSchemaId", multipartFile, true, 1L,
@@ -503,7 +503,7 @@ public class DatasetControllerImplTest {
       Mockito.when(dataFlowControllerZuul.getMetabaseById(anyLong())).thenReturn(mockDataflow);
     MultipartFile multipartFile =
         new MockMultipartFile("multipartFile", "multipartFile".getBytes());
-    Mockito.when(jobControllerZuul.checkEligibilityOfJob(anyString(), anyBoolean(), anyLong(), anyLong(), anyList())).thenReturn(JobStatusEnum.IN_PROGRESS);
+    Mockito.when(jobControllerZuul.checkEligibilityOfJob(anyString(), anyBoolean(), anyLong(), anyLong(), anyList(), any())).thenReturn(JobStatusEnum.IN_PROGRESS);
     doThrow(EEAException.class).when(fileTreatmentHelper).importFileData(1L,2L, "tableSchemaId",
         multipartFile, true, 1L, "delimiter", 0L);
     try {
@@ -883,7 +883,7 @@ public class DatasetControllerImplTest {
    */
   @Test
   public void etlImportDatasetTest() throws EEAException {
-    Mockito.when(jobControllerZuul.checkEligibilityOfJob(Mockito.anyString(), Mockito.anyBoolean(), Mockito.anyLong(), Mockito.anyLong(), Mockito.anyList())).thenReturn(JobStatusEnum.IN_PROGRESS);
+    Mockito.when(jobControllerZuul.checkEligibilityOfJob(Mockito.anyString(), Mockito.anyBoolean(), Mockito.anyLong(), Mockito.anyLong(), Mockito.anyList(), Mockito.any())).thenReturn(JobStatusEnum.IN_PROGRESS);
     Mockito.when(jobControllerZuul.addEtlImportJob(Mockito.anyLong(), Mockito.anyLong(), Mockito.anyLong(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(1L);
     Mockito.when(datasetService.getDataFlowIdById(Mockito.any())).thenReturn(1L);
     Mockito.when(datasetService.isDatasetReportable(Mockito.any())).thenReturn(Boolean.TRUE);
@@ -899,7 +899,7 @@ public class DatasetControllerImplTest {
    */
   @Test
   public void etlImportDatasetLegacyTest() throws EEAException {
-    Mockito.when(jobControllerZuul.checkEligibilityOfJob(Mockito.anyString(), Mockito.anyBoolean(), Mockito.anyLong(), Mockito.anyLong(), Mockito.anyList())).thenReturn(JobStatusEnum.IN_PROGRESS);
+    Mockito.when(jobControllerZuul.checkEligibilityOfJob(Mockito.anyString(), Mockito.anyBoolean(), Mockito.anyLong(), Mockito.anyLong(), Mockito.anyList(), Mockito.any())).thenReturn(JobStatusEnum.IN_PROGRESS);
     Mockito.when(jobControllerZuul.addEtlImportJob(Mockito.anyLong(), Mockito.anyLong(), Mockito.anyLong(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(1L);
     Mockito.when(datasetService.getDataFlowIdById(Mockito.any())).thenReturn(1L);
     Mockito.when(datasetService.isDatasetReportable(Mockito.any())).thenReturn(Boolean.TRUE);
@@ -931,7 +931,7 @@ public class DatasetControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void etlImportDatasetExceptionTest() throws EEAException {
-    Mockito.when(jobControllerZuul.checkEligibilityOfJob(Mockito.anyString(), Mockito.anyBoolean(), Mockito.anyLong(), Mockito.anyLong(), Mockito.anyList())).thenReturn(JobStatusEnum.IN_PROGRESS);
+    Mockito.when(jobControllerZuul.checkEligibilityOfJob(Mockito.anyString(), Mockito.anyBoolean(), Mockito.anyLong(), Mockito.anyLong(), Mockito.anyList(), Mockito.any())).thenReturn(JobStatusEnum.IN_PROGRESS);
     Mockito.when(jobControllerZuul.addEtlImportJob(Mockito.anyLong(), Mockito.anyLong(), Mockito.anyLong(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(1L);
     Mockito.doNothing().when(jobControllerZuul).updateJobStatus(Mockito.any(), Mockito.any());
     Mockito.when(datasetService.getDataFlowIdById(Mockito.any())).thenReturn(1L);
@@ -1689,7 +1689,7 @@ public class DatasetControllerImplTest {
 
     MultipartFile multipartFile =
             new MockMultipartFile("multipartFile", "multipartFile".getBytes());
-    Mockito.when(jobControllerZuul.checkEligibilityOfJob(anyString(), anyBoolean(), anyLong(), anyLong(), anyList())).thenReturn(JobStatusEnum.IN_PROGRESS);
+    Mockito.when(jobControllerZuul.checkEligibilityOfJob(anyString(), anyBoolean(), anyLong(), anyLong(), anyList(), any())).thenReturn(JobStatusEnum.IN_PROGRESS);
     Mockito.doNothing().when(fileTreatmentHelper).importFileData(Mockito.anyLong(), Mockito.any(),Mockito.any(),
         Mockito.nullable(MultipartFile.class), Mockito.anyBoolean(), Mockito.any(), Mockito.any(), Mockito.any());
     datasetControllerImpl.importFileData(1L, 1L, 1L, "5cf0e9b3b793310e9ceca190", multipartFile, true, 1L,
@@ -1711,7 +1711,7 @@ public class DatasetControllerImplTest {
     Mockito.when(dataFlowControllerZuul.getMetabaseById(anyLong())).thenReturn(mockDataflow);
     Mockito.doNothing().when(fileTreatmentHelper).importFileData(Mockito.anyLong(), Mockito.any(), Mockito.any(),
         Mockito.any(), Mockito.anyBoolean(), Mockito.any(), Mockito.any(), Mockito.nullable(Long.class));
-    Mockito.when(jobControllerZuul.checkEligibilityOfJob(anyString(), anyBoolean(), anyLong(), anyLong(), anyList())).thenReturn(JobStatusEnum.IN_PROGRESS);
+    Mockito.when(jobControllerZuul.checkEligibilityOfJob(anyString(), anyBoolean(), anyLong(), anyLong(), anyList(), any())).thenReturn(JobStatusEnum.IN_PROGRESS);
     datasetControllerImpl.importFileDataLegacy(1L, 1L, 1L, "5cf0e9b3b793310e9ceca190", fileMock, true,
         1L, null, null, null, null);
     Mockito.verify(fileTreatmentHelper, times(1)).importFileData(Mockito.anyLong(), Mockito.any(),Mockito.any(),
@@ -1729,7 +1729,7 @@ public class DatasetControllerImplTest {
     DataFlowVO mockDataflow = new DataFlowVO();
     mockDataflow.setBigData(false);
     Mockito.when(dataFlowControllerZuul.getMetabaseById(anyLong())).thenReturn(mockDataflow);
-    Mockito.when(jobControllerZuul.checkEligibilityOfJob(anyString(), anyBoolean(), anyLong(), anyLong(), anyList())).thenReturn(JobStatusEnum.IN_PROGRESS);
+    Mockito.when(jobControllerZuul.checkEligibilityOfJob(anyString(), anyBoolean(), anyLong(), anyLong(), anyList(), any())).thenReturn(JobStatusEnum.IN_PROGRESS);
     MultipartFile file = Mockito.mock(MultipartFile.class);
     Mockito.doThrow(EEAException.class).when(fileTreatmentHelper).importFileData(Mockito.anyLong(),
         Mockito.any(),Mockito.any(), Mockito.any(), Mockito.anyBoolean(), Mockito.any(), Mockito.any(), Mockito.any());
@@ -2280,7 +2280,7 @@ public class DatasetControllerImplTest {
     Mockito.when(datasetService.getDataFlowIdById(datasetId)).thenReturn(dataflowId);
     Mockito.when(dataFlowControllerZuul.getMetabaseById(dataflowId)).thenReturn(dataFlowVO);
     Mockito.when(datasetService.isDatasetReportable(datasetId)).thenReturn(true);
-    Mockito.when(jobControllerZuul.checkEligibilityOfJob(jobType, false, dataflowId, providerId, datasetIds)).thenReturn(jobStatus);
+    Mockito.when(jobControllerZuul.checkEligibilityOfJob(jobType, false, dataflowId, providerId, datasetIds, null)).thenReturn(jobStatus);
     try {
       datasetControllerImpl.etlImportDatasetDL(datasetId, dataflowId, providerId, replaceData, tableSchemaId, delimiter, filePathInS3, null);
     }
@@ -2314,7 +2314,7 @@ public class DatasetControllerImplTest {
     Mockito.when(datasetService.getDataFlowIdById(datasetId)).thenReturn(dataflowId);
     Mockito.when(dataFlowControllerZuul.getMetabaseById(dataflowId)).thenReturn(dataFlowVO);
     Mockito.when(datasetService.isDatasetReportable(datasetId)).thenReturn(true);
-    Mockito.when(jobControllerZuul.checkEligibilityOfJob(jobType, false, dataflowId, providerId, datasetIds)).thenReturn(jobStatus);
+    Mockito.when(jobControllerZuul.checkEligibilityOfJob(jobType, false, dataflowId, providerId, datasetIds, null)).thenReturn(jobStatus);
     Mockito.when(jobControllerZuul.addEtlImportJob(datasetId, dataflowId, providerId, jobStatus, replaceData, tableSchemaId, delimiter, filePathInS3, null)).thenReturn(jobId);
     Map<String, Object> result = datasetControllerImpl.etlImportDatasetDL(datasetId, dataflowId, providerId, replaceData, tableSchemaId, delimiter, filePathInS3, null);
     assertEquals(result.get("jobId"), jobId);
