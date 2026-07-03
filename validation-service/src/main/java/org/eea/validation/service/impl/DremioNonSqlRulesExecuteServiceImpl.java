@@ -195,7 +195,7 @@ public class DremioNonSqlRulesExecuteServiceImpl implements DremioRulesExecuteSe
 
             Task task = taskRepository.findById(taskId).orElse(null);
 
-            runRuleAndCreateParquet(createParquetWithSQL, parameters, fieldName, fileName, rs, dataTableResolver, validationResolver, ruleVO, method, object, task);
+            runRuleAndCreateParquet(createParquetWithSQL, parameters, fieldName, fileName, rs, dataTableResolver, validationResolver, ruleVO, method, object, task, preparationCode);
         } catch (Exception e1) {
             LOG.error("Error creating validation folder for ruleId {}, datasetId {} and taskId {},{}", ruleId, datasetId, taskId, e1.getMessage());
             throw new DremioValidationException(e1.getMessage());
@@ -237,7 +237,7 @@ public class DremioNonSqlRulesExecuteServiceImpl implements DremioRulesExecuteSe
      * @throws IOException
      */
     private void runRuleAndCreateParquet(boolean createParquetWithSQL, List<String> parameters, String fieldName, String fileName, SqlRowSet rs,
-                                        S3PathResolver dataTableResolver, S3PathResolver validationResolver, RuleVO ruleVO, Method method, Object object, Task task) throws Exception {
+                                        S3PathResolver dataTableResolver, S3PathResolver validationResolver, RuleVO ruleVO, Method method, Object object, Task task,  String preparationCode) throws Exception {
         if (createParquetWithSQL) {
             int count = 0;
             boolean createRuleFolder = false;
@@ -260,7 +260,8 @@ public class DremioNonSqlRulesExecuteServiceImpl implements DremioRulesExecuteSe
                 boolean blocker = TaskJsonUtils.isBlockerTask(task.getJson());
                 if (blocker) {
                     LOG.info("MIKETEST Adding blocker for dataset " + TaskJsonUtils.getDatasetId(task.getJson()));
-                    redisLockService.setBlocker(TaskJsonUtils.getDatasetId(task.getJson()));
+                    redisLockService.setBlocker(TaskJsonUtils.getDatasetId(task.getJson()),
+                        TaskJsonUtils.getProcessId(task.getJson()), preparationCode);
                 }
                 validationQuery.append("))");
                 dremioHelperService.executeSqlStatement(validationQuery.toString());

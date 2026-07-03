@@ -65,20 +65,24 @@ public class RedisLockServiceImpl implements RedisLockService {
   }
 
   @Override
-  public void setBlocker(Long datasetId) {
-    String key = "BLOCKER_" + datasetId;
-    redisTemplate.opsForValue().set(key, "BLOCKER");
+  public void setBlocker(Long datasetId, String processId, String preparationCode) {
+    redisTemplate.opsForValue().set(
+            buildBlockerKey(datasetId, processId, preparationCode),
+            "BLOCKER");
   }
 
   @Override
-  public boolean hasBlocker(Long datasetId) {
-    String key = "BLOCKER_" + datasetId;
-    return Boolean.TRUE.equals(redisTemplate.hasKey(key));
+  public boolean hasBlocker(Long datasetId, String processId, String preparationCode) {
+    return redisTemplate.hasKey(
+            buildBlockerKey(datasetId, processId, preparationCode));
   }
 
   @Override
-  public void removeBlocker(Long datasetId) {
-    String key = "BLOCKER_" + datasetId;
-    redisTemplate.delete(key);
+  public void removeBlocker(Long datasetId, String processId, String preparationCode) {
+    redisTemplate.delete(buildBlockerKey(datasetId, processId, preparationCode));
+  }
+
+  private String buildBlockerKey(Long datasetId, String processId, String preparationCode) {
+    return String.format("BLOCKER_%d_%s_%s", datasetId, processId, preparationCode);
   }
 }

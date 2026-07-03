@@ -183,7 +183,7 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
 
             Task task = taskRepository.findById(taskId).orElse(null);
 
-            runRuleAndCreateParquet(createParquetWithSQL, providerCode, ruleVO, fieldName, fileName, headerNames, rs,  dataTableResolver, validationResolver, fieldSchemaIdNameMap, task);
+            runRuleAndCreateParquet(createParquetWithSQL, providerCode, ruleVO, fieldName, fileName, headerNames, rs,  dataTableResolver, validationResolver, fieldSchemaIdNameMap, task, preparationCode);
         } catch (Exception e1) {
             LOG.error("Error creating validation folder for ruleId {}, datasetId {} and taskId {},{}", ruleId, datasetId, taskId, e1.getMessage());
             throw new DremioValidationException(e1.getMessage());
@@ -225,7 +225,7 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
      * @throws IOException
      */
     private void runRuleAndCreateParquet(boolean createParquetWithSQL, String providerCode, RuleVO ruleVO, String fieldName, String fileName, Map<String, List<String>> headerNames, SqlRowSet rs,
-                                         S3PathResolver dataTableResolver, S3PathResolver validationResolver, Map<String, String> fieldSchemaIdNameMap, Task task) throws Exception {
+                                         S3PathResolver dataTableResolver, S3PathResolver validationResolver, Map<String, String> fieldSchemaIdNameMap, Task task, String preparationCode) throws Exception {
         Class<?> cls = Class.forName(RULE_OPERATORS);
         Method factoryMethod = cls.getDeclaredMethod(GET_INSTANCE);
         Object object = factoryMethod.invoke(null, null);
@@ -257,7 +257,8 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
                 boolean blocker = TaskJsonUtils.isBlockerTask(task.getJson());
                 if (blocker) {
                     LOG.info("MIKETEST Adding blocker for dataset " + TaskJsonUtils.getDatasetId(task.getJson()));
-                    redisLockService.setBlocker(TaskJsonUtils.getDatasetId(task.getJson()));
+                    redisLockService.setBlocker(TaskJsonUtils.getDatasetId(task.getJson()),
+                            TaskJsonUtils.getProcessId(task.getJson()), preparationCode);
                 }
 
                 validationQuery.append("))");

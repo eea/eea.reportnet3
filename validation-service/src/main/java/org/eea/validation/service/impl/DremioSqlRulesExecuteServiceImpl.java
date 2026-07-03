@@ -206,7 +206,7 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
             if (!recordIds.isEmpty()) {
                 if (blocker) {
                     LOG.info("MIKETEST Adding blocker for dataset " + datasetId);
-                    redisLockService.setBlocker(datasetId);
+                    redisLockService.setBlocker(datasetId, TaskJsonUtils.getProcessId(task.getJson()), preparationCode);
                 }
                 runRuleAndCreateParquet(createParquetWithSQL, dataTableResolver, validationResolver, ruleVO, recordIds, fieldName, fileName, customQueryResultSet);
             }
