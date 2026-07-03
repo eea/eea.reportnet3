@@ -203,10 +203,13 @@ export const WebformRecord = ({
   };
 
   const checkIfElementIsConditional = element => {
-    const matchesCondition = el =>
-      el?.referencedField?.masterConditionalFieldId === element.fieldSchemaId ||
-      (!isEmpty(el?.referenceParentField) && el.referenceParentField.field === element.name) ||
-      (el?.type === 'BLOCK' && el.elements?.some(matchesCondition));
+    const matchesCondition = el => {
+      return (
+        el?.referencedField?.masterConditionalFieldId === element.fieldSchemaId ||
+        (!isEmpty(el?.referenceParentField) && el.referenceParentField.field === element.name) ||
+        el?.elements?.some(matchesCondition)
+      );
+    };
 
     return webformRecordState.record?.elements?.some(matchesCondition) ?? false;
   };

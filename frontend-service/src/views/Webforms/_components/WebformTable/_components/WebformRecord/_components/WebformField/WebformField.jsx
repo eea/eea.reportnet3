@@ -178,17 +178,42 @@ export const WebformField = ({
 
       const fieldMatch = el => [el.fieldSchemaId, el.fieldId, el.fieldSchema].includes(masterConditionalFieldId);
 
-      const conditionalField =
-        // 1. Try to find a matching field directly in the top-level elements
-        record.elements.find(el => fieldMatch(el)) ||
-        // 2. Otherwise, look inside BLOCKs:
-        //    - pick the block records matching the current recordId
-        //    - search their elements for the matching field
-        record.elements
-          .filter(el => el.type === 'BLOCK')
-          .flatMap(block => block.elementsRecords?.filter(er => er.recordId === record.recordId) || [])
-          .flatMap(elementRecord => elementRecord.elements || [])
-          .find(recordElement => fieldMatch(recordElement));
+      // Search for the conditional field in nested containers
+      const findConditionalField = elements => {
+        for (const element of elements) {
+          if (fieldMatch(element)) {
+            return element;
+          }
+
+          // Search inside record based containers (BLOCK)
+          if (element.elementsRecords) {
+            const currentElementRecord = element.elementsRecords.find(
+              elementRecord => elementRecord.recordId === record.recordId
+            );
+
+            if (currentElementRecord) {
+              const conditionalField = findConditionalField(currentElementRecord.elements);
+
+              if (conditionalField) {
+                return conditionalField;
+              }
+            }
+          }
+
+          // Search inside simple containers (SECTION)
+          if (element.elements) {
+            const conditionalField = findConditionalField(element.elements);
+
+            if (conditionalField) {
+              return conditionalField;
+            }
+          }
+        }
+
+        return undefined;
+      };
+
+      const conditionalField = findConditionalField(record.elements);
 
       const conditionalValue = (() => {
         if (isNil(conditionalField)) return encodeURIComponent(element.value);
@@ -294,10 +319,25 @@ export const WebformField = ({
     let parsedValues;
 
     if (isConditional && ['LINK', 'CODELIST', 'MULTISELECT_CODELIST'].includes(field.fieldType)) {
-      //Flatten BLOCK elements before mapping
-      const allFieldElements = record.elements.flatMap(el =>
-        el?.type === 'BLOCK' && Array.isArray(el.elementsRecords?.[0]?.elements) ? el.elementsRecords[0].elements : el
-      );
+      // Flatten nested BLOCK and SECTION elements before mapping
+      const getFieldElements = elements =>
+        elements.flatMap(el => {
+          if (Array.isArray(el.elementsRecords)) {
+            const currentElementRecord = el.elementsRecords.find(
+              elementRecord => elementRecord.recordId === record.recordId
+            );
+
+            return currentElementRecord?.elements ? getFieldElements(currentElementRecord.elements) : [];
+          }
+
+          if (Array.isArray(el.elements)) {
+            return getFieldElements(el.elements);
+          }
+
+          return el.type === 'FIELD' ? [el] : [];
+        });
+
+      const allFieldElements = getFieldElements(record.elements);
 
       const fieldsToReset = new Set([field.fieldSchema, field.fieldSchemaId, field.name]);
 
@@ -581,7 +621,6 @@ export const WebformField = ({
                       updatingField.field?.fieldId
                   ))
               }
-              key={`${record.recordId}-${field.fieldSchemaId || field.fieldSchema || field.fieldId}-${field.value}`}
               maxSelectedLabels={10}
               onChange={() => {
                 if (isNil(field.recordId)) onSaveField(option, field.value);
