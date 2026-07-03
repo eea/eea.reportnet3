@@ -489,17 +489,9 @@ public class ValidationHelper implements DisposableBean {
           try {
             schema = schemasRepository.findByIdDataSetSchema(new ObjectId(dataSetMetabaseVO.getDatasetSchema()));
             for (TableSchema tableSchema : schema.getTableSchemas()) {
-              long start = System.currentTimeMillis();
-
-              LOG.info("Calling Dataset createEmptyTablesV2. tableSchemaId={}, start={}",
-                      tableSchema.getIdTableSchema(), start);
               dataSetControllerZuul.createEmptyTablesV2(dataSetMetabaseVO, tableSchema.getIdTableSchema().toString());
-              LOG.info("Dataset createEmptyTablesV2 completed successfully in {} ms",
-                      System.currentTimeMillis() - start);
             }
           } catch (FeignException fe) {
-            LOG.error("Dataset createEmptyTablesV2 failed {} ms.",
-                    System.currentTimeMillis());
             String body = fe.contentUTF8();
             LOG.error("createEmptyTablesV2 failed (422) for datasetId {}: {}", dataSetMetabaseVO.getId(), body);
             String errorMsg = EEAErrorMessage.ERROR_ILLEGAL_HEADER_CHARACTER;
@@ -1596,6 +1588,8 @@ public class ValidationHelper implements DisposableBean {
     public void run() {
       ProcessStatusEnum status = ProcessStatusEnum.FINISHED;
       Long currentTime = System.currentTimeMillis();
+      final String preparationCode = String.valueOf(validationTask.eeaEventVO.getData().get("preparationCode"));
+
       int workingThreads =
           ((ThreadPoolExecutor) ((EEADelegatingSecurityContextExecutorService) validationExecutorService)
               .getDelegateExecutorService()).getActiveCount();
@@ -1606,8 +1600,8 @@ public class ValidationHelper implements DisposableBean {
 
       try {
         LOG.info("MIKETEST Task id" + validationTask.taskId);
-        LOG.info("MIKETEST has blocker" + redisLockService.hasBlocker(validationTask.datasetId));
-        if (redisLockService.hasBlocker(validationTask.datasetId)) {
+        LOG.info("MIKETEST has blocker" + redisLockService.hasBlocker(validationTask.datasetId, validationTask.processId, preparationCode));
+        if (redisLockService.hasBlocker(validationTask.datasetId, validationTask.processId, preparationCode)) {
           status = ProcessStatusEnum.SKIPPED;
         }
         else{
@@ -1788,7 +1782,7 @@ public class ValidationHelper implements DisposableBean {
               }
             }
           }
-          redisLockService.removeBlocker(datasetId);
+          redisLockService.removeBlocker(datasetId, processId, preparationCode);
           isFinished = true;
         }
       }
