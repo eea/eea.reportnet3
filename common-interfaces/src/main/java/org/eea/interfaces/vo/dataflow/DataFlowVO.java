@@ -96,6 +96,9 @@ public class DataFlowVO extends GenericDataflowVO implements Serializable {
   /** The official reporting. */
   private Boolean officialReporting;
 
+  /** Whether typed Dremio views are used for this dataflow by default. */
+  private Boolean useViews;
+
 
   /**
    * Equals.
