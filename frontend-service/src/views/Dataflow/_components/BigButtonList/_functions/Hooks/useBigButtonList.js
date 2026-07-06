@@ -779,9 +779,9 @@ const useBigButtonList = ({
     ...createDataCollection,
     ...updateDatasetsNewRepresentatives,
     ...groupByRepresentativeModels,
-    ...managePreparationSetsBigButton,
-    ...createPreparationSets,
-    ...preparationSetsModels,
+    // ...managePreparationSetsBigButton,
+    // ...createPreparationSets,
+    // ...preparationSetsModels,
     ...receiptBigButton,
     ...releaseBigButton
   ];
