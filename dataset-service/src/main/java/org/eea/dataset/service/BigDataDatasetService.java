@@ -403,4 +403,16 @@ public interface BigDataDatasetService {
             String tableSchemaId,
             String tableName
     ) throws Exception;
+
+    /**
+     * Attempts to create a typed Dremio view for a given dataset table with up to 3 retries.
+     * On failure of all attempts, updates the job info with an error.
+     *
+     * @param dataflowId the dataflow identifier used in the dataset path
+     * @param providerId the provider identifier used in the dataset path
+     * @param datasetId the dataset identifier in metadata storage
+     * @param tableSchemaId the schema identifier of the table to be transformed
+     * @param tableName the physical table name used in Dremio/S3 paths
+     */
+    void createTypedViewWithRetry(Long dataflowId, Long providerId, Long datasetId, String tableSchemaId, String tableName) throws Exception;
 }

@@ -808,6 +808,24 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             if (!isPreparationDataset) {
                 datasetMetabaseService.updateDatasetRunningStatus(importFileInDremioInfo.getDatasetId(),
                         DatasetRunningStatusEnum.IMPORTED);
+                if (isUseViewsEnabled(importFileInDremioInfo.getDataflowId(), importFileInDremioInfo.getDatasetId())) {
+                    try {
+                        if (importFileInDremioInfo.getTableSchemaId() != null) {
+                            String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(importFileInDremioInfo.getDatasetId());
+                            TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(importFileInDremioInfo.getTableSchemaId(), datasetSchemaId);
+                            createTypedViewWithRetry(importFileInDremioInfo.getDataflowId(), importFileInDremioInfo.getProviderId(), importFileInDremioInfo.getDatasetId(), importFileInDremioInfo.getTableSchemaId(), tableSchemaVO.getNameTableSchema());
+                        } else {
+                            List<TableSchemaIdNameVO> tableSchemas = datasetSchemaService.getTableSchemasIds(importFileInDremioInfo.getDatasetId());
+                            for (TableSchemaIdNameVO tableSchema : tableSchemas) {
+                                createTypedViewWithRetry(importFileInDremioInfo.getDataflowId(), importFileInDremioInfo.getProviderId(), importFileInDremioInfo.getDatasetId(), tableSchema.getIdTableSchema(), tableSchema.getNameTableSchema());
+                            }
+                        }
+                    } catch (Exception e) {
+                        if (importFileInDremioInfo.getJobId() != null) {
+                            jobControllerZuul.updateJobInfo(importFileInDremioInfo.getJobId(), JobInfoEnum.ERROR_MATERIALIZED_VIEWS_ARE_NOT_CORRECT, null);
+                        }
+                    }
+                }
             }
 
             if(StringUtils.isNotBlank(importFileInDremioInfo.getProcessId())) {
@@ -991,6 +1009,15 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             }
             if(BooleanUtils.isTrue(createEmptyTablesBool)) {
                 createEmptyTables.runCreationForSpecificTableSchema(dataSetMetabaseVO, tableSchemaId);
+                if (!isPreparationDataset && isUseViewsEnabled(dataflowId, datasetId)) {
+                    try {
+                        createTypedViewWithRetry(dataflowId, providerId, datasetId, tableSchemaId, tableSchemaName);
+                    } catch (Exception e) {
+                        if (jobId != null) {
+                            jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.ERROR_MATERIALIZED_VIEWS_ARE_NOT_CORRECT, null);
+                        }
+                    }
+                }
             }
 
             if (jobId != null) {
@@ -1420,6 +1447,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             String datasetSchemaId = dataSetMetabaseVO.getDatasetSchema();
 
             List<TableSchemaVO> availableForConversionTables = new ArrayList<>();
+            boolean useViewsEnabled = isUseViewsEnabled(dataflowId, datasetId);
 
             for (String tableSchemaId : tableSchemaIds) {
                 TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, datasetSchemaId);
@@ -1428,6 +1456,13 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                     Boolean availableForConversion = convertIcebergToParquetTable(datasetId, dataflowId, providerId, tableSchemaVO, datasetSchemaId, lockValue);
                     if(BooleanUtils.isTrue(availableForConversion)){
                         availableForConversionTables.add(tableSchemaVO);
+                        if (useViewsEnabled) {
+                            try {
+                                createTypedViewWithRetry(dataflowId, providerId, datasetId, tableSchemaVO.getIdTableSchema(), tableSchemaVO.getNameTableSchema());
+                            } catch (Exception e) {
+                                LOG.error("Could not create typed view for datasetId {} tableSchemaId {}: {}", datasetId, tableSchemaVO.getIdTableSchema(), e);
+                            }
+                        }
                     }
                 } else {
                     LOG.error("TableSchemaVO not found for tableSchemaId: {}", tableSchemaId);
@@ -1947,6 +1982,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
     @Override
     public void createPrefilledTables(Long designDatasetId, String designDatasetSchemaId, Long datasetIdForCreation, Long providerId, String tableSchemaId) throws Exception {
         DataSetMetabaseVO designDataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(designDatasetId);
+        boolean useViewsEnabled = isUseViewsEnabled(designDataSetMetabaseVO.getDataflowId(), datasetIdForCreation);
 
         List<TableSchemaIdNameVO> tables = datasetSchemaService.getTableSchemasIds(designDatasetId);
         for (TableSchemaIdNameVO table : tables) {
@@ -2035,6 +2071,14 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 //refresh the metadata
                 dremioHelperService.refreshTableMetadataAndPromote(null, dremioNewTableQueryPath, s3NewTablePathResolver, tableSchemaName);
                 LOG.info("Created prefilled data for datasetId {} and table {} from designDatasetId {} ", datasetIdForCreation, tableSchemaVO.getNameTableSchema(), designDatasetId);
+
+                if (useViewsEnabled) {
+                    try {
+                        createTypedViewWithRetry(designDataSetMetabaseVO.getDataflowId(), providerId, datasetIdForCreation, tableSchemaVO.getIdTableSchema(), tableSchemaName);
+                    } catch (Exception e) {
+                        LOG.error("Could not create typed view for prefilled datasetId {} tableSchemaId {}: {}", datasetIdForCreation, tableSchemaVO.getIdTableSchema(), e.getMessage());
+                    }
+                }
             }
         }
     }
@@ -3365,6 +3409,25 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             }
         }
         else{
+            boolean isPreparationDataset = StringUtils.isNotBlank(importFileInDremioInfo.getPreparationCode());
+            if (!isPreparationDataset && isUseViewsEnabled(importFileInDremioInfo.getDataflowId(), importFileInDremioInfo.getDatasetId())) {
+                try {
+                    if (importFileInDremioInfo.getTableSchemaId() != null) {
+                        String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(importFileInDremioInfo.getDatasetId());
+                        TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(importFileInDremioInfo.getTableSchemaId(), datasetSchemaId);
+                        createTypedViewWithRetry(importFileInDremioInfo.getDataflowId(), importFileInDremioInfo.getProviderId(), importFileInDremioInfo.getDatasetId(), importFileInDremioInfo.getTableSchemaId(), tableSchemaVO.getNameTableSchema());
+                    } else {
+                        List<TableSchemaIdNameVO> tableSchemas = datasetSchemaService.getTableSchemasIds(importFileInDremioInfo.getDatasetId());
+                        for (TableSchemaIdNameVO tableSchema : tableSchemas) {
+                            createTypedViewWithRetry(importFileInDremioInfo.getDataflowId(), importFileInDremioInfo.getProviderId(), importFileInDremioInfo.getDatasetId(), tableSchema.getIdTableSchema(), tableSchema.getNameTableSchema());
+                        }
+                    }
+                } catch (Exception e) {
+                    LOG.error("Could not create typed view(s) for etl import job {}: {}", jobId, e.getMessage());
+                    jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.ERROR_MATERIALIZED_VIEWS_ARE_NOT_CORRECT, null);
+                }
+            }
+
             if(importFileInDremioInfo.getWarningMessages() != null && !importFileInDremioInfo.getWarningMessages().isEmpty() && StringUtils.isNotBlank(importFileInDremioInfo.getWarningMessages().get(0))) {
                 //update job info message by the first warning
                 String warningToUpdate = importFileInDremioInfo.getWarningMessages().get(0);
@@ -3467,6 +3530,40 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
     }
 
     @Override
+    public void createTypedViewWithRetry(Long dataflowId, Long providerId, Long datasetId, String tableSchemaId, String tableName) throws Exception {
+        for (int attempt = 1; attempt <= 3; attempt++) {
+            try {
+                createTypedView(dataflowId, providerId, datasetId, tableSchemaId, tableName);
+                return;
+            } catch (Exception e) {
+                LOG.error("Attempt {}/3 to create typed view failed for datasetId {} tableSchemaId {}: {}", attempt, datasetId, tableSchemaId, e);
+                if (attempt < 3) {
+                    try { Thread.sleep(3000); } catch (InterruptedException ie) { Thread.currentThread().interrupt(); }
+                } else {
+                    throw e;
+                }
+            }
+        }
+    }
+
+    /**
+     * Resolves whether typed views should be created for a dataset: the per-dataset override
+     * (dataset.use_views) wins if set, otherwise falls back to the dataflow-level flag.
+     */
+    private boolean isUseViewsEnabled(Long dataflowId, Long datasetId) {
+        try {
+            Boolean datasetUseViewsOverride = datasetMetabaseService.findDatasetMetabase(datasetId).getUseViews();
+            if (datasetUseViewsOverride != null) {
+                return datasetUseViewsOverride;
+            }
+            DataFlowVO dataFlowVO = dataFlowControllerZuul.getMetabaseById(dataflowId);
+            return dataFlowVO != null && BooleanUtils.isTrue(dataFlowVO.getUseViews());
+        } catch (Exception e) {
+            LOG.error("Could not resolve useViews flag for dataflowId {} datasetId {}: {}", dataflowId, datasetId, e.getMessage());
+            return false;
+        }
+    }
+
     public void createTypedView(
             Long dataflowId,
             Long providerId,
@@ -3474,6 +3571,8 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             String tableSchemaId,
             String tableName
     ) throws Exception {
+
+        LOG.info("Creating typed view for datasetId {} tableSchemaId {} table {}", datasetId, tableSchemaId, tableName);
 
         DataSetMetabaseVO dataset =
                 datasetMetabaseService.findDatasetMetabase(datasetId);
@@ -3560,6 +3659,8 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                     null
             );
         }
+
+        LOG.info("Created typed view for datasetId {} tableSchemaId {} table {}", datasetId, tableSchemaId, tableName);
     }
 
     private boolean sourceTableHasRows(String sourcePath) {

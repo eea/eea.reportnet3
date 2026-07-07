@@ -64,4 +64,7 @@ public class DataSetMetabaseVO implements Serializable {
   /** The dataset running status. */
   private DatasetRunningStatusEnum datasetRunningStatus;
 
+  /** Whether typed Dremio views are used for this dataset. Null inherits the dataflow-level setting. */
+  private Boolean useViews;
+
 }
