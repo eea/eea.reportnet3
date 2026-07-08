@@ -205,7 +205,9 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
             //and this redis KV will be used to check getTaskTypeBlockers, getTaskTypeNonBlockers
             if (!recordIds.isEmpty()) {
                 if (blocker) {
-                    LOG.info("MIKETEST Adding blocker for dataset " + datasetId);
+                    LOG.info("Adding blocker for dataset " + datasetId
+                            + " process id "  + TaskJsonUtils.getProcessId(task.getJson())
+                            + " preparationCode "  + preparationCode);
                     redisLockService.setBlocker(datasetId, TaskJsonUtils.getProcessId(task.getJson()), preparationCode);
                 }
                 runRuleAndCreateParquet(createParquetWithSQL, dataTableResolver, validationResolver, ruleVO, recordIds, fieldName, fileName, customQueryResultSet);

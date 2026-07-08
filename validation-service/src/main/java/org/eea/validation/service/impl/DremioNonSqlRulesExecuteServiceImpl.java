@@ -259,7 +259,9 @@ public class DremioNonSqlRulesExecuteServiceImpl implements DremioRulesExecuteSe
             if (createRuleFolder) {
                 boolean blocker = TaskJsonUtils.isBlockerTask(task.getJson());
                 if (blocker) {
-                    LOG.info("MIKETEST Adding blocker for dataset " + TaskJsonUtils.getDatasetId(task.getJson()));
+                    LOG.info("Adding blocker for dataset " + TaskJsonUtils.getDatasetId(task.getJson())
+                     + " process id "  + TaskJsonUtils.getProcessId(task.getJson())
+                     + " preparationCode "  + preparationCode);
                     redisLockService.setBlocker(TaskJsonUtils.getDatasetId(task.getJson()),
                         TaskJsonUtils.getProcessId(task.getJson()), preparationCode);
                 }
