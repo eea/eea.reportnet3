@@ -1588,7 +1588,9 @@ public class ValidationHelper implements DisposableBean {
     public void run() {
       ProcessStatusEnum status = ProcessStatusEnum.FINISHED;
       Long currentTime = System.currentTimeMillis();
-      final String preparationCode = String.valueOf(validationTask.eeaEventVO.getData().get("preparationCode"));
+
+      final Object value = validationTask.eeaEventVO.getData().get("preparationCode");
+      final String preparationCode = value == null ? null : String.valueOf(value);
 
       int workingThreads =
           ((ThreadPoolExecutor) ((EEADelegatingSecurityContextExecutorService) validationExecutorService)
@@ -1599,8 +1601,10 @@ public class ValidationHelper implements DisposableBean {
           validationTask.eeaEventVO, workingThreads, maxRunningTasks - workingThreads);
 
       try {
-        LOG.info("MIKETEST Task id" + validationTask.taskId);
-        LOG.info("MIKETEST has blocker" + redisLockService.hasBlocker(validationTask.datasetId, validationTask.processId, preparationCode));
+        LOG.info("Validation task id " + validationTask.taskId
+                + " process id " + validationTask.processId
+                + " preparationCode " + preparationCode
+                + " has blocker " + redisLockService.hasBlocker(validationTask.datasetId, validationTask.processId, preparationCode));
         if (redisLockService.hasBlocker(validationTask.datasetId, validationTask.processId, preparationCode)) {
           status = ProcessStatusEnum.SKIPPED;
         }
