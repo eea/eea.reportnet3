@@ -29,7 +29,10 @@ import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.IntegrityVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.validation.TaskVO;
+import org.eea.lock.redis.RedisLockService;
 import org.eea.utils.UtilityClass;
+import org.eea.validation.persistence.data.metabase.domain.Task;
+import org.eea.validation.persistence.data.metabase.repository.TaskRepository;
 import org.eea.validation.persistence.repository.SchemasRepository;
 import org.eea.validation.persistence.schemas.DataSetSchema;
 import org.eea.validation.persistence.schemas.FieldSchema;
@@ -38,9 +41,7 @@ import org.eea.validation.service.DremioRulesExecuteService;
 import org.eea.validation.service.DremioRulesService;
 import org.eea.validation.service.RulesService;
 import org.eea.validation.service.SqlRulesService;
-import org.eea.validation.util.FKValidationUtils;
-import org.eea.validation.util.UniqueValidationUtils;
-import org.eea.validation.util.ValidationHelper;
+import org.eea.validation.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,7 +49,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
-import org.eea.validation.util.ObjectWrapper;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -83,6 +83,8 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
     private DremioHelperService dremioHelperService;
     private RepresentativeControllerZuul representativeControllerZuul;
     private ValidationHelper validationHelper;
+    private TaskRepository taskRepository;
+    private RedisLockService redisLockService;
 
     private static final Logger LOG = LoggerFactory.getLogger(DremioSqlRulesExecuteServiceImpl.class);
     private static final String IS_TABLE_EMPTY = "isTableEmpty";
@@ -99,7 +101,8 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
                                             DatasetSchemaControllerZuul datasetSchemaControllerZuul, DremioRulesService dremioRulesService, S3Helper s3Helper,
                                             DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul, SchemasRepository schemasRepository,
                                             DataSetControllerZuul dataSetControllerZuul, SqlRulesService sqlRulesService, DremioHelperService dremioHelperService,
-                                            RepresentativeControllerZuul representativeControllerZuul, ValidationHelper validationHelper) {
+                                            RepresentativeControllerZuul representativeControllerZuul, ValidationHelper validationHelper, TaskRepository taskRepository,
+                                            RedisLockService redisLockService) {
         this.dremioJdbcTemplate = dremioJdbcTemplate;
         this.s3Service = s3Service;
         this.rulesService = rulesService;
@@ -113,6 +116,8 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
         this.dremioHelperService = dremioHelperService;
         this.representativeControllerZuul = representativeControllerZuul;
         this.validationHelper = validationHelper;
+        this.taskRepository = taskRepository;
+        this.redisLockService = redisLockService;
     }
 
     @Override
@@ -194,7 +199,17 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
                 }
             }
 
+            Task task = taskRepository.findById(taskId).orElse(null);
+            boolean blocker = TaskJsonUtils.isBlockerTask(task.getJson());
+            //redis KV - found blocker for this dataset
+            //and this redis KV will be used to check getTaskTypeBlockers, getTaskTypeNonBlockers
             if (!recordIds.isEmpty()) {
+                if (blocker) {
+                    LOG.info("Adding blocker for dataset " + datasetId
+                            + " process id "  + TaskJsonUtils.getProcessId(task.getJson())
+                            + " preparationCode "  + preparationCode);
+                    redisLockService.setBlocker(datasetId, TaskJsonUtils.getProcessId(task.getJson()), preparationCode);
+                }
                 runRuleAndCreateParquet(createParquetWithSQL, dataTableResolver, validationResolver, ruleVO, recordIds, fieldName, fileName, customQueryResultSet);
             }
         } catch (Exception e) {

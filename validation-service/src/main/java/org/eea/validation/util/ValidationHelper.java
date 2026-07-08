@@ -54,6 +54,7 @@ import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
+import org.eea.lock.redis.RedisLockService;
 import org.eea.lock.service.LockService;
 import org.eea.multitenancy.TenantResolver;
 import org.eea.thread.EEADelegatingSecurityContextExecutorService;
@@ -217,6 +218,9 @@ public class ValidationHelper implements DisposableBean {
 
   @Autowired
   private RepresentativeControllerZuul representativeControllerZuul;
+
+  @Autowired
+  private RedisLockService redisLockService;
 
   private final S3Service s3ServicePrivate;
 
@@ -1574,6 +1578,10 @@ public class ValidationHelper implements DisposableBean {
     public void run() {
       ProcessStatusEnum status = ProcessStatusEnum.FINISHED;
       Long currentTime = System.currentTimeMillis();
+
+      final Object value = validationTask.eeaEventVO.getData().get("preparationCode");
+      final String preparationCode = value == null ? null : String.valueOf(value);
+
       int workingThreads =
           ((ThreadPoolExecutor) ((EEADelegatingSecurityContextExecutorService) validationExecutorService)
               .getDelegateExecutorService()).getActiveCount();
@@ -1583,8 +1591,17 @@ public class ValidationHelper implements DisposableBean {
           validationTask.eeaEventVO, workingThreads, maxRunningTasks - workingThreads);
 
       try {
-        validationTask.validator.performValidation(validationTask.eeaEventVO,
-            validationTask.datasetId, validationTask.kieBase, validationTask.taskId);
+        LOG.info("Validation task id " + validationTask.taskId
+                + " process id " + validationTask.processId
+                + " preparationCode " + preparationCode
+                + " has blocker " + redisLockService.hasBlocker(validationTask.datasetId, validationTask.processId, preparationCode));
+        if (redisLockService.hasBlocker(validationTask.datasetId, validationTask.processId, preparationCode)) {
+          status = ProcessStatusEnum.SKIPPED;
+        }
+        else{
+          validationTask.validator.performValidation(validationTask.eeaEventVO,
+                  validationTask.datasetId, validationTask.kieBase, validationTask.taskId);
+        }
       } catch (Exception e) {
         LOG.error("Error processing validations for dataset {} due to exception {}",
             validationTask.datasetId, e.getMessage(), e);
@@ -1606,7 +1623,6 @@ public class ValidationHelper implements DisposableBean {
           try {
             Thread.sleep(1000);
             LOG.info("Checking status of process {} for dataset {}. taskId {}", validationTask.processId, validationTask.datasetId, validationTask.taskId);
-            final String preparationCode = String.valueOf(validationTask.eeaEventVO.getData().get("preparationCode"));
             checkFinishedValidations(validationTask.datasetId, validationTask.processId, validationTask.taskId, preparationCode);
           } catch (EEAException | InterruptedException eeaEx) {
             LOG.error("Error finishing validations for dataset {} due to exception {}",
@@ -1757,6 +1773,7 @@ public class ValidationHelper implements DisposableBean {
               }
             }
           }
+          redisLockService.removeBlocker(datasetId, processId, preparationCode);
           isFinished = true;
         }
       }

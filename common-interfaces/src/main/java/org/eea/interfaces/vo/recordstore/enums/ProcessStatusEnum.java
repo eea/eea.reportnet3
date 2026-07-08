@@ -15,6 +15,9 @@ public enum ProcessStatusEnum {
   /** The in process. */
   IN_PROGRESS("IN_PROGRESS"),
 
+  /** The finished. */
+  SKIPPED("SKIPPED"),
+
   /** The canceled. */
   CANCELED("CANCELED"),
 
