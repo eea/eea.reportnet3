@@ -10,7 +10,7 @@
     "@fortawesome/react-fontawesome": "0.1.17",
     "@mapbox/geojsonhint": "3.0.1",
     "@stomp/stompjs": "6.1.2",
-    "axios": "0.26.0",
+    "axios": "1.15.0",
     "chart.js": "2.9.4",
     "classnames": "2.3.1",
     "dayjs": "1.10.7",
