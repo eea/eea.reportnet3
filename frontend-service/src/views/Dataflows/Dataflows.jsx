@@ -62,8 +62,8 @@ import { DataflowsUtils } from './_functions/Utils/DataflowsUtils';
 import { PaginatorRecordsCount } from 'views/_components/DataTable/_functions/Utils/PaginatorRecordsCount';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 import { AddOrganizations } from './_components/AddOrganizations';
-import {Checkbox} from "../_components/Checkbox";
-import {TooltipButton} from "../_components/TooltipButton";
+import { Checkbox } from '../_components/Checkbox';
+import { TooltipButton } from '../_components/TooltipButton';
 
 const { permissions } = config;
 
@@ -131,16 +131,12 @@ export const Dataflows = () => {
           <label htmlFor="sncDataCheckbox">
             <span>{resourcesContext.messages['sncData']}</span>
           </label>
-          <TooltipButton
-            message={resourcesContext.messages['sncDataMessage']}
-            uniqueIdentifier="sncData"
-          />
+          <TooltipButton message={resourcesContext.messages['sncDataMessage']} uniqueIdentifier="sncData" />
         </div>
       );
     }
     return null;
   };
-
 
   const {
     activeIndex,
@@ -1062,7 +1058,6 @@ export const Dataflows = () => {
           isVisible={dataflowsState.isReferencedDataflowDialogVisible}
           manageDialogs={manageDialogs}
           onCreateDataflow={onCreateDataflow}
-          renderSncData={renderSncData}
         />
       )}
 
@@ -1134,7 +1129,6 @@ export const Dataflows = () => {
           manageDialogs={manageDialogs}
           obligation={obligation}
           onCreateDataflow={onCreateDataflow}
-          renderSncData={renderSncData}
           resetObligations={resetObligations}
           state={dataflowsState}
         />
@@ -1146,7 +1140,6 @@ export const Dataflows = () => {
           manageDialogs={manageDialogs}
           obligation={obligation}
           onCreateDataflow={onCreateDataflow}
-          renderSncData={renderSncData}
           resetObligations={resetObligations}
           state={dataflowsState}
         />

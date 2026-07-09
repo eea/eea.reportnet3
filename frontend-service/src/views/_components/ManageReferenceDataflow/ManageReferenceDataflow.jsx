@@ -39,8 +39,7 @@ export const ManageReferenceDataflow = ({
   onCreateDataflow,
   onEditDataflow,
   onLoadReferenceDataflow,
-  onUpdateSoftDelete,
-  renderSncData
+  onUpdateSoftDelete
 }) => {
   const dialogName = isEditing ? 'isEditDialogVisible' : 'isReferencedDataflowDialogVisible';
 
@@ -319,11 +318,6 @@ export const ManageReferenceDataflow = ({
         )}
       </div>
       {!isEditing && <div className="p-toolbar-group-left">{renderOfficialReporting()}</div>}
-      {bigData && (
-        <div className="p-toolbar-group-left">
-          {renderSncData && renderSncData(false, sncData, false, () => setSncData(!sncData))}
-        </div>
-      )}
       <Button
         className={`p-button-primary ${
           !isEmpty(name) && !isEmpty(description) && !isSending && 'p-button-animated-blink'

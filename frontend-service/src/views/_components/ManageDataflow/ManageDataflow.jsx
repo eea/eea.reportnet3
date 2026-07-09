@@ -49,7 +49,6 @@ export const ManageDataflow = ({
   onLoadReportingDataflow,
   onUpdateAddUserText,
   onUpdateSoftDelete,
-  renderSncData,
   resetDeliveryDate,
   resetObligations,
   setCheckedObligation,
@@ -383,11 +382,6 @@ export const ManageDataflow = ({
         </div>
         <div className="p-toolbar-group-left">{renderBigDataStorage()}</div>
         {!isEditing && <div className="p-toolbar-group-left">{renderOfficialReporting()}</div>}
-        {reportingDataflowState.bigDataStorage && (
-          <div className="p-toolbar-group-left">
-            {renderSncData && renderSncData(false, sncData, false, () => setSncData(!sncData))}
-          </div>
-        )}
         <Button
           className={`p-button-primary ${
             !(isCitizenScienceDataflow && isEmpty(reportingDataflowState.providerGroup)) &&
