@@ -22,7 +22,7 @@ export const DataflowRepository = {
   cloneSchemas: async (sourceDataflowId, targetDataflowId) =>
     await HTTPRequester.post({ url: getUrl(DataflowConfig.cloneSchemas, { sourceDataflowId, targetDataflowId }) }),
 
-  create: async (name, description, obligationId, type, bigData, dataProviderGroupId, sncData, officialReporting) =>
+  create: async (name, description, obligationId, type, bigData, dataProviderGroupId, sncData, officialReporting,useViews) =>
     await HTTPRequester.post({
       url: getUrl(DataflowConfig.createUpdate),
       data: {
@@ -34,7 +34,8 @@ export const DataflowRepository = {
         bigData,
         dataProviderGroupId,
         sncData,
-        officialReporting
+        officialReporting,
+        useViews
       }
     }),
 
@@ -170,7 +171,8 @@ export const DataflowRepository = {
     bigData,
     dataProviderGroupId,
     deadlineDate,
-    officialReporting
+    officialReporting,
+    useViews
   ) =>
     await HTTPRequester.update({
       url: getUrl(DataflowConfig.createUpdate),
@@ -184,7 +186,8 @@ export const DataflowRepository = {
         bigData,
         dataProviderGroupId,
         deadlineDate,
-        officialReporting
+        officialReporting,
+        useViews
       }
     }),
 

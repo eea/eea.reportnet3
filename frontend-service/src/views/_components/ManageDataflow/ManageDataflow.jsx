@@ -72,11 +72,12 @@ export const ManageDataflow = ({
     description: isEditing ? state.description : '',
     isDeleting: false,
     isOfficialReporting: isEditing ? state.officialReporting : false,
+    useViews: isEditing ? state.useViews : false,
     isSubmitting: false,
     name: isEditing ? state.name : '',
     obligation,
     pinDataflow: false,
-    bigDataStorage: false,
+    bigDataStorage: isEditing ? state.data.bigData : false,
     providerGroup: null,
     isReleasable: state.isReleasable
   };
@@ -213,7 +214,8 @@ export const ManageDataflow = ({
       formRef.current.handleSubmit(
         reportingDataflowState.pinDataflow,
         reportingDataflowState.bigDataStorage,
-        reportingDataflowState.isOfficialReporting
+        reportingDataflowState.isOfficialReporting,
+        reportingDataflowState.useViews
       );
     resetObligations();
   };
@@ -272,6 +274,41 @@ export const ManageDataflow = ({
       </div>
     );
   };
+
+  const renderUseViews = () => {
+    return (
+      <div className={styles.checkboxWrapper}>
+        <Checkbox
+          ariaLabel={resourcesContext.messages['useViews']}
+          checked={reportingDataflowState.useViews}
+          id="useViewsCheckbox"
+          inputId="useViewsCheckbox"
+          onChange={() =>
+            reportingDataflowDispatch({
+              type: 'TOGGLE_USE_VIEWS',
+              payload: !reportingDataflowState.useViews
+            })
+          }
+          role="checkbox"
+        />
+        <label>
+          <span
+            onClick={() =>
+              reportingDataflowDispatch({
+                type: 'TOGGLE_USE_VIEWS',
+                payload: !reportingDataflowState.useViews
+              })
+            }>
+            {resourcesContext.messages['useViews']}
+          </span>
+        </label>
+        <TooltipButton
+          message={resourcesContext.messages['useViewsMessage']}
+          uniqueIdentifier="useViews"></TooltipButton>
+      </div>
+    );
+  };
+
 
   const renderDataflowDialog = () => {
     const renderDeleteDataflowButton = () => {
@@ -383,6 +420,7 @@ export const ManageDataflow = ({
         </div>
         <div className="p-toolbar-group-left">{renderBigDataStorage()}</div>
         {!isEditing && <div className="p-toolbar-group-left">{renderOfficialReporting()}</div>}
+        {!isEditing && reportingDataflowState.bigDataStorage && <div className="p-toolbar-group-left">{renderUseViews()}</div>}
         {reportingDataflowState.bigDataStorage && (
           <div className="p-toolbar-group-left">
             {renderSncData && renderSncData(false, sncData, false, () => setSncData(!sncData))}
@@ -449,7 +487,9 @@ export const ManageDataflow = ({
                 : state.isReportingDataflowDialogVisible
             }
             renderOfficialReporting={renderOfficialReporting}
+            renderUseViews={renderUseViews}
             sncData={sncData}
+            bigData={reportingDataflowState.bigDataStorage}
           />
           {manualAcceptance && state.status === 'DRAFT' && (
             <>
