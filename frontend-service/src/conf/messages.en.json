@@ -1778,6 +1778,8 @@
     "userSettingsTitle": "User settings",
     "userTypeOfView": "Type of view",
     "userTypeOfViewSubtitle": "Choose default layout to search obligations and dataflows",
+    "useViews": "Use Views",
+    "useViewsMessage": "Use views for data validation ",
     "utc": "UTC",
     "valid": "Valid",
     "validate": "Validate",

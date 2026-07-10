@@ -147,6 +147,7 @@ export const Dataflow = () => {
     obligations: {},
     preparationSetsList: null,
     officialReporting: false,
+    useViews:false,
     representative: {},
     representativesImport: false,
     restrictFromPublic: false,
@@ -155,7 +156,7 @@ export const Dataflow = () => {
     showPublicInfo: false,
     status: '',
     updatedDatasetSchema: [],
-    userRoles: []
+    userRoles: [],
   };
 
   const [dataflowState, dataflowDispatch] = useReducer(dataflowDataReducer, dataflowInitialState);
@@ -982,6 +983,7 @@ export const Dataflow = () => {
           name: dataflow.name,
           obligations: dataflow.obligation,
           officialReporting: dataflow.officialReporting,
+          useViews: dataflow.useViews,
           showPublicInfo: dataflow.showPublicInfo,
           status: dataflow.status
         }
