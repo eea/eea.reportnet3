@@ -128,7 +128,7 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
 
     @Override
     public void execute(Long dataflowId, Long datasetId, String datasetSchemaId, String tableName, String tableSchemaId, String ruleId, Long dataProviderId,
-                        Long taskId, boolean createParquetWithSQL, String preparationCode) throws DremioValidationException {
+                        Long taskId, boolean createParquetWithSQL, String preparationCode, boolean useViews) throws DremioValidationException {
         try {
             //TODO Fix preparationCode
             //if the dataset to validate is of reference type, then the table path should be changed

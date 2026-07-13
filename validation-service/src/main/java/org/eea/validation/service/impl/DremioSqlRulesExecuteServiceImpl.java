@@ -122,13 +122,13 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
 
     @Override
     public void execute(Long dataflowId, Long datasetId, String datasetSchemaId, String tableName, String tableSchemaId, String ruleId, Long dataProviderId,
-                        Long taskId, boolean createParquetWithSQL, String preparationCode) throws DremioValidationException {
+                        Long taskId, boolean createParquetWithSQL, String preparationCode, boolean useViews) throws DremioValidationException {
         try {
             //if the dataset to validate is of reference type, then the table path should be changed
             //TODO Fix the resolver
             S3PathResolver dataTableResolver = new S3PathResolver(dataflowId, dataProviderId != null ? dataProviderId : 0, datasetId, tableName);
             dataTableResolver.setPreparationCode(preparationCode);
-            String path = getPath(datasetId, preparationCode);
+            String path = getPath(datasetId, preparationCode, useViews);
 
             // Draw validateAsProviderCode from task json if exists.
             String validateAsProviderCode = resolveValidateAsProviderCodeFromTask(taskId);
@@ -148,6 +148,7 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
             S3PathResolver validationResolver = new S3PathResolver(dataflowId, dataProviderId != null ? dataProviderId : 0, datasetId, S3_VALIDATION);
             validationResolver.setPreparationCode(preparationCode);
             RuleVO ruleVO = rulesService.findRule(datasetSchemaId, ruleId);
+            LOG.info("useViews {} used for ruleId {} ruleName {} datasetId {}", useViews, ruleId, ruleVO.getRuleName(), datasetId);
             deleteRuleFolderIfExists(validationResolver, ruleVO);
             int startIndex = ruleVO.getWhenConditionMethod().indexOf(OPEN_PARENTHESIS);
             int endIndex = ruleVO.getWhenConditionMethod().indexOf(CLOSE_PARENTHESIS);
@@ -229,6 +230,27 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
         }
         else {
             path = S3_VIEWS_TABLE_AS_FOLDER_QUERY_PATH;
+        }
+        return path;
+    }
+
+    /**
+     * Resolves the main rule-evaluation table path, gated by whether typed Dremio views are
+     * enabled for this dataflow/dataset. Only used by the top-level query (record count and
+     * getRecordIds) - getModifiedQuery/getDheckIntegrityConstraintRecordIds keep using the
+     * 2-arg getPath above, unrelated to rule evaluation.
+     */
+    private String getPath(Long datasetId, String preparationCode, boolean useViews) {
+        DataSetMetabaseVO dataset = dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
+        String path;
+        if (dataset.getDatasetTypeEnum().equals(DatasetTypeEnum.REFERENCE)) {
+            path = S3_DATAFLOW_REFERENCE_QUERY_PATH;
+        }
+        else if (StringUtils.isNotBlank(preparationCode)) {
+            path = S3_PREPARATION_TABLE_AS_FOLDER_QUERY_PATH;
+        }
+        else {
+            path = useViews ? S3_VIEWS_TABLE_AS_FOLDER_QUERY_PATH : S3_TABLE_AS_FOLDER_QUERY_PATH;
         }
         return path;
     }
