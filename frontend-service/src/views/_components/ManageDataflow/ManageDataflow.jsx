@@ -491,7 +491,7 @@ export const ManageDataflow = ({
               <h4 className={styles.addUserTextLabel}>{resourcesContext.messages['addUserTextToReceiptEdit']}</h4>
               <InputTextarea
                 className={`class`}
-                collapsedHeight={75}
+                collapsedHeight={150}
                 hasMaxCharCounter={true}
                 id="createDataCollectionText"
                 key="createDataCollectionText"
@@ -501,7 +501,6 @@ export const ManageDataflow = ({
                 onFocus={e => {
                   setAddInitialUserText(e.target.value);
                 }}
-                onKeyDown={e => onKeyChange(e)}
                 placeholder={resourcesContext.messages['addUserTextToReceiptNew']}
                 value={addUserText}
               />
