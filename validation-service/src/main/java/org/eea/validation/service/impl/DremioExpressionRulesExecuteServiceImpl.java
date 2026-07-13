@@ -128,7 +128,7 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
 
     @Override
     public void execute(Long dataflowId, Long datasetId, String datasetSchemaId, String tableName, String tableSchemaId, String ruleId, Long dataProviderId,
-                        Long taskId, boolean createParquetWithSQL, String preparationCode) throws DremioValidationException {
+                        Long taskId, boolean createParquetWithSQL, String preparationCode, boolean useViews) throws DremioValidationException {
         try {
             //TODO Fix preparationCode
             //if the dataset to validate is of reference type, then the table path should be changed
@@ -141,7 +141,7 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
             } else if (StringUtils.isNotBlank(preparationCode)) {
                 path = S3_PREPARATION_TABLE_AS_FOLDER_QUERY_PATH;
             } else {
-                path = S3_TABLE_AS_FOLDER_QUERY_PATH;
+                path = S3_VIEWS_TABLE_AS_FOLDER_QUERY_PATH;
             }
             String tablePath = s3Service.getTableAsFolderQueryPath(dataTableResolver, path);
             String numberOfRecordsQuery = "SELECT COUNT (*) FROM " + tablePath;

@@ -62,7 +62,8 @@ public class ExecuteSqlValidationCommandDL extends ExecuteValidationCommand {
         final boolean createParquetWithSQL = Boolean.valueOf(String.valueOf(eeaEventVO.getData().get("createParquetWithSQL")));
         final Object tmp = eeaEventVO.getData().get("preparationCode");
         final String preparationCode = tmp == null ? null : String.valueOf(tmp);
-        dremioRulesExecuteService.execute(dataflowId, datasetId, datasetSchemaId, tableName, tableSchemaId, ruleId, dataProviderId, taskId, createParquetWithSQL, preparationCode);
+        final boolean useViews = Boolean.valueOf(String.valueOf(eeaEventVO.getData().get("useViews")));
+        dremioRulesExecuteService.execute(dataflowId, datasetId, datasetSchemaId, tableName, tableSchemaId, ruleId, dataProviderId, taskId, createParquetWithSQL, preparationCode, useViews);
       };
     } catch (Exception e) {
       LOG.error("Unexpected error! Error executing event COMMAND_VALIDATE_DL_WITH_SQL. Message: {}", e.getMessage());
