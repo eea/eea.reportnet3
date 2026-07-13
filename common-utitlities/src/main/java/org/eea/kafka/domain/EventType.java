@@ -289,6 +289,10 @@ public enum EventType {
   ADD_DATASET_SCHEMA_SNAPSHOT_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "add_dataset_schema_snapshot_failed_event", true),
 
+  /** The snapshot date change through historic release view failed event. */
+  SNAPSHOT_DATE_CHANGE_FAIL_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "snapshot_date_change_failed_event", true),
+
   /** The copy data to eudataset completed event. */
   COPY_DATA_TO_EUDATASET_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "copy_data_to_eudataset_completed_event", true),
@@ -868,6 +872,21 @@ public enum EventType {
 
   DOWNLOAD_GEOMETRY_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
           "download_geometry_completed_event", true),
+
+  ANOTHER_PREPARATION_DATASET_CREATION_IS_RUNNING_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+          "another_preparation_dataset_creation_is_running_failed_event", true),
+
+  PREPARATION_DATASET_CREATION_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+          "preparation_dataset_creation_completed_event", true),
+
+  PREPARATION_DATASET_CREATION_STARTED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+          "preparation_dataset_creation_started_event", true),
+
+  PREPARATION_DATASET_CREATION_HAS_EMPTY_QUEUE_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+          "preparation_dataset_creation_has_empty_queue_event", true),
+
+  PREPARATION_DATASET_CREATION_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+          "preparation_dataset_creation_failed_event", true),
 
   DOWNLOAD_GEOMETRY_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
           "download_geometry_failed_event", true);

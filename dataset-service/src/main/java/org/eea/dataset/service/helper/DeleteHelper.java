@@ -129,7 +129,7 @@ public class DeleteHelper {
       LOG.info("Deleting table {} from dataset {}", tableSchemaId, datasetId);
 
       // --- EDITING LOCK CHECK ---
-      String currentEditor =  (datasetTableService.getDatasetEditingUsername(datasetId));
+      String currentEditor =  (datasetTableService.getDatasetEditingUsername(datasetId, null));
       if (currentEditor != null) {
         LOG.error("Cannot delete for datasetId {} job id {} because it is locked for editing by user {}",
                 datasetId, jobId, currentEditor);
@@ -200,7 +200,7 @@ public class DeleteHelper {
       LOG.info("Deleting data from dataset {}", datasetId);
 
       // --- EDITING LOCK CHECK ---
-     String currentEditor =  (datasetTableService.getDatasetEditingUsername(datasetId));
+     String currentEditor =  (datasetTableService.getDatasetEditingUsername(datasetId, null));
       if (currentEditor != null) {
         LOG.error("Cannot delete for datasetId {} because it is locked for editing by user {}",
                 datasetId,currentEditor);
@@ -274,7 +274,7 @@ public class DeleteHelper {
       DataSetMetabaseVO dataset = datasetMetabaseService.findDatasetMetabase(datasetId);
       String datasetSchemaId = dataset.getDatasetSchema();
       Long providerId = datasetService.getDataProviderIdById(datasetId);
-      ImportFileInDremioInfo importFileInDremioInfo = new ImportFileInDremioInfo(null, datasetId, dataflowId, providerId, null, null, true, null, integrationId, null);
+      ImportFileInDremioInfo importFileInDremioInfo = new ImportFileInDremioInfo(null, datasetId, dataflowId, providerId, null, null, true, null, integrationId, null, null);
       try {
         parquetConverterService.deleteAllDataBeforeImport(importFileInDremioInfo, datasetSchemaId, dataset);
       } catch (Exception e) {

@@ -3,6 +3,8 @@ package org.eea.validation.io.notification.events;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.apache.commons.lang.StringUtils;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
@@ -82,6 +84,11 @@ public class ValidationFinishedEvent implements NotificableEventHandler {
         dataflowControllerZuul.getMetabaseById(dataSetMetabaseVO.getDataflowId());
     String dataflowName = dataFlowVO.getName();
 
+    String preparationCode = notificationVO.getPreparationCode();
+    String preparationDatasetMessagePart = (StringUtils.isNotBlank(preparationCode))
+            ? " for preparation dataset " + preparationCode
+            : "";
+
     Map<String, Object> notification = new HashMap<>();
     notification.put("user", notificationVO.getUser());
     notification.put("datasetId", datasetId);
@@ -90,6 +97,8 @@ public class ValidationFinishedEvent implements NotificableEventHandler {
     notification.put("dataflowName", dataflowName);
     notification.put("dataProviderName", dataProviderName);
     notification.put("type", type);
+    notification.put("preparationCode", preparationCode);
+    notification.put("preparationDatasetMessagePart", preparationDatasetMessagePart);
     notification.put("typeStatus", dataFlowVO.getStatus().toString());
     return notification;
   }

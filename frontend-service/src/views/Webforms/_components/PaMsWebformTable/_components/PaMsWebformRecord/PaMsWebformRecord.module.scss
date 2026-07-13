@@ -101,10 +101,22 @@
   .fieldsBlock {
     display: flex;
     justify-content: space-between;
-    max-width: 90%;
+    max-width: 100%;
     align-items: flex-end;
+    position:relative;
     > div:has(.label3){
       align-self: flex-start;
+    }
+    &:has(> div:nth-child(2)) :global(.p-inputtext) {
+      max-height: 51px;
+      min-height:0;
+    }
+    :global(.webformCharacterCount) {
+      position: absolute !important;
+      bottom: -21px;
+      right: 0;
+      margin-bottom: 0;
+      top: auto !important;
     }
     > * {
       margin-left: 0.5rem;
@@ -123,6 +135,7 @@
         margin-right: 0;
       }
       .template {
+        position:relative;
         color: var(--general-text-color);
         width: 100%;
       }
@@ -200,7 +213,7 @@
     }
 
     .template {
-      width: 90%;
+      width: 100%;
 
       .nonExistField {
         color: var(--errors);
@@ -311,7 +324,7 @@
     }
 
     .template {
-      width: 90%;
+      width: 100%;
 
       .nonExistField {
         color: var(--errors);

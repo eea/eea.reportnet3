@@ -1349,7 +1349,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       }
       // if the user is admin can release without validations
       if (!isAdmin() || validate) {
-        validationControllerZuul.validateDataSetData(dataset.getId(), true, jobId);
+        validationControllerZuul.validateDataSetData(dataset.getId(), true, jobId, null);
       } else {
         if (jobId!=null) {
           jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FINISHED);
@@ -1808,6 +1808,18 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
           snapshotsToUpdate.add(sn);
         }
       }
+    } else {
+      DataFlowVO dataFlowVO = dataflowControllerZuul.getMetabaseById(dataflowId);
+      LOG.error("Snapshot ID {} doesn't have a job_id linked to it. The date did not change for dataset {}.", snapshotId, datasetMetabase.getDataSetName());
+      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.SNAPSHOT_DATE_CHANGE_FAIL_EVENT, null,
+          NotificationVO.builder()
+              .user(SecurityContextHolder.getContext().getAuthentication().getName())
+              .dataflowId(dataflowId)
+              .dataflowName(dataFlowVO.getName())
+              .providerId(providerId)
+              .build());
+
+      throw new EEAException(EEAErrorMessage.UPDATING_SNAPSHOT);
     }
 
     SimpleDateFormat descFmt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");

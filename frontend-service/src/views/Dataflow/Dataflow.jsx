@@ -1,5 +1,5 @@
 import { Fragment, useContext, useEffect, useReducer, useRef, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 
 import dayjs from 'dayjs';
 import first from 'lodash/first';
@@ -62,10 +62,12 @@ import { getUrl } from 'repositories/_utils/UrlUtils';
 import { TextByDataflowTypeUtils } from 'views/_functions/Utils/TextByDataflowTypeUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 import { Calendar } from 'views/_components/Calendar';
+import { ManagePreparationSets } from './_components/ManagePreparationSets/ManagePreparationSets';
+import { ManagePreparationSetsService } from 'services/ManagePreparationSetsService';
 
 export const Dataflow = () => {
   const navigate = useNavigate();
-  const { dataflowId, representativeId } = useParams();
+  const { dataflowId, representativeId, code } = useParams();
   const [isUpdatingUserText, setIsUpdatingUserText] = useState(false);
 
   const exportImportMenuRef = useRef(null);
@@ -90,6 +92,7 @@ export const Dataflow = () => {
     description: '',
     designDatasetSchemas: [],
     formHasLeadReporters: false,
+    hasActiveLocks: false,
     hasCustodianPermissions: false,
     hasEnableEditingDatasets: false,
     hasReporters: false,
@@ -101,6 +104,7 @@ export const Dataflow = () => {
     isBusinessDataflowDialogVisible: false,
     isCitizenScienceDataflowDialogVisible: false,
     isCopyDataCollectionToEUDatasetLoading: false,
+    isCreatingPreparationSets: false,
     isDataSchemaCorrect: [],
     isDatasetsInfoDialogVisible: false,
     isDataUpdated: false,
@@ -114,6 +118,7 @@ export const Dataflow = () => {
     isFetchingData: false,
     isImportLeadReportersVisible: false,
     isImportAndReplaceLeadReportersVisible: false,
+    isManagePreparationSetsDialogVisible: false,
     isManageReportersDialogVisible: false,
     isManageRequestersDialogVisible: false,
     isManageRolesDialogVisible: false,
@@ -140,11 +145,13 @@ export const Dataflow = () => {
     isValidateReportersDialogVisible: false,
     name: '',
     obligations: {},
+    preparationSetsList: null,
     officialReporting: false,
     representative: {},
     representativesImport: false,
     restrictFromPublic: false,
     restrictFromPublicIsUpdating: {},
+    selectedPreparationSet: null,
     showPublicInfo: false,
     status: '',
     updatedDatasetSchema: [],
@@ -189,6 +196,8 @@ export const Dataflow = () => {
 
   const isLeadDesigner = isSteward || isCustodian;
 
+  const rolesLoaded = dataflowState.userRoles.length > 0;
+
   const isStewardSupport = userContext.hasContextAccessPermission(config.permissions.prefixes.DATAFLOW, dataflowId, [
     config.permissions.roles.STEWARD_SUPPORT.key
   ]);
@@ -200,7 +209,7 @@ export const Dataflow = () => {
   const isDesign = dataflowState.status === config.dataflowStatus.DESIGN;
 
   const isInsideACountry =
-    !isNil(representativeId) || (uniqDataProviders.length === 1 && !isLeadDesigner && !isObserver);
+    rolesLoaded && (!isNil(representativeId) || (uniqDataProviders.length === 1 && !isLeadDesigner && !isObserver));
 
   const isOpenStatus = dataflowState.status === config.dataflowStatus.OPEN;
 
@@ -266,6 +275,43 @@ export const Dataflow = () => {
     }
   }, []);
 
+  const location = useLocation();
+
+  // Reset preparation sets when navigating back to dataflow before provider is resolved
+  useEffect(() => {
+    const dataflowPath = getUrl(routes.DATAFLOW, { dataflowId }, true);
+
+    if (location.pathname === dataflowPath && !dataProviderId) {
+      setPreparationSetsList(null);
+    }
+  }, [location.pathname, dataflowId]);
+
+  useEffect(() => {
+    if (!dataProviderId || !dataflowState.data.bigData) return;
+
+    getPreparationSets({ code });
+  }, [dataProviderId, dataflowState.data.bigData, code]);
+
+  const getPreparationSets = async ({ code, showPageLoader = true } = {}) => {
+    try {
+      showPageLoader && setIsPageLoading(true);
+      const preparationList = await ManagePreparationSetsService.getPreparationSets({
+        dataflowId,
+        providerId: dataProviderId,
+        code
+      });
+      setHasActiveLocks(!isEmpty(preparationList?.activeLocks));
+      code && setSelectedPreparationSet(preparationList?.preparationDatasetList[0] ?? null);
+      !code && setPreparationSetsList(preparationList?.preparationDatasetList);
+      return preparationList;
+    } catch (error) {
+      console.error(error);
+      notificationContext.add({ type: 'GET_PREPARATION_SETS_ERROR' }, true);
+    } finally {
+      showPageLoader && setIsPageLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (dataflowState.dataCollectionDueDate) {
       dataflowDispatch({
@@ -281,10 +327,12 @@ export const Dataflow = () => {
 
   useBreadCrumbs({
     currentPage: CurrentPage.DATAFLOW,
+    code,
     dataflowId,
     dataflowStateData: dataflowState.data,
     dataflowType: dataflowState.dataflowType,
-    representativeId
+    representativeId,
+    selectedPreparationSet: dataflowState.selectedPreparationSet
   });
 
   useEffect(() => {
@@ -308,6 +356,23 @@ export const Dataflow = () => {
       setIsDownloadingUsers(false);
     }
   }, [notificationContext.hidden]);
+
+  const hasCreatePreparationSetsNotification = list =>
+    list?.some(
+      notification =>
+        [
+          'PREPARATION_DATASET_CREATION_FAILED_EVENT',
+          'PREPARATION_DATASET_CREATION_HAS_EMPTY_QUEUE_EVENT',
+          'PREPARATION_DATASET_CREATION_COMPLETED_EVENT'
+        ].includes(notification.key) && notification?.content?.providerId === dataProviderId
+    );
+
+  useEffect(() => {
+    if (hasCreatePreparationSetsNotification(notificationContext.toShow)) {
+      setIsCreatingPreparationSets(false);
+      getPreparationSets();
+    }
+  }, [notificationContext.toShow]);
 
   const exportImportMenuItems = [
     {
@@ -433,6 +498,34 @@ export const Dataflow = () => {
     dataflowDispatch({
       type: 'SET_IS_RIGHT_PERMISSIONS_CHANGED',
       payload: { isRightPermissionsChanged }
+    });
+  };
+
+  const setIsCreatingPreparationSets = isCreating => {
+    dataflowDispatch({
+      type: 'SET_IS_CREATING_PREPARATION_SETS',
+      payload: { isCreating }
+    });
+  };
+
+  const setPreparationSetsList = list => {
+    dataflowDispatch({
+      type: 'SET_PREPARATION_SETS_LIST',
+      payload: { preparationSetsList: list }
+    });
+  };
+
+  const setHasActiveLocks = hasLocks => {
+    dataflowDispatch({
+      type: 'SET_HAS_ACTIVE_LOCKS',
+      payload: { hasLocks }
+    });
+  };
+
+  const setSelectedPreparationSet = set => {
+    dataflowDispatch({
+      type: 'SET_SELECTED_SET',
+      payload: set
     });
   };
 
@@ -604,6 +697,18 @@ export const Dataflow = () => {
       console.error('DatasetDesigner - onUpdateDescription.', error);
     } finally {
       setIsUpdatingUserText(false);
+    }
+  };
+
+  const onCreatePreparationSets = async () => {
+    setIsCreatingPreparationSets(true);
+    try {
+      await ManagePreparationSetsService.createPreparationSets({
+        dataflowId: dataflowState.id,
+        providerId: dataProviderId
+      });
+    } catch (error) {
+      console.error('Dataflow - onCreatePreparationSets.', error);
     }
   };
 
@@ -1072,6 +1177,10 @@ export const Dataflow = () => {
     manageDialogs('isReleaseSilentDialogVisible', true);
   };
 
+  const onShowManagePreparationSetsDialog = visible => {
+    manageDialogs('isManagePreparationSetsDialogVisible', visible);
+  };
+
   const onConfirmExport = async () => {
     try {
       dataflowDispatch({ type: 'SET_IS_EXPORTING', payload: true });
@@ -1349,24 +1458,32 @@ export const Dataflow = () => {
     if (isNil(representativeId)) {
       return (
         <BigButtonList
+          bigData={dataflowState.data.bigData}
           className="dataflow-big-buttons-help-step"
+          code={code}
           dataflowState={dataflowState}
           dataflowType={dataflowState.dataflowType}
           dataProviderId={dataProviderId}
           handleRedirect={handleRedirect}
+          hasActiveLocks={dataflowState.hasActiveLocks}
+          isCreatingPreparationSets={dataflowState.isCreatingPreparationSets}
           isLeadReporter={isLeadReporter}
           isLeadReporterOfCountry={isLeadReporterOfCountry}
           isUpdatingUserText={isUpdatingUserText}
           manageDialogs={manageDialogs}
           onCleanUpReceipt={onCleanUpReceipt}
+          onCreatePreparationSets={onCreatePreparationSets}
           onOpenReleaseConfirmDialog={onOpenReleaseConfirmDialog}
           onSaveName={onSaveName}
+          onShowManagePreparationSetsDialog={onShowManagePreparationSetsDialog}
           onShowManageReportersDialog={onShowManageReportersDialog}
           onUpdateAddUserText={onUpdateAddUserText}
           onUpdateData={setIsDataUpdated}
+          preparationSetsList={dataflowState.preparationSetsList}
           setIsCopyDataCollectionToEUDatasetLoading={setIsCopyDataCollectionToEUDatasetLoading}
           setIsExportEUDatasetLoading={setIsExportEUDatasetLoading}
           setIsReceiptLoading={setIsReceiptLoading}
+          setSelectedPreparationSet={setSelectedPreparationSet}
           setSelectedRepresentative={setSelectedRepresentative}
           setUpdatedDatasetSchema={setUpdatedDatasetSchema}
         />
@@ -1374,18 +1491,26 @@ export const Dataflow = () => {
     } else {
       return (
         <BigButtonListRepresentative
+          bigData={dataflowState.data.bigData}
+          code={code}
           dataflowState={dataflowState}
           dataProviderId={dataProviderId}
           handleRedirect={handleRedirect}
+          hasActiveLocks={dataflowState.hasActiveLocks}
           isAdmin={isAdmin}
+          isCreatingPreparationSets={dataflowState.isCreatingPreparationSets}
           isCustodian={isCustodian}
           isLeadReporterOfCountry={isLeadReporterOfCountry}
           manageDialogs={manageDialogs}
           onCleanUpReceipt={onCleanUpReceipt}
+          onCreatePreparationSets={onCreatePreparationSets}
           onOpenReleaseConfirmDialog={onOpenReleaseConfirmDialog}
           onOpenSilentReleaseConfirmDialog={onOpenSilentReleaseConfirmDialog}
+          onShowManagePreparationSetsDialog={onShowManagePreparationSetsDialog}
+          preparationSetsList={dataflowState.preparationSetsList}
           representativeId={representativeId}
           setIsReceiptLoading={setIsReceiptLoading}
+          setSelectedPreparationSet={setSelectedPreparationSet}
         />
       );
     }
@@ -1406,9 +1531,15 @@ export const Dataflow = () => {
       subtitle = dataflowState.data.sncData
         ? dataflowState.data.bigData
           ? TextUtils.parseText(resourcesContext.messages['sncBigDataDataflowNamed'], {
-              name: dataflowState.data.name
+              name: code ? dataflowState?.selectedPreparationSet?.datasetName || '' : dataflowState.data.name
             })
-          : TextUtils.parseText(resourcesContext.messages['sncCitusDataflowNamed'], { name: dataflowState.data.name })
+          : TextUtils.parseText(resourcesContext.messages['sncCitusDataflowNamed'], {
+              name: code ? dataflowState?.selectedPreparationSet?.datasetName || '' : dataflowState.data.name
+            })
+        : dataflowState.data.bigData
+        ? TextUtils.parseText(resourcesContext.messages['bigDataDataflowNamed'], {
+            name: dataflowState.data.name
+          })
         : dataflowState.data.name;
     } else {
       subtitle = dataflowState.data.sncData
@@ -1431,7 +1562,9 @@ export const Dataflow = () => {
   const getTitle = () => {
     if (parseInt(representativeId) !== 0) {
       if (isInsideACountry && !isNil(country) && country.length > 0) {
-        return `${resourcesContext.messages['dataflow']} - ${country}`;
+        return `${resourcesContext.messages['dataflow']} - ${
+          code ? dataflowState?.selectedPreparationSet?.datasetName || '' : country
+        }`;
       } else {
         return dataflowState.data.name;
       }
@@ -1481,6 +1614,17 @@ export const Dataflow = () => {
             visible={dataflowState.isReleaseSilentDialogVisible}>
             {resourcesContext.messages['confirmSilentReleaseQuestion']}
           </ConfirmDialog>
+        )}
+
+        {dataflowState.isManagePreparationSetsDialogVisible && (
+          <ManagePreparationSets
+            dataflowId={dataflowId}
+            isDialogVisible={dataflowState.isManagePreparationSetsDialogVisible}
+            onCloseDialog={() => onShowManagePreparationSetsDialog(false)}
+            onGetPreparationSetsList={getPreparationSets}
+            preparationSetsList={dataflowState.preparationSetsList}
+            providerId={dataProviderId}
+          />
         )}
 
         {hasCustodianPermissions && dataflowState.isManageRolesDialogVisible && (

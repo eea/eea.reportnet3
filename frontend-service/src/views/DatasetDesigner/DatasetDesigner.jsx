@@ -719,7 +719,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
     const action = 'DATASET_VALIDATE';
     actionsContext.testProcess(datasetId, action);
     try {
-      await DatasetService.validate(datasetId);
+      await DatasetService.validate({ datasetId });
       notificationContext.add(
         {
           type: 'VALIDATE_DATA_INIT',
@@ -761,7 +761,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
     const action = 'DATASET_VALIDATE';
     actionsContext.testProcess(datasetId, action);
     try {
-      await DatasetService.validateAsProvider(datasetId, dataflowId, providerId);
+      await DatasetService.validateAsProvider({ datasetId, dataflowId, providerId });
       notificationContext.add(
         {
           type: 'VALIDATE_DATA_INIT',
@@ -807,7 +807,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
     actionsContext.testProcess(datasetId, action);
     try {
       notificationContext.add({ type: 'DELETE_DATASET_DATA_INIT' });
-      await DatasetService.deleteData(datasetId, arePrefilledTablesDeleted);
+      await DatasetService.deleteData({ datasetId, arePrefilledTablesDeleted });
       onResetDelete();
     } catch (error) {
       if (error.response.status === 423) {
@@ -1025,6 +1025,10 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
     ['VALIDATE_ALL_RULES_COMPLETED_EVENT', 'DISABLE_NAMES_TYPES_RULES_ERROR_EVENT', 'VALIDATE_ALL_QCS_ERROR_EVENT'],
     setAllSqlValidationRunning,
     false
+  );
+
+  useCheckNotifications(['PARQUET_TO_ICEBERG_CONVERSION_COMPLETED_EVENT'], () =>
+    notificationContext.add({ type: 'YOU_ONLY_HAVE_LIMITED_TIME' }, true)
   );
 
   const onHideValidationsDialog = () => {
@@ -1393,6 +1397,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
     } else {
       try {
         await DatasetService.enableEditing({ datasetId });
+        notificationContext.add({ type: 'YOU_ONLY_HAVE_LIMITED_TIME' }, true);
       } catch (error) {
         console.error('Dataset - toggleEditMode.', error);
       } finally {
@@ -1592,7 +1597,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
   const onDownloadValidations = async () => {
     setIsDownloadingValidations(true);
     try {
-      await ValidationService.generateShowValidationsFile(datasetId);
+      await ValidationService.generateShowValidationsFile({ datasetId });
       notificationContext.add({ type: 'DOWNLOAD_VALIDATIONS_START' });
     } catch (error) {
       console.error('DatasetDesigner - onDownloadValidations.', error);
@@ -1833,7 +1838,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
       </label>
     </div>
   );
-  
+
   const sortedWebformOptions = useMemo(() => {
     if (!webformOptions?.length) return [];
     const [notSelected, ...rest] = webformOptions;

@@ -40,6 +40,7 @@ export const TabsSchema = ({
   onLoadTableData,
   onRestoreData,
   onTabChange,
+  preparationSetCode,
   reporting,
   selectedRuleId,
   selectedRuleLevelError,
@@ -55,19 +56,24 @@ export const TabsSchema = ({
   const resourcesContext = useContext(ResourcesContext);
 
   const getRightIcon = tab => {
-    
-    // The priority for the Icon display is Blockers > Errors > Warnings > Infos, so if a tab has blockers, only the blockers tooltip will be shown, if it has errors but no blockers, only the errors tooltip will be shown and so on.
-    if (tab.hasBlockers) {
-      return config.icons['blocker'];
-    }
-    if (tab.hasErrors) {
-      return config.icons['errorCircle'];
-    }
-    if (tab.hasWarnings) {
-      return config.icons['warning'];
-    }
-    if (tab.hasInfos) {
-      return config.icons['info'];
+    // On preparation sets, the error/warning/info/blockers icons on Tabs will not be displayed.
+    if (preparationSetCode) {
+      return null;
+
+    } else {
+      // The priority for the Icon display is Blockers > Errors > Warnings > Infos, so if a tab has blockers, only the blockers tooltip will be shown, if it has errors but no blockers, only the errors tooltip will be shown and so on.
+      if (tab.hasBlockers) {
+        return config.icons['blocker'];
+      }
+      if (tab.hasErrors) {
+        return config.icons['errorCircle'];
+      }
+      if (tab.hasWarnings) {
+        return config.icons['warning'];
+      }
+      if (tab.hasInfos) {
+        return config.icons['info'];
+      }
     }
   };
 
@@ -128,6 +134,7 @@ export const TabsSchema = ({
                   onHideSelectGroupedValidation={onHideSelectGroupedValidation}
                   onLoadTableData={onLoadTableData}
                   onRestoreData={onRestoreData}
+                  preparationSetCode={preparationSetCode}
                   reporting={reporting}
                   selectedRuleId={selectedRuleId}
                   selectedRuleLevelError={selectedRuleLevelError}

@@ -8,6 +8,7 @@ import org.eea.datalake.service.DremioHelperService;
 import org.eea.datalake.service.S3Service;
 import org.eea.datalake.service.model.DremioApiJob;
 import org.eea.datalake.service.model.DremioItemTypeEnum;
+import org.eea.datalake.service.model.PreparationPathRegistry;
 import org.eea.datalake.service.model.S3PathResolver;
 import org.eea.exception.DremioApiException;
 import org.eea.exception.EEAException;
@@ -24,13 +25,11 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import  java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.Callable;
-import java.util.stream.Collectors;
 
 import static org.eea.utils.LiteralConstants.*;
 
@@ -86,16 +85,24 @@ public class DremioHelperServiceImpl implements DremioHelperService {
     @Override
     public boolean checkFolderPromoted(S3PathResolver s3PathResolver, String folderName) {
         DremioDirectoryItemsResponse directoryItems = getDirectoryItems(s3PathResolver, folderName);
-        if (directoryItems!=null) {
+        String path = PreparationPathRegistry.resolve(s3PathResolver.getPath(), s3PathResolver.getPreparationCode());
+        if (directoryItems != null) {
             Integer itemPosition;
-            if (S3_IMPORT_FILE_PATH.equals(s3PathResolver.getPath())) {
+            if (S3_IMPORT_FILE_PATH.equals(path)) {
                 itemPosition = 8;
-            } else if (S3_DATAFLOW_REFERENCE_FOLDER_PATH.equals(s3PathResolver.getPath())) {
+            } else if (S3_PREPARATION_IMPORT_FILE_PATH.equals(path)) {
+                itemPosition = 9;
+            } else if (S3_DATAFLOW_REFERENCE_FOLDER_PATH.equals(path)) {
                 itemPosition = 4;
-            } else if (S3_EU_SNAPSHOT_ROOT_PATH.equals(s3PathResolver.getPath())) {
+            } else if (S3_EU_SNAPSHOT_ROOT_PATH.equals(path)) {
                 itemPosition = 5;
+            } else if (S3_PREPARATION_TABLE_NAME_FOLDER_PATH.equals(path)
+            || S3_PREPARATION_TABLE_AS_FOLDER_QUERY_PATH.equals(path)
+            || S3_PREPARATION_VALIDATION_TABLE_PATH.equals(path)
+            || S3_PREPARATION_TABLE_NAME_WITH_PARQUET_FOLDER_PATH.equals(path)) {
+                itemPosition = 7;
             } else {
-                itemPosition = 6;
+                itemPosition = 6; //this is for S3_TABLE_NAME_FOLDER_PATH
             }
 
             Optional<DremioDirectoryItem> itemOptional = directoryItems.getChildren().stream().filter(di -> di.getPath().get(itemPosition).equals(folderName)).findFirst();
@@ -114,16 +121,22 @@ public class DremioHelperServiceImpl implements DremioHelperService {
     public DremioDirectoryItemsResponse getDirectoryItems(S3PathResolver s3PathResolver, String folderName) {
         String bucketName = (BooleanUtils.isTrue(s3PathResolver.getIsIcebergTable())) ? S3_ICEBERG_BUCKET_PATH : S3_DEFAULT_BUCKET_PATH;
         String directoryPath = null;
-        if(S3_IMPORT_FILE_PATH.equals(s3PathResolver.getPath())) {
+        if (S3_IMPORT_FILE_PATH.equals(s3PathResolver.getPath())) {
             directoryPath = bucketName + "/" + s3Service.getTableAsFolderQueryPath(s3PathResolver,
-                S3_IMPORT_TABLE_NAME_FOLDER_PATH);
+                    S3_IMPORT_TABLE_NAME_FOLDER_PATH);
+        }else if (S3_PREPARATION_IMPORT_FILE_PATH.equals(s3PathResolver.getPath())) {
+            directoryPath = bucketName + "/" + s3Service.getTableAsFolderQueryPath(s3PathResolver,
+                    S3_PREPARATION_IMPORT_TABLE_NAME_FOLDER_PATH
+                    );
         } else if (S3_TABLE_NAME_ROOT_DC_FOLDER_PATH.equals(s3PathResolver.getPath())
-            || S3_EU_SNAPSHOT_ROOT_PATH.equals(s3PathResolver.getPath())) {
+                || S3_EU_SNAPSHOT_ROOT_PATH.equals(s3PathResolver.getPath())) {
             directoryPath = bucketName + "/" + s3Service.getS3Path(s3PathResolver);
         } else if (S3_DATAFLOW_REFERENCE_FOLDER_PATH.equals(s3PathResolver.getPath())) {
             directoryPath = bucketName + "/" + s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_REFERENCE_FOLDER_PATH);
+        } else if (S3_PREPARATION_TABLE_NAME_FOLDER_PATH.equals(s3PathResolver.getPath())) {
+            directoryPath = bucketName + "/" + s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_PREPARATION_PROVIDER_PATH);
         } else {
-            directoryPath = bucketName + "/" + s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_PROVIDER_PATH);
+            directoryPath = bucketName + "/" + s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_PROVIDER_PATH); // this is for S3_TABLE_NAME_FOLDER_PATH
         }
         DremioDirectoryItemsResponse directoryItems = null;
         try {
@@ -131,12 +144,11 @@ public class DremioHelperServiceImpl implements DremioHelperService {
         } catch (FeignException e) {
             //retry call if there is an authentication error
             String errorMessage = "Could not retrieve directory items for datasetId " + s3PathResolver.getDatasetId() + " and table " + s3PathResolver.getTableName();
-            if (e.status()== HttpStatus.UNAUTHORIZED.value()) {
+            if (e.status() == HttpStatus.UNAUTHORIZED.value()) {
                 token = this.getAuthToken();
                 try {
                     directoryItems = dremioApiController.getDirectoryItems(token, directoryPath);
-                }
-                catch (Exception e2){
+                } catch (Exception e2) {
                     throw new DremioApiException(errorMessage);
                 }
             } else {
@@ -154,12 +166,16 @@ public class DremioHelperServiceImpl implements DremioHelperService {
             Integer itemPosition;
             if (S3_IMPORT_FILE_PATH.equals(s3PathResolver.getPath())) {
                 itemPosition = 8;
+            } else if (S3_PREPARATION_IMPORT_FILE_PATH.equals(s3PathResolver.getPath())) {
+                itemPosition = 9;
             } else if (S3_DATAFLOW_REFERENCE_FOLDER_PATH.equals(s3PathResolver.getPath())) {
                 itemPosition = 4;
             } else if (S3_EU_SNAPSHOT_ROOT_PATH.equals(s3PathResolver.getPath())) {
                 itemPosition = 5;
+            } else if (S3_PREPARATION_TABLE_NAME_FOLDER_PATH.equals(s3PathResolver.getPath())) {
+                itemPosition = 7;
             } else {
-                itemPosition = 6;
+                itemPosition = 6; //this is for S3_TABLE_NAME_FOLDER_PATH
             }
             Optional<DremioDirectoryItem> itemOptional = directoryItems.getChildren().stream().filter(di -> di.getPath().get(itemPosition).equals(folderName)).findFirst();
             if (itemOptional.isPresent()) {
@@ -179,6 +195,10 @@ public class DremioHelperServiceImpl implements DremioHelperService {
         DremioPromotionRequestBody requestBody;
         if (S3_IMPORT_FILE_PATH.equals(s3PathResolver.getPath())) {
             directoryPath = S3_DEFAULT_BUCKET_PATH + "/" + s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_IMPORT_FILE_PATH);
+            String[] path = directoryPath.split("/");
+            requestBody = new DremioCSVPromotionRequestBody(ENTITY_TYPE, DREMIO_CONSTANT + directoryPath, path, DATASET_TYPE, new DremioCSVPromotionRequestBody.Format(CSV_FORMAT_TYPE, true));
+        } else if (S3_PREPARATION_IMPORT_FILE_PATH.equals(s3PathResolver.getPath())) {
+            directoryPath = S3_DEFAULT_BUCKET_PATH + "/" + s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_PREPARATION_IMPORT_FILE_PATH);
             String[] path = directoryPath.split("/");
             requestBody = new DremioCSVPromotionRequestBody(ENTITY_TYPE, DREMIO_CONSTANT + directoryPath, path, DATASET_TYPE, new DremioCSVPromotionRequestBody.Format(CSV_FORMAT_TYPE, true));
         } else if (S3_TABLE_NAME_ROOT_DC_FOLDER_PATH.equals(s3PathResolver.getPath()) || S3_EU_SNAPSHOT_ROOT_PATH.equals(s3PathResolver.getPath())) {
@@ -383,11 +403,13 @@ public class DremioHelperServiceImpl implements DremioHelperService {
     @Override
     public long getRowCount(String tablePath) throws Exception {
         String headerName = "myRowCount";
+
         String query = String.format(
-            "SELECT COUNT(*) AS %s FROM %s ",
-            headerName,
-            tablePath
+                "SELECT 1 AS %s FROM %s LIMIT 1",
+                headerName,
+                tablePath
         );
+
         try {
             // Extract and return the row count
             List<LinkedHashMap<String,Object>> rows =  (List<LinkedHashMap<String,Object>>) executeSqlStatementGet(query).get("rows");

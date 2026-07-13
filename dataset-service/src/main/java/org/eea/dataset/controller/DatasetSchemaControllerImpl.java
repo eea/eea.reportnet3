@@ -585,7 +585,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
         updateMaterializedViews = false;
       }
       if (BooleanUtils.isTrue(isBigDataFlow) && !StringUtil.isNullOrEmpty(tableSchemaVO.getIdTableSchema())) {
-        bigDataDatasetService.deleteTableData(datasetId, dataflowId, null, tableSchemaVO.getIdTableSchema(), null, false);
+        bigDataDatasetService.deleteTableData(datasetId, dataflowId, null, null, tableSchemaVO.getIdTableSchema(), null, false);
       }
       dataschemaService.updateTableSchema(datasetId, tableSchemaVO, updateMaterializedViews);
     } catch (EEAException e) {
@@ -648,7 +648,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
 
       //if table is big data remove first data from s3
       if (BooleanUtils.isTrue(isBigDataFlow)) {
-        bigDataDatasetService.deleteTableData(datasetId, dataSetMetabaseVO.getDataflowId(), dataSetMetabaseVO.getDataProviderId(), tableSchemaId, null, false);
+        bigDataDatasetService.deleteTableData(datasetId, dataSetMetabaseVO.getDataflowId(), dataSetMetabaseVO.getDataProviderId(), null, tableSchemaId, null, false);
       }
 
       // Delete the Pk if needed from the catalogue, for all the fields of the table
@@ -832,6 +832,8 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
           @ApiParam(value = "Field schema object") @RequestBody FieldSchemaVO fieldSchemaVO) {
 
 
+    final boolean isBigData = dataflowControllerZuul.isBigDataflowDataset(datasetId);
+
     if (null != fieldSchemaVO.getName()) {
       if (fieldSchemaVO.getName().chars().anyMatch(Character::isWhitespace)) {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FIELD_NAME_WHITESPACES);
@@ -859,7 +861,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
         dataschemaService.updateForeignRelation(datasetId, fieldSchemaVO, datasetSchema);
 
         // Clear the attachments if necessary
-        if (Boolean.TRUE.equals(
+        if (!isBigData && Boolean.TRUE.equals(
                 dataschemaService.checkClearAttachments(datasetId, datasetSchema, fieldSchemaVO))) {
           datasetService.deleteAttachmentByFieldSchemaId(datasetId, fieldSchemaVO.getId());
         }

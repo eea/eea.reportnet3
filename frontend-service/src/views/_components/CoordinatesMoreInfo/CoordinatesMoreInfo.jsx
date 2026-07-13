@@ -34,7 +34,7 @@ export const CoordinatesMoreInfo = ({
         fieldId,
         dataflowId,
         tableSchemaId,
-        providerId
+        providerId: providerId ?? 0
       });
       DownloadFile(data, 'geometry.geojson');
     } catch (error) {

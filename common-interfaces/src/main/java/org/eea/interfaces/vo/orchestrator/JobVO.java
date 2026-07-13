@@ -69,4 +69,7 @@ public class JobVO implements Serializable {
 
     /** The fme status */
     private FmeJobStatusEnum fmeStatus;
+
+    /** The preparation code (nullable, only for preparation jobs) */
+    private String preparationCode;
 }

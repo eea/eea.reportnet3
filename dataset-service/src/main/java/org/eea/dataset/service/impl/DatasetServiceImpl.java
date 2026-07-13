@@ -87,6 +87,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
@@ -94,7 +96,12 @@ import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipException;
+import java.util.zip.ZipOutputStream;
 
 import static org.eea.utils.LiteralConstants.*;
 
@@ -334,6 +341,9 @@ public class DatasetServiceImpl implements DatasetService {
   /** The import path. */
   @Value("${importPath}")
   private String importPath;
+
+  @PersistenceContext
+  private EntityManager entityManager;
 
   /**
    * The default process priority
@@ -653,6 +663,7 @@ public class DatasetServiceImpl implements DatasetService {
 
       if (bigData) {
           final S3PathResolver s3PathResolver = new S3PathResolver(datasetMb.getDataflowId(), datasetMb.getDataProviderId() != null ? datasetMb.getDataProviderId() : 0, datasetId, S3_VALIDATION);
+
           if (s3Helper.checkFolderExist(s3PathResolver, S3_VALIDATION_TABLE_PATH)) {
               datasetErrors = true;
           }
@@ -1389,12 +1400,12 @@ public class DatasetServiceImpl implements DatasetService {
   @Override
   public void etlExportDataset(@DatasetId Long datasetId, OutputStream outputStream,
       String tableSchemaId, Integer limit, Integer offset, String filterValue, String columnName,
-      String dataProviderCodes) {
+      String dataProviderCodes, String preparationCode) {
     try {
       long startTime = System.currentTimeMillis();
       LOG.info("ETL Export process initiated to datasetId: {}", datasetId);
       exportDatasetETLSQL(datasetId, outputStream, tableSchemaId, limit, offset, filterValue,
-          columnName, dataProviderCodes);
+          columnName, dataProviderCodes, preparationCode);
       outputStream.flush();
       long endTime = System.currentTimeMillis() - startTime;
       LOG.info("ETL Export process completed for datasetId: {} in {} seconds", datasetId,
@@ -2240,6 +2251,7 @@ public class DatasetServiceImpl implements DatasetService {
     Long datasetId = dataset.getId();
     List<Statistics> stats = new ArrayList<>();
     S3PathResolver s3PathResolver = new S3PathResolver(dataset.getDataflowId(), dataset.getDataProviderId()!=null ? dataset.getDataProviderId() : 0, datasetId, tableSchema.getNameTableSchema());
+
     Long totalRecords = 0L;
     Long totalRecordsWithBlockers = 0L;
     Long totalRecordsWithErrors = 0L;
@@ -3023,10 +3035,15 @@ public class DatasetServiceImpl implements DatasetService {
    * @throws EEAException the EEA exception
    */
   @Override
-  public File downloadExportedFileDL(Long datasetId, String fileName)
+  public File downloadExportedFileDL(Long datasetId, String fileName, String preparationCode)
       throws EEAException {
     // we compound the route and create the file
-    File file = new File(new File(exportDLPath, "dataset-" + datasetId), FilenameUtils.getName(fileName));
+    File file;
+    if (StringUtils.isNotBlank(preparationCode)) {
+      file = new File(new File(exportDLPath, "dataset-" + datasetId + "/" + preparationCode), FilenameUtils.getName(fileName));
+    } else {
+      file = new File(new File(exportDLPath, "dataset-" + datasetId), FilenameUtils.getName(fileName));
+    }
 
     LOG.info("File {} ", file);
     if (!file.exists()) {
@@ -3277,17 +3294,25 @@ public class DatasetServiceImpl implements DatasetService {
    */
   private void exportDatasetETLSQL(Long datasetId, OutputStream outputStream, String tableSchemaId,
       Integer limit, Integer offset, String filterValue, String columnName,
-      String dataProviderCodes) throws EEAException {
+      String dataProviderCodes, String preparationCode) throws EEAException {
     try {
       Long dataflowId = getDataFlowIdById(datasetId);
       DataFlowVO dataflow = dataflowControllerZuul.getMetabaseById(dataflowId);
       if (dataflow.getBigData()) {
-        File fileFolder = new File(exportDLPath, "dataset-" + datasetId);
+        File fileFolder;
+
+        if (StringUtils.isNotBlank(preparationCode)) {
+          fileFolder = new File(exportDLPath,
+                  "dataset-" + datasetId + "/" + preparationCode);
+        } else {
+          fileFolder = new File(exportDLPath, "dataset-" + datasetId);
+        }
+
         fileFolder.mkdirs();
         File jsonFile = new File(new File(exportDLPath, "dataset-" + datasetId), tableSchemaId + "_etlExport" + JSON_TYPE);
 
         jsonFile = recordRepository.findAndGenerateETLJsonDL(datasetId, tableSchemaId, limit,
-                offset, filterValue, columnName, dataProviderCodes, jsonFile);
+                offset, filterValue, columnName, dataProviderCodes, jsonFile, preparationCode);
 
         byte[] bytes = IOUtils.toByteArray(new FileInputStream(jsonFile));
         outputStream.write(bytes);
@@ -3838,11 +3863,11 @@ public class DatasetServiceImpl implements DatasetService {
   public void createFileForEtlExport(@DatasetId Long datasetId, String tableSchemaId,
                                      Integer limit, Integer offset, String filterValue, String columnName,
                                      String dataProviderCodes, Long jobId, Long dataflowId, String user,
-                                     Boolean exportCsv, Boolean includeAttachments) throws EEAException, IOException, SQLException {
+                                     Boolean exportCsv, Boolean includeAttachments,String preparationCode) throws EEAException, IOException, SQLException {
     String processUUID = UUID.randomUUID().toString();
     try {
       LOG.info("Initiating FILE_EXPORT process for datasetId: {} and jobId {}", datasetId, jobId);
-      recordRepository.findAndGenerateETLJsonV3(datasetId, tableSchemaId, limit, offset, filterValue, columnName, dataProviderCodes, jobId, dataflowId, user, processUUID);
+      recordRepository.findAndGenerateETLJsonV3(datasetId, tableSchemaId, limit, offset, filterValue, columnName, dataProviderCodes, jobId, dataflowId, user, processUUID, preparationCode);
       LOG.info("FILE_EXPORT process submitted for datasetId: {} and jobId {}", datasetId, jobId);
     } catch (Exception e) {
       LOG.error("FILE_EXPORT process error in  Dataset {} and jobId {}. Message: {}", datasetId, jobId, e);
@@ -3965,4 +3990,70 @@ public class DatasetServiceImpl implements DatasetService {
     // 3. Return as bytes
     return geoJson.getBytes(StandardCharsets.UTF_8);
   }
+
+  /**
+   * Streams attachments for the given field schema and writes them to the ZIP output stream. We were originally constracting
+   * a List instead of a Stream and it caused java heap exception that was discovered in ticket #305064. The process was moved
+   * in the service to be transactional with readOnly without changing the callers that managed insert and delete actions.
+   *
+   * @param datasetId The dataset id
+   * @param fieldSchemaId The field schema id
+   * @param tableSchemaId The table schema id
+   * @param tableName The table name
+   * @param out the ZIP output stream
+   * @throws IOException if an attachment cannot be written
+   */
+  @Override
+  @org.springframework.transaction.annotation.Transactional(readOnly = true)
+  public void writeAttachmentsToZip(@DatasetId Long datasetId, String fieldSchemaId, String tableSchemaId, String tableName, ZipOutputStream out) throws IOException {
+    try (Stream<AttachmentValue> attachments =
+             attachmentRepository
+                 .streamAllByIdFieldSchemaAndValueIsNotNull(fieldSchemaId)) {
+
+      try {
+        attachments.forEachOrdered(attachment -> {
+          boolean zipOutputStreamOpened = false;
+
+          try {
+            LOG.info("We are in tableSchema with id {}, checking field {} and processing attachment {}",
+                tableSchemaId, fieldSchemaId, attachment.getFileName());
+
+            ZipEntry attachmentEntry = new ZipEntry(tableName + "/" + attachment.getFileName());
+
+            out.putNextEntry(attachmentEntry);
+            zipOutputStreamOpened = true;
+
+            // Stream bytes directly to the zip file.
+            byte[] content = attachment.getContent();
+            if (content != null) {
+              out.write(content, 0, content.length);
+            }
+
+          } catch (ZipException e) {
+            LOG.info("Error creating file {} because it already exists", attachment.getFileName(), e);
+          } catch (IOException e) {
+            throw new UncheckedIOException(e);
+          } finally {
+            if (zipOutputStreamOpened) {
+              try {
+                out.closeEntry();
+              } catch (IOException e) {
+                throw new UncheckedIOException(e);
+              }
+            }
+
+            if (entityManager.contains(attachment)) {
+              // CRITICAL FOR MEMORY: Detach from the persistence context.
+              // This breaks the Hibernate reference, allowing GC to free up memory immediately.
+              entityManager.detach(attachment);
+            }
+          }
+        });
+
+      } catch (UncheckedIOException e) {
+        throw e.getCause();
+      }
+    }
+  }
+
 }

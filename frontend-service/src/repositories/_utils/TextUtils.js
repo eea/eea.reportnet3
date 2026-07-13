@@ -1,7 +1,7 @@
 import isNil from 'lodash/isNil';
 import isObject from 'lodash/isObject';
 
-const parseText = (rawText = '', param = {}) => {
+const parseText = (rawText = '', param = {}, removeUnknownPlaceholders) => {
   if (isNil(rawText)) {
     return '';
   }
@@ -15,6 +15,11 @@ const parseText = (rawText = '', param = {}) => {
         !isNil(param[key]) ? param[key] : ''
       );
     });
+  }
+
+  // 👇 remove any leftover placeholders
+  if (removeUnknownPlaceholders) {
+    text = text.replace(/{:[^}]+}/g, '');
   }
 
   return text;

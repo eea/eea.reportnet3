@@ -23,6 +23,12 @@ export const getProviderColumns = (styles, resourcesContext, templates) => [
     className: styles.middleColumn
   },
   {
+    key: 'preparationCode',
+    header: resourcesContext.messages['setCode'],
+    template: templates.getSetCodeTemplate,
+    className: styles.middleColumn
+  },
+  {
     key: 'jobType',
     header: resourcesContext.messages['jobType'],
     template: templates.getJobTypeTemplate,
@@ -76,6 +82,12 @@ export const getAdminCustodianColumns = (styles, resourcesContext, templates) =>
     key: 'datasetId',
     header: resourcesContext.messages['datasetId'],
     template: templates.getDatasetIdTemplate,
+    className: styles.middleColumn
+  },
+  {
+    key: 'preparationCode',
+    header: resourcesContext.messages['setCode'],
+    template: templates.getSetCodeTemplate,
     className: styles.middleColumn
   },
   {
@@ -135,6 +147,12 @@ export const getHistoryProviderColumns = (styles, resourcesContext, templates) =
     className: styles.middleColumn
   },
   {
+    key: 'preparationCode',
+    header: resourcesContext.messages['setCode'],
+    template: templates.getSetCodeTemplate,
+    className: styles.middleColumn
+  },
+  {
     key: 'jobType',
     header: resourcesContext.messages['jobType'],
     template: templates.getJobTypeTemplate,
@@ -183,6 +201,12 @@ export const getHistoryAdminCustodianColumns = (styles, resourcesContext, templa
     key: 'datasetId',
     header: resourcesContext.messages['datasetId'],
     template: templates.getDatasetIdTemplate,
+    className: styles.middleColumn
+  },
+  {
+    key: 'preparationCode',
+    header: resourcesContext.messages['setCode'],
+    template: templates.getSetCodeTemplate,
     className: styles.middleColumn
   },
   {

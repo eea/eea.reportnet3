@@ -14,6 +14,14 @@
           }
         },
         {
+          "key": "PREPARATION_DATASET_CREATION_FAILED_EVENT",
+          "navigateTo": {
+            "section": "DATAFLOW",
+            "parameters": ["dataflowId", "providerId"],
+            "hasQueryString": true
+          }
+        },
+        {
           "key": "IMPORT_REPORTING_DATASET_DATA_FAILED_EVENT",
           "navigateTo": {
             "section": "DATASET",
@@ -120,6 +128,13 @@
         },
         {
           "key": "RESTORE_DATASET_SNAPSHOT_FAILED_EVENT",
+          "navigateTo": {
+            "section": "DATASET",
+            "parameters": ["dataflowId", "datasetId"]
+          }
+        },
+        {
+          "key": "SNAPSHOT_DATE_CHANGE_FAIL_EVENT",
           "navigateTo": {
             "section": "DATASET",
             "parameters": ["dataflowId", "datasetId"]
@@ -1119,7 +1134,11 @@
         { "key": "UPLOAD_TO_S3_ERROR" },
         { "key": "IMPORT_S3_TO_DLH_ERROR" },
         { "key": "GET_ORGANIZATIONS_ERROR" },
+        { "key": "GET_PREPARATION_SETS_ERROR" },
         { "key": "CREATE_ORGANIZATION_ERROR" },
+        { "key": "CREATE_PREPARATION_SET_ERROR" },
+        { "key": "UPDATE_ORGANIZATION_ERROR" },
+        { "key": "UPDATE_PREPARATION_SET_ERROR" },
         { "key": "GET_CONTROL_STATUSES_ERROR" },
         { "key": "DELETE_VALIDATION_FROM_QUEUE_ERROR" },
         { "key": "SET_VALIDATIONS_STATUS_PRIORITY_ERROR" },
@@ -1285,6 +1304,14 @@
           "navigateTo": {
             "section": "DATASET",
             "parameters": ["dataflowId", "datasetId"]
+          }
+        },
+        {
+          "key": "PREPARATION_DATASET_CREATION_COMPLETED_EVENT",
+          "navigateTo": {
+            "section": "DATAFLOW",
+            "parameters": ["dataflowId", "providerId"],
+            "hasQueryString": true
           }
         },
         {
@@ -1604,10 +1631,26 @@
         { "key": "DOCUMENT_UPLOADING_INIT_INFO" },
         { "key": "DELETE_DOCUMENT_INIT_INFO" },
         {
+          "key": "PREPARATION_DATASET_CREATION_STARTED_EVENT",
+          "navigateTo": {
+            "section": "DATAFLOW",
+            "parameters": ["dataflowId", "providerId"],
+            "hasQueryString": true
+          }
+        },
+        {
           "key": "RECEIVED_MESSAGE",
           "navigateTo": {
             "section": "DATAFLOW",
             "parameters": ["dataflowId", "dataflowName"]
+          }
+        },
+        {
+          "key": "PREPARATION_DATASET_CREATION_HAS_EMPTY_QUEUE_EVENT",
+          "navigateTo": {
+            "section": "DATAFLOW",
+            "parameters": ["dataflowId", "providerId"],
+            "hasQueryString": true
           }
         },
         {
@@ -1811,6 +1854,12 @@
           }
         }
       ]
+    },
+    {
+      "key": "warn",
+      "lifeTime": 20000,
+      "fixed": false,
+      "types": [{ "key": "YOU_ONLY_HAVE_LIMITED_TIME" }]
     }
   ],
   "hiddenNotifications": [

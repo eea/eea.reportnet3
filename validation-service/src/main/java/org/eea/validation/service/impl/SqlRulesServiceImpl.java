@@ -472,7 +472,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
           checkDatasetFromReferenceDataflow(ids);
         }
       } else {
-        throw new EEAForbiddenSQLCommandException("SQL Command not allowed in SQL Rule.");
+        throw new EEAForbiddenSQLCommandException("SQL Command not allowed in SQL Rule. Reserved keywords and semicolon (;) are prohibited.");
       }
 
       if (!ids.isEmpty() && !ids.contains(datasetId.toString())) {
@@ -799,6 +799,12 @@ public class SqlRulesServiceImpl implements SqlRulesService {
    */
   private boolean checkQuerySyntax(String query) {
     boolean queryContainsKeyword = true;
+
+    // usage of semicolon is prohibited for queries in custom SQL as from #300397
+    if (query.contains(";")) {
+      return false;
+    }
+
     String[] queryKeywords = KEYWORDS.split(",");
     for (String word : queryKeywords) {
       String regex = "\\b" + word + "\\b";

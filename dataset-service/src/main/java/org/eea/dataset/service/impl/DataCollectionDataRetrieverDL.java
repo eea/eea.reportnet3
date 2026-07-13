@@ -57,7 +57,7 @@ public class DataCollectionDataRetrieverDL implements DataLakeDataRetriever {
         TableVO result = new TableVO();
 
         // ROOT resolver for demoting/promoting.
-        S3PathResolver s3RootResolver = s3Service.getS3PathResolverByDatasetType(dataset, tableSchemaVO.getNameTableSchema(), false);
+        S3PathResolver s3RootResolver = s3Service.getS3PathResolverByDatasetType(dataset, tableSchemaVO.getNameTableSchema(), false, null);
         s3RootResolver.setIsIcebergTable(false);
 
         boolean folderExist = s3Helper.checkTableNameDCFolderExist(s3RootResolver);
@@ -80,6 +80,11 @@ public class DataCollectionDataRetrieverDL implements DataLakeDataRetriever {
             setEmptyResults(result);
         }
         return result;
+    }
+
+    @Override
+    public TableVO getPreparationTableResult(DataSetMetabaseVO dataset, TableSchemaVO tableSchemaVO, Pageable pageable, String fields, String fieldSchemaId, String fieldValue, ErrorTypeEnum[] levelError, String[] qcCodes, String preparationCode) throws EEAException {
+        return null; // no preparation for datacollection
     }
 
     /**

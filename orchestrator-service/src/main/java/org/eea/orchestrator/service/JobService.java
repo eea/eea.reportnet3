@@ -20,7 +20,7 @@ import java.util.Map;
 
 public interface JobService {
     JobsVO getJobs(Pageable pageable, boolean asc, String sortedColumn, Long jobId, String jobTypes, Long dataflowId, String dataflowName, Long providerId,
-                   Long datasetId, String datasetName, String creatorUsername, String jobStatuses);
+                   Long datasetId, String datasetName, String creatorUsername, String jobStatuses, String preparationCode);
 
     List<JobVO> getJobsByStatus(JobStatusEnum status);
 
@@ -31,9 +31,9 @@ public interface JobService {
 
     Boolean canJobBeExecuted(JobVO job);
 
-    JobStatusEnum checkEligibilityOfJob(String jobType, Long dataflowId, Long dataProviderId, List<Long> datasetId, boolean release);
+    JobStatusEnum checkEligibilityOfJob(String jobType, Long dataflowId, Long dataProviderId, List<Long> datasetId, boolean release, Long excludeCallerJobId);
 
-    Long addJob(Long dataflowId, Long dataProviderId, Long datasetId, Map<String, Object> parameters, JobTypeEnum jobType, JobStatusEnum jobStatus, boolean release, String fmeJobId, String dataflowName, String datasetName);
+    Long addJob(Long dataflowId, Long dataProviderId, Long datasetId, Map<String, Object> parameters, JobTypeEnum jobType, JobStatusEnum jobStatus, boolean release, String fmeJobId, String dataflowName, String datasetName, String preparationCode);
 
     void prepareAndExecuteValidationJob(JobVO jobVO);
 
@@ -96,4 +96,5 @@ public interface JobService {
     void restartImportJob(Long jobId, Boolean sendRestartNotification);
 
     List<JobVO> findActiveJobsRelatedToADatasetId(Long datasetId, Long dataflowId, Long providerId);
-}
+
+    JobStatusEnum checkEligibilityOfPreparationJob(String jobType, Long datasetId, String preparationCode);}

@@ -1,0 +1,1 @@
+ALTER TABLE dataset_table ADD COLUMN preparation_code VARCHAR(255);

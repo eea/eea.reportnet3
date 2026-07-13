@@ -46,8 +46,10 @@ export const DatasetRepository = {
       data: { nameTableSchema: tableSchemaName, notEmpty: true }
     }),
 
-  deleteData: async (datasetId, deletePrefilledTables) =>
-    await HTTPRequester.delete({ url: getUrl(DatasetConfig.deleteData, { datasetId, deletePrefilledTables }) }),
+  deleteData: async ({ datasetId, deletePrefilledTables, preparationCode }) =>
+    await HTTPRequester.delete({
+      url: getUrl(DatasetConfig.deleteData, { datasetId, deletePrefilledTables, preparationCode })
+    }),
 
   deleteAttachment: async ({
     dataflowId,
@@ -95,8 +97,8 @@ export const DatasetRepository = {
   deleteSchema: async datasetId =>
     await HTTPRequester.delete({ url: getUrl(DatasetConfig.deleteSchema, { datasetId }) }),
 
-  deleteTableData: async (datasetId, tableId) =>
-    await HTTPRequester.delete({ url: getUrl(DatasetConfig.deleteTableData, { datasetId, tableId }) }),
+  deleteTableData: async ({ datasetId, tableId, preparationCode }) =>
+    await HTTPRequester.delete({ url: getUrl(DatasetConfig.deleteTableData, { datasetId, tableId, preparationCode }) }),
 
   deleteTableDesign: async (datasetId, tableSchemaId) =>
     await HTTPRequester.delete({ url: getUrl(DatasetConfig.deleteTableDesign, { datasetId, tableSchemaId }) }),
@@ -111,9 +113,9 @@ export const DatasetRepository = {
       url: getUrl(DatasetConfig.downloadExportDatasetFile, { datasetId, fileName })
     }),
 
-  downloadExportDatasetFileDL: async (datasetId, fileName) =>
+  downloadExportDatasetFileDL: async (datasetId, fileName, code) =>
     await HTTPRequester.download({
-      url: getUrl(DatasetConfig.downloadExportDatasetFileDL, { datasetId, fileName })
+      url: getUrl(DatasetConfig.downloadExportDatasetFileDL, { datasetId, fileName, code })
     }),
 
   downloadExportFile: async (datasetId, fileName, providerId = null) =>
@@ -196,9 +198,9 @@ export const DatasetRepository = {
       url: getUrl(DatasetConfig.downloadTableData, { datasetId, fileName })
     }),
 
-  downloadTableDataDL: async (datasetId, fileName) =>
+  downloadTableDataDL: async (datasetId, fileName, code) =>
     await HTTPRequester.download({
-      url: getUrl(DatasetConfig.downloadTableDataDL, { datasetId, fileName })
+      url: getUrl(DatasetConfig.downloadTableDataDL, { datasetId, fileName, code })
     }),
 
   downloadTableDefinitions: async datasetSchemaId =>
@@ -220,9 +222,9 @@ export const DatasetRepository = {
       url: getUrl(DatasetConfig.downloadImportedFile, { fileName, datasetId, dataflowId })
     }),
 
-  exportDatasetDataDL: async (datasetId, fileType) =>
+  exportDatasetDataDL: async (datasetId, fileType, code) =>
     await HTTPRequester.download({
-      url: getUrl(DatasetConfig.exportDatasetDataDL, { datasetId, fileType }),
+      url: getUrl(DatasetConfig.exportDatasetDataDL, { datasetId, fileType, code }),
       headers: { 'Content-Type': 'application/octet-stream' }
     }),
 
@@ -260,10 +262,11 @@ export const DatasetRepository = {
     levelErrorValidations,
     selectedShortCode,
     isExportFilteredCsv,
-    isFilterValidationsActive
+    isFilterValidationsActive,
+    code
   ) =>
     await HTTPRequester.post({
-      url: getUrl(DatasetConfig.exportTableDataDL, { datasetId, fileType, tableSchemaId }),
+      url: getUrl(DatasetConfig.exportTableDataDL, { datasetId, fileType, tableSchemaId, code }),
       data: {
         fieldValue: isExportFilteredCsv ? filterValue : '',
         qcCodes: isExportFilteredCsv ? selectedShortCode : '',
@@ -278,8 +281,8 @@ export const DatasetRepository = {
       headers: { 'Content-Type': 'application/octet-stream' }
     }),
 
-  getEditingStatus: async ({ datasetId }) =>
-    await HTTPRequester.get({ url: getUrl(DatasetConfig.getEditingStatus, { datasetId }) }),
+  getEditingStatus: async ({ datasetId, preparationCode }) =>
+    await HTTPRequester.get({ url: getUrl(DatasetConfig.getEditingStatus, { datasetId, preparationCode }) }),
 
   getMetadata: async datasetId => await HTTPRequester.get({ url: getUrl(DatasetConfig.getMetadata, { datasetId }) }),
 
@@ -308,7 +311,8 @@ export const DatasetRepository = {
     replace,
     integrationId,
     delimiter,
-    fileName
+    fileName,
+    code
   }) =>
     await HTTPRequester.get({
       url: getUrl(DatasetConfig.getPresignedUrl, {
@@ -319,7 +323,8 @@ export const DatasetRepository = {
         replace,
         integrationId,
         delimiter,
-        fileName
+        fileName,
+        code
       })
     }),
 
@@ -383,7 +388,8 @@ export const DatasetRepository = {
     fieldValueFilter,
     levelErrorsFilter,
     typeEntitiesFilter,
-    tablesFilter
+    tablesFilter,
+    code
   ) => {
     if (asc === -1) {
       asc = 0;
@@ -399,7 +405,8 @@ export const DatasetRepository = {
         fieldValueFilter,
         levelErrorsFilter,
         typeEntitiesFilter,
-        tableFilter: tablesFilter
+        tableFilter: tablesFilter,
+        code
       })
     });
   },
@@ -459,20 +466,34 @@ export const DatasetRepository = {
     levelError,
     qcCodes,
     fieldSchemaId,
-    value
+    value,
+    code
   ) => {
     return await HTTPRequester.get({
-      url: getUrl(DatasetConfig.getTableDataDL, {
-        datasetId,
-        fields,
-        fieldSchemaId,
-        qcCodes,
-        levelError,
-        pageNum,
-        pageSize,
-        tableSchemaId,
-        value
-      })
+      url: code
+        ? getUrl(DatasetConfig.getPreparationsTableDataDL, {
+            datasetId,
+            fields,
+            fieldSchemaId,
+            qcCodes,
+            levelError,
+            pageNum,
+            pageSize,
+            tableSchemaId,
+            value,
+            code
+          })
+        : getUrl(DatasetConfig.getTableDataDL, {
+            datasetId,
+            fields,
+            fieldSchemaId,
+            qcCodes,
+            levelError,
+            pageNum,
+            pageSize,
+            tableSchemaId,
+            value
+          })
     });
   },
   checkDuplicateValues: async (datasetId, tableSchemaId, fieldVO) =>
@@ -490,7 +511,8 @@ export const DatasetRepository = {
     replace,
     integrationId,
     delimiter,
-    jobId
+    jobId,
+    code
   }) =>
     await HTTPRequester.post({
       url: getUrl(DatasetConfig.importTableFileWithS3, {
@@ -501,7 +523,8 @@ export const DatasetRepository = {
         replace,
         integrationId,
         delimiter,
-        jobId
+        jobId,
+        code
       })
     }),
 
@@ -600,11 +623,12 @@ export const DatasetRepository = {
         dataAreManuallyEditable
       }
     }),
-  validate: async datasetId => await HTTPRequester.update({ url: getUrl(DatasetConfig.validate, { datasetId }) }),
+  validate: async ({ datasetId, code }) =>
+    await HTTPRequester.update({ url: getUrl(DatasetConfig.validate, { datasetId, code }) }),
 
-  validateAsProvider: async (datasetId, dataflowId, providerId) =>
+  validateAsProvider: async ({ datasetId, dataflowId, providerId, code }) =>
     await HTTPRequester.update({
-      url: getUrl(DatasetConfig.validateAsProvider, { datasetId, dataflowId, providerId })
+      url: getUrl(DatasetConfig.validateAsProvider, { datasetId, dataflowId, providerId, code })
     }),
 
   validateAllSql: async datasetId =>

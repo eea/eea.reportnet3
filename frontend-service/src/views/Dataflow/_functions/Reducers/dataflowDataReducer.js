@@ -30,6 +30,9 @@ export const dataflowDataReducer = (state, { type, payload }) => {
     case 'SET_REPRESENTATIVES_IMPORT':
       return { ...state, representativesImport: payload };
 
+    case 'SET_IS_CREATING_PREPARATION_SETS':
+      return { ...state, isCreatingPreparationSets: payload.isCreating };
+
     case 'SET_SHOW_PUBLIC_INFO':
       return { ...state, showPublicInfo: payload.showPublicInfo };
 
@@ -122,6 +125,15 @@ export const dataflowDataReducer = (state, { type, payload }) => {
 
     case 'SET_IS_UPDATING_PERMISSIONS':
       return { ...state, isUpdatingPermissions: payload.isUpdatingPermissions };
+
+    case 'SET_PREPARATION_SETS_LIST':
+      return { ...state, preparationSetsList: payload.preparationSetsList };
+
+    case 'SET_HAS_ACTIVE_LOCKS':
+      return { ...state, hasActiveLocks: payload.hasLocks };
+
+    case 'SET_SELECTED_SET':
+      return { ...state, selectedPreparationSet: payload };
 
     case 'SET_REPRESENTATIVE':
       return { ...state, representative: payload };

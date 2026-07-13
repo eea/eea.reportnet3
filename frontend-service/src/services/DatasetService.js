@@ -125,8 +125,8 @@ export const DatasetService = {
   createTableDesign: async (datasetId, tableSchemaName) =>
     await DatasetRepository.createTableDesign(datasetId, tableSchemaName),
 
-  deleteData: async (datasetId, arePrefilledTablesDeleted) =>
-    await DatasetRepository.deleteData(datasetId, arePrefilledTablesDeleted),
+  deleteData: async ({ datasetId, arePrefilledTablesDeleted, isReferenceDataset, preparationCode }) =>
+    await DatasetRepository.deleteData({ datasetId, arePrefilledTablesDeleted, isReferenceDataset, preparationCode }),
 
   deleteAttachment: async ({
     dataflowId,
@@ -158,7 +158,8 @@ export const DatasetService = {
 
   deleteSchema: async datasetId => await DatasetRepository.deleteSchema(datasetId),
 
-  deleteTableData: async (datasetId, tableId) => await DatasetRepository.deleteTableData(datasetId, tableId),
+  deleteTableData: async ({ datasetId, tableId, preparationCode }) =>
+    await DatasetRepository.deleteTableData({ datasetId, tableId, preparationCode }),
 
   deleteTableDesign: async (datasetId, tableSchemaId) =>
     await DatasetRepository.deleteTableDesign(datasetId, tableSchemaId),
@@ -166,8 +167,8 @@ export const DatasetService = {
   downloadExportDatasetFile: async (datasetId, fileName) =>
     await DatasetRepository.downloadExportDatasetFile(datasetId, fileName),
 
-  downloadExportDatasetFileDL: async (datasetId, fileName) =>
-    await DatasetRepository.downloadExportDatasetFileDL(datasetId, fileName),
+  downloadExportDatasetFileDL: async (datasetId, fileName, code) =>
+    await DatasetRepository.downloadExportDatasetFileDL(datasetId, fileName, code),
 
   downloadExportFile: async (datasetId, fileName, providerId) =>
     await DatasetRepository.downloadExportFile(datasetId, fileName, providerId),
@@ -206,7 +207,8 @@ export const DatasetService = {
 
   downloadTableData: async (datasetId, fileName) => await DatasetRepository.downloadTableData(datasetId, fileName),
 
-  downloadTableDataDL: async (datasetId, fileName) => await DatasetRepository.downloadTableDataDL(datasetId, fileName),
+  downloadTableDataDL: async (datasetId, fileName, code) =>
+    await DatasetRepository.downloadTableDataDL(datasetId, fileName, code),
 
   getAlignmentBetween: async (datasetId, selectedRepresentativesCode, selectedTable) =>
     await DatasetRepository.getAlignmentBetween(datasetId, selectedRepresentativesCode, selectedTable),
@@ -278,7 +280,8 @@ export const DatasetService = {
 
   exportDatasetData: async (datasetId, fileType) => await DatasetRepository.exportDatasetData(datasetId, fileType),
 
-  exportDatasetDataDL: async (datasetId, fileType) => await DatasetRepository.exportDatasetDataDL(datasetId, fileType),
+  exportDatasetDataDL: async (datasetId, fileType, code) =>
+    await DatasetRepository.exportDatasetDataDL(datasetId, fileType, code),
 
   exportDatasetDataExternal: async (datasetId, integrationId) =>
     await DatasetRepository.exportDatasetDataExternal(datasetId, integrationId),
@@ -312,7 +315,8 @@ export const DatasetService = {
     levelErrorValidations,
     selectedShortCode,
     isExportFilteredCsv,
-    isFilterValidationsActive
+    isFilterValidationsActive,
+    code
   ) =>
     await DatasetRepository.exportTableDataDL(
       datasetId,
@@ -322,14 +326,15 @@ export const DatasetService = {
       levelErrorValidations,
       selectedShortCode,
       isExportFilteredCsv,
-      isFilterValidationsActive
+      isFilterValidationsActive,
+      code
     ),
 
   exportTableSchema: async (datasetId, datasetSchemaId, tableSchemaId, fileType) =>
     await DatasetRepository.exportTableSchema(datasetId, datasetSchemaId, tableSchemaId, fileType),
 
-  getEditingStatus: async ({ datasetId }) => {
-    return await DatasetRepository.getEditingStatus({ datasetId });
+  getEditingStatus: async ({ datasetId, preparationCode }) => {
+    return await DatasetRepository.getEditingStatus({ datasetId, preparationCode });
   },
 
   getIsIcebergTableCreated: async ({ datasetId, tableSchemaId }) => {
@@ -375,7 +380,8 @@ export const DatasetService = {
     replace,
     integrationId,
     delimiter,
-    fileName
+    fileName,
+    code
   }) => {
     const presignedUrl = await DatasetRepository.getPresignedUrl({
       datasetId,
@@ -385,7 +391,8 @@ export const DatasetService = {
       replace,
       integrationId,
       delimiter,
-      fileName
+      fileName,
+      code
     });
     return presignedUrl.data;
   },
@@ -484,7 +491,8 @@ export const DatasetService = {
     fieldValueFilter,
     levelErrorsFilter,
     typeEntitiesFilter,
-    tablesFilter
+    tablesFilter,
+    code
   ) => {
     const datasetErrorsDTO = await DatasetRepository.getShowValidationErrorsDL(
       datasetId,
@@ -496,7 +504,8 @@ export const DatasetService = {
       fieldValueFilter,
       levelErrorsFilter,
       typeEntitiesFilter,
-      tablesFilter
+      tablesFilter,
+      code
     );
     const dataset = new Dataset({
       datasetId: datasetErrorsDTO.data.idDataset,
@@ -719,7 +728,8 @@ export const DatasetService = {
     pageSize,
     qcCodes = undefined,
     tableSchemaId,
-    value = ''
+    value = '',
+    code
   }) => {
     const tableDataDTO = await DatasetRepository.getTableDataDL(
       datasetId,
@@ -730,7 +740,8 @@ export const DatasetService = {
       levelError,
       qcCodes,
       fieldSchemaId,
-      value
+      value,
+      code
     );
     const table = new DatasetTable({});
 
@@ -804,7 +815,8 @@ export const DatasetService = {
     replace,
     integrationId,
     delimiter,
-    jobId
+    jobId,
+    code
   }) =>
     await DatasetRepository.importTableFileWithS3({
       datasetId,
@@ -814,7 +826,8 @@ export const DatasetService = {
       replace,
       integrationId,
       delimiter,
-      jobId
+      jobId,
+      code
     }),
 
   restorePrefilledTables: async ({ datasetId, tableSchemaId }) =>
@@ -974,10 +987,10 @@ export const DatasetService = {
   updateTableNameDesign: async (tableSchemaId, tableSchemaName, datasetId) =>
     await DatasetRepository.updateTableNameDesign(tableSchemaId, tableSchemaName, datasetId),
 
-  validate: async datasetId => await DatasetRepository.validate(datasetId),
+  validate: async ({ datasetId, code }) => await DatasetRepository.validate({ datasetId, code }),
 
-  validateAsProvider: async (datasetId, dataflowId, providerId) =>
-    await DatasetRepository.validateAsProvider(datasetId, dataflowId, providerId),
+  validateAsProvider: async ({ datasetId, dataflowId, providerId, code }) =>
+    await DatasetRepository.validateAsProvider({ datasetId, dataflowId, providerId, code }),
 
   validateAllSql: async datasetId => await DatasetRepository.validateAllSql(datasetId),
 

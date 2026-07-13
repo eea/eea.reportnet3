@@ -35,7 +35,7 @@ public class DatasetEnableEditingFailedActiveEditingByOtherUserEvent implements 
             DataSetMetabaseVO ds = datasetMetabaseService.findDatasetMetabase(vo.getDatasetId());
             datasetName = ds.getDataSetName();
         }
-        String currentEditor = datasetTableService.getDatasetEditingUsername(vo.getDatasetId());
+        String currentEditor = datasetTableService.getDatasetEditingUsername(vo.getDatasetId(), vo.getPreparationCode());
         String message= "Dataset enable editing failed.";
 
         if (!(currentEditor == null)) {
@@ -45,6 +45,7 @@ public class DatasetEnableEditingFailedActiveEditingByOtherUserEvent implements 
         Map<String, Object> map = new HashMap<>();
         map.put("user", vo.getUser());
         map.put("datasetId", vo.getDatasetId());
+        map.put("preparationCode", vo.getPreparationCode());
         map.put("dataflowId", vo.getDataflowId());
         map.put("datasetName", datasetName);
         map.put("error", vo.getError());

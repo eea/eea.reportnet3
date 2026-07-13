@@ -78,7 +78,7 @@ public class ValidationFinishedEventTest {
     Mockito.when(dataflowVO.getStatus()).thenReturn(TypeStatusEnum.DESIGN);
     Map<String, Object> result =
         validationFinishedEvent.getMap(NotificationVO.builder().user("user").datasetId(1L).build());
-    Assert.assertEquals(8, result.size());
+    Assert.assertEquals(10, result.size());
     Assert.assertEquals("user", result.get("user"));
     Assert.assertEquals(1L, result.get("datasetId"));
     Assert.assertEquals(2L, result.get("dataflowId"));

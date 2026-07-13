@@ -24,7 +24,7 @@ public interface JobExtendedRepository {
      * @return
      */
     List<Job> findJobsPaginated(Pageable pageable, boolean asc, String sortedColumn, Long jobId, String jobTypes, Long dataflowId, String dataflowName, Long providerId,
-                                Long datasetId, String datasetName, String creatorUsername, String jobStatuses);
+                                Long datasetId, String datasetName, String creatorUsername, String jobStatuses, String preparationCode);
 
     /**
      * Count jobs paginated.

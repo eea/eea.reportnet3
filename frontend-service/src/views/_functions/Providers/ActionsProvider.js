@@ -23,7 +23,7 @@ export const ActionsProvider = ({ children }) => {
   inProgressRef.current = isInProgress;
   jobTypeRef.current = jobTypeInProgress;
 
-  const testProcess = (datasetId, action) => {
+  const testProcess = (datasetId, action, code) => {
     clearInterval(timer.current);
 
     setDeleteDatasetProcessing(false);
@@ -65,7 +65,8 @@ export const ActionsProvider = ({ children }) => {
     timer.current = setInterval(async () => {
       const jobsInProgress = await JobsStatusesService.getJobsStatuses({
         datasetId: datasetId,
-        jobStatus: ['QUEUED', 'IN_PROGRESS'].join()
+        jobStatus: ['QUEUED', 'IN_PROGRESS'].join(),
+        code: code
       });
 
       if (isEmpty(jobsInProgress.jobsList)) {
@@ -80,7 +81,15 @@ export const ActionsProvider = ({ children }) => {
           );
         }
       } else {
-        setIsInProgress(true);
+        const relevantJobs = jobsInProgress.jobsList.filter(job => ['QUEUED', 'IN_PROGRESS'].includes(job.jobStatus));
+
+        const canSetInProgress = relevantJobs.some(job => {
+          const preparationCode = job.preparationCode;
+          return !preparationCode || preparationCode === code;
+        });
+
+        setIsInProgress(canSetInProgress);
+
         const jobInProgress = jobsInProgress.jobsList.find(job => job.jobStatus === 'IN_PROGRESS');
         const jobInQueue = jobsInProgress.jobsList.find(job => job.jobStatus === 'QUEUED');
         setJobTypeInProgress(jobInProgress ? jobInProgress?.jobType : jobInQueue?.jobType);

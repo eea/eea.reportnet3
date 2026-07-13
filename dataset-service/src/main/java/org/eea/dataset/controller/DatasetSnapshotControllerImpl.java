@@ -942,7 +942,7 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
       for(TableSchemaIdNameVO table: tables){
         TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(table.getIdTableSchema(), datasetSchemaId);
         if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable())
-                && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(dataset.getId(), tableSchemaVO.getIdTableSchema()))) {
+                && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(dataset.getId(), null, tableSchemaVO.getIdTableSchema()))) {
           if(jobId != null) {
             LOG.info("Can not release for jobId {} because an iceberg table exists", jobId);
             jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.ERROR_ICEBERG_TABLE_EXISTS, null);

@@ -248,7 +248,7 @@ public class DatasetMetabaseControllerImpl implements DatasetMetabaseController 
   @ApiOperation(value = "Update dataset Status", hidden = true)
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully updated status"),
           @ApiResponse(code = 500, message = "Error updating status")})
-  @PreAuthorize("secondLevelAuthorize(#datasetStatusMessageVO.datasetId,'DATASET_CUSTODIAN','DATASET_STEWARD','DATASET_STEWARD_SUPPORT')")
+  @PreAuthorize("secondLevelAuthorize(#datasetStatusMessageVO.datasetId,'DATASET_CUSTODIAN','DATASET_STEWARD','DATASET_STEWARD_SUPPORT') OR hasAnyRole('ADMIN')")
   public void updateDatasetStatus(@ApiParam(
           value = "dataset Status message object") @RequestBody DatasetStatusMessageVO datasetStatusMessageVO) {
     try {

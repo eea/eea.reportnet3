@@ -13,6 +13,8 @@ public interface DataLakeDataRetriever {
 
     TableVO getTableResult(DataSetMetabaseVO dataset, TableSchemaVO tableSchemaVO, Pageable pageable, String fields, String fieldSchemaId, String fieldValue, ErrorTypeEnum[] levelError, String[] qcCodes) throws EEAException;
 
+    TableVO getPreparationTableResult(DataSetMetabaseVO dataset, TableSchemaVO tableSchemaVO, Pageable pageable, String fields, String fieldSchemaId, String fieldValue, ErrorTypeEnum[] levelError, String[] qcCodes, String preparationCode) throws EEAException;
+
     boolean isApplicable(String datasetType);
 
     default void setEmptyResults(TableVO result) {

@@ -203,10 +203,13 @@ export const WebformRecord = ({
   };
 
   const checkIfElementIsConditional = element => {
-    const matchesCondition = el =>
-      el?.referencedField?.masterConditionalFieldId === element.fieldSchemaId ||
-      (!isEmpty(el?.referenceParentField) && el.referenceParentField.field === element.name) ||
-      (el?.type === 'BLOCK' && el.elements?.some(matchesCondition));
+    const matchesCondition = el => {
+      return (
+        el?.referencedField?.masterConditionalFieldId === element.fieldSchemaId ||
+        (!isEmpty(el?.referenceParentField) && el.referenceParentField.field === element.name) ||
+        el?.elements?.some(matchesCondition)
+      );
+    };
 
     return webformRecordState.record?.elements?.some(matchesCondition) ?? false;
   };
@@ -236,6 +239,20 @@ export const WebformRecord = ({
           isBlockVisible && (
             <div className={styles.fieldsBlock} key={`BLOCK_${i}`}>
               {element.elementsRecords.map(record => renderElements(record.elements))}
+            </div>
+          )
+        );
+      }
+
+      if (element.type === 'SECTION') {
+        const isSectionVisible = element.referenceParentField
+          ? onToggleFieldVisibility(element.referenceParentField, elements)
+          : true;
+
+        return (
+          isSectionVisible && (
+            <div className={styles.section} key={`SECTION_${i}`}>
+              {renderElements(element.elements)}
             </div>
           )
         );
@@ -300,7 +317,7 @@ export const WebformRecord = ({
                       onFieldUpdate={onFieldUpdate}
                       onFillField={onFillField}
                       onSaveField={onSaveField}
-                      record={record}
+                      record={webformRecordState.record}
                       referencedTableSchemaId={referencedTableSchemaId}
                       rootPkFieldId={rootPkFieldId}
                       tableSchemaId={tableId}

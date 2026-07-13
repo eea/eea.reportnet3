@@ -131,6 +131,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -842,12 +843,12 @@ public class FileTreatmentHelper implements DisposableBean {
      */
     @Async
     public void exportFileDL(Long datasetId, String mimeType, String tableSchemaId, String tableName,
-                           ExportFilterVO filters) throws Exception {
+                           ExportFilterVO filters, String preparationCode) throws Exception {
 
         String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
         TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, datasetSchemaId);
-        if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable())
-                && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, tableSchemaId))) {
+        if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable() &&!StringUtils.isBlank(preparationCode))
+                && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, preparationCode, tableSchemaId))) {
             throw new Exception("Can not export table data because iceberg table is created");
         }
 
@@ -861,7 +862,14 @@ public class FileTreatmentHelper implements DisposableBean {
             .error("Error exporting table data")
             .build();
 
-        File fileFolder = new File(exportDLPath, "dataset-" + datasetId);
+        File fileFolder;
+        if (StringUtils.isNotBlank(preparationCode)) {
+            fileFolder = new File(exportDLPath,
+                    "dataset-" + datasetId + "/" + preparationCode);
+        } else {
+            fileFolder = new File(exportDLPath, "dataset-" + datasetId);
+        }
+
         fileFolder.mkdirs();
 
         try {
@@ -870,20 +878,25 @@ public class FileTreatmentHelper implements DisposableBean {
                 DataSetMetabaseVO dataset = datasetMetabaseService.findDatasetMetabase(datasetId);
                 DatasetTypeEnum datasetType = datasetMetabaseService.getDatasetType(datasetId);
                 String includeCountryCode = getCode(dataset.getDataflowId(), datasetType);
-                S3PathResolver s3PathResolver = s3Service.getS3PathResolverByDatasetType(dataset, tableName, false);
+                S3PathResolver s3PathResolver = s3Service.getS3PathResolverByDatasetType(dataset, tableName, false, preparationCode);
                 boolean folderExist = s3Helper.checkFolderExist(s3PathResolver);
                 LOG.info("For datasetId {} s3PathResolver : {}", dataset.getId(), s3PathResolver);
                 LOG.info("s3Helper.checkFolderExist(s3PathResolver, S3_TABLE_NAME_FOLDER_PATH) : {}", folderExist);
                 if (folderExist && dremioHelperService.checkFolderPromoted(s3PathResolver, s3PathResolver.getTableName())) {
                     StringBuilder dataQuery = createDataQuery(tableName, filters, dataset, s3PathResolver, tableSchemaVO);
                     List<String> headers = getHeadersForFileDL(includeCountryCode, tableSchemaVO);
-                    File csvFile = new File(new File(exportDLPath, "dataset-" + dataset.getId()), tableName + CSV_TYPE);
+                    File csvFile;
+                    if (StringUtils.isNotBlank(preparationCode)) {
+                        csvFile = new File(new File(exportDLPath, "dataset-" + dataset.getId() + "/" + preparationCode), tableName + CSV_TYPE);
+                    } else {
+                        csvFile = new File(new File(exportDLPath, "dataset-" + dataset.getId()), tableName + CSV_TYPE);
+                    }
                     LOG.info("Creating file for export: {}", csvFile);
                     SqlRowSet rs = dremioJdbcTemplate.queryForRowSet(dataQuery.toString());
                     createCsvWithFiltersDL(headers, csvFile, rs, includeCountryCode);
                 }
             } else {
-                convertParquetFile(datasetId, mimeType, tableSchemaId, tableName, false, null);
+                convertParquetFile(datasetId, mimeType, tableSchemaId, tableName, false, null, preparationCode);
             }
             kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.EXPORT_TABLE_DATA_COMPLETED_EVENT, null, notificationVO);
             LOG.info("Successfully exported table data for datasetId {} and tableSchemaId {}", datasetId, tableSchemaId);
@@ -957,12 +970,19 @@ public class FileTreatmentHelper implements DisposableBean {
         if (REFERENCE.equals(dataset.getDatasetTypeEnum())) {
             s3PathResolver.setPath(S3_DATAFLOW_REFERENCE_QUERY_PATH);
             dataQuery.append("select * from " + s3Service.getTableAsFolderQueryPath(s3PathResolver) + " t ");
+        } else if (StringUtils.isNotBlank(s3PathResolver.getPreparationCode())){
+            dataQuery.append("select * from " + s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_PREPARATION_TABLE_AS_FOLDER_QUERY_PATH) + " t ");
         } else {
             dataQuery.append("select * from " + s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH) + " t ");
         }
         S3PathResolver s3ValidationResolver = new S3PathResolver(dataset.getDataflowId(), dataset.getDataProviderId() != null ? dataset.getDataProviderId() : 0, dataset.getId(), tableName);
         s3ValidationResolver.setTableName(S3_VALIDATION);
-        String validationTablePath = s3Service.getTableAsFolderQueryPath(s3ValidationResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
+        String validationTablePath;
+        if (StringUtils.isNotBlank(s3PathResolver.getPreparationCode())){
+            validationTablePath = s3Service.getTableAsFolderQueryPath(s3ValidationResolver, S3_PREPARATION_TABLE_AS_FOLDER_QUERY_PATH);
+        } else {
+            validationTablePath = s3Service.getTableAsFolderQueryPath(s3ValidationResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
+        }
         Map<String, FieldSchemaVO> fieldIdMap = tableSchemaVO.getRecordSchema().getFieldSchema().stream().collect(Collectors.toMap(FieldSchemaVO::getId, Function.identity()));
         String[] qcCodes = null;
         if (!filters.getQcCodes().isEmpty()) {
@@ -974,19 +994,19 @@ public class FileTreatmentHelper implements DisposableBean {
         return dataQuery;
     }
 
-    public void convertParquetFile(Long datasetId, String mimeType, String tableSchemaId, String tableName, Boolean etlExportV4, Long jobId) {
+    public void convertParquetFile(Long datasetId, String mimeType, String tableSchemaId, String tableName, Boolean etlExportV4, Long jobId, String preparationCode) {
         DataSetMetabaseVO dataset = datasetMetabaseService.findDatasetMetabase(datasetId);
         S3PathResolver s3PathResolver = new S3PathResolver(dataset.getDataflowId(), tableName);
 
         try {
-            setUpS3PathResolver(datasetId, dataset, s3PathResolver);
+            setUpS3PathResolver(datasetId, dataset, s3PathResolver, preparationCode);
             List<S3Object> exportFilenames = s3Helper.getFilenamesFromTableNames(s3PathResolver);
             LOG.info("Exporting table data for S3PathResolver {} with exportFilenames {}", s3PathResolver, exportFilenames);
 
             if (mimeType.equalsIgnoreCase(CSV.getValue())) {
-                convertParquetToCSV(exportFilenames, tableName, datasetId, tableSchemaId, dataset.getDatasetTypeEnum(), etlExportV4, jobId);
+                convertParquetToCSV(exportFilenames, tableName, datasetId, tableSchemaId, dataset.getDatasetTypeEnum(), etlExportV4, jobId, preparationCode);
             } else if (mimeType.equalsIgnoreCase(FileTypeEnum.JSON.getValue())) {
-                convertParquetToJSON(exportFilenames, tableName, datasetId, dataset.getDatasetTypeEnum());
+                convertParquetToJSON(exportFilenames, tableName, datasetId, dataset.getDatasetTypeEnum(), preparationCode);
             }/*else if (mimeType.equalsIgnoreCase(FileTypeEnum.XLSX.getValue())) {
                 File parquetFile = s3Helper.getFileFromS3(key, nameDataset, exportDLPath, LiteralConstants.PARQUET_TYPE);
                 nameDataset = nameDataset + XLSX_TYPE;
@@ -1005,12 +1025,13 @@ public class FileTreatmentHelper implements DisposableBean {
         }
     }
 
-    private void convertParquetFileZip(Long datasetId, String mimeType, String tableName, ZipOutputStream out, String tableSchemaId, DatasetTypeEnum datasetTypeEnum, Boolean etlExportV4) {
+    private void convertParquetFileZip(Long datasetId, String mimeType, String tableName, ZipOutputStream out, String tableSchemaId, DatasetTypeEnum datasetTypeEnum, Boolean etlExportV4, String preparationCode) {
         DataSetMetabaseVO dataset = datasetMetabaseService.findDatasetMetabase(datasetId);
         S3PathResolver s3PathResolver = new S3PathResolver(dataset.getDataflowId(), tableName);
+        s3PathResolver.setPreparationCode(preparationCode);
 
         try {
-            setUpS3PathResolver(datasetId, dataset, s3PathResolver);
+            setUpS3PathResolver(datasetId, dataset, s3PathResolver, preparationCode);
             LOG.info("Exporting table data for S3PathResolver {}", s3PathResolver);
             List<S3Object> exportFilenames = s3Helper.getFilenamesFromTableNames(s3PathResolver);
             LOG.info("Exporting table data with exportFilenames {}", exportFilenames);
@@ -1041,10 +1062,19 @@ public class FileTreatmentHelper implements DisposableBean {
         }
     }
 
-    private void setUpS3PathResolver(Long datasetId, DataSetMetabaseVO dataset, S3PathResolver s3PathResolver) {
+    private void setUpS3PathResolver(Long datasetId, DataSetMetabaseVO dataset, S3PathResolver s3PathResolver, String preparationCode) {
+        if (StringUtils.isNotBlank(preparationCode)) {
+            s3PathResolver.setPreparationCode(preparationCode);
+        }
+
         switch (dataset.getDatasetTypeEnum()) {
             case REPORTING:
-                s3PathResolver.setPath(S3_TABLE_NAME_FOLDER_PATH);
+                if(StringUtils.isNotBlank(preparationCode)) {
+                    s3PathResolver.setPath(S3_PREPARATION_TABLE_NAME_FOLDER_PATH);
+                }
+                else {
+                    s3PathResolver.setPath(S3_TABLE_NAME_FOLDER_PATH); //default
+                }
                 s3PathResolver.setDataProviderId(dataset.getDataProviderId());
                 s3PathResolver.setDatasetId(datasetId);
                 break;
@@ -1330,13 +1360,13 @@ public class FileTreatmentHelper implements DisposableBean {
     }
 
     @Async
-    public void exportDatasetFileDL(Long datasetId, String mimeType) throws Exception {
+    public void exportDatasetFileDL(Long datasetId, String mimeType, String preparationCode) throws Exception {
         String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
         List<TableSchemaIdNameVO> tableSchemas = datasetSchemaService.getTableSchemasIds(datasetId);
         for(TableSchemaIdNameVO entry: tableSchemas){
             TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(entry.getIdTableSchema(), datasetSchemaId);
-            if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable())
-                    && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, tableSchemaVO.getIdTableSchema()))) {
+            if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable() && StringUtils.isBlank(preparationCode))
+                    && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, preparationCode, tableSchemaVO.getIdTableSchema()))) {
                 throw new Exception("Can not export table data because iceberg table is created");
             }
         }
@@ -1362,15 +1392,27 @@ public class FileTreatmentHelper implements DisposableBean {
                         .error("Error exporting table data")
                         .build();
 
-                File datasetFolder = new File(exportDLPath, "dataset-" + datasetId);
+                File datasetFolder;
+                if (StringUtils.isNotBlank(preparationCode)) {
+                    datasetFolder = new File(exportDLPath,
+                            "dataset-" + datasetId + "/" + preparationCode);
+                } else {
+                    datasetFolder = new File(exportDLPath, "dataset-" + datasetId);
+                }
+
                 datasetFolder.mkdirs();
-                File fileWriteZip = new File(new File(exportDLPath, "dataset-" + datasetId), dataset.getDataSetName() + ZIP_TYPE);
+                File fileWriteZip;
+                if (StringUtils.isNotBlank(preparationCode)) {
+                    fileWriteZip = new File(new File(exportDLPath, "dataset-" + datasetId  + "/" + preparationCode), dataset.getDataSetName() + ZIP_TYPE);
+                } else {
+                    fileWriteZip = new File(new File(exportDLPath, "dataset-" + datasetId), dataset.getDataSetName() + ZIP_TYPE);
+                }
 
                 DataSetSchema dataSetSchema = schemasRepository.findByIdDataSetSchema(new ObjectId(dataset.getDatasetSchema()));
                 try (ZipOutputStream out = new ZipOutputStream(new FileOutputStream(fileWriteZip.toString()))) {
                     for (TableSchema tableSchema : dataSetSchema.getTableSchemas()) {
                         LOG.info("Exporting tableSchema {}", tableSchema);
-                        convertParquetFileZip(datasetId, extension, tableSchema.getNameTableSchema(), out, tableSchema.getIdTableSchema().toString(), dataset.getDatasetTypeEnum(), false);
+                        convertParquetFileZip(datasetId, extension, tableSchema.getNameTableSchema(), out, tableSchema.getIdTableSchema().toString(), dataset.getDatasetTypeEnum(), false, preparationCode);
                     }
                     kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.EXPORT_DATASET_COMPLETED_EVENT, null, notificationVO);
                 } catch (Exception e) {
@@ -1813,7 +1855,7 @@ public class FileTreatmentHelper implements DisposableBean {
 
             if (null != integrationVO) {
                 prepareFmeFileProcess(datasetId, files.get(0), integrationVO, mimeType, tableSchemaId,
-                        replace,jobId);
+                        replace,jobId, null);
             } else {
                 List<File> validatedNamesList = validateFileNames(tableSchemaId, schema, files, processId, datasetId, jobId, originalFileName);
                 List<File> validatedHeadersList = !validatedNamesList.isEmpty() ? validateFileHeaders(tableSchemaId, schema,originalFileName, validatedNamesList, delimiter, processId, datasetId, jobId) : new ArrayList<>();
@@ -2175,31 +2217,32 @@ public class FileTreatmentHelper implements DisposableBean {
          * @throws EEAException the EEA exception
          */
         public void prepareFmeFileProcess (Long datasetId, File file, IntegrationVO integrationVO,
-                String mimeType, String tableSchemaId, boolean replace, Long jobId) throws IOException, EEAException {
+                String mimeType, String tableSchemaId, boolean replace, Long jobId, String preparationCode) throws IOException, EEAException {
 
             LOG.info("Start FME-Import process: datasetId={}, integrationVO={}", datasetId, integrationVO);
             Map<String, String> internalParameters = integrationVO.getInternalParameters();
 
-            // Remove the lock so FME will not encounter it while calling back importFileData
-            if (!"true".equals(internalParameters.get(IntegrationParams.NOTIFICATION_REQUIRED))
-                    || IntegrationOperationTypeEnum.IMPORT_FROM_OTHER_SYSTEM
-                    .equals(integrationVO.getOperation())
-                    || "zip".equalsIgnoreCase(mimeType)) {
-                Map<String, Object> importFileData = new HashMap<>();
-                importFileData.put(LiteralConstants.SIGNATURE, LockSignature.IMPORT_FILE_DATA.getValue());
-                importFileData.put(LiteralConstants.DATASETID, datasetId);
-                lockService.removeLockByCriteria(importFileData);
-                Map<String, Object> importBigFileData = new HashMap<>();
-                importBigFileData.put(LiteralConstants.SIGNATURE,
-                        LockSignature.IMPORT_BIG_FILE_DATA.getValue());
-                importBigFileData.put(LiteralConstants.DATASETID, datasetId);
-                lockService.removeLockByCriteria(importBigFileData);
-                releaseLockReleasingProcess(datasetId);
+            if(StringUtils.isBlank(preparationCode)) {//SKIP for preparation code
+                // Remove the lock so FME will not encounter it while calling back importFileData
+                if (!"true".equals(internalParameters.get(IntegrationParams.NOTIFICATION_REQUIRED))
+                        || IntegrationOperationTypeEnum.IMPORT_FROM_OTHER_SYSTEM
+                        .equals(integrationVO.getOperation())
+                        || "zip".equalsIgnoreCase(mimeType)) {
+                    Map<String, Object> importFileData = new HashMap<>();
+                    importFileData.put(LiteralConstants.SIGNATURE, LockSignature.IMPORT_FILE_DATA.getValue());
+                    importFileData.put(LiteralConstants.DATASETID, datasetId);
+                    lockService.removeLockByCriteria(importFileData);
+                    Map<String, Object> importBigFileData = new HashMap<>();
+                    importBigFileData.put(LiteralConstants.SIGNATURE,
+                            LockSignature.IMPORT_BIG_FILE_DATA.getValue());
+                    importBigFileData.put(LiteralConstants.DATASETID, datasetId);
+                    lockService.removeLockByCriteria(importBigFileData);
+                    releaseLockReleasingProcess(datasetId);
+                }
             }
-
             // delete precious data if necessary
             if (replace) {
-                wipeDataAsync(datasetId, tableSchemaId, file, integrationVO, jobId);
+                wipeDataAsync(datasetId, tableSchemaId, file, integrationVO, jobId, preparationCode);
                 LOG.info("Data has been wiped for datasetId {}", datasetId);
             } else {
                 Map<String, Object> valuesFME = new HashMap<>();
@@ -2207,6 +2250,7 @@ public class FileTreatmentHelper implements DisposableBean {
                 valuesFME.put("fileName", file);
                 valuesFME.put("integrationId", integrationVO.getId());
                 valuesFME.put("jobId", jobId);
+                valuesFME.put("code", preparationCode);
                 kafkaSenderUtils.releaseKafkaEvent(EventType.CONTINUE_FME_PROCESS_EVENT, valuesFME);
             }
         }
@@ -2597,11 +2641,15 @@ public class FileTreatmentHelper implements DisposableBean {
          */
         @Async
         public void wipeDataAsync (Long datasetId, String tableSchemaId, File file,
-                IntegrationVO integrationVO, Long jobId){
-            if (null != tableSchemaId) {
-                datasetService.deleteTableBySchema(tableSchemaId, datasetId, false);
-            } else {
-                datasetService.deleteImportData(datasetId, true);
+                IntegrationVO integrationVO, Long jobId, String preparationCode){
+            // Skip relational wipe for preparation datasets
+            if (StringUtils.isBlank(preparationCode)) {
+
+                if (null != tableSchemaId) {
+                    datasetService.deleteTableBySchema(tableSchemaId, datasetId, false);
+                } else {
+                    datasetService.deleteImportData(datasetId, true);
+                }
             }
 
             Map<String, Object> valuesFME = new HashMap<>();
@@ -3358,83 +3406,58 @@ public class FileTreatmentHelper implements DisposableBean {
         }
     }
 
-        private void createFilesAndZip (Long dataflowId, Long dataProviderId,
-                DataSetMetabase datasetToFile,byte[] file, String nameFileUnique, String nameFileScape)
-      throws IOException {
+    private void createFilesAndZip(Long dataflowId, Long dataProviderId, DataSetMetabase datasetToFile,
+                                   byte[] file, String nameFileUnique, String nameFileScape) throws IOException {
+        // we create folder to save the file.zip
+        File fileFolderProvider;
+        if (dataProviderId != null) {
+            fileFolderProvider = new File((new File(pathPublicFile, "dataflow-" + dataflowId.toString())),
+                "dataProvider-" + dataProviderId.toString());
+        } else {
+            fileFolderProvider = new File(pathPublicFile, "dataflow-" + dataflowId.toString());
+        }
+        fileFolderProvider.mkdirs();
 
-            // we create folder to save the file.zip
-            File fileFolderProvider = null;
-            if (dataProviderId != null) {
-                fileFolderProvider = new File((new File(pathPublicFile, "dataflow-" + dataflowId.toString())),
-                        "dataProvider-" + dataProviderId.toString());
-            } else {
-                fileFolderProvider = new File(pathPublicFile, "dataflow-" + dataflowId.toString());
-            }
-            fileFolderProvider.mkdirs();
+        // we create the file.zip
+        File fileWriteZip = new File(fileFolderProvider, nameFileUnique + ".zip");
 
-            // we create the file.zip
-            File fileWriteZip = null;
-            if (dataProviderId != null) {
-                fileWriteZip =
-                        new File(new File(new File(pathPublicFile, "dataflow-" + dataflowId.toString()),
-                                "dataProvider-" + dataProviderId.toString()), nameFileUnique + ".zip");
-            } else {
-                fileWriteZip = new File(new File(pathPublicFile, "dataflow-" + dataflowId.toString()),
-                        nameFileUnique + ".zip");
-            }
-            // create the context to add all files in a treemap inside to attachment and file information
-            try (ZipOutputStream out = new ZipOutputStream(new FileOutputStream(fileWriteZip.toString()))) {
-                // we get the dataschema and check every table to see if find any field attachemnt
-                DataSetSchema dataSetSchema =
-                        schemasRepository.findByIdDataSetSchema(new ObjectId(datasetToFile.getDatasetSchema()));
-                for (TableSchema tableSchema : dataSetSchema.getTableSchemas()) {
+        // create the context to add all files in a treemap inside to attachment and file information
+        try (ZipOutputStream out = new ZipOutputStream(new FileOutputStream(fileWriteZip.toString()))) {
+            // we get the dataschema and check every table to see if find any field attachemnt
+            DataSetSchema dataSetSchema =
+                schemasRepository.findByIdDataSetSchema(new ObjectId(datasetToFile.getDatasetSchema()));
+            for (TableSchema tableSchema : dataSetSchema.getTableSchemas()) {
 
-                    // we find if in any table have one field type ATTACHMENT
-                    List<FieldSchema> fieldSchemaAttachment = tableSchema.getRecordSchema().getFieldSchema()
-                            .stream().filter(field -> DataType.ATTACHMENT.equals(field.getType()))
-                            .collect(Collectors.toList());
-                    if (!CollectionUtils.isEmpty(fieldSchemaAttachment)) {
-
-                        LOG.info("We  are in tableSchema with id {} looking if we have attachments",
-                                tableSchema.getIdTableSchema());
-                        // We took every field for every table
-                        for (FieldSchema fieldAttach : fieldSchemaAttachment) {
-                            List<AttachmentValue> attachmentValue = attachmentRepository
-                                    .findAllByIdFieldSchemaAndValueIsNotNull(fieldAttach.getIdFieldSchema().toString());
-
-                            // if there are filled we create a folder and inside of any folder we create the fields
-                            if (!CollectionUtils.isEmpty(attachmentValue)) {
-                                LOG.info(
-                                        "We  are in tableSchema with id {}, checking field {} and we have attachments files",
-                                        tableSchema.getIdTableSchema(), fieldAttach.getIdFieldSchema());
-
-                                for (AttachmentValue attachment : attachmentValue) {
-                                    try {
-                                        ZipEntry eFieldAttach = new ZipEntry(
-                                                tableSchema.getNameTableSchema() + "/" + attachment.getFileName());
-                                        out.putNextEntry(eFieldAttach);
-                                        out.write(attachment.getContent(), 0, attachment.getContent().length);
-                                    } catch (ZipException e) {
-                                        LOG.info("Error creating file {} because already exist", attachment.getFileName(),
-                                                e);
-                                    }
-                                    out.closeEntry();
-                                }
-                            }
-                        }
-                    }
+                // we find if in any table have one field type ATTACHMENT
+                List<FieldSchema> fieldSchemaAttachment = tableSchema.getRecordSchema().getFieldSchema()
+                    .stream().filter(field -> DataType.ATTACHMENT.equals(field.getType()))
+                    .collect(Collectors.toList());
+                if (CollectionUtils.isEmpty(fieldSchemaAttachment)) {
+                    continue;
                 }
 
-                ZipEntry e = new ZipEntry(nameFileScape);
-                out.putNextEntry(e);
-                out.write(file, 0, file.length);
-                out.closeEntry();
-                LOG.info("We create file {} in the route ", fileWriteZip);
-            } catch (Exception e) {
-                LOG.error("Unexpected error! Error in createFilesAndZip for dataflowId {} and dataProviderId {}. Message: {}", dataflowId, dataProviderId, e.getMessage());
-                throw e;
+                LOG.info("We  are in tableSchema with id {} looking if we have attachments", tableSchema.getIdTableSchema());
+                // We took every field for every table
+                for (FieldSchema fieldAttach : fieldSchemaAttachment) {
+                    datasetService.writeAttachmentsToZip(
+                        datasetToFile.getId(),
+                        fieldAttach.getIdFieldSchema().toString(),
+                        tableSchema.getIdTableSchema().toString(),
+                        tableSchema.getNameTableSchema(),
+                        out);
+                }
             }
+
+            ZipEntry e = new ZipEntry(nameFileScape);
+            out.putNextEntry(e);
+            out.write(file, 0, file.length);
+            out.closeEntry();
+            LOG.info("We create file {} in the route ", fileWriteZip);
+        } catch (Exception e) {
+            LOG.error("Unexpected error! Error in createFilesAndZip for dataflowId {} and dataProviderId {}. Message: {}", dataflowId, dataProviderId, e.getMessage());
+            throw e;
         }
+    }
 
     private void createFilesAndZipDL(DataSetMetabase dataset, String zipDestinationPath, String nameFileUnique) throws EEAException {
         try {
@@ -3447,7 +3470,7 @@ public class FileTreatmentHelper implements DisposableBean {
             for (TableSchemaIdNameVO entry : tableSchemas) {
                 TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(entry.getIdTableSchema(), datasetSchemaId);
                 if (tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable())
-                        && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(dataset.getId(), tableSchemaVO.getIdTableSchema()))) {
+                        && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(dataset.getId(), null, tableSchemaVO.getIdTableSchema()))) {
                     throw new EEAException("Cannot export table data because iceberg table is created");
                 }
             }
@@ -3466,7 +3489,7 @@ public class FileTreatmentHelper implements DisposableBean {
                     final String tableId = tableSchema.getIdTableSchema().toString();
 
                     LOG.info("Exporting tableSchema {}", tableId);
-                    convertParquetFileZip(dataset.getId(), FileTypeEnum.CSV.getValue(), tableName, out, tableId, datasetType, false);
+                    convertParquetFileZip(dataset.getId(), FileTypeEnum.CSV.getValue(), tableName, out, tableId, datasetType, false, null);
 
                     final boolean attachmentFieldExistsInSchema = tableSchema
                             .getRecordSchema()
@@ -3624,15 +3647,19 @@ public class FileTreatmentHelper implements DisposableBean {
             return isProcessStarted;
         }
 
-    public void convertParquetFileForProvider(Long datasetId, Long providerId, String tableSchemaId, String tableName, DatasetTypeEnum datasetType, Boolean etlExportV4, Long jobId, String providerOutDir) throws EEAException {
+    public void convertParquetFileForProvider(Long datasetId, Long providerId, String tableSchemaId, String tableName, DatasetTypeEnum datasetType, Boolean etlExportV4, Long jobId, String providerOutDir, String preparationCode) throws EEAException {
 
       DataSetMetabaseVO dataset = datasetMetabaseService.findDatasetMetabase(datasetId);
 
       try {
-        S3PathResolver s3PathResolver = new S3PathResolver(dataset.getDataflowId(), providerId, datasetId, tableName);
+        S3PathResolver s3PathResolver = new S3PathResolver(dataset.getDataflowId(), providerId, datasetId, tableName, preparationCode);
         List<S3Object> exportFilenames;
 
-        if (DatasetTypeEnum.COLLECTION.equals(datasetType)) {
+        if (StringUtils.isBlank(preparationCode)) {
+            s3PathResolver.setPath(S3_PREPARATION_PROVIDER_PATH);
+            exportFilenames = s3Helper.getFilenamesFromTableNames(s3PathResolver);
+        }
+        else if (DatasetTypeEnum.COLLECTION.equals(datasetType)) {
           s3PathResolver.setPath(S3_TABLE_NAME_DC_PROVIDER_FOLDER_PATH);
           exportFilenames = s3Helper.getFilenamesFromTableNames(s3PathResolver);
         } else if (DatasetTypeEnum.EUDATASET.equals(datasetType)) {
@@ -3670,9 +3697,9 @@ public class FileTreatmentHelper implements DisposableBean {
                 File csvFile;
                 List<String> headers = getFieldsFromSchema(datasetId, tableSchemaId);
                 if (CollectionUtils.isEmpty(exportFilenames)) {
-                    csvFile = s3ConvertService.createEmptyCSVFile(tableName, datasetId, headers, etlExportV4, null);
+                    csvFile = s3ConvertService.createEmptyCSVFile(tableName, datasetId, headers, etlExportV4, null, null);
                 } else {
-                    csvFile = s3ConvertService.createCSVFile(exportFilenames, tableName, datasetId, datasetTypeEnum, headers, etlExportV4, null);
+                    csvFile = s3ConvertService.createCSVFile(exportFilenames, tableName, datasetId, datasetTypeEnum, headers, etlExportV4, null, null);
                 }
 
                 s3ConvertService.convertParquetToCSVinZIP(csvFile, tableName, out);
@@ -3682,13 +3709,13 @@ public class FileTreatmentHelper implements DisposableBean {
             }
         }
 
-        private void convertParquetToCSV(List<S3Object> exportFilenames, String tableName, Long datasetId, String tableSchemaId, DatasetTypeEnum datasetTypeEnum, Boolean etlExportV4, Long jobId) {
+        private void convertParquetToCSV(List<S3Object> exportFilenames, String tableName, Long datasetId, String tableSchemaId, DatasetTypeEnum datasetTypeEnum, Boolean etlExportV4, Long jobId, String preparationCode) {
             try {
                 List<String> headers = getFieldsFromSchema(datasetId, tableSchemaId);
                 if (CollectionUtils.isEmpty(exportFilenames)) {
-                    s3ConvertService.createEmptyCSVFile(tableName, datasetId, headers, etlExportV4, jobId);
+                    s3ConvertService.createEmptyCSVFile(tableName, datasetId, headers, etlExportV4, jobId, preparationCode);
                 } else {
-                    s3ConvertService.createCSVFile(exportFilenames, tableName, datasetId, datasetTypeEnum, headers, etlExportV4, jobId);
+                    s3ConvertService.createCSVFile(exportFilenames, tableName, datasetId, datasetTypeEnum, headers, etlExportV4, jobId, preparationCode);
                 }
             } catch (Exception e) {
                 LOG.error("Unexpected error! Error in convertParquetToCSV for datasetId {} and tableName {}", datasetId, tableName, e);
@@ -3714,8 +3741,8 @@ public class FileTreatmentHelper implements DisposableBean {
             return headers;
         }
 
-        private void convertParquetToJSON(List<S3Object> exportFilenames, String tableName, Long datasetId, DatasetTypeEnum datasetTypeEnum) {
-            s3ConvertService.createJsonFile(exportFilenames, tableName, datasetId, datasetTypeEnum);
+        private void convertParquetToJSON(List<S3Object> exportFilenames, String tableName, Long datasetId, DatasetTypeEnum datasetTypeEnum, String preparationCode) {
+            s3ConvertService.createJsonFile(exportFilenames, tableName, datasetId, datasetTypeEnum, preparationCode);
         }
 }
 

@@ -72,8 +72,7 @@ import java.io.*;
 import java.util.*;
 import java.util.concurrent.Future;
 
-import static org.eea.utils.LiteralConstants.S3_VALIDATION;
-import static org.eea.utils.LiteralConstants.S3_VALIDATION_TABLE_PATH;
+import static org.eea.utils.LiteralConstants.*;
 
 /**
  * The Class ValidationServiceImpl.
@@ -404,6 +403,7 @@ public class ValidationServiceImpl implements ValidationService {
         validationDatasetRepository.saveAll(validations);
       } finally {
         RuleOperators.clearValidateAsProviderCode();
+        RuleOperators.clearFields();
         session.destroy();
         validations = null;
         dataset = null;
@@ -448,6 +448,7 @@ public class ValidationServiceImpl implements ValidationService {
           }
         } finally {
           RuleOperators.clearValidateAsProviderCode();
+          RuleOperators.clearFields();
         }
       }
     } catch (EEAInvalidSQLException e) {
@@ -496,6 +497,7 @@ public class ValidationServiceImpl implements ValidationService {
         }
       } finally {
         RuleOperators.clearValidateAsProviderCode();
+        RuleOperators.clearFields();
         records = null;
         session.destroy();
         System.gc();
@@ -534,6 +536,7 @@ public class ValidationServiceImpl implements ValidationService {
         }
       } finally {
         RuleOperators.clearValidateAsProviderCode();
+        RuleOperators.clearFields();
         session.destroy();
       }
     } catch (Exception e) {
@@ -773,11 +776,19 @@ public class ValidationServiceImpl implements ValidationService {
      */
     @Async
     @Override
-    public void exportValidationFile(Long datasetId) throws EEAException, IOException {
+    public void exportValidationFile(Long datasetId, String preparationCode) throws EEAException, IOException {
         final DatasetTypeEnum datasetType = dataSetControllerZuul.getDatasetType(datasetId);
 
         // Sets the validation file name and it's root directory
-        final String composedFileName = "dataset-" + datasetId + "-validations";
+        //TODO Find out what the filename will be for preparation sets
+        final String composedFileName;
+        if (StringUtils.isNotBlank(preparationCode)) {
+          composedFileName = "dataset-" + datasetId + "-preparationCode-" + preparationCode + "-validations";
+        }
+        else {
+          composedFileName = "dataset-" + datasetId + "-validations";
+        }
+
         final String fileNameWithExtension = composedFileName + "." + FileTypeEnum.CSV.getValue();
         final String creatingFileError =
                 String.format("Failed generating CSV file with name %s using datasetID %s",
@@ -819,7 +830,7 @@ public class ValidationServiceImpl implements ValidationService {
             final DataSetMetabaseVO dataSetMetabaseVO = dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
 
             if (isBigData) {
-                final FailedValidationsDatasetVO validations = getBigDataValidationsByDataset(dataSetMetabaseVO);
+                final FailedValidationsDatasetVO validations = getBigDataValidationsByDataset(dataSetMetabaseVO, preparationCode);
                 fillValidationDataCSV(validations, dataSetMetabaseVO.getDatasetSchema(), nHeaders, csvWriter);
             } else {
                 final DatasetValue dataset = getDatasetValuebyId(datasetId);
@@ -858,11 +869,18 @@ public class ValidationServiceImpl implements ValidationService {
     }
 
   @Override
-  public void exportValidationFileDL(Long datasetId) throws EEAException {
+  public void exportValidationFileDL(Long datasetId, String preparationCode) throws EEAException {
     DataSetMetabaseVO dataset = dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
     S3PathResolver s3PathResolver = new S3PathResolver(dataset.getDataflowId(), dataset.getDataProviderId()!=null ? dataset.getDataProviderId() : 0, dataset.getId(), S3_VALIDATION);
-    s3PathResolver.setPath(S3_VALIDATION_TABLE_PATH);
-    if (s3Helper.checkFolderExist(s3PathResolver, S3_VALIDATION_TABLE_PATH) && dremioHelperService.checkFolderPromoted(s3PathResolver, s3PathResolver.getTableName())) {
+    s3PathResolver.setPreparationCode(preparationCode);
+    if (StringUtils.isNotBlank(preparationCode)) {
+      s3PathResolver.setPath(S3_PREPARATION_VALIDATION_TABLE_PATH);
+    }
+    else {
+      s3PathResolver.setPath(S3_VALIDATION_TABLE_PATH);
+    }
+
+    if (s3Helper.checkFolderExist(s3PathResolver, s3PathResolver.getPath()) && dremioHelperService.checkFolderPromoted(s3PathResolver, s3PathResolver.getTableName())) {
       String creatingFileError =
               String.format("Failed generating CSV file with name %s using datasetID %s",
                       S3_VALIDATION, datasetId);
@@ -893,12 +911,21 @@ public class ValidationServiceImpl implements ValidationService {
    * @throws ResponseStatusException the response status exception
    */
   @Override
-  public File downloadExportedFile(Long datasetId, String fileName)
+  public File downloadExportedFile(Long datasetId, String fileName, String preparationCode)
       throws IOException, ResponseStatusException {
 
+
+    final String folder;
+    if (StringUtils.isNotBlank(preparationCode)) {
+      folder = "dataset-" + datasetId + "-preparationCode-" + preparationCode + "-validations";
+    }
+    else {
+      folder = "dataset-" + datasetId + "-validations";
+    }
+
     // we compound the route and create the file
-    File file =
-        new File(new File(pathPublicFile, "dataset-" + datasetId + "-validations"), fileName);
+    final File file =
+        new File(new File(pathPublicFile, folder), fileName);
     if (!file.exists()) {
 
       LOG.error(String.format(EXCEPTIONERRORSTRING, datasetId, fileName));
@@ -938,7 +965,7 @@ public class ValidationServiceImpl implements ValidationService {
     return validations;
   }
 
-  private FailedValidationsDatasetVO getBigDataValidationsByDataset(DataSetMetabaseVO dataSetMetabaseVO) {
+  private FailedValidationsDatasetVO getBigDataValidationsByDataset(DataSetMetabaseVO dataSetMetabaseVO, String preparationCode) {
     FailedValidationsDatasetVO validations = new FailedValidationsDatasetVO();
 
     validations.setErrors(new ArrayList<>());
@@ -947,10 +974,22 @@ public class ValidationServiceImpl implements ValidationService {
     List<GroupValidationVO> errors = new ArrayList<>();
 
     S3PathResolver s3PathResolver = new S3PathResolver(dataSetMetabaseVO.getDataflowId(), dataSetMetabaseVO.getDataProviderId()!=null ? dataSetMetabaseVO.getDataProviderId() : 0, dataSetMetabaseVO.getId(), S3_VALIDATION);
-    if (s3Helper.checkFolderExist(s3PathResolver, S3_VALIDATION_TABLE_PATH) && dremioHelperService.checkFolderPromoted(s3PathResolver, s3PathResolver.getTableName())) {
-       errors = dataLakeValidationService.findGroupRecordsByFilter(s3PathResolver, null, null, "",
-              "", "", null, "", false, false);
+    s3PathResolver.setPreparationCode(preparationCode);
+
+    if (StringUtils.isBlank(preparationCode)) {
+      if (s3Helper.checkFolderExist(s3PathResolver, S3_VALIDATION_TABLE_PATH) && dremioHelperService.checkFolderPromoted(s3PathResolver, s3PathResolver.getTableName())) {
+        errors = dataLakeValidationService.findGroupRecordsByFilter(s3PathResolver, null, null, "",
+                "", "", null, "", false, false);
+      }
     }
+    else {
+      s3PathResolver.setPath(S3_PREPARATION_VALIDATION_TABLE_PATH);
+      if (s3Helper.checkFolderExist(s3PathResolver, S3_PREPARATION_VALIDATION_TABLE_PATH) && dremioHelperService.checkFolderPromoted(s3PathResolver, s3PathResolver.getTableName())) {
+        errors = dataLakeValidationService.findGroupRecordsByFilter(s3PathResolver, null, null, "",
+                "", "", null, "", false, false);
+      }
+    }
+
 
     DataSetSchemaVO schema = datasetSchemaController.findDataSchemaByDatasetId(dataSetMetabaseVO.getId());
     setRuleMessageDL(schema.getIdDataSetSchema(), errors);
