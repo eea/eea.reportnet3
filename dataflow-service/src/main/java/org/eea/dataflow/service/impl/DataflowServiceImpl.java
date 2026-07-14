@@ -620,6 +620,9 @@ public class DataflowServiceImpl implements DataflowService {
         if (null != dataflowVO.getOfficialReporting()) {
           dataflowSave.get().setOfficialReporting(dataflowVO.getOfficialReporting());
         }
+        if (null != dataflowVO.getPreparationEnabled()) {
+          dataflowSave.get().setPreparationEnabled(dataflowVO.getPreparationEnabled());
+        }
         dataflowRepository.save(dataflowSave.get());
         LOG.info("The dataflow {} has been updated.", dataflowSave.get().getName());
       }

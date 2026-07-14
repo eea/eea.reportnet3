@@ -50,6 +50,7 @@ export const ManageDataflowForm = forwardRef(
       onSubmit,
       refresh,
       renderOfficialReporting,
+      renderPreparationEnabled,
       sncData
     },
     ref
@@ -141,7 +142,7 @@ export const ManageDataflowForm = forwardRef(
       return hasErrors;
     };
 
-    const onConfirm = async (pinned, bigData, officialReporting) => {
+    const onConfirm = async (pinned, bigData, officialReporting, preparationEnabled) => {
       checkIsCorrectInputValue(metadata.obligation.title, 'obligation');
       checkIsCorrectInputValue(name, 'name');
       checkIsCorrectInputValue(description, 'description');
@@ -164,7 +165,8 @@ export const ManageDataflowForm = forwardRef(
                   isDataflowOpen && deliveryDate
                     ? new Date(dayjs(deliveryDate).utc(true).endOf('day').valueOf()).getTime()
                     : undefined,
-                  officialReporting
+                  officialReporting,
+                  preparationEnabled
                 )
               : await DataflowService.update(
                   dataflowId,
@@ -178,7 +180,8 @@ export const ManageDataflowForm = forwardRef(
                   isDataflowOpen && deliveryDate
                     ? new Date(dayjs(deliveryDate).utc(true).endOf('day').valueOf()).getTime()
                     : undefined,
-                  officialReporting
+                  officialReporting,
+                  preparationEnabled
                 );
 
             onEdit(name, description, metadata.obligation.id);
@@ -192,7 +195,8 @@ export const ManageDataflowForm = forwardRef(
                   bigData,
                   selectedGroup.dataProviderGroupId,
                   sncData === true ? true : undefined,
-                  officialReporting
+                  officialReporting,
+                  preparationEnabled
                 )
               : await DataflowService.create(
                   name,
@@ -202,7 +206,8 @@ export const ManageDataflowForm = forwardRef(
                   bigData,
                   selectedGroup.dataProviderGroupId,
                   sncData === true ? true : undefined,
-                  officialReporting
+                  officialReporting,
+                  preparationEnabled
                 );
 
             if (pinned) {
@@ -391,6 +396,7 @@ export const ManageDataflowForm = forwardRef(
             </label>
           </div>
           {isEditing && <div className={`${styles.officialReportingWrapper}`}>{renderOfficialReporting()}</div>}
+          {isEditing && metadata.bigDataStorage && <div className={`${styles.officialReportingWrapper}`}>{renderPreparationEnabled()}</div>}
         </fieldset>
       </form>
     );

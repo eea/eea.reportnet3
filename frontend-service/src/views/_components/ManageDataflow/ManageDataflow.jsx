@@ -71,11 +71,12 @@ export const ManageDataflow = ({
     description: isEditing ? state.description : '',
     isDeleting: false,
     isOfficialReporting: isEditing ? state.officialReporting : false,
+    isPreparationEnabled: isEditing ? state.preparationEnabled : false,
     isSubmitting: false,
     name: isEditing ? state.name : '',
     obligation,
     pinDataflow: false,
-    bigDataStorage: false,
+    bigDataStorage: isEditing ? state.data.bigData : false,
     providerGroup: null,
     isReleasable: state.isReleasable
   };
@@ -212,7 +213,8 @@ export const ManageDataflow = ({
       formRef.current.handleSubmit(
         reportingDataflowState.pinDataflow,
         reportingDataflowState.bigDataStorage,
-        reportingDataflowState.isOfficialReporting
+        reportingDataflowState.isOfficialReporting,
+        reportingDataflowState.isPreparationEnabled
       );
     resetObligations();
   };
@@ -271,6 +273,41 @@ export const ManageDataflow = ({
       </div>
     );
   };
+
+  const renderPreparationEnabled = () => {
+    return (
+      <div className={styles.checkboxWrapper}>
+        <Checkbox
+          ariaLabel={resourcesContext.messages['preparationEnabled']}
+          checked={reportingDataflowState.isPreparationEnabled}
+          id="preparationEnabledCheckbox"
+          inputId="preparationEnabledCheckbox"
+          onChange={() =>
+            reportingDataflowDispatch({
+              type: 'TOGGLE_PREPARATION_ENABLED',
+              payload: !reportingDataflowState.isPreparationEnabled
+            })
+          }
+          role="checkbox"
+        />
+        <label>
+          <span
+            onClick={() =>
+              reportingDataflowDispatch({
+                type: 'TOGGLE_PREPARATION_ENABLED',
+                payload: !reportingDataflowState.isPreparationEnabled
+              })
+            }>
+            {resourcesContext.messages['preparationEnabled']}
+          </span>
+        </label>
+        <TooltipButton
+          message={resourcesContext.messages['preparationEnabledMessage']}
+          uniqueIdentifier="preparationEnabled"></TooltipButton>
+      </div>
+    );
+  };
+
 
   const renderDataflowDialog = () => {
     const renderDeleteDataflowButton = () => {
@@ -382,6 +419,7 @@ export const ManageDataflow = ({
         </div>
         <div className="p-toolbar-group-left">{renderBigDataStorage()}</div>
         {!isEditing && <div className="p-toolbar-group-left">{renderOfficialReporting()}</div>}
+        {!isEditing && reportingDataflowState.bigDataStorage && <div className="p-toolbar-group-left">{renderPreparationEnabled()}</div>}
         <Button
           className={`p-button-primary ${
             !(isCitizenScienceDataflow && isEmpty(reportingDataflowState.providerGroup)) &&
@@ -443,6 +481,7 @@ export const ManageDataflow = ({
                 : state.isReportingDataflowDialogVisible
             }
             renderOfficialReporting={renderOfficialReporting}
+            renderPreparationEnabled={renderPreparationEnabled}
             sncData={sncData}
           />
           {manualAcceptance && state.status === 'DRAFT' && (

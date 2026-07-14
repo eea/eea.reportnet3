@@ -11,16 +11,16 @@ export const ReferenceDataflowRepository = {
       data: { ...filterBy }
     }),
 
-  create: async (name, description, type, bigData, sncData, officialReporting) =>
+  create: async (name, description, type, bigData, sncData, officialReporting, preparationEnabled) =>
     await HTTPRequester.post({
       url: getUrl(DataflowConfig.createUpdate),
-      data: { name, description, type, bigData, sncData, officialReporting }
+      data: { name, description, type, bigData, sncData, officialReporting, preparationEnabled }
     }),
 
-  update: async (dataflowId, description, name, type, bigData, officialReporting) =>
+  update: async (dataflowId, description, name, type, bigData, officialReporting, preparationEnabled) =>
     await HTTPRequester.update({
       url: getUrl(DataflowConfig.createUpdate),
-      data: { description, id: dataflowId, name, type, bigData, officialReporting }
+      data: { description, id: dataflowId, name, type, bigData, officialReporting, preparationEnabled }
     }),
 
   getReferencingDataflows: async referenceDataflowId =>

@@ -147,6 +147,7 @@ export const Dataflow = () => {
     obligations: {},
     preparationSetsList: null,
     officialReporting: false,
+    preparationEnabled: false,
     representative: {},
     representativesImport: false,
     restrictFromPublic: false,
@@ -982,6 +983,7 @@ export const Dataflow = () => {
           name: dataflow.name,
           obligations: dataflow.obligation,
           officialReporting: dataflow.officialReporting,
+          preparationEnabled: dataflow.preparationEnabled,
           showPublicInfo: dataflow.showPublicInfo,
           status: dataflow.status
         }
