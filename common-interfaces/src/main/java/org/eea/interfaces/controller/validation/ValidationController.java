@@ -252,6 +252,14 @@ public interface ValidationController {
    */
   @GetMapping("/private/hasProcessCanceledTasks/{processId}")
   boolean hasProcessCanceledTasks(@PathVariable("processId") String processId);
+
+  /**
+   * Finds task by processId
+   * @param processId
+   * @return
+   */
+  @GetMapping("/private/hasProcessSkippedTasks/{processId}")
+  boolean hasProcessSkippedTasks(@PathVariable("processId") String processId);
 }
 
 

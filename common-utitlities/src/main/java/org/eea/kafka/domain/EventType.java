@@ -722,6 +722,9 @@ public enum EventType {
   /** Validation finished with canceled tasks event */
   FINISHED_VALIDATION_WITH_CANCELED_TASKS(LiteralConstants.DATA_REPORTING_TOPIC, "finished_validation_with_canceled_tasks_event", true),
 
+  /** Validation finished with skipped tasks event */
+  FINISHED_VALIDATION_WITH_SKIPPED_TASKS_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "finished_validation_with_skipped_tasks_event", true),
+
   /** The release canceled event. */
   RELEASE_CANCELED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "release_canceled_event", true),
 

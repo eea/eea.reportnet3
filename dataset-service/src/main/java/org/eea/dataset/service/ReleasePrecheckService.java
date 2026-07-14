@@ -164,6 +164,11 @@ public class ReleasePrecheckService {
         LOG.info("Found canceled task(s) without blockers for validationJobId {}", validationJobId);
         jobControllerZuul.updateJobInfo(releaseJobId, JobInfoEnum.WARNING_HAS_CANCELED_VALIDATION_TASKS, null);
       }
+      Task jobHasSkippedTask = taskRepository.findFirstByProcessIdInAndStatus(processIds, ProcessStatusEnum.SKIPPED);
+      if (jobHasSkippedTask != null) {
+        LOG.info("Found canceled task(s) without blockers for validationJobId {}", validationJobId);
+        jobControllerZuul.updateJobInfo(releaseJobId, JobInfoEnum.WARNING_HAS_SKIPPED_VALIDATION_TASKS, null);
+      }
     }
   }
 
