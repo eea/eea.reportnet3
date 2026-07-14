@@ -1859,6 +1859,20 @@
       "key": "warn",
       "lifeTime": 20000,
       "fixed": false,
+      "types": [
+        {
+          "key": "FINISHED_VALIDATION_WITH_SKIPPED_TASKS_EVENT",
+          "navigateTo": {
+            "section": "DATASET",
+            "parameters": ["dataflowId", "datasetId"]
+          }
+        }
+      ]
+    },
+    {
+      "key": "warn",
+      "lifeTime": 20000,
+      "fixed": false,
       "types": [{ "key": "YOU_ONLY_HAVE_LIMITED_TIME" }]
     }
   ],

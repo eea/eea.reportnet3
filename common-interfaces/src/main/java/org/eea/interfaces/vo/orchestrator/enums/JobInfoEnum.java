@@ -69,6 +69,8 @@ public enum JobInfoEnum {
 
     WARNING_HAS_CANCELED_VALIDATION_TASKS("There are canceled validation tasks. Please review and address the issues before retrying."),
 
+    WARNING_HAS_SKIPPED_VALIDATION_TASKS("One or more blocking validation errors were detected during validation. To avoid unnecessary processing, the remaining validation tasks were not executed and were marked as SKIPPED. Resolve the blocking issues and run validation again."),
+
     IMPORT_JOB_FAILED_STUCK_QUEUED("The import job failed because it was stuck in status QUEUED for a long time. Please try again."),
 
     IMPORT_JOB_RESTART_FAILED("The import job could not be completed as it became stuck following a restart. Please try again or contact the Service Desk."),
