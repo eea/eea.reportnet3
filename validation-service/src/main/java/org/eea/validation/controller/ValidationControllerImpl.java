@@ -753,6 +753,12 @@ public class ValidationControllerImpl implements ValidationController {
   public boolean hasProcessCanceledTasks(@PathVariable("processId") String processId) {
     return taskRepository.hasProcessCanceledTasks(processId);
   }
+
+  @Override
+  @GetMapping("/private/hasProcessSkippedTasks/{processId}")
+  public boolean hasProcessSkippedTasks(@PathVariable("processId") String processId) {
+    return taskRepository.hasProcessSkippedTasks((processId));
+  }
 }
 
 

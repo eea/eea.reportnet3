@@ -104,6 +104,7 @@ public class JobForFinalizingInProgressValidationJobsWithFinishedTasks {
                         String uuid = null, user = null, queuedProcess = null;
                         Long datasetId = null;
                         boolean hasProcessCanceledTasks = false;
+                        boolean hasProcessSkippedTasks = false;
                         for (String processId : processes) {
                             ProcessVO process = processControllerZuul.findById(processId);
                             if (process.getStatus().equals(ProcessStatusEnum.IN_QUEUE.toString())) {
@@ -125,6 +126,9 @@ public class JobForFinalizingInProgressValidationJobsWithFinishedTasks {
                             if (validationControllerZuul.hasProcessCanceledTasks(processId)) {
                                 hasProcessCanceledTasks = true;
                             }
+                            if (validationControllerZuul.hasProcessSkippedTasks(processId)) {
+                                hasProcessSkippedTasks = true;
+                            }
                         }
                         if (finished && queuedProcess == null) {
                             //all processes of the provider datasets are finished, as all tasks are finished
@@ -139,6 +143,13 @@ public class JobForFinalizingInProgressValidationJobsWithFinishedTasks {
                                 kafkaSenderUtils.releaseKafkaEvent(EventType.VALIDATION_CANCELED_EVENT,
                                     value);
                             }
+
+                            if (hasProcessSkippedTasks) {
+                                kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.FINISHED_VALIDATION_WITH_SKIPPED_TASKS_EVENT,
+                                        value,
+                                        NotificationVO.builder().user(user).datasetId(datasetId).build());
+                            }
+
                         } else if (queuedProcess != null) {
                             //a process for one of the provider datasets is stuck in state IN_QUEUE, so execute validation for that process
                             ProcessVO process = processControllerZuul.findById(queuedProcess);
@@ -171,6 +182,12 @@ public class JobForFinalizingInProgressValidationJobsWithFinishedTasks {
 
                             if (validationControllerZuul.hasProcessCanceledTasks(processId)) {
                                 kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.VALIDATION_CANCELED_EVENT,
+                                    value,
+                                    NotificationVO.builder().user(user).datasetId(datasetId).build());
+                            }
+
+                            if (validationControllerZuul.hasProcessSkippedTasks(processId)) {
+                                kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.FINISHED_VALIDATION_WITH_SKIPPED_TASKS_EVENT,
                                     value,
                                     NotificationVO.builder().user(user).datasetId(datasetId).build());
                             }

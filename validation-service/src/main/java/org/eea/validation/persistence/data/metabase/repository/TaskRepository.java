@@ -193,6 +193,17 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
   @Query(nativeQuery = true,
       value = "select case when (exists (select id from task where process_id=:processId and status ='CANCELED' and task_type='VALIDATION_TASK' limit 1)) then TRUE else FALSE end")
   boolean hasProcessCanceledTasks(@Param("processId") String processId);
+
+
+  /**
+   * Checks if is process has skipped tasks.
+   *
+   * @param processId the process id
+   * @return true, if is process has skipped tasks
+   */
+  @Query(nativeQuery = true,
+          value = "select case when (exists (select id from task where process_id=:processId and status ='SKIPPED' and task_type='VALIDATION_TASK' limit 1)) then TRUE else FALSE end")
+  boolean hasProcessSkippedTasks(@Param("processId") String processId);
 }
 
 

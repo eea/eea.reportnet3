@@ -1746,6 +1746,10 @@ public class ValidationHelper implements DisposableBean {
                   jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.WARNING_HAS_CANCELED_VALIDATION_TASKS, null);
                   kafkaSenderUtils.releaseKafkaEvent(EventType.FINISHED_VALIDATION_WITH_CANCELED_TASKS, value);
                 }
+                if (taskRepository.hasProcessSkippedTasks(processId)) {
+                  jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.WARNING_HAS_SKIPPED_VALIDATION_TASKS, null);
+                  kafkaSenderUtils.releaseKafkaEvent(EventType.FINISHED_VALIDATION_WITH_SKIPPED_TASKS_EVENT, value);
+                }
               }
 
             }
@@ -1770,6 +1774,17 @@ public class ValidationHelper implements DisposableBean {
                 kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.FINISHED_VALIDATION_WITH_CANCELED_TASKS,
                         value,
                         NotificationVO.builder().user(process.getUser()).datasetId(datasetId).build());
+              }
+              if (taskRepository.hasProcessSkippedTasks(processId)) {
+                jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.WARNING_HAS_SKIPPED_VALIDATION_TASKS, null);
+                kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.FINISHED_VALIDATION_WITH_SKIPPED_TASKS_EVENT,
+                        value,
+                        NotificationVO
+                                .builder()
+                                .user(process.getUser())
+                                .datasetId(datasetId)
+                                .preparationCode(preparationCode)
+                                .build());
               }
             }
           }
@@ -1806,8 +1821,8 @@ public class ValidationHelper implements DisposableBean {
   private void checkAndPromoteFolder(S3PathResolver s3PathResolver, DataFlowVO dataflow) throws EEAException {
     if (dataflow.getBigData()!=null && dataflow.getBigData()) {
       final String preparationCode = s3PathResolver.getPreparationCode();
-      final String validationTablePath = preparationCode.isBlank() ? S3_VALIDATION_TABLE_PATH : S3_PREPARATION_VALIDATION_TABLE_PATH;
-      final String validationFolderPath = preparationCode.isBlank() ? S3_TABLE_AS_FOLDER_QUERY_PATH : S3_PREPARATION_TABLE_AS_FOLDER_QUERY_PATH;
+      final String validationTablePath = (preparationCode == null || preparationCode.isBlank()) ? S3_VALIDATION_TABLE_PATH : S3_PREPARATION_VALIDATION_TABLE_PATH;
+      final String validationFolderPath = (preparationCode == null || preparationCode.isBlank()) ? S3_TABLE_AS_FOLDER_QUERY_PATH : S3_PREPARATION_TABLE_AS_FOLDER_QUERY_PATH;
       if (s3Helper.checkFolderExist(s3PathResolver, validationTablePath)) {
         try {
           String validateTable = s3Helper.getS3Service().getTableAsFolderQueryPath(s3PathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
