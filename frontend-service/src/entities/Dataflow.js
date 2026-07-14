@@ -23,6 +23,7 @@ export class Dataflow {
     name,
     obligation,
     officialReporting,
+    useViews,
     referenceDatasets,
     reportingDatasetsStatus,
     representatives,
@@ -58,6 +59,7 @@ export class Dataflow {
     this.name = name;
     this.obligation = obligation;
     this.officialReporting = officialReporting;
+    this.useViews = useViews;
     this.referenceDatasets = referenceDatasets;
     this.reportingDatasetsStatus = reportingDatasetsStatus;
     this.representatives = representatives;

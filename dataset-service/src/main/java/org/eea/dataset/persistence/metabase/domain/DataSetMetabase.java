@@ -91,6 +91,10 @@ public class DataSetMetabase {
   @Enumerated(EnumType.STRING)
   private DatasetRunningStatusEnum datasetRunningStatus;
 
+  /** Whether typed Dremio views are used for this dataset. */
+  @Column(name = "USE_VIEWS")
+  private Boolean useViews;
+
   /**
    * Hash code.
    *

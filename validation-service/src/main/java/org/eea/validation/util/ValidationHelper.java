@@ -480,6 +480,10 @@ public class ValidationHelper implements DisposableBean {
       }
 
       DataFlowVO dataflow = dataFlowControllerZuul.getMetabaseById(dataset.getDataflowId());
+      boolean useViewsEnabled = isUseViewsEnabled(dataset, dataflow);
+      if (useViewsEnabled && StringUtils.isBlank(preparationCode)) {
+        checkViewsAreUpToDate(tableNames, dataset, datasetId, processId, jobId, user, released, jobVO, preparationCode);
+      }
       /* Add check for design dataflows #297461 In design dataflows empty tables will be created during the validation process.
          For draft dataflows empty tables will be created during the data collection creation.*/
       if (dataflow.getStatus().equals(TypeStatusEnum.DESIGN)) {
@@ -541,6 +545,7 @@ public class ValidationHelper implements DisposableBean {
         value.put("bigData", "true");
         value.put("createParquetWithSQL", createParquetWithSQL);
         value.put("preparationCode", preparationCode);
+        value.put("useViews", useViewsEnabled);
 
         String providerCode = validateAsProviderCodeByProcessId.get(processId);;
         if (providerCode != null) {
@@ -563,6 +568,17 @@ public class ValidationHelper implements DisposableBean {
         addValidationTaskToProcess(processId, EventType.COMMAND_VALIDATE_EMPTY_RULE, value);
       }
     }
+  }
+
+  /**
+   * Resolves whether typed Dremio views should be read during validation: the per-dataset
+   * override wins if set, otherwise falls back to the dataflow-level flag.
+   */
+  private boolean isUseViewsEnabled(DataSetMetabaseVO dataset, DataFlowVO dataflow) {
+    if (dataset.getUseViews() != null) {
+      return dataset.getUseViews();
+    }
+    return dataflow != null && BooleanUtils.isTrue(dataflow.getUseViews());
   }
 
   private String extractHeaderFromMessage(String jsonBody, String prefix) {
@@ -722,6 +738,68 @@ public class ValidationHelper implements DisposableBean {
     } catch (Exception e) {
       LOG.warn("Could not send VALIDATION_FAILED_ILLEGAL_CHARACTER_EVENT notification for jobId {} and datasetId {}: {}", jobId, datasetId, e.getMessage());
     }
+  }
+
+  /**
+   * Compares each table's typed view row count against its raw current table. If any table's
+   * view is out of sync, aborts the validation run rather than validating against stale data.
+   *
+   * preparationCode is unused  - checkViewsAreUpToDate is only ever called when it's blank,
+   * since views don't apply to preparation datasets yet. Kept wired through (here and in
+   * failDueToViewsMismatch) so that if/when views are extended to preparation datasets, the plumbing
+   * doesn't need to be redone.
+   */
+  private void checkViewsAreUpToDate(List<String> tableNames, DataSetMetabaseVO dataset, Long datasetId, String processId, Long jobId, String user, boolean released, JobVO jobVO, String preparationCode) throws EEAException {
+    Long providerId = dataset.getDataProviderId() != null ? dataset.getDataProviderId() : 0L;
+    List<String> mismatchedTables = new ArrayList<>();
+    for (String tableName : tableNames) {
+      S3PathResolver tableResolver = new S3PathResolver(dataset.getDataflowId(), providerId, datasetId, tableName);
+      String viewsPath = s3ServicePrivate.getTableAsFolderQueryPath(tableResolver, S3_VIEWS_TABLE_AS_FOLDER_QUERY_PATH);
+      String currentPath = s3ServicePrivate.getTableAsFolderQueryPath(tableResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
+      try {
+        Long numberOfRecords = dremioHelperService.compareNumberOfRecords(viewsPath, currentPath);
+        LOG.info("View for table {} is up to date for datasetId {}. Number of records is {}", tableName, datasetId, numberOfRecords);
+      } catch (Exception e) {
+        LOG.error("View for table {} does not match current table for datasetId {}: {}", tableName, datasetId, e.getMessage());
+        mismatchedTables.add(tableName);
+      }
+    }
+    if (!mismatchedTables.isEmpty()) {
+      failDueToViewsMismatch(dataset, datasetId, processId, jobId, user, released, jobVO, mismatchedTables, preparationCode);
+    }
+  }
+
+  // preparationCode: unused for now (always blank, see checkViewsAreUpToDate) - kept wired through for
+  // when views may support preparation datasets in the future.
+  private void failDueToViewsMismatch(DataSetMetabaseVO dataset, Long datasetId, String processId, Long jobId, String user, boolean released, JobVO jobVO, List<String> mismatchedTables, String preparationCode) throws EEAException {
+    if (jobId != null) {
+      try {
+        jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.ERROR_MATERIALIZED_VIEWS_ARE_NOT_CORRECT, null);
+        jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FAILED);
+        processControllerZuul.updateProcess(datasetId, dataset.getDataflowId(),
+            ProcessStatusEnum.CANCELED, ProcessTypeEnum.VALIDATION, processId, user, getPriority(dataset), released);
+        LOG.info("Canceled job and process for jobId {} datasetId {} and processId {} due to views/table mismatch on tables {}", jobId, datasetId, processId, mismatchedTables);
+      } catch (Exception e) {
+        LOG.error("Could not cancel job and process for jobId {} datasetId {} and processId {}: {}", jobId, datasetId, processId, e.getMessage());
+      }
+    }
+
+    deleteLockToReleaseProcess(datasetId);
+
+    try {
+      kafkaSenderUtils.releaseNotificableKafkaEvent(
+          EventType.VALIDATION_FAILED_SYSTEM_ERROR_EVENT, null,
+          NotificationVO.builder()
+              .user(jobVO != null ? jobVO.getCreatorUsername() : user)
+              .datasetId(datasetId)
+              .dataflowId(dataset.getDataflowId())
+              .build()
+      );
+    } catch (Exception e) {
+      LOG.warn("Could not send VALIDATION_FAILED_SYSTEM_ERROR_EVENT for jobId {} and datasetId {}: {}", jobId, datasetId, e.getMessage());
+    }
+
+    throw new EEAException("Can not validate for jobId " + jobId + ". Views do not match current data for tables: " + mismatchedTables);
   }
 
   private List<DataSetMetabaseVO> getCombinedDatasets(DataSetMetabaseVO dataset) {
@@ -1155,11 +1233,24 @@ public class ValidationHelper implements DisposableBean {
     mapCriteriaValidation.put(DATASETID, datasetId);
     lockService.removeLockByCriteria(mapCriteriaValidation);
 
+    // Two different FORCE_EXECUTE_VALIDATION locks can exist under the same signature, with different
+    // criteria shapes
+    // 1) created manually via createLockWithSignature/addLockToReleaseProcess - signature+datasetId only.
     Map<String, Object> mapCriteriaValidationDataset = new HashMap<>();
     mapCriteriaValidationDataset.put(SIGNATURE,
         LockSignature.FORCE_EXECUTE_VALIDATION.getValue());
     mapCriteriaValidationDataset.put(DATASETID, datasetId);
     lockService.removeLockByCriteria(mapCriteriaValidationDataset);
+
+    // 2) created automatically by ValidationControllerImpl.validateDataSetData's @LockMethod, which always
+    // includes a preparationCode key (even null - MethodLockAspect adds every @LockCriteria param
+    // Covers the common (non-preparation) case.
+    Map<String, Object> mapCriteriaValidationDatasetWithPreparationCode = new HashMap<>();
+    mapCriteriaValidationDatasetWithPreparationCode.put(SIGNATURE,
+        LockSignature.FORCE_EXECUTE_VALIDATION.getValue());
+    mapCriteriaValidationDatasetWithPreparationCode.put(DATASETID, datasetId);
+    mapCriteriaValidationDatasetWithPreparationCode.put(PREPARATION_CODE, null);
+    lockService.removeLockByCriteria(mapCriteriaValidationDatasetWithPreparationCode);
   }
 
   /**
@@ -1821,8 +1912,8 @@ public class ValidationHelper implements DisposableBean {
   private void checkAndPromoteFolder(S3PathResolver s3PathResolver, DataFlowVO dataflow) throws EEAException {
     if (dataflow.getBigData()!=null && dataflow.getBigData()) {
       final String preparationCode = s3PathResolver.getPreparationCode();
-      final String validationTablePath = (preparationCode == null || preparationCode.isBlank()) ? S3_VALIDATION_TABLE_PATH : S3_PREPARATION_VALIDATION_TABLE_PATH;
-      final String validationFolderPath = (preparationCode == null || preparationCode.isBlank()) ? S3_TABLE_AS_FOLDER_QUERY_PATH : S3_PREPARATION_TABLE_AS_FOLDER_QUERY_PATH;
+      final String validationTablePath = StringUtils.isBlank(preparationCode) ? S3_VALIDATION_TABLE_PATH : S3_PREPARATION_VALIDATION_TABLE_PATH;
+      final String validationFolderPath = StringUtils.isBlank(preparationCode) ? S3_TABLE_AS_FOLDER_QUERY_PATH : S3_PREPARATION_TABLE_AS_FOLDER_QUERY_PATH;
       if (s3Helper.checkFolderExist(s3PathResolver, validationTablePath)) {
         try {
           String validateTable = s3Helper.getS3Service().getTableAsFolderQueryPath(s3PathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);

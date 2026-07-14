@@ -114,7 +114,7 @@ public class DremioNonSqlRulesExecuteServiceImpl implements DremioRulesExecuteSe
 
     @Override
     public void execute(Long dataflowId, Long datasetId, String datasetSchemaId, String tableName, String tableSchemaId, String ruleId, Long dataProviderId,
-                        Long taskId, boolean createParquetWithSQL, String preparationCode) throws DremioValidationException {
+                        Long taskId, boolean createParquetWithSQL, String preparationCode, boolean useViews) throws DremioValidationException {
         try {
             //if the dataset to validate is of reference type, then the table path should be changed
             S3PathResolver dataTableResolver = new S3PathResolver(dataflowId, dataProviderId != null ? dataProviderId : 0, datasetId, tableName);
