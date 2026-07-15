@@ -59,6 +59,12 @@ public class ReceiptPDFGenerator {
   /** A rectangle the size of A5 Paper. */
   public static final PDRectangle A4 = new PDRectangle(210 * POINTS_PER_MM, 297 * POINTS_PER_MM);
 
+  private PDDocument document;
+
+  private PDPage page;
+
+  private PDPageContentStream contentStream;
+
   /**
    * Generate PDF.
    *
@@ -67,12 +73,14 @@ public class ReceiptPDFGenerator {
    */
   public void generatePDF(ReleaseReceiptInfoVO receipt, OutputStream out, Boolean isManualAcceptance) {
     if (out != null) {
-      try (PDDocument document = new PDDocument()) {
+      try (PDDocument pddocument = new PDDocument()) {
+
+        document = pddocument;
         // Create and add an A4 page
-        PDPage page = new PDPage(A4);
+        page = new PDPage(A4);
         document.addPage(page);
 
-        printContentPDF(receipt, document, page, isManualAcceptance);
+        printContentPDF(receipt, isManualAcceptance);
 
         // Save and close the PDF
         document.save(out);
@@ -92,11 +100,9 @@ public class ReceiptPDFGenerator {
    * Prints the content PDF.
    *
    * @param receipt the receipt
-   * @param document the document
-   * @param page the page
    * @throws IOException Signals that an I/O exception has occurred.
    */
-  private void printContentPDF(ReleaseReceiptInfoVO receipt, PDDocument document, PDPage page, Boolean isManualAcceptance)
+  private void printContentPDF(ReleaseReceiptInfoVO receipt, Boolean isManualAcceptance)
       throws IOException {
 
     float x;
@@ -107,7 +113,7 @@ public class ReceiptPDFGenerator {
     ZoneId timeZone = ZoneId.of(LiteralConstants.EUROPE_ZONE_ID);
     DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-    PDPageContentStream contentStream = new PDPageContentStream(document, page);
+    contentStream = new PDPageContentStream(document, page);
     PDType0Font font;
     PDType0Font fontBold;
     PDImageXObject pdImage;
@@ -176,6 +182,7 @@ public class ReceiptPDFGenerator {
         fontSize)) {
       printLinePDF(contentStream, line, fontBold, fontSize, x, y);
       y -= spaceBetweenLines + fontSize;
+      y = checkForPageChange(y);
     }
 
     // Print dataflow link
@@ -184,11 +191,13 @@ public class ReceiptPDFGenerator {
     String dataflowLink = reportneturl + "/dataflow/" + receipt.getIdDataflow();
     printLinePDF(contentStream, dataflowLink, font, fontSize, 133f, y);
     y -= spaceBetweenLines + fontSize;
+    y = checkForPageChange(y);
 
     fontSize = 58f;
 
     // Print obligation information
     y -= 18f;
+    y = checkForPageChange(y);
     text = "Obligation: ";
     printLinePDF(contentStream, text, fontBold, fontSize, x, y);
     x += fontBold.getStringWidth(text) / 1000 * fontSize;
@@ -196,6 +205,7 @@ public class ReceiptPDFGenerator {
         fontSize)) {
       printLinePDF(contentStream, line, font, fontSize, x, y);
       y -= spaceBetweenLines + fontSize;
+      y = checkForPageChange(y);
     }
     text = "https://rod.eionet.europa.eu/obligations/" + receipt.getObligationId();
     printLinePDF(contentStream, text, font, fontSize, x, y);
@@ -203,6 +213,7 @@ public class ReceiptPDFGenerator {
 // Print Additional notes text if the dataflow has Manual Acceptance step
     if (Boolean.TRUE.equals(isManualAcceptance)) {
       y -= spaceBetweenLines * 2 + fontSize;
+      y = checkForPageChange(y);
 
       String[] lines;
       if (receipt.getNote() != null && !receipt.getNote().isEmpty()) {
@@ -220,6 +231,7 @@ public class ReceiptPDFGenerator {
       for (String line : lines) {
         printLinePDF(contentStream, line, font, fontSize, 133f, y);
         y -= spaceBetweenLines + fontSize; // Move down for the next line
+        y = checkForPageChange(y);
       }
     }
 
@@ -242,6 +254,7 @@ public class ReceiptPDFGenerator {
 
     // Print dataset list
     y -= spaceBetweenLines * 2 + fontSize;
+    y = checkForPageChange(y);
     printLinePDF(contentStream, "Datasets", fontBold, fontSize, 133f, y);
 
 
@@ -250,6 +263,7 @@ public class ReceiptPDFGenerator {
             .sort(Comparator.comparing(ReportingDatasetVO::getNameDatasetSchema));
     for (ReportingDatasetVO dataset : receipt.getDatasets()) {
       y -= spaceBetweenLines + fontSize;
+      y = checkForPageChange(y);
       printLinePDF(contentStream, dataset.getNameDatasetSchema(), font, fontSize, 133f, y);
       contentStream.addRect(133f, y - spaceBetweenLines / 2, 2213, 1f);
       contentStream.fill();
@@ -259,9 +273,21 @@ public class ReceiptPDFGenerator {
     fontSize = 40f;
     x = 133f;
     y -= spaceBetweenLines * 4 - fontSize;
+    y = checkForPageChange(y);
     text = "Submitted by user: " + receipt.getEmail();
     printLinePDF(contentStream, text, font, fontSize, x, y);
     contentStream.close();
+  }
+
+  private float checkForPageChange(float newHeight) throws IOException {
+      if (newHeight <= 400) {
+        contentStream.close();
+        page = new PDPage(A4);
+        newHeight = 3334f;
+        document.addPage(page);
+        contentStream = new PDPageContentStream(document, page);
+      }
+      return newHeight;
   }
 
   /**
