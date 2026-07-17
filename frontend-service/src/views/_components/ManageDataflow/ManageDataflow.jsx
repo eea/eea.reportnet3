@@ -419,7 +419,9 @@ export const ManageDataflow = ({
         </div>
         <div className="p-toolbar-group-left">{renderBigDataStorage()}</div>
         {!isEditing && <div className="p-toolbar-group-left">{renderOfficialReporting()}</div>}
-        {!isEditing && reportingDataflowState.bigDataStorage && <div className="p-toolbar-group-left">{renderPreparationEnabled()}</div>}
+        {!isEditing && (reportingDataflowState.bigDataStorage || isCitizenScienceDataflow) && (
+          <div className="p-toolbar-group-left">{renderPreparationEnabled()}</div>
+        )}
         <Button
           className={`p-button-primary ${
             !(isCitizenScienceDataflow && isEmpty(reportingDataflowState.providerGroup)) &&

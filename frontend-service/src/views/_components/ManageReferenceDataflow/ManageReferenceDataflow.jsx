@@ -67,7 +67,6 @@ export const ManageReferenceDataflow = ({
   const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isOfficialReporting, setIsOfficialReporting] = useState(isEditing ? metadata.officialReporting : false);
-  const [isPreparationEnabled, setIsPreparationEnabled] = useState(isEditing ? metadata.preparationEnabled : false);
   const [isSending, setIsSending] = useState(false);
   const [name, setName] = useState(isEditing ? metadata.name : '');
   const [pinDataflow, setPinDataflow] = useState(false);
@@ -185,7 +184,7 @@ export const ManageReferenceDataflow = ({
     try {
       setIsSending(true);
       if (isEditing) {
-        await ReferenceDataflowService.update(dataflowId, description, name, 'REFERENCE', bigData, isOfficialReporting, isPreparationEnabled);
+        await ReferenceDataflowService.update(dataflowId, description, name, 'REFERENCE', bigData, isOfficialReporting);
         manageDialogs(dialogName, false);
         onEditDataflow(name, description);
       } else {
@@ -195,8 +194,7 @@ export const ManageReferenceDataflow = ({
           'REFERENCE',
           bigData,
           sncData === true ? true : undefined,
-          isOfficialReporting,
-          isPreparationEnabled
+          isOfficialReporting
         );
         if (pinDataflow) {
           const inmUserProperties = { ...userContext.userProps };
@@ -260,30 +258,6 @@ export const ManageReferenceDataflow = ({
     );
   };
 
-  const renderPreparationEnabled = () => {
-    return (
-      <div className={styles.checkboxWrapper}>
-        <Checkbox
-          ariaLabel={resourcesContext.messages['preparationEnabled']}
-          checked={isPreparationEnabled}
-          id="preparationEnabledCheckbox"
-          inputId="preparationEnabledCheckbox"
-          onChange={() => setIsPreparationEnabled(!isPreparationEnabled)}
-          role="checkbox"
-        />
-        <label>
-          <span onClick={() => setIsPreparationEnabled(!isPreparationEnabled)}>
-            {resourcesContext.messages['preparationEnabled']}
-          </span>
-        </label>
-        <TooltipButton
-          message={resourcesContext.messages['preparationEnabledMessage']}
-          uniqueIdentifier="PreparationEnabled"></TooltipButton>
-      </div>
-    );
-  };
-
-
   const renderDialogFooter = () => (
     <Fragment>
       <div className="p-toolbar-group-left">
@@ -344,7 +318,6 @@ export const ManageReferenceDataflow = ({
         )}
       </div>
       {!isEditing && <div className="p-toolbar-group-left">{renderOfficialReporting()}</div>}
-      {!isEditing && bigData && <div className="p-toolbar-group-left">{renderPreparationEnabled()}</div>}
       <Button
         className={`p-button-primary ${
           !isEmpty(name) && !isEmpty(description) && !isSending && 'p-button-animated-blink'

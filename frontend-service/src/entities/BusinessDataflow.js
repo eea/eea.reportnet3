@@ -16,6 +16,7 @@ export class BusinessDataflow {
     manualAcceptance,
     name,
     obligation,
+    preparationEnabled,
     referenceDatasets,
     reportingDatasetsStatus,
     representatives,
@@ -43,6 +44,7 @@ export class BusinessDataflow {
     this.manualAcceptance = manualAcceptance;
     this.name = name;
     this.obligation = obligation;
+    this.preparationEnabled = preparationEnabled;
     this.referenceDatasets = referenceDatasets;
     this.reportingDatasetsStatus = reportingDatasetsStatus;
     this.representatives = representatives;

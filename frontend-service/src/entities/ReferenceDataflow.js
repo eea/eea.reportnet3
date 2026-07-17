@@ -14,7 +14,6 @@ export class ReferenceDataflow {
     manualAcceptance,
     name,
     officialReporting,
-    preparationEnabled,
     referenceDatasets,
     reportingDatasetsStatus,
     representatives,
@@ -40,7 +39,6 @@ export class ReferenceDataflow {
     this.manualAcceptance = manualAcceptance;
     this.name = name;
     this.officialReporting = officialReporting;
-    this.preparationEnabled = preparationEnabled;
     this.referenceDatasets = referenceDatasets;
     this.reportingDatasetsStatus = reportingDatasetsStatus;
     this.representatives = representatives;

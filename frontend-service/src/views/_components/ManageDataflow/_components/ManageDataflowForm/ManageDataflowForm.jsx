@@ -282,7 +282,6 @@ export const ManageDataflowForm = forwardRef(
             </label>
             {errors.name.message !== '' && <ErrorMessage message={errors.name.message} />}
           </div>
-
           <div className={`formField ${errors.description.hasErrors ? 'error' : ''}`}>
             <InputTextarea
               className={styles.inputTextArea}
@@ -317,7 +316,6 @@ export const ManageDataflowForm = forwardRef(
               {errors.description.message !== '' && <ErrorMessage message={errors.description.message} />}
             </div>
           </div>
-
           {isCitizenScienceDataflow ? (
             <div className={styles.dropdownsWrapper}>
               <Dropdown
@@ -355,7 +353,6 @@ export const ManageDataflowForm = forwardRef(
               />
             </div>
           )}
-
           {isEditing && isDataflowOpen && (
             <div className={`${styles.deliveryDate}`}>
               <Button
@@ -369,7 +366,6 @@ export const ManageDataflowForm = forwardRef(
               </span>
             </div>
           )}
-
           <div className={`${styles.search}`}>
             <Button
               disabled={isEditing && !isLeadDesigner && !isAdmin}
@@ -396,7 +392,9 @@ export const ManageDataflowForm = forwardRef(
             </label>
           </div>
           {isEditing && <div className={`${styles.officialReportingWrapper}`}>{renderOfficialReporting()}</div>}
-          {isEditing && metadata.bigDataStorage && <div className={`${styles.officialReportingWrapper}`}>{renderPreparationEnabled()}</div>}
+          {isEditing && (metadata.bigDataStorage || isCitizenScienceDataflow) && (
+            <div className={`${styles.officialReportingWrapper}`}>{renderPreparationEnabled()}</div>
+          )}{' '}
         </fieldset>
       </form>
     );

@@ -79,7 +79,6 @@ export const ReferenceDataflow = () => {
     isUserRightManagementDialogVisible: false,
     name: '',
     officialReporting: false,
-    preparationEnabled: false,
     refresh: false,
     requestStatus: 'idle',
     status: '',
@@ -287,7 +286,6 @@ export const ReferenceDataflow = () => {
           description: referenceDataflow.description,
           name: referenceDataflow.name,
           officialReporting: referenceDataflow.officialReporting,
-          preparationEnabled: referenceDataflow.preparationEnabled,
           sncData: referenceDataflow.sncData,
           status: referenceDataflow.status
         }
@@ -447,8 +445,7 @@ export const ReferenceDataflow = () => {
             deleted: dataflowState.data.deleted,
             isSoftDeleteDialogVisible: dataflowState.isSoftDeleteDialogVisible,
             isReverseSoftDeleteDialogVisible: dataflowState.isReverseSoftDeleteDialogVisible,
-            officialReporting: dataflowState.officialReporting,
-            preparationEnabled: dataflowState.preparationEnabled
+            officialReporting: dataflowState.officialReporting
           }}
           onEditDataflow={onEditDataflow}
           onLoadReferenceDataflow={onLoadReferenceDataflow}
