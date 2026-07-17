@@ -151,6 +151,10 @@ public class DremioHelperServiceImpl implements DremioHelperService {
                 } catch (Exception e2) {
                     throw new DremioApiException(errorMessage);
                 }
+            } else if (S3_IMPORT_FILE_PATH.equals(s3PathResolver.getPath()) || S3_PREPARATION_IMPORT_FILE_PATH.equals(s3PathResolver.getPath())) {
+                //import folder has not been created yet in Dremio (e.g. first-time import with replace)
+                LOG.info("Import directory items not found"+  + s3PathResolver.getDatasetId() + " and table " + s3PathResolver.getTableName());
+                return null;
             } else {
                 throw new DremioApiException(errorMessage);
             }
