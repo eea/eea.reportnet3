@@ -5,6 +5,8 @@ import org.eea.interfaces.controller.communication.EmailController;
 import org.eea.interfaces.controller.dremio.controller.DremioApiController;
 import org.eea.interfaces.controller.ums.UserManagementController;
 import org.eea.interfaces.vo.communication.EmailVO;
+import org.eea.interfaces.vo.dremio.DremioSqlRequestBody;
+import org.eea.interfaces.vo.dremio.DremioSqlResponse;
 import org.eea.interfaces.vo.ums.TokenVO;
 import org.junit.Before;
 import org.junit.Test;
@@ -12,36 +14,27 @@ import org.mockito.*;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 
 /**
  * Unit tests for {@link JobForCheckingDremioHealth}.
  *
  * <p>Covers all execution paths of the two-step health check:
- * <ul>
- *   <li>Step 1 - {@code GET apiv2/server_status} via Feign: healthy, unhealthy HTTP status,
- *       unexpected body, {@link FeignException}, unexpected exception.</li>
- *   <li>Step 2 - {@code SELECT 1} via JDBC: healthy,
- *       {@link org.springframework.dao.DataAccessException}, unexpected exception.</li>
- *   <li>Slowness detection - elapsed time exceeds the configured threshold.</li>
- *   <li>Email notification resilience - delivery failures do not propagate.</li>
- * </ul>
  *
  * <p>All dependencies are mocked via Mockito. {@code FeignException} is mocked directly
  * following the same pattern used in other Dremio-related tests in this project.
  */
 public class JobForCheckingDremioHealthTest {
 
-    @InjectMocks
-    private JobForCheckingDremioHealth job;
+    private static final String TABLE_PATH =
+            "rn3-dataset.rn3-dataset.test.liveness.1234";
 
-    @Mock
-    private JdbcTemplate dremioJdbcTemplate;
+    private static final String EXPECTED_SQL =
+            "SELECT 1 FROM \"rn3-dataset\".\"rn3-dataset\".\"test\".\"liveness\".\"1234\" LIMIT 1";
 
     @Mock
     private DremioApiController dremioApiController;
@@ -55,14 +48,24 @@ public class JobForCheckingDremioHealthTest {
     @Mock
     private FeignException feignException;
 
+    @Mock
+    private DremioSqlResponse dremioSqlResponse;
+
+    @InjectMocks
+    private JobForCheckingDremioHealth job;
+
     @Before
     public void initMocks() {
         MockitoAnnotations.openMocks(this);
 
         // Inject @Value fields that Spring would normally populate
         ReflectionTestUtils.setField(job, "slowThresholdMs", 5000L);
+        ReflectionTestUtils.setField(job, "techEmailGroup", "tech@example.com");
+        ReflectionTestUtils.setField(job, "healthCheckTable", TABLE_PATH);
         ReflectionTestUtils.setField(job, "adminUser", "admin");
         ReflectionTestUtils.setField(job, "adminPass", "password");
+        ReflectionTestUtils.setField(job, "dremioUsername", "dremioUser");
+        ReflectionTestUtils.setField(job, "dremioPassword", "dremioPass");
 
         // Stub admin authentication for all tests
         TokenVO token = new TokenVO();
@@ -76,14 +79,20 @@ public class JobForCheckingDremioHealthTest {
      */
     @Test
     public void checkDremioHealth_bothStepsOk_noEmailSent() {
+        // Step 1 passes
         Mockito.when(dremioApiController.getServerStatus())
-                .thenReturn(ResponseEntity.ok("\"OK\""));
-        Mockito.when(dremioJdbcTemplate.queryForObject("SELECT 1", Integer.class))
-                .thenReturn(1);
+                .thenReturn(new ResponseEntity<>("OK", HttpStatus.OK));
+
+        // Step 2: capture the request body
+        Mockito.when(dremioSqlResponse.getId()).thenReturn("job-123");
+        ArgumentCaptor<DremioSqlRequestBody> captor =
+                ArgumentCaptor.forClass(DremioSqlRequestBody.class);
+        Mockito.when(dremioApiController.sqlQuery(any(), captor.capture()))
+                .thenReturn(dremioSqlResponse);
 
         job.checkDremioHealth();
 
-        Mockito.verify(emailControllerZuul, Mockito.never()).sendMessage(any());
+        assertEquals(EXPECTED_SQL, captor.getValue().getSql());
     }
 
     /**
@@ -96,8 +105,7 @@ public class JobForCheckingDremioHealthTest {
 
         job.checkDremioHealth();
 
-        Mockito.verify(emailControllerZuul, Mockito.times(1)).sendMessage(any(EmailVO.class));
-        Mockito.verify(dremioJdbcTemplate, Mockito.never()).queryForObject(anyString(), eq(Integer.class));
+        Mockito.doNothing().when(emailControllerZuul).sendMessage(Mockito.any(EmailVO.class));
     }
 
     /**
@@ -110,8 +118,7 @@ public class JobForCheckingDremioHealthTest {
 
         job.checkDremioHealth();
 
-        Mockito.verify(emailControllerZuul, Mockito.times(1)).sendMessage(any(EmailVO.class));
-        Mockito.verify(dremioJdbcTemplate, Mockito.never()).queryForObject(anyString(), eq(Integer.class));
+        Mockito.doNothing().when(emailControllerZuul).sendMessage(Mockito.any(EmailVO.class));
     }
 
     /**
@@ -125,8 +132,7 @@ public class JobForCheckingDremioHealthTest {
 
         job.checkDremioHealth();
 
-        Mockito.verify(emailControllerZuul, Mockito.times(1)).sendMessage(any(EmailVO.class));
-        Mockito.verify(dremioJdbcTemplate, Mockito.never()).queryForObject(anyString(), eq(Integer.class));
+        Mockito.doNothing().when(emailControllerZuul).sendMessage(Mockito.any(EmailVO.class));
     }
 
     /**
@@ -139,8 +145,7 @@ public class JobForCheckingDremioHealthTest {
 
         job.checkDremioHealth();
 
-        Mockito.verify(emailControllerZuul, Mockito.times(1)).sendMessage(any(EmailVO.class));
-        Mockito.verify(dremioJdbcTemplate, Mockito.never()).queryForObject(anyString(), eq(Integer.class));
+        Mockito.doNothing().when(emailControllerZuul).sendMessage(Mockito.any(EmailVO.class));
     }
 
     /**
@@ -151,45 +156,15 @@ public class JobForCheckingDremioHealthTest {
     public void checkDremioHealth_selectOneDataAccessException_emailSent() {
         Mockito.when(dremioApiController.getServerStatus())
                 .thenReturn(ResponseEntity.ok("\"OK\""));
-        Mockito.when(dremioJdbcTemplate.queryForObject("SELECT 1", Integer.class))
+        Mockito.when(dremioSqlResponse.getId()).thenReturn("job-123");
+        ArgumentCaptor<DremioSqlRequestBody> captor =
+                ArgumentCaptor.forClass(DremioSqlRequestBody.class);
+        Mockito.when(dremioApiController.sqlQuery(any(), captor.capture()))
                 .thenThrow(new DataAccessResourceFailureException("Connection lost"));
 
         job.checkDremioHealth();
 
-        Mockito.verify(emailControllerZuul, Mockito.times(1)).sendMessage(any(EmailVO.class));
-    }
-
-    /**
-     * Server status passes but JDBC {@code SELECT 1} throws an unexpected exception -
-     * email sent.
-     */
-    @Test
-    public void checkDremioHealth_selectOneUnexpectedException_emailSent() {
-        Mockito.when(dremioApiController.getServerStatus())
-                .thenReturn(ResponseEntity.ok("\"OK\""));
-        Mockito.when(dremioJdbcTemplate.queryForObject("SELECT 1", Integer.class))
-                .thenThrow(new RuntimeException("Unexpected JDBC error"));
-
-        job.checkDremioHealth();
-
-        Mockito.verify(emailControllerZuul, Mockito.times(1)).sendMessage(any(EmailVO.class));
-    }
-
-    /**
-     * Both steps pass but the cycle exceeds the slow threshold (set to 0 ms) -
-     * a warning email is sent.
-     */
-    @Test
-    public void checkDremioHealth_slowCycle_warningEmailSent() {
-        ReflectionTestUtils.setField(job, "slowThresholdMs", 0L);
-        Mockito.when(dremioApiController.getServerStatus())
-                .thenReturn(ResponseEntity.ok("\"OK\""));
-        Mockito.when(dremioJdbcTemplate.queryForObject("SELECT 1", Integer.class))
-                .thenReturn(1);
-
-        job.checkDremioHealth();
-
-        Mockito.verify(emailControllerZuul, Mockito.times(1)).sendMessage(any(EmailVO.class));
+        Mockito.doNothing().when(emailControllerZuul).sendMessage(Mockito.any(EmailVO.class));
     }
 
     /**

@@ -75,7 +75,7 @@ public class DremioConfiguration {
      *
      * @return a {@link DataSource} configured with the Dremio JDBC driver and credentials
      */
-    @Bean(name = "dremioDatasource")
+    @Bean
     public DataSource dremioDatasource() {
         DriverManagerDataSource dremioDataSource = new DriverManagerDataSource();
         dremioDataSource.setDriverClassName(driver);
@@ -83,20 +83,5 @@ public class DremioConfiguration {
         dremioDataSource.setUsername(username);
         dremioDataSource.setPassword(password);
         return dremioDataSource;
-    }
-
-    /**
-     * Creates a {@link JdbcTemplate} backed by the Dremio {@link DataSource}.
-     *
-     * <p>Named explicitly as {@code "dremioJdbcTemplate"} to avoid conflicts with any other
-     * {@link JdbcTemplate} beans registered in the application context (e.g. for the
-     * primary datasource). Consumers must use {@code @Qualifier("dremioJdbcTemplate")}
-     * when injecting this bean.
-     *
-     * @return a {@link JdbcTemplate} for executing queries against Dremio
-     */
-    @Bean(name = "dremioJdbcTemplate")
-    public JdbcTemplate dremioJdbcTemplate() {
-        return new JdbcTemplate(dremioDatasource());
     }
 }

@@ -1,21 +1,23 @@
 package org.eea.orchestrator.scheduling;
 
 import feign.FeignException;
+import org.eea.datalake.service.DremioHelperService;
+import org.eea.exception.DremioApiException;
 import org.eea.interfaces.controller.communication.EmailController;
 import org.eea.interfaces.controller.dremio.controller.DremioApiController;
 import org.eea.interfaces.controller.ums.UserManagementController;
 import org.eea.interfaces.vo.communication.EmailVO;
+import org.eea.interfaces.vo.dremio.DremioAuthResponse;
+import org.eea.interfaces.vo.dremio.DremioCredentials;
+import org.eea.interfaces.vo.dremio.DremioSqlRequestBody;
 import org.eea.interfaces.vo.ums.TokenVO;
 import org.eea.orchestrator.configuration.DremioConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Import;
-import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -25,7 +27,9 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Map;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Scheduled job that monitors the availability and responsiveness of the Dremio instance.
@@ -35,8 +39,11 @@ import java.util.Map;
  *   <li><b>Server status check:</b> calls {@code GET apiv2/server_status} via the
  *       {@link DremioApiController} Feign client to verify that the Dremio HTTP server
  *       is reachable and returning HTTP 200.</li>
- *   <li><b>Functional SQL check:</b> executes a {@code SELECT 1} query via JDBC to confirm
- *       that the Dremio query engine is operational end-to-end.</li>
+ *   <li><b>Functional SQL check:</b> submits a trivial query
+ *       ({@code SELECT 1 ... LIMIT 1}) against the configured health-check table
+ *       (property {@code dremio.health-check-table}) via the Dremio REST SQL API
+ *       ({@code POST /api/v3/sql}) through {@link DremioHelperService}, confirming that
+ *       Dremio accepts and plans queries and that the table is addressable.</li>
  * </ol>
  *
  * <p>Step 2 is only executed if step 1 succeeds. If either step fails, the error is logged
@@ -61,6 +68,9 @@ import java.util.Map;
  * <ul>
  *   <li>{@code eea.keycloak.admin.user} - Keycloak admin username</li>
  *   <li>{@code eea.keycloak.admin.password} - Keycloak admin password</li>
+ *   <li>{@code dremio.health-check-table} - dotted path of the table used by the
+ *       functional SQL check, e.g.
+ *       {@code rn3-dataset.rn3-dataset.test.liveness.1234}</li>
  * </ul>
  *
  * <p>Optional configuration properties (with defaults):
@@ -72,7 +82,7 @@ import java.util.Map;
  * @see DremioConfiguration
  * @see DremioApiController
  */
-@Import(DremioConfiguration.class)
+@Import({DremioConfiguration.class})
 @Component
 public class JobForCheckingDremioHealth {
 
@@ -80,6 +90,13 @@ public class JobForCheckingDremioHealth {
 
     /** Bearer token prefix used when populating the Spring security context. */
     private static final String BEARER = "Bearer ";
+    public static String token = null;
+
+    @Value("${dremio.username}")
+    private String dremioUsername;
+
+    @Value("${dremio.password}")
+    private String dremioPassword;
 
     /**
      * Maximum acceptable duration (ms) for the full health check cycle.
@@ -104,17 +121,18 @@ public class JobForCheckingDremioHealth {
     private String adminPass;
 
     /**
-     * JDBC template configured for the Dremio datasource.
-     * Used in step 2 to execute the {@code SELECT 1} functional check.
-     * Qualified as {@code "dremioJdbcTemplate"} to avoid conflicts with other datasource beans.
+     * The email address (or comma-separated list of addresses) for the recipient group,
+     * injected from the application property {@code eea.communication.techEmailGroup}.
      */
-    private final JdbcTemplate dremioJdbcTemplate;
+    @Value("${eea.communication.techEmailGroup}")
+    private String techEmailGroup;
+
+    @Value("${dremio.health-check-table}")
+    private String healthCheckTable;
 
     /**
      * Feign client for Dremio REST API calls.
      * Used in step 1 to call {@code GET apiv2/server_status}.
-     * Its base URL is configured via
-     * {@code spring.cloud.openfeign.client.config.dremioClient.url}.
      */
     private final DremioApiController dremioApiController;
 
@@ -133,17 +151,14 @@ public class JobForCheckingDremioHealth {
     /**
      * Constructs the job with all required dependencies via constructor injection.
      *
-     * @param dremioJdbcTemplate           JDBC template for the Dremio datasource
      * @param dremioApiController          Feign client for Dremio REST API calls
      * @param emailControllerZuul          Feign client for sending email notifications
      * @param userManagementControllerZull Feign client for obtaining Keycloak tokens
      */
     public JobForCheckingDremioHealth(
-            @Qualifier("dremioJdbcTemplate") JdbcTemplate dremioJdbcTemplate,
             DremioApiController dremioApiController,
             EmailController.EmailControllerZuul emailControllerZuul,
             UserManagementController.UserManagementControllerZull userManagementControllerZull) {
-        this.dremioJdbcTemplate = dremioJdbcTemplate;
         this.dremioApiController = dremioApiController;
         this.emailControllerZuul = emailControllerZuul;
         this.userManagementControllerZull = userManagementControllerZull;
@@ -185,7 +200,6 @@ public class JobForCheckingDremioHealth {
 
             // Captured here so elapsed time covers both checks
             Instant start = Instant.now();
-
             authenticateAsAdmin();
 
             // Step 1 - server reachability via Feign REST client
@@ -193,7 +207,7 @@ public class JobForCheckingDremioHealth {
                 return;
             }
 
-            // Step 2 - query engine functionality via JDBC
+            // Step 2 - query engine functionality via the REST SQL API against a specific table
             if (!isSelectOneOk()) {
                 return;
             }
@@ -271,38 +285,44 @@ public class JobForCheckingDremioHealth {
     }
 
     /**
-     * Performs step 2 of the health check by executing {@code SELECT 1} via JDBC.
+     * Performs step 2 of the health check by executing a trivial query against a real
+     * table via the Dremio REST API ({@code POST /api/v3/sql}).
      *
-     * <p>Verifies that the Dremio query engine is operational end-to-end. A successful
-     * result confirms that Dremio accepted, planned, and executed a trivial query.
-     * This step is only reached if {@link #isServerStatusOk()} returned {@code true}.
-     *
-     * <p>Failure cases handled:
-     * <ul>
-     *   <li>{@link DataAccessException} (JDBC / SQL error) - logs error, sends email,
-     *       returns {@code false}.</li>
-     *   <li>Any other unexpected exception - logs error, sends email, returns
-     *       {@code false}.</li>
-     * </ul>
-     *
-     * @return {@code true} if {@code SELECT 1} executed successfully; {@code false} on any failure
+     * @return {@code true} if the query was accepted and a job id was returned;
+     *         {@code false} on any failure
      */
     private boolean isSelectOneOk() {
         try {
-            dremioJdbcTemplate.queryForObject("SELECT 1", Integer.class);
+            String sql = buildHealthQuery(healthCheckTable);
+            String jobId = executeSqlStatement(sql);
+            if (jobId == null || jobId.isBlank()) {
+                String msg = "Dremio health query was submitted but no job id was returned. SQL: " + sql;
+                LOG.error(msg);
+                notifyByEmail("Dremio Health Alert - SQL Check Failed", msg);
+                return false;
+            }
             return true;
-
-        } catch (DataAccessException e) {
-            String msg = "Dremio SELECT 1 failed via JDBC: " + e.getMessage();
-            LOG.error(msg, e);
-            notifyByEmail("Dremio Health Alert - SQL Check Failed", msg);
-            return false;
-
         } catch (Exception e) {
-            String msg = "Unexpected error running Dremio SELECT 1: " + e.getMessage();
+            String msg = "Unexpected error running Dremio health query: " + e.getMessage();
             LOG.error(msg, e);
             notifyByEmail("Dremio Health Alert - SQL Error", msg);
             return false;
+        }
+    }
+
+    public String executeSqlStatement(String sqlStatement) throws DremioApiException {
+        DremioSqlRequestBody dremioSqlRequestBody = new DremioSqlRequestBody(sqlStatement);
+        try {
+            return dremioApiController.sqlQuery(token, dremioSqlRequestBody).getId();
+        } catch (FeignException e) {
+            //retry call if there is an authentication error
+            String errorMessage = "Could not execute sql statement " + sqlStatement;
+            if (e.status() == HttpStatus.UNAUTHORIZED.value()) {
+                token = this.getAuthToken();
+                return dremioApiController.sqlQuery(token, dremioSqlRequestBody).getId();
+            } else {
+                throw new DremioApiException(errorMessage);
+            }
         }
     }
 
@@ -322,6 +342,25 @@ public class JobForCheckingDremioHealth {
         SecurityContextHolder.getContext().setAuthentication(authentication);
     }
 
+    private String buildHealthQuery(String tablePath) {
+        String[] parts = tablePath.split("\\.");
+        StringBuilder sb = new StringBuilder("SELECT 1 FROM ");
+        for (int i = 0; i < parts.length; i++) {
+            sb.append('"').append(parts[i].replace("\"", "\"\"")).append('"');
+            if (i < parts.length - 1) {
+                sb.append(".");
+            }
+        }
+        sb.append(" LIMIT 1");
+        return sb.toString();
+    }
+
+    public String getAuthToken() {
+        DremioCredentials dremioCredentials = new DremioCredentials(dremioUsername, dremioPassword);
+        DremioAuthResponse response = dremioApiController.login(dremioCredentials);
+        return BEARER + response.getToken();
+    }
+
     /**
      * Sends an email notification via the communication microservice.
      *
@@ -335,6 +374,7 @@ public class JobForCheckingDremioHealth {
     private void notifyByEmail(String subject, String body) {
         try {
             EmailVO emailVO = new EmailVO();
+            emailVO.setTo(resolveRecipients(techEmailGroup));
             emailVO.setSubject(subject);
             emailVO.setText(body);
             emailControllerZuul.sendMessage(emailVO);
@@ -342,4 +382,18 @@ public class JobForCheckingDremioHealth {
             LOG.error("Failed to send Dremio health-check notification email: {}", e.getMessage(), e);
         }
     }
+
+    /**
+     * Resolves a comma-separated string of email addresses into a {@link List}.
+     *
+     * <p>Trims whitespace from each entry and filters out any blank values,
+     * making it safe for use with loosely formatted property values.
+     */
+    private List<String> resolveRecipients(String emailGroupValue) {
+        return Arrays.stream(emailGroupValue.split(","))
+                .map(String::trim)
+                .filter(s -> !s.isBlank())
+                .collect(Collectors.toList());
+    }
+
 }
