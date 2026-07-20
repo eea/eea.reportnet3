@@ -41,7 +41,7 @@ import java.util.stream.Collectors;
  *       is reachable and returning HTTP 200.</li>
  *   <li><b>Functional SQL check:</b> submits a trivial query
  *       ({@code SELECT 1 ... LIMIT 1}) against the configured health-check table
- *       (property {@code dremio.health-check-table}) via the Dremio REST SQL API
+ *       (property {@code dremio.healthCheck.table}) via the Dremio REST SQL API
  *       ({@code POST /api/v3/sql}) through {@link DremioHelperService}, confirming that
  *       Dremio accepts and plans queries and that the table is addressable.</li>
  * </ol>
@@ -68,7 +68,7 @@ import java.util.stream.Collectors;
  * <ul>
  *   <li>{@code eea.keycloak.admin.user} - Keycloak admin username</li>
  *   <li>{@code eea.keycloak.admin.password} - Keycloak admin password</li>
- *   <li>{@code dremio.health-check-table} - dotted path of the table used by the
+ *   <li>{@code dremio.healthCheck.table} - dotted path of the table used by the
  *       functional SQL check, e.g.
  *       {@code rn3-dataset.rn3-dataset.test.liveness.1234}</li>
  * </ul>
@@ -127,7 +127,7 @@ public class JobForCheckingDremioHealth {
     @Value("${eea.communication.techEmailGroup}")
     private String techEmailGroup;
 
-    @Value("${dremio.health-check-table}")
+    @Value("${dremio.healthCheck.table}")
     private String healthCheckTable;
 
     /**
