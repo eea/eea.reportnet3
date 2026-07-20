@@ -523,4 +523,14 @@ public interface DatasetSchemaController {
    */
   @PutMapping(value = "/updateManuallyEditable/{datasetId}")
   void updateManuallyEditableByDatasetId(@PathVariable("datasetId") Long datasetId, @RequestParam("manuallyEditable") Boolean manuallyEditable) throws Exception;
+
+  /**
+   * Gets the table schemas ids.
+   *
+   * @param datasetId the dataset id
+   * @return the table schemas ids
+   */
+  @GetMapping("/private/getTableSchemasIds/{datasetId}")
+  List<TableSchemaIdNameVO> getTableSchemasIdsPrivate(
+      @PathVariable("datasetId") Long datasetId);
 }
