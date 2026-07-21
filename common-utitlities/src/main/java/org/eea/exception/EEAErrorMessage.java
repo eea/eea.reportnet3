@@ -770,6 +770,10 @@ public final class EEAErrorMessage {
   /** The Constant FILE_EXPORT_ERROR_MESSAGE */
   public static final String AT_LEAST_ONE_FILTER_SHOULD_BE_ACTIVE = "At least one filter should be active";
 
+  /** The Constant JOB_NOT_FOUND: {@value}. */
+  public static final String JOB_NOT_FOUND =
+          "JOB not found for Job ID %s.";
+
   /**
    * Instantiates a new EEA error message.
    */

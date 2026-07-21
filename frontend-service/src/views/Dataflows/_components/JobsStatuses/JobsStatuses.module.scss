@@ -57,6 +57,10 @@ h6 {
   margin-left: auto !important;
 }
 
+.buttonPushDown {
+  margin-top: 1rem !important;
+}
+
 .deleteRowButton {
   border: 1px solid var(--general-border-color) !important;
   color: var(--errors) !important;
@@ -112,14 +116,24 @@ h6 {
   }
 }
 
-.statusBox:hover {
-  cursor: pointer;
-  filter: brightness(0.9);
+.statusBox {
+  position: relative;
+  :hover {
+    cursor: pointer;
+    filter: brightness(0.9);
+  }
+
+  i {
+    position: absolute;
+    margin-left: 0.5rem;
+    font-size: 1.5rem !important;
+    color: var(--datatable-header-info-button-color) !important;
+  }
 }
 
 .tooltip .tooltiptext {
   visibility: hidden;
-  width: 120px;
+  width: 160px;
   background-color: rgb(83, 83, 83);
   color: #fff;
   text-align: center;
@@ -131,4 +145,33 @@ h6 {
 
 .tooltip:hover .tooltiptext {
   visibility: visible;
+}
+
+.cancelledValidationsTable {
+  margin-top: 1rem !important;
+}
+
+.emptyArrayMessage {
+  margin-top: 1rem !important;
+}
+
+.noCancelledTasksContent {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+  flex-direction: column;
+  .spinnerPosition {
+    top: 0;
+    left: 0;
+  }
+}
+
+.dialogContent {
+  :global {
+    .p-multiselect-panel {
+      width: auto !important;
+      min-width: 220px !important;
+    }
+  }
 }

@@ -757,6 +757,7 @@
     "geospatialDataMoreInfo": "Geospatial data - More info",
     "getConfigurationUserServiceError": "Error loading user preferences",
     "getJobsStatusesError": "Error loading jobs statuses",
+    "getCancelledTasksError": "Error loading canceled validations",
     "getOrganizationsError": "Error loading organizations",
     "getMetadataError": "Error getting metadata",
     "getReferencedLinkValuesError": "Error while loading the referenced field values",
@@ -1407,7 +1408,9 @@
     "showPublicInfoDataflowCheckboxLabel": "Dataflow public info is available",
     "showPublicInfoDataflowDialogHeader": "Show/hide public dataflow data",
     "showValidations": "Show validations",
+    "showCancelledValidations": "Show canceled validations",
     "sidebarApiKeyBtn": "API-key",
+    "silentRelease": "Silent release",
     "single": "Single",
     "singleMultipleSelectItems": "Single/Multiple select items",
     "size": "Size",
@@ -1658,6 +1661,7 @@
     "validatingDataError": "Error validating data",
     "validationDashboards": "Validation dashboards",
     "validation": "Validation",
+    "validationForRelease": "Validation for release",
     "validationFilter": "Validation filter",
     "validationFinishedEvent": "Validation finished at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName} ({:dataProviderName})</a>. Click <strong>Refresh</strong> to view the data.",
     "validationInProgress": "Validation in progress",
@@ -1719,6 +1723,8 @@
     "deletingNationalCoordinatorFailedEvent": "National coordinator has not been deleted",
     "nationalCoordinatorAddingProcessStartedEvent": "National coordinator adding process has been started, please wait...",
     "nationalCoordinatorDeletingProcessStartedEvent": "National coordinator deleting process has been started, please wait...",
-    "nationalCoordinatorAnotherProcessInProgressEvent": "Another National coordinator process is still in progress, please wait..."
+    "nationalCoordinatorAnotherProcessInProgressEvent": "Another National coordinator process is still in progress, please wait...",
+    "hideCancelledValidations": "Hide canceled validations",
+    "noCancelledTasks": "There are no canceled validations for this job"
   }
 }

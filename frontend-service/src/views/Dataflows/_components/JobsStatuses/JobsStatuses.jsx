@@ -59,6 +59,7 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
   const isAdmin = userContext.hasPermission([permissions.roles.ADMIN.key]);
   const isCustodian = userContext.hasPermission([permissions.roles.CUSTODIAN.key, permissions.roles.STEWARD.key]);
   const isProvider = userContext.hasPermission([permissions.roles.LEAD_REPORTER.key]);
+  const shouldRestrictToProviderData = isProvider && !isAdmin && !isCustodian;
 
   const [activeIndex, setActiveIndex] = useState(0);
   const [expandedRows, setExpandedRows] = useState(null);
@@ -77,7 +78,13 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
   const [providersTotalRecords, setProvidersTotalRecords] = useState(0);
   const [remainingJobs, setRemainingJobs] = useState(0);
   const [sort, setSort] = useState({ field: 'dateStatusChanged', order: -1 });
+  const [sortCancelled, setSortCancelled] = useState({ field: 'ruleCode', order: -1 });
   const [totalRecords, setTotalRecords] = useState(0);
+  const [showValidationTable, setShowValidationTable] = useState(false);
+  const [paginationInfo, setPaginationInfo] = useState({ recordsPerPage: 10, firstPageRecord: 0 });
+  const [cancelledValidations, setCancelledValidations] = useState([]);
+  const [totalCancelledValidations, setTotalCancelledValidations] = useState(0);
+  const [isLoadingCancelledValidations, setIsLoadingCancelledValidations] = useState(false);
 
   const { getDateTimeFormatByUserPreferences, getDateDifferenceInMinutes } = useDateTimeFormatByUserPreferences();
   const { setData } = useApplyFilters('jobsStatuses');
@@ -107,11 +114,7 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
           providerId: filterBy.providerId,
           datasetId: filterBy.datasetId,
           datasetName: filterBy.datasetName,
-          creatorUsername: !isAdmin
-            ? isProvider
-              ? userContext.preferredUsername
-              : filterBy.creatorUsername
-            : undefined,
+          creatorUsername: filterBy.creatorUsername,
           jobStatus: filterBy.jobStatus?.join()
         });
         setData(data.jobsList);
@@ -119,7 +122,7 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
         setRemainingJobs(data.remainingJobs);
       } else {
         const adminCustodianTabChange = index && page === undefined && (isCustodian || isAdmin);
-        const providerTabChange = index && !page && isProvider;
+        const providerTabChange = index && !page && shouldRestrictToProviderData;
 
         if (!adminCustodianTabChange) {
           if (providerTabChange || (!isEmpty(filterBy) && (index === undefined || page !== undefined))) {
@@ -135,11 +138,7 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
               providerId: providerTabChange ? undefined : filterBy.providerId,
               datasetId: providerTabChange ? undefined : filterBy.datasetId,
               datasetName: providerTabChange ? undefined : filterBy.datasetName,
-              creatorUsername: !isAdmin
-                ? isProvider
-                  ? userContext.preferredUsername
-                  : filterBy.creatorUsername
-                : undefined,
+              creatorUsername: providerTabChange ? undefined : filterBy.creatorUsername,
               jobStatus: filterBy.jobStatus?.join()
             });
           }
@@ -159,13 +158,13 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
       }
 
       if (monitoringTab || (!isEmpty(filterBy) && !(index && !page))) {
-        if (isProvider && !providersTotalRecords) {
+        if (shouldRestrictToProviderData && !providersTotalRecords) {
           setProvidersTotalRecords(data.filteredRecords);
-        } else if (index !== undefined && !page && !(isCustodian || isAdmin)) {
+        } else if (index !== undefined && !page && shouldRestrictToProviderData) {
           setProvidersTotalRecords(data.filteredRecords);
         }
 
-        if (isProvider && Object.keys(filterBy).length === 1) {
+        if (shouldRestrictToProviderData && Object.keys(filterBy).length === 1) {
           setIsFiltered(FiltersUtils.getIsFiltered({}));
         } else {
           setIsFiltered(FiltersUtils.getIsFiltered(filterBy));
@@ -237,6 +236,77 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
   const onSort = event => {
     setSort({ field: event.sortField, order: event.sortOrder });
     getJobsStatuses(undefined, undefined, undefined, event);
+  };
+
+  const onSortCancelledTasks = event => {
+    setSortCancelled({ field: event.sortField, order: event.sortOrder });
+    getCancelledTasks(paginationInfo.firstPageRecord / paginationInfo.recordsPerPage, paginationInfo.recordsPerPage, {
+      sortField: event.sortField,
+      sortOrder: event.sortOrder
+    });
+  };
+
+  const getCancelledTasks = async (page, rows, sortOption) => {
+    setIsLoadingCancelledValidations(true);
+    try {
+      const data = await JobsStatusesService.getCancelledValidations({
+        pageNum: page !== undefined ? page : pageNum,
+        numberRows: rows !== undefined ? rows : numberRows,
+        sortOrder: sortOption?.sortOrder || sortCancelled.order,
+        sortField: sortOption?.sortField || sortCancelled.field,
+        jobId: jobStatus?.jobId ?? jobStatus?.id
+      });
+      setCancelledValidations(data.tasksList || []);
+      setTotalCancelledValidations(data.totalRecords);
+    } catch (error) {
+      console.error('JobsStatus - getCancelledTasks.', error);
+      setLoadingStatus('error');
+      notificationContext.add({ type: 'GET_CANCELLED_TASKS_ERROR' }, true);
+      setShowValidationTable(false);
+    } finally {
+      setIsLoadingCancelledValidations(false);
+    }
+  };
+
+  const getCancelledValidationsColumns = () => {
+    const columns = [
+      {
+        key: 'ruleCode',
+        header: resourcesContext.messages['ruleCode'],
+        template: rowData => <span>{rowData.ruleCode}</span>,
+        className: styles.smallColumn,
+        style: { width: '6rem' }
+      },
+      {
+        key: 'ruleLevelError',
+        header: resourcesContext.messages['ruleLevelError'],
+        template: rowData => <span>{rowData.ruleLevelError}</span>,
+        className: styles.smallColumn,
+        style: { width: '6rem' }
+      }
+    ];
+
+    return columns.map(column => (
+      <Column
+        body={column.template}
+        className={column.className ? column.className : ''}
+        field={column.key}
+        header={column.header}
+        key={column.key}
+        sortable={column.key !== 'buttonsUniqueId' && column.key !== 'expanderColumn'}
+        style={column.style}
+      />
+    ));
+  };
+
+  const newCancelledTasksClassName = rowData => ({
+    'p-highlight-bg': rowData.index < notificationContext.all.filter(notification => !notification.isSystem).length
+  });
+
+  const onChangePage = event => {
+    const pageNum = event.first / event.rows;
+    setPaginationInfo({ ...paginationInfo, recordsPerPage: event.rows, firstPageRecord: event.first });
+    getCancelledTasks(pageNum, event.rows);
   };
 
   const filterOptions = [
@@ -359,7 +429,7 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
   const getTableColumns = () => {
     const columns = getJobsStatusesColumns();
 
-    if (isAdmin && activeIndex !== 1) {
+    if (activeIndex !== 1) {
       columns.push({
         key: 'buttonsUniqueId',
         header: resourcesContext.messages['actions'],
@@ -383,27 +453,28 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
     ));
   };
 
-  const getCancelButton = job => (
-    <ActionsColumn
-      disabledButtons={
-        !(
-          job.jobStatus === 'IN_PROGRESS' &&
-          (job.jobType === 'DELETE' ||
-            job.jobType === 'IMPORT' ||
-            job.jobType === 'VALIDATION' ||
-            job.jobType === 'RELEASE' ||
-            job.jobType === 'FILE_EXPORT') &&
-          getDateDifferenceInMinutes(job.dateStatusChanged) > 9
-        )
-      }
-      onDeleteClick={() => {
-        setIsDeleteDialogVisible(true);
-        setJobStatus(job);
-      }}
-      rowDataId={job.id}
-      tooltip={resourcesContext.messages['cancel']}
-    />
-  );
+  const getCancelButton = job => {
+    const isDataflowCustodian = userContext.hasContextAccessPermission(
+      config.permissions.prefixes.DATAFLOW,
+      job.dataflowId,
+      [config.permissions.roles.CUSTODIAN.key]
+    );
+
+    return (
+      <ActionsColumn
+        disabledButtons={
+          (!isAdmin && !isDataflowCustodian && userContext.preferredUsername !== job.creatorUsername) ||
+          !(job.jobStatus === 'IN_PROGRESS' && getDateDifferenceInMinutes(job.dateStatusChanged) > 9)
+        }
+        onDeleteClick={() => {
+          setIsDeleteDialogVisible(true);
+          setJobStatus(job);
+        }}
+        rowDataId={job.id}
+        tooltip={resourcesContext.messages['cancel']}
+      />
+    );
+  };
 
   const getJobStatusTemplate = job => (
     <div
@@ -416,6 +487,7 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
         className={config.jobRunningStatus[job.jobStatus].label}
         type={resourcesContext.messages[config.jobRunningStatus[job.jobStatus].label]}
       />
+      {job.jobInfo && <i className="pi pi-info-circle" />}
     </div>
   );
 
@@ -431,14 +503,23 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
       {job.fmeJobId}
     </a>
   );
-
   const getJobTypeTemplate = job => {
     const isRelease = job.release && job.jobType === 'VALIDATION' ? '*' : '';
+    const isSilentRelease = job.parameters.silentRelease ? (
+      <i className="pi pi-volume-off" title="silent release" />
+    ) : null;
+
+    const tooltipMessages = [];
+    if (isRelease) tooltipMessages.push(resourcesContext.messages['validationForRelease']);
+    if (isSilentRelease) tooltipMessages.push(resourcesContext.messages['silentRelease']);
+    const tooltipText = tooltipMessages.join('\n');
+
     return (
       <div className={styles.tooltip}>
         {job.jobType}
         {isRelease}
-        {isRelease && <span className={styles.tooltiptext}>Validation For Release</span>}
+        {isSilentRelease}
+        {tooltipText && <span className={styles.tooltiptext}>{tooltipText}</span>}
       </div>
     );
   };
@@ -550,7 +631,7 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
     setLoadingStatus('pending');
     setIsDeleteDialogVisible(false);
     try {
-      await JobsStatusesService.cancelJob(jobStatus.id);
+      await JobsStatusesService.cancelJob(jobStatus.id, jobStatus.dataflowId, jobStatus.datasetId);
       setLoadingStatus('success');
     } catch (error) {
       console.error('JobsStatus - onConfirmDeleteDialog.', error);
@@ -569,6 +650,9 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
   const onHideStatusInfoDialog = () => {
     setIsStatusInfoDialogVisible(false);
     setJobStatus(null);
+    setShowValidationTable(false);
+    setCancelledValidations([]);
+    setPaginationInfo({ recordsPerPage: 10, firstPageRecord: 0 });
   };
 
   const renderFilters = () => (
@@ -577,7 +661,7 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
       className="lineItems"
       isJobsStatuses={true}
       isLoading={loadingStatus === 'pending'}
-      isProvider={isProvider}
+      isProvider={shouldRestrictToProviderData}
       onFilter={() => setPagination({ firstRow: 0, numberRows: pagination.numberRows, pageNum: 0 })}
       onReset={() => {
         setPagination({ firstRow: 0, numberRows: pagination.numberRows, pageNum: 0 });
@@ -587,7 +671,7 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
         }
       }}
       options={filterOptions}
-      providerUsername={userContext.preferredUsername}
+      providerUsername={shouldRestrictToProviderData ? userContext.preferredUsername : undefined}
       recoilId="jobsStatuses"
     />
   );
@@ -666,7 +750,7 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
           paginator={true}
           paginatorRight={
             <PaginatorRecordsCount
-              dataLength={isProvider && !isAdmin ? providersTotalRecords : totalRecords}
+              dataLength={shouldRestrictToProviderData && !isAdmin ? providersTotalRecords : totalRecords}
               filteredDataLength={filteredRecords}
               filteredJobsLength={filteredJobs}
               isFiltered={isFiltered}
@@ -680,7 +764,9 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
           rowsPerPageOptions={[5, 10, 15]}
           sortField={sort.field}
           sortOrder={sort.order}
-          totalRecords={isFiltered ? filteredRecords : isProvider ? providersTotalRecords : totalRecords}
+          totalRecords={
+            isFiltered ? filteredRecords : shouldRestrictToProviderData ? providersTotalRecords : totalRecords
+          }
           value={jobsStatuses}>
           {getTableColumns()}
         </DataTable>
@@ -735,6 +821,57 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
           onHide={onHideStatusInfoDialog}
           visible={isStatusInfoDialogVisible}>
           {jobStatus.jobInfo ? jobStatus.jobInfo : resourcesContext.messages['noJobStatusInfo']}
+          <br />
+          {(jobStatus?.jobType === 'VALIDATION' || jobStatus?.jobType === 'RELEASE') && jobStatus?.jobInfo !== null && (
+            <>
+              <Button
+                className={`p-button-secondary ${styles.buttonPushDown}`}
+                icon="warning"
+                label={
+                  showValidationTable
+                    ? resourcesContext.messages['hideCancelledValidations']
+                    : resourcesContext.messages['showCancelledValidations']
+                }
+                onClick={() => {
+                  setShowValidationTable(!showValidationTable);
+                  if (!showValidationTable) {
+                    getCancelledTasks(paginationInfo.firstPageRecord, paginationInfo.recordsPerPage, sortCancelled);
+                  }
+                }}
+              />
+              {showValidationTable &&
+                (isLoadingCancelledValidations ? (
+                  <div className={styles.noCancelledTasksContent}>
+                    <Spinner className={styles.spinnerPosition} />
+                  </div>
+                ) : cancelledValidations.length > 0 ? (
+                  <DataTable
+                    autoLayout={true}
+                    className={styles.cancelledValidationsTable}
+                    first={paginationInfo.firstPageRecord}
+                    hasDefaultCurrentPage={true}
+                    lazy={true}
+                    loading={isLoadingCancelledValidations}
+                    onPage={onChangePage}
+                    onSort={onSortCancelledTasks}
+                    paginator={true}
+                    paginatorRight={
+                      <span>{`${resourcesContext.messages['totalRecords']} ${totalCancelledValidations}`}</span>
+                    }
+                    rowClassName={newCancelledTasksClassName}
+                    rows={paginationInfo.recordsPerPage}
+                    rowsPerPageOptions={[5, 10, 15]}
+                    sortField={sortCancelled.field}
+                    sortOrder={sortCancelled.order}
+                    totalRecords={totalCancelledValidations}
+                    value={cancelledValidations}>
+                    {getCancelledValidationsColumns()}
+                  </DataTable>
+                ) : (
+                  <p className={styles.emptyArrayMessage}>{resourcesContext.messages['noCancelledTasks']}</p>
+                ))}
+            </>
+          )}
         </Dialog>
       )}
     </Fragment>

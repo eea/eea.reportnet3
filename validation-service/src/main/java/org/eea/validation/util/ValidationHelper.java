@@ -31,6 +31,7 @@ import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.lock.enums.LockType;
 import org.eea.interfaces.vo.metabase.TaskType;
 import org.eea.interfaces.vo.orchestrator.JobVO;
+import org.eea.interfaces.vo.orchestrator.enums.JobInfoEnum;
 import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.interfaces.vo.recordstore.ProcessVO;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
@@ -393,6 +394,12 @@ public class ValidationHelper implements DisposableBean {
         value.put("datasetSchema", dataset.getDatasetSchema());
         value.put("ruleId", rule.getRuleId().toString());
         value.put("ruleCode", rule.getShortCode());
+        if(rule.getThenCondition() != null && rule.getThenCondition().size() > 1){
+          value.put("ruleLevelError", rule.getThenCondition().get(1));
+        }
+        else{
+          value.put("ruleLevelError", null);
+        }
         value.put("tableName", tableSchema.getNameTableSchema());
         value.put("tableSchemaId", tableSchema.getIdTableSchema().toString());
         value.put("bigData", "true");
@@ -909,6 +916,13 @@ public class ValidationHelper implements DisposableBean {
     value.put("dataProviderId", dataset.getDataProviderId());
     value.put("datasetSchema", dataset.getDatasetSchema());
     value.put("sqlRule", sqlRule != null ? sqlRule.getRuleId().toString() : null);
+    value.put("ruleCode", sqlRule != null ? sqlRule.getShortCode() : null);
+    if(sqlRule != null && sqlRule.getThenCondition() != null && sqlRule.getThenCondition().size() > 1){
+      value.put("ruleLevelError", sqlRule.getThenCondition().get(1));
+    }
+    else{
+      value.put("ruleLevelError", null);
+    }
     addValidationTaskToProcess(processId, EventType.COMMAND_VALIDATE_TABLE, value);
   }
 
@@ -1140,6 +1154,7 @@ public class ValidationHelper implements DisposableBean {
           validationTask.eeaEventVO, workingThreads, maxRunningTasks - workingThreads);
 
       try {
+
         validationTask.validator.performValidation(validationTask.eeaEventVO,
             validationTask.datasetId, validationTask.kieBase, validationTask.taskId);
       } catch (Exception e) {
@@ -1273,6 +1288,7 @@ public class ValidationHelper implements DisposableBean {
                 }
                 kafkaSenderUtils.releaseKafkaEvent(EventType.VALIDATION_RELEASE_FINISHED_EVENT, value);
                 if (taskRepository.hasProcessCanceledTasks(processId)) {
+                  jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.WARNING_HAS_CANCELED_VALIDATION_TASKS, null);
                   kafkaSenderUtils.releaseKafkaEvent(EventType.FINISHED_VALIDATION_WITH_CANCELED_TASKS, value);
                 }
               }
@@ -1288,6 +1304,7 @@ public class ValidationHelper implements DisposableBean {
                       value,
                       NotificationVO.builder().user(process.getUser()).datasetId(datasetId).build());
               if (taskRepository.hasProcessCanceledTasks(processId)) {
+                jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.WARNING_HAS_CANCELED_VALIDATION_TASKS, null);
                 kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.FINISHED_VALIDATION_WITH_CANCELED_TASKS,
                         value,
                         NotificationVO.builder().user(process.getUser()).datasetId(datasetId).build());
