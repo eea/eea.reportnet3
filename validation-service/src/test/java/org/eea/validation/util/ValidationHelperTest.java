@@ -348,7 +348,7 @@ public class ValidationHelperTest {
     ProcessVO processVO = new ProcessVO();
     processVO.setUser("test");
     Mockito.when(processControllerZuul.findById(anyString())).thenReturn(processVO);
-    Mockito.when(datasetSchemaControllerZuul.getTableSchemasIds(any(),any(),any()))
+    Mockito.when(datasetSchemaControllerZuul.getTableSchemasIdsPrivate(any()))
                     .thenReturn(new ArrayList<>());
     validationHelper.executeValidation(1l, "1", false, true);
     Mockito.verify(referenceDatasetControllerZuul, Mockito.times(1))
