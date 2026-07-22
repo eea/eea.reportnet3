@@ -5,16 +5,41 @@
   width: 100%;
 
   .dropdownFilter {
-    display: flex;
-    align-items: flex-end;
     position: relative;
     border-radius: 0px !important;
     border: 0px !important;
     font-size: 0.8333rem !important;
     height: 3em;
-    padding-left: 0em;
     width: 100%;
     box-shadow: none !important;
+//changes needed to make it look like the old version
+
+    :global(.p-dropdown-label) {
+      padding-top: 1.15rem !important;
+      padding-bottom: 0px !important;
+      color: var(--inputtext-color) !important;
+      display: block !important;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+
+    :global(.p-dropdown-clear-icon) {
+      position: absolute !important;
+      right: 2.2em !important;
+      top: 50% !important;
+      transform: translateY(-20%) !important;
+      cursor: pointer !important;
+      z-index: 10 !important;
+      pointer-events: auto !important;
+    }
+
+
+    :global(.p-dropdown-trigger) {
+      width: 2em !important;
+      z-index: 1 !important;
+    }
 
     .label {
       clip: auto;
@@ -37,27 +62,9 @@
     border-bottom: var(--inputtext-border) !important;
   }
 
-  .elementFilter:focus-within {
-    label {
-      top: -0.75em;
-      font-size: 12px;
-    }
-  }
-
   .elementFilterSelected {
     border-bottom: var(--active-filter-border) !important;
     box-shadow: var(--active-filter-shadow) !important;
-    label {
-      padding-left: 0 !important;
-      span {
-        color: var(--inputtext-color);
-        overflow: hidden;
-        white-space: nowrap;
-        text-overflow: ellipsis;
-        display: block;
-        padding-bottom: 0.01em;
-      }
-    }
   }
 }
 

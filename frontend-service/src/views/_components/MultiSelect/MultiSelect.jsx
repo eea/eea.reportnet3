@@ -10,7 +10,7 @@ import { MultiSelectItem } from './_components/MultiSelectItem';
 import { MultiSelectPanel } from './_components/MultiSelectPanel';
 import { Spinner } from 'views/_components/Spinner';
 
-import Tooltip from 'primereact/tooltip';
+import { Tooltip } from 'primereact/tooltip';
 
 import ObjectUtils from 'views/_functions/PrimeReact/ObjectUtils';
 import MultiSelectUtils from './_functions/MultiSelectUtils';
@@ -266,7 +266,9 @@ export class MultiSelect extends Component {
       }, 1);
 
       this.alignPanel();
-      this.bindDocumentClickListener();
+      setTimeout(() => {
+        this.bindDocumentClickListener();
+      }, 0);
       this.setState({ isPanelVisible: true });
     }
   }

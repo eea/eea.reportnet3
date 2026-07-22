@@ -1,11 +1,16 @@
-import { memo } from 'react';
-
+import { memo, Children } from 'react';
 import { Toolbar as PrimeToolbar } from 'primereact/toolbar';
 
-export const Toolbar = memo(({ className, id, style, children }) => {
+export const Toolbar = memo(function Toolbar({className = '', id, style, children}) {
+  const [left, right] = Children.toArray(children);
+
   return (
-    <PrimeToolbar className={`${className} datasetSchema-toolbar-dataset-data-help-step`} id={id} style={style}>
-      {children}
-    </PrimeToolbar>
+    <PrimeToolbar
+      className={`${className} datasetSchema-toolbar-dataset-data-help-step`}
+      id={id}
+      style={style}
+      left={left}
+      right={right}
+    />
   );
 });

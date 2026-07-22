@@ -1,0 +1,119 @@
+//growl to toast needed changes
+.p-toast-message {
+  margin: 0 0 1rem 0;
+  box-shadow: var(--growl-box-shadow);
+  word-break: break-word;
+  border-style: solid;
+  border-width: 0 0 0 5px; /* Keeps your custom left indicator bar accent */
+  border-radius: 4px;
+
+  &:not(.p-growl-message-system-notification) {
+    max-width: 25rem !important;
+    margin-left: auto !important;
+  }
+
+  a {
+    color: var(--c-corporate-blue);
+    text-decoration: none;
+    &:hover, &:active { color: var(--c-corporate-blue-lighter); }
+    &:visited { color: var(--c-corporate-blue); }
+  }
+}
+
+.p-toast-message-content {
+  padding: 1rem;
+
+  .p-toast-message-text {
+    margin: 0 1rem 0 4rem; /* Preserves your exact layout spacing alignment */
+  }
+
+  .p-toast-message-icon {
+    font-size: 2.571rem;
+    cursor: pointer;
+  }
+}
+
+.p-toast-summary {
+  font-weight: bold;
+  display: block;
+  font-size: 11pt;
+}
+
+/* --- Severity Theme Color Mapping --- */
+
+// Info
+.p-toast-message-info {
+  background-color: var(--growl-info-bg);
+  border-color: var(--growl-info-border-color);
+  color: var(--growl-info-color);
+  .p-toast-summary { color: var(--growl-info-border-color); }
+  .p-toast-message-icon { color: var(--growl-info-icon-color); }
+}
+
+// Success
+.p-toast-message-success {
+  background-color: var(--growl-success-bg);
+  border-color: var(--growl-success-border-color);
+  color: var(--growl-success-color);
+  .p-toast-summary { color: var(--growl-success-border-color); }
+  .p-toast-message-icon { color: var(--growl-success-icon-color); }
+}
+
+// Warning
+.p-toast-message-warn {
+  background-color: var(--growl-warning-bg);
+  border-color: var(--growl-warning-border-color);
+  color: var(--growl-warning-color);
+  .p-toast-summary { color: var(--growl-warning-border-color); }
+  .p-toast-message-icon { color: var(--growl-warning-icon-color); }
+}
+
+// Error
+.p-toast-message-error {
+  background-color: var(--growl-error-bg);
+  border-color: var(--growl-error-border-color);
+  color: var(--growl-error-color);
+  .p-toast-summary { color: var(--growl-error-border-color); }
+  .p-toast-message-icon { color: var(--growl-error-icon-color); }
+}
+
+/* --- Special Custom System Broadcast Layout --- */
+
+.p-growl-message-system-notification {
+  background-color: var(--growl-system-notification-bg) !important;
+  border-width: 1px 1px 1px 5px !important;
+  width: 50rem !important;
+  margin-left: auto !important;
+}
+
+.p-growl-message-system-notification-icon {
+  transform: scaleX(-1); /* Flips your custom bullhorn icon horizontally */
+  font-size: 0.9em;
+  opacity: 0.8;
+}
+
+.p-toast-icon-close {
+  color: var(--growl-close-icon-color);
+  font-size: 16pt !important;
+}
+
+.p-toast-detail {
+  color: var(--growl-details-message-color);
+}
+
+/*.p-toast {
+  top: 70px;
+  opacity: 0.95;
+  filter: alpha(opacity=95);
+  width: auto !important;
+  min-width: 25rem !important;
+  max-width: 50rem !important;
+}*/
+.p-toast.p-component.p-toast-top-right {
+  z-index: 5100 !important;
+}
+
+/*
+.p-toast-top-right {
+  top: 80px !important;
+}*/

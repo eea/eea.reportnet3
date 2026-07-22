@@ -91,10 +91,11 @@ export const Dialog = ({
       document.body.style.overflow = 'hidden auto';
     }
   };
-
+//react 18.3 upgrade append to self is needed otherwize it was put at the end of the dom
   return (
     <div className={dialogClass} style={maskStyle}>
       <PrimeDialog
+        appendTo="self"
         blockScroll={blockScroll}
         className={className}
         closable={!disabledCancel}

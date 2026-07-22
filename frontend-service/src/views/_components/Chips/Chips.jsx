@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import isNil from 'lodash/isNil';
 
@@ -6,7 +6,7 @@ import styles from './Chips.module.scss';
 import './Chips.scss';
 
 import { InputText } from 'views/_components/InputText';
-import Tooltip from 'primereact/tooltip';
+import { Tooltip } from 'primereact/tooltip';
 
 import DomHandler from 'views/_functions/PrimeReact/DomHandler';
 import classNames from 'classnames';
@@ -41,11 +41,8 @@ export const Chips = ({
   const inputElement = useRef();
   const listElement = useRef();
   const [hasErrors, setHasErrors] = useState(false);
-  useEffect(() => {
-    if (!isNil(tooltip)) {
-      renderTooltip();
-    }
-  }, []);
+
+  // removed: react 18.3 render tooltip cause problems
 
   const onKeyDownChips = event => {
     const inputValue = deleteWhiteSpaces ? event.target.value.trim() : event.target.value;
@@ -209,7 +206,7 @@ export const Chips = ({
         <InputText
           aria-hidden={disabled || isMaxedOut()}
           aria-labelledby={ariaLabelledBy}
-          className={hasErrors ? styles.chipsTokenError : null}
+          className={classNames('custom-chips-input', hasErrors ? styles.chipsTokenError : null)}
           disabled={disabled || isMaxedOut()}
           id={name}
           keyfilter={forbiddenChar ? (pasteSeparator === ',' ? 'noComma' : 'noSemicolon') : ''}
@@ -277,18 +274,19 @@ export const Chips = ({
     }
   };
 
-  const renderTooltip = () => {
-    new Tooltip({
-      target: inputElement.current.element,
-      targetContainer: listElement.current.element,
-      content: tooltip,
-      options: tooltipOptions
-    });
-  };
+  //removed rendertooltip causing problems
 
   return (
     <div className={`p-chips p-component ${className}`} id={id} style={style}>
       {renderList()}
+
+      {!isNil(tooltip) && (
+        <Tooltip
+          target=".custom-chips-input"
+          content={tooltip}
+          {...tooltipOptions}
+        />
+      )}
     </div>
   );
 };

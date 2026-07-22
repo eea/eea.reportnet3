@@ -201,3 +201,39 @@ body .p-datatable .p-column-resizer-helper {
 .initialOverflowX {
   overflow-x: initial !important;
 }
+
+//react upgrade 18.3 tables had problems and with these rulles they are fixed
+.p-datatable-scrollable .p-datatable-thead {
+  display:table-header-group!important;
+  tr {
+    display: table-row !important;
+
+    th {
+      display: table-cell !important;
+      white-space:wrap!important;
+    }
+  }
+}
+
+p-datatable-scrollable-body{
+  td{
+    display:table-cell!important;
+  }
+}
+
+body .p-datatable .p-datatable-tbody{
+  display:table-row-group;
+  > tr{
+    display:table-row!important;
+    td{
+      display:table-cell!important;
+      white-space:normal;
+    }
+  }
+}
+
+//in geospecial big tables needed this
+.p-datatable-scrollable-body {
+  overflow: auto;
+  position: relative;
+}

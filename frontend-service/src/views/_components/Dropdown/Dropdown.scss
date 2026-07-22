@@ -8,6 +8,7 @@ body .p-dropdown {
   -moz-border-radius: 3px;
   -webkit-border-radius: 3px;
   border-radius: 3px;
+
 }
 body .p-dropdown:not(.p-disabled):hover {
   border-color: var(--dropdown-border-color-hover);
@@ -20,6 +21,7 @@ body .p-dropdown:not(.p-disabled).p-focus {
 body .p-dropdown .p-dropdown-label {
   padding-right: 2em;
   box-shadow: none !important;
+  width:100%;//labels would not be 100%
 }
 body .p-dropdown .p-dropdown-label:focus {
   outline: 0 none;
@@ -102,4 +104,22 @@ body .p-dropdown-panel .p-dropdown-items .p-dropdown-item:not(.p-highlight):not(
 body .p-dropdown-panel .p-dropdown-items .p-dropdown-item-group:not(.p-highlight):not(.p-disabled):hover {
   color: var(--dropdown-panel-items-group-not-highlight-color-hover);
   background-color: var(--dropdown-panel-items-group-not-highlight-bg-hover);
+}
+//needed change for the dropdowns
+.p-dropdown .p-dropdown-trigger {
+  border-right: 0;
+  border-top: 0;
+  border-bottom: 0;
+  cursor: pointer;
+  width: 1.5em;
+  height: 100%;
+  position: absolute;
+  right: 0;
+  top: 0;
+  padding: 0 .25em;
+}
+
+//change for react primereact upgrade
+body .p-float-label label{
+  font-size:.8333rem;
 }

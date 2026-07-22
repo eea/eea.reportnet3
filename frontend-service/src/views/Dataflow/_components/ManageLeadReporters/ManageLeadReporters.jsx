@@ -471,16 +471,27 @@ export const ManageLeadReporters = ({
     }
   };
 
-  const renderLeadReporterColumnTemplate = representative => {
+  const renderLeadReporterColumnTemplate = (representative, columnOptions) => {
     const { dataProviderId, representativeId } = representative;
+
+    // Get the explicit row index from PrimeReact's column state (fallback to '0' if unassigned)
+    const rowIndex = columnOptions?.rowIndex ?? '0';
 
     if (isNil(representative.leadReporters)) return [];
 
-    return representative.leadReporters.map(leadReporter => {
+    // FIX 1: Filter the array inline to guarantee that duplicate record profiles aren't mapped twice
+    const uniqueReporters = representative.leadReporters.filter(
+      (reporter, index, self) => self.findIndex(r => r.id === reporter.id) === index
+    );
+
+    return uniqueReporters.map((leadReporter, internalIndex) => {
       const reporters = formState.leadReporters[dataProviderId];
       const errors = formState.leadReportersErrors[dataProviderId];
       const isNewLeadReporter = TextUtils.areEquals(leadReporter.id, 'empty');
-      const uniqueInputId = `${leadReporter.id}-${representativeId}`;
+
+      // FIX 2: Append grid rowIndex and the map position loop index to secure distinct strings
+      const uniqueInputId = `${leadReporter.id}-${representativeId}-${rowIndex}-${internalIndex}`;
+
       if (!reporters) {
         return null;
       }
@@ -527,7 +538,6 @@ export const ManageLeadReporters = ({
       );
     });
   };
-
   const renderDropdownColumnTemplate = (representative, column) => {
     const selectedOptionForThisSelect = formState.allPossibleDataProviders.filter(
       option => option.dataProviderId === representative.dataProviderId
@@ -617,10 +627,18 @@ export const ManageLeadReporters = ({
       );
     }
 
+    const uniqueFilteredData = filteredData.filter(
+      (representative, index, self) =>
+        self.findIndex(
+          r => r.representativeId === representative.representativeId &&
+            r.dataProviderId === representative.dataProviderId
+        ) === index
+    );
+
     return (
       <Fragment>
         {formState.isLoading && <Spinner className={styles.spinner} />}
-        <DataTable value={filteredData}>
+        <DataTable value={uniqueFilteredData}>
           <Column
             body={renderDeleteBtnColumnTemplate}
             className={styles.emptyTableHeader}
@@ -640,7 +658,6 @@ export const ManageLeadReporters = ({
       </Fragment>
     );
   };
-
   const renderDeleteBtnColumnTemplate = representative => {
     if (!isNil(representative.representativeId) && !representative.hasDatasets) {
       return (

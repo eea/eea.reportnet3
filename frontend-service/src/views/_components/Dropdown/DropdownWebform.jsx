@@ -16,7 +16,7 @@ import { AwesomeIcons } from 'conf/AwesomeIcons';
 import DropdownPanel from './_components/DropdownPanel/DropdownPanel';
 import { DropdownItem } from './_components/DropdownItem';
 import { Spinner } from 'views/_components/Spinner';
-import Tooltip from 'primereact/tooltip';
+import { Tooltip } from 'primereact/tooltip';
 import { isNil } from 'lodash';
 
 const DropdownWebform = props => {
@@ -734,19 +734,10 @@ const DropdownWebform = props => {
       focusInputRef.current.focus();
     }
 
-    if (tooltip) {
-      renderTooltip();
-    }
-
     if (nativeSelectRef) nativeSelectRef.current.selectedIndex = 1;
 
     return () => {
       unbindDocumentClickListener();
-
-      if (tooltip) {
-        tooltip.destroy();
-        tooltip = null;
-      }
 
       if (hideTimeout) {
         clearTimeout(hideTimeout);
@@ -771,22 +762,6 @@ const DropdownWebform = props => {
   useEffect(() => {
     if (nativeSelectRef.current) nativeSelectRef.current.selectedIndex = 1;
   }, [nativeSelectRef.current]);
-
-  useEffect(() => {
-    if (tooltip) {
-      tooltip.updateContent(tooltip);
-    } else {
-      if (containerRef && containerRef.current) renderTooltip();
-    }
-  }, [tooltip, containerRef]);
-
-  const renderTooltip = () => {
-    tooltip = new Tooltip({
-      target: containerRef?.current,
-      content: tooltip,
-      options: tooltipOptions
-    });
-  };
 
   let className = classNames('p-dropdown p-component', classNameProp, {
     'p-disabled': disabled,
@@ -850,6 +825,13 @@ const DropdownWebform = props => {
         scrollHeight={scrollHeight}>
         {items}
       </DropdownPanel>
+      {tooltip && (
+        <Tooltip
+          target={containerRef}
+          content={tooltip}
+          options={tooltipOptions}
+        />
+      )}
     </div>
   );
 };

@@ -69,8 +69,8 @@ body .p-button:enabled:active {
 body .p-button.p-button-text-only .p-button-text {
   padding: 0.429em 1em;
 }
-body .p-button.p-button-text-icon-left .p-button-text {
-  padding: 0.429em 1em 0.429em 2.25em;
+body .p-button-icon-left + .p-button-label { //react 18.3 change because no absolute position on icons now but flex
+  padding: 0.429em 1em 0.429em 0.429em;
 }
 body .p-button.p-button-text-icon-right .p-button-text {
   padding: 0.429em 2.25em 0.429em 1em;

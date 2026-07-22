@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import isEmpty from 'lodash/isEmpty';
 import uniqueId from 'lodash/uniqueId';
 
-import Joyride, { ACTIONS, EVENTS, STATUS } from 'react-joyride';
+import { Joyride, ACTIONS, EVENTS, STATUS } from 'react-joyride';
 
 import styles from './LeftSideBar.module.scss';
 
@@ -28,25 +28,17 @@ export const LeftSideBar = ({ setIsNotificationVisible, setIsSystemNotificationV
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
-
-  const [helpIndex, setHelpIndex] = useState();
+  //joyride react 18.3 needed upgrades
   const [logoutConfirmVisible, setLogoutConfirmVisible] = useState(undefined);
   const [run, setRun] = useState(false);
 
-  const handleJoyrideCallback = data => {
-    const { action, index, status, type } = data;
+  const [tourCount, setTourCount] = useState(0);
 
-    if ([ACTIONS.CLOSE].includes(action) || [STATUS.FINISHED, STATUS.SKIPPED].includes(status)) {
-      setHelpIndex(0);
+  const handleJoyrideCallback = data => {
+    const { action, status } = data;
+
+    if ([STATUS.FINISHED, STATUS.SKIPPED].includes(status) || action === ACTIONS.CLOSE) {
       setRun(false);
-    } else {
-      if ([EVENTS.STEP_AFTER, EVENTS.TARGET_NOT_FOUND].includes(type)) {
-        setHelpIndex(index + (action === ACTIONS.PREV ? -1 : 1));
-      } else {
-        if ([STATUS.FINISHED, STATUS.SKIPPED].includes(status)) {
-          setRun(false);
-        }
-      }
     }
   };
 
@@ -120,6 +112,7 @@ export const LeftSideBar = ({ setIsNotificationVisible, setIsSystemNotificationV
       label: 'help',
       onClick: async e => {
         e.preventDefault();
+        setTourCount(prev => prev + 1);
         setRun(true);
       },
       title: 'help'
@@ -177,69 +170,67 @@ export const LeftSideBar = ({ setIsNotificationVisible, setIsSystemNotificationV
   return (
     <Fragment>
       <Joyride
+        key={`joyride-${tourCount}`}
         callback={handleJoyrideCallback}
         continuous={true}
-        disableScrolling={true}
         run={run}
-        scrollToFirstStep={true}
+        steps={leftSideBarContext.steps}
+
+        disableScrolling={true}
+        disableScrollParentFix={false}
+        scrollToFirstStep={false}
+
         showProgress={true}
         showSkipButton={false}
-        stepIndex={helpIndex}
-        steps={leftSideBarContext.steps}
+        options={{
+          arrowColor: 'var(--help-modal-bg)',
+          backgroundColor: 'var(--help-modal-bg)',
+          primaryColor: 'var(--button-primary-bg)',
+          textColor: 'var(--main-font-color)',
+          zIndex: 999999,
+          skipScroll: true
+        }}
         styles={{
-          options: {
-            arrowColor: 'var(--help-modal-bg)',
-            backgroundColor: 'var(--help-modal-bg)',
-            primaryColor: 'var(--button-primary-bg)',
-            textColor: 'var(--main-font-color)',
-            zIndex: 10000
-          },
-          buttonNext: {
-            color: 'var(--button-primary-color)'
-          },
-          buttonBack: {
-            color: 'var(--main-font-color)'
-          },
+          buttonNext: { color: 'var(--button-primary-color)' },
+          buttonBack: { color: 'var(--main-font-color)' },
           overlay: { backgroundColor: 'var(--help-overlay-bg)' }
         }}
       />
       <div className={`${styles.leftSideBar}${leftSideBarContext.isLeftSideBarOpened ? ` ${styles.open}` : ''}`}>
-        {
-          <Fragment>
-            <div className={`${styles.barSection} dataflowList-left-side-bar-top-section-help-step`}>
-              <div className={styles.leftSideBarElementWrapper}>{renderHome()}</div>
-              <div className={styles.leftSideBarElementWrapper}>{renderUserProfile()}</div>
-              <div className={styles.leftSideBarElementWrapper}>{renderHelp()}</div>
-              <div className={styles.leftSideBarElementWrapper}>{renderUserNotifications()}</div>
-              <div className={styles.leftSideBarElementWrapper}>{renderManageSystemNotifications()}</div>
-            </div>
-            {!isEmpty(renderSectionButtons()) && (
-              <Fragment>
-                <hr />
-                <div className={`${styles.barSection} dataflowList-left-side-bar-mid-section-help-step`}>
-                  {renderSectionButtons()}
-                </div>
-              </Fragment>
-            )}
-            <hr />
-            <div className={styles.barSection}>
-              <div className={styles.leftSideBarElementWrapper}>{renderLogout()}</div>
-              <div className={styles.leftSideBarElementWrapper}>{renderOpenClose()}</div>
-            </div>
+        <Fragment>
+          <div className={`${styles.barSection} dataflowList-left-side-bar-top-section-help-step`}>
+            <div className={styles.leftSideBarElementWrapper}>{renderHome()}</div>
+            <div className={styles.leftSideBarElementWrapper}>{renderUserProfile()}</div>
+            <div className={styles.leftSideBarElementWrapper}>{renderHelp()}</div>
+            <div className={styles.leftSideBarElementWrapper}>{renderUserNotifications()}</div>
+            <div className={styles.leftSideBarElementWrapper}>{renderManageSystemNotifications()}</div>
+          </div>
+          {!isEmpty(renderSectionButtons()) && (
+            <Fragment>
+              <hr />
+              <div className={`${styles.barSection} dataflowList-left-side-bar-mid-section-help-step`}>
+                {renderSectionButtons()}
+              </div>
+            </Fragment>
+          )}
+          <hr />
+          <div className={styles.barSection}>
+            <div className={styles.leftSideBarElementWrapper}>{renderLogout()}</div>
+            <div className={styles.leftSideBarElementWrapper}>{renderOpenClose()}</div>
+          </div>
 
-            {userContext.userProps.showLogoutConfirmation && logoutConfirmVisible && (
-              <ConfirmDialog
-                header={resourcesContext.messages['logout']}
-                labelCancel={resourcesContext.messages['no']}
-                labelConfirm={resourcesContext.messages['yes']}
-                onConfirm={userLogout}
-                onHide={() => setLogoutConfirmVisible(false)}
-                visible={logoutConfirmVisible}>
-                {resourcesContext.messages['userLogout']}
-              </ConfirmDialog>
-            )}
-          </Fragment>
-        }
+          {userContext.userProps.showLogoutConfirmation && logoutConfirmVisible && (
+            <ConfirmDialog
+              header={resourcesContext.messages['logout']}
+              labelCancel={resourcesContext.messages['no']}
+              labelConfirm={resourcesContext.messages['yes']}
+              onConfirm={userLogout}
+              onHide={() => setLogoutConfirmVisible(false)}
+              visible={logoutConfirmVisible}>
+              {resourcesContext.messages['userLogout']}
+            </ConfirmDialog>
+          )}
+        </Fragment>
       </div>
     </Fragment>
   );

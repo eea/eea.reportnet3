@@ -1,8 +1,36 @@
 import { forwardRef, useEffect, useState } from 'react';
 
 import isNil from 'lodash/isNil';
+import { addLocale } from 'primereact/api';
 import { Calendar as PrimeCalendar } from 'primereact/calendar';
 import { Spinner } from '../Spinner';
+
+// PrimeReact 18.3 change needed for calendar to play cause of newest versions of calendar
+
+addLocale('custom-en', {
+    firstDayOfWeek: 1,
+    dayNames: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+    dayNamesShort: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+    dayNamesMin: ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'],
+    monthNames: [
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December'
+    ],
+    monthNamesShort: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+    today: 'Today',
+    clear: 'Clear',
+    weekHeader: 'Wk'
+});
 
 export const Calendar = forwardRef((props, _) => {
   const {
@@ -44,30 +72,6 @@ export const Calendar = forwardRef((props, _) => {
     yearRange
   } = props;
 
-  const locale = {
-    firstDayOfWeek: 1,
-    dayNames: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
-    dayNamesShort: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
-    dayNamesMin: ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'],
-    monthNames: [
-      'January',
-      'February',
-      'March',
-      'April',
-      'May',
-      'June',
-      'July',
-      'August',
-      'September',
-      'October',
-      'November',
-      'December'
-    ],
-    monthNamesShort: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-    today: 'Today',
-    clear: 'Clear',
-    weekHeader: 'Wk'
-  };
 
   useEffect(() => {
     const isValidDate = date => date instanceof Date && !isNaN(date);
@@ -98,7 +102,7 @@ export const Calendar = forwardRef((props, _) => {
         inputClassName={inputClassName}
         inputId={inputId}
         keepInvalid={keepInvalid}
-        locale={locale}
+        locale="custom-en"
         maxDate={maxDate}
         minDate={minDate}
         monthNavigator={monthNavigator}

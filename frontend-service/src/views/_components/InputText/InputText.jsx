@@ -12,7 +12,7 @@ import ObjectUtils from 'views/_functions/PrimeReact/ObjectUtils';
 
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import Tooltip from 'primereact/tooltip';
+import { Tooltip } from 'primereact/tooltip';
 
 import { Spinner } from '../Spinner';
 
@@ -90,34 +90,15 @@ export class InputText extends Component {
   }
 
   componentDidMount() {
-    if (this.props.tooltip) {
-      this.renderTooltip();
-    }
     if (this.props.hasMaxCharCounter && !isNil(this.inputElement)) {
       this.element.style.paddingRight = `${this.inputElement.getBoundingClientRect().width + 30}px`;
     }
   }
 
   componentDidUpdate(prevProps) {
-    if (prevProps.tooltip !== this.props.tooltip) {
-      if (this.tooltip) this.tooltip.updateContent(this.props.tooltip);
-      else this.renderTooltip();
-    }
   }
 
   componentWillUnmount() {
-    if (this.tooltip) {
-      this.tooltip.destroy();
-      this.tooltip = null;
-    }
-  }
-
-  renderTooltip() {
-    this.tooltip = new Tooltip({
-      target: this.element,
-      content: this.props.tooltip,
-      options: this.props.tooltipOptions
-    });
   }
 
   render() {
@@ -184,6 +165,13 @@ export class InputText extends Component {
         <label className="srOnly" htmlFor={this.props.id}>
           {this.props.name !== '' ? this.props.name : this.props.placeholder || this.props.id}
         </label>
+        {this.props.tooltip && (
+          <Tooltip
+            target={this.element}
+            content={this.props.tooltip}
+            options={this.props.tooltipOptions}
+          />
+        )}
       </Fragment>
     );
   }

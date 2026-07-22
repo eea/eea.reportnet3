@@ -1,4 +1,4 @@
-.p-growl {
+.p-toast {
   top: 70px;
   opacity: 0.95;
   filter: alpha(opacity=95);
@@ -6,10 +6,10 @@
   min-width: 25rem !important;
   max-width: 50rem !important;
 }
-.p-growl.p-component.p-growl-topright {
+.p-toast.p-component.p-toast-top-right {
   z-index: 5100 !important;
 }
 
-.p-growl-topright {
+.p-toast-top-right {
   top: 80px !important;
 }

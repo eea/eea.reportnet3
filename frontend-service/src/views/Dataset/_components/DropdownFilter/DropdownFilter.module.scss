@@ -1,7 +1,7 @@
 .dropdownFilter {
   position: absolute;
   cursor: pointer;
-  font-size: 0.8rem;
+  font-size: 0.8rem!important;
   border: var(--dropdownFilter-border);
   background-color: var(--dropdownFilter-bg-color);
   min-width: 250px;
@@ -15,6 +15,9 @@
   font-size: 0.9rem;
   opacity: 0;
   user-select: none;
+  .p-float-label label{
+    font-size:2rem;
+  }
   ul {
     list-style: none;
     padding: 0px;

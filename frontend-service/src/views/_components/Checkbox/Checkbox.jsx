@@ -1,10 +1,12 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import Tooltip from 'primereact/tooltip';
+import { Tooltip } from 'primereact/tooltip';
 
 import uniqueId from 'lodash/uniqueId';
 import { Icon } from '../Icon';
+
+//react 18.3 upgrade new tooltip had to be removed
 
 export class Checkbox extends Component {
   static defaultProps = {
@@ -85,26 +87,8 @@ export class Checkbox extends Component {
     }
   }
 
-  componentDidMount() {
-    if (this.props.tooltip) {
-      this.renderTooltip();
-    }
-  }
-
-  componentWillUnmount() {
-    if (this.tooltip) {
-      this.tooltip.destroy();
-      this.tooltip = null;
-    }
-  }
-
-  componentDidUpdate(prevProps) {
+  componentDidUpdate() {
     this.input.checked = this.props.checked;
-
-    if (prevProps.tooltip !== this.props.tooltip) {
-      if (this.tooltip) this.tooltip.updateContent(this.props.tooltip);
-      else this.renderTooltip();
-    }
   }
 
   onFocus() {
@@ -122,14 +106,6 @@ export class Checkbox extends Component {
     }
   }
 
-  renderTooltip() {
-    this.tooltip = new Tooltip({
-      target: this.element,
-      content: this.props.tooltip,
-      options: this.props.tooltipOptions
-    });
-  }
-
   render() {
     const containerClass = classNames('p-checkbox p-component', this.props.className);
     const boxClass = classNames('p-checkbox-box p-component', {
@@ -140,6 +116,8 @@ export class Checkbox extends Component {
     const iconClass = classNames('p-checkbox-icon p-c', { 'pi pi-check': this.props.checked });
     const id = uniqueId();
 
+    const tooltipTargetId = `cb-tooltip-${id}`;
+
     return (
       <div
         className={containerClass}
@@ -147,8 +125,24 @@ export class Checkbox extends Component {
         onClick={this.onClick}
         onContextMenu={this.props.onContextMenu}
         onMouseDown={this.props.onMouseDown}
-        ref={el => (this.element = el)}
-        style={this.props.style}>
+        style={this.props.style}
+
+        data-pr-tooltip={this.props.tooltip}
+        data-pr-position={this.props.tooltipOptions?.position || 'right'}
+        data-pr-at={this.props.tooltipOptions?.at}
+        data-pr-my={this.props.tooltipOptions?.my}
+        id-tooltip={tooltipTargetId}
+        className-target={tooltipTargetId}
+      >
+        {}
+        {this.props.tooltip && (
+          <Tooltip
+            target={`.${tooltipTargetId}`}
+            content={this.props.tooltip}
+            {...this.props.tooltipOptions}
+          />
+        )}
+
         <div className="p-hidden-accessible">
           <input
             aria-label={this.props.ariaLabel}

@@ -24,3 +24,37 @@ body .p-dialog.edit-table.calendar-table .p-dialog-content {
 .p-toolbar.p-component {
   position: relative;
 }
+
+.clearfix{ //react 18.3 upgrade clearfix was not part of reactprime or it did not work properly
+  &:after{
+    display:table;
+    content:"";
+  }
+}
+
+.p-accordion{ //react 18.3 upgrade for full width
+  width:100%;
+}
+
+
+body .p-dialog .p-dialog-header {  //react 18.3 dialog headers were invinsible
+  display: flex;
+  justify-content: space-between;
+  border: var(--dialog-header-border);
+  background-color: var(--dialog-header-bg);
+  color: var(--sidebar-title-color);
+  padding: 1.2rem 1.5em;
+  font-weight: 700;
+  word-break: break-all;
+  border-bottom: 0;
+  border-radius: 5px 5px 0 0;
+}
+
+body:not(:hover) :global .__react_component_tooltip.show {
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
+
+body :global .__react_component_tooltip {
+  pointer-events: none; /* Prevents the tooltip itself from hijacking the mouseleave event */
+}

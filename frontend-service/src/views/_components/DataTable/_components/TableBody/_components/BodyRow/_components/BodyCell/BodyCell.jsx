@@ -11,7 +11,7 @@ import { RowRadioButton } from './_components/RowRadioButton';
 import { RowCheckbox } from 'views/_components/DataTable/_components/RowCheckbox';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
-
+//react 18.3 in geospecial points it opened but did not close
 export class BodyCell extends Component {
   static contextType = ResourcesContext;
 
@@ -61,9 +61,7 @@ export class BodyCell extends Component {
           editing: true
         });
 
-        if (this.props.editorValidatorEvent === 'click') {
-          this.bindDocumentEditListener();
-        }
+        this.bindDocumentEditListener();
       }
     }
   }
@@ -97,8 +95,6 @@ export class BodyCell extends Component {
 
         this.editingCellClick = false;
       };
-
-      this.editingCellClick = false;
 
       document.addEventListener('click', this.documentEditListener);
     }

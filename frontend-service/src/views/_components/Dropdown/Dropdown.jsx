@@ -18,8 +18,9 @@ import { AwesomeIcons } from 'conf/AwesomeIcons';
 import DropdownPanel from './_components/DropdownPanel/DropdownPanel';
 import { DropdownItem } from './_components/DropdownItem';
 import { Spinner } from 'views/_components/Spinner';
-import Tooltip from 'primereact/tooltip';
+import { Tooltip } from 'primereact/tooltip';
 
+//react 18.3 upgrade dropdowns would not work would open and close immediately
 export class Dropdown extends Component {
   static defaultProps = {
     appendTo: null,
@@ -148,6 +149,11 @@ export class Dropdown extends Component {
       return;
     }
 
+
+    if (event && event.nativeEvent) {
+      event.nativeEvent._pDropdownClick = true;
+    }
+
     if (this.documentClickListener) {
       this.selfClick = true;
     }
@@ -156,16 +162,16 @@ export class Dropdown extends Component {
       DomHandler.hasClass(event.target, 'p-dropdown-clear-icon') ||
       DomHandler.hasClass(event.target, 'p-dropdown-clear-filter-icon');
     if (!this.overlayClick && !this.editableInputClick && !clearClick) {
-      this.focusInput.focus();
+      if (this.focusInput) this.focusInput.focus();
 
-      if (this.panel.offsetParent) {
+      if (this.panel && this.panel.offsetParent) {
         this.hide();
       } else {
         this.show();
 
         if (this.props.filter && this.props.filterInputAutoFocus) {
           setTimeout(() => {
-            this.filterInput.focus();
+            if (this.filterInput) this.filterInput.focus();
           }, 200);
         }
       }
@@ -176,8 +182,14 @@ export class Dropdown extends Component {
     }
   }
 
-  panelClick() {
+  panelClick(event) {
     this.overlayClick = true;
+
+    if (event && event.nativeEvent) {
+      event.nativeEvent._pDropdownClick = true;
+    } else if (window.event) {
+      window.event._pDropdownClick = true;
+    }
   }
 
   onInputFocus(event) {
@@ -528,18 +540,20 @@ export class Dropdown extends Component {
 
   bindDocumentClickListener() {
     if (!this.documentClickListener) {
-      this.documentClickListener = () => {
-        if (!this.selfClick && !this.overlayClick) {
-          this.hide();
+      this.documentClickListener = (event) => {
+
+        if (event && (event._pDropdownClick || this.selfClick || this.overlayClick)) {
+          this.clearClickState();
+          return;
         }
 
+        this.hide();
         this.clearClickState();
       };
 
       document.addEventListener('click', this.documentClickListener);
     }
   }
-
   unbindDocumentClickListener() {
     if (this.documentClickListener) {
       document.removeEventListener('click', this.documentClickListener);
@@ -766,20 +780,11 @@ export class Dropdown extends Component {
       this.focusInput.focus();
     }
 
-    if (this.props.tooltip) {
-      this.renderTooltip();
-    }
-
     this.nativeSelect.selectedIndex = 1;
   }
 
   componentWillUnmount() {
     this.unbindDocumentClickListener();
-
-    if (this.tooltip) {
-      this.tooltip.destroy();
-      this.tooltip = null;
-    }
 
     if (this.hideTimeout) {
       clearTimeout(this.hideTimeout);
@@ -798,20 +803,7 @@ export class Dropdown extends Component {
       }
     }
 
-    if (prevProps.tooltip !== this.props.tooltip) {
-      if (this.tooltip) this.tooltip.updateContent(this.props.tooltip);
-      else this.renderTooltip();
-    }
-
     this.nativeSelect.selectedIndex = 1;
-  }
-
-  renderTooltip() {
-    this.tooltip = new Tooltip({
-      target: this.container,
-      content: this.props.tooltip,
-      options: this.props.tooltipOptions
-    });
   }
 
   render() {
@@ -864,6 +856,13 @@ export class Dropdown extends Component {
           scrollHeight={this.props.scrollHeight}>
           {items}
         </DropdownPanel>
+        {this.props.tooltip && (
+          <Tooltip
+            target={this.container}
+            content={this.props.tooltip}
+            options={this.props.tooltipOptions}
+          />
+        )}
       </div>
     );
   }

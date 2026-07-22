@@ -1,113 +1,84 @@
-import { Component } from 'react';
-
+import { forwardRef, useImperativeHandle, useRef, useContext } from 'react';
 import PropTypes from 'prop-types';
+import { Toast } from 'primereact/toast';
 
-import './Growl.scss';
 
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { AwesomeIcons } from 'conf/AwesomeIcons';
+import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import classNames from 'classnames';
 
-import { CSSTransition, TransitionGroup } from 'react-transition-group';
-import { GrowlMessage } from './_components/GrowlMessage';
+export const Growl = forwardRef((props, ref) => {
+  const toastRef = useRef(null);
+  const resourcesContext = useContext(ResourcesContext); // Access your global language resources
 
-import DomHandler from 'views/_functions/PrimeReact/DomHandler';
+  useImperativeHandle(ref, () => ({
+    show: (value) => {
+      if (!value) return;
+      toastRef.current?.show(value);
+    },
+    clear: () => {
+      toastRef.current?.clear();
+    }
+  }));
 
-var messageIdx = 0;
-
-export class Growl extends Component {
-  static defaultProps = {
-    baseZIndex: 0,
-    className: null,
-    closableOnClick: false,
-    id: null,
-    onClick: null,
-    onRemove: null,
-    position: 'topright',
-    style: null
+  const getPosition = (pos) => {
+    switch (pos) {
+      case 'topright': return 'top-right';
+      case 'topleft': return 'top-left';
+      case 'bottomright': return 'bottom-right';
+      case 'bottomleft': return 'bottom-left';
+      default: return 'top-right';
+    }
   };
 
-  static propTypes = {
-    baseZIndex: PropTypes.number,
-    className: PropTypes.string,
-    closableOnClick: PropTypes.bool,
-    id: PropTypes.string,
-    onClick: PropTypes.func,
-    onRemove: PropTypes.func,
-    position: PropTypes.string,
-    style: PropTypes.object
+
+  const itemTemplate = (message) => {
+
+    if (message.system) {
+      const title = resourcesContext?.messages?.['systemNotification']?.toUpperCase() || 'SYSTEM NOTIFICATION';
+      return (
+        <div className="p-toast-message-content p-growl-message-system-notification">
+          <FontAwesomeIcon
+            className="p-toast-message-icon p-growl-message-system-notification-icon"
+            icon={AwesomeIcons('bullhorn')}
+            role="presentation"
+          />
+          <div className="p-toast-message-text">
+            <span className="p-toast-summary p-growl-title">{title}</span>
+            {message.detail && <div className="p-toast-detail p-growl-details">{message.detail}</div>}
+          </div>
+        </div>
+      );
+    }
+
+
+    return null;
   };
 
-  constructor(props) {
-    super(props);
-    this.state = {
-      messages: []
-    };
+  return (
+    <Toast
+      id={props.id}
+      ref={toastRef}
+      position={getPosition(props.position)}
+      style={props.style}
+      className={props.className}
+      baseZIndex={props.baseZIndex}
+      onClick={props.onClick}
+      onRemove={props.onRemove}
+      itemTemplate={itemTemplate} // Pass our template interceptor here
+    />
+  );
+});
 
-    this.onClose = this.onClose.bind(this);
-  }
+Growl.displayName = 'Growl';
 
-  show(value) {
-    if (value) {
-      let newMessages;
-
-      if (Array.isArray(value)) {
-        for (let i = 0; i < value.length; i++) {
-          value[i].id = messageIdx++;
-          newMessages = [...this.state.messages, ...value];
-        }
-      } else {
-        value.id = messageIdx++;
-        newMessages = this.state.messages ? [...this.state.messages, value] : [value];
-      }
-
-      this.setState({
-        messages: newMessages
-      });
-
-      this.container.style.zIndex = String(this.props.baseZIndex + DomHandler.generateZIndex());
-    }
-  }
-
-  clear() {
-    this.setState({
-      messages: []
-    });
-  }
-
-  onClose(message) {
-    let newMessages = this.state.messages.filter(msg => msg.id !== message.id);
-    this.setState({
-      messages: newMessages
-    });
-
-    if (this.props.onRemove) {
-      this.props.onRemove(message);
-    }
-  }
-
-  render() {
-    let className = classNames('p-growl p-component p-growl-' + this.props.position, this.props.className);
-
-    return (
-      <div
-        className={className}
-        id={this.props.id}
-        ref={el => {
-          this.container = el;
-        }}
-        style={this.props.style}>
-        <TransitionGroup>
-          {this.state.messages.map(message => (
-            <CSSTransition classNames="p-growl" key={message.id} timeout={{ enter: 250, exit: 500 }}>
-              <GrowlMessage
-                closableOnClick={this.props.closableOnClick}
-                message={message}
-                onClick={this.props.onClick}
-                onClose={this.onClose}
-              />
-            </CSSTransition>
-          ))}
-        </TransitionGroup>
-      </div>
-    );
-  }
-}
+Growl.propTypes = {
+  baseZIndex: PropTypes.number,
+  className: PropTypes.string,
+  id: PropTypes.string,
+  onClick: PropTypes.func,
+  onRemove: PropTypes.func,
+  position: PropTypes.string,
+  style: PropTypes.object
+};

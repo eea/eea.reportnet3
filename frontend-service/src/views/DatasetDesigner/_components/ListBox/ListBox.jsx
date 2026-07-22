@@ -10,7 +10,7 @@ import ObjectUtils from 'views/_functions/PrimeReact/ObjectUtils';
 import { ListBoxItem } from './_components/ListBoxItem';
 import { ListBoxHeader } from './_components/ListBoxHeader';
 import { Spinner } from 'views/_components/Spinner';
-import Tooltip from 'primereact/tooltip';
+import { Tooltip } from 'primereact/tooltip';
 
 export const ListBox = ({
   ariaLabel = null,

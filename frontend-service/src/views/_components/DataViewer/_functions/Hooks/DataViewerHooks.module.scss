@@ -2,8 +2,9 @@
   opacity: 0.5;
 }
 
-.invisibleHeader {
-  display: none;
+//had problems cause of primereact usually in tables hiding stuff
+.invisibleHeader.invisibleHeader.invisibleHeader.invisibleHeader.invisibleHeader {
+  display: none!important;
 }
 
 .fieldDisabled {

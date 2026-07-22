@@ -7,7 +7,7 @@ import { MultiSelectItem } from './_components/MultiSelectItem';
 import { MultiSelectPanel } from './_components/MultiSelectPanel';
 import { Spinner } from 'views/_components/Spinner';
 
-import Tooltip from 'primereact/tooltip';
+import { Tooltip } from 'primereact/tooltip';
 
 import ObjectUtils from 'views/_functions/PrimeReact/ObjectUtils';
 import MultiSelectUtils from './_functions/MultiSelectUtils';

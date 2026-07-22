@@ -1,9 +1,22 @@
+:global .p-datepicker-prev,
+:global .p-datepicker-next{
+  background-color:transparent;
+  border:none;
+  span:before{
+    font-size:1rem;
+    color: var(--active-filter);
+  }
+}
+
 .block {
   display: flex;
   margin-bottom: 1.5rem;
   align-items: flex-end;
   width: 100%;
-
+  :global .p-datepicker-prev,
+  :global .p-datepicker-next{
+    background-color:transparent!important;
+  }
   .dateBlock {
     display: flex;
     align-items: flex-end;

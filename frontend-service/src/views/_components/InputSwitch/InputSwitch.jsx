@@ -1,11 +1,9 @@
 import { Component } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import Tooltip from 'primereact/tooltip';
 
 import './InputSwitch.scss';
 import styles from './InputSwitch.module.scss';
-
 import ObjectUtils from 'views/_functions/PrimeReact/ObjectUtils';
 
 export class InputSwitch extends Component {
@@ -100,33 +98,7 @@ export class InputSwitch extends Component {
     }
   }
 
-  componentDidMount() {
-    if (this.props.tooltip) {
-      this.renderTooltip();
-    }
-  }
 
-  componentDidUpdate(prevProps) {
-    if (prevProps.tooltip !== this.props.tooltip) {
-      if (this.tooltip) this.tooltip.updateContent(this.props.tooltip);
-      else this.renderTooltip();
-    }
-  }
-
-  componentWillUnmount() {
-    if (this.tooltip) {
-      this.tooltip.destroy();
-      this.tooltip = null;
-    }
-  }
-
-  renderTooltip() {
-    this.tooltip = new Tooltip({
-      target: this.container,
-      content: this.props.tooltip,
-      options: this.props.tooltipOptions
-    });
-  }
 
   render() {
     const className = classNames('p-inputswitch p-component', this.props.className, {
@@ -146,6 +118,10 @@ export class InputSwitch extends Component {
         ref={el => (this.container = el)}
         role="checkbox"
         style={this.props.style}
+
+        data-pr-tooltip={this.props.tooltip}
+        data-pr-position={this.props.tooltipOptions?.position || 'right'}
+        data-pr-at={this.props.tooltipOptions?.at || 'right+5 center'}
         {...inputSwitchProps}>
         <div className="p-hidden-accessible">
           <input
@@ -172,8 +148,8 @@ export class InputSwitch extends Component {
                 ? styles.inputswitch_dark_theme_checked
                 : null
               : this.props.sliderCheckedClassName
-              ? styles.inputswitch_dark_theme_unchecked
-              : null
+                ? styles.inputswitch_dark_theme_unchecked
+                : null
           }`}></span>
       </div>
     );

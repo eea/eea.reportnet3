@@ -49,14 +49,22 @@
       display: flex;
       align-items: center;
       margin-right: 1rem;
+
       .loginButton {
         background-color: var(--c-white-color);
         color: var(--public-custom-header-bg);
         padding: 0.25rem 0.9rem;
         font-weight: bold;
-        span:first-child {
-          margin-left: 0.5rem;
-          margin-top: -0.5rem;
+
+        // Target the icon
+        :global(.p-button-icon) {
+          margin-right: 0.5rem;
+          margin-top: 0;
+        }
+
+
+        :global(.p-button-label) {
+          display: inline-block;
         }
       }
     }

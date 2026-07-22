@@ -60,6 +60,7 @@ export const BigButton = ({
   const [isEditEnabled, setIsEditEnabled] = useState(false);
 
   const menuBigButtonRef = useRef();
+  const isMenuBigButtonOpenRef = useRef(false); //react 18.3 upgrade and general changes to this file because the dropdowns would open and close. primereact new version fault
   const tooltipId = uniqueId();
 
   useEffect(() => {
@@ -180,15 +181,35 @@ export const BigButton = ({
     }
   };
 
+  const isDropdownOpenRef = useRef(false);
+
   const renderDropDownModel = () => {
     if (model && !isEmpty(model)) {
       return (
-        <DropdownButton
-          buttonStyle={{ position: 'absolute', bottom: '-5px', right: '0px' }}
-          icon="caretDown"
-          iconStyle={{ fontSize: '1.8rem' }}
-          model={getDesignModel()}
-        />
+        <div
+          onClick={(event) => {
+            if (isDropdownOpenRef.current) {
+              isDropdownOpenRef.current = false;
+              return;
+            }
+            isDropdownOpenRef.current = true;
+
+            if (event && typeof event.stopPropagation === 'function') {
+              event.stopPropagation();
+            }
+            if (event && event.nativeEvent && typeof event.nativeEvent.stopImmediatePropagation === 'function') {
+              event.nativeEvent.stopImmediatePropagation();
+            }
+          }}
+          style={{ display: 'contents' }}
+        >
+          <DropdownButton
+            buttonStyle={{ position: 'absolute', bottom: '-5px', right: '0px' }}
+            icon="caretDown"
+            iconStyle={{ fontSize: '1.8rem' }}
+            model={getDesignModel()}
+          />
+        </div>
       );
     }
   };
@@ -373,7 +394,29 @@ export const BigButton = ({
   const menuBigButton = (
     <Fragment>
       <div className={`${styles.bigButton} ${styles.menuBigButton} ${styles[buttonClass]} ${helpClassName}`}>
-        <span onClick={event => menuBigButtonRef.current.show(event)}>
+        <span
+          onClick={(event) => {
+            if (isMenuBigButtonOpenRef.current) {
+              isMenuBigButtonOpenRef.current = false;
+              if (menuBigButtonRef.current && typeof menuBigButtonRef.current.hide === 'function') {
+                menuBigButtonRef.current.hide(event);
+              }
+              return;
+            }
+            isMenuBigButtonOpenRef.current = true;
+
+            if (event && typeof event.stopPropagation === 'function') {
+              event.stopPropagation();
+            }
+            if (event && event.nativeEvent && typeof event.nativeEvent.stopImmediatePropagation === 'function') {
+              event.nativeEvent.stopImmediatePropagation();
+            }
+
+            if (menuBigButtonRef.current && typeof menuBigButtonRef.current.show === 'function') {
+              menuBigButtonRef.current.show(event);
+            }
+          }}
+        >
           <FontAwesomeIcon className={styles[buttonIconClass]} icon={AwesomeIcons(buttonIcon)} role="presentation" />
         </span>
         <DropDownMenu model={model} ref={menuBigButtonRef} />
@@ -381,7 +424,6 @@ export const BigButton = ({
       <p className={styles.caption}>{caption}</p>
     </Fragment>
   );
-
   const buttons = {
     defaultBigButton,
     menuBigButton

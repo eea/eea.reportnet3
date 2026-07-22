@@ -6,7 +6,10 @@
   font-size: 12pt !important;
   color: var(--datatable-header-info-button-color) !important;
   margin-left: 0.4rem !important;
-  background-color: var(--c-white-color) !important;
+  //background-color: var(--c-white-color) !important;
+  background-color:transparent!important;
+  overflow:visible!important;
+
   &:focus {
     box-shadow: var(--c-white-color) !important;
   }
@@ -67,5 +70,13 @@
 
   @include for-big-desktop-up {
     max-width: calc(60vw - 25%);
+  }
+}
+
+.infoCircleButton{
+  display:none!important;
+  button{
+    background:transparent!important;
+    overflow:visible;
   }
 }

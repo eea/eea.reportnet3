@@ -16,7 +16,7 @@ import * as esri from 'esri-leaflet';
 import { Button } from 'views/_components/Button';
 import { Dialog } from 'views/_components/Dialog';
 import { Dropdown } from 'views/_components/Dropdown';
-import { Map as MapComponent, GeoJSON, Marker, Popup } from 'react-leaflet';
+import { MapContainer, GeoJSON, Marker, Popup, useMap, useMapEvents } from 'react-leaflet';
 
 import icon from 'leaflet/dist/images/marker-icon.png';
 import iconShadow from 'leaflet/dist/images/marker-shadow.png';
@@ -28,16 +28,12 @@ import { MapUtils } from 'views/_functions/Utils';
 
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
-let DefaultIcon = L.icon({
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: icon,
   iconUrl: icon,
-  shadowUrl: iconShadow,
-  iconSize: [25, 41],
-  iconAnchor: [12, 36]
+  shadowUrl: iconShadow
 });
-
-// 3035 --> ETRS89 / ETRS-LAEA
-// 4258 --> ETRS89
-// 4326 --> WGS84
 
 proj4.defs([
   ['EPSG:4258', '+proj=longlat +ellps=GRS80 +no_defs'],
@@ -45,14 +41,24 @@ proj4.defs([
   ['EPSG:4326', '+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs']
 ]);
 
-L.Marker.prototype.options.icon = DefaultIcon;
-
 let NewMarkerIcon = L.icon({
   iconUrl: newMarkerIcon,
   shadowUrl: iconShadow,
   iconSize: [25, 41],
   iconAnchor: [12, 36]
 });
+
+const MapInstanceSetter = ({ setLeafletMap }) => {
+  const map = useMap();
+  useEffect(() => setLeafletMap(map), [map, setLeafletMap]);
+  return null;
+};
+
+const DoubleClickHandler = ({ onDoubleClick }) => {
+  useMapEvents({ dblclick: onDoubleClick });
+  return null;
+};
+
 export const Map = ({
   disabledEdition = false,
   enabledDrawElements = {
@@ -104,7 +110,7 @@ export const Map = ({
 
   const [currentCRS, setCurrentCRS] = useState(
     !isNil(selectedCRS)
-      ? crs.find(crsItem => crsItem.value === selectedCRS) || { label: 'WGS84 - 4326', value: 'EPSG:4326' }
+      ? crs.find(crsItem => crsItem.value === selectedCRS.value) || { label: 'WGS84 - 4326', value: 'EPSG:4326' }
       : selectedCRS
   );
 
@@ -118,13 +124,9 @@ export const Map = ({
   const [isNewPositionMarkerVisible, setIsNewPositionMarkerVisible] = useState(false);
   const [popUpVisible, setPopUpVisible] = useState(false);
 
-  const mapRef = useRef();
+  const [leafletMap, setLeafletMap] = useState(null);
 
-  useEffect(() => {
-    const map = mapRef.current.leafletElement;
-    esri.basemapLayer(currentTheme.value).addTo(map);
-
-    // Disabled. It now requires an API Key.
+  // Disabled. It now requires an API Key.
     // const searchControl = new ELG.Geosearch().addTo(map);
     // const results = new L.LayerGroup().addTo(map);
 
@@ -160,7 +162,6 @@ export const Map = ({
     //     }
     //   }
     // });
-  }, []);
 
   // memoize parsed inputs to avoid repeated JSON.parse on every vertex/operation
   const parsedInputGeoJson = useMemo(() => {
@@ -196,9 +197,9 @@ export const Map = ({
   }, [newPositionMarker]);
 
   useEffect(() => {
-    const map = mapRef.current.leafletElement;
-    esri.basemapLayer(currentTheme.value).addTo(map);
-  }, [currentTheme]);
+    if (!leafletMap) return;
+    esri.basemapLayer(currentTheme.value).addTo(leafletMap);
+  }, [leafletMap, currentTheme]);
 
   const checkCoordsToLatLng = coords => new L.LatLng(coords[0], coords[1], coords[2]);
 
@@ -230,6 +231,7 @@ export const Map = ({
         if (MapUtils.checkValidJSONCoordinates(mapGeoJson)) {
           return (
             <GeoJSON
+              key={mapGeoJson}
               coordsToLatLng={coords => checkCoordsToLatLng(coords)}
               data={JSON.parse(mapGeoJson)}
               onEachFeature={onEachFeature}
@@ -245,6 +247,7 @@ export const Map = ({
         if (MapUtils.checkValidJSONMultipleCoordinates(mapGeoJson)) {
           return (
             <GeoJSON
+              key={mapGeoJson}
               coordsToLatLng={coords => checkCoordsToLatLng(coords)}
               data={JSON.parse(mapGeoJson)}
               onEachFeature={onEachFeature}
@@ -314,7 +317,7 @@ export const Map = ({
             }),
             currentCRS.value
           );
-          mapRef.current.leafletElement.setView(e.latlng, mapRef.current.leafletElement.zoom);
+          if (leafletMap) leafletMap.setView(e.latlng, leafletMap.getZoom());
         }
       }
     }
@@ -324,13 +327,14 @@ export const Map = ({
     if (TextUtils.areEquals(geometryType, 'POINT')) {
       layer.bindPopup(renderCoordinates({ data: feature.geometry.coordinates, isGeoJson: false }));
       layer.on({
-        click: () =>
-          mapRef.current.leafletElement.setView(feature.geometry.coordinates, mapRef.current.leafletElement.zoom)
+        click: () => {
+          if (leafletMap) leafletMap.setView(feature.geometry.coordinates, leafletMap.getZoom());
+        }
       });
     } else {
       var bounds = layer.getBounds();
       var center = bounds.getCenter();
-      mapRef.current.leafletElement.setView(center, mapRef.current.leafletElement.zoom);
+      if (leafletMap) leafletMap.setView(center, leafletMap.getZoom());
     }
   };
 
@@ -351,7 +355,7 @@ export const Map = ({
     );
 
     if (sourceSrid === 'EPSG:4326') {
-      return isCenter ? parsedGeoJsonData.geometry.coordinates : parsedGeoJsonData.geometry.coordinates;
+      return parsedGeoJsonData.geometry.coordinates;
     }
 
     const sourceProj = proj4(sourceSrid);
@@ -516,29 +520,30 @@ export const Map = ({
         />
       </div>
       <div>
-        <MapComponent
-          center={projectGeoJsonCoordinates(getCenter(), true)}
-          doubleClickZoom={false}
-          onDblclick={onDoubleClick}
-          ref={mapRef}
-          style={{ height: '60vh', marginTop: '6px' }}
-          zoom="4">
-          {getGeoJson()}
+          <MapContainer
+            center={projectGeoJsonCoordinates(getCenter(), true)}
+            doubleClickZoom={false}
+            style={{ height: '60vh', marginTop: '6px' }}
+            zoom={4}
+          >
+            <MapInstanceSetter setLeafletMap={setLeafletMap} />
+            <DoubleClickHandler onDoubleClick={onDoubleClick} />
+            {getGeoJson()}
           {isNewPositionMarkerVisible && (
             <Marker
               draggable={false}
               icon={NewMarkerIcon}
-              onClick={e => {
-                if (!popUpVisible) {
-                  setPopUpVisible(true);
+              eventHandlers={{
+                click: e => {
+                  if (!popUpVisible) setPopUpVisible(true);
+                  if (leafletMap) leafletMap.setView(e.latlng, leafletMap.getZoom());
                 }
-                mapRef.current.leafletElement.setView(e.latlng, mapRef.current.leafletElement.zoom);
               }}
               position={projectPointCoordinates({ coordinates: newPositionMarker })}>
               <Popup>{onPrintCoordinates(newPositionMarker)}</Popup>
             </Marker>
           )}
-        </MapComponent>
+          </MapContainer>
         {(hasErrors.newPointError || hasErrors.projection) && (
           <Dialog
             blockScroll={false}

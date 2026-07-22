@@ -125,6 +125,7 @@ export const TableWebform = ({
             data-for={!isCreated ? 'TableNotExists' : ''}
             data-tip
             disabled={tableWebformState.isLoading}
+
             icon={!isCreated ? 'info' : hasErrors.includes(true) ? 'warning' : 'table'}
             iconClasses={
               !tableWebformState.isVisible[webform.title] ? (hasErrors.includes(true) ? 'warning' : 'info') : ''
