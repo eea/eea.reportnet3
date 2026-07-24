@@ -182,6 +182,11 @@ export const WebformTable = ({
         // Get all FIELD elements from nested containers
         const getFieldElements = elements =>
           elements.flatMap(element => {
+            // Ignore TABLE elements
+            if (element.type === 'TABLE') {
+              return [];
+            }
+
             if (Array.isArray(element.elements)) {
               return getFieldElements(element.elements);
             }
