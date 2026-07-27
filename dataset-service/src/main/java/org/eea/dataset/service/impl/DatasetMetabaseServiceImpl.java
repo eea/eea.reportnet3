@@ -1172,4 +1172,8 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
     return nextIdValidation;
   }
 
+  @Override
+  public DesignDataset getDesignDatasetByDataflowIdAndDatasetSchemaId(Long dataflowId, String datasetSchemaId){
+    return designDatasetRepository.findByDataflowIdAndDatasetSchema(dataflowId, datasetSchemaId);
+  }
 }
