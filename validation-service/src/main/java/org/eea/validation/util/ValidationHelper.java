@@ -385,11 +385,7 @@ public class ValidationHelper implements DisposableBean {
           //if updateViews is false it means that the materialized views have already been updated, so we must compare the number of records
           executeValidationProcess(dataset, processId, !updateViews, validateAsProviderCode);
         } else {
-          try {
-            deleteLockToReleaseProcess(datasetId, null);
-          } catch (Exception e) {
-            LOG.error("Could not remove validation locks for dataset {} and process {}", datasetId, processId, e);
-          }
+          deleteLockToReleaseProcess(datasetId, null);
           Map<String, Object> values = new HashMap<>();
           values.put(DATASET_ID, datasetId);
           values.put("released", released);
@@ -675,11 +671,7 @@ public class ValidationHelper implements DisposableBean {
       }
     }
 
-    try {
-      deleteLockToReleaseProcess(datasetId, preparationCode);
-    } catch (Exception e) {
-      LOG.error("Could not remove validation locks for dataset {} and process {}", datasetId, processId, e);
-    }
+    deleteLockToReleaseProcess(datasetId, preparationCode);
 
     try {
       kafkaSenderUtils.releaseNotificableKafkaEvent(
@@ -710,11 +702,7 @@ public class ValidationHelper implements DisposableBean {
       }
     }
 
-    try {
-      deleteLockToReleaseProcess(datasetId, preparationCode);
-    } catch (Exception e) {
-      LOG.error("Could not remove validation locks for dataset {}, process {} and preparationCode {}", datasetId, processId, preparationCode, e);
-    }
+    deleteLockToReleaseProcess(datasetId, preparationCode);
 
     try {
       kafkaSenderUtils.releaseNotificableKafkaEvent(
@@ -1109,11 +1097,7 @@ public class ValidationHelper implements DisposableBean {
     } catch (Exception e) {
       LOG.error("There's an error putting the lock to validation process in dataset {}",
           datasetId);
-      try {
-        deleteLockToReleaseProcess(datasetId, preparationCode);
-      } catch (Exception ex) {
-        LOG.error("Could not remove validation locks for dataset {} and preparationCode {}", datasetId, preparationCode, ex);
-      }
+      deleteLockToReleaseProcess(datasetId, preparationCode);
     }
 
   }
@@ -1154,8 +1138,10 @@ public class ValidationHelper implements DisposableBean {
     TenantResolver.setTenantName(DATASET_PREFIX + datasetId);
 
       final List<TableSchemaIdNameVO> tables = datasetSchemaControllerZuul
-              .getTableSchemasIdsPrivate(
-                      datasetMetabaseVO.getId());
+              .getTableSchemasIds(
+                      datasetMetabaseVO.getId(),
+                      datasetMetabaseVO.getId(),
+                      datasetMetabaseVO.getDataProviderId());
 
     for (TableSchemaIdNameVO table : tables) {
       Map<String, Object> mapCriteriaDeleteTable = new HashMap<>();
@@ -1657,8 +1643,6 @@ public class ValidationHelper implements DisposableBean {
         LOG.info("isProcessFinished for datasetId {}, processId {} and taskId {}", datasetId, processId, taskId);
         if (finishProcessInMap(processId)) {
           LOG.info("Removed process for datasetId {}, processId {} and taskId {} from processesMap", datasetId, processId, taskId);
-          Long jobId = null;
-          try {
           ProcessVO process = processControllerZuul.findById(processId);
           LOG.info("Process {} with taskId {} finished for dataset {}", processId, taskId, datasetId);
           // Release the lock manually
@@ -1709,7 +1693,7 @@ public class ValidationHelper implements DisposableBean {
                   ProcessTypeEnum.VALIDATION, processId,
                   process.getUser(), 0, null)) {
 
-            jobId = jobProcessControllerZuul.findJobIdByProcessId(processId);
+            Long jobId = jobProcessControllerZuul.findJobIdByProcessId(processId);
             value.put("validation_job_id", jobId);
 
             checkAndPromoteFolder(s3PathResolver, dataflow);
@@ -1763,15 +1747,10 @@ public class ValidationHelper implements DisposableBean {
             }
             else {
               // Delete the lock to the Release process
-              try {
-                deleteLockToReleaseProcess(datasetId, null);
-              } catch (Exception e) {
-                LOG.error("Could not remove validation locks for dataset {} and process {}", datasetId, processId, e);
-              }
+              deleteLockToReleaseProcess(datasetId, preparationCode);
               checkAndPromoteFolder(s3PathResolver, dataflow);
               if (jobId != null) {
                 jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FINISHED);
-                LOG.info("Validation job {} marked as FINISHED for process {} and dataset {}", jobId, processId, datasetId);
               }
               value.put("preparationCode", preparationCode);
               kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.VALIDATION_FINISHED_EVENT,
@@ -1791,13 +1770,6 @@ public class ValidationHelper implements DisposableBean {
             }
           }
           isFinished = true;
-          } catch (EEAException e) {
-            LOG.error("Could not finalize validation job {} with processId {} for dataset {}.", jobId,processId, datasetId, e);
-            throw e;
-          } catch (RuntimeException e) {
-            LOG.error("Unexpected error finalizing validation job {} with processId {} for dataset {}.",jobId, processId, datasetId, e);
-            throw e;
-          }
         }
       }
       else {

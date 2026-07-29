@@ -1926,27 +1926,4 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
     }
   }
 
-  /**
-  * Gets the table schemas ids. No preAuth required because it's only used to clean locks.
-  *
-  * @param datasetId the dataset id
-  * @return the table schemas ids
-  */
-  @Override
-  @GetMapping(
-      value = "/private/getTableSchemasIds/{datasetId}",
-      produces = MediaType.APPLICATION_JSON_VALUE)
-  public List<TableSchemaIdNameVO> getTableSchemasIdsPrivate(@PathVariable("datasetId") Long datasetId) {
-    if (datasetId == null) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.DATASET_INCORRECT_ID);
-    }
-
-    try {
-      return dataschemaService.getTableSchemasIds(datasetId);
-    } catch (EEAException e) {
-      LOG.error("Error retrieving table schema ids for datasetId {}. Message: {}", datasetId, e.getMessage(), e);
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, EEAErrorMessage.RETRIEVING_TABLE_SCHEMAS);
-    }
-  }
-
 }
