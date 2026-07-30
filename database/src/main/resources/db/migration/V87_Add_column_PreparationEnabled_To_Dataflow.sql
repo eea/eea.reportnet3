@@ -1,0 +1,1 @@
+ALTER TABLE dataflow ADD COLUMN preparation_enabled Boolean default false;

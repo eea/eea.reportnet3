@@ -1311,6 +1311,8 @@
     "prefilled": "Prefilled",
     "prefilledTableHasNoDataError": "Table marked as prefilled has no data",
     "preview": "View data",
+    "preparationEnabled": "Enable Preparation Datasets",
+    "preparationEnabledMessage": "Check to allow the creation of preparation datasets for this dataflow",
     "previewNotification": "Preview",
     "previewNotificationMessage": "Launch notification to preview it",
     "preparationSetsCreated": "All preparation sets have been created",

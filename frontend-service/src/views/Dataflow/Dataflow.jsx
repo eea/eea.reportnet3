@@ -147,6 +147,7 @@ export const Dataflow = () => {
     obligations: {},
     preparationSetsList: null,
     officialReporting: false,
+    preparationEnabled: false,
     representative: {},
     representativesImport: false,
     restrictFromPublic: false,
@@ -982,6 +983,7 @@ export const Dataflow = () => {
           name: dataflow.name,
           obligations: dataflow.obligation,
           officialReporting: dataflow.officialReporting,
+          preparationEnabled: dataflow.preparationEnabled,
           showPublicInfo: dataflow.showPublicInfo,
           status: dataflow.status
         }
@@ -2067,6 +2069,7 @@ export const Dataflow = () => {
             isVisible={dataflowState.isCitizenScienceDataflowDialogVisible}
             manageDialogs={manageDialogs}
             obligation={obligation}
+            onUpdateAddUserText={onUpdateAddUserText}
             onEditDataflow={onEditDataflow}
             onLoadReportingDataflow={onLoadReportingDataflow}
             onUpdateSoftDelete={onUpdateSoftDelete}
@@ -2100,7 +2103,8 @@ export const Dataflow = () => {
               dataProviderGroupId: dataflowState.data.dataProviderGroupId,
               dataProviderGroupName: dataflowState.data.dataProviderGroupName,
               isSoftDeleteDialogVisible: dataflowState.isSoftDeleteDialogVisible,
-              isReverseSoftDeleteDialogVisible: dataflowState.isReverseSoftDeleteDialogVisible
+              isReverseSoftDeleteDialogVisible: dataflowState.isReverseSoftDeleteDialogVisible,
+              preparationEnabled: dataflowState.data.preparationEnabled
             }}
           />
         )}

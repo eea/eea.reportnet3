@@ -385,6 +385,7 @@ export const ManageReferenceDataflow = ({
           </div>
         </div>
         {isEditing && <div>{renderOfficialReporting()}</div>}
+        {isEditing && <div>{renderOfficialReporting()}</div>}
       </Dialog>
 
       {isDeleteDialogVisible && (

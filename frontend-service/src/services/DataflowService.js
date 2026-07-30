@@ -62,7 +62,7 @@ export const DataflowService = {
     });
   },
 
-  create: async (name, description, obligationId, type, bigData, dataProviderGroupId, sncData, officialReporting) =>
+  create: async (name, description, obligationId, type, bigData, dataProviderGroupId, sncData, officialReporting, preparationEnabled) =>
     await DataflowRepository.create(
       name,
       description,
@@ -71,7 +71,8 @@ export const DataflowService = {
       bigData,
       dataProviderGroupId,
       sncData,
-      officialReporting
+      officialReporting,
+      preparationEnabled
     ),
 
   cloneSchemas: async (sourceDataflowId, targetDataflowId) =>
@@ -473,7 +474,8 @@ export const DataflowService = {
     bigData,
     dataProviderGroupId,
     deadlineDate,
-    officialReporting
+    officialReporting,
+    preparationEnabled
   ) =>
     await DataflowRepository.update(
       dataflowId,
@@ -485,7 +487,8 @@ export const DataflowService = {
       bigData,
       dataProviderGroupId,
       deadlineDate,
-      officialReporting
+      officialReporting,
+      preparationEnabled
     ),
 
   updateAutomaticDelete: async (dataflowId, isAutomaticReportingDeletion) =>
