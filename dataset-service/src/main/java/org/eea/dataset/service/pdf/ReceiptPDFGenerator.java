@@ -8,6 +8,8 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.apache.pdfbox.contentstream.PDContentStream;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
@@ -390,12 +392,19 @@ public class ReceiptPDFGenerator {
    * @return an array of lines
    */
   private String[] splitInDifferentLinesByLineCharacterLength(String input, int maxLineLength) {
-    // Split the input text into words
-    String[] words = input.split(" ");
+    // Split the input text into words by spaces and \n characters. Keep the \n characters as words.
+    String[] words = input.split(" |(?<=\\n)|(?=\\n)");
+
     StringBuilder currentLine = new StringBuilder();
     List<String> lines = new ArrayList<>();
 
     for (String word : words) {
+
+      if (word.equals("\n")) {
+        lines.add(currentLine.toString());
+        currentLine.setLength(0); // Reset the StringBu
+        continue;
+      }
       // If the current line plus this word exceeds the max length, add the current line to the list and start a new one
       if (currentLine.length() + word.length() + 1 > maxLineLength) {
         lines.add(currentLine.toString());
@@ -415,4 +424,5 @@ public class ReceiptPDFGenerator {
 
     return lines.toArray(new String[0]);
   }
+
 }
