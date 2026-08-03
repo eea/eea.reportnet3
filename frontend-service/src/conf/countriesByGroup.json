@@ -159,6 +159,11 @@
       "name": "Türkiye",
       "code": "TR",
       "flag": "TR"
+    },
+    {
+      "name": "Ukraine",
+      "code": "UA",
+      "flag": "UA"
     }
   ],
   "associates": [
@@ -290,11 +295,6 @@
       "name": "Turkmenistan",
       "code": "TM",
       "flag": "TM"
-    },
-    {
-      "name": "Ukraine",
-      "code": "UA",
-      "flag": "UA"
     },
     {
       "name": "United Kingdom",
