@@ -7,6 +7,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import org.apache.pdfbox.contentstream.PDContentStream;
@@ -245,6 +246,8 @@ public class ReceiptPDFGenerator {
 
 
     spaceBetweenLines = 40f;
+    receipt.getDatasets()
+            .sort(Comparator.comparing(ReportingDatasetVO::getNameDatasetSchema));
     for (ReportingDatasetVO dataset : receipt.getDatasets()) {
       y -= spaceBetweenLines + fontSize;
       printLinePDF(contentStream, dataset.getNameDatasetSchema(), font, fontSize, 133f, y);
