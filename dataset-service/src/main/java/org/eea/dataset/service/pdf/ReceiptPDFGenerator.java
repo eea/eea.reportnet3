@@ -234,20 +234,34 @@ public class ReceiptPDFGenerator {
       }
     }
 
+    //Print release date
+    y -= spaceBetweenLines * 2 + fontSize;
+    y = checkForPageChange(y);
+    printLinePDF(contentStream, "Release date", fontBold, fontSize, 133f, y);
+    if (!receipt.getDatasets().isEmpty()) {
+      y -= spaceBetweenLines * 2 + fontSize;
+      y = checkForPageChange(y);
+      text = dateTimeFormatter
+              .format(ZonedDateTime.ofInstant(receipt
+                      .getDatasets()
+                      .get(0)
+                      .getDateReleased()
+                      .toInstant(), timeZone))
+              .concat(" CET");
+      printLinePDF(contentStream, text, font, fontSize, 133f, y);
+    }
+
     // Print dataset list
     y -= spaceBetweenLines * 2 + fontSize;
     y = checkForPageChange(y);
     printLinePDF(contentStream, "Datasets", fontBold, fontSize, 133f, y);
-    printLinePDF(contentStream, "Release date", fontBold, fontSize, 1672f, y);
+
+
     spaceBetweenLines = 40f;
     for (ReportingDatasetVO dataset : receipt.getDatasets()) {
       y -= spaceBetweenLines + fontSize;
       y = checkForPageChange(y);
       printLinePDF(contentStream, dataset.getNameDatasetSchema(), font, fontSize, 133f, y);
-      text = dateTimeFormatter
-          .format(ZonedDateTime.ofInstant(dataset.getDateReleased().toInstant(), timeZone))
-          .concat(" CET");
-      printLinePDF(contentStream, text, font, fontSize, 1672f, y);
       contentStream.addRect(133f, y - spaceBetweenLines / 2, 2213, 1f);
       contentStream.fill();
     }
