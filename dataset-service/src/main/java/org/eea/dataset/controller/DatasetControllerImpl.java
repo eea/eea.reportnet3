@@ -59,6 +59,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
@@ -70,6 +71,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.concurrent.DelegatingSecurityContextRunnable;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.task.DelegatingSecurityContextAsyncTaskExecutor;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
@@ -82,6 +84,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
 
 import static org.eea.interfaces.vo.dataset.enums.FileTypeEnum.CSV;
@@ -1177,8 +1181,6 @@ public class DatasetControllerImpl implements DatasetController {
    */
   @SneakyThrows
   @Override
-  @HystrixCommand(commandProperties = {@HystrixProperty(
-          name = "execution.isolation.thread.timeoutInMilliseconds", value = "7200000")})
   @LockMethod(removeWhenFinish = false)
   @DeleteMapping("/v1/{datasetId}/deleteDatasetData")
   @PreAuthorize("secondLevelAuthorize(#datasetId, 'DATASCHEMA_CUSTODIAN', 'DATASCHEMA_STEWARD', 'DATASCHEMA_EDITOR_WRITE', 'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE', 'EUDATASET_CUSTODIAN','EUDATASET_STEWARD','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','REFERENCEDATASET_STEWARD') OR checkApiKey(#dataflowId,#providerId, #datasetId, 'DATASCHEMA_CUSTODIAN', 'DATASCHEMA_STEWARD', 'DATASCHEMA_EDITOR_WRITE', 'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE', 'EUDATASET_CUSTODIAN','EUDATASET_STEWARD','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','REFERENCEDATASET_STEWARD')")
@@ -1224,16 +1226,38 @@ public class DatasetControllerImpl implements DatasetController {
         throw new ResponseStatusException(HttpStatus.LOCKED, EEAErrorMessage.DELETING_DATASET_DATA_REFUSED);
       }
 
-      executeDeleteDatasetProcess(datasetId, preparationCode, resolvedDataflowId, providerId, jobId, deletePrefilledTables);
-      LOG.info("Successfully deleted dataset data for dataflowId {} and datasetId {}", resolvedDataflowId, datasetId);
+      // Capture SecurityContext to pass it to the background thread.
+      // This prevents subsequent Feign calls in executeDeleteDatasetProcess from failing with 401 Unauthorized.
+      SecurityContext securityContext = SecurityContextHolder.getContext();
+      final Long finalJobId = jobId;
 
+      // Fire and forget the heavy process using Spring Boot's managed Thread Pool
+      // and Instantiate a local executor to protect the JVM commonPool
+      SimpleAsyncTaskExecutor localExecutor = new SimpleAsyncTaskExecutor("dataset-delete-");
+      Executor securityExecutor = new DelegatingSecurityContextAsyncTaskExecutor(localExecutor);
+
+      // Pass it to the CompletableFuture
+      CompletableFuture.runAsync(() -> {
+        SecurityContextHolder.setContext(securityContext);
+        try {
+          executeDeleteDatasetProcess(datasetId, preparationCode, resolvedDataflowId, providerId, finalJobId, deletePrefilledTables);
+          LOG.info("Successfully deleted dataset data for dataflowId {} and datasetId {}", resolvedDataflowId, datasetId);
+        } catch (Exception e) {
+          LOG.error("Unexpected error! Message: {}", e.getMessage());
+        } finally {
+          // MUST release lock here when the background task finishes.
+          deleteLocksToDeleteProcess(datasetId, null, preparationCode);
+          SecurityContextHolder.clearContext();
+        }
+      }, securityExecutor);
+
+      // Return immediately to the frontend.
       return buildDeleteResponse(jobId, datasetId, resolvedDataflowId, providerId);
     } catch (Exception e) {
-      LOG.error("Unexpected error! Error deleting dataset data for dataflowId {} datasetId {} and providerId {} Message: {}", resolvedDataflowId, datasetId, providerId, e.getMessage());
-      throw e;
-    } finally {
-      // Release the lock manually
+      // If the synchronous setup fails (e.g. REFUSED), release lock immediately.
       deleteLocksToDeleteProcess(datasetId, null, preparationCode);
+      LOG.error("Unexpected error during synchronous setup for dataflowId {} datasetId {} Message: {}", resolvedDataflowId, datasetId, e.getMessage());
+      throw e;
     }
   }
 
