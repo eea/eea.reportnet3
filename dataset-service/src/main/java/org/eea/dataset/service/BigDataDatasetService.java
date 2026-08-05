@@ -372,4 +372,6 @@ public interface BigDataDatasetService {
      * @param s3PathResolver table resolver
      */
      boolean isTableEmpty(S3PathResolver s3PathResolver);
+
+     void createEmptyTablesForSpecificTableSchema(Long datasetId, String tableSchemaId) throws EEAException;
 }
