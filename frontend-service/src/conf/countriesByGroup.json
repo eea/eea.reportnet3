@@ -228,6 +228,11 @@
       "name": "Serbia",
       "code": "RS",
       "flag": "RS"
+    },
+    {
+      "name": "Ukraine",
+      "code": "UA",
+      "flag": "UA"
     }
   ],
   "otherCountries": [
