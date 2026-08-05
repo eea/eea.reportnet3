@@ -159,11 +159,6 @@
       "name": "Türkiye",
       "code": "TR",
       "flag": "TR"
-    },
-    {
-      "name": "Ukraine",
-      "code": "UA",
-      "flag": "UA"
     }
   ],
   "associates": [
@@ -228,6 +223,11 @@
       "name": "Serbia",
       "code": "RS",
       "flag": "RS"
+    },
+    {
+      "name": "Ukraine",
+      "code": "UA",
+      "flag": "UA"
     }
   ],
   "otherCountries": [
