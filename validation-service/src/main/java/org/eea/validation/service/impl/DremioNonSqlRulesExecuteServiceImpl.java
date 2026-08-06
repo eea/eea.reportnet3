@@ -44,6 +44,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.eea.utils.LiteralConstants.*;
 
@@ -135,7 +136,8 @@ public class DremioNonSqlRulesExecuteServiceImpl implements DremioRulesExecuteSe
             RuleVO ruleVO = rulesService.findRule(datasetSchemaId, ruleId);
             deleteRuleFolderIfExists(validationResolver, ruleVO, preparationCode);
             int startIndex = ruleVO.getWhenConditionMethod().indexOf(OPEN_PARENTHESIS);
-            int endIndex = ruleVO.getWhenConditionMethod().indexOf(CLOSE_PARENTHESIS);
+            // endIndex uses lastIndexOf in case the method parameter contains more parentheses.
+            int endIndex = ruleVO.getWhenConditionMethod().lastIndexOf(CLOSE_PARENTHESIS);
             String ruleMethodName = ruleVO.getWhenConditionMethod().substring(0, startIndex);
             List<String> parameters = dremioRulesService.processRuleMethodParameters(ruleVO, startIndex, endIndex);
           switch (ruleMethodName) {
@@ -453,7 +455,9 @@ public class DremioNonSqlRulesExecuteServiceImpl implements DremioRulesExecuteSe
                     }
                     break;
                 case 2:
-                    isValid = (boolean) method.invoke(object, getConvertedString(rs, fieldName), parameters.get(1));  //ValidationDroolsUtils methods
+                    String convertedValue = getConvertedString(rs, fieldName);
+                    isValid = (boolean) method.invoke(object, convertedValue, parameters.get(1));  //ValidationDroolsUtils methods
+                    LOG.info("Validation method {} result={} for rawValue=[{}]", method.getName(), isValid, convertedValue);
                     break;
                 case 3:
                     isValid = (boolean) method.invoke(object, getConvertedString(rs, fieldName), parameters.get(1), Boolean.parseBoolean(parameters.get(2)));  //ValidationDroolsUtils codelistValidate method
