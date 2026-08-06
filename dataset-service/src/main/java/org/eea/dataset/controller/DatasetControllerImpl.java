@@ -2424,7 +2424,8 @@ public class DatasetControllerImpl implements DatasetController {
 
       Map<String, Object> result = new HashMap<>();
       String pollingUrl = "/orchestrator/jobs/pollForJobStatus/" + jobId + "?datasetId=" + datasetId + "&dataflowId=" + dataflowId;
-      if(providerId != null){
+      // Avoid including providerId in polling URL if null or 0 due to 403 http response.
+      if(providerId != null && providerId != 0L){
         pollingUrl+= "&providerId=" + providerId;
       }
       result.put("jobId", jobId);
