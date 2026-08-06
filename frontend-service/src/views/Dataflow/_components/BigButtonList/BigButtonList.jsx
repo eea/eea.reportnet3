@@ -153,6 +153,16 @@ export const BigButtonList = ({
       setAddUserText(addInitialUserText);
     } else if (event.key === 'Enter') {
       event.preventDefault();
+
+      const target = event.target;
+      const {selectionStart, selectionEnd, value} = target;
+
+      const newValue = value.substring(0, selectionStart) + '\n' + value.substring(selectionEnd);
+      setAddUserText(newValue);
+
+      setTimeout(() => {
+        target.selectionStart = target.selectionEnd = selectionStart + 1;
+      }, 0);
     }
   };
 
@@ -934,7 +944,7 @@ export const BigButtonList = ({
               </h4>
               <InputTextarea
                 className={`addUserTextArea`}
-                collapsedHeight={75}
+                collapsedHeight={150}
                 hasMaxCharCounter={true}
                 id="createUserTextToReceipt"
                 key="createUserTextToReceipt"
