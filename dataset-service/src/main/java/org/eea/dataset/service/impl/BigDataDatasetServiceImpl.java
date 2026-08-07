@@ -998,7 +998,9 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 }
             }
 
-            createEmptyTables.runCreationForSpecificTableSchema(dataSetMetabaseVO, tableSchemaId, preparationCode);
+            if (createEmptyTablesBool) {
+                createEmptyTables.runCreationForSpecificTableSchema(dataSetMetabaseVO, tableSchemaId, preparationCode);
+            }
 
             if (jobId != null) {
                 jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FINISHED);
@@ -3483,5 +3485,12 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             LOG.warn("Could not query row count for table {}, treating as non-empty", s3PathResolver.getTableName(), e);
             return false;
         }
+    }
+
+    public void createEmptyTablesForSpecificTableSchema(Long datasetId, String tableSchemaId) throws EEAException {
+
+        final DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
+        createEmptyTables.runCreationForSpecificTableSchema(dataSetMetabaseVO, tableSchemaId);
+
     }
 }
