@@ -78,6 +78,7 @@ public interface BigDataDatasetService {
      * Gets the attachment for big data dataflows.
      *
      * @param datasetId the dataset id
+     * @param preparationCode the code that identifies the preparation dataset.
      * @param dataflowId the dataset id
      * @param providerId the dataset id
      * @param tableSchemaName the table name
@@ -88,13 +89,14 @@ public interface BigDataDatasetService {
      * @return the attachment
      *
      */
-    AttachmentDLVO getAttachmentDL(@DatasetId Long datasetId, Long dataflowId, Long providerId, String tableSchemaName,
+    AttachmentDLVO getAttachmentDL(@DatasetId Long datasetId, String preparationCode, Long dataflowId, Long providerId, String tableSchemaName,
                                    String fieldName, String fileName, String recordId, String dataProviderCode);
 
     /**
      * Delete attachment for big data dataflows.
      *
      * @param datasetId the dataset id
+     * @param preparationCode the code that identifies the preparation dataset
      * @param dataflowId the dataset id
      * @param providerId the dataset id
      * @param tableSchemaName the table name
@@ -104,13 +106,14 @@ public interface BigDataDatasetService {
      *
      * @throws EEAException the EEA exception
      */
-    void deleteAttachmentDL(@DatasetId Long datasetId, Long dataflowId, Long providerId, String tableSchemaName,
+    void deleteAttachmentDL(@DatasetId Long datasetId, String preparationCode, Long dataflowId, Long providerId, String tableSchemaName,
                             String fieldName, String fileName, String recordId);
 
     /**
      * Update attachment for big data dataflows.
      *
      * @param datasetId the dataset id
+     * @param preparationCode the code that identifies the preparation dataset
      * @param dataflowId the dataset id
      * @param providerId the dataset id
      * @param tableSchemaName the table name
@@ -119,13 +122,14 @@ public interface BigDataDatasetService {
      * @param recordId the recordId
      * @param previousFileName the previousFileName
      */
-    void updateAttachmentDL(@DatasetId Long datasetId, Long dataflowId, Long providerId, String tableSchemaName,
+    void updateAttachmentDL(@DatasetId Long datasetId, String preparationCode, Long dataflowId, Long providerId, String tableSchemaName,
                             String fieldName, MultipartFile multipartFile, String recordId, String previousFileName);
 
     /**
      * Convert Parquet To Iceberg Table
      *
      * @param datasetId the dataset id
+     * @param preparationCode the preparation code
      * @param dataflowId the dataflow id
      * @param providerId the provider id
      * @param tableSchemaVO the tableSchemaVO
@@ -133,12 +137,13 @@ public interface BigDataDatasetService {
      * @param lockValue the lock value
      * @return true if table can be converted
      */
-    Boolean convertParquetToIcebergTable(Long datasetId, Long dataflowId, Long providerId, TableSchemaVO tableSchemaVO, String datasetSchemaId, String lockValue) throws Exception;
+    Boolean convertParquetToIcebergTable(Long datasetId,  String preparationCode, Long dataflowId, Long providerId, TableSchemaVO tableSchemaVO, String datasetSchemaId, String lockValue) throws Exception;
 
     /**
      * Convert Iceberg To Parquet Table
      *
      * @param datasetId the dataset id
+     * @param preparationCode the preparation code
      * @param dataflowId the dataflow id
      * @param providerId the provider id
      * @param tableSchemaVO the tableSchemaVO
@@ -146,12 +151,13 @@ public interface BigDataDatasetService {
      * @param lockValue the lock value
      * @return true if table can be converted
      */
-    Boolean convertIcebergToParquetTable(Long datasetId, Long dataflowId, Long providerId, TableSchemaVO tableSchemaVO, String datasetSchemaId, String lockValue) throws Exception;
+    Boolean convertIcebergToParquetTable(Long datasetId, String preparationCode, Long dataflowId, Long providerId, TableSchemaVO tableSchemaVO, String datasetSchemaId, String lockValue) throws Exception;
 
     /**
      * Convert Parquet To Iceberg Tables
      *
      * @param datasetId the dataset id
+     * @param preparationCode the preparationCode
      * @param dataflowId the dataflow id
      * @param providerId the provider id
      * @param tableSchemaIds the list of table ids
@@ -159,12 +165,13 @@ public interface BigDataDatasetService {
      * @param lockValue the lock value
      * @return
      */
-    void convertParquetToIcebergTables(Long datasetId, Long dataflowId, Long providerId, List<String> tableSchemaIds, String user, String lockValue) throws Exception;
+    void convertParquetToIcebergTables(Long datasetId, String preparationCode, Long dataflowId, Long providerId, List<String> tableSchemaIds, String user, String lockValue) throws Exception;
 
     /**
      * Convert Iceberg to Parquet Tables
      *
      * @param datasetId the dataset id
+     * @param preparationCode the preparation code
      * @param dataflowId the dataflow id
      * @param providerId the provider id
      * @param tableSchemaIds the list of table ids
@@ -172,7 +179,19 @@ public interface BigDataDatasetService {
      * @param lockValue the lock value
      * @return
      */
-    void convertIcebergToParquetTables(Long datasetId, Long dataflowId, Long providerId, List<String> tableSchemaIds, String user, String lockValue) throws Exception;
+    void convertIcebergToParquetTables(Long datasetId, String preparationCode, Long dataflowId, Long providerId, List<String> tableSchemaIds, String user, String lockValue) throws Exception;
+
+    /**
+     * Convert Iceberg To Parquet Table
+     *
+     * @param datasetId the dataset id
+     * @param preparationCode the preparation code
+     * @param dataflowId the dataflow id
+     * @param providerId the provider id
+     * @param tableSchemaIds the tableSchema Ids
+     * @param lockValue the lock value
+     */
+    void initiateParquetToIcebergConversion(Long datasetId, String preparationCode, Long dataflowId, Long providerId, List<String> tableSchemaIds, String lockValue) throws Exception;
 
     /**
      * Convert Iceberg To Parquet Table
@@ -183,18 +202,7 @@ public interface BigDataDatasetService {
      * @param tableSchemaIds the tableSchema Ids
      * @param lockValue the lock value
      */
-    void initiateParquetToIcebergConversion(Long datasetId, Long dataflowId, Long providerId, List<String> tableSchemaIds, String lockValue) throws Exception;
-
-    /**
-     * Convert Iceberg To Parquet Table
-     *
-     * @param datasetId the dataset id
-     * @param dataflowId the dataflow id
-     * @param providerId the provider id
-     * @param tableSchemaIds the tableSchema Ids
-     * @param lockValue the lock value
-     */
-    void initiateIcebergToParquetConversion(Long datasetId, Long dataflowId, Long providerId, List<String> tableSchemaIds, String lockValue) throws Exception;
+    void initiateIcebergToParquetConversion(Long datasetId, String preparationCode, Long dataflowId, Long providerId, List<String> tableSchemaIds, String lockValue) throws Exception;
 
     /**
      * Insert records manually
@@ -202,11 +210,12 @@ public interface BigDataDatasetService {
      * @param dataflowId the dataflow id
      * @param providerId the provider id
      * @param datasetId the dataset id
+     * @param preparationCode the preparation code
      * @param tableSchemaName the tableSchemaName
      * @param records the new editted records
      *
      */
-    void insertRecords(Long dataflowId, Long providerId, Long datasetId, String tableSchemaName, List<RecordVO> records) throws Exception;
+    void insertRecords(Long dataflowId, Long providerId, Long datasetId, String preparationCode, String tableSchemaName, List<RecordVO> records) throws Exception;
 
     /**
      * Update records manually
@@ -214,11 +223,12 @@ public interface BigDataDatasetService {
      * @param dataflowId the dataflow id
      * @param providerId the provider id
      * @param datasetId the dataset id
+     * @param preparationCode the code identifying the preparation set
      * @param records the new editted records
      * @param updateCascadePK the updateCascadePK
      *
      */
-    void updateRecords(Long dataflowId, Long providerId, Long datasetId, TableSchemaVO tableSchemaVOe, List<RecordVO> records, boolean updateCascadePK) throws Exception;
+    void updateRecords(Long dataflowId, Long providerId, Long datasetId, String preparationCode, TableSchemaVO tableSchemaVOe, List<RecordVO> records, boolean updateCascadePK) throws Exception;
 
     /**
      * Update field manually
@@ -242,12 +252,13 @@ public interface BigDataDatasetService {
      * @param dataflowId the dataflow id
      * @param providerId the provider id
      * @param datasetId the dataset id
+     * @param preparationCode the code that identifies the preparation dataset.
      * @param tableSchemaVO the tableSchemaVO
      * @param recordIds the record ids to be removed
      * @param deleteCascadePK the deleteCascadePK
      *
      */
-    void deleteRecord(Long dataflowId, Long providerId, Long datasetId, TableSchemaVO tableSchemaVO, List<String> recordIds, boolean deleteCascadePK) throws Exception;
+    void deleteRecord(Long dataflowId, Long providerId, Long datasetId, String preparationCode, TableSchemaVO tableSchemaVO, List<String> recordIds, boolean deleteCascadePK) throws Exception;
 
     void removeRootDataflowFolderFromS3(Long dataflowId);
 
