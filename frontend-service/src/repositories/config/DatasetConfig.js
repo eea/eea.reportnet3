@@ -1,18 +1,18 @@
 export const DatasetConfig = {
   uploadAttachment:
-    '/dataset/v1/{:datasetId}/field/{:fieldId}/attachment?dataflowId={:dataflowId}&tableSchemaName={:tableSchemaName}&fieldName={:fieldName}&recordId={:recordId}&previousFileName={:previousFileName}',
+    '/dataset/v1/{:datasetId}/field/{:fieldId}/attachment?dataflowId={:dataflowId}&tableSchemaName={:tableSchemaName}&fieldName={:fieldName}&recordId={:recordId}&previousFileName={:previousFileName}&preparationCode={:preparationCode}',
   uploadAttachmentWithProviderId:
-    '/dataset/v1/{:datasetId}/field/{:fieldId}/attachment?dataflowId={:dataflowId}&providerId={:providerId}&tableSchemaName={:tableSchemaName}&fieldName={:fieldName}&recordId={:recordId}&previousFileName={:previousFileName}',
+    '/dataset/v1/{:datasetId}/field/{:fieldId}/attachment?dataflowId={:dataflowId}&providerId={:providerId}&tableSchemaName={:tableSchemaName}&fieldName={:fieldName}&recordId={:recordId}&previousFileName={:previousFileName}&preparationCode={:preparationCode}',
   enableEditing: '/dataset/{:datasetId}/enableEditing',
   disableEditing: '/dataset/{:datasetId}/disableEditing',
   convertIcebergsToParquets:
-    '/dataset/convertIcebergToParquetTables/{:datasetId}?dataflowId={:dataflowId}&providerId={:providerId}',
+      '/dataset/convertIcebergToParquetTables/{:datasetId}?dataflowId={:dataflowId}&providerId={:providerId}&preparationCode={:preparationCode}',
   convertParquetsToIcebergs:
-    '/dataset/convertParquetToIcebergTables/{:datasetId}?dataflowId={:dataflowId}&providerId={:providerId}',
-  createRecord: '/dataset/{:datasetId}/table/{:tableSchemaId}/record',
+      '/dataset/convertParquetToIcebergTables/{:datasetId}?dataflowId={:dataflowId}&providerId={:providerId}&preparationCode={:preparationCode}',
+  createRecord: '/dataset/{:datasetId}/table/{:tableSchemaId}/record?preparationCode={:preparationCode}',
   createRecordDesign: '/dataschema/{:datasetId}/fieldSchema',
   createTableDesign: '/dataschema/{:datasetId}/tableSchema',
-  getIsIcebergTableCreated: '/dataset/isIcebergTableCreated/{:datasetId}/{:tableSchemaId}',
+  getIsIcebergTableCreated: '/dataset/isIcebergTableCreated/{:datasetId}/{:tableSchemaId}?preparationCode={:preparationCode}',
   getAlignmentBetween:
     '/dataset/getReleasedDatasetDataInfo?collectionDatasetId={:datasetId}&providerCode={:selectedRepresentativesCode}&tableSchemaId={:selectedTable}',
   getIsAvailableForManualEditing: '/dataset/getAvailableForManualEditingTables/{:datasetId}',
@@ -31,14 +31,14 @@ export const DatasetConfig = {
   downloadTableDefinitions: '/dataschema/v1/dataset/{:datasetSchemaId}/exportFieldSchemas',
   deleteSchema: '/dataschema/dataset/{:datasetId}',
   deleteAttachment:
-    '/dataset/v1/{:datasetId}/field/{:fieldId}/attachment?dataflowId={:dataflowId}&tableSchemaName={:tableSchemaName}&fieldName={:fieldName}&fileName={:fileName}&recordId={:recordId}',
+    '/dataset/v1/{:datasetId}/field/{:fieldId}/attachment?dataflowId={:dataflowId}&tableSchemaName={:tableSchemaName}&fieldName={:fieldName}&fileName={:fileName}&recordId={:recordId}&preparationCode={:preparationCode}',
   deleteAttachmentWithProviderId:
-    '/dataset/v1/{:datasetId}/field/{:fieldId}/attachment?dataflowId={:dataflowId}&providerId={:providerId}&tableSchemaName={:tableSchemaName}&fieldName={:fieldName}&fileName={:fileName}&recordId={:recordId}',
+    '/dataset/v1/{:datasetId}/field/{:fieldId}/attachment?dataflowId={:dataflowId}&providerId={:providerId}&tableSchemaName={:tableSchemaName}&fieldName={:fieldName}&fileName={:fileName}&recordId={:recordId}&preparationCode={:preparationCode}',
   deleteData:
     '/dataset/v1/{:datasetId}/deleteDatasetData?deletePrefilledTables={:deletePrefilledTables}&preparationCode={:preparationCode}',
   deleteTableData: '/dataset/v1/{:datasetId}/deleteTableData/{:tableId}?preparationCode={:preparationCode}',
   deleteRecord:
-    '/dataset/{:datasetId}/record/{:selectedRecordId}?deleteCascadePK={:updateInCascade}&tableSchemaId={:tableId}',
+    '/dataset/{:datasetId}/record/{:selectedRecordId}?deleteCascadePK={:updateInCascade}&tableSchemaId={:tableId}&preparationCode={:preparationCode}',
   deleteFieldDesign: '/dataschema/{:datasetId}/fieldSchema/{:fieldSchemaId}',
   deleteTableDesign: '/dataschema/{:datasetId}/tableSchema/{:tableSchemaId}',
   downloadPublicDatasetFile:
@@ -50,9 +50,9 @@ export const DatasetConfig = {
   downloadExportFileWithProviderId:
     '/fme/downloadExportFile?datasetId={:datasetId}&fileName={:fileName}&providerId={:providerId}',
   downloadFileData:
-    '/dataset/v1/{:datasetId}/field/{:fieldId}/attachment?dataflowId={:dataflowId}&tableSchemaName={:tableSchemaName}&fieldName={:fieldName}&fileName={:fileName}&recordId={:recordId}&providerCode={:providerCode}',
+    '/dataset/v1/{:datasetId}/field/{:fieldId}/attachment?dataflowId={:dataflowId}&tableSchemaName={:tableSchemaName}&fieldName={:fieldName}&fileName={:fileName}&recordId={:recordId}&providerCode={:providerCode}&preparationCode={:preparationCode}',
   downloadFileDataWithProviderId:
-    '/dataset/v1/{:datasetId}/field/{:fieldId}/attachment?dataflowId={:dataflowId}&providerId={:providerId}&tableSchemaName={:tableSchemaName}&fieldName={:fieldName}&fileName={:fileName}&recordId={:recordId}&providerCode={:providerCode}',
+    '/dataset/v1/{:datasetId}/field/{:fieldId}/attachment?dataflowId={:dataflowId}&providerId={:providerId}&tableSchemaName={:tableSchemaName}&fieldName={:fieldName}&fileName={:fileName}&recordId={:recordId}&providerCode={:providerCode}&preparationCode={:preparationCode}',
   downloadGeometry:
     '/dataset/v1/{:datasetId}/record/{:recordId}/geometry?fieldId={:fieldId}&dataflowId={:dataflowId}&idTableSchema={:tableSchemaId}&providerId={:providerId}',
   downloadPublicReferenceDatasetFileData: '/dataset/exportPublicFile/dataflow/{:dataflowId}?fileName={:fileName}',
@@ -105,7 +105,7 @@ export const DatasetConfig = {
     '/dataset/{:datasetId}/updateField?updateCascadePK={:updateInCascade}&recordId={:recordId}&tableSchemaId={:tableSchemaId}',
   updateConditionalFieldsWebform:
     '/dataset/{:datasetId}/updateWebformFields?updateCascadePK={:updateInCascade}&recordId={:recordId}&tableSchemaId={:tableSchemaId}',
-  updateRecord: '/dataset/{:datasetId}/updateRecord?updateCascadePK={:updateInCascade}&tableSchemaId={:tableSchemaId}',
+  updateRecord: '/dataset/{:datasetId}/updateRecord?updateCascadePK={:updateInCascade}&tableSchemaId={:tableSchemaId}&preparationCode={:preparationCode}',
   updateTableDesign: '/dataschema/{:datasetId}/tableSchema',
   validate: '/orchestrator/jobs/addValidationJob/{:datasetId}?code={:code}',
   validateAsProvider:

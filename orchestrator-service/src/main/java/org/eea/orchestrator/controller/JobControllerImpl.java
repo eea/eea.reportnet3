@@ -1067,12 +1067,15 @@ public class JobControllerImpl implements JobController {
 
     @Override
     @GetMapping(value = "/private/findActiveJobsRelatedToADatasetId/{datasetId}")
-    public List<JobVO> findActiveJobsRelatedToADatasetId(@PathVariable("datasetId") Long datasetId, @RequestParam(value = "dataflowId", required = false) Long dataflowId, @RequestParam(value = "providerId", required = false) Long providerId){
+    public List<JobVO> findActiveJobsRelatedToADatasetId(@PathVariable("datasetId") Long datasetId,
+                                                         @RequestParam(value = "dataflowId", required = false) Long dataflowId,
+                                                         @RequestParam(value = "providerId", required = false) Long providerId,
+                                                         @RequestParam(value = "preparationCode", required = false) String preparationCode) {
         try {
-            return jobService.findActiveJobsRelatedToADatasetId(datasetId, dataflowId, providerId);
+            return jobService.findActiveJobsRelatedToADatasetId(datasetId, preparationCode, dataflowId, providerId);
         }
         catch (Exception e){
-            LOG.error("Could not retrieve active jobs for dataflowId {} datasetId {} and providerId {} Error: {}", dataflowId, datasetId, providerId, e.getMessage());
+            LOG.error("Could not retrieve active jobs for dataflowId {} datasetId {} preparationCode {} and providerId {} Error: {}", dataflowId, datasetId, preparationCode, providerId, e.getMessage());
             throw e;
         }
     }

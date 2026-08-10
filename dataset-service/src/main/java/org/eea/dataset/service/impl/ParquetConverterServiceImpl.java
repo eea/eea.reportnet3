@@ -286,7 +286,8 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
   //returns the number of records that were inserted for a table
   private Long convertCsvToParquet(File csvFile, DataSetSchema dataSetSchema, ImportFileInDremioInfo importFileInDremioInfo, TableSchemaVO tableSchemaVO, DataSetMetabaseVO dataSetMetabaseVO) throws Exception {
     LOG.info("For job {} converting csv file {} to parquet file", importFileInDremioInfo, csvFile.getPath());
-    boolean isPreparationDataset = StringUtils.isNotBlank(importFileInDremioInfo.getPreparationCode());
+    final String preparationCode = importFileInDremioInfo.getPreparationCode();
+    boolean isPreparationDataset = StringUtils.isNotBlank(preparationCode);
     Long numberOfRecordsToBeInserted = 0L;
     try {
       String user =  SecurityContextHolder.getContext().getAuthentication().getName();
@@ -326,18 +327,19 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
       if (!DatasetTypeEnum.DESIGN.equals(datasetType) && !DatasetTypeEnum.REFERENCE.equals(datasetType) && readOnlyFieldsExist && importFileInDremioInfo.getReplaceData()  && StringUtils.isBlank(importFileInDremioInfo.getPreparationCode())) {
         //convert old table to iceberg
         Long providerId = (importFileInDremioInfo.getProviderId() != null) ? importFileInDremioInfo.getProviderId() : 0L;
-        bigDataDatasetService.convertParquetToIcebergTable(importFileInDremioInfo.getDatasetId(), importFileInDremioInfo.getDataflowId(), providerId, tableSchemaVO, dataSetSchema.getIdDataSetSchema().toString(), null);
-        //TODO APBO Preparation code should be added here when edit functionality is implemented for prep sets.
-        DatasetTable datasetTableEntry = new DatasetTable(importFileInDremioInfo.getDatasetId(), null, dataSetSchema.getIdDataSetSchema().toString(), tableSchemaVO.getIdTableSchema(), true, user, null);
+        bigDataDatasetService.convertParquetToIcebergTable(importFileInDremioInfo.getDatasetId(), preparationCode, importFileInDremioInfo.getDataflowId(), providerId, tableSchemaVO, dataSetSchema.getIdDataSetSchema().toString(), null);
+        DatasetTable datasetTableEntry = new DatasetTable(importFileInDremioInfo.getDatasetId(), preparationCode, dataSetSchema.getIdDataSetSchema().toString(), tableSchemaVO.getIdTableSchema(), true, user, null);
         datasetTableService.saveOrUpdateDatasetTableEntry(datasetTableEntry);
         S3PathResolver s3IcebergTablePathResolver = new S3PathResolver(importFileInDremioInfo.getDataflowId(), providerId, importFileInDremioInfo.getDatasetId(), tableSchemaVO.getNameTableSchema(), tableSchemaVO.getNameTableSchema(), S3_TABLE_AS_FOLDER_QUERY_PATH);
         s3IcebergTablePathResolver.setIsIcebergTable(true);
+        s3IcebergTablePathResolver.setPreparationCode(preparationCode);
         try {
           Long numberOfRecordsUpdated = updatePrefilledDataBasedOnReadOnlyData(importFileInDremioInfo, csvFile, s3IcebergTablePathResolver, dataSetSchema, tableSchemaVO);
           return numberOfRecordsUpdated;
-        } finally {
+        }
+        finally {
           //after all updates convert iceberg to parquet
-          bigDataDatasetService.convertIcebergToParquetTable(importFileInDremioInfo.getDatasetId(), importFileInDremioInfo.getDataflowId(), providerId, tableSchemaVO, dataSetSchema.getIdDataSetSchema().toString(), null);
+          bigDataDatasetService.convertIcebergToParquetTable(importFileInDremioInfo.getDatasetId(), preparationCode, importFileInDremioInfo.getDataflowId(), providerId, tableSchemaVO, dataSetSchema.getIdDataSetSchema().toString(), null);
           datasetTableEntry.setIsIcebergTableCreated(false);
           datasetTableService.saveOrUpdateDatasetTableEntry(datasetTableEntry);
         }

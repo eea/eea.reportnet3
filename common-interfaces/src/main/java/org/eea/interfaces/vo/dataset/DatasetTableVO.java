@@ -18,6 +18,7 @@ public class DatasetTableVO implements Serializable {
 
     private Long id;
     private Long datasetId;
+    private String preparationCode;
     private String datasetSchemaId;
     private String tableSchemaId;
     private Boolean isIcebergTableCreated;

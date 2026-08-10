@@ -39,24 +39,27 @@ public class ParquetToIcebergConversionCommand extends AbstractEEAEventHandlerCo
    */
   @Override
   public void execute(EEAEventVO eeaEventVO) throws EEAException {
-    String user = eeaEventVO.getData().get("user") != null
+    final String user = eeaEventVO.getData().get("user") != null
         ? String.valueOf(eeaEventVO.getData().get("user"))
         : SecurityContextHolder.getContext().getAuthentication().getName();
 
-    Long datasetId = Long.parseLong(String.valueOf(eeaEventVO.getData().get("datasetId")));
-    Long dataflowId = Long.parseLong(String.valueOf(eeaEventVO.getData().get("dataflowId")));
-    String lockValue = (String) eeaEventVO.getData().get("lockValue");
+    final Long datasetId = Long.parseLong(String.valueOf(eeaEventVO.getData().get("datasetId")));
+    final Object tmp = eeaEventVO.getData().get("preparationCode");
+    final String preparationCode = tmp == null ? null : String.valueOf(tmp);
+    final Long dataflowId = Long.parseLong(String.valueOf(eeaEventVO.getData().get("dataflowId")));
+    final String lockValue = (String) eeaEventVO.getData().get("lockValue");
 
-    Long providerId = eeaEventVO.getData().get("providerId") != null
+
+    final Long providerId = eeaEventVO.getData().get("providerId") != null
             ? Long.parseLong(String.valueOf(eeaEventVO.getData().get("providerId")))
             : null;
-    List<String> tableSchemaIds = (List<String>) eeaEventVO.getData().get("tableSchemaIds");
+    final List<String> tableSchemaIds = (List<String>) eeaEventVO.getData().get("tableSchemaIds");
 
     try {
-      bigDataDatasetService.convertParquetToIcebergTables(datasetId, dataflowId, providerId, tableSchemaIds, user, lockValue);
+      bigDataDatasetService.convertParquetToIcebergTables(datasetId, preparationCode, dataflowId, providerId, tableSchemaIds, user, lockValue);
     }
     catch (Exception e){
-      LOG.error("Could not call async method convertParquetToIcebergTables for datasetId {} Error: {}", datasetId, e.getMessage());
+      LOG.error("Could not call async method convertParquetToIcebergTables for datasetId {} preparationCode {} Error: {}", datasetId, preparationCode, e.getMessage());
       throw new EEAException(e.getMessage());
     }
   }
