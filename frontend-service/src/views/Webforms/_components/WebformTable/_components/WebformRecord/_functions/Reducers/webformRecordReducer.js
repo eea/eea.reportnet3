@@ -1,5 +1,3 @@
-import isEmpty from 'lodash/isEmpty';
-
 export const webformRecordReducer = (state, { type, payload }) => {
   switch (type) {
     case 'INITIAL_LOAD':
@@ -11,60 +9,55 @@ export const webformRecordReducer = (state, { type, payload }) => {
     case 'ON_FILL_FIELD':
       const inmNewRecord = { ...state.newRecord };
 
-      inmNewRecord.dataRow.filter(data => Object.keys(data.fieldData)[0] === payload.option)[0].fieldData[
-        payload.option
-      ] = payload.value;
+      const newRecordField = inmNewRecord.dataRow.find(data => Object.keys(data.fieldData)[0] === payload.option);
+
+      if (newRecordField) {
+        newRecordField.fieldData[payload.option] = payload.value;
+      }
 
       const inmRecord = { ...state.record };
 
-      const filteredRecord = inmRecord.elements.filter(field => {
-        if (field.type === 'BLOCK') {
-          return field.elements.filter(
-            fieldRecord =>
-              fieldRecord.fieldId === payload.option ||
-              fieldRecord.fieldSchema === payload.option ||
-              fieldRecord.fieldSchemaId === payload.option
-          );
-        }
-        return field.fieldSchemaId === payload.option;
-      });
+      // Recursively search for the field inside nested containers (e.g. BLOCK, SECTION)
+      const findElement = elements => {
+        for (const element of elements) {
+          if (
+            element.fieldId === payload.option ||
+            element.fieldSchema === payload.option ||
+            element.fieldSchemaId === payload.option
+          ) {
+            return element;
+          }
 
-      if (!isEmpty(filteredRecord)) {
-        if (!isEmpty(inmRecord.elements.filter(field => field.fieldSchemaId === payload.option))) {
-          inmRecord.elements.filter(
-            field =>
-              field.fieldId === payload.option ||
-              field.fieldSchema === payload.option ||
-              field.fieldSchemaId === payload.option
-          )[0].value = payload.value;
-        } else {
-          inmRecord.elements
-            .find(field => {
-              if (field.type === 'BLOCK') {
-                return field.elements.find(
-                  blockField => (blockField.fieldId || blockField.fieldSchema) === payload.option
-                );
+          // Search inside record-based containers (BLOCK)
+          if (element.elementsRecords) {
+            for (const elementRecord of element.elementsRecords) {
+              if (elementRecord.recordId === payload.field.recordId) {
+                const nestedElement = findElement(elementRecord.elements);
+
+                if (nestedElement) {
+                  return nestedElement;
+                }
               }
-              return undefined;
-            })
-            .elementsRecords.find(elementRecord => elementRecord.recordId === payload.field.recordId)
-            .elements.find(
-              blockElement =>
-                blockElement.fieldId === payload.option ||
-                blockElement.fieldSchema === payload.option ||
-                blockElement.fieldSchemaId === payload.option
-            ).value = payload.value;
-        }
-      }
+            }
+          }
 
-      let dependantConditionalFieldId;
-      let isDependantConditionalField = false;
+          // Search inside simple containers (SECTION)
+          if (element.elements) {
+            const nestedElement = findElement(element.elements);
 
-      if (payload.conditional && ['LINK', 'CODELIST', 'MULTISELECT_CODELIST'].includes(payload.field.fieldType)) {
-        if (!isEmpty(payload.field?.referenceParentField)) {
-          isDependantConditionalField = true;
-          dependantConditionalFieldId = payload.field.fieldSchema || payload.field.fieldSchemaId;
+            if (nestedElement) {
+              return nestedElement;
+            }
+          }
         }
+
+        return undefined;
+      };
+
+      const recordElement = findElement(inmRecord.elements);
+
+      if (recordElement) {
+        recordElement.value = payload.value;
       }
 
       return {
@@ -72,11 +65,7 @@ export const webformRecordReducer = (state, { type, payload }) => {
         selectedField: payload.field,
         newRecord: inmNewRecord,
         record: inmRecord,
-        changedConditionalFieldData: payload.conditional ? payload.field : null,
-        conditionalFieldChange: payload.conditional ? !state.conditionalFieldChange : state.conditionalFieldChange,
-        isConditionalChanged: payload.conditional,
-        isDependantConditionalField,
-        dependantConditionalFieldId
+        conditionalFieldChange: payload.conditional ? !state.conditionalFieldChange : state.conditionalFieldChange
       };
 
     case 'GET_DELETE_ROW_ID':

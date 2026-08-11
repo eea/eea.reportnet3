@@ -3,13 +3,8 @@ package org.eea.lock.service.impl;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.SortedSet;
-import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -193,10 +188,16 @@ public class LockServiceImpl implements LockService {
     LOG.info("Method findAllByCriteria called for id: {}", id);
     List<LockVO> results = new ArrayList<>();
     for (LockVO lock : locks) {
+      final Map<String, Object> map = lock.getLockCriteria();
+
+
+      for (Object value : map.values()) {
+        System.out.println(value);
+      }
       boolean exist = lock.getLockCriteria()
           .values()
           .stream()
-          .anyMatch(value -> value.equals(id));
+          .anyMatch(value -> Objects.equals(value, id));
       if (exist) {
         results.add(lock);
       }

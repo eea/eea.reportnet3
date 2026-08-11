@@ -140,7 +140,7 @@ public class ValidationControllerImplTest {
     Mockito.when(dataFlowControllerZuul.getMetabaseById(Mockito.any())).thenReturn(dataFlowVO);
     DatasetEditingStatusVO status = new DatasetEditingStatusVO();
     status.setIsEditing(false);
-    Mockito.when(dataSetControllerZuul.getEditingStatus(Mockito.anyLong()))
+    Mockito.when(dataSetControllerZuul.getEditingStatus(Mockito.anyLong(), Mockito.isNull()))
             .thenReturn(status);
     validationController.validateDataSetData(1L, false, null, null);
     Mockito.verify(validationHelper, times(1)).executeValidation(Mockito.any(), Mockito.any(),
@@ -164,7 +164,7 @@ public class ValidationControllerImplTest {
     Mockito.when(dataFlowControllerZuul.getMetabaseById(Mockito.any())).thenReturn(dataFlowVO);
     DatasetEditingStatusVO status = new DatasetEditingStatusVO();
     status.setIsEditing(false);
-    Mockito.when(dataSetControllerZuul.getEditingStatus(Mockito.anyLong()))
+    Mockito.when(dataSetControllerZuul.getEditingStatus(Mockito.anyLong(), Mockito.isNull()))
             .thenReturn(status);
     try {
       validationController.validateDataSetData(1L, false, null, null);
@@ -186,13 +186,13 @@ public class ValidationControllerImplTest {
     Mockito.when(dataFlowControllerZuul.getMetabaseById(Mockito.any())).thenReturn(dataFlowVO);
     DatasetEditingStatusVO status = new DatasetEditingStatusVO();
     status.setIsEditing(false);
-    Mockito.when(dataSetControllerZuul.getEditingStatus(Mockito.anyLong()))
+    Mockito.when(dataSetControllerZuul.getEditingStatus(Mockito.anyLong(), Mockito.isNull()))
             .thenReturn(status);
     doThrow(new EEAException("e")).when(validationHelper).executeValidation(Mockito.anyLong(),
         Mockito.any(), Mockito.anyBoolean(), Mockito.anyBoolean(), Mockito.any());
     validationController.validateDataSetData(1L, false, null, null);
 
-    Mockito.verify(validationHelper, times(1)).deleteLockToReleaseProcess(Mockito.any());
+    Mockito.verify(validationHelper, times(1)).deleteLockToReleaseProcess(Mockito.any(), Mockito.isNull());
   }
 
   /**

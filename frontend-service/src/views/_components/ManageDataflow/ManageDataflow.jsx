@@ -49,7 +49,6 @@ export const ManageDataflow = ({
   onLoadReportingDataflow,
   onUpdateAddUserText,
   onUpdateSoftDelete,
-  renderSncData,
   resetDeliveryDate,
   resetObligations,
   setCheckedObligation,
@@ -73,6 +72,7 @@ export const ManageDataflow = ({
     isDeleting: false,
     isOfficialReporting: isEditing ? state.officialReporting : false,
     useViews: isEditing ? state.useViews : false,
+    isPreparationEnabled: isEditing ? state.preparationEnabled : false,
     isSubmitting: false,
     name: isEditing ? state.name : '',
     obligation,
@@ -215,7 +215,8 @@ export const ManageDataflow = ({
         reportingDataflowState.pinDataflow,
         reportingDataflowState.bigDataStorage,
         reportingDataflowState.isOfficialReporting,
-        reportingDataflowState.useViews
+        reportingDataflowState.useViews,
+        reportingDataflowState.isPreparationEnabled
       );
     resetObligations();
   };
@@ -305,6 +306,41 @@ export const ManageDataflow = ({
         <TooltipButton
           message={resourcesContext.messages['useViewsMessage']}
           uniqueIdentifier="useViews"></TooltipButton>
+      </div>
+    );
+  };
+
+
+  const renderPreparationEnabled = () => {
+    return (
+      <div className={styles.checkboxWrapper}>
+        <Checkbox
+          ariaLabel={resourcesContext.messages['preparationEnabled']}
+          checked={reportingDataflowState.isPreparationEnabled}
+          id="preparationEnabledCheckbox"
+          inputId="preparationEnabledCheckbox"
+          onChange={() =>
+            reportingDataflowDispatch({
+              type: 'TOGGLE_PREPARATION_ENABLED',
+              payload: !reportingDataflowState.isPreparationEnabled
+            })
+          }
+          role="checkbox"
+        />
+        <label>
+          <span
+            onClick={() =>
+              reportingDataflowDispatch({
+                type: 'TOGGLE_PREPARATION_ENABLED',
+                payload: !reportingDataflowState.isPreparationEnabled
+              })
+            }>
+            {resourcesContext.messages['preparationEnabled']}
+          </span>
+        </label>
+        <TooltipButton
+          message={resourcesContext.messages['preparationEnabledMessage']}
+          uniqueIdentifier="preparationEnabled"></TooltipButton>
       </div>
     );
   };
@@ -426,6 +462,9 @@ export const ManageDataflow = ({
             {renderSncData && renderSncData(false, sncData, false, () => setSncData(!sncData))}
           </div>
         )}
+        {!isEditing && (reportingDataflowState.bigDataStorage || isCitizenScienceDataflow) && (
+            <div className="p-toolbar-group-left">{renderPreparationEnabled()}</div>
+        )} //TODO check if the above is merged correctly
         <Button
           className={`p-button-primary ${
             !(isCitizenScienceDataflow && isEmpty(reportingDataflowState.providerGroup)) &&
@@ -488,6 +527,7 @@ export const ManageDataflow = ({
             }
             renderOfficialReporting={renderOfficialReporting}
             renderUseViews={renderUseViews}
+            renderPreparationEnabled={renderPreparationEnabled}
             sncData={sncData}
             bigData={reportingDataflowState.bigDataStorage}
           />
@@ -496,7 +536,7 @@ export const ManageDataflow = ({
               <h4 className={styles.addUserTextLabel}>{resourcesContext.messages['addUserTextToReceiptEdit']}</h4>
               <InputTextarea
                 className={`class`}
-                collapsedHeight={75}
+                collapsedHeight={150}
                 hasMaxCharCounter={true}
                 id="createDataCollectionText"
                 key="createDataCollectionText"
@@ -506,7 +546,6 @@ export const ManageDataflow = ({
                 onFocus={e => {
                   setAddInitialUserText(e.target.value);
                 }}
-                onKeyDown={e => onKeyChange(e)}
                 placeholder={resourcesContext.messages['addUserTextToReceiptNew']}
                 value={addUserText}
               />

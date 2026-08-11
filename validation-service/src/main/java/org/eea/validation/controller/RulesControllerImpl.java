@@ -1269,5 +1269,27 @@ public class RulesControllerImpl implements RulesController {
     }
   }
 
+  /**
+   * Updates the automatic geometry names in sql for Big Data.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param datasetId the dataset id
+   * @param tableSchemaId the table schema id
+   * @param fieldSchemaId the field schema id
+   */
+  @Override
+  @HystrixCommand
+  @PutMapping("/private/updateBigDataGeometryRulesSql")
+  @ApiOperation(value = "Updates Big Data geometry automatic QC SQL rules after schema name changes", hidden = true)
+  public void updateBigDataGeometryRulesSql(String datasetSchemaId, Long datasetId,
+                                            String tableSchemaId, String fieldSchemaId) {
+    try {
+      rulesService.updateBigDataGeometryRulesSql(datasetSchemaId, datasetId, tableSchemaId, fieldSchemaId);
+    } catch (Exception e) {
+      LOG.error("Unexpected error updating Big Data geometry QC SQL rules. datasetSchemaId: {}, datasetId: {}, tableSchemaId: {}, fieldSchemaId: {}. Message: {}",
+          datasetSchemaId, datasetId, tableSchemaId, fieldSchemaId, e.getMessage(), e);
+      throw e;
+    }
+  }
 
 }

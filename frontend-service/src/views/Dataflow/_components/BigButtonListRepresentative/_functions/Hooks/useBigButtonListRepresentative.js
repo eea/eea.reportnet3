@@ -362,9 +362,9 @@ const useBigButtonListRepresentative = ({
     ...getReferenceDatasetModels(),
     ...groupByRepresentativeModels,
     ...testDatasetsModels,
-    ...managePreparationSetsBigButton,
-    ...createPreparationSets,
-    ...preparationSetsModels,
+    ...(dataflowState.preparationEnabled ? managePreparationSetsBigButton : []),
+    ...(dataflowState.preparationEnabled ? createPreparationSets : []),
+    ...(dataflowState.preparationEnabled ? preparationSetsModels : []),
     ...receiptBigButton,
     ...releaseBigButton,
     ...(isAdmin ? silentReleaseButton : [])

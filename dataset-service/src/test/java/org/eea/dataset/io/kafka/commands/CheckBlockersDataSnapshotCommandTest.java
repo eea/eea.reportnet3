@@ -128,7 +128,7 @@ public class CheckBlockersDataSnapshotCommandTest {
         .when(dataSetMetabaseRepository.getDatasetIdsByDataflowIdAndDataProviderId(
             datasetMetabase.getDataflowId(), datasetMetabase.getDataProviderId()))
         .thenReturn(datasetsId);
-    Mockito.when(jobControllerZuul.checkEligibilityOfJob(anyString(), anyBoolean(), anyLong(), anyLong(), anyList())).thenReturn(JobStatusEnum.QUEUED);
+    Mockito.when(jobControllerZuul.checkEligibilityOfJob(anyString(), anyBoolean(), anyLong(), anyLong(), anyList(), any())).thenReturn(JobStatusEnum.QUEUED);
     JobVO jobVO = new JobVO(Long.valueOf(1), JobTypeEnum.RELEASE, JobStatusEnum.QUEUED, new Timestamp(System.currentTimeMillis()), new Timestamp(System.currentTimeMillis()), null, "test", true, 1L, 1L, 1L, null, null, null, null, null, null);
     Mockito.when(jobControllerZuul.save(any(JobVO.class))).thenReturn(jobVO);
     Mockito.doNothing().when(jobHistoryControllerZuul).save(any(JobVO.class));
@@ -166,8 +166,8 @@ public class CheckBlockersDataSnapshotCommandTest {
         .when(dataSetMetabaseRepository.getDatasetIdsByDataflowIdAndDataProviderId(
             datasetMetabase.getDataflowId(), datasetMetabase.getDataProviderId()))
         .thenReturn(datasetsId);
-    Mockito.when(jobControllerZuul.checkEligibilityOfJob(anyString(), anyBoolean(), anyLong(), anyLong(), anyList())).thenReturn(JobStatusEnum.QUEUED);
-    JobVO jobVO = new JobVO(Long.valueOf(1), JobTypeEnum.RELEASE, JobStatusEnum.QUEUED, new Timestamp(System.currentTimeMillis()), new Timestamp(System.currentTimeMillis()), null, "test", true, 1L, 1L, 1L, null, null, null, null, null,null);
+    Mockito.when(jobControllerZuul.checkEligibilityOfJob(anyString(), anyBoolean(), anyLong(), anyLong(), anyList(), any())).thenReturn(JobStatusEnum.QUEUED);
+    JobVO jobVO = new JobVO(Long.valueOf(1), JobTypeEnum.RELEASE, JobStatusEnum.QUEUED, new Timestamp(System.currentTimeMillis()), new Timestamp(System.currentTimeMillis()), null, "test", true, 1L, 1L, 1L, null, null, null, null, null, null);
     Mockito.when(jobControllerZuul.save(any(JobVO.class))).thenReturn(jobVO);
     checkBlockersDataSnapshotCommand.execute(eeaEventVO);
     Mockito.verifyNoInteractions(validationRepository);

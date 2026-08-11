@@ -486,6 +486,9 @@
   display: flex;
   line-height:1;
   position:relative;
+  textarea{
+    min-height:150px;
+  }
 }
 
 
@@ -506,10 +509,30 @@
   }
 }
 
-.content :global  {
+//previous version trying the below
+/*.content :global  {
   .webformCharacterCount {
     position: absolute;
     bottom: -21px;
     right: 0;
   }
+}*/
+
+.fieldsBlock :global  {
+  .webformCharacterCount {
+    position: absolute!important;
+    bottom: -21px;
+    right:0;
+    margin-bottom:0;
+    top:auto!important;
+  }
 }
+
+
+
+.fieldsBlock:has(> div:nth-child(2)) :global(.p-inputtext) {
+  max-height: 51px;
+  min-height:51px!important;
+}
+
+

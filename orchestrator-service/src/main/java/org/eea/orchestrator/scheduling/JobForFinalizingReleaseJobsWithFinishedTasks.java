@@ -71,7 +71,7 @@ public class JobForFinalizingReleaseJobsWithFinishedTasks {
     @Autowired
     private JobService jobService;
     @Autowired
-    private DatasetSnapshotController datasetSnapshotController;
+    private DatasetSnapshotController.DataSetSnapshotControllerZuul dataSetSnapshotControllerZuul;
     @Autowired
     private KafkaSenderUtils kafkaSenderUtils;
     @Autowired
@@ -79,13 +79,11 @@ public class JobForFinalizingReleaseJobsWithFinishedTasks {
     @Autowired
     private UserManagementControllerZull userManagementControllerZull;
     @Autowired
-    private DatasetMetabaseController datasetMetabaseController;
+    private DatasetMetabaseController.DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul;
     @Autowired
-    private DataFlowController dataFlowController;
+    private DataFlowController.DataFlowControllerZuul dataFlowControllerZuul;
     @Autowired
-    private CollaborationController collaborationControllerZuul;
-    @Autowired
-    private DatasetMetabaseController datasetMetabaseControllerZull;
+    private CollaborationController.CollaborationControllerZuul collaborationControllerZuul;
 
     @PostConstruct
     private void init() {
@@ -117,14 +115,14 @@ public class JobForFinalizingReleaseJobsWithFinishedTasks {
             for (JobVO jobVO : jobs) {
                 Long providerId = jobVO.getProviderId();
                 Long dataflowId = jobVO.getDataflowId();
-                DataFlowVO dataflow = dataFlowController.getMetabaseById(dataflowId);
+                DataFlowVO dataflow = dataFlowControllerZuul.getMetabaseById(dataflowId);
                 boolean isSilentRelease = Boolean.TRUE.equals(jobVO.getParameters().get("silentRelease"));
 
                 List<String> processIds = jobProcessService.findProcessesByJobId(jobVO.getId());
 
                 boolean allFinished = true;
 
-                List<Long> datasetIds = datasetMetabaseControllerZull
+                List<Long> datasetIds = dataSetMetabaseControllerZuul
                         .getDatasetIdsByDataflowIdAndDataProviderId(dataflowId, providerId);
 
                 if (checkAndFailIncompleteReleaseJob(jobVO, datasetIds, processIds, isSilentRelease)) {
@@ -186,25 +184,25 @@ public class JobForFinalizingReleaseJobsWithFinishedTasks {
                 }
 
                 // Remove locks.
-                datasetSnapshotController.releaseLocksFromReleaseDatasets(dataflowId, providerId);
+                dataSetSnapshotControllerZuul.releaseLocksFromReleaseDatasets(dataflowId, providerId);
 
                 // Check that for the datasets released column is false.
                 List<ReportingDatasetVO> datasets =
-                        datasetMetabaseController.findReportingDataSetIdByDataflowIdAndProviderId(dataflowId, providerId);
+                        dataSetMetabaseControllerZuul.findReportingDataSetIdByDataflowIdAndProviderId(dataflowId, providerId);
 
                 for (ReportingDatasetVO dataset : datasets) {
 
                     // Set to false if dataset is not released yet.
                     if (dataset.getReleasing()) {
                         dataset.setReleasing(false);
-                        datasetMetabaseControllerZull.updateReportingDatasetMetabase(dataset);
+                        dataSetMetabaseControllerZuul.updateReportingDatasetMetabase(dataset);
                     }
 
                     // Check Snapshot entries only if not silent release.
                     if (!isSilentRelease) {
                         // Get last snapshot from reporting dataset.
                         SnapshotVO lastSnapshot = Collections.max(
-                                datasetSnapshotController.getSnapshotByDatasetId(dataset.getId()),
+                                dataSetSnapshotControllerZuul.getSnapshotByDatasetId(dataset.getId()),
                                 Comparator.comparingLong(SnapshotVO::getId));
 
                         // Stops the process either field is has wrong values.
@@ -317,13 +315,13 @@ public class JobForFinalizingReleaseJobsWithFinishedTasks {
                 datasetStatusMessageVO.setDatasetId(datasetId);
                 datasetStatusMessageVO.setDataflowId(dataflowId);
                 datasetStatusMessageVO.setStatus(DatasetStatusEnum.PENDING);
-                datasetMetabaseController.updateDatasetStatus(datasetStatusMessageVO);
+                dataSetMetabaseControllerZuul.updateDatasetStatus(datasetStatusMessageVO);
             }
 
-            datasetSnapshotController.releaseLocksFromReleaseDatasets(dataflowId, providerId);
+            dataSetSnapshotControllerZuul.releaseLocksFromReleaseDatasets(dataflowId, providerId);
             jobService.updateJobStatus(jobVO.getId(), JobStatusEnum.FAILED);
             jobService.updateJobInfo(jobVO.getId(), JobInfoEnum.ERROR_RELEASE_PARTIALLY_COMPLETED, null, true);
-            datasetSnapshotController.rollBackSnapshotRecord(jobVO.getId(), dataflowId, providerId);
+            dataSetSnapshotControllerZuul.rollBackSnapshotRecord(jobVO.getId(), dataflowId, providerId);
 
             if(isSilentRelease){
                 LOG.info("Sending SILENT_RELEASE_FAILED_EVENT event for jobId {}", jobVO.getId());

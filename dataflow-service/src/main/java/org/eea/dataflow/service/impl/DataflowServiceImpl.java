@@ -623,6 +623,9 @@ public class DataflowServiceImpl implements DataflowService {
         if (null != dataflowVO.getUseViews()) {
           dataflowSave.get().setUseViews(dataflowVO.getUseViews());
         }
+        if (null != dataflowVO.getPreparationEnabled()) {
+          dataflowSave.get().setPreparationEnabled(dataflowVO.getPreparationEnabled());
+        }
         dataflowRepository.save(dataflowSave.get());
         LOG.info("The dataflow {} has been updated.", dataflowSave.get().getName());
       }

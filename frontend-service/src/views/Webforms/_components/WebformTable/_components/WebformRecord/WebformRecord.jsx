@@ -90,11 +90,7 @@ export const WebformRecord = ({
   const resourcesContext = useContext(ResourcesContext);
 
   const [webformRecordState, webformRecordDispatch] = useReducer(webformRecordReducer, {
-    changedConditionalFieldData: null,
     conditionalFieldChange: false,
-    dependantConditionalFieldId: '',
-    isConditionalChanged: false,
-    isDependantConditionalField: false,
     isDialogVisible: { deleteRow: false, uploadFile: false },
     newRecord: {},
     record,
@@ -102,15 +98,7 @@ export const WebformRecord = ({
     selectedRecordId: null
   });
 
-  const {
-    changedConditionalFieldData,
-    conditionalFieldChange,
-    dependantConditionalFieldId,
-    isConditionalChanged,
-    isDependantConditionalField,
-    isDialogVisible,
-    selectedRecordId
-  } = webformRecordState;
+  const { conditionalFieldChange, isDialogVisible, selectedRecordId } = webformRecordState;
 
   const { parseMultiselect, parseNewRecordData } = WebformRecordUtils;
   const { parseRecordValidations } = WebformsUtils;
@@ -215,10 +203,13 @@ export const WebformRecord = ({
   };
 
   const checkIfElementIsConditional = element => {
-    const matchesCondition = el =>
-      el?.referencedField?.masterConditionalFieldId === element.fieldSchemaId ||
-      (!isEmpty(el?.referenceParentField) && el.referenceParentField.field === element.name) ||
-      (el?.type === 'BLOCK' && el.elements?.some(matchesCondition));
+    const matchesCondition = el => {
+      return (
+        el?.referencedField?.masterConditionalFieldId === element.fieldSchemaId ||
+        (!isEmpty(el?.referenceParentField) && el.referenceParentField.field === element.name) ||
+        el?.elements?.some(matchesCondition)
+      );
+    };
 
     return webformRecordState.record?.elements?.some(matchesCondition) ?? false;
   };
@@ -248,6 +239,20 @@ export const WebformRecord = ({
           isBlockVisible && (
             <div className={styles.fieldsBlock} key={`BLOCK_${i}`}>
               {element.elementsRecords.map(record => renderElements(record.elements))}
+            </div>
+          )
+        );
+      }
+
+      if (element.type === 'SECTION') {
+        const isSectionVisible = element.referenceParentField
+          ? onToggleFieldVisibility(element.referenceParentField, elements)
+          : true;
+
+        return (
+          isSectionVisible && (
+            <div className={styles.section} key={`SECTION_${i}`}>
+              {renderElements(element.elements)}
             </div>
           )
         );
@@ -298,25 +303,21 @@ export const WebformRecord = ({
                   {
                     <WebformField
                       bigData={bigData}
-                      changedConditionalFieldData={changedConditionalFieldData}
                       columnsSchema={columnsSchema}
                       conditionalFieldChange={conditionalFieldChange}
                       dataflowId={dataflowId}
                       dataProviderId={dataProviderId}
                       datasetId={datasetId}
                       datasetSchemaId={datasetSchemaId}
-                      dependantConditionalFieldId={dependantConditionalFieldId}
                       element={element}
                       hasErrors={!isNil(element.validations)}
                       isConditional={checkIfElementIsConditional(element)}
-                      isConditionalChanged={isConditionalChanged}
-                      isDependantConditionalField={isDependantConditionalField}
                       isSubTableCreated={getCreatedSubTable(webformRecordState.record, element)}
                       isViewMode={isViewMode}
                       onFieldUpdate={onFieldUpdate}
                       onFillField={onFillField}
                       onSaveField={onSaveField}
-                      record={record}
+                      record={webformRecordState.record}
                       referencedTableSchemaId={referencedTableSchemaId}
                       rootPkFieldId={rootPkFieldId}
                       tableSchemaId={tableId}
@@ -391,7 +392,9 @@ export const WebformRecord = ({
               const { referencedField } = field;
 
               const referencedRecordField = record.elements.find(
-                recordElement => recordElement.fieldSchema === referencedField.idPk
+                recordElement =>
+                  recordElement.fieldSchema === referencedField.idPk ||
+                  recordElement?.referencedField?.idPk === referencedField.idPk
               );
 
               const rootPkField =

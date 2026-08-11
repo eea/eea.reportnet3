@@ -234,6 +234,8 @@ public interface BigDataDatasetService {
      */
     void updateField(Long dataflowId, Long providerId, Long datasetId, FieldVO field, String recordId, TableSchemaVO tableSchemaVO, boolean updateCascadePK) throws Exception;
 
+    void updateFields(Long dataflowId, Long providerId, Long datasetId, List<FieldVO> fields, String recordId, TableSchemaVO tableSchemaVO, boolean updateCascadePK) throws Exception;
+
     /**
      * Delete record manually
      *
@@ -415,4 +417,6 @@ public interface BigDataDatasetService {
      * @param tableName the physical table name used in Dremio/S3 paths
      */
     void createTypedViewWithRetry(Long dataflowId, Long providerId, Long datasetId, String tableSchemaId, String tableName) throws Exception;
+
+    void createEmptyTablesForSpecificTableSchema(Long datasetId, String tableSchemaId) throws EEAException;
 }

@@ -364,4 +364,14 @@ public interface RulesService {
    * @return
    */
   RuleVO findRule(String datasetSchemaId, String ruleId);
+
+  /**
+   * Update Big Data geometry rules sql.
+   *
+   * @param datasetSchemaId
+   * @param datasetId
+   * @param tableSchemaId
+   * @param fieldSchemaId
+   */
+  void updateBigDataGeometryRulesSql(String datasetSchemaId, Long datasetId, String tableSchemaId, String fieldSchemaId);
 }

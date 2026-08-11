@@ -59,6 +59,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
@@ -69,6 +70,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.concurrent.DelegatingSecurityContextRunnable;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.task.DelegatingSecurityContextAsyncTaskExecutor;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
@@ -81,6 +83,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
 
 import static org.eea.interfaces.vo.dataset.enums.FileTypeEnum.CSV;
@@ -467,7 +471,7 @@ public class DatasetControllerImpl implements DatasetController {
 
     if(!isPreparationDataset) {
       // --- EDITING LOCK CHECK ---
-      String userEditingDataset = datasetTableService.getDatasetEditingUsername(datasetId);
+      String userEditingDataset = datasetTableService.getDatasetEditingUsername(datasetId, null);
 
       if (userEditingDataset != null) {
         LOG.error("Can not private import for datasetId {} because the table is locked for username {} from   {} ", datasetId, userEditingDataset, userEditingDataset);
@@ -490,25 +494,25 @@ public class DatasetControllerImpl implements DatasetController {
     }
     DataFlowVO dataFlowVO = dataFlowControllerZuul.getMetabaseById(dataflowId);
     //Datalakes import
-    if(dataFlowVO.getBigData() != null && dataFlowVO.getBigData()){
+    if (dataFlowVO.getBigData() != null && dataFlowVO.getBigData()) {
       try {
-        if(!isPreparationDataset){
+        if (!isPreparationDataset) {
         String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
-        if(StringUtils.isNotBlank(tableSchemaId)){
+        if (StringUtils.isNotBlank(tableSchemaId)) {
           TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, datasetSchemaId);
-          if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable())
-                  && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, tableSchemaVO.getIdTableSchema()))){
+          if (tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable())
+                  && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, null, tableSchemaVO.getIdTableSchema()))){
             LOG.error("Can not import for datasetId {} because the table is iceberg", datasetId);
             datasetService.failImportJob(jobId, datasetId, EventType.IMPORT_FAILED_EVENT_ICEBERG_EXISTS, JobInfoEnum.ERROR_ICEBERG_TABLE_EXISTS);
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.IMPORTING_FILE_ICEBERG);
           }
         }
-        else{
+        else {
           List<TableSchemaIdNameVO> tableSchemaIdNameVOS =  datasetSchemaService.getTableSchemasIds(datasetId);
           for(TableSchemaIdNameVO tableSchemaIdNameVO: tableSchemaIdNameVOS){
             TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaIdNameVO.getIdTableSchema(), datasetSchemaId);
             if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable())
-                    && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, tableSchemaVO.getIdTableSchema()))){
+                    && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, null, tableSchemaVO.getIdTableSchema()))){
               LOG.error("Can not import zip file for datasetId {} because a table is iceberg", datasetId);
               datasetService.failImportJob(jobId, datasetId, EventType.IMPORT_FAILED_EVENT_ICEBERG_EXISTS, JobInfoEnum.ERROR_ICEBERG_TABLE_EXISTS);
               throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.IMPORTING_FILE_ICEBERG);
@@ -566,7 +570,7 @@ public class DatasetControllerImpl implements DatasetController {
           //check if there is already an import job with status IN_PROGRESS for the specific datasetId
           List<Long> datasetIds = new ArrayList<>();
           datasetIds.add(datasetId);
-          jobStatus = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.IMPORT.getValue(), false, dataflowId, providerId, datasetIds);
+          jobStatus = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.IMPORT.getValue(), false, dataflowId, providerId, datasetIds, null);
           jobId = jobControllerZuul.addImportJob(datasetId, dataflowId, providerId, tableSchemaId, file.getOriginalFilename(), replace, integrationId, null, delimiter, jobStatus, fmeJobId, null);
           if(jobStatus.getValue().equals(JobStatusEnum.REFUSED.getValue())){
             LOG.info("Added import job with id {} for datasetId {} with status REFUSED", jobId, datasetId);
@@ -669,7 +673,7 @@ public class DatasetControllerImpl implements DatasetController {
                   example = "0") @RequestParam(value = "code", required = false) String preparationCode) {
 
     String originalFilename = (file != null) ? file.getOriginalFilename() : null;
-    LOG.info("Private Import endpoint was called for datasetId {} dataflowId {} providerId {} integrationId {} delimiter {} replace {} jobId {} fmeJobId {} and file {}", datasetId, dataflowId, providerId, integrationId, delimiter, replace, jobId, fmeJobId, originalFilename);
+    LOG.info("Private Import endpoint was called for datasetId {} preparationCode {} dataflowId {} providerId {} integrationId {} delimiter {} replace {} jobId {} fmeJobId {} and file {}", datasetId, preparationCode, dataflowId, providerId, integrationId, delimiter, replace, jobId, fmeJobId, originalFilename);
 
     if (dataflowId == null){
       dataflowId = datasetService.getDataFlowIdById(datasetId);
@@ -685,8 +689,8 @@ public class DatasetControllerImpl implements DatasetController {
         if(StringUtils.isNotBlank(tableSchemaId)){
           TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, datasetSchemaId);
           if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable())
-                  && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, tableSchemaVO.getIdTableSchema()))){
-            LOG.error("Can not private import for datasetId {} because the table is iceberg", datasetId);
+                  && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, preparationCode, tableSchemaVO.getIdTableSchema()))){
+            LOG.error("Can not private import for datasetId {} preparationCode because the table is iceberg", datasetId, preparationCode);
             datasetService.failImportJob(jobId, datasetId, EventType.IMPORT_FAILED_EVENT_ICEBERG_EXISTS, JobInfoEnum.ERROR_ICEBERG_TABLE_EXISTS);
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.IMPORTING_FILE_ICEBERG);
           }
@@ -696,8 +700,8 @@ public class DatasetControllerImpl implements DatasetController {
           for(TableSchemaIdNameVO tableSchemaIdNameVO: tableSchemaIdNameVOS){
             TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaIdNameVO.getIdTableSchema(), datasetSchemaId);
             if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable())
-                    && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, tableSchemaVO.getIdTableSchema()))){
-              LOG.error("Can not private import zip file for datasetId {} because a table is iceberg", datasetId);
+                    && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, preparationCode, tableSchemaVO.getIdTableSchema()))){
+              LOG.error("Can not private import zip file for datasetId {} preparationCode {} because a table is iceberg", datasetId, preparationCode);
               datasetService.failImportJob(jobId, datasetId, EventType.IMPORT_FAILED_EVENT_ICEBERG_EXISTS, JobInfoEnum.ERROR_ICEBERG_TABLE_EXISTS);
               throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.IMPORTING_FILE_ICEBERG);
             }
@@ -744,7 +748,7 @@ public class DatasetControllerImpl implements DatasetController {
           //check if there is already an import job with status IN_PROGRESS for the specific datasetId
           List<Long> datasetIds = new ArrayList<>();
           datasetIds.add(datasetId);
-          jobStatus = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.IMPORT.getValue(), false, dataflowId, providerId, datasetIds);
+          jobStatus = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.IMPORT.getValue(), false, dataflowId, providerId, datasetIds, null);
           jobId = jobControllerZuul.addImportJob(datasetId, dataflowId, providerId, tableSchemaId, file.getOriginalFilename(), replace, integrationId, null, delimiter, jobStatus, fmeJobId, null);
           if(jobStatus.getValue().equals(JobStatusEnum.REFUSED.getValue())){
             LOG.info("Added private import job with id {} for datasetId {} with status REFUSED", jobId, datasetId);
@@ -948,8 +952,9 @@ public class DatasetControllerImpl implements DatasetController {
         String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
         Long providerId = datasetService.getDataProviderIdById(datasetId);
         TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, datasetSchemaId);
+        //TODO APBO Preparation code should be added here when edit functionality is implemented for prep sets.
         if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable())
-                && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, tableSchemaVO.getIdTableSchema()))) {
+                && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, null, tableSchemaVO.getIdTableSchema()))) {
           bigDataDatasetService.updateRecords(dataflowId, providerId, datasetId, tableSchemaVO, records, updateCascadePK);
         }
         else{
@@ -1021,8 +1026,9 @@ public class DatasetControllerImpl implements DatasetController {
                           datasetService.findRecordSchemaIdById(datasetId, recordId)));
         }
         Long providerId = datasetService.getDataProviderIdById(datasetId);
+        //TODO APBO Preparation code should be added here when edit functionality is implemented for prep sets.
         if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable())
-                && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, tableSchemaVO.getIdTableSchema()))) {
+                && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, null, tableSchemaVO.getIdTableSchema()))) {
           providerId = providerId != null ? providerId : 0L;
           bigDataDatasetService.deleteRecord(dataflowId, providerId, datasetId, tableSchemaVO, new ArrayList<>(Arrays.asList(recordId)), deleteCascadePK);
         }
@@ -1099,8 +1105,9 @@ public class DatasetControllerImpl implements DatasetController {
       Boolean isBigDataflow = dataFlowControllerZuul.isBigDataflow(dataflowId);
       if(Boolean.TRUE.equals(isBigDataflow)){
         Long providerId = datasetService.getDataProviderIdById(datasetId);
+        //TODO APBO Preparation code should be added here when edit functionality is implemented for prep sets.
         if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable())
-                && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, tableSchemaVO.getIdTableSchema()))) {
+                && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, null,tableSchemaVO.getIdTableSchema()))) {
           bigDataDatasetService.insertRecords(dataflowId, providerId, datasetId, tableSchemaVO.getNameTableSchema(), records);
         }
         else{
@@ -1172,7 +1179,6 @@ public class DatasetControllerImpl implements DatasetController {
    */
   @SneakyThrows
   @Override
-  @HystrixCommand
   @LockMethod(removeWhenFinish = false)
   @DeleteMapping("/v1/{datasetId}/deleteDatasetData")
   @PreAuthorize("secondLevelAuthorize(#datasetId, 'DATASCHEMA_CUSTODIAN', 'DATASCHEMA_STEWARD', 'DATASCHEMA_EDITOR_WRITE', 'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE', 'EUDATASET_CUSTODIAN','EUDATASET_STEWARD','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','REFERENCEDATASET_STEWARD') OR checkApiKey(#dataflowId,#providerId, #datasetId, 'DATASCHEMA_CUSTODIAN', 'DATASCHEMA_STEWARD', 'DATASCHEMA_EDITOR_WRITE', 'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE', 'EUDATASET_CUSTODIAN','EUDATASET_STEWARD','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','REFERENCEDATASET_STEWARD')")
@@ -1209,7 +1215,7 @@ public class DatasetControllerImpl implements DatasetController {
       if (isPreparationDataset) {
         jobStatus = jobControllerZuul.checkEligibilityOfPreparationJob(JobTypeEnum.DELETE.getValue(), datasetId, preparationCode);
       } else {
-        jobStatus = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.DELETE.getValue(), false, resolvedDataflowId, providerId, Collections.singletonList(datasetId));
+        jobStatus = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.DELETE.getValue(), false, resolvedDataflowId, providerId, Collections.singletonList(datasetId), null);
       }
 
       jobId = jobControllerZuul.addDeleteDataJob(datasetId, null, resolvedDataflowId, providerId, preparationCode, deletePrefilledTables, jobStatus);
@@ -1218,16 +1224,38 @@ public class DatasetControllerImpl implements DatasetController {
         throw new ResponseStatusException(HttpStatus.LOCKED, EEAErrorMessage.DELETING_DATASET_DATA_REFUSED);
       }
 
-      executeDeleteDatasetProcess(datasetId, preparationCode, resolvedDataflowId, providerId, jobId, deletePrefilledTables);
-      LOG.info("Successfully deleted dataset data for dataflowId {} and datasetId {}", resolvedDataflowId, datasetId);
+      // Capture SecurityContext to pass it to the background thread.
+      // This prevents subsequent Feign calls in executeDeleteDatasetProcess from failing with 401 Unauthorized.
+      SecurityContext securityContext = SecurityContextHolder.getContext();
+      final Long finalJobId = jobId;
 
+      // Fire and forget the heavy process using Spring Boot's managed Thread Pool
+      // and Instantiate a local executor to protect the JVM commonPool
+      SimpleAsyncTaskExecutor localExecutor = new SimpleAsyncTaskExecutor("dataset-delete-");
+      Executor securityExecutor = new DelegatingSecurityContextAsyncTaskExecutor(localExecutor);
+
+      // Pass it to the CompletableFuture
+      CompletableFuture.runAsync(() -> {
+        SecurityContextHolder.setContext(securityContext);
+        try {
+          executeDeleteDatasetProcess(datasetId, preparationCode, resolvedDataflowId, providerId, finalJobId, deletePrefilledTables);
+          LOG.info("Successfully deleted dataset data for dataflowId {} and datasetId {}", resolvedDataflowId, datasetId);
+        } catch (Exception e) {
+          LOG.error("Unexpected error! Message: {}", e.getMessage());
+        } finally {
+          // MUST release lock here when the background task finishes.
+          deleteLocksToDeleteProcess(datasetId, null, preparationCode);
+          SecurityContextHolder.clearContext();
+        }
+      }, securityExecutor);
+
+      // Return immediately to the frontend.
       return buildDeleteResponse(jobId, datasetId, resolvedDataflowId, providerId);
     } catch (Exception e) {
-      LOG.error("Unexpected error! Error deleting dataset data for dataflowId {} datasetId {} and providerId {} Message: {}", resolvedDataflowId, datasetId, providerId, e.getMessage());
-      throw e;
-    } finally {
-      // Release the lock manually
+      // If the synchronous setup fails (e.g. REFUSED), release lock immediately.
       deleteLocksToDeleteProcess(datasetId, null, preparationCode);
+      LOG.error("Unexpected error during synchronous setup for dataflowId {} datasetId {} Message: {}", resolvedDataflowId, datasetId, e.getMessage());
+      throw e;
     }
   }
 
@@ -1370,7 +1398,7 @@ public class DatasetControllerImpl implements DatasetController {
       if (isPreparationDataset) {
         jobStatus = jobControllerZuul.checkEligibilityOfPreparationJob(JobTypeEnum.DELETE.getValue(), datasetId, preparationCode);
        } else {
-        jobStatus = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.DELETE.getValue(), false, resolvedDataflowId, providerId, Collections.singletonList(datasetId));
+        jobStatus = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.DELETE.getValue(), false, resolvedDataflowId, providerId, Collections.singletonList(datasetId), null);
       }
 
       jobId = jobControllerZuul.addDeleteDataJob(datasetId, tableSchemaId, resolvedDataflowId, providerId, preparationCode, null, jobStatus);
@@ -1721,8 +1749,9 @@ public class DatasetControllerImpl implements DatasetController {
         String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
         Long providerId = datasetService.getDataProviderIdById(datasetId);
         TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, datasetSchemaId);
+        //TODO APBO Preparation code should be added here when edit functionality is implemented for prep sets.
         if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable())
-                && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, tableSchemaVO.getIdTableSchema()))) {
+                && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, null, tableSchemaVO.getIdTableSchema()))) {
           bigDataDatasetService.updateField(dataflowId, providerId, datasetId, field, recordId, tableSchemaVO, updateCascadePK);
         }
         else{
@@ -1786,11 +1815,10 @@ public class DatasetControllerImpl implements DatasetController {
         String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
         Long providerId = datasetService.getDataProviderIdById(datasetId);
         TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, datasetSchemaId);
+        //TODO APBO Preparation code should be added here when edit functionality is implemented for prep sets.
         if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable())
-            && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, tableSchemaVO.getIdTableSchema()))) {
-          for (FieldVO field : fields) {
-            bigDataDatasetService.updateField(dataflowId, providerId, datasetId, field, recordId, tableSchemaVO, updateCascadePK);
-          }
+            && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, null, tableSchemaVO.getIdTableSchema()))) {
+          bigDataDatasetService.updateFields(dataflowId, providerId, datasetId, fields, recordId, tableSchemaVO, updateCascadePK);
         }
         else{
           throw new Exception("The table data are not manually editable or the iceberg table has not been created");
@@ -2245,7 +2273,7 @@ public class DatasetControllerImpl implements DatasetController {
       //check eligibility of new job
       List<Long> datasetIds = new ArrayList<>();
       datasetIds.add(datasetId);
-      JobStatusEnum jobStatus = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.ETL_IMPORT.getValue(), false, dataflowId, providerId, datasetIds);
+      JobStatusEnum jobStatus = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.ETL_IMPORT.getValue(), false, dataflowId, providerId, datasetIds, null);
       if(jobStatus.getValue().equals(JobStatusEnum.REFUSED.getValue())){
         LOG.info("Added etl import job with id {} for datasetId {} with status REFUSED", jobId, datasetId);
         throw new ResponseStatusException(HttpStatus.LOCKED, EEAErrorMessage.IMPORTING_REFUSED);
@@ -2356,12 +2384,12 @@ public class DatasetControllerImpl implements DatasetController {
 
       //check if iceberg is enabled
       String userEditingDataset;
-      if(StringUtils.isBlank(tableSchemaId)) {
-        userEditingDataset = datasetTableService.getDatasetEditingUsername(datasetId);
+      if (StringUtils.isBlank(tableSchemaId)) {
+        userEditingDataset = datasetTableService.getDatasetEditingUsername(datasetId, preparationCode);
 
       }
-      else{
-        userEditingDataset = datasetTableService.getDatasetEditingUsernameForTable(datasetId, tableSchemaId);
+      else {
+        userEditingDataset = datasetTableService.getDatasetEditingUsernameForTable(datasetId, preparationCode, tableSchemaId);
       }
       if (userEditingDataset != null) {
         LOG.error("Can not etl import for datasetId {} because the table is locked for username {}", datasetId, userEditingDataset);
@@ -2374,7 +2402,7 @@ public class DatasetControllerImpl implements DatasetController {
       if (StringUtils.isBlank(preparationCode)) { // NOT Preparation eligibility check
         List<Long> datasetIds = new ArrayList<>();
         datasetIds.add(datasetId);
-        jobStatus = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.ETL_IMPORT.getValue(), false, dataflowId, providerId, datasetIds);
+        jobStatus = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.ETL_IMPORT.getValue(), false, dataflowId, providerId, datasetIds, null);
       }
       else {
         jobStatus = jobControllerZuul.checkEligibilityOfPreparationJob(JobTypeEnum.ETL_IMPORT.getValue(),  datasetId, preparationCode);
@@ -2394,7 +2422,8 @@ public class DatasetControllerImpl implements DatasetController {
 
       Map<String, Object> result = new HashMap<>();
       String pollingUrl = "/orchestrator/jobs/pollForJobStatus/" + jobId + "?datasetId=" + datasetId + "&dataflowId=" + dataflowId;
-      if(providerId != null){
+      // Avoid including providerId in polling URL if null or 0 due to 403 http response.
+      if(providerId != null && providerId != 0L){
         pollingUrl+= "&providerId=" + providerId;
       }
       result.put("jobId", jobId);
@@ -3590,22 +3619,23 @@ public class DatasetControllerImpl implements DatasetController {
       DataFlowVO dataFlowVO = dataFlowControllerZuul.getMetabaseById(dataflowId);
       if(dataFlowVO.getBigData() != null && dataFlowVO.getBigData()) {
         String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
-        if (StringUtils.isNotBlank(tableSchemaId) && (StringUtils.isBlank(preparationCode))) { //TODO check iceberg preparation
+        if (StringUtils.isNotBlank(tableSchemaId)) {
           TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, datasetSchemaId);
           if (tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable())
-                  && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, tableSchemaVO.getIdTableSchema()))) {
-            LOG.error("Can not import for datasetId {} because the table is iceberg", datasetId);
+                  && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, preparationCode, tableSchemaVO.getIdTableSchema()))) {
+            LOG.error("Can not import for datasetId {} preparationCode {} because the table is iceberg", datasetId, preparationCode);
             jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.ERROR_ICEBERG_TABLE_EXISTS, null);
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.EXPORTING_FILE_ICEBERG);
           }
-        } else {
+        }
+        else {
           List<TableSchemaIdNameVO> tableSchemaIdNameVOS = datasetSchemaService.getTableSchemasIds(datasetId);
           for (TableSchemaIdNameVO tableSchemaIdNameVO : tableSchemaIdNameVOS) {
             TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaIdNameVO.getIdTableSchema(), datasetSchemaId);
             if (tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable())
-                    && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, tableSchemaVO.getIdTableSchema()))
-                    && (StringUtils.isBlank(preparationCode))) {
-              LOG.error("Can not import zip file for datasetId {} because a table is iceberg", datasetId);
+                    && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, preparationCode, tableSchemaVO.getIdTableSchema()))
+                    ) {
+              LOG.error("Can not import zip file for datasetId {} preparationCode {} because a table is iceberg", datasetId, preparationCode);
               jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.ERROR_ICEBERG_TABLE_EXISTS, null);
               throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.EXPORTING_FILE_ICEBERG);
             }
@@ -3724,7 +3754,7 @@ public class DatasetControllerImpl implements DatasetController {
         if (isPreparationDataset) {
           jobStatus = jobControllerZuul.checkEligibilityOfPreparationJob(JobTypeEnum.IMPORT.getValue(), datasetId, preparationCode);
         } else {
-          jobStatus = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.IMPORT.getValue(), false, dataflowId, providerId, datasetIds);
+          jobStatus = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.IMPORT.getValue(), false, dataflowId, providerId, datasetIds, null);
         }
 
         if (jobStatus == JobStatusEnum.IN_PROGRESS) {
@@ -3763,7 +3793,8 @@ public class DatasetControllerImpl implements DatasetController {
     DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
     String datasetName = dataSetMetabaseVO.getDataSetName();
 
-    String currentEditor = datasetTableService.getDatasetEditingUsername(datasetId);
+    //TODO APBO Preparation code should be added here when edit functionality is implemented for prep sets.
+    String currentEditor = datasetTableService.getDatasetEditingUsername(datasetId, null);
     if (currentEditor != null && !currentEditor.equals(username)) {
       LOG.warn("User {} attempted Parquet to Iceberg conversion for dataset {} but {} is editing.",
               username, datasetId, currentEditor);
@@ -3787,7 +3818,12 @@ public class DatasetControllerImpl implements DatasetController {
       providerId = dataSetMetabaseVO.getDataProviderId();
     }
 
-    List<JobVO> activeJobsForDatasetId = jobControllerZuul.findActiveJobsRelatedToADatasetId(datasetId, dataflowId, providerId);
+    final List<JobVO> activeJobsForDatasetId = jobControllerZuul
+            .findActiveJobsRelatedToADatasetId(datasetId, dataflowId, providerId)
+            .stream()
+            .filter(jobVO -> StringUtils.isBlank(jobVO.getPreparationCode()))
+            .collect(Collectors.toList());;
+
     if(activeJobsForDatasetId != null && !activeJobsForDatasetId.isEmpty()){
       List<Long> jobIds = activeJobsForDatasetId.stream().map(JobVO::getId).collect(Collectors.toList());
       LOG.info("Can not convert tables from parquet to iceberg for dataflowId {} datasetId {} providerId {} and user {} because there are active jobs related to the same dataset id. Job ids: {}", dataflowId, datasetId, providerId, username, jobIds);
@@ -3836,7 +3872,8 @@ public class DatasetControllerImpl implements DatasetController {
 
     }
 
-    String currentEditor = datasetTableService.getDatasetEditingUsername(datasetId);
+    //TODO APBO Preparation code should be added here when edit functionality is implemented for prep sets.
+    String currentEditor = datasetTableService.getDatasetEditingUsername(datasetId, null);
     if (currentEditor != null && !currentEditor.equals(username)) {
       LOG.warn("User {} attempted Iceberg to Parquet Iceberg conversion for dataset {} but {} is editing.",
               username, datasetId, currentEditor);
@@ -3855,7 +3892,11 @@ public class DatasetControllerImpl implements DatasetController {
       return;
     }
 
-    List<JobVO> activeJobsForDatasetId = jobControllerZuul.findActiveJobsRelatedToADatasetId(datasetId, dataflowId, providerId);
+    final List<JobVO> activeJobsForDatasetId = jobControllerZuul.findActiveJobsRelatedToADatasetId(datasetId, dataflowId, providerId)
+            .stream()
+            .filter(jobVO -> StringUtils.isBlank(jobVO.getPreparationCode()))
+            .collect(Collectors.toList());
+
     if(activeJobsForDatasetId != null && !activeJobsForDatasetId.isEmpty()){
       List<Long> jobIds = activeJobsForDatasetId.stream().map(JobVO::getId).collect(Collectors.toList());
       LOG.info("Can not convert tables from iceberg to parquet for dataflowId {} datasetId {} providerId {} and user {} because there are active jobs related to the same dataset id. Job ids: {}", dataflowId, datasetId, providerId, username, jobIds);
@@ -3889,15 +3930,17 @@ public class DatasetControllerImpl implements DatasetController {
    *
    * @param datasetId the dataset id
    * @param tableSchemaId the tableSchemaId
+   * @param preparationCode the code that identifies a preparation dataset
    * @return if the iceberg table is created
    */
   @Override
   @PreAuthorize("isAuthenticated()")
   @GetMapping("/isIcebergTableCreated/{datasetId}/{tableSchemaId}")
   public Boolean isIcebergTableCreated(@PathVariable("datasetId") Long datasetId,
-                             @PathVariable("tableSchemaId") String tableSchemaId){
-    try{
-      return datasetTableService.icebergTableIsCreated(datasetId, tableSchemaId);
+                             @PathVariable("tableSchemaId") String tableSchemaId,
+                             @RequestParam(value = "preparationCode", required = false) String preparationCode){
+    try {
+      return datasetTableService.icebergTableIsCreated(datasetId, tableSchemaId, preparationCode);
     }
     catch (Exception e){
       LOG.error("Could not find if the icebergTableCreated option was enabled for datasetId {}, tableSchemaId {}", datasetId, tableSchemaId);
@@ -3911,6 +3954,7 @@ public class DatasetControllerImpl implements DatasetController {
    * @param dataflowId the dataflow id
    * @param providerId the provider id
    * @param datasetId the dataset id
+   * @param preparationCode the code that identifies the preparation set.
    * @return list of tables info
    *
    */
@@ -3918,10 +3962,11 @@ public class DatasetControllerImpl implements DatasetController {
   @PreAuthorize("isAuthenticated()")
   @GetMapping("/getIcebergTables")
   public List<DatasetTableVO> getIcebergTables(@RequestParam(value = "dataflowId") Long dataflowId,
-                                             @RequestParam(value = "providerId", required = false) Long providerId,
-                                             @RequestParam(value = "datasetId", required = false) Long datasetId){
+                                               @RequestParam(value = "providerId", required = false) Long providerId,
+                                               @RequestParam(value = "datasetId", required = false) Long datasetId,
+                                               @RequestParam(value = "preparationCode", required = false) String preparationCode) {
     try{
-      return datasetTableService.getIcebergTablesForDataflow(dataflowId, providerId, datasetId);
+      return datasetTableService.getIcebergTablesForDataflow(dataflowId, providerId, datasetId, preparationCode);
     }
     catch (Exception e){
       LOG.error("Could not retrieve iceberg tables for dataflowId {}, providerId {} and datasetId {}", dataflowId, providerId, datasetId);
@@ -4136,7 +4181,7 @@ public class DatasetControllerImpl implements DatasetController {
     }
 
     // Check if another user is editing
-    String currentEditor = datasetTableService.getDatasetEditingUsername(datasetId);
+    String currentEditor = datasetTableService.getDatasetEditingUsername(datasetId, null);
 
     if (currentEditor != null && !currentEditor.equals(username)) {
       LOG.warn("User {} attempted to enable editing for dataset {}, but {} is already editing.",
@@ -4293,7 +4338,7 @@ public class DatasetControllerImpl implements DatasetController {
       );
     }
 
-    String currentEditor = datasetTableService.getDatasetEditingUsername(datasetId);
+    String currentEditor = datasetTableService.getDatasetEditingUsername(datasetId, null);
 
     // If no one is editing, nothing to disable
     if (currentEditor == null) {
@@ -4405,11 +4450,12 @@ public class DatasetControllerImpl implements DatasetController {
   @ApiOperation(value = "Get dataset editing status", hidden = true)
   public DatasetEditingStatusVO getEditingStatus(
           @ApiParam(type = "Long", value = "Dataset Id", example = "0")
-          @PathVariable("id") Long datasetId) {
+          @PathVariable("id") Long datasetId,
+          @RequestParam(value = "preparationCode", required = false) String preparationCode) {
 
     String username = SecurityContextHolder.getContext().getAuthentication().getName();
 
-    return datasetTableService.getEditingStatus(datasetId, username);
+    return datasetTableService.getEditingStatus(datasetId, preparationCode, username);
 
   }
 

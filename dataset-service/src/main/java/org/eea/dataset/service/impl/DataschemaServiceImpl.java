@@ -639,6 +639,12 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    */
   private void tableSchemaAddAtributes(Long datasetId, TableSchemaVO tableSchemaVO,
                                        String datasetSchemaId, Document tableSchema) throws EEAException {
+    String oldTableName = tableSchema.getString("nameTableSchema");
+    String newTableName = tableSchemaVO.getNameTableSchema();
+
+    boolean tableNameChanged = StringUtils.isNotBlank(newTableName) && !StringUtils.equals(oldTableName, newTableName);
+
+
     if (tableSchemaVO.getDescription() != null) {
       tableSchema.put("description", tableSchemaVO.getDescription());
     }
@@ -664,7 +670,15 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       tableSchema.put("notEmpty", newValue);
       updateNotEmptyRule(oldValue, newValue, tableSchemaVO.getIdTableSchema(), datasetId);
     }
-    schemasRepository.updateTableSchema(datasetSchemaId, tableSchema);
+
+    UpdateResult updateResult = schemasRepository.updateTableSchema(datasetSchemaId, tableSchema);
+
+    if (updateResult.getMatchedCount() == 1 && updateResult.getModifiedCount() == 1 && tableNameChanged && isBigDataDataset(datasetId)) {
+      LOG.info("Requested Big Data geometry QC SQL update after table rename from {} to {} for tableSchemaId {} and datasetId {}",
+          oldTableName, newTableName, tableSchemaVO.getIdTableSchema(), datasetId);
+
+      rulesControllerZuul.updateBigDataGeometryRulesSql(datasetSchemaId, datasetId, tableSchemaVO.getIdTableSchema(), null);
+    }
   }
 
   /**
@@ -832,9 +846,10 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     boolean typeModified = false;
     try {
       // Retrieve the FieldSchema from MongoDB
-      Document fieldSchema =
-              schemasRepository.findFieldSchema(datasetSchemaId, fieldSchemaVO.getId());
+      Document fieldSchema = schemasRepository.findFieldSchema(datasetSchemaId, fieldSchemaVO.getId());
       if (fieldSchema != null) {
+        String oldFieldName = fieldSchema.getString("headerName");
+
         // First of all, we update the previous data in the catalog
         updatePreviousDataInCatalog(fieldSchema, datasetId, cloningOrImporting);
 
@@ -844,12 +859,22 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         // we find if one data is modified
         typeModified = modifySchemaInUpdate(fieldSchemaVO, typeModified, fieldSchema);
 
+        String newFieldName = fieldSchema.getString("headerName");
+        DataType newType = getDataTypeFromFieldSchemaDocument(fieldSchema);
+        // Compare the old and new names of the field that's about to change.
+        boolean fieldNameChanged = StringUtils.isNotBlank(fieldSchemaVO.getName()) && !StringUtils.equals(oldFieldName, newFieldName);
+
         // Save the modified FieldSchema in the MongoDB
-        UpdateResult updateResult =
-                schemasRepository.updateFieldSchema(datasetSchemaId, fieldSchema);
+        UpdateResult updateResult = schemasRepository.updateFieldSchema(datasetSchemaId, fieldSchema);
         if (updateResult.getMatchedCount() == 1) {
           if (updateResult.getModifiedCount() == 1 && typeModified) {
             return fieldSchemaVO.getType();
+          }
+
+          // Move to validation service to change the actual sql sentence.
+          if (fieldNameChanged && !typeModified && isGeometryDataType(newType) && isBigDataDataset(datasetId)) {
+            LOG.info("Requested Big Data geometry QC SQL update after field rename from {} to {} in datasetId: {}", oldFieldName, newFieldName, datasetId);
+            rulesControllerZuul.updateBigDataGeometryRulesSql(datasetSchemaId, datasetId, null, fieldSchemaVO.getId());
           }
           return null;
         }
@@ -3752,6 +3777,66 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   public boolean isReferenceSchema(String datasetSchemaId){
     DataSetSchemaVO schema = getDataSchemaById(datasetSchemaId);
     return schema != null && Boolean.TRUE.equals(schema.getReferenceDataset());
+  }
+
+  /**
+   * Gets the DataType from a raw Mongo field schema document.
+   *
+   * @param fieldSchema the field schema document
+   * @return the field DataType, or null if it cannot be resolved
+   */
+  private DataType getDataTypeFromFieldSchemaDocument(Document fieldSchema) {
+    if (fieldSchema == null) {
+      return null;
+    }
+
+    Object dataType = fieldSchema.get("typeData");
+
+    if (dataType instanceof DataType) {
+      return (DataType) dataType;
+    }
+
+    if (dataType instanceof String && StringUtils.isNotBlank((String) dataType)) {
+      try {
+        return DataType.valueOf((String) dataType);
+      } catch (IllegalArgumentException e) {
+        LOG.warn("Unknown DataType value found in field schema document: {}", dataType);
+        return null;
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * Checks whether a field type is one of the spatial geometry types.
+   *
+   * @param type the field data type
+   * @return true if the type is a geometry type
+   */
+  private boolean isGeometryDataType(DataType type) {
+    return DataType.POINT.equals(type)
+        || DataType.MULTIPOINT.equals(type)
+        || DataType.LINESTRING.equals(type)
+        || DataType.MULTILINESTRING.equals(type)
+        || DataType.POLYGON.equals(type)
+        || DataType.MULTIPOLYGON.equals(type)
+        || DataType.GEOMETRYCOLLECTION.equals(type);
+  }
+
+  /**
+   * Checks whether the dataset belongs to a Big Data dataflow.
+   *
+   * @param datasetId the dataset id
+   * @return true if the dataset belongs to a Big Data dataflow
+   */
+  private boolean isBigDataDataset(Long datasetId) {
+    if (datasetId == null) {
+      return false;
+    }
+
+    Long dataflowId = datasetService.getDataFlowIdById(datasetId);
+    return Boolean.TRUE.equals(dataFlowControllerZuul.isBigDataflow(dataflowId));
   }
 
 }

@@ -16,7 +16,7 @@ export const DatasetConfig = {
   getAlignmentBetween:
     '/dataset/getReleasedDatasetDataInfo?collectionDatasetId={:datasetId}&providerCode={:selectedRepresentativesCode}&tableSchemaId={:selectedTable}',
   getIsAvailableForManualEditing: '/dataset/getAvailableForManualEditingTables/{:datasetId}',
-  getEditingStatus: '/dataset/{:datasetId}/editingStatus',
+  getEditingStatus: '/dataset/{:datasetId}/editingStatus?preparationCode={:preparationCode}',
   getIsEdited: '/dataset/tablesUpdated/?datasetId={:datasetId}',
   getSchema: '/dataschema/v1/datasetId/{:datasetId}',
   getTableImportedMetadata: '/dataset/getImportRelatedStatistics/{:datasetId}',

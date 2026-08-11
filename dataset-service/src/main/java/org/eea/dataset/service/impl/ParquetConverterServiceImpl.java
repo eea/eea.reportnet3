@@ -46,6 +46,7 @@ import org.eea.datalake.service.model.SpatialFieldInfo;
 import org.eea.exception.DremioApiException;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.exception.SRIDConversionException;
 import org.eea.interfaces.controller.orchestrator.JobController.JobControllerZuul;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
@@ -56,6 +57,7 @@ import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.orchestrator.enums.JobInfoEnum;
 import org.eea.utils.LiteralConstants;
 import org.eea.utils.UtilityClass;
+import org.locationtech.jts.io.ParseException;
 import org.mozilla.universalchardet.UniversalDetector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -325,7 +327,8 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
         //convert old table to iceberg
         Long providerId = (importFileInDremioInfo.getProviderId() != null) ? importFileInDremioInfo.getProviderId() : 0L;
         bigDataDatasetService.convertParquetToIcebergTable(importFileInDremioInfo.getDatasetId(), importFileInDremioInfo.getDataflowId(), providerId, tableSchemaVO, dataSetSchema.getIdDataSetSchema().toString(), null);
-        DatasetTable datasetTableEntry = new DatasetTable(importFileInDremioInfo.getDatasetId(), dataSetSchema.getIdDataSetSchema().toString(), tableSchemaVO.getIdTableSchema(), true, user, null);
+        //TODO APBO Preparation code should be added here when edit functionality is implemented for prep sets.
+        DatasetTable datasetTableEntry = new DatasetTable(importFileInDremioInfo.getDatasetId(), null, dataSetSchema.getIdDataSetSchema().toString(), tableSchemaVO.getIdTableSchema(), true, user, null);
         datasetTableService.saveOrUpdateDatasetTableEntry(datasetTableEntry);
         S3PathResolver s3IcebergTablePathResolver = new S3PathResolver(importFileInDremioInfo.getDataflowId(), providerId, importFileInDremioInfo.getDatasetId(), tableSchemaVO.getNameTableSchema(), tableSchemaVO.getNameTableSchema(), S3_TABLE_AS_FOLDER_QUERY_PATH);
         s3IcebergTablePathResolver.setIsIcebergTable(true);
@@ -858,25 +861,32 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
     for (FieldSchema expectedHeader : expectedHeaders) {
       String expectedHeaderName = expectedHeader.getHeaderName();
       DataType fieldType = fieldNameAndTypeMap.get(expectedHeaderName);
-      if(!DatasetTypeEnum.DESIGN.equals(datasetType) && BooleanUtils.isTrue(expectedHeader.getReadOnly()) && !BooleanUtils.isTrue(importFileInDremioInfo.getReplaceData())){
+      if (!DatasetTypeEnum.DESIGN.equals(datasetType) && BooleanUtils.isTrue(expectedHeader.getReadOnly())
+          && !BooleanUtils.isTrue(importFileInDremioInfo.getReplaceData())) {
         //if replace data is not selected and the field is read only, no value should be inserted
         row.add("");
       }
       else if (fieldType == DataType.ATTACHMENT) {
         //if the field is attachment handle it if import is etl
-        if (!importFileInDremioInfo.getIsEtlImport() || importFileInDremioInfo.getAttachmentsExistPerTableName() == null || importFileInDremioInfo.getAttachmentsExistPerTableName().size() == 0
-                || importFileInDremioInfo.getAttachmentsExistPerTableName().get(tableName.toLowerCase()) == null || importFileInDremioInfo.getAttachmentsExistPerTableName().get(tableName.toLowerCase()) == false) {
+        if (!importFileInDremioInfo.getIsEtlImport()
+            || importFileInDremioInfo.getAttachmentsExistPerTableName() == null
+            || importFileInDremioInfo.getAttachmentsExistPerTableName().isEmpty()
+            || importFileInDremioInfo.getAttachmentsExistPerTableName().get(tableName.toLowerCase()) == null
+            || importFileInDremioInfo.getAttachmentsExistPerTableName().get(tableName.toLowerCase()) == false) {
           row.add("");
-        } else {
+        }
+        else {
           row.add(addRecordAttachmentAndValue(importFileInDremioInfo, tableName, expectedHeaderName, csvRecord, recordIdValue));
         }
 
-      } else if (fieldType == DataType.TEXTAREA){
+      }
+      else if (fieldType == DataType.TEXTAREA) {
         // Resolve the value safely for normal header and then BOM header.
         String value = null;
         if (csvRecord.isMapped(expectedHeaderName)) {
           value = csvRecord.get(expectedHeaderName);
-        } else {
+        }
+        else {
           String headerWithBom = "\uFEFF" + expectedHeaderName;
           if (csvRecord.isMapped(headerWithBom)) {
             value = csvRecord.get(headerWithBom);
@@ -897,23 +907,69 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
           rl.add(lineNumber);
           textFieldLengthInfo.setRecordLines(rl);
           row.add("");
-        } else {
+        }
+        else {
           row.add(value != null ? value : "");
         }
-      } else if (expectedHeaderName.equals(LiteralConstants.PARQUET_RECORD_ID_COLUMN_HEADER)) {
+      }
+      else if (expectedHeaderName.equals(LiteralConstants.PARQUET_RECORD_ID_COLUMN_HEADER)) {
         row.add(recordIdValue);
-      } else if (expectedHeaderName.equals(LiteralConstants.PARQUET_PROVIDER_CODE_COLUMN_HEADER)) {
+      }
+      else if (expectedHeaderName.equals(LiteralConstants.PARQUET_PROVIDER_CODE_COLUMN_HEADER)) {
         row.add(importFileInDremioInfo.getDataProviderCode() != null ? importFileInDremioInfo.getDataProviderCode() : "");
-      } else if (csvRecord.isMapped(expectedHeaderName)) {
-        row.add(spatialDataHandling.getGeoJsonEnums().contains(fieldType) ?
-            spatialDataHandling.convertToHEX(csvRecord.get(expectedHeaderName), lineNumber, spatialFieldInfo, expectedHeaderName) : csvRecord.get(expectedHeaderName));
-      } else {
-        String headerWithBom = "\uFEFF" + expectedHeaderName;
-        if(csvRecord.isMapped(headerWithBom)){
-          row.add(spatialDataHandling.getGeoJsonEnums().contains(fieldType) ?
-                  spatialDataHandling.convertToHEX(csvRecord.get(headerWithBom), lineNumber, spatialFieldInfo, expectedHeaderName) : csvRecord.get(headerWithBom));
+      }
+      else if (csvRecord.isMapped(expectedHeaderName)) {
+
+        if (spatialDataHandling.getGeoJsonEnums().contains(fieldType)) {
+          String hexGeoJsonValue = "";
+          try {
+            hexGeoJsonValue = spatialDataHandling.convertToHexWithSRidCheck(
+                    csvRecord.get(expectedHeaderName),
+                    lineNumber,
+                    spatialFieldInfo,
+                    expectedHeaderName);
+          }
+          catch (SRIDConversionException e) {
+            LOG.error("SRid failed to be converted during the conversion of GeoJson to hex at line {}", lineNumber);
+            importFileInDremioInfo.addDistinctWarningMessage(JobInfoEnum.WARNING_SRID_FAILED_TO_BE_CONVERTED.getValue(null));
+          }
+          catch (IOException | ParseException e ) {
+            LOG.error("SpatialDataHandlingImpl.convertToHEX() Invalid GeoJson!! Tried to convert the geoJson , to HEX but failed at line {}, with message: {}", lineNumber, e.getMessage());
+            importFileInDremioInfo.addDistinctWarningMessage(JobInfoEnum.WARNING_GEOSPATIAL_DATA_FAILED_TO_BE_CONVERTED.getValue(null));
+          }
+          row.add(hexGeoJsonValue);
         }
-        else{
+        else {
+          row.add(csvRecord.get(expectedHeaderName));
+        }
+      }
+      else {
+        String headerWithBom = "\uFEFF" + expectedHeaderName;
+        if (csvRecord.isMapped(headerWithBom)) {
+          String hexGeoJsonValue = "";
+          try {
+            if (spatialDataHandling.getGeoJsonEnums().contains(fieldType)) {
+              hexGeoJsonValue = spatialDataHandling.convertToHexWithSRidCheck(
+                      csvRecord.get(headerWithBom),
+                      lineNumber,
+                      spatialFieldInfo,
+                      expectedHeaderName);
+            }
+            else {
+              hexGeoJsonValue = csvRecord.get(headerWithBom);
+            }
+          }
+          catch (SRIDConversionException e) {
+            LOG.error("SRid failed to be converted during the conversion of GeoJson to hex at line {}", lineNumber);
+            importFileInDremioInfo.addDistinctWarningMessage(JobInfoEnum.WARNING_SRID_FAILED_TO_BE_CONVERTED.getValue(null));
+          }
+          catch (IOException | ParseException e ) {
+            LOG.error("SpatialDataHandlingImpl.convertToHEX() Invalid GeoJson!! Tried to convert the geoJson , to HEX but failed at line {}, with message: {}", lineNumber, e.getMessage());
+            importFileInDremioInfo.addDistinctWarningMessage(JobInfoEnum.WARNING_GEOSPATIAL_DATA_FAILED_TO_BE_CONVERTED.getValue(null));
+          }
+          row.add(hexGeoJsonValue);
+        }
+        else {
           row.add("");
         }
       }

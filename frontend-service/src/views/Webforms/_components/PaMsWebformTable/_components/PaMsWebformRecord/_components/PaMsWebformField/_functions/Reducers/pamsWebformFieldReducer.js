@@ -3,19 +3,24 @@ export const pamsWebformFieldReducer = (state, { type, payload }) => {
     case 'SET_IS_SUBMITING':
       return { ...state, isSubmiting: payload };
 
+    case 'SET_IS_DELETING_ATTACHMENT':
+      return { ...state, isDeletingAttachment: payload };
+
     case 'ON_FILE_DELETE_OPENED':
       return {
         ...state,
         isDeleteAttachmentVisible: true,
-        selectedFieldId: payload.fieldId,
+        selectedFieldId: payload.fieldId || payload.fieldSchemaId,
         selectedFieldSchemaId: payload.fieldSchemaId,
-        selectedFileName: payload.fileName
+        selectedFileName: payload.fileName,
+        selectedRecordId: payload.recordId,
+        selectedFieldName: payload.fieldName
       };
 
     case 'ON_FILE_UPLOAD_SET_FIELDS':
       return {
         ...state,
-        selectedFieldId: payload.fieldId,
+        selectedFieldId: payload.fieldId || payload.fieldSchemaId,
         selectedFieldSchemaId: payload.fieldSchemaId,
         selectedValidExtensions: payload.validExtensions,
         selectedMaxSize: payload.maxSize,

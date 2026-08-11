@@ -1055,11 +1055,14 @@ public interface DatasetController {
    *
    * @param datasetId the dataset id
    * @param tableSchemaId the tableSchemaId
+   * @param preparationCode the code that identifies a preparation dataset
    * @return if the iceberg table is created
    *
    */
   @GetMapping("/isIcebergTableCreated/{datasetId}/{tableSchemaId}")
-  Boolean isIcebergTableCreated(@PathVariable("datasetId") Long datasetId, @PathVariable("tableSchemaId") String tableSchemaId);
+  Boolean isIcebergTableCreated(@PathVariable("datasetId") Long datasetId,
+                                @PathVariable("tableSchemaId") String tableSchemaId,
+                                @RequestParam(value = "preparationCode", required = false) String preparationCode);
 
   /**
    * Get iceberg tables in dataflow
@@ -1067,13 +1070,15 @@ public interface DatasetController {
    * @param dataflowId the dataflow id
    * @param providerId the provider id
    * @param datasetId the dataset id
+   * @param preparationCode the code that identifies the preparation set.
    * @return list of tables info
    *
    */
   @GetMapping("/getIcebergTables")
   List<DatasetTableVO> getIcebergTables(@RequestParam(value = "dataflowId") Long dataflowId,
-                                             @RequestParam(value = "providerId", required = false) Long providerId,
-                                             @RequestParam(value = "datasetId", required = false) Long datasetId);
+                                        @RequestParam(value = "providerId", required = false) Long providerId,
+                                        @RequestParam(value = "datasetId", required = false) Long datasetId,
+                                        @RequestParam(value = "preparationCode", required = false) String preparationCode);
 
   /**
    * Get available for manual editing tables in dataflow
@@ -1171,7 +1176,8 @@ public interface DatasetController {
 
   @GetMapping("/{id}/editingStatus")
   DatasetEditingStatusVO getEditingStatus(
-          @PathVariable("id") Long datasetId);
+          @PathVariable("id") Long datasetId,
+          @RequestParam(value = "preparationCode", required = false) String preparationCode);
 
   @GetMapping("/hasEnabledEditingDatasets")
   Boolean hasEnabledEditingDatasets(@RequestParam(value = "dataflowId") Long dataflowId,

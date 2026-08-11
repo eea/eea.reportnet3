@@ -141,6 +141,9 @@ public class Dataflow {
   @Column(name = "USE_VIEWS")
   private Boolean useViews;
 
+  @Column(name = "PREPARATION_ENABLED")
+  private Boolean preparationEnabled = Boolean.FALSE;
+
   /**
    * Equals.
    *

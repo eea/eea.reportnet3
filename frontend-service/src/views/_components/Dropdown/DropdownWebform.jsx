@@ -67,7 +67,7 @@ const DropdownWebform = props => {
     filterLocale
   } = props;
 
-  const [filterState, setFilterState] = useState(currentValue ? currentValue : '');
+  const [filterState, setFilterState] = useState('');
   const [initialValue, setInitialValue] = useState(null);
   const [searchTimeout, setSearchTimeout] = useState(null);
   const [previousSearchChar, setPreviousSearchChar] = useState('');

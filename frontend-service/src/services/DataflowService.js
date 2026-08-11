@@ -62,7 +62,7 @@ export const DataflowService = {
     });
   },
 
-  create: async (name, description, obligationId, type, bigData, dataProviderGroupId, sncData, officialReporting, useViews) =>
+  create: async (name, description, obligationId, type, bigData, dataProviderGroupId, sncData, officialReporting, useViews, preparationEnabled) =>
     await DataflowRepository.create(
       name,
       description,
@@ -72,7 +72,8 @@ export const DataflowService = {
       dataProviderGroupId,
       sncData,
       officialReporting,
-      useViews
+      useViews,
+      preparationEnabled
     ),
 
   cloneSchemas: async (sourceDataflowId, targetDataflowId) =>
@@ -447,8 +448,8 @@ export const DataflowService = {
     return dataflow;
   },
 
-  getIcebergTables: async ({ dataflowId, providerId, datasetId }) => {
-    const icebergTables = await DataflowRepository.getIcebergTables({ dataflowId, providerId, datasetId });
+  getIcebergTables: async ({ dataflowId, providerId, datasetId, preparationCode }) => {
+    const icebergTables = await DataflowRepository.getIcebergTables({ dataflowId, providerId, datasetId, preparationCode });
 
     return icebergTables;
   },
@@ -475,7 +476,8 @@ export const DataflowService = {
     dataProviderGroupId,
     deadlineDate,
     officialReporting,
-    useViews
+    useViews,
+    preparationEnabled
   ) =>
     await DataflowRepository.update(
       dataflowId,
@@ -488,7 +490,8 @@ export const DataflowService = {
       dataProviderGroupId,
       deadlineDate,
       officialReporting,
-      useViews
+      useViews,
+      preparationEnabled
     ),
 
   updateAutomaticDelete: async (dataflowId, isAutomaticReportingDeletion) =>

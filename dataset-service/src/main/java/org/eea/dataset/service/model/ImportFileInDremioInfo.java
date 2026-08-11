@@ -54,4 +54,10 @@ public class ImportFileInDremioInfo {
         this.providerId = providerId;
         this.datasetId = datasetId;
     }
+
+    public void addDistinctWarningMessage(String warningMessage) {
+        if (!warningMessages.contains(warningMessage)) {
+            warningMessages.add(warningMessage);
+        }
+    }
 }

@@ -81,19 +81,25 @@ const parseNewRecordData = (columnsSchema, data) => {
   if (!isEmpty(columnsSchema)) {
     const fields = [];
 
-    if (!isUndefined(columnsSchema)) {
-      for (const column of columnsSchema) {
-        if (column.type === 'BLOCK') {
-          column.elementsRecords[0].elements.forEach(element => {
-            fields.push({
-              fieldData: { [element.fieldSchemaId]: null, type: element.type, fieldSchemaId: element.fieldSchemaId }
-            });
-          });
+    const addElements = elements => {
+      elements.forEach(element => {
+        if (element.type === 'BLOCK' && element.elementsRecords?.[0]?.elements) {
+          addElements(element.elementsRecords[0].elements);
         }
+
+        if (element.type === 'SECTION' && element.elements) {
+          addElements(element.elements);
+          return;
+        }
+
         fields.push({
-          fieldData: { [column.fieldSchemaId]: null, type: column.type, fieldSchemaId: column.fieldSchemaId }
+          fieldData: { [element.fieldSchemaId]: null, type: element.type, fieldSchemaId: element.fieldSchemaId }
         });
-      }
+      });
+    };
+
+    if (!isUndefined(columnsSchema)) {
+      addElements(columnsSchema);
     }
 
     const obj = { dataRow: fields, recordSchemaId: columnsSchema[0].recordId };

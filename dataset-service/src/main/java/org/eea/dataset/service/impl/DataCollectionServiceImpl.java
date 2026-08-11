@@ -422,7 +422,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         for (TableSchemaIdNameVO table : tables) {
           TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(table.getIdTableSchema(), datasetSchemaId);
           if (tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable())
-                  && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(dataset.getId(), tableSchemaVO.getIdTableSchema()))) {
+                  && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(dataset.getId(), null, tableSchemaVO.getIdTableSchema()))) {
             releaseLockAndNotification(dataflowId, EEAErrorMessage.DATA_COLLECTION_FAILED_ICEBERG_EXISTS, true, false);
             throw new Exception("Can not create data collection for dataflowId " + dataflowId + " because there is an iceberg table");
           }
@@ -660,20 +660,23 @@ public class DataCollectionServiceImpl implements DataCollectionService {
   private void checkIfTablesEmpty(List<Long> emptyDatasetTables, DesignDatasetVO dataset, RuleVO ruleVO) {
     DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(dataset.getId());
     DataSetSchema dataSetSchema = schemasRepository.findByIdDataSetSchema(new ObjectId(dataSetMetabaseVO.getDatasetSchema()));
-    String tableName = null;
+    String prefilledTableName = null;
     if (ruleVO.getType().equals(EntityTypeEnum.TABLE)) {
-      tableName = dataSetSchema.getTableSchemas().stream().filter(t -> t.getIdTableSchema().toString().equals(ruleVO.getReferenceId())).findFirst().get().getNameTableSchema();
+      prefilledTableName = dataSetSchema.getTableSchemas().stream().filter(t -> t.getIdTableSchema().toString().equals(ruleVO.getReferenceId()) && Boolean.TRUE.equals(t.getToPrefill())).findFirst().map(TableSchema::getNameTableSchema).orElse(null);
     } else {
       for (TableSchema t : dataSetSchema.getTableSchemas()) {
         List<FieldSchema> fieldSchemas = t.getRecordSchema().getFieldSchema().stream().filter(f -> f.getIdFieldSchema().toString().equals(ruleVO.getReferenceId())).collect(Collectors.toList());
-        if (fieldSchemas.size() > 0 || t.getRecordSchema().getIdRecordSchema().toString().equals(ruleVO.getReferenceId())) {
-          tableName = t.getNameTableSchema();
+        if ((fieldSchemas.size() > 0 || t.getRecordSchema().getIdRecordSchema().toString().equals(ruleVO.getReferenceId())) && Boolean.TRUE.equals(t.getToPrefill())) {
+          prefilledTableName = t.getNameTableSchema();
           break;
         }
       }
     }
 
-    S3PathResolver dataTableResolver = new S3PathResolver(dataSetMetabaseVO.getDataflowId(), dataSetMetabaseVO.getDataProviderId() != null ? dataSetMetabaseVO.getDataProviderId() : 0, dataSetMetabaseVO.getId(), tableName);
+    //could not find a prefilled table -> exit
+    if (prefilledTableName == null) return;
+
+    S3PathResolver dataTableResolver = new S3PathResolver(dataSetMetabaseVO.getDataflowId(), dataSetMetabaseVO.getDataProviderId() != null ? dataSetMetabaseVO.getDataProviderId() : 0, dataSetMetabaseVO.getId(), prefilledTableName);
     if (!s3Helper.checkFolderExist(dataTableResolver, S3_TABLE_NAME_FOLDER_PATH)) {
       emptyDatasetTables.add(dataset.getId());
     }
@@ -1933,16 +1936,4 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     }
     return null;
   }
-
-  public boolean isAnyDatasetBeingEdited(List<Long> datasetIds, String username) {
-    for (Long datasetId : datasetIds) {
-      String editor = datasetTableService.getDatasetEditingUsername(datasetId);
-      if (editor != null && !editor.equals(username)) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-
 }

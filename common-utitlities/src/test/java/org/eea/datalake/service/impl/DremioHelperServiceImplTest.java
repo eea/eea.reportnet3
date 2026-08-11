@@ -15,8 +15,11 @@ import org.springframework.http.HttpStatus;
 
 import static org.eea.utils.LiteralConstants.S3_IMPORT_FILE_PATH;
 import static org.eea.utils.LiteralConstants.S3_IMPORT_TABLE_NAME_FOLDER_PATH;
+import static org.eea.utils.LiteralConstants.S3_PROVIDER_PATH;
+import static org.eea.utils.LiteralConstants.S3_TABLE_NAME_FOLDER_PATH;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.junit.Assert.assertNull;
 
 public class DremioHelperServiceImplTest {
 
@@ -49,11 +52,21 @@ public class DremioHelperServiceImplTest {
     @Test(expected = DremioApiException.class)
     public void getDirectoryItemsThrowsDremioApiException(){
         String testDirectoryPath = "testDirectoryPath";
+        S3PathResolver s3PathResolver = new S3PathResolver(1L, 1L, 1L, "test", "test", S3_TABLE_NAME_FOLDER_PATH);
+        Mockito.when(s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_PROVIDER_PATH)).thenReturn(testDirectoryPath);
+        Mockito.when(feignException.status()).thenReturn(HttpStatus.INTERNAL_SERVER_ERROR.value());
+        Mockito.when(dremioApiController.getDirectoryItems(any(), anyString())).thenThrow(feignException);
+        dremioHelperService.getDirectoryItems(s3PathResolver, "test");
+    }
+
+    @Test
+    public void getDirectoryItemsImportPathReturnsNullWhenFolderNotYetCreated(){
+        String testDirectoryPath = "testDirectoryPath";
         S3PathResolver s3PathResolver = new S3PathResolver(1L, 1L, 1L, "test", "test", S3_IMPORT_FILE_PATH);
         Mockito.when(s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_IMPORT_TABLE_NAME_FOLDER_PATH)).thenReturn(testDirectoryPath);
         Mockito.when(feignException.status()).thenReturn(HttpStatus.INTERNAL_SERVER_ERROR.value());
         Mockito.when(dremioApiController.getDirectoryItems(any(), anyString())).thenThrow(feignException);
-        dremioHelperService.getDirectoryItems(s3PathResolver, "test");
+        assertNull(dremioHelperService.getDirectoryItems(s3PathResolver, "test"));
     }
 
 
