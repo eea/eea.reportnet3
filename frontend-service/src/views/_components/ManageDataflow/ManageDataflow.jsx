@@ -49,6 +49,7 @@ export const ManageDataflow = ({
   onLoadReportingDataflow,
   onUpdateAddUserText,
   onUpdateSoftDelete,
+  renderSncData,
   resetDeliveryDate,
   resetObligations,
   setCheckedObligation,
@@ -282,6 +283,7 @@ export const ManageDataflow = ({
         <Checkbox
           ariaLabel={resourcesContext.messages['useViews']}
           checked={reportingDataflowState.useViews}
+          disabled={reportingDataflowState.isPreparationEnabled}
           id="useViewsCheckbox"
           inputId="useViewsCheckbox"
           onChange={() =>
@@ -295,6 +297,7 @@ export const ManageDataflow = ({
         <label>
           <span
             onClick={() =>
+              !reportingDataflowState.isPreparationEnabled &&
               reportingDataflowDispatch({
                 type: 'TOGGLE_USE_VIEWS',
                 payload: !reportingDataflowState.useViews
@@ -317,6 +320,7 @@ export const ManageDataflow = ({
         <Checkbox
           ariaLabel={resourcesContext.messages['preparationEnabled']}
           checked={reportingDataflowState.isPreparationEnabled}
+          disabled={reportingDataflowState.useViews}
           id="preparationEnabledCheckbox"
           inputId="preparationEnabledCheckbox"
           onChange={() =>
@@ -330,6 +334,7 @@ export const ManageDataflow = ({
         <label>
           <span
             onClick={() =>
+              !reportingDataflowState.useViews &&
               reportingDataflowDispatch({
                 type: 'TOGGLE_PREPARATION_ENABLED',
                 payload: !reportingDataflowState.isPreparationEnabled

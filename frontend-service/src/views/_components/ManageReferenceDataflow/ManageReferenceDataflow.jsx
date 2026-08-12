@@ -39,7 +39,8 @@ export const ManageReferenceDataflow = ({
   onCreateDataflow,
   onEditDataflow,
   onLoadReferenceDataflow,
-  onUpdateSoftDelete
+  onUpdateSoftDelete,
+  renderSncData
 }) => {
   const dialogName = isEditing ? 'isEditDialogVisible' : 'isReferencedDataflowDialogVisible';
 
