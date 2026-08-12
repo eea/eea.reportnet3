@@ -1490,16 +1490,39 @@ public class DatasetServiceImpl implements DatasetService {
    * @param entityType the entity type
    * @return true, if successful
    */
+  /*
+      | Dataset Type      | Updatable | Table ReadOnly | Returns |
+      | ------------      | --------- | -------------- | ------- |
+      | DESIGN            | —         | true           | false   |
+      | REFERENCE         | false     | false          | true    |
+      | REFERENCE         | false     | true           | true    |
+      | REFERENCE         | true      | false          | false   |
+      | REFERENCE         | true      | true           | false   |
+      | REPORTING/OTHER   | —         | true           | true    |
+      | REPORTING/OTHER   | —         | false          | false   |
+   */
   @Override
   public boolean checkIfDatasetLockedOrReadOnly(Long datasetId, String idRecordSchema,
-      EntityTypeEnum entityType) {
-    DatasetTypeEnum datasetType = getDatasetType(datasetId);
-    Boolean updatable = Boolean.TRUE.equals(referenceDatasetRepository.findById(datasetId)
-        .orElse(new ReferenceDataset()).getUpdatable());
-    return (DatasetTypeEnum.REFERENCE.equals(datasetType) && Boolean.FALSE.equals(updatable))
-        || (!DatasetTypeEnum.DESIGN.equals(datasetType)
-            && !(DatasetTypeEnum.REFERENCE.equals(datasetType) && Boolean.TRUE.equals(updatable))
-            && Boolean.TRUE.equals(getTableReadOnly(datasetId, idRecordSchema, entityType)));
+                                                EntityTypeEnum entityType) {
+
+    final DatasetTypeEnum datasetType = getDatasetType(datasetId);
+
+    boolean updatable = referenceDatasetRepository.findById(datasetId)
+            .map(ReferenceDataset::getUpdatable)
+            .orElse(false);
+
+    // Case 1:
+    // Reference dataset but not updatable
+    if (datasetType == DatasetTypeEnum.REFERENCE && !updatable) {
+      return true;
+    }
+
+    // Case 2:
+    // Non-design dataset, not editable reference dataset,
+    // and underlying table marked readonly
+    return datasetType != DatasetTypeEnum.DESIGN
+            && !(datasetType == DatasetTypeEnum.REFERENCE && updatable)
+            && getTableReadOnly(datasetId, idRecordSchema, entityType);
   }
 
   /**

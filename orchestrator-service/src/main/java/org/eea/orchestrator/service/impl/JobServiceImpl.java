@@ -858,10 +858,13 @@ public class JobServiceImpl implements JobService {
     }
 
     @Override
-    public List<JobVO> findActiveJobsRelatedToADatasetId(Long datasetId, Long dataflowId, Long providerId){
-        List<Job> jobs = jobRepository.findAllByDatasetIdAndJobStatusIn(datasetId, Arrays.asList(JobStatusEnum.QUEUED, JobStatusEnum.IN_PROGRESS));
-
-        if(dataflowId != null && providerId != null && providerId != 0L){
+    public List<JobVO> findActiveJobsRelatedToADatasetId(Long datasetId, String preparationCode, Long dataflowId, Long providerId){
+        final List<Job> jobs = jobRepository.findAllByDatasetIdAndPreparationCodeAndJobStatusIn(
+                datasetId,
+                preparationCode,
+                Arrays.asList(JobStatusEnum.QUEUED, JobStatusEnum.IN_PROGRESS));
+        //TODO Prep check this
+        if (dataflowId != null && providerId != null && providerId != 0L){
             List<Job> jobsByDataflowAndProvider = jobRepository.findAllByDataflowIdAndProviderIdAndJobStatusIn(dataflowId, providerId, Arrays.asList(JobStatusEnum.QUEUED, JobStatusEnum.IN_PROGRESS));
             jobs.addAll(jobsByDataflowAndProvider);
         }
