@@ -296,6 +296,7 @@ export const ManageDataflow = ({
         />
         <label>
           <span
+            className={reportingDataflowState.isPreparationEnabled ? styles.disabledLabel : ''}
             onClick={() =>
               !reportingDataflowState.isPreparationEnabled &&
               reportingDataflowDispatch({
@@ -333,6 +334,7 @@ export const ManageDataflow = ({
         />
         <label>
           <span
+            className={reportingDataflowState.useViews ? styles.disabledLabel : ''}
             onClick={() =>
               !reportingDataflowState.useViews &&
               reportingDataflowDispatch({
