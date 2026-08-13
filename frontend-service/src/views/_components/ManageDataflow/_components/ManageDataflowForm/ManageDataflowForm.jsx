@@ -397,7 +397,6 @@ export const ManageDataflowForm = forwardRef(
             </label>
           </div>
           {isEditing && <div className={`${styles.officialReportingWrapper}`}>{renderOfficialReporting()}</div>}
-            //TODO Check if merge has been done correctly
           {isEditing && metadata.bigDataStorage && <div className={`${styles.officialReportingWrapper}`}>{renderUseViews()}</div>}
           {isEditing && (metadata.bigDataStorage || isCitizenScienceDataflow) && (
             <div className={`${styles.officialReportingWrapper}`}>{renderPreparationEnabled()}</div>

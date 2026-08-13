@@ -469,7 +469,7 @@ export const ManageDataflow = ({
         )}
         {!isEditing && (reportingDataflowState.bigDataStorage || isCitizenScienceDataflow) && (
             <div className="p-toolbar-group-left">{renderPreparationEnabled()}</div>
-        )} //TODO check if the above is merged correctly
+        )}
         <Button
           className={`p-button-primary ${
             !(isCitizenScienceDataflow && isEmpty(reportingDataflowState.providerGroup)) &&
