@@ -8,6 +8,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.eea.dataset.persistence.metabase.domain.DatasetTable;
 import org.eea.dataset.service.model.ImportFileInDremioInfo;
 import org.eea.lock.redis.LockEnum;
 import org.eea.lock.redis.RedisLockService;
@@ -4603,8 +4604,20 @@ public class DatasetControllerImpl implements DatasetController {
       return;
     }
 
-    for (DatasetTableVO datasetTableVO : datasetTables) {
-      disableEditing(datasetTableVO);
+    //Group the datasetTableVOs by datasetId
+    final Map<Long, List<DatasetTableVO>> groupedByDatasetId = datasetTables.stream()
+            .collect(Collectors.groupingBy(DatasetTableVO::getDatasetId));
+
+    //For each group of datasetTableVOs, collect all tableSchemaIds and disable editing for
+    //all of them.
+    for (Map.Entry<Long, List<DatasetTableVO>> entry : groupedByDatasetId.entrySet()) {
+      final Long datasetId = entry.getKey();
+      final List<String> tableSchemaIds = entry.getValue()
+              .stream()
+              .map(DatasetTableVO::getTableSchemaId)
+              .collect(Collectors.toList());
+
+      disableEditing(datasetId, tableSchemaIds);
     }
   }
 
@@ -4630,9 +4643,41 @@ public class DatasetControllerImpl implements DatasetController {
       return;
     }
 
-    for (DatasetTableVO datasetTableVO : expiredDatasetTables) {
-      disableEditing(datasetTableVO);
+    //Group the datasetTableVOs by datasetId
+    final Map<Long, List<DatasetTableVO>> groupedByDatasetId = expiredDatasetTables.stream()
+            .collect(Collectors.groupingBy(DatasetTableVO::getDatasetId));
+
+    //For each group of datasetTableVOs, collect all tableSchemaIds and disable editing for
+    //all of them.
+    for (Map.Entry<Long, List<DatasetTableVO>> entry : groupedByDatasetId.entrySet()) {
+      final Long datasetId = entry.getKey();
+      final List<String> tableSchemaIds = entry.getValue()
+              .stream()
+              .map(DatasetTableVO::getTableSchemaId)
+              .collect(Collectors.toList());
+
+      disableEditing(datasetId, tableSchemaIds);
     }
+  }
+
+  @DeleteMapping("/clearDatasetTableLocksByDataset")
+  @HystrixCommand(commandProperties = {@HystrixProperty(name = "execution.isolation.thread.timeoutInMilliseconds", value = "650000")})
+  @PreAuthorize("hasAnyRole('ADMIN')")
+  @Override
+  public void clearDatasetTableLocksByDataset(@RequestParam("datasetId") Long datasetId) {
+
+    final List<DatasetTableVO> datasetTables = datasetTableService.getDatasetTablesByDatasetIdAndIcebergTable(datasetId, true);
+
+    LOG.info("Found {} DatasetTables with Iceberg tables in dataset with id {}", datasetTables.size(), datasetId);
+    if (datasetTables.isEmpty()) {
+      return;
+    }
+
+    final List<String> tableSchemaIds = datasetTables.stream()
+            .map(DatasetTableVO::getTableSchemaId)
+            .collect(Collectors.toList());
+
+    disableEditing(datasetId, tableSchemaIds);
   }
 
   @DeleteMapping("/clearDatasetTableLocksByDataflow")
@@ -4641,15 +4686,27 @@ public class DatasetControllerImpl implements DatasetController {
   @Override
   public void clearDatasetTableLocksByDataflow(@RequestParam("dataflowId") Long dataflowId) {
 
-    final List<DatasetTableVO> datasetTables = datasetTableService.getDatasetTablesByDataflowId(dataflowId);
+    final List<DatasetTableVO> datasetTables = datasetTableService.getDatasetTablesByDataflowIdAndIcebergTable(dataflowId, true);
 
-    LOG.info("Found {} DatasetTables in dataflow with id {}", datasetTables.size(), dataflowId);
+    LOG.info("Found {} DatasetTables with Iceberg tables in dataflow with id {}", datasetTables.size(), dataflowId);
     if (datasetTables.isEmpty()) {
       return;
     }
 
-    for (DatasetTableVO datasetTableVO : datasetTables) {
-      disableEditing(datasetTableVO);
+    //Group the datasetTableVOs by datasetId
+    final Map<Long, List<DatasetTableVO>> groupedByDatasetId = datasetTables.stream()
+            .collect(Collectors.groupingBy(DatasetTableVO::getDatasetId));
+
+    //For each group of datasetTableVOs, collect all tableSchemaIds and disable editing for
+    //all of them.
+    for (Map.Entry<Long, List<DatasetTableVO>> entry : groupedByDatasetId.entrySet()) {
+      final Long datasetId = entry.getKey();
+      final List<String> tableSchemaIds = entry.getValue()
+              .stream()
+              .map(DatasetTableVO::getTableSchemaId)
+              .collect(Collectors.toList());
+
+      disableEditing(datasetId, tableSchemaIds);
     }
   }
 
@@ -4666,20 +4723,31 @@ public class DatasetControllerImpl implements DatasetController {
       return;
     }
 
-    for (DatasetTableVO datasetTableVO : datasetTables) {
-      disableEditing(datasetTableVO);
+    //Group the datasetTableVOs by datasetId
+    final Map<Long, List<DatasetTableVO>> groupedByDatasetId = datasetTables.stream()
+            .collect(Collectors.groupingBy(DatasetTableVO::getDatasetId));
+
+    //For each group of datasetTableVOs, collect all tableSchemaIds and disable editing for
+    //all of them.
+    for (Map.Entry<Long, List<DatasetTableVO>> entry : groupedByDatasetId.entrySet()) {
+      final Long datasetId = entry.getKey();
+      final List<String> tableSchemaIds = entry.getValue()
+              .stream()
+              .map(DatasetTableVO::getTableSchemaId)
+              .collect(Collectors.toList());
+
+      disableEditing(datasetId, tableSchemaIds);
     }
   }
 
-  private void disableEditing(DatasetTableVO datasetTableVO) {
+  private void disableEditing(Long datasetId, List<String> tableSchemaIds) {
     try {
-      final Long datasetId = datasetTableVO.getDatasetId();
+
       final DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
 
       final Long dataflowId = dataSetMetabaseVO.getDataflowId();
       final Long providerId = dataSetMetabaseVO.getDataProviderId();
       final boolean isBigData = dataFlowControllerZuul.isBigDataflow(dataflowId);
-      final List<String> tableSchemaIds = Collections.singletonList(datasetTableVO.getTableSchemaId());
 
       if (!isBigData) {
         datasetTableService.disableEditingForDatasetTable(datasetId);
@@ -4714,18 +4782,21 @@ public class DatasetControllerImpl implements DatasetController {
                   providerId,
                   tableSchemaIds,
                   lockValue);
-        } else {
+        }
+        else {
           Map<String, String> activeLocks = redisLockService.listActiveLocks(lockKey);
           LOG.info("Orchestrator has triggered the iceberg to parquet conversion for dataflowId {} datasetId {} providerId {} and tableSchemaIds {} but another iceberg to parquet conversion for the same dataset is in progress {}",
                   dataflowId, datasetId, providerId, tableSchemaIds, activeLocks);
         }
-      } catch (Exception e) {
+      }
+      catch (Exception e) {
         LOG.error("Failed to initiate Iceberg to Parquet conversion for dataflowId {} datasetId {} providerId {} tableSchemaIds {} : {} - Releasing lock with value {}",
                 dataflowId, datasetId, providerId, tableSchemaIds, e.getMessage(), lockValue);
         redisLockService.releaseLock(lockKey, lockValue);
         throw e;
       }
-    } catch (Exception e) {
+    }
+    catch (Exception e) {
       LOG.error(e.getMessage(), e);
     }
   }

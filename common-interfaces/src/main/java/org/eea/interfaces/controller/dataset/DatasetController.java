@@ -625,7 +625,7 @@ public interface DatasetController {
    * Delete attachment.
    *
    * @param datasetId the dataset id
-   * @param fieldId the field id
+   * @param idField the field id
    * @param dataflowId the dataflow id
    * @param providerId the provider id
    * @param tableSchemaName the table name
@@ -647,7 +647,7 @@ public interface DatasetController {
    * Delete attachment legacy.
    *
    * @param datasetId the dataset id
-   * @param fieldId the field id
+   * @param idField the field id
    * @param dataflowId the dataflow id
    * @param providerId the provider id
    * @param tableSchemaName the table name
@@ -1203,6 +1203,9 @@ public interface DatasetController {
 
   @GetMapping("/private/expiredDatasetTables")
   List<DatasetTableVO> getDatasetTablesWithExpiredEditingLocks();
+
+  @DeleteMapping("/clearDatasetTableLocksByDataset")
+  void clearDatasetTableLocksByDataset(@RequestParam("datasetId") Long datasetId);
 
   @DeleteMapping("/clearDatasetTableLocksByDataflow")
   void clearDatasetTableLocksByDataflow(@RequestParam("dataflowId") Long dataflowId);
