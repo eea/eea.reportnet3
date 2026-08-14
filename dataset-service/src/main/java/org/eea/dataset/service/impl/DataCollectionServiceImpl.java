@@ -863,6 +863,9 @@ public class DataCollectionServiceImpl implements DataCollectionService {
               testDataset.setDatasetTypeEnum(DatasetTypeEnum.TEST);
               LOG.info("Creating empty tables if needed for test dataset {}", testDataset.getId());
               createEmptyTables.runCreationForOneDataset(testDataset);
+
+              //create views for non-prefilled tables if needed
+              bigDataDatasetService.createViewsForNewDataset(design.getId(), testDatasetId, 0L);
             }
 
 
@@ -920,6 +923,9 @@ public class DataCollectionServiceImpl implements DataCollectionService {
             referenceDatasetMetabaseVO.setDatasetTypeEnum(DatasetTypeEnum.DESIGN); //set to design not reference because we create tables for the green reference dataset
             LOG.info("Creating empty tables if needed for reference dataset {}", referenceDatasetMetabaseVO.getId());
             createEmptyTables.runCreationForOneDataset(referenceDatasetMetabaseVO);
+
+            //create views for non-prefilled tables if needed
+            bigDataDatasetService.createViewsForNewDataset(referenceDataset.getId(), referenceDataset.getId(), 0L);
           }
         }
       }
@@ -1101,6 +1107,9 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         reportingDataset.setDatasetTypeEnum(DatasetTypeEnum.REPORTING); //set to design not reference because we create tables for the green reference dataset
         LOG.info("Creating empty tables if needed for reporting dataset {}", reportingDataset.getId());
         createEmptyTables.runCreationForOneDataset(reportingDataset);
+
+        //create views for non-prefilled tables if needed
+        bigDataDatasetService.createViewsForNewDataset(design.getId(), datasetId, representative.getDataProviderId());
       }
     }
   }

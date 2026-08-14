@@ -266,6 +266,17 @@ public interface BigDataDatasetService {
 
     void createPrefilledTables(Long designDatasetId, String designDatasetSchemaId, Long datasetIdForCreation, Long providerId, String tableSchemaId) throws Exception;
 
+    /**
+     * Creates typed views (if use_views is enabled) for a newly created dataset's tables that
+     * are not marked as prefilled, since those already get their view built by
+     * {@link #createPrefilledTables}.
+     *
+     * @param designDatasetId the design dataset id the new dataset's schema/tables are resolved from
+     * @param datasetIdForCreation the id of the newly created dataset
+     * @param providerId the provider id
+     */
+    void createViewsForNewDataset(Long designDatasetId, Long datasetIdForCreation, Long providerId) throws Exception;
+
     List<FieldVO> getFieldValuesReferencedDL(Long datasetIdOrigin, String datasetSchemaId,
                                      String fieldSchemaId, String conditionalValue, String searchValue, Integer resultsNumber) throws EEAException;
 
@@ -429,5 +440,15 @@ public interface BigDataDatasetService {
      */
     void createTypedViewWithRetry(Long dataflowId, Long providerId, Long datasetId, String tableSchemaId, String tableName) throws Exception;
 
+    /**
+     * Same as {@link #createTypedViewWithRetry(Long, Long, Long, String, String)}, but takes the
+     * dataset's schema id explicitly instead of resolving it by re-reading the dataset's metabase
+     * row. Use this overload when the dataset was just created in the same transaction and its
+     * metabase row may not yet be visible to a fresh read (e.g. a different datasource/connection).
+     *
+     * @param datasetSchemaId the schema id of datasetId, already known to the caller
+     */
+    void createTypedViewWithRetry(Long dataflowId, Long providerId, Long datasetId, String tableSchemaId, String tableName, String datasetSchemaId) throws Exception;
+      
     void createEmptyTablesForSpecificTableSchema(Long datasetId, String tableSchemaId) throws EEAException;
 }

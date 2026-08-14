@@ -2149,11 +2149,33 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
                 if (useViewsEnabled) {
                     try {
-                        createTypedViewWithRetry(designDataSetMetabaseVO.getDataflowId(), providerId, datasetIdForCreation, tableSchemaVO.getIdTableSchema(), tableSchemaName);
+                        createTypedViewWithRetry(designDataSetMetabaseVO.getDataflowId(), providerId, datasetIdForCreation, tableSchemaVO.getIdTableSchema(), tableSchemaName, designDatasetSchemaId);
                     } catch (Exception e) {
                         LOG.error("Could not create typed view for prefilled datasetId {} tableSchemaId {}: {}", datasetIdForCreation, tableSchemaVO.getIdTableSchema(), e.getMessage());
                     }
                 }
+            }
+        }
+    }
+
+    @Override
+    public void createViewsForNewDataset(Long designDatasetId, Long datasetIdForCreation, Long providerId) throws Exception {
+        DataSetMetabaseVO designDataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(designDatasetId);
+        if (!isUseViewsEnabled(designDataSetMetabaseVO.getDataflowId(), datasetIdForCreation)) {
+            return;
+        }
+
+        List<TableSchemaIdNameVO> tables = datasetSchemaService.getTableSchemasIds(designDatasetId);
+        for (TableSchemaIdNameVO table : tables) {
+            TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(table.getIdTableSchema(), designDataSetMetabaseVO.getDatasetSchema());
+            if (tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getToPrefill())) {
+                // already got its view built by createPrefilledTables
+                continue;
+            }
+            try {
+                createTypedViewWithRetry(designDataSetMetabaseVO.getDataflowId(), providerId, datasetIdForCreation, table.getIdTableSchema(), table.getNameTableSchema(), designDataSetMetabaseVO.getDatasetSchema());
+            } catch (Exception e) {
+                LOG.error("Could not create typed view for datasetId {} tableSchemaId {}: {}", datasetIdForCreation, table.getIdTableSchema(), e.getMessage());
             }
         }
     }
@@ -3613,9 +3635,14 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
     @Override
     public void createTypedViewWithRetry(Long dataflowId, Long providerId, Long datasetId, String tableSchemaId, String tableName) throws Exception {
+        createTypedViewWithRetry(dataflowId, providerId, datasetId, tableSchemaId, tableName, null);
+    }
+
+    @Override
+    public void createTypedViewWithRetry(Long dataflowId, Long providerId, Long datasetId, String tableSchemaId, String tableName, String datasetSchemaId) throws Exception {
         for (int attempt = 1; attempt <= 3; attempt++) {
             try {
-                createTypedView(dataflowId, providerId, datasetId, tableSchemaId, tableName);
+                createTypedView(dataflowId, providerId, datasetId, tableSchemaId, tableName, datasetSchemaId);
                 return;
             } catch (Exception e) {
                 LOG.error("Attempt {}/3 to create typed view failed for datasetId {} tableSchemaId {}: {}", attempt, datasetId, tableSchemaId, e);
@@ -3653,15 +3680,30 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             String tableSchemaId,
             String tableName
     ) throws Exception {
+        createTypedView(dataflowId, providerId, datasetId, tableSchemaId, tableName, null);
+    }
+
+    public void createTypedView(
+            Long dataflowId,
+            Long providerId,
+            Long datasetId,
+            String tableSchemaId,
+            String tableName,
+            String datasetSchemaId
+    ) throws Exception {
 
         LOG.info("Creating typed view for datasetId {} tableSchemaId {} table {}", datasetId, tableSchemaId, tableName);
 
-        DataSetMetabaseVO dataset =
-                datasetMetabaseService.findDatasetMetabase(datasetId);
+        // datasetSchemaId may be passed explicitly by callers acting on a dataset just created in
+        // the same transaction, whose metabase row a fresh read (different datasource/connection)
+        // may not see yet
+        String resolvedDatasetSchemaId = datasetSchemaId != null
+                ? datasetSchemaId
+                : datasetMetabaseService.findDatasetMetabase(datasetId).getDatasetSchema();
 
         DataSetSchema schema =
                 schemasRepository.findById(
-                        new ObjectId(dataset.getDatasetSchema())
+                        new ObjectId(resolvedDatasetSchemaId)
                 ).orElseThrow();
 
         TableSchema tableSchema =
