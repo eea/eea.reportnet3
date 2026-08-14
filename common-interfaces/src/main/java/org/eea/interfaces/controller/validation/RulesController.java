@@ -465,4 +465,19 @@ public interface RulesController {
    */
   @GetMapping(value = "/historicDatasetRules")
   List<DatasetHistoricRuleVO> getRuleHistoricByDatasetId(@RequestParam("datasetId") long datasetId);
+
+  /**
+   * Updates the automatic geometry names in sql for Big Data.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param datasetId the dataset id
+   * @param tableSchemaId the table schema id
+   * @param fieldSchemaId the field schema id
+   */
+  @PutMapping("/private/updateBigDataGeometryRulesSql")
+  void updateBigDataGeometryRulesSql(
+      @RequestParam("datasetSchemaId") String datasetSchemaId,
+      @RequestParam("datasetId") Long datasetId,
+      @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,
+      @RequestParam(value = "fieldSchemaId", required = false) String fieldSchemaId);
 }

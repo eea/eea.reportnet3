@@ -236,19 +236,27 @@ export const EntitiesWebform = ({
     // Add foreign key fields that reference the root table
     const rootTableFKFields = [];
 
-    // Find FK fields in datasetSchema that reference the root table
-    datasetSchema.tables.forEach(table => {
-      if (table.records && table.records[0] && table.records[0].fields) {
-        table.records[0].fields.forEach(field => {
-          // Check if this field references the root table's primary key
-          if (field.referencedField && field.referencedField.idPk === rootPkFieldId) {
-            rootTableFKFields.push(field.name);
-          }
-        });
-      }
-    });
-    // Add FK field names to autoIncrementFields
-    autoIncrementFields.push(...rootTableFKFields);
+    const manualRootId = tables
+      .filter(table => table?.isRootTable === true)[0]
+      .elements.some(element => element?.autoIncrement === false && element?.isPrimary === true);
+
+    // Pass the Fk fields to the backend only if the root table has an auto-incremented primary key
+    if (!manualRootId) {
+      // Find FK fields in datasetSchema that reference the root table
+      datasetSchema.tables.forEach(table => {
+        if (table.records && table.records[0] && table.records[0].fields) {
+          table.records[0].fields.forEach(field => {
+            // Check if this field references the root table's primary key
+            if (field.referencedField && field.referencedField.idPk === rootPkFieldId) {
+              rootTableFKFields.push(field.name);
+            }
+          });
+        }
+      });
+      // Add FK field names to autoIncrementFields
+      autoIncrementFields.push(...rootTableFKFields);
+    }
+
     // Remove duplicates
     const uniqueAutoIncrementFields = [...new Set(autoIncrementFields)];
 

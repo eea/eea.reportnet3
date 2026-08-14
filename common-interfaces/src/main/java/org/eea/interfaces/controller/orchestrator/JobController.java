@@ -242,7 +242,8 @@ public interface JobController {
      */
     @GetMapping(value = "/checkEligibility")
     JobStatusEnum checkEligibilityOfJob(@RequestParam("jobType") String jobType, @RequestParam("release") boolean release, @RequestParam("dataflowId") Long dataflowId,
-                                        @RequestParam(value="dataProviderID", required = false) Long dataProviderId, @RequestParam("datasets") List<Long> datasets);
+                                        @RequestParam(value="dataProviderID", required = false) Long dataProviderId, @RequestParam("datasets") List<Long> datasets,
+                                        @RequestParam(value="excludeCallerJobId", required = false) Long excludeCallerJobId);
 
     /**
      * Finds job by id
@@ -377,7 +378,10 @@ public interface JobController {
     String getJobsStatistics();
 
     @GetMapping(value = "/private/findActiveJobsRelatedToADatasetId/{datasetId}")
-    List<JobVO> findActiveJobsRelatedToADatasetId(@PathVariable("datasetId") Long datasetId, @RequestParam(value = "dataflowId", required = false) Long dataflowId, @RequestParam(value = "providerId", required = false) Long providerId);
+    List<JobVO> findActiveJobsRelatedToADatasetId(@PathVariable("datasetId") Long datasetId,
+                                                  @RequestParam(value = "dataflowId", required = false) Long dataflowId,
+                                                  @RequestParam(value = "providerId", required = false) Long providerId,
+                                                  @RequestParam(value = "preparationCode", required = false) String preparationCode);
 
     /**
      * Updates job status and info value

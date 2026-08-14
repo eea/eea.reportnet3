@@ -23,6 +23,16 @@ public interface DatasetTableRepository extends JpaRepository<DatasetTable, Long
     Optional<DatasetTable> findByDatasetIdAndTableSchemaId(Long datasetId, String tableSchemaId);
 
     /**
+     * Retrieves an entry based on datasetId and tableSchemaId
+     *
+     * @param datasetId     the dataset id
+     * @param preparationCode the code that identifies the preparation dataset
+     * @param tableSchemaId the table schema id
+     * @return optional entry
+     */
+    Optional<DatasetTable> findByDatasetIdAndPreparationCodeAndTableSchemaId(Long datasetId, String preparationCode, String tableSchemaId);
+
+    /**
      * Retrieves entries by datasetId
      *
      * @param datasetId             the dataset id
@@ -31,12 +41,22 @@ public interface DatasetTableRepository extends JpaRepository<DatasetTable, Long
      */
     List<DatasetTable> findByDatasetIdAndIsIcebergTableCreated(Long datasetId, Boolean isIcebergTableCreated);
 
+    /**
+     * Retrieves entries by datasetId
+     *
+     * @param datasetId             the dataset id
+     * @param isIcebergTableCreated
+     * @return list of entries
+     */
+    List<DatasetTable> findByDatasetIdAndPreparationCodeAndIsIcebergTableCreated(Long datasetId, String preparationCode, Boolean isIcebergTableCreated);
+
     List<DatasetTable> findByDatasetId(Long datasetId);
 
     @Query(
             "SELECT DISTINCT t.editingUsername " +
                     "FROM DatasetTable t " +
                     "WHERE t.datasetId = :datasetId " +
+                    "AND (t.preparationCode IS NULL OR t.preparationCode = '') " +
                     "AND t.editingUsername IS NOT NULL"
     )
     List<String> findEditors(@Param("datasetId") Long datasetId);
@@ -45,6 +65,16 @@ public interface DatasetTableRepository extends JpaRepository<DatasetTable, Long
             "SELECT DISTINCT t.editingUsername " +
                     "FROM DatasetTable t " +
                     "WHERE t.datasetId = :datasetId " +
+                    "AND t.preparationCode = :preparationCode " +
+                    "AND t.editingUsername IS NOT NULL"
+    )
+    List<String> findEditors(@Param("datasetId") Long datasetId, @Param("preparationCode") String preparationCode);
+
+    @Query(
+            "SELECT DISTINCT t.editingUsername " +
+                    "FROM DatasetTable t " +
+                    "WHERE t.datasetId = :datasetId " +
+                    "AND (t.preparationCode IS NULL OR t.preparationCode = '') " +
                     "AND t.tableSchemaId = :tableSchemaId " +
                     "AND t.editingUsername IS NOT NULL"
     )
@@ -54,6 +84,19 @@ public interface DatasetTableRepository extends JpaRepository<DatasetTable, Long
             "SELECT DISTINCT t.editingUsername " +
                     "FROM DatasetTable t " +
                     "WHERE t.datasetId = :datasetId " +
+                    "AND t.preparationCode = :preparationCode " +
+                    "AND t.tableSchemaId = :tableSchemaId " +
+                    "AND t.editingUsername IS NOT NULL"
+    )
+    List<String> findEditorsOfTable(@Param("datasetId") Long datasetId,
+                                    @Param("preparationCode") String preparationCode,
+                                    @Param("tableSchemaId") String tableSchemaId);
+
+    @Query(
+            "SELECT DISTINCT t.editingUsername " +
+                    "FROM DatasetTable t " +
+                    "WHERE t.datasetId = :datasetId " +
+                    "AND (t.preparationCode IS NULL OR t.preparationCode = '') " +
                     "AND t.editingUsername IS NOT NULL " +
                     "AND t.editLockExpirationDate > CURRENT_TIMESTAMP"
     )
@@ -98,8 +141,8 @@ public interface DatasetTableRepository extends JpaRepository<DatasetTable, Long
     @Query(
             nativeQuery = true,
             value =
-                    "INSERT INTO dataset_table (dataset_id, dataset_schema_id, table_schema_id, editing_username) " +
-                            "SELECT :datasetId, :datasetSchemaId, table_id, NULL " +
+                    "INSERT INTO dataset_table (id, dataset_id, dataset_schema_id, table_schema_id, editing_username) " +
+                            "SELECT nextval('dataset_table_id_seq'), :datasetId, :datasetSchemaId, table_id, NULL " +
                             "FROM unnest(CAST(:tableSchemaIds AS varchar[])) AS table_id " +
                             "WHERE NOT EXISTS ( " +
                             "    SELECT 1 FROM dataset_table x " +

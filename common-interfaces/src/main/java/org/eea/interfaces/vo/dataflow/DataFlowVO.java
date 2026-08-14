@@ -99,6 +99,8 @@ public class DataFlowVO extends GenericDataflowVO implements Serializable {
   /** Whether typed Dremio views are used for this dataflow by default. */
   private Boolean useViews;
 
+  private Boolean preparationEnabled;
+
 
   /**
    * Equals.

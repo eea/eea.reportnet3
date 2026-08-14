@@ -331,7 +331,7 @@ export const DataViewer = ({
           fieldId: effectiveFieldId,
           dataflowId,
           tableSchemaId: tableId,
-          providerId: effectiveProviderId
+          providerId: effectiveProviderId ?? 0
         });
 
         const fullGeometryData = fullGeometryResponse?.data ?? fullGeometryResponse;
@@ -379,7 +379,8 @@ export const DataViewer = ({
         recordId,
         tableSchemaName: tableName,
         fieldName,
-        providerCode: dataProviderCode
+        providerCode: dataProviderCode,
+        preparationCode: preparationSetCode
       });
       DownloadFile(data, fileName);
     } catch (error) {
@@ -791,7 +792,8 @@ export const DataViewer = ({
         tableSchemaName: tableName,
         fieldName: records.selectedFieldName,
         fileName: encodedFileName,
-        recordId: records.selectedRecordId
+        recordId: records.selectedRecordId,
+        preparationCode: preparationSetCode
       });
       RecordUtils.changeRecordValue(records.selectedRecord, records.selectedFieldSchemaId, '');
       setIsDeleteAttachmentVisible(false);
@@ -808,7 +810,8 @@ export const DataViewer = ({
       await DatasetService.deleteRecord({
         datasetId,
         selectedRecordId: records.selectedRecord.recordId,
-        tableId
+        tableId,
+        preparationCode: preparationSetCode
       });
       const calcRecords = records.totalFilteredRecords >= 0 ? records.totalFilteredRecords : records.totalRecords;
       const page =
@@ -1020,7 +1023,8 @@ export const DataViewer = ({
       const recordsAdded = await DatasetService.createRecord(
         datasetId,
         tableId,
-        MapUtils.parseGeometryData(records.pastedRecords)
+        MapUtils.parseGeometryData(records.pastedRecords),
+        preparationSetCode
       );
       if (!recordsAdded) {
         throw new Error('ADD_RECORDS_PASTING_ERROR');
@@ -1099,7 +1103,7 @@ export const DataViewer = ({
     if (isNewRecord) {
       try {
         setIsSaving(true);
-        await DatasetService.createRecord(datasetId, tableId, [parseMultiselect(record)]);
+        await DatasetService.createRecord(datasetId, tableId, [parseMultiselect(record)], preparationSetCode);
         onRefresh();
       } catch (error) {
         if (error.response.status === 423) {
@@ -1128,7 +1132,7 @@ export const DataViewer = ({
     } else {
       try {
         setIsSaving(true);
-        await DatasetService.updateRecord({ datasetId, record: parseMultiselect(record), tableSchemaId: tableId });
+        await DatasetService.updateRecord({ datasetId, record: parseMultiselect(record), tableSchemaId: tableId, preparationCode: preparationSetCode });
         onRefresh();
       } catch (error) {
         if (error.response?.status === 423) {
@@ -1675,7 +1679,8 @@ export const DataViewer = ({
                   tableSchemaName: tableName,
                   fieldName: records.selectedFieldName,
                   recordId: records.selectedRecordId,
-                  previousFileName: encodeURIComponent(records.selectedFileName)
+                  previousFileName: encodeURIComponent(records.selectedFileName),
+                  preparationCode: preparationSetCode
                 })
               : getUrl(DatasetConfig.uploadAttachmentWithProviderId, {
                   dataflowId,
@@ -1685,7 +1690,8 @@ export const DataViewer = ({
                   tableSchemaName: tableName,
                   fieldName: records.selectedFieldName,
                   recordId: records.selectedRecordId,
-                  previousFileName: encodeURIComponent(records.selectedFileName)
+                  previousFileName: encodeURIComponent(records.selectedFileName),
+                  preparationCode: preparationSetCode
                 })
           }`}
         />

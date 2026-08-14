@@ -32,6 +32,7 @@ export const WebformTable = ({
   getFieldSchemaId = () => ({ fieldSchema: undefined, fieldId: undefined }),
   isEditor,
   isIcebergCreated,
+  isLoadingTableData,
   isLoadingIceberg,
   isRefresh,
   isReporting,
@@ -178,15 +179,22 @@ export const WebformTable = ({
           .find(datasetTable => datasetTable.tableSchemaName === webformData.name)
           ?.records?.[0]?.fields?.find(tableField => tableField?.referencedField?.idPk === rootPkFieldId);
 
-        const webformFieldElements = webformData.elements.filter(el => el.type === 'FIELD');
+        // Get all FIELD elements from nested containers
+        const getFieldElements = elements =>
+          elements.flatMap(element => {
+            // Ignore TABLE elements
+            if (element.type === 'TABLE') {
+              return [];
+            }
 
-        // Include field elements nested inside blocks so they are part of the record sent to the backend.
-        // This ensures all table fields are included and created in the database if any columns are missing.
-        const blockFieldElements = webformData.elements
-          .filter(el => el.type === 'BLOCK' && Array.isArray(el.elements))
-          .flatMap(block => block.elements.filter(blockElement => blockElement.type === 'FIELD'));
+            if (Array.isArray(element.elements)) {
+              return getFieldElements(element.elements);
+            }
 
-        const allFieldElements = [...webformFieldElements, ...blockFieldElements];
+            return element.type === 'FIELD' ? [element] : [];
+          });
+
+        const allFieldElements = getFieldElements(webformData.elements);
 
         webformDataWithFkRootField = fkRootField
           ? {
@@ -461,7 +469,7 @@ export const WebformTable = ({
       <div className={styles.overlay}>
         <div
           style={
-            bigData && (isLoadingIceberg || !allManualCheck)
+            bigData && (isLoadingIceberg || isLoadingTableData || !allManualCheck)
               ? { opacity: 0.5, pointerEvents: 'none' }
               : isEditor || isViewMode || updatingField.isUpdating
               ? { opacity: 1 }

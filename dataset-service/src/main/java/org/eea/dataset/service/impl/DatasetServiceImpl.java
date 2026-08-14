@@ -88,6 +88,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.StandardCharsets;
@@ -95,6 +97,10 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipException;
+import java.util.zip.ZipOutputStream;
 
 import static org.eea.utils.LiteralConstants.*;
 
@@ -338,6 +344,9 @@ public class DatasetServiceImpl implements DatasetService {
   /** The import path. */
   @Value("${importPath}")
   private String importPath;
+
+  @PersistenceContext
+  private EntityManager entityManager;
 
   /**
    * The default process priority
@@ -1481,16 +1490,39 @@ public class DatasetServiceImpl implements DatasetService {
    * @param entityType the entity type
    * @return true, if successful
    */
+  /*
+      | Dataset Type      | Updatable | Table ReadOnly | Returns |
+      | ------------      | --------- | -------------- | ------- |
+      | DESIGN            | —         | true           | false   |
+      | REFERENCE         | false     | false          | true    |
+      | REFERENCE         | false     | true           | true    |
+      | REFERENCE         | true      | false          | false   |
+      | REFERENCE         | true      | true           | false   |
+      | REPORTING/OTHER   | —         | true           | true    |
+      | REPORTING/OTHER   | —         | false          | false   |
+   */
   @Override
   public boolean checkIfDatasetLockedOrReadOnly(Long datasetId, String idRecordSchema,
-      EntityTypeEnum entityType) {
-    DatasetTypeEnum datasetType = getDatasetType(datasetId);
-    Boolean updatable = Boolean.TRUE.equals(referenceDatasetRepository.findById(datasetId)
-        .orElse(new ReferenceDataset()).getUpdatable());
-    return (DatasetTypeEnum.REFERENCE.equals(datasetType) && Boolean.FALSE.equals(updatable))
-        || (!DatasetTypeEnum.DESIGN.equals(datasetType)
-            && !(DatasetTypeEnum.REFERENCE.equals(datasetType) && Boolean.TRUE.equals(updatable))
-            && Boolean.TRUE.equals(getTableReadOnly(datasetId, idRecordSchema, entityType)));
+                                                EntityTypeEnum entityType) {
+
+    final DatasetTypeEnum datasetType = getDatasetType(datasetId);
+
+    boolean updatable = referenceDatasetRepository.findById(datasetId)
+            .map(ReferenceDataset::getUpdatable)
+            .orElse(false);
+
+    // Case 1:
+    // Reference dataset but not updatable
+    if (datasetType == DatasetTypeEnum.REFERENCE && !updatable) {
+      return true;
+    }
+
+    // Case 2:
+    // Non-design dataset, not editable reference dataset,
+    // and underlying table marked readonly
+    return datasetType != DatasetTypeEnum.DESIGN
+            && !(datasetType == DatasetTypeEnum.REFERENCE && updatable)
+            && getTableReadOnly(datasetId, idRecordSchema, entityType);
   }
 
   /**
@@ -3999,4 +4031,70 @@ public class DatasetServiceImpl implements DatasetService {
     Boolean exists = dataSetsJdbcTemplate.queryForObject(sql, Boolean.class);
     return Boolean.TRUE.equals(exists);
   }
+
+  /**
+   * Streams attachments for the given field schema and writes them to the ZIP output stream. We were originally constracting
+   * a List instead of a Stream and it caused java heap exception that was discovered in ticket #305064. The process was moved
+   * in the service to be transactional with readOnly without changing the callers that managed insert and delete actions.
+   *
+   * @param datasetId The dataset id
+   * @param fieldSchemaId The field schema id
+   * @param tableSchemaId The table schema id
+   * @param tableName The table name
+   * @param out the ZIP output stream
+   * @throws IOException if an attachment cannot be written
+   */
+  @Override
+  @org.springframework.transaction.annotation.Transactional(readOnly = true)
+  public void writeAttachmentsToZip(@DatasetId Long datasetId, String fieldSchemaId, String tableSchemaId, String tableName, ZipOutputStream out) throws IOException {
+    try (Stream<AttachmentValue> attachments =
+             attachmentRepository
+                 .streamAllByIdFieldSchemaAndValueIsNotNull(fieldSchemaId)) {
+
+      try {
+        attachments.forEachOrdered(attachment -> {
+          boolean zipOutputStreamOpened = false;
+
+          try {
+            LOG.info("We are in tableSchema with id {}, checking field {} and processing attachment {}",
+                tableSchemaId, fieldSchemaId, attachment.getFileName());
+
+            ZipEntry attachmentEntry = new ZipEntry(tableName + "/" + attachment.getFileName());
+
+            out.putNextEntry(attachmentEntry);
+            zipOutputStreamOpened = true;
+
+            // Stream bytes directly to the zip file.
+            byte[] content = attachment.getContent();
+            if (content != null) {
+              out.write(content, 0, content.length);
+            }
+
+          } catch (ZipException e) {
+            LOG.info("Error creating file {} because it already exists", attachment.getFileName(), e);
+          } catch (IOException e) {
+            throw new UncheckedIOException(e);
+          } finally {
+            if (zipOutputStreamOpened) {
+              try {
+                out.closeEntry();
+              } catch (IOException e) {
+                throw new UncheckedIOException(e);
+              }
+            }
+
+            if (entityManager.contains(attachment)) {
+              // CRITICAL FOR MEMORY: Detach from the persistence context.
+              // This breaks the Hibernate reference, allowing GC to free up memory immediately.
+              entityManager.detach(attachment);
+            }
+          }
+        });
+
+      } catch (UncheckedIOException e) {
+        throw e.getCause();
+      }
+    }
+  }
+
 }

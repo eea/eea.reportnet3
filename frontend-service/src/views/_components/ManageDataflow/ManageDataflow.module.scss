@@ -23,6 +23,11 @@
   }
 }
 
+.disabledLabel {
+  cursor: not-allowed !important;
+  opacity: 0.5;
+}
+
 .cancelButton {
   margin-right: 0px !important;
 }

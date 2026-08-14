@@ -59,6 +59,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
@@ -69,6 +70,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.concurrent.DelegatingSecurityContextRunnable;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.task.DelegatingSecurityContextAsyncTaskExecutor;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
@@ -81,6 +83,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
 
 import static org.eea.interfaces.vo.dataset.enums.FileTypeEnum.CSV;
@@ -467,7 +471,7 @@ public class DatasetControllerImpl implements DatasetController {
 
     if(!isPreparationDataset) {
       // --- EDITING LOCK CHECK ---
-      String userEditingDataset = datasetTableService.getDatasetEditingUsername(datasetId);
+      String userEditingDataset = datasetTableService.getDatasetEditingUsername(datasetId, null);
 
       if (userEditingDataset != null) {
         LOG.error("Can not private import for datasetId {} because the table is locked for username {} from   {} ", datasetId, userEditingDataset, userEditingDataset);
@@ -490,25 +494,25 @@ public class DatasetControllerImpl implements DatasetController {
     }
     DataFlowVO dataFlowVO = dataFlowControllerZuul.getMetabaseById(dataflowId);
     //Datalakes import
-    if(dataFlowVO.getBigData() != null && dataFlowVO.getBigData()){
+    if (dataFlowVO.getBigData() != null && dataFlowVO.getBigData()) {
       try {
-        if(!isPreparationDataset){
+        if (!isPreparationDataset) {
         String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
-        if(StringUtils.isNotBlank(tableSchemaId)){
+        if (StringUtils.isNotBlank(tableSchemaId)) {
           TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, datasetSchemaId);
-          if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable())
-                  && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, tableSchemaVO.getIdTableSchema()))){
+          if (tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable())
+                  && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, null, tableSchemaVO.getIdTableSchema()))){
             LOG.error("Can not import for datasetId {} because the table is iceberg", datasetId);
             datasetService.failImportJob(jobId, datasetId, EventType.IMPORT_FAILED_EVENT_ICEBERG_EXISTS, JobInfoEnum.ERROR_ICEBERG_TABLE_EXISTS);
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.IMPORTING_FILE_ICEBERG);
           }
         }
-        else{
+        else {
           List<TableSchemaIdNameVO> tableSchemaIdNameVOS =  datasetSchemaService.getTableSchemasIds(datasetId);
           for(TableSchemaIdNameVO tableSchemaIdNameVO: tableSchemaIdNameVOS){
             TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaIdNameVO.getIdTableSchema(), datasetSchemaId);
             if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable())
-                    && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, tableSchemaVO.getIdTableSchema()))){
+                    && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, null, tableSchemaVO.getIdTableSchema()))){
               LOG.error("Can not import zip file for datasetId {} because a table is iceberg", datasetId);
               datasetService.failImportJob(jobId, datasetId, EventType.IMPORT_FAILED_EVENT_ICEBERG_EXISTS, JobInfoEnum.ERROR_ICEBERG_TABLE_EXISTS);
               throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.IMPORTING_FILE_ICEBERG);
@@ -566,7 +570,7 @@ public class DatasetControllerImpl implements DatasetController {
           //check if there is already an import job with status IN_PROGRESS for the specific datasetId
           List<Long> datasetIds = new ArrayList<>();
           datasetIds.add(datasetId);
-          jobStatus = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.IMPORT.getValue(), false, dataflowId, providerId, datasetIds);
+          jobStatus = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.IMPORT.getValue(), false, dataflowId, providerId, datasetIds, null);
           jobId = jobControllerZuul.addImportJob(datasetId, dataflowId, providerId, tableSchemaId, file.getOriginalFilename(), replace, integrationId, null, delimiter, jobStatus, fmeJobId, null);
           if(jobStatus.getValue().equals(JobStatusEnum.REFUSED.getValue())){
             LOG.info("Added import job with id {} for datasetId {} with status REFUSED", jobId, datasetId);
@@ -669,7 +673,7 @@ public class DatasetControllerImpl implements DatasetController {
                   example = "0") @RequestParam(value = "code", required = false) String preparationCode) {
 
     String originalFilename = (file != null) ? file.getOriginalFilename() : null;
-    LOG.info("Private Import endpoint was called for datasetId {} dataflowId {} providerId {} integrationId {} delimiter {} replace {} jobId {} fmeJobId {} and file {}", datasetId, dataflowId, providerId, integrationId, delimiter, replace, jobId, fmeJobId, originalFilename);
+    LOG.info("Private Import endpoint was called for datasetId {} preparationCode {} dataflowId {} providerId {} integrationId {} delimiter {} replace {} jobId {} fmeJobId {} and file {}", datasetId, preparationCode, dataflowId, providerId, integrationId, delimiter, replace, jobId, fmeJobId, originalFilename);
 
     if (dataflowId == null){
       dataflowId = datasetService.getDataFlowIdById(datasetId);
@@ -685,8 +689,8 @@ public class DatasetControllerImpl implements DatasetController {
         if(StringUtils.isNotBlank(tableSchemaId)){
           TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, datasetSchemaId);
           if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable())
-                  && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, tableSchemaVO.getIdTableSchema()))){
-            LOG.error("Can not private import for datasetId {} because the table is iceberg", datasetId);
+                  && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, preparationCode, tableSchemaVO.getIdTableSchema()))){
+            LOG.error("Can not private import for datasetId {} preparationCode because the table is iceberg", datasetId, preparationCode);
             datasetService.failImportJob(jobId, datasetId, EventType.IMPORT_FAILED_EVENT_ICEBERG_EXISTS, JobInfoEnum.ERROR_ICEBERG_TABLE_EXISTS);
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.IMPORTING_FILE_ICEBERG);
           }
@@ -696,8 +700,8 @@ public class DatasetControllerImpl implements DatasetController {
           for(TableSchemaIdNameVO tableSchemaIdNameVO: tableSchemaIdNameVOS){
             TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaIdNameVO.getIdTableSchema(), datasetSchemaId);
             if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable())
-                    && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, tableSchemaVO.getIdTableSchema()))){
-              LOG.error("Can not private import zip file for datasetId {} because a table is iceberg", datasetId);
+                    && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, preparationCode, tableSchemaVO.getIdTableSchema()))){
+              LOG.error("Can not private import zip file for datasetId {} preparationCode {} because a table is iceberg", datasetId, preparationCode);
               datasetService.failImportJob(jobId, datasetId, EventType.IMPORT_FAILED_EVENT_ICEBERG_EXISTS, JobInfoEnum.ERROR_ICEBERG_TABLE_EXISTS);
               throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.IMPORTING_FILE_ICEBERG);
             }
@@ -744,7 +748,7 @@ public class DatasetControllerImpl implements DatasetController {
           //check if there is already an import job with status IN_PROGRESS for the specific datasetId
           List<Long> datasetIds = new ArrayList<>();
           datasetIds.add(datasetId);
-          jobStatus = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.IMPORT.getValue(), false, dataflowId, providerId, datasetIds);
+          jobStatus = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.IMPORT.getValue(), false, dataflowId, providerId, datasetIds, null);
           jobId = jobControllerZuul.addImportJob(datasetId, dataflowId, providerId, tableSchemaId, file.getOriginalFilename(), replace, integrationId, null, delimiter, jobStatus, fmeJobId, null);
           if(jobStatus.getValue().equals(JobStatusEnum.REFUSED.getValue())){
             LOG.info("Added private import job with id {} for datasetId {} with status REFUSED", jobId, datasetId);
@@ -923,15 +927,24 @@ public class DatasetControllerImpl implements DatasetController {
           @ApiResponse(code = 404, message = "Record not found in dataset"),
           @ApiResponse(code = 400, message = "record informed not found or table is read only")})
   public void updateRecords(
-          @ApiParam(type = "Long", value = "Dataset Id",
-                  example = "0") @LockCriteria(name = "datasetId") @PathVariable("id") Long datasetId,
-          @ApiParam(value = "list of records") @RequestBody List<RecordVO> records,
-          @ApiParam(type = "boolean", value = "update cascade", example = "true") @RequestParam(
-                  value = "updateCascadePK", required = false) boolean updateCascadePK,
-          @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId) throws Exception {
+          @ApiParam(type = "Long", value = "Dataset Id", example = "0")
+          @LockCriteria(name = "datasetId")
+          @PathVariable("id") Long datasetId,
+
+          @ApiParam(value = "list of records")
+          @RequestBody List<RecordVO> records,
+
+          @ApiParam(type = "boolean", value = "update cascade", example = "true")
+          @RequestParam(value = "updateCascadePK", required = false) boolean updateCascadePK,
+
+          @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,
+
+          @ApiParam(type = "string", value = "preparation code", example = "dataset1-prepset1")
+          @LockCriteria(name = "preparationCode")
+          @RequestParam(value = "preparationCode", required = false) String preparationCode) throws Exception {
+
     if (datasetId == null || records == null || records.isEmpty()) {
-      LOG.error(
-              "Error updating records. The datasetId or the records to update are emtpy or null");
+      LOG.error("Error updating records. The datasetId or the records to update are emtpy or null");
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.RECORD_NOTFOUND);
     }
     if (datasetService.checkIfDatasetLockedOrReadOnly(datasetId, records.get(0).getIdRecordSchema(),
@@ -941,31 +954,36 @@ public class DatasetControllerImpl implements DatasetController {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.TABLE_READ_ONLY);
     }
     try {
-      LOG.info("Updating records for datasetId {}", datasetId);
-      Long dataflowId = datasetService.getDataFlowIdById(datasetId);
-      Boolean isBigDataflow = dataFlowControllerZuul.isBigDataflow(dataflowId);
-      if(Boolean.TRUE.equals(isBigDataflow)){
-        String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
-        Long providerId = datasetService.getDataProviderIdById(datasetId);
-        TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, datasetSchemaId);
-        if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable())
-                && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, tableSchemaVO.getIdTableSchema()))) {
-          bigDataDatasetService.updateRecords(dataflowId, providerId, datasetId, tableSchemaVO, records, updateCascadePK);
+      LOG.info("Updating records for datasetId {} preparationCode {}", datasetId, preparationCode);
+      final Long dataflowId = datasetService.getDataFlowIdById(datasetId);
+      final Boolean isBigDataflow = dataFlowControllerZuul.isBigDataflow(dataflowId);
+      if (Boolean.TRUE.equals(isBigDataflow)) {
+        final String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
+        final Long providerId = datasetService.getDataProviderIdById(datasetId);
+        final TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, datasetSchemaId);
+
+        if (tableSchemaVO != null
+                && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable())
+                && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, preparationCode, tableSchemaVO.getIdTableSchema()))) {
+          bigDataDatasetService.updateRecords(dataflowId, providerId, datasetId, preparationCode, tableSchemaVO, records, updateCascadePK);
         }
-        else{
+        else {
           throw new Exception("The table data are not manually editable or the iceberg table has not been created");
         }
       }
-      else{
+      else {
         updateRecordHelper.executeUpdateProcess(datasetId, records, updateCascadePK);
       }
-      LOG.info("Successfully updated records for datasetId {}", datasetId);
-    } catch (EEAException e) {
-      LOG.error("Error updating records in the datasetId {}. Message: {}", datasetId,
-              e.getMessage(), e);
+      LOG.info("Successfully updated records for datasetId {} preparationCode {}", datasetId, preparationCode);
+    }
+    catch (EEAException e) {
+      LOG.error("Error updating records in the datasetId {} preparationCode {}. Message: {}",
+              datasetId, preparationCode, e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.UPDATING_TABLE_DATA);
-    } catch (Exception e) {
-      LOG.error("Unexpected error! Error updating records for datasetId {} Message: {}", datasetId, e.getMessage());
+    }
+    catch (Exception e) {
+      LOG.error("Unexpected error! Error updating records for datasetId {} preparationCode {} Message: {}",
+              datasetId, preparationCode, e.getMessage());
       throw e;
     }
   }
@@ -988,45 +1006,56 @@ public class DatasetControllerImpl implements DatasetController {
           @ApiResponse(code = 404, message = "record or dataset not found"), @ApiResponse(code = 400,
           message = "error because table is read only or fixed number of records is active")})
   public void deleteRecord(
-          @ApiParam(type = "Long", value = "Dataset Id",
-                  example = "0") @LockCriteria(name = "datasetId") @PathVariable("id") Long datasetId,
-          @ApiParam(type = "String", value = "record Id",
-                  example = "19D0B971B7E0D2FB66B77F2A8DBA4964") @PathVariable("recordId") String recordId,
-          @ApiParam(type = "boolean", value = "delete cascade", example = "true") @RequestParam(
-                  value = "deleteCascadePK", required = false) boolean deleteCascadePK,
-          @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId) {
-    try {
-      String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
+          @ApiParam(type = "Long", value = "Dataset Id", example = "0")
+          @LockCriteria(name = "datasetId")
+          @PathVariable("id") Long datasetId,
 
-      TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, datasetSchemaId);
+          @ApiParam(type = "String", value = "record Id", example = "19D0B971B7E0D2FB66B77F2A8DBA4964")
+          @PathVariable("recordId") String recordId,
+
+          @ApiParam(type = "boolean", value = "delete cascade", example = "true")
+          @RequestParam(value = "deleteCascadePK", required = false) boolean deleteCascadePK,
+
+          @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,
+
+          @ApiParam(type = "string", value = "preparation code", example = "dataset1-prepset1")
+          @LockCriteria(name = "preparationCode")
+          @RequestParam(value = "preparationCode", required = false) String preparationCode) {
+
+    try {
+      final String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
+
+      final TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, datasetSchemaId);
 
       if (datasetService.checkIfDatasetLockedOrReadOnly(datasetId,
               tableSchemaVO.getRecordSchema().getIdRecordSchema(), EntityTypeEnum.RECORD)) {
-        LOG.error("Error deleting record with id {} in the datasetId {}. The table is read only",
-                recordId, datasetId);
+        LOG.error("Error deleting record with id {} in the datasetId {} preparationCode {}. The table is read only",
+                recordId, datasetId, preparationCode);
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.TABLE_READ_ONLY);
       }
 
       LOG.info("Deleting record with id {} for datasetId {}", recordId, datasetId);
-      Long dataflowId = datasetService.getDataFlowIdById(datasetId);
-      Boolean isBigDataflow = dataFlowControllerZuul.isBigDataflow(dataflowId);
-      if(Boolean.TRUE.equals(isBigDataflow)){
+      final Long dataflowId = datasetService.getDataFlowIdById(datasetId);
+      final Boolean isBigDataflow = dataFlowControllerZuul.isBigDataflow(dataflowId);
+      if (Boolean.TRUE.equals(isBigDataflow)) {
         if (!DatasetTypeEnum.DESIGN.equals(datasetMetabaseService.getDatasetType(datasetId))
                 && Boolean.TRUE.equals(tableSchemaVO.getFixedNumber())) {
           LOG.error(
-                  "Error deleting record with id {} in the datasetId {}. The table has a fixed number of records",
-                  recordId, datasetId);
+                  "Error deleting record with id {} in the datasetId {} preparationCode {}. The table has a fixed number of records",
+                  recordId, datasetId, preparationCode);
           throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                   String.format(EEAErrorMessage.FIXED_NUMBER_OF_RECORDS,
                           datasetService.findRecordSchemaIdById(datasetId, recordId)));
         }
         Long providerId = datasetService.getDataProviderIdById(datasetId);
-        if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable())
-                && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, tableSchemaVO.getIdTableSchema()))) {
+
+        if (tableSchemaVO != null
+                && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable())
+                && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, preparationCode, tableSchemaVO.getIdTableSchema()))) {
           providerId = providerId != null ? providerId : 0L;
-          bigDataDatasetService.deleteRecord(dataflowId, providerId, datasetId, tableSchemaVO, new ArrayList<>(Arrays.asList(recordId)), deleteCascadePK);
+          bigDataDatasetService.deleteRecord(dataflowId, providerId, datasetId, preparationCode, tableSchemaVO, new ArrayList<>(Arrays.asList(recordId)), deleteCascadePK);
         }
-        else{
+        else {
           throw new Exception("The table data are not manually editable or the iceberg table has not been created");
         }
       }
@@ -1044,12 +1073,15 @@ public class DatasetControllerImpl implements DatasetController {
         updateRecordHelper.executeDeleteProcess(datasetId, recordId, deleteCascadePK);
       }
       LOG.info("Successfully deleted record with id {} for datasetId {}", recordId, datasetId);
-    } catch (EEAException e) {
-      LOG.error("Error deleting record with id {} in the datasetId {}. Message: {}", recordId, datasetId,
-              e.getMessage(), e);
+    }
+    catch (EEAException e) {
+      LOG.error("Error deleting record with id {} in the datasetId {} preparationCode {}. Message: {}",
+              recordId, datasetId, preparationCode, e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DELETING_TABLE_DATA);
-    } catch (Exception e) {
-      LOG.error("Unexpected error! Error deleting record with id {} for datasetId {} Message: {}", recordId, datasetId, e.getMessage());
+    }
+    catch (Exception e) {
+      LOG.error("Unexpected error! Error deleting record with id {} for datasetId {} preparationCode {} Message: {}",
+              recordId, datasetId, preparationCode, e.getMessage());
       throw e;
     }
   }
@@ -1072,51 +1104,62 @@ public class DatasetControllerImpl implements DatasetController {
           code = 400,
           message = "error because table is read only or fixed number of records is active or inserting")})
   public void insertRecords(
-          @ApiParam(type = "Long", value = "Dataset Id", example = "0") @LockCriteria(
-                  name = "datasetId") @PathVariable("datasetId") Long datasetId,
-          @ApiParam(type = "String", value = "table schema Id",
-                  example = "5cf0e9b3b793310e9ceca190") @PathVariable("tableSchemaId") String tableSchemaId,
-          @ApiParam(value = "list of records") @RequestBody List<RecordVO> records) {
+          @ApiParam(type = "Long", value = "Dataset Id", example = "0")
+          @LockCriteria(name = "datasetId")
+          @PathVariable("datasetId") Long datasetId,
 
-    String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
-    TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, datasetSchemaId);
+          @ApiParam(type = "String", value = "table schema Id", example = "5cf0e9b3b793310e9ceca190")
+          @PathVariable("tableSchemaId") String tableSchemaId,
+
+          @ApiParam(type = "String", value = "preparation code", example = "dataset1-prepset1")
+          @LockCriteria(name = "preparationCode")
+          @RequestParam(value = "preparationCode", required = false) String preparationCode,
+
+          @ApiParam(value = "list of records")
+          @RequestBody List<RecordVO> records) {
+
+    final String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
+    final TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, datasetSchemaId);
     if (!DatasetTypeEnum.DESIGN.equals(datasetMetabaseService.getDatasetType(datasetId))
             && Boolean.TRUE.equals(tableSchemaVO.getFixedNumber())) {
-      LOG.error("Error inserting record in the datasetId {} and tableSchemaId {}. The table has a fixed number of records",
-              datasetId, tableSchemaId);
+      LOG.error("Error inserting record in the datasetId {} preparationCode {} and tableSchemaId {}. The table has a fixed number of records",
+              datasetId, preparationCode, tableSchemaId);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String
               .format(EEAErrorMessage.FIXED_NUMBER_OF_RECORDS, records.get(0).getIdRecordSchema()));
     }
     try {
       if (datasetService.checkIfDatasetLockedOrReadOnly(datasetId, records.get(0).getIdRecordSchema(),
               EntityTypeEnum.RECORD)) {
-        LOG.error("Error inserting record in the datasetId {} and tableSchemaId {}. The table is read only",
-                datasetId, tableSchemaId);
+        LOG.error("Error inserting record in the datasetId {} preparationCode {} and tableSchemaId {}. The table is read only",
+                datasetId, preparationCode, tableSchemaId);
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.TABLE_READ_ONLY);
       }
-      LOG.info("Inserting records for datasetId {} and tableSchemaId {}", datasetId, tableSchemaId);
-      Long dataflowId = datasetService.getDataFlowIdById(datasetId);
-      Boolean isBigDataflow = dataFlowControllerZuul.isBigDataflow(dataflowId);
-      if(Boolean.TRUE.equals(isBigDataflow)){
-        Long providerId = datasetService.getDataProviderIdById(datasetId);
-        if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable())
-                && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, tableSchemaVO.getIdTableSchema()))) {
-          bigDataDatasetService.insertRecords(dataflowId, providerId, datasetId, tableSchemaVO.getNameTableSchema(), records);
+      LOG.info("Inserting records for datasetId {} preparationCode {} and tableSchemaId {}", datasetId, preparationCode, tableSchemaId);
+      final Long dataflowId = datasetService.getDataFlowIdById(datasetId);
+      final Boolean isBigDataflow = dataFlowControllerZuul.isBigDataflow(dataflowId);
+      if (Boolean.TRUE.equals(isBigDataflow)) {
+        final Long providerId = datasetService.getDataProviderIdById(datasetId);
+        if (tableSchemaVO != null
+                && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable())
+                && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, preparationCode,tableSchemaVO.getIdTableSchema()))) {
+          bigDataDatasetService.insertRecords(dataflowId, providerId, datasetId, preparationCode, tableSchemaVO.getNameTableSchema(), records);
         }
-        else{
+        else {
           throw new Exception("The table data are not manually editable or the iceberg table has not been created");
         }
       }
       else {
         updateRecordHelper.executeCreateProcess(datasetId, records, tableSchemaId);
       }
-      LOG.info("Successfully inserted records for datasetId {} and tableSchemaId {}", datasetId, tableSchemaId);
-    } catch (EEAException e) {
-      LOG.error("Error inserting records for datasetId {} and tableSchemaId {} Message: {}", datasetId, tableSchemaId, e.getMessage(), e);
+      LOG.info("Successfully inserted records for datasetId {} preparationCode {} and tableSchemaId {}", datasetId, preparationCode, tableSchemaId);
+    }
+    catch (EEAException e) {
+      LOG.error("Error inserting records for datasetId {} preparationCode {} and tableSchemaId {} Message: {}", datasetId, preparationCode, tableSchemaId, e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
               EEAErrorMessage.INSERTING_TABLE_DATA);
-    } catch (Exception e) {
-      LOG.error("Unexpected error! Error inserting records for datasetId {} and tableSchemaId {} Message: {}", datasetId, tableSchemaId, e.getMessage());
+    }
+    catch (Exception e) {
+      LOG.error("Unexpected error! Error inserting records for datasetId {} preparationCode {} and tableSchemaId {} Message: {}", datasetId, preparationCode, tableSchemaId, e.getMessage());
       throw e;
     }
   }
@@ -1172,7 +1215,6 @@ public class DatasetControllerImpl implements DatasetController {
    */
   @SneakyThrows
   @Override
-  @HystrixCommand
   @LockMethod(removeWhenFinish = false)
   @DeleteMapping("/v1/{datasetId}/deleteDatasetData")
   @PreAuthorize("secondLevelAuthorize(#datasetId, 'DATASCHEMA_CUSTODIAN', 'DATASCHEMA_STEWARD', 'DATASCHEMA_EDITOR_WRITE', 'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE', 'EUDATASET_CUSTODIAN','EUDATASET_STEWARD','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','REFERENCEDATASET_STEWARD') OR checkApiKey(#dataflowId,#providerId, #datasetId, 'DATASCHEMA_CUSTODIAN', 'DATASCHEMA_STEWARD', 'DATASCHEMA_EDITOR_WRITE', 'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE', 'EUDATASET_CUSTODIAN','EUDATASET_STEWARD','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','REFERENCEDATASET_STEWARD')")
@@ -1209,7 +1251,7 @@ public class DatasetControllerImpl implements DatasetController {
       if (isPreparationDataset) {
         jobStatus = jobControllerZuul.checkEligibilityOfPreparationJob(JobTypeEnum.DELETE.getValue(), datasetId, preparationCode);
       } else {
-        jobStatus = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.DELETE.getValue(), false, resolvedDataflowId, providerId, Collections.singletonList(datasetId));
+        jobStatus = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.DELETE.getValue(), false, resolvedDataflowId, providerId, Collections.singletonList(datasetId), null);
       }
 
       jobId = jobControllerZuul.addDeleteDataJob(datasetId, null, resolvedDataflowId, providerId, preparationCode, deletePrefilledTables, jobStatus);
@@ -1218,16 +1260,38 @@ public class DatasetControllerImpl implements DatasetController {
         throw new ResponseStatusException(HttpStatus.LOCKED, EEAErrorMessage.DELETING_DATASET_DATA_REFUSED);
       }
 
-      executeDeleteDatasetProcess(datasetId, preparationCode, resolvedDataflowId, providerId, jobId, deletePrefilledTables);
-      LOG.info("Successfully deleted dataset data for dataflowId {} and datasetId {}", resolvedDataflowId, datasetId);
+      // Capture SecurityContext to pass it to the background thread.
+      // This prevents subsequent Feign calls in executeDeleteDatasetProcess from failing with 401 Unauthorized.
+      SecurityContext securityContext = SecurityContextHolder.getContext();
+      final Long finalJobId = jobId;
 
+      // Fire and forget the heavy process using Spring Boot's managed Thread Pool
+      // and Instantiate a local executor to protect the JVM commonPool
+      SimpleAsyncTaskExecutor localExecutor = new SimpleAsyncTaskExecutor("dataset-delete-");
+      Executor securityExecutor = new DelegatingSecurityContextAsyncTaskExecutor(localExecutor);
+
+      // Pass it to the CompletableFuture
+      CompletableFuture.runAsync(() -> {
+        SecurityContextHolder.setContext(securityContext);
+        try {
+          executeDeleteDatasetProcess(datasetId, preparationCode, resolvedDataflowId, providerId, finalJobId, deletePrefilledTables);
+          LOG.info("Successfully deleted dataset data for dataflowId {} and datasetId {}", resolvedDataflowId, datasetId);
+        } catch (Exception e) {
+          LOG.error("Unexpected error! Message: {}", e.getMessage());
+        } finally {
+          // MUST release lock here when the background task finishes.
+          deleteLocksToDeleteProcess(datasetId, null, preparationCode);
+          SecurityContextHolder.clearContext();
+        }
+      }, securityExecutor);
+
+      // Return immediately to the frontend.
       return buildDeleteResponse(jobId, datasetId, resolvedDataflowId, providerId);
     } catch (Exception e) {
-      LOG.error("Unexpected error! Error deleting dataset data for dataflowId {} datasetId {} and providerId {} Message: {}", resolvedDataflowId, datasetId, providerId, e.getMessage());
-      throw e;
-    } finally {
-      // Release the lock manually
+      // If the synchronous setup fails (e.g. REFUSED), release lock immediately.
       deleteLocksToDeleteProcess(datasetId, null, preparationCode);
+      LOG.error("Unexpected error during synchronous setup for dataflowId {} datasetId {} Message: {}", resolvedDataflowId, datasetId, e.getMessage());
+      throw e;
     }
   }
 
@@ -1370,7 +1434,7 @@ public class DatasetControllerImpl implements DatasetController {
       if (isPreparationDataset) {
         jobStatus = jobControllerZuul.checkEligibilityOfPreparationJob(JobTypeEnum.DELETE.getValue(), datasetId, preparationCode);
        } else {
-        jobStatus = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.DELETE.getValue(), false, resolvedDataflowId, providerId, Collections.singletonList(datasetId));
+        jobStatus = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.DELETE.getValue(), false, resolvedDataflowId, providerId, Collections.singletonList(datasetId), null);
       }
 
       jobId = jobControllerZuul.addDeleteDataJob(datasetId, tableSchemaId, resolvedDataflowId, providerId, preparationCode, null, jobStatus);
@@ -1721,8 +1785,9 @@ public class DatasetControllerImpl implements DatasetController {
         String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
         Long providerId = datasetService.getDataProviderIdById(datasetId);
         TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, datasetSchemaId);
+        //TODO APBO Preparation code should be added here when edit functionality is implemented for prep sets.
         if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable())
-                && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, tableSchemaVO.getIdTableSchema()))) {
+                && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, null, tableSchemaVO.getIdTableSchema()))) {
           bigDataDatasetService.updateField(dataflowId, providerId, datasetId, field, recordId, tableSchemaVO, updateCascadePK);
         }
         else{
@@ -1786,11 +1851,10 @@ public class DatasetControllerImpl implements DatasetController {
         String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
         Long providerId = datasetService.getDataProviderIdById(datasetId);
         TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, datasetSchemaId);
+        //TODO APBO Preparation code should be added here when edit functionality is implemented for prep sets.
         if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable())
-            && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, tableSchemaVO.getIdTableSchema()))) {
-          for (FieldVO field : fields) {
-            bigDataDatasetService.updateField(dataflowId, providerId, datasetId, field, recordId, tableSchemaVO, updateCascadePK);
-          }
+            && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, null, tableSchemaVO.getIdTableSchema()))) {
+          bigDataDatasetService.updateFields(dataflowId, providerId, datasetId, fields, recordId, tableSchemaVO, updateCascadePK);
         }
         else{
           throw new Exception("The table data are not manually editable or the iceberg table has not been created");
@@ -2245,7 +2309,7 @@ public class DatasetControllerImpl implements DatasetController {
       //check eligibility of new job
       List<Long> datasetIds = new ArrayList<>();
       datasetIds.add(datasetId);
-      JobStatusEnum jobStatus = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.ETL_IMPORT.getValue(), false, dataflowId, providerId, datasetIds);
+      JobStatusEnum jobStatus = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.ETL_IMPORT.getValue(), false, dataflowId, providerId, datasetIds, null);
       if(jobStatus.getValue().equals(JobStatusEnum.REFUSED.getValue())){
         LOG.info("Added etl import job with id {} for datasetId {} with status REFUSED", jobId, datasetId);
         throw new ResponseStatusException(HttpStatus.LOCKED, EEAErrorMessage.IMPORTING_REFUSED);
@@ -2356,12 +2420,12 @@ public class DatasetControllerImpl implements DatasetController {
 
       //check if iceberg is enabled
       String userEditingDataset;
-      if(StringUtils.isBlank(tableSchemaId)) {
-        userEditingDataset = datasetTableService.getDatasetEditingUsername(datasetId);
+      if (StringUtils.isBlank(tableSchemaId)) {
+        userEditingDataset = datasetTableService.getDatasetEditingUsername(datasetId, preparationCode);
 
       }
-      else{
-        userEditingDataset = datasetTableService.getDatasetEditingUsernameForTable(datasetId, tableSchemaId);
+      else {
+        userEditingDataset = datasetTableService.getDatasetEditingUsernameForTable(datasetId, preparationCode, tableSchemaId);
       }
       if (userEditingDataset != null) {
         LOG.error("Can not etl import for datasetId {} because the table is locked for username {}", datasetId, userEditingDataset);
@@ -2374,7 +2438,7 @@ public class DatasetControllerImpl implements DatasetController {
       if (StringUtils.isBlank(preparationCode)) { // NOT Preparation eligibility check
         List<Long> datasetIds = new ArrayList<>();
         datasetIds.add(datasetId);
-        jobStatus = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.ETL_IMPORT.getValue(), false, dataflowId, providerId, datasetIds);
+        jobStatus = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.ETL_IMPORT.getValue(), false, dataflowId, providerId, datasetIds, null);
       }
       else {
         jobStatus = jobControllerZuul.checkEligibilityOfPreparationJob(JobTypeEnum.ETL_IMPORT.getValue(),  datasetId, preparationCode);
@@ -2394,7 +2458,8 @@ public class DatasetControllerImpl implements DatasetController {
 
       Map<String, Object> result = new HashMap<>();
       String pollingUrl = "/orchestrator/jobs/pollForJobStatus/" + jobId + "?datasetId=" + datasetId + "&dataflowId=" + dataflowId;
-      if(providerId != null){
+      // Avoid including providerId in polling URL if null or 0 due to 403 http response.
+      if(providerId != null && providerId != 0L){
         pollingUrl+= "&providerId=" + providerId;
       }
       result.put("jobId", jobId);
@@ -2432,47 +2497,67 @@ public class DatasetControllerImpl implements DatasetController {
           @ApiResponse(code = 404, message = "Error downloading attachment from dataset")})
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_CUSTODIAN','DATASET_STEWARD','DATASET_OBSERVER','DATASET_STEWARD_SUPPORT','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATACOLLECTION_CUSTODIAN','DATASCHEMA_CUSTODIAN','DATASCHEMA_STEWARD','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','DATASET_NATIONAL_COORDINATOR','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','EUDATASET_OBSERVER','EUDATASET_STEWARD_SUPPORT','DATACOLLECTION_OBSERVER','DATACOLLECTION_STEWARD_SUPPORT','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','DATACOLLECTION_STEWARD','REFERENCEDATASET_OBSERVER','REFERENCEDATASET_STEWARD_SUPPORT','REFERENCEDATASET_STEWARD','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD') OR checkApiKey(#dataflowId,#providerId,#datasetId,'DATASET_CUSTODIAN','DATASET_STEWARD','DATASET_OBSERVER','DATASET_STEWARD_SUPPORT','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATACOLLECTION_CUSTODIAN','DATASCHEMA_CUSTODIAN','DATASCHEMA_STEWARD','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','DATASET_NATIONAL_COORDINATOR','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','EUDATASET_OBSERVER','EUDATASET_STEWARD_SUPPORT','DATACOLLECTION_OBSERVER','DATACOLLECTION_STEWARD_SUPPORT','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','DATACOLLECTION_STEWARD','REFERENCEDATASET_OBSERVER','REFERENCEDATASET_STEWARD_SUPPORT','REFERENCEDATASET_STEWARD','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD')")
   public ResponseEntity<byte[]> getAttachment(
-          @ApiParam(type = "Long", value = "Dataset id",
-                  example = "0") @PathVariable("datasetId") Long datasetId,
-          @ApiParam(type = "String", value = "Field id",
-                  example = "19D0B971B7E0D2FB66B77F2A8DBA4964") @PathVariable("fieldId") String idField,
-          @ApiParam(type = "Long", value = "Dataflow id",
-                  example = "0") @RequestParam(value = "dataflowId") Long dataflowId,
-          @ApiParam(type = "Long", value = "Provider id",
-                  example = "0") @RequestParam(value = "providerId", required = false) Long providerId,
-          @ApiParam(type = "String", value = "Table schema name", example = "table") @RequestParam(value = "tableSchemaName", required = false) String tableSchemaName,
-          @ApiParam(type = "String", value = "Field name", example = "table") @RequestParam(value = "fieldName", required = false) String fieldName,
-          @ApiParam(type = "String", value = "File name", example = "file") @RequestParam(value = "fileName", required = false) String fileName,
-          @ApiParam(type = "String", value = "Record id", example = "SDHFKSD792812") @RequestParam(value = "recordId", required = false) String recordId,
-          @ApiParam(type = "String", value = "Provider code", example = "AT") @RequestParam(value = "providerCode", required = false) String providerCode) {
+          @ApiParam(type = "Long", value = "Dataset id", example = "0")
+          @PathVariable("datasetId") Long datasetId,
 
-    LOG.info("Downloading attachment from the datasetId {}", datasetId);
+          @ApiParam(type = "String", value = "Field id", example = "19D0B971B7E0D2FB66B77F2A8DBA4964")
+          @PathVariable("fieldId") String idField,
+
+          @ApiParam(type = "Long", value = "Dataflow id", example = "0")
+          @RequestParam(value = "dataflowId") Long dataflowId,
+
+          @ApiParam(type = "Long", value = "Provider id", example = "0")
+          @RequestParam(value = "providerId", required = false) Long providerId,
+
+          @ApiParam(type = "String", value = "Table schema name", example = "table")
+          @RequestParam(value = "tableSchemaName", required = false) String tableSchemaName,
+
+          @ApiParam(type = "String", value = "Field name", example = "table")
+          @RequestParam(value = "fieldName", required = false) String fieldName,
+
+          @ApiParam(type = "String", value = "File name", example = "file")
+          @RequestParam(value = "fileName", required = false) String fileName,
+
+          @ApiParam(type = "String", value = "Record id", example = "SDHFKSD792812")
+          @RequestParam(value = "recordId", required = false) String recordId,
+
+          @ApiParam(type = "String", value = "Provider code", example = "AT")
+          @RequestParam(value = "providerCode", required = false) String providerCode,
+
+          @ApiParam(type = "String", value = "Preparation code", example = "dataset1-prepset1")
+          @RequestParam(value = "preparationCode", required = false) String preparationCode) {
+
+    LOG.info("Downloading attachment from the datasetId {} preparationCode {}", datasetId, preparationCode);
     try {
       if (providerId == null) {
-        DataSetMetabaseVO dataset = datasetMetabaseService.findDatasetMetabase(datasetId);
+        final DataSetMetabaseVO dataset = datasetMetabaseService.findDatasetMetabase(datasetId);
         providerId = dataset.getDataProviderId();
       }
-      Boolean isBigDataflow = dataFlowControllerZuul.isBigDataflow(dataflowId);
-      byte[] file = null;
-      String filename = null;
-      if(Boolean.TRUE.equals(isBigDataflow)){
-        AttachmentDLVO attachment = bigDataDatasetService.getAttachmentDL(datasetId, dataflowId, providerId, tableSchemaName, fieldName, fileName, recordId, providerCode);
+      final Boolean isBigDataflow = dataFlowControllerZuul.isBigDataflow(dataflowId);
+      byte[] file;
+      String filename;
+      if (Boolean.TRUE.equals(isBigDataflow)) {
+        final AttachmentDLVO attachment = bigDataDatasetService.getAttachmentDL(datasetId, preparationCode, dataflowId, providerId, tableSchemaName, fieldName, fileName, recordId, providerCode);
         file = attachment.getContent();
         filename = attachment.getFileName();
       }
-      else{
-        AttachmentValue attachment = datasetService.getAttachment(datasetId, idField);
+      else {
+        final AttachmentValue attachment = datasetService.getAttachment(datasetId, idField);
         file = attachment.getContent();
         filename = attachment.getFileName();
       }
-      HttpHeaders httpHeaders = new HttpHeaders();
+      final HttpHeaders httpHeaders = new HttpHeaders();
       httpHeaders.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + filename);
       return new ResponseEntity<>(file, httpHeaders, HttpStatus.OK);
-    } catch (EEAException | IOException e) {
-      LOG.error("Error downloading attachment from the datasetId {} and fieldId {}, with message: {}", datasetId, idField, e.getMessage());
+    }
+    catch (EEAException | IOException e) {
+      LOG.error("Error downloading attachment from the datasetId {} preparationCode {} and fieldId {}, with message: {}",
+              datasetId, preparationCode, idField, e.getMessage());
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DOWNLOADING_ATTACHMENT_IN_A_DATAFLOW);
-    } catch (Exception e) {
-      LOG.error("Unexpected error! Error retrieving attachment for dataflowId {} datasetId {} fieldId {} and providerId {} Message: {}", dataflowId, datasetId, idField, providerId, e.getMessage());
+    }
+    catch (Exception e) {
+      LOG.error("Unexpected error! Error retrieving attachment for dataflowId {} datasetId {} preparationCode {} fieldId {} and providerId {} Message: {}",
+              dataflowId, datasetId, preparationCode, idField, providerId, e.getMessage());
       throw e;
     }
   }
@@ -2513,7 +2598,7 @@ public class DatasetControllerImpl implements DatasetController {
           @ApiParam(type = "String", value = "File name", example = "file") @RequestParam(value = "fileName", required = false) String fileName,
           @ApiParam(type = "String", value = "Record id", example = "SDHFKSD792812") @RequestParam(value = "recordId", required = false) String recordId,
           @ApiParam(type = "String", value = "Provider code", example = "AT") @RequestParam(value = "providerCode", required = false) String providerCode) {
-    return this.getAttachment(datasetId, idField, dataflowId, providerId, tableSchemaName, fieldName, fileName, recordId, providerCode);
+    return this.getAttachment(datasetId, idField, dataflowId, providerId, tableSchemaName, fieldName, fileName, recordId, providerCode, null);
   }
 
   /**
@@ -2539,25 +2624,41 @@ public class DatasetControllerImpl implements DatasetController {
           @ApiResponse(code = 500, message = "Error updating attachment"),
           @ApiResponse(code = 400, message = "Table is read only or file format is invalid")})
   public void updateAttachment(
-          @ApiParam(type = "Long", value = "Dataset id",
-                  example = "0") @PathVariable("datasetId") Long datasetId,
-          @ApiParam(type = "Long", value = "Dataflow id",
-                  example = "0") @RequestParam(value = "dataflowId", required = false) Long dataflowId,
-          @ApiParam(type = "Long", value = "Provider id",
-                  example = "0") @RequestParam(value = "providerId", required = false) Long providerId,
-          @ApiParam(type = "String", value = "Field id",
-                  example = "19D0B971B7E0D2FB66B77F2A8DBA4964") @PathVariable("fieldId") String idField,
-          @ApiParam(value = "file") @RequestParam("file") MultipartFile file,
-          @ApiParam(type = "String", value = "Table schema name", example = "table") @RequestParam(value = "tableSchemaName", required = false) String tableSchemaName,
-          @ApiParam(type = "String", value = "Field name", example = "table") @RequestParam(value = "fieldName", required = false) String fieldName,
-          @ApiParam(type = "String", value = "Record id", example = "SDHFKSD792812") @RequestParam(value = "recordId", required = false) String recordId,
-          @ApiParam(type = "String", value = "Previous File Name", example = "file.txt") @RequestParam(value = "previousFileName", required = false) String previousFileName) {
+          @ApiParam(type = "Long", value = "Dataset id", example = "0")
+          @PathVariable("datasetId") Long datasetId,
+
+          @ApiParam(type = "Long", value = "Dataflow id", example = "0")
+          @RequestParam(value = "dataflowId", required = false) Long dataflowId,
+
+          @ApiParam(type = "Long", value = "Provider id", example = "0")
+          @RequestParam(value = "providerId", required = false) Long providerId,
+
+          @ApiParam(type = "String", value = "Field id", example = "19D0B971B7E0D2FB66B77F2A8DBA4964")
+          @PathVariable("fieldId") String idField,
+
+          @ApiParam(value = "file")
+          @RequestParam("file") MultipartFile file,
+
+          @ApiParam(type = "String", value = "Table schema name", example = "table")
+          @RequestParam(value = "tableSchemaName", required = false) String tableSchemaName,
+
+          @ApiParam(type = "String", value = "Field name", example = "table")
+          @RequestParam(value = "fieldName", required = false) String fieldName,
+
+          @ApiParam(type = "String", value = "Record id", example = "SDHFKSD792812")
+          @RequestParam(value = "recordId", required = false) String recordId,
+
+          @ApiParam(type = "String", value = "Previous File Name", example = "file.txt")
+          @RequestParam(value = "previousFileName", required = false) String previousFileName,
+
+          @ApiParam(type = "String", value = "Preparation code", example = "dataset1-prepset1")
+          @RequestParam(value = "preparationCode", required = false) String preparationCode) {
 
     try {
-      LOG.info("Method updateAttachment was called for dataflowId {} datasetId {} and fieldId {}", dataflowId, datasetId, idField);
+      LOG.info("Method updateAttachment was called for dataflowId {} datasetId {} preparationCode {} and fieldId {}", dataflowId, datasetId, preparationCode, idField);
 
       if (providerId == null) {
-        DataSetMetabaseVO dataset = datasetMetabaseService.findDatasetMetabase(datasetId);
+        final DataSetMetabaseVO dataset = datasetMetabaseService.findDatasetMetabase(datasetId);
         providerId = dataset.getDataProviderId();
       }
 
@@ -2566,12 +2667,14 @@ public class DatasetControllerImpl implements DatasetController {
       fileName = StringUtils.isNotBlank(fileName) ? fileName.replace(",", "") : "";
 
       if (!UtilityClass.containsOnlyLatinCharacters(fileName)) {
-        LOG.info("Update attachment filename for dataflowId {} datasetId {} and fieldId {}. File is denied because filename contains non-Latin letters: {}", dataflowId, datasetId, idField, fileName);
+        LOG.info("Update attachment filename for dataflowId {} datasetId {} preparationCode {} and fieldId {}. File is denied because filename contains non-Latin letters: {}",
+                dataflowId, datasetId, preparationCode, idField, fileName);
 
-        EventType eventType = EventType.IMPORT_FILENAME_CONTAINS_NON_LATIN_CHARACTERS_ERROR_EVENT;
+        final EventType eventType = EventType.IMPORT_FILENAME_CONTAINS_NON_LATIN_CHARACTERS_ERROR_EVENT;
         NotificationVO notificationVO = new NotificationVO();
         notificationVO.setDataflowId(dataflowId);
         notificationVO.setDatasetId(datasetId);
+        notificationVO.setPreparationCode(preparationCode);
         notificationVO.setUser(SecurityContextHolder.getContext().getAuthentication().getName());
         notificationVO.setFileName(fileName);
         notificationVO.setNonLatinCharacters(UtilityClass.extractNonLatinCharacters(fileName));
@@ -2580,29 +2683,29 @@ public class DatasetControllerImpl implements DatasetController {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FILENAME_CONTAINS_NON_LATIN_CHARACTERS);
       }
 
-      LOG.info("Updating attachment for dataflowId {} and datasetId {}", dataflowId, datasetId);
-      Boolean isBigDataflow = dataFlowControllerZuul.isBigDataflow(dataflowId);
-      if(Boolean.TRUE.equals(isBigDataflow)){
+      LOG.info("Updating attachment for dataflowId {} and datasetId {} preparationCode {}", dataflowId, datasetId, preparationCode);
+      final Boolean isBigDataflow = dataFlowControllerZuul.isBigDataflow(dataflowId);
+      if (Boolean.TRUE.equals(isBigDataflow)) {
         //check if table is read only
-        String fieldSchemaId = datasetSchemaService.getFieldSchemaIdByDatasetIdTableNameAndFieldName(datasetId, tableSchemaName, fieldName);
-        if(StringUtils.isNotBlank(fieldSchemaId)){
+        final String fieldSchemaId = datasetSchemaService.getFieldSchemaIdByDatasetIdTableNameAndFieldName(datasetId, tableSchemaName, fieldName);
+        if (StringUtils.isNotBlank(fieldSchemaId)) {
           if (datasetService.checkIfDatasetLockedOrReadOnly(datasetId, fieldSchemaId, EntityTypeEnum.FIELD)) {
-            LOG.error("Error updating an attachment in the datasetId {}. In table {} field {} is read only",
-                    datasetId, tableSchemaName, fieldName);
+            LOG.error("Error updating an attachment in the datasetId {} preparationCode {}. In table {} field {} is read only",
+                    datasetId, preparationCode, tableSchemaName, fieldName);
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.TABLE_READ_ONLY);
           }
         }
 
         //validate attachment
-        if (!validateAttachment(datasetId, idField, fileName, file.getSize(), tableSchemaName, fieldName, true)
-                || fileName.equals("")) {
+        if (!validateAttachment(datasetId, preparationCode, idField, fileName, file.getSize(), tableSchemaName, fieldName, true)
+                || fileName.isEmpty()) {
           throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FILE_FORMAT);
         }
 
         //upload attachment
-        bigDataDatasetService.updateAttachmentDL(datasetId, dataflowId, providerId, tableSchemaName, fieldName, file, recordId, previousFileName);
+        bigDataDatasetService.updateAttachmentDL(datasetId, preparationCode, dataflowId, providerId, tableSchemaName, fieldName, file, recordId, previousFileName);
       }
-      else{
+      else {
         // Not allow insert attachment if the table is marked as read only. This not applies to design datasets
         if (datasetService.checkIfDatasetLockedOrReadOnly(datasetId,
                 datasetService.findFieldSchemaIdById(datasetId, idField), EntityTypeEnum.FIELD)) {
@@ -2610,7 +2713,7 @@ public class DatasetControllerImpl implements DatasetController {
                   datasetId);
           throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.TABLE_READ_ONLY);
         }
-        if (!validateAttachment(datasetId, idField, fileName, file.getSize(), tableSchemaName, fieldName, false)
+        if (!validateAttachment(datasetId, null, idField, fileName, file.getSize(), tableSchemaName, fieldName, false)
                 || fileName.equals("")) {
           throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FILE_FORMAT);
         }
@@ -2618,14 +2721,17 @@ public class DatasetControllerImpl implements DatasetController {
         datasetService.updateAttachment(datasetId, idField, fileName, is);
       }
 
-      LOG.info("Successfully updated attachment for dataflowId {} and datasetId {}", dataflowId, datasetId);
-    } catch (EEAException | IOException e) {
-      LOG.error("Error updating attachment from the dataflowId {} and datasetId {}, with message: {}", dataflowId,
-              datasetId, e.getMessage());
+      LOG.info("Successfully updated attachment for dataflowId {} and datasetId {} preparationCode {}", dataflowId, datasetId, preparationCode);
+    }
+    catch (EEAException | IOException e) {
+      LOG.error("Error updating attachment from the dataflowId {} and datasetId {} preparationCode {}, with message: {}",
+              dataflowId, datasetId, preparationCode, e.getMessage());
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
               EEAErrorMessage.UPDATING_ATTACHMENT_IN_A_DATAFLOW);
-    } catch (Exception e) {
-      LOG.error("Unexpected error! Error retrieving attachment for dataflowId {} datasetId {} fieldId {} and providerId {} Message: {}", dataflowId, datasetId, idField, providerId, e.getMessage());
+    }
+    catch (Exception e) {
+      LOG.error("Unexpected error! Error retrieving attachment for dataflowId {} datasetId {} preparationCode {} fieldId {} and providerId {} Message: {}",
+              dataflowId, datasetId, preparationCode, idField, providerId, e.getMessage());
       throw e;
     }
   }
@@ -2666,7 +2772,7 @@ public class DatasetControllerImpl implements DatasetController {
           @ApiParam(type = "String", value = "Field name", example = "table") @RequestParam(value = "fieldName", required = false) String fieldName,
           @ApiParam(type = "String", value = "Record id", example = "SDHFKSD792812") @RequestParam(value = "recordId", required = false) String recordId,
           @ApiParam(type = "String", value = "Previous File Name", example = "file.txt") @RequestParam(value = "previousFileName", required = false) String previousFileName) {
-    this.updateAttachment(datasetId, dataflowId, providerId, idField, file, tableSchemaName, fieldName, recordId, previousFileName);
+    this.updateAttachment(datasetId, dataflowId, providerId, idField, file, tableSchemaName, fieldName, recordId, previousFileName, null);
   }
 
   /**
@@ -2691,39 +2797,53 @@ public class DatasetControllerImpl implements DatasetController {
           @ApiResponse(code = 404, message = "Error deleting attachment from dataset"),
           @ApiResponse(code = 400, message = "Table is read only")})
   public void deleteAttachment(
-          @ApiParam(type = "Long", value = "Dataset id",
-                  example = "0") @PathVariable("datasetId") Long datasetId,
-          @ApiParam(type = "Long", value = "Dataflow id",
-                  example = "0") @RequestParam(value = "dataflowId", required = false) Long dataflowId,
-          @ApiParam(type = "Long", value = "Provider id",
-                  example = "0") @RequestParam(value = "providerId", required = false) Long providerId,
-          @ApiParam(type = "String", value = "Field id",
-                  example = "19D0B971B7E0D2FB66B77F2A8DBA4964") @PathVariable("fieldId") String idField,
-          @ApiParam(type = "String", value = "Table schema name", example = "table") @RequestParam(value = "tableSchemaName", required = false) String tableSchemaName,
-          @ApiParam(type = "String", value = "Field name", example = "table") @RequestParam(value = "fieldName", required = false) String fieldName,
-          @ApiParam(type = "String", value = "File name", example = "file") @RequestParam(value = "fileName", required = false) String fileName,
-          @ApiParam(type = "String", value = "Record id", example = "SDHFKSD792812") @RequestParam(value = "recordId", required = false) String recordId) {
+          @ApiParam(type = "Long", value = "Dataset id", example = "0")
+          @PathVariable("datasetId") Long datasetId,
+
+          @ApiParam(type = "Long", value = "Dataflow id", example = "0")
+          @RequestParam(value = "dataflowId", required = false) Long dataflowId,
+
+          @ApiParam(type = "Long", value = "Provider id", example = "0")
+          @RequestParam(value = "providerId", required = false) Long providerId,
+
+          @ApiParam(type = "String", value = "Field id", example = "19D0B971B7E0D2FB66B77F2A8DBA4964")
+          @PathVariable("fieldId") String idField,
+
+          @ApiParam(type = "String", value = "Table schema name", example = "table")
+          @RequestParam(value = "tableSchemaName", required = false) String tableSchemaName,
+
+          @ApiParam(type = "String", value = "Field name", example = "table")
+          @RequestParam(value = "fieldName", required = false) String fieldName,
+
+          @ApiParam(type = "String", value = "File name", example = "file")
+          @RequestParam(value = "fileName", required = false) String fileName,
+
+          @ApiParam(type = "String", value = "Record id", example = "SDHFKSD792812")
+          @RequestParam(value = "recordId", required = false) String recordId,
+
+          @ApiParam(type = "String", value = "Preparation code", example = "dataset1-prepset1")
+          @RequestParam(value = "preparationCode", required = false) String preparationCode) {
 
     try {
-      LOG.info("Deleting attachment for dataflowId {}, datasetId {} and fieldId {}", dataflowId, datasetId, idField);
+      LOG.info("Deleting attachment for dataflowId {}, datasetId {} preparationCode {} and fieldId {}", dataflowId, datasetId, preparationCode, idField);
       if (providerId == null) {
-        DataSetMetabaseVO dataset = datasetMetabaseService.findDatasetMetabase(datasetId);
+        final DataSetMetabaseVO dataset = datasetMetabaseService.findDatasetMetabase(datasetId);
         providerId = dataset.getDataProviderId();
       }
-      Boolean isBigDataflow = dataFlowControllerZuul.isBigDataflow(dataflowId);
-      if(Boolean.TRUE.equals(isBigDataflow)){
+      final Boolean isBigDataflow = dataFlowControllerZuul.isBigDataflow(dataflowId);
+      if (Boolean.TRUE.equals(isBigDataflow)) {
         //check if table is read only
-        String fieldSchemaId = datasetSchemaService.getFieldSchemaIdByDatasetIdTableNameAndFieldName(datasetId, tableSchemaName, fieldName);
-        if(StringUtils.isNotBlank(fieldSchemaId)){
+        final String fieldSchemaId = datasetSchemaService.getFieldSchemaIdByDatasetIdTableNameAndFieldName(datasetId, tableSchemaName, fieldName);
+        if (StringUtils.isNotBlank(fieldSchemaId)) {
           if (datasetService.checkIfDatasetLockedOrReadOnly(datasetId, fieldSchemaId, EntityTypeEnum.FIELD)) {
-            LOG.error("Error deleting an attachment in the datasetId {}. In table {} field {} is read only",
-                    datasetId, tableSchemaName, fieldName);
+            LOG.error("Error deleting an attachment in the datasetId {} preparationCode {}. In table {} field {} is read only",
+                    datasetId, preparationCode, tableSchemaName, fieldName);
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.TABLE_READ_ONLY);
           }
         }
-        bigDataDatasetService.deleteAttachmentDL(datasetId, dataflowId, providerId, tableSchemaName, fieldName, fileName, recordId);
+        bigDataDatasetService.deleteAttachmentDL(datasetId, preparationCode, dataflowId, providerId, tableSchemaName, fieldName, fileName, recordId);
       }
-      else{
+      else {
         if (datasetService.checkIfDatasetLockedOrReadOnly(datasetId,
                 datasetService.findFieldSchemaIdById(datasetId, idField), EntityTypeEnum.FIELD)) {
           LOG.error("Error deleting an attachment in the datasetId {}. The table is read only",
@@ -2732,14 +2852,17 @@ public class DatasetControllerImpl implements DatasetController {
         }
         datasetService.deleteAttachment(datasetId, idField);
       }
-      LOG.info("Successfully deleted attachment for dataflowId {}, datasetId {} and fieldId {}", dataflowId, datasetId, idField);
-    } catch (EEAException e) {
-      LOG.error("Error deleting attachment from dataflowId {}, datasetId {} and fieldId {}, with message: {}",
-              dataflowId, datasetId, idField, e.getMessage(), e);
+      LOG.info("Successfully deleted attachment for dataflowId {}, datasetId {} preparationCode {} and fieldId {}", dataflowId, datasetId, preparationCode, idField);
+    }
+    catch (EEAException e) {
+      LOG.error("Error deleting attachment from dataflowId {}, datasetId {} preparationCode {} and fieldId {}, with message: {}",
+              dataflowId, datasetId, preparationCode, idField, e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.NOT_FOUND,
               EEAErrorMessage.DELETING_ATTACHMENT_IN_A_DATAFLOW);
-    } catch (Exception e) {
-      LOG.error("Unexpected error! Error deleting attachment for dataflowId {} datasetId {} fieldId {} and providerId {} Message: {}", dataflowId, datasetId, idField, providerId, e.getMessage());
+    }
+    catch (Exception e) {
+      LOG.error("Unexpected error! Error deleting attachment for dataflowId {} datasetId {} preparationCode {} fieldId {} and providerId {} Message: {}",
+              dataflowId, datasetId, preparationCode, idField, providerId, e.getMessage());
       throw e;
     }
   }
@@ -2778,7 +2901,7 @@ public class DatasetControllerImpl implements DatasetController {
           @ApiParam(type = "String", value = "Field name", example = "table") @RequestParam(value = "fieldName", required = false) String fieldName,
           @ApiParam(type = "String", value = "File name", example = "file") @RequestParam(value = "fileName", required = false) String fileName,
           @ApiParam(type = "String", value = "Record id", example = "SDHFKSD792812") @RequestParam(value = "recordId", required = false) String recordId) {
-    this.deleteAttachment(datasetId, dataflowId, providerId, idField, tableSchemaName, fieldName, fileName, recordId);
+    this.deleteAttachment(datasetId, dataflowId, providerId, idField, tableSchemaName, fieldName, fileName, recordId, null);
   }
 
   /**
@@ -3355,26 +3478,26 @@ public class DatasetControllerImpl implements DatasetController {
    * @return true, if successful
    * @throws EEAException the EEA exception
    */
-  private boolean validateAttachment(Long datasetId, String idField, String originalFilename,
+  private boolean validateAttachment(Long datasetId, String preparationCode, String idField, String originalFilename,
                                      Long size, String tableSchemaName, String fieldName, Boolean isBigDataDataflow) throws EEAException {
 
-    LOG.info("Validating attachment for datasetId {}, fieldId {} and fileName {}", datasetId, idField, originalFilename);
+    LOG.info("Validating attachment for datasetId {}, preparationCode {} fieldId {} and fileName {}", datasetId, preparationCode, idField, originalFilename);
 
     Boolean result = true;
-    String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
+    final String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
     if (datasetSchemaId == null) {
       throw new EEAException(EEAErrorMessage.DATASET_SCHEMA_ID_NOT_FOUND);
     }
     String fieldSchemaId = null;
-    if(isBigDataDataflow){
+    if (isBigDataDataflow) {
       fieldSchemaId = datasetSchemaService.getFieldSchemaIdByDatasetIdTableNameAndFieldName(datasetId, tableSchemaName, fieldName);
     }
-    else{
-      FieldVO fieldVO = datasetService.getFieldById(datasetId, idField);
+    else {
+      final FieldVO fieldVO = datasetService.getFieldById(datasetId, idField);
       fieldSchemaId = fieldVO.getIdFieldSchema();
     }
 
-    FieldSchemaVO fieldSchema =
+    final FieldSchemaVO fieldSchema =
             datasetSchemaService.getFieldSchema(datasetSchemaId, fieldSchemaId);
     if (fieldSchema == null || fieldSchema.getId() == null) {
       throw new EEAException(EEAErrorMessage.FIELD_SCHEMA_ID_NOT_FOUND);
@@ -3386,13 +3509,13 @@ public class DatasetControllerImpl implements DatasetController {
     }
     // Validate property extensions of the file. If no extensions provided, it's ok, continue
     if (fieldSchema.getValidExtensions() != null) {
-      List<String> extensions = Arrays.asList(fieldSchema.getValidExtensions());
+      final List<String> extensions = Arrays.asList(fieldSchema.getValidExtensions());
       if (!extensions.isEmpty()
               && !extensions.contains(datasetService.getExtension(originalFilename))) {
         result = false;
       }
     }
-    LOG.info("Successfully validated attachment for datasetId {}, fieldId {} and fileName {} Result: {}", datasetId, idField, originalFilename, result);
+    LOG.info("Successfully validated attachment for datasetId {}, preparationCode {} fieldId {} and fileName {} Result: {}", datasetId, preparationCode, idField, originalFilename, result);
     return result;
   }
 
@@ -3590,22 +3713,23 @@ public class DatasetControllerImpl implements DatasetController {
       DataFlowVO dataFlowVO = dataFlowControllerZuul.getMetabaseById(dataflowId);
       if(dataFlowVO.getBigData() != null && dataFlowVO.getBigData()) {
         String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
-        if (StringUtils.isNotBlank(tableSchemaId) && (StringUtils.isBlank(preparationCode))) { //TODO check iceberg preparation
+        if (StringUtils.isNotBlank(tableSchemaId)) {
           TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, datasetSchemaId);
           if (tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable())
-                  && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, tableSchemaVO.getIdTableSchema()))) {
-            LOG.error("Can not import for datasetId {} because the table is iceberg", datasetId);
+                  && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, preparationCode, tableSchemaVO.getIdTableSchema()))) {
+            LOG.error("Can not import for datasetId {} preparationCode {} because the table is iceberg", datasetId, preparationCode);
             jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.ERROR_ICEBERG_TABLE_EXISTS, null);
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.EXPORTING_FILE_ICEBERG);
           }
-        } else {
+        }
+        else {
           List<TableSchemaIdNameVO> tableSchemaIdNameVOS = datasetSchemaService.getTableSchemasIds(datasetId);
           for (TableSchemaIdNameVO tableSchemaIdNameVO : tableSchemaIdNameVOS) {
             TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaIdNameVO.getIdTableSchema(), datasetSchemaId);
             if (tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable())
-                    && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, tableSchemaVO.getIdTableSchema()))
-                    && (StringUtils.isBlank(preparationCode))) {
-              LOG.error("Can not import zip file for datasetId {} because a table is iceberg", datasetId);
+                    && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, preparationCode, tableSchemaVO.getIdTableSchema()))
+                    ) {
+              LOG.error("Can not import zip file for datasetId {} preparationCode {} because a table is iceberg", datasetId, preparationCode);
               jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.ERROR_ICEBERG_TABLE_EXISTS, null);
               throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.EXPORTING_FILE_ICEBERG);
             }
@@ -3724,7 +3848,7 @@ public class DatasetControllerImpl implements DatasetController {
         if (isPreparationDataset) {
           jobStatus = jobControllerZuul.checkEligibilityOfPreparationJob(JobTypeEnum.IMPORT.getValue(), datasetId, preparationCode);
         } else {
-          jobStatus = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.IMPORT.getValue(), false, dataflowId, providerId, datasetIds);
+          jobStatus = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.IMPORT.getValue(), false, dataflowId, providerId, datasetIds, null);
         }
 
         if (jobStatus == JobStatusEnum.IN_PROGRESS) {
@@ -3755,18 +3879,28 @@ public class DatasetControllerImpl implements DatasetController {
   public void convertParquetToIcebergTables(@PathVariable("datasetId") Long datasetId,
                                            @RequestParam(value = "dataflowId") Long dataflowId,
                                            @RequestParam(value = "providerId", required = false) Long providerId,
-                                           @RequestParam(value = "tableSchemaIds", required = false) List<String> tableSchemaIds) throws Exception {
+                                           @RequestParam(value = "tableSchemaIds", required = false) List<String> tableSchemaIds,
+                                           @RequestParam(value = "preparationCode", required = false) String preparationCode) throws Exception {
 
-    String username = SecurityContextHolder.getContext().getAuthentication().getName();
-    String lockKey = LockEnum.PARQUET_CONVERSION.getValue() + "_" + datasetId;
-    String lockValue = LockEnum.PARQUET_CONVERSION.getValue() + "_" + datasetId + "_" + username + "_" + UUID.randomUUID();
-    DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
-    String datasetName = dataSetMetabaseVO.getDataSetName();
+    final String username = SecurityContextHolder.getContext().getAuthentication().getName();
+    String lockKey;
+    String lockValue;
+    if (StringUtils.isBlank(preparationCode)) {
+      lockKey = LockEnum.PARQUET_CONVERSION.getValue() + "_" + datasetId;
+      lockValue = LockEnum.PARQUET_CONVERSION.getValue() + "_" + datasetId + "_" + username + "_" + UUID.randomUUID();
+    }
+    else {
+      lockKey = LockEnum.PARQUET_CONVERSION.getValue() + "_" + datasetId + "_" + preparationCode;
+      lockValue = LockEnum.PARQUET_CONVERSION.getValue() + "_" + datasetId + "_" + preparationCode + "_" + username + "_" + UUID.randomUUID();
+    }
 
-    String currentEditor = datasetTableService.getDatasetEditingUsername(datasetId);
+    final DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
+    final String datasetName = dataSetMetabaseVO.getDataSetName();
+
+    final String currentEditor = datasetTableService.getDatasetEditingUsername(datasetId, preparationCode);
     if (currentEditor != null && !currentEditor.equals(username)) {
-      LOG.warn("User {} attempted Parquet to Iceberg conversion for dataset {} but {} is editing.",
-              username, datasetId, currentEditor);
+      LOG.warn("User {} attempted Parquet to Iceberg conversion for dataset {} preparationCode {} but {} is editing.",
+              username, datasetId, preparationCode, currentEditor);
 
       kafkaSenderUtils.releaseNotificableKafkaEvent(
               EventType.PARQUET_TO_ICEBERG_FAILED_ACTIVE_EDITING_BY_OTHER_USER,
@@ -3776,6 +3910,7 @@ public class DatasetControllerImpl implements DatasetController {
                       .dataflowId(dataflowId)
                       .datasetId(datasetId)
                       .datasetName(datasetName)
+                      .preparationCode(preparationCode)
                       .error("Dataset is currently being edited by user " + currentEditor)
                       .build()
       );
@@ -3783,35 +3918,51 @@ public class DatasetControllerImpl implements DatasetController {
     }
 
 
-    if(providerId == null){
+    if (providerId == null) {
       providerId = dataSetMetabaseVO.getDataProviderId();
     }
 
-    List<JobVO> activeJobsForDatasetId = jobControllerZuul.findActiveJobsRelatedToADatasetId(datasetId, dataflowId, providerId);
-    if(activeJobsForDatasetId != null && !activeJobsForDatasetId.isEmpty()){
-      List<Long> jobIds = activeJobsForDatasetId.stream().map(JobVO::getId).collect(Collectors.toList());
-      LOG.info("Can not convert tables from parquet to iceberg for dataflowId {} datasetId {} providerId {} and user {} because there are active jobs related to the same dataset id. Job ids: {}", dataflowId, datasetId, providerId, username, jobIds);
+    final List<JobVO> activeJobsForDatasetId = new ArrayList<>(jobControllerZuul
+            .findActiveJobsRelatedToADatasetId(datasetId, dataflowId, providerId, preparationCode));
+
+    if (!activeJobsForDatasetId.isEmpty()){
+      List<Long> jobIds = activeJobsForDatasetId.stream()
+              .map(JobVO::getId)
+              .collect(Collectors.toList());
+      LOG.info("Can not convert tables from parquet to iceberg for dataflowId {} datasetId {} preparationCode {} providerId {} and user {} because there are active jobs related to the same dataset id. Job ids: {}", dataflowId, datasetId, preparationCode, providerId, username, jobIds);
       kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.PARQUET_TO_ICEBERG_FAILED_ACTIVE_JOBS_EVENT, null,
-              NotificationVO.builder().user(username).dataflowId(dataflowId).datasetId(datasetId).datasetName(datasetName).build());
+              NotificationVO.builder()
+                      .user(username)
+                      .dataflowId(dataflowId)
+                      .datasetId(datasetId)
+                      .datasetName(datasetName)
+                      .preparationCode(preparationCode)
+                      .build());
       return;
     }
 
     try {
       if (redisLockService.checkAndAcquireLock(lockKey, lockValue, conversionLockExpirationInMillis)){
-        LOG.info("User {} has triggered the parquet to iceberg conversion for dataflowId {} datasetId {} providerId {} and tableSchemaIds {} LockValue {}", username, dataflowId, datasetId, providerId, tableSchemaIds, lockValue);
-        bigDataDatasetService.initiateParquetToIcebergConversion(datasetId, dataflowId, providerId, tableSchemaIds, lockValue);
+        LOG.info("User {} has triggered the parquet to iceberg conversion for dataflowId {} datasetId {} preparationCode {} providerId {} and tableSchemaIds {} LockValue {}", username, dataflowId, datasetId, preparationCode, providerId, tableSchemaIds, lockValue);
+        bigDataDatasetService.initiateParquetToIcebergConversion(datasetId, preparationCode, dataflowId, providerId, tableSchemaIds, lockValue);
       }
       else {
-        Map<String, String> activeLocks = redisLockService.listActiveLocks(lockKey);
-        LOG.info("User {} has triggered the parquet to iceberg conversion for dataflowId {} datasetId {} providerId {} and tableSchemaIds {} but another parquet to iceberg conversion for the same dataset is in progress {}",
-                username, dataflowId, datasetId, providerId, tableSchemaIds, activeLocks);
+        final Map<String, String> activeLocks = redisLockService.listActiveLocks(lockKey);
+        LOG.info("User {} has triggered the parquet to iceberg conversion for dataflowId {} datasetId {} preparationCode {} providerId {} and tableSchemaIds {} but another parquet to iceberg conversion for the same dataset is in progress {}",
+                username, dataflowId, datasetId, preparationCode, providerId, tableSchemaIds, activeLocks);
         kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.ANOTHER_CONVERSION_IS_RUNNING_FAILED_EVENT, null,
-                NotificationVO.builder().user(username).dataflowId(dataflowId).datasetId(datasetId).datasetName(datasetName).build());
+                NotificationVO.builder()
+                        .user(username)
+                        .dataflowId(dataflowId)
+                        .datasetId(datasetId)
+                        .datasetName(datasetName)
+                        .preparationCode(preparationCode)
+                        .build());
 
       }
     } catch (Exception e) {
-      LOG.error("Failed to initiate Parquet to Iceberg conversion for dataflowId {} datasetId {} providerId {} tableSchemaIds {} and username {} : {} - Releasing lock with value {}",
-              dataflowId, datasetId, providerId, tableSchemaIds, username, e.getMessage(), lockValue);
+      LOG.error("Failed to initiate Parquet to Iceberg conversion for dataflowId {} datasetId {} preparationCode {} providerId {} tableSchemaIds {} and username {} : {} - Releasing lock with value {}",
+              dataflowId, datasetId, preparationCode, providerId, tableSchemaIds, username, e.getMessage(), lockValue);
       redisLockService.releaseLock(lockKey, lockValue);
       throw e;
     }
@@ -3823,23 +3974,30 @@ public class DatasetControllerImpl implements DatasetController {
   public void convertIcebergToParquetTables(@PathVariable("datasetId") Long datasetId,
                                            @RequestParam(value = "dataflowId") Long dataflowId,
                                            @RequestParam(value = "providerId", required = false) Long providerId,
-                                           @RequestParam(value = "tableSchemaIds", required = false) List<String> tableSchemaIds) throws Exception {
+                                           @RequestParam(value = "tableSchemaIds", required = false) List<String> tableSchemaIds,
+                                           @RequestParam(value = "preparationCode", required = false) String preparationCode) throws Exception {
 
-    String username = SecurityContextHolder.getContext().getAuthentication().getName();
-    String lockKey = LockEnum.PARQUET_CONVERSION.getValue() + "_" + datasetId;
-    String lockValue = LockEnum.PARQUET_CONVERSION.getValue() + "_" + datasetId + "_" + username + "_" + UUID.randomUUID();
-
-    DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
-    String datasetName = dataSetMetabaseVO.getDataSetName();
-    if(providerId == null){
+    final String username = SecurityContextHolder.getContext().getAuthentication().getName();
+    String lockKey;
+    String lockValue;
+    if (StringUtils.isBlank(preparationCode)) {
+      lockKey = LockEnum.PARQUET_CONVERSION.getValue() + "_" + datasetId;
+      lockValue = LockEnum.PARQUET_CONVERSION.getValue() + "_" + datasetId + "_" + username + "_" + UUID.randomUUID();
+    }
+    else {
+      lockKey = LockEnum.PARQUET_CONVERSION.getValue() + "_" + datasetId + "_" + preparationCode;
+      lockValue = LockEnum.PARQUET_CONVERSION.getValue() + "_" + datasetId + "_" + preparationCode + "_" + username + "_" + UUID.randomUUID();
+    }
+    final DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
+    final String datasetName = dataSetMetabaseVO.getDataSetName();
+    if (providerId == null) {
       providerId = dataSetMetabaseVO.getDataProviderId();
-
     }
 
-    String currentEditor = datasetTableService.getDatasetEditingUsername(datasetId);
+    final String currentEditor = datasetTableService.getDatasetEditingUsername(datasetId, preparationCode);
     if (currentEditor != null && !currentEditor.equals(username)) {
-      LOG.warn("User {} attempted Iceberg to Parquet Iceberg conversion for dataset {} but {} is editing.",
-              username, datasetId, currentEditor);
+      LOG.warn("User {} attempted Iceberg to Parquet Iceberg conversion for dataset {} preparationCode {} but {} is editing.",
+              username, datasetId, preparationCode, currentEditor);
 
       kafkaSenderUtils.releaseNotificableKafkaEvent(
               EventType.ICEBERG_TO_PARQUET_FAILED_ACTIVE_EDITING_BY_OTHER_USER,
@@ -3849,36 +4007,53 @@ public class DatasetControllerImpl implements DatasetController {
                       .dataflowId(dataflowId)
                       .datasetId(datasetId)
                       .datasetName(datasetName)
+                      .preparationCode(preparationCode)
                       .error("Dataset is currently being edited by user " + currentEditor)
                       .build()
       );
       return;
     }
 
-    List<JobVO> activeJobsForDatasetId = jobControllerZuul.findActiveJobsRelatedToADatasetId(datasetId, dataflowId, providerId);
-    if(activeJobsForDatasetId != null && !activeJobsForDatasetId.isEmpty()){
-      List<Long> jobIds = activeJobsForDatasetId.stream().map(JobVO::getId).collect(Collectors.toList());
-      LOG.info("Can not convert tables from iceberg to parquet for dataflowId {} datasetId {} providerId {} and user {} because there are active jobs related to the same dataset id. Job ids: {}", dataflowId, datasetId, providerId, username, jobIds);
+    final List<JobVO> activeJobsForDatasetId = new ArrayList<>(jobControllerZuul
+            .findActiveJobsRelatedToADatasetId(datasetId, dataflowId, providerId, preparationCode));
+
+    if (!activeJobsForDatasetId.isEmpty()) {
+      final List<Long> jobIds = activeJobsForDatasetId.stream()
+              .map(JobVO::getId)
+              .collect(Collectors.toList());
+      LOG.info("Can not convert tables from iceberg to parquet for dataflowId {} datasetId {} preparationCode {} providerId {} and user {} because there are active jobs related to the same dataset id. Job ids: {}", dataflowId, datasetId, preparationCode, providerId, username, jobIds);
       kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.ICEBERG_TO_PARQUET_FAILED_ACTIVE_JOBS_EVENT, null,
-              NotificationVO.builder().user(username).dataflowId(dataflowId).datasetId(datasetId).datasetName(datasetName).build());
+              NotificationVO.builder()
+                      .user(username)
+                      .dataflowId(dataflowId)
+                      .datasetId(datasetId)
+                      .datasetName(datasetName)
+                      .preparationCode(preparationCode)
+                      .build());
       return;
     }
 
     try {
       if (redisLockService.checkAndAcquireLock(lockKey, lockValue, conversionLockExpirationInMillis)){
-        LOG.info("User {} has triggered the iceberg to parquet conversion for dataflowId {} datasetId {} providerId {} and tableSchemaIds {} LockValue {}", username, dataflowId, datasetId, providerId, tableSchemaIds, lockValue);
-        bigDataDatasetService.initiateIcebergToParquetConversion(datasetId, dataflowId, providerId, tableSchemaIds, lockValue);
+        LOG.info("User {} has triggered the iceberg to parquet conversion for dataflowId {} datasetId {} preparationCode {} providerId {} and tableSchemaIds {} LockValue {}", username, dataflowId, datasetId, preparationCode, providerId, tableSchemaIds, lockValue);
+        bigDataDatasetService.initiateIcebergToParquetConversion(datasetId, preparationCode, dataflowId, providerId, tableSchemaIds, lockValue);
       }
       else {
-        Map<String, String> activeLocks = redisLockService.listActiveLocks(lockKey);
-        LOG.info("User {} has triggered the iceberg to parquet conversion for dataflowId {} datasetId {} providerId {} and tableSchemaIds {} but another iceberg to parquet conversion for the same dataset is in progress {}",
-                username, dataflowId, datasetId, providerId, tableSchemaIds, activeLocks);
+        final Map<String, String> activeLocks = redisLockService.listActiveLocks(lockKey);
+        LOG.info("User {} has triggered the iceberg to parquet conversion for dataflowId {} datasetId {} preparationCode {} providerId {} and tableSchemaIds {} but another iceberg to parquet conversion for the same dataset is in progress {}",
+                username, dataflowId, datasetId, preparationCode, providerId, tableSchemaIds, activeLocks);
         kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.ANOTHER_CONVERSION_IS_RUNNING_FAILED_EVENT, null,
-                NotificationVO.builder().user(username).dataflowId(dataflowId).datasetId(datasetId).datasetName(datasetName).build());
+                NotificationVO.builder()
+                        .user(username)
+                        .dataflowId(dataflowId)
+                        .datasetId(datasetId)
+                        .datasetName(datasetName)
+                        .preparationCode(preparationCode)
+                        .build());
       }
     } catch (Exception e) {
-      LOG.error("Failed to initiate Iceberg to Parquet conversion for dataflowId {} datasetId {} providerId {} tableSchemaIds {} and username {} : {} - Releasing lock with value {}",
-              dataflowId, datasetId, providerId, tableSchemaIds, username, e.getMessage(), lockValue);
+      LOG.error("Failed to initiate Iceberg to Parquet conversion for dataflowId {} datasetId {} preparationCode {} providerId {} tableSchemaIds {} and username {} : {} - Releasing lock with value {}",
+              dataflowId, datasetId, preparationCode, providerId, tableSchemaIds, username, e.getMessage(), lockValue);
       redisLockService.releaseLock(lockKey, lockValue);
       throw e;
     }
@@ -3889,18 +4064,20 @@ public class DatasetControllerImpl implements DatasetController {
    *
    * @param datasetId the dataset id
    * @param tableSchemaId the tableSchemaId
+   * @param preparationCode the code that identifies a preparation dataset
    * @return if the iceberg table is created
    */
   @Override
   @PreAuthorize("isAuthenticated()")
   @GetMapping("/isIcebergTableCreated/{datasetId}/{tableSchemaId}")
   public Boolean isIcebergTableCreated(@PathVariable("datasetId") Long datasetId,
-                             @PathVariable("tableSchemaId") String tableSchemaId){
-    try{
-      return datasetTableService.icebergTableIsCreated(datasetId, tableSchemaId);
+                             @PathVariable("tableSchemaId") String tableSchemaId,
+                             @RequestParam(value = "preparationCode", required = false) String preparationCode){
+    try {
+      return datasetTableService.icebergTableIsCreated(datasetId, tableSchemaId, preparationCode);
     }
     catch (Exception e){
-      LOG.error("Could not find if the icebergTableCreated option was enabled for datasetId {}, tableSchemaId {}", datasetId, tableSchemaId);
+      LOG.error("Could not find if the icebergTableCreated option was enabled for datasetId {}, preparationCode {} tableSchemaId {}", datasetId, preparationCode, tableSchemaId);
       throw e;
     }
   }
@@ -3911,6 +4088,7 @@ public class DatasetControllerImpl implements DatasetController {
    * @param dataflowId the dataflow id
    * @param providerId the provider id
    * @param datasetId the dataset id
+   * @param preparationCode the code that identifies the preparation set.
    * @return list of tables info
    *
    */
@@ -3918,13 +4096,15 @@ public class DatasetControllerImpl implements DatasetController {
   @PreAuthorize("isAuthenticated()")
   @GetMapping("/getIcebergTables")
   public List<DatasetTableVO> getIcebergTables(@RequestParam(value = "dataflowId") Long dataflowId,
-                                             @RequestParam(value = "providerId", required = false) Long providerId,
-                                             @RequestParam(value = "datasetId", required = false) Long datasetId){
+                                               @RequestParam(value = "providerId", required = false) Long providerId,
+                                               @RequestParam(value = "datasetId", required = false) Long datasetId,
+                                               @RequestParam(value = "preparationCode", required = false) String preparationCode) {
     try{
-      return datasetTableService.getIcebergTablesForDataflow(dataflowId, providerId, datasetId);
+      return datasetTableService.getIcebergTablesForDataflow(dataflowId, providerId, datasetId, preparationCode);
     }
     catch (Exception e){
-      LOG.error("Could not retrieve iceberg tables for dataflowId {}, providerId {} and datasetId {}", dataflowId, providerId, datasetId);
+      LOG.error("Could not retrieve iceberg tables for dataflowId {}, providerId {} datasetId {} and preparationCode {}",
+              dataflowId, providerId, datasetId, preparationCode);
       throw e;
     }
   }
@@ -4136,7 +4316,7 @@ public class DatasetControllerImpl implements DatasetController {
     }
 
     // Check if another user is editing
-    String currentEditor = datasetTableService.getDatasetEditingUsername(datasetId);
+    String currentEditor = datasetTableService.getDatasetEditingUsername(datasetId, null);
 
     if (currentEditor != null && !currentEditor.equals(username)) {
       LOG.warn("User {} attempted to enable editing for dataset {}, but {} is already editing.",
@@ -4293,7 +4473,7 @@ public class DatasetControllerImpl implements DatasetController {
       );
     }
 
-    String currentEditor = datasetTableService.getDatasetEditingUsername(datasetId);
+    String currentEditor = datasetTableService.getDatasetEditingUsername(datasetId, null);
 
     // If no one is editing, nothing to disable
     if (currentEditor == null) {
@@ -4405,11 +4585,12 @@ public class DatasetControllerImpl implements DatasetController {
   @ApiOperation(value = "Get dataset editing status", hidden = true)
   public DatasetEditingStatusVO getEditingStatus(
           @ApiParam(type = "Long", value = "Dataset Id", example = "0")
-          @PathVariable("id") Long datasetId) {
+          @PathVariable("id") Long datasetId,
+          @RequestParam(value = "preparationCode", required = false) String preparationCode) {
 
     String username = SecurityContextHolder.getContext().getAuthentication().getName();
 
-    return datasetTableService.getEditingStatus(datasetId, username);
+    return datasetTableService.getEditingStatus(datasetId, preparationCode, username);
 
   }
 
@@ -4601,6 +4782,14 @@ public class DatasetControllerImpl implements DatasetController {
     }
 
     for (DatasetTableVO datasetTableVO : datasetTables) {
+      //Adding a sleep to allow redis locks to be removed between conversion of DatasetTable with the same datasetId
+      //but different tableSchemaId
+      try {
+        Thread.sleep(5000);
+      }
+      catch (Exception e) {
+        LOG.error(e.getMessage(), e);
+      }
       disableEditing(datasetTableVO);
     }
   }
@@ -4619,6 +4808,14 @@ public class DatasetControllerImpl implements DatasetController {
     }
 
     for (DatasetTableVO datasetTableVO : datasetTables) {
+      //Adding a sleep to allow redis locks to be removed between conversion of DatasetTable with the same datasetId
+      //but different tableSchemaId
+      try {
+        Thread.sleep(5000);
+      }
+      catch (Exception e) {
+        LOG.error(e.getMessage(), e);
+      }
       disableEditing(datasetTableVO);
     }
   }
@@ -4630,6 +4827,7 @@ public class DatasetControllerImpl implements DatasetController {
 
       final Long dataflowId = dataSetMetabaseVO.getDataflowId();
       final Long providerId = dataSetMetabaseVO.getDataProviderId();
+      final String preparationCode = datasetTableVO.getPreparationCode();
       final boolean isBigData = dataFlowControllerZuul.isBigDataflow(dataflowId);
       final List<String> tableSchemaIds = Collections.singletonList(datasetTableVO.getTableSchemaId());
 
@@ -4638,12 +4836,19 @@ public class DatasetControllerImpl implements DatasetController {
         return;
       }
 
-      //Dataset is BigData
-      final String lockKey = LockEnum.PARQUET_CONVERSION.getValue() + "_" + datasetId;
-      final String lockValue = LockEnum.PARQUET_CONVERSION.getValue() + "_" + datasetId + "_orchestrator_" + UUID.randomUUID();
+      String lockKey;
+      String lockValue;
+      if (StringUtils.isBlank(preparationCode)) {
+        lockKey = LockEnum.PARQUET_CONVERSION.getValue() + "_" + datasetId;
+        lockValue = LockEnum.PARQUET_CONVERSION.getValue() + "_" + datasetId + "_orchestrator_" + UUID.randomUUID();
+      }
+      else {
+        lockKey = LockEnum.PARQUET_CONVERSION.getValue() + "_" + datasetId + "_" + preparationCode;
+        lockValue = LockEnum.PARQUET_CONVERSION.getValue() + "_" + datasetId + "_" + preparationCode + "_orchestrator_" + UUID.randomUUID();
+      }
 
       final List<JobVO> activeJobsForDatasetId = jobControllerZuul
-              .findActiveJobsRelatedToADatasetId(datasetId, dataflowId, providerId);
+              .findActiveJobsRelatedToADatasetId(datasetId, dataflowId, providerId, preparationCode);
 
       if (activeJobsForDatasetId != null && !activeJobsForDatasetId.isEmpty()) {
         final List<Long> jobIds = activeJobsForDatasetId
@@ -4651,29 +4856,31 @@ public class DatasetControllerImpl implements DatasetController {
                 .map(JobVO::getId)
                 .collect(Collectors.toList());
 
-        LOG.info("Cannot convert tables from iceberg to parquet for dataflowId {} datasetId {} providerId {} because there are active jobs related to the same dataset id. Job ids: {}",
-                dataflowId, datasetId, providerId, jobIds);
+        LOG.info("Cannot convert tables from iceberg to parquet for dataflowId {} datasetId {} preparationCode {} providerId {} because there are active jobs related to the same dataset id. Job ids: {}",
+                dataflowId, datasetId, preparationCode, providerId, jobIds);
         return;
       }
 
       try {
         if (redisLockService.checkAndAcquireLock(lockKey, lockValue, conversionLockExpirationInMillis)) {
-          LOG.info("Orchestrator has triggered the iceberg to parquet conversion for dataflowId {} datasetId {} providerId {} and tableSchemaIds {} LockValue {}",
-                  dataflowId, datasetId, providerId, tableSchemaIds, lockValue);
+          LOG.info("Orchestrator has triggered the iceberg to parquet conversion for dataflowId {} datasetId {} preparationCode {} providerId {} and tableSchemaIds {} LockValue {}",
+                  dataflowId, datasetId, preparationCode, providerId, tableSchemaIds, lockValue);
           bigDataDatasetService.initiateIcebergToParquetConversion(
                   datasetId,
+                  preparationCode,
                   dataflowId,
                   providerId,
                   tableSchemaIds,
                   lockValue);
-        } else {
-          Map<String, String> activeLocks = redisLockService.listActiveLocks(lockKey);
-          LOG.info("Orchestrator has triggered the iceberg to parquet conversion for dataflowId {} datasetId {} providerId {} and tableSchemaIds {} but another iceberg to parquet conversion for the same dataset is in progress {}",
-                  dataflowId, datasetId, providerId, tableSchemaIds, activeLocks);
+        }
+        else {
+          final Map<String, String> activeLocks = redisLockService.listActiveLocks(lockKey);
+          LOG.info("Orchestrator has triggered the iceberg to parquet conversion for dataflowId {} datasetId {} preparationCode {} providerId {} and tableSchemaIds {} but another iceberg to parquet conversion for the same dataset is in progress {}",
+                  dataflowId, datasetId, preparationCode, providerId, tableSchemaIds, activeLocks);
         }
       } catch (Exception e) {
-        LOG.error("Failed to initiate Iceberg to Parquet conversion for dataflowId {} datasetId {} providerId {} tableSchemaIds {} : {} - Releasing lock with value {}",
-                dataflowId, datasetId, providerId, tableSchemaIds, e.getMessage(), lockValue);
+        LOG.error("Failed to initiate Iceberg to Parquet conversion for dataflowId {} datasetId {} preparationCode {} providerId {} tableSchemaIds {} : {} - Releasing lock with value {}",
+                dataflowId, datasetId, preparationCode, providerId, tableSchemaIds, e.getMessage(), lockValue);
         redisLockService.releaseLock(lockKey, lockValue);
         throw e;
       }

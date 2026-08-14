@@ -1,10 +1,15 @@
 package org.eea.dataset.persistence.data.repository;
 
 import java.util.List;
+import java.util.stream.Stream;
+
 import org.eea.dataset.persistence.data.domain.AttachmentValue;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.QueryHints;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
+
+import javax.persistence.QueryHint;
 
 
 /**
@@ -50,4 +55,20 @@ public interface AttachmentRepository extends PagingAndSortingRepository<Attachm
       @Param("idFieldSchemas") String idFieldSchemas);
 
 
+  /**
+   * Find all by id field schema and value is not null and add them in a Stream.
+   *
+   * @param idFieldSchemas the id field schemas
+   * @return the list
+   */
+  @QueryHints(value = {
+      // Enforces JDBC cursor fetch size so Postgres streams records.
+      @QueryHint(name = org.hibernate.annotations.QueryHints.FETCH_SIZE, value = "10"),
+      // Tells Hibernate not to keep dirty-checking snapshots of files in memory.
+      @QueryHint(name = org.hibernate.annotations.QueryHints.READ_ONLY, value = "true")
+  })
+  @Query("SELECT attv FROM FieldValue fv, AttachmentValue attv WHERE fv.idFieldSchema = :idFieldSchemas "
+      + "AND fv.value is not null AND fv.id = attv.fieldValue")
+  Stream<AttachmentValue> streamAllByIdFieldSchemaAndValueIsNotNull(
+      @Param("idFieldSchemas") String idFieldSchemas);
 }

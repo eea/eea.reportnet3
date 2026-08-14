@@ -162,7 +162,7 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
 
       waitForValidationJobIfInProgress(validationJobId, 2000);
 
-      JobStatusEnum statusToInsert = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.RELEASE.toString(), true, dataset.getDataflowId(), dataset.getDataProviderId(), datasets);
+      JobStatusEnum statusToInsert = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.RELEASE.toString(), true, dataset.getDataflowId(), dataset.getDataProviderId(), datasets, validationJobId);
       if (statusToInsert == JobStatusEnum.REFUSED) {
         releaseJob.setJobStatus(JobStatusEnum.REFUSED);
         addReleaseJob(user, dataset, releaseJob, statusToInsert);

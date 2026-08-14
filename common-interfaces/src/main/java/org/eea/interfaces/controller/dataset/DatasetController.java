@@ -123,7 +123,9 @@ public interface DatasetController {
    */
   @PostMapping("/{datasetId}/table/{tableSchemaId}/record")
   void insertRecords(@PathVariable("datasetId") Long datasetId,
-      @PathVariable("tableSchemaId") String tableSchemaId, @RequestBody List<RecordVO> records);
+                     @PathVariable("tableSchemaId") String tableSchemaId,
+                     @RequestParam(value = "preparationCode", required = false) String preparationCode,
+                     @RequestBody List<RecordVO> records);
 
   /**
    * Update records.
@@ -136,7 +138,8 @@ public interface DatasetController {
   @PutMapping("/{id}/updateRecord")
   void updateRecords(@PathVariable("id") Long datasetId, @RequestBody List<RecordVO> records,
       @RequestParam(value = "updateCascadePK", required = false) boolean updateCascadePK,
-      @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId) throws Exception;
+      @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,
+      @RequestParam(value = "preparationCode", required = false) String preparationCode) throws Exception;
 
   /**
    * Delete record.
@@ -148,7 +151,8 @@ public interface DatasetController {
   @DeleteMapping("/{id}/record/{recordId}")
   void deleteRecord(@PathVariable("id") Long datasetId, @PathVariable("recordId") String recordId,
       @RequestParam(value = "deleteCascadePK", required = false) boolean deleteCascadePK,
-      @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId);
+      @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,
+      @RequestParam(value = "preparationCode", required = false) String preparationCode);
 
   /**
    * Delete dataset data.
@@ -540,6 +544,7 @@ public interface DatasetController {
    * @param fileName the file name
    * @param recordId the recordId
    * @param providerCode the providerCode
+   * @param preparationCode the code that identifies the preparation dataset.
    * @return the attachment
    */
   @GetMapping(value = "/v1/{datasetId}/field/{fieldId}/attachment",
@@ -551,7 +556,8 @@ public interface DatasetController {
       @RequestParam(value = "fieldName", required = false) String fieldName,
       @RequestParam(value = "fileName", required = false) String fileName,
       @RequestParam(value = "recordId", required = false) String recordId,
-      @RequestParam(value = "providerCode", required = false) String providerCode);
+      @RequestParam(value = "providerCode", required = false) String providerCode,
+      @RequestParam(value = "preparationCode", required = false) String preparationCode);
   /**
    * Gets the attachment legacy.
    *
@@ -588,6 +594,7 @@ public interface DatasetController {
    * @param tableSchemaName the table name
    * @param fieldName the field name
    * @param recordId the recordId
+   * @param preparationCode the code that identifies the preparation dataset.
    */
   @PutMapping("/v1/{datasetId}/field/{fieldId}/attachment")
   void updateAttachment(@PathVariable("datasetId") Long datasetId,
@@ -597,7 +604,8 @@ public interface DatasetController {
       @RequestParam(value = "tableSchemaName", required = false) String tableSchemaName,
       @RequestParam(value = "fieldName", required = false) String fieldName,
       @RequestParam(value = "recordId", required = false) String recordId,
-      @RequestParam(value = "previousFileName", required = false) String previousFileName);
+      @RequestParam(value = "previousFileName", required = false) String previousFileName,
+      @RequestParam(value = "preparationCode", required = false) String preparationCode);
 
   /**
    * Update attachment legacy.
@@ -632,6 +640,7 @@ public interface DatasetController {
    * @param fieldName the field name
    * @param fileName the file name
    * @param recordId the recordId
+   * @param preparationCode the code that identifies the preparation dataset.
    */
   @DeleteMapping("/v1/{datasetId}/field/{fieldId}/attachment")
   void deleteAttachment(@PathVariable("datasetId") Long datasetId,
@@ -641,7 +650,8 @@ public interface DatasetController {
       @RequestParam(value = "tableSchemaName", required = false) String tableSchemaName,
       @RequestParam(value = "fieldName", required = false) String fieldName,
       @RequestParam(value = "fileName", required = false) String fileName,
-      @RequestParam(value = "recordId", required = false) String recordId);
+      @RequestParam(value = "recordId", required = false) String recordId,
+      @RequestParam(value = "preparationCode", required = false) String preparationCode);
 
   /**
    * Delete attachment legacy.
@@ -1027,13 +1037,15 @@ public interface DatasetController {
    * @param dataflowId the dataflow id
    * @param providerId the provider id
    * @param tableSchemaIds the tableSchemaIds
+   * @param preparationCode the code that identifies the preparation set.
    *
    */
   @PostMapping("/convertParquetToIcebergTables/{datasetId}")
   void convertParquetToIcebergTables(@PathVariable("datasetId") Long datasetId,
                                     @RequestParam(value = "dataflowId") Long dataflowId,
                                     @RequestParam(value = "providerId", required = false) Long providerId,
-                                    @RequestParam(value = "tableSchemaIds", required = false) List<String> tableSchemaIds) throws Exception;
+                                    @RequestParam(value = "tableSchemaIds", required = false) List<String> tableSchemaIds,
+                                    @RequestParam(value = "preparationCode", required = false) String preparationCode) throws Exception;
 
   /**
    * Convert Iceberg To Parquet Tables
@@ -1042,24 +1054,29 @@ public interface DatasetController {
    * @param dataflowId the dataflow id
    * @param providerId the provider id
    * @param tableSchemaIds the tableSchemaIds
+   * @param preparationCode the code that identifies the preparation set.
    *
    */
   @PostMapping("/convertIcebergToParquetTables/{datasetId}")
   void convertIcebergToParquetTables(@PathVariable("datasetId") Long datasetId,
                                     @RequestParam(value = "dataflowId") Long dataflowId,
                                     @RequestParam(value = "providerId", required = false) Long providerId,
-                                    @RequestParam(value = "tableSchemaIds", required = false) List<String> tableSchemaIds) throws Exception;
+                                    @RequestParam(value = "tableSchemaIds", required = false) List<String> tableSchemaIds,
+                                    @RequestParam(value = "preparationCode", required = false) String preparationCode) throws Exception;
 
   /**
    * Check if iceberg table is created
    *
    * @param datasetId the dataset id
    * @param tableSchemaId the tableSchemaId
+   * @param preparationCode the code that identifies a preparation dataset
    * @return if the iceberg table is created
    *
    */
   @GetMapping("/isIcebergTableCreated/{datasetId}/{tableSchemaId}")
-  Boolean isIcebergTableCreated(@PathVariable("datasetId") Long datasetId, @PathVariable("tableSchemaId") String tableSchemaId);
+  Boolean isIcebergTableCreated(@PathVariable("datasetId") Long datasetId,
+                                @PathVariable("tableSchemaId") String tableSchemaId,
+                                @RequestParam(value = "preparationCode", required = false) String preparationCode);
 
   /**
    * Get iceberg tables in dataflow
@@ -1067,13 +1084,15 @@ public interface DatasetController {
    * @param dataflowId the dataflow id
    * @param providerId the provider id
    * @param datasetId the dataset id
+   * @param preparationCode the code that identifies the preparation set.
    * @return list of tables info
    *
    */
   @GetMapping("/getIcebergTables")
   List<DatasetTableVO> getIcebergTables(@RequestParam(value = "dataflowId") Long dataflowId,
-                                             @RequestParam(value = "providerId", required = false) Long providerId,
-                                             @RequestParam(value = "datasetId", required = false) Long datasetId);
+                                        @RequestParam(value = "providerId", required = false) Long providerId,
+                                        @RequestParam(value = "datasetId", required = false) Long datasetId,
+                                        @RequestParam(value = "preparationCode", required = false) String preparationCode);
 
   /**
    * Get available for manual editing tables in dataflow
@@ -1171,7 +1190,8 @@ public interface DatasetController {
 
   @GetMapping("/{id}/editingStatus")
   DatasetEditingStatusVO getEditingStatus(
-          @PathVariable("id") Long datasetId);
+          @PathVariable("id") Long datasetId,
+          @RequestParam(value = "preparationCode", required = false) String preparationCode);
 
   @GetMapping("/hasEnabledEditingDatasets")
   Boolean hasEnabledEditingDatasets(@RequestParam(value = "dataflowId") Long dataflowId,

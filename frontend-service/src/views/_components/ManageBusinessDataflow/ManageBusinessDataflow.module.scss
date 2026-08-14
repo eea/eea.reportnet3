@@ -75,3 +75,22 @@
 .dialogContent {
   min-height: 360px;
 }
+
+.preparationWrapper {
+  margin-top: 1rem;
+  display: flex;
+  align-items: center;
+}
+
+.checkboxWrapper{
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: nowrap;
+}
+
+.checkboxItem {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}

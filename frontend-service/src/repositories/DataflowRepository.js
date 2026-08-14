@@ -22,7 +22,7 @@ export const DataflowRepository = {
   cloneSchemas: async (sourceDataflowId, targetDataflowId) =>
     await HTTPRequester.post({ url: getUrl(DataflowConfig.cloneSchemas, { sourceDataflowId, targetDataflowId }) }),
 
-  create: async (name, description, obligationId, type, bigData, dataProviderGroupId, sncData, officialReporting,useViews) =>
+  create: async (name, description, obligationId, type, bigData, dataProviderGroupId, sncData, officialReporting, useViews, preparationEnabled) =>
     await HTTPRequester.post({
       url: getUrl(DataflowConfig.createUpdate),
       data: {
@@ -35,7 +35,8 @@ export const DataflowRepository = {
         dataProviderGroupId,
         sncData,
         officialReporting,
-        useViews
+        useViews,
+        preparationEnabled
       }
     }),
 
@@ -146,8 +147,8 @@ export const DataflowRepository = {
 
   get: async dataflowId => await HTTPRequester.get({ url: getUrl(DataflowConfig.get, { dataflowId }) }),
 
-  getIcebergTables: async ({ dataflowId, providerId, datasetId }) =>
-    await HTTPRequester.get({ url: getUrl(DataflowConfig.getIcebergTables, { dataflowId, providerId, datasetId }) }),
+  getIcebergTables: async ({ dataflowId, providerId, datasetId, preparationCode }) =>
+    await HTTPRequester.get({ url: getUrl(DataflowConfig.getIcebergTables, { dataflowId, providerId, datasetId, preparationCode }) }),
 
   getEditStatus: async ({ dataflowId, providerId }) => {
     return await HTTPRequester.get({
@@ -172,7 +173,8 @@ export const DataflowRepository = {
     dataProviderGroupId,
     deadlineDate,
     officialReporting,
-    useViews
+    useViews,
+    preparationEnabled
   ) =>
     await HTTPRequester.update({
       url: getUrl(DataflowConfig.createUpdate),
@@ -187,7 +189,8 @@ export const DataflowRepository = {
         dataProviderGroupId,
         deadlineDate,
         officialReporting,
-        useViews
+        useViews,
+        preparationEnabled
       }
     }),
 

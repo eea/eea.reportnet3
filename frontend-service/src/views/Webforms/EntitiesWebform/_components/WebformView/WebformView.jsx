@@ -117,6 +117,7 @@ export const WebformView = ({
         getFieldSchemaId={getFieldSchemaId}
         isEditor={isEditor}
         isIcebergCreated={isIcebergCreated}
+        isLoadingTableData={isLoading}
         isRefresh={isRefresh}
         isReporting={isReporting}
         isViewMode={isViewMode}

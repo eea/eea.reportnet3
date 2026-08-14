@@ -481,4 +481,7 @@ public interface DataFlowController {
 
   @GetMapping("/delete")
   ResponseEntity<String> cleanupDataflows() throws Exception;
+
+  @GetMapping("/deleteDataflowById")
+  ResponseEntity<String> cleanupDataflow(@RequestParam("dataflowId") Long dataflowId) throws Exception;
 }

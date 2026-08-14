@@ -487,12 +487,15 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
         await DatasetService.convertIcebergsToParquets({
           dataflowId,
           datasetId,
-          providerId: !isTestDataset ? metadata.dataset.dataProviderId : undefined
+          providerId: !isTestDataset ? metadata.dataset.dataProviderId : undefined,
+          preparationCode: code
         });
       } else {
         await DatasetService.convertIcebergsToParquets({
           dataflowId,
-          datasetId
+          datasetId,
+          undefined,
+          preparationCode: code
         });
       }
     } else {
@@ -500,12 +503,15 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
         await DatasetService.convertParquetsToIcebergs({
           dataflowId,
           datasetId,
-          providerId: !isTestDataset ? metadata.dataset.dataProviderId : undefined
+          providerId: !isTestDataset ? metadata.dataset.dataProviderId : undefined,
+          preparationCode: code
         });
       } else {
         await DatasetService.convertParquetsToIcebergs({
           dataflowId,
-          datasetId
+          datasetId,
+          undefined,
+          preparationCode: code
         });
       }
     }
@@ -513,7 +519,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   };
 
   const onGetIcebergTables = async () => {
-    const icebergTables = await DataflowService.getIcebergTables({ dataflowId, datasetId });
+    const icebergTables = await DataflowService.getIcebergTables({ dataflowId, datasetId, preparationCode: code });
     setIsIcebergCreated(!isEmpty(icebergTables?.data));
   };
 
@@ -655,7 +661,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
 
   const getEditingStatus = async () => {
     try {
-      const editingStatusData = await DatasetService.getEditingStatus({ datasetId });
+      const editingStatusData = await DatasetService.getEditingStatus({ datasetId, preparationCode: code });
 
       setEditingStatus({
         editor: editingStatusData?.data?.editor,
@@ -868,9 +874,21 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
     const isNotification = notificationContext.toShow.find(
       notification => notification.key === 'VALIDATION_FINISHED_EVENT'
     );
-    if (isNotification && isNotification.content.datasetId?.toString() === datasetId.toString()) {
+    if (
+      isNotification &&
+      isNotification.content.datasetId?.toString() === datasetId.toString() &&
+      isNotification.content.preparationCode === code
+    ) {
       onHighlightRefresh(true);
       changeProgressStepBar({ step: 1, currentStep: 2, isRunning: false, completed: false, withError: false });
+    } else if (
+      isNotification &&
+      isNotification.content.datasetId?.toString() === datasetId.toString() &&
+      code === undefined &&
+      isNotification.content.preparationCode === null
+    ) {
+      onHighlightRefresh(true);
+      changeProgressStepBar({ step: 1, currentStep: 2, isRunning: false, completed: false, withError: true });
     }
 
     const validationFinishedWithError = notificationContext.toShow.find(notification =>
@@ -942,6 +960,10 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
     ['AUTOMATICALLY_DOWNLOAD_VALIDATIONS_FILE', 'DOWNLOAD_VALIDATIONS_FILE_ERROR', 'DOWNLOAD_FILE_BAD_REQUEST_ERROR'],
     setIsDownloadingValidations,
     false
+  );
+
+  useCheckNotifications(['PARQUET_TO_ICEBERG_CONVERSION_COMPLETED_EVENT'], () =>
+    notificationContext.add({ type: 'YOU_ONLY_HAVE_LIMITED_TIME' }, true)
   );
 
   const onLoadTableData = hasData => {
@@ -1757,7 +1779,6 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
               <Button
                 className={styles.openWebformButton}
                 disabled={
-                  code ||
                   (editingStatus?.isEditing && editingStatus?.editor !== userName) ||
                   (isAdmin && (!isCustodian || !isDataflowCustodian)) ||
                   !hasWritePermissions ||

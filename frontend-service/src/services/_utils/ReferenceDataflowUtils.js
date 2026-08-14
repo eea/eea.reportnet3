@@ -16,6 +16,7 @@ const parseReferenceDataflowDTO = referenceDataflowDTO =>
     isReleasable: referenceDataflowDTO.releasable,
     name: referenceDataflowDTO.name,
     officialReporting: referenceDataflowDTO.officialReporting,
+    preparationEnabled: referenceDataflowDTO.preparationEnabled,
     referenceDatasets: DatasetUtils.parseDatasetListDTO(referenceDataflowDTO.referenceDatasets),
     reportingDatasetsStatus: referenceDataflowDTO.reportingStatus,
     requestId: referenceDataflowDTO.requestId,

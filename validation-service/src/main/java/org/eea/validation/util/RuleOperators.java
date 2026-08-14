@@ -16,7 +16,7 @@ import java.util.regex.PatternSyntaxException;
 public class RuleOperators {
 
   /** The fields. */
-  private static List<FieldValue> fields;
+  private static ThreadLocal<List<FieldValue>> fields = new ThreadLocal<>();
 
   /** The country code. */
   private static String countryCode;
@@ -45,6 +45,10 @@ public class RuleOperators {
     return instance;
   }
 
+  public static void clearFields() {
+    fields.remove();
+  }
+
   public static void setValidateAsProviderCodee(String code) {
     if (code == null || code.isEmpty()) {
       VALIDATE_AS_PROVIDER_CODE.remove();
@@ -66,7 +70,7 @@ public class RuleOperators {
   public static boolean setEntity(RecordValue recordValue) {
     // Avoid persistent bag errors when records validation batch is too big
     Hibernate.initialize(recordValue.getFields());
-    fields = recordValue.getFields();
+    fields.set(recordValue.getFields());
     countryCode = recordValue.getDataProviderCode();
     if (null == countryCode) {
       countryCode = "XX";
@@ -110,7 +114,13 @@ public class RuleOperators {
    * @return the value
    */
   public static String getValue(String fieldSchemaId) {
-    for (FieldValue field : fields) {
+    List<FieldValue> currentFields = fields.get();
+
+    if (currentFields == null) {
+      return "";
+    }
+
+    for (FieldValue field : currentFields) {
       if (field.getIdFieldSchema().equals(fieldSchemaId)) {
         return field.getValue();
       }

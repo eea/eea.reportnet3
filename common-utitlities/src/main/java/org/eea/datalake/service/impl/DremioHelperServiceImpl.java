@@ -8,6 +8,7 @@ import org.eea.datalake.service.DremioHelperService;
 import org.eea.datalake.service.S3Service;
 import org.eea.datalake.service.model.DremioApiJob;
 import org.eea.datalake.service.model.DremioItemTypeEnum;
+import org.eea.datalake.service.model.PreparationPathRegistry;
 import org.eea.datalake.service.model.S3PathResolver;
 import org.eea.exception.DremioApiException;
 import org.eea.exception.EEAException;
@@ -84,7 +85,7 @@ public class DremioHelperServiceImpl implements DremioHelperService {
     @Override
     public boolean checkFolderPromoted(S3PathResolver s3PathResolver, String folderName) {
         DremioDirectoryItemsResponse directoryItems = getDirectoryItems(s3PathResolver, folderName);
-        String path = s3PathResolver.getPath();
+        String path = PreparationPathRegistry.resolve(s3PathResolver.getPath(), s3PathResolver.getPreparationCode());
         if (directoryItems != null) {
             Integer itemPosition;
             if (S3_IMPORT_FILE_PATH.equals(path)) {
@@ -97,7 +98,9 @@ public class DremioHelperServiceImpl implements DremioHelperService {
                 itemPosition = 5;
             } else if (S3_PREPARATION_TABLE_NAME_FOLDER_PATH.equals(path)
             || S3_PREPARATION_TABLE_AS_FOLDER_QUERY_PATH.equals(path)
-            || S3_PREPARATION_VALIDATION_TABLE_PATH.equals(path)) {
+            || S3_PREPARATION_VALIDATION_TABLE_PATH.equals(path)
+            || S3_PREPARATION_TABLE_NAME_FOLDER_PATH_FOR_VALID_PREFIX.equals(path)
+            || S3_PREPARATION_TABLE_NAME_WITH_PARQUET_FOLDER_PATH.equals(path)) {
                 itemPosition = 7;
             } else {
                 itemPosition = 6; //this is for S3_TABLE_NAME_FOLDER_PATH
@@ -151,6 +154,10 @@ public class DremioHelperServiceImpl implements DremioHelperService {
                 } catch (Exception e2) {
                     throw new DremioApiException(errorMessage);
                 }
+            } else if (S3_IMPORT_FILE_PATH.equals(s3PathResolver.getPath()) || S3_PREPARATION_IMPORT_FILE_PATH.equals(s3PathResolver.getPath())) {
+                //import folder has not been created yet in Dremio (e.g. first-time import with replace)
+                LOG.info("Import directory items not found"+  + s3PathResolver.getDatasetId() + " and table " + s3PathResolver.getTableName());
+                return null;
             } else {
                 throw new DremioApiException(errorMessage);
             }
@@ -162,17 +169,19 @@ public class DremioHelperServiceImpl implements DremioHelperService {
     public String getFolderId(S3PathResolver s3PathResolver, String folderName) {
         String folderId = null;
         DremioDirectoryItemsResponse directoryItems = getDirectoryItems(s3PathResolver, folderName);
+        String path = PreparationPathRegistry.resolve(s3PathResolver.getPath(), s3PathResolver.getPreparationCode());
         if (directoryItems!=null) {
             Integer itemPosition;
-            if (S3_IMPORT_FILE_PATH.equals(s3PathResolver.getPath())) {
+            if (S3_IMPORT_FILE_PATH.equals(path)) {
                 itemPosition = 8;
-            } else if (S3_PREPARATION_IMPORT_FILE_PATH.equals(s3PathResolver.getPath())) {
+            } else if (S3_PREPARATION_IMPORT_FILE_PATH.equals(path)) {
                 itemPosition = 9;
-            } else if (S3_DATAFLOW_REFERENCE_FOLDER_PATH.equals(s3PathResolver.getPath())) {
+            } else if (S3_DATAFLOW_REFERENCE_FOLDER_PATH.equals(path)) {
                 itemPosition = 4;
-            } else if (S3_EU_SNAPSHOT_ROOT_PATH.equals(s3PathResolver.getPath())) {
+            } else if (S3_EU_SNAPSHOT_ROOT_PATH.equals(path)) {
                 itemPosition = 5;
-            } else if (S3_PREPARATION_TABLE_NAME_FOLDER_PATH.equals(s3PathResolver.getPath())) {
+            } else if (S3_PREPARATION_TABLE_NAME_FOLDER_PATH.equals(path) ||
+                       S3_PREPARATION_TABLE_AS_FOLDER_QUERY_PATH.equals(path)) {
                 itemPosition = 7;
             } else {
                 itemPosition = 6; //this is for S3_TABLE_NAME_FOLDER_PATH

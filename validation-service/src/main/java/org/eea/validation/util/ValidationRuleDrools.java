@@ -1,6 +1,7 @@
 package org.eea.validation.util;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -16,6 +17,9 @@ import org.eea.validation.persistence.data.domain.RecordValue;
 import org.eea.validation.persistence.data.domain.TableValidation;
 import org.eea.validation.persistence.data.domain.TableValue;
 import org.eea.validation.persistence.data.domain.Validation;
+import org.eea.validation.persistence.data.repository.DatasetExtendedRepositoryImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 
 /**
@@ -30,6 +34,9 @@ public class ValidationRuleDrools {
   private static int maxErrors;
   private static final Map<String, AtomicInteger> ruleCallCount =
     new ConcurrentHashMap<>();
+
+  private static final Logger LOG = LoggerFactory.getLogger(ValidationRuleDrools.class);
+
   /**
    * Fill validation.
    *
@@ -188,5 +195,19 @@ public class ValidationRuleDrools {
       return true;
     }
     return false;
+  }
+
+  /**
+   * Resets the maximum error map for the given rules.
+   *
+   * @param ruleIds the rule IDs
+   */
+  public static void resetRuleCallCount(Collection<String> ruleIds) {
+    if (ruleIds == null || ruleIds.isEmpty()) {
+      return;
+    }
+
+    LOG.info("Removing rule entries from ruleCallCount. Number of entries removed: {}", ruleIds.size());
+    ruleIds.forEach(ruleCallCount::remove);
   }
 }

@@ -76,7 +76,7 @@ public class S3ServiceImpl implements S3Service {
                 : s3PathResolver.getDataProviderName();
         String datasetFolder = formatFolderName(s3PathResolver.getDatasetId(), S3_DATASET_PATTERN);
         String fileName = s3PathResolver.getFilename();
-        String path = s3PathResolver.getPath();
+        String path = PreparationPathRegistry.resolve(s3PathResolver.getPath(), s3PathResolver.getPreparationCode());
         String dataCollectionFolder =  formatFolderName(s3PathResolver.getDatasetId(), S3_DATA_COLLECTION_PATTERN);
         String parquetFolder = s3PathResolver.getParquetFolder();
         String snapshotFolder = formatSnapshotFolder(s3PathResolver.getSnapshotId());
@@ -126,6 +126,7 @@ public class S3ServiceImpl implements S3Service {
                 path = String.format(path, dataflowFolder, dataProviderFolder, datasetFolder,
                     tableName);
                 break;
+            case  S3_PREPARATION_ATTACHMENTS_PATH:
             case  S3_PREPARATION_TABLE_NAME_WITH_PARQUET_FOLDER_PATH:
                 path = String.format(path, dataflowFolder, dataProviderFolder, datasetFolder, preparationCode, tableName, fileName);
                 break;
@@ -271,6 +272,7 @@ public class S3ServiceImpl implements S3Service {
 
         switch (path) {
             case S3_PREPARATION_TABLE_NAME_FOLDER_PATH:
+            case S3_PREPARATION_TABLE_NAME_FOLDER_PATH_FOR_VALID_PREFIX:
                 return String.format(path, dataflowFolder, dataProviderFolder, datasetFolder, preparationCode, tableName);
             case S3_EXPORT_PREFILLED_TABLE_FILE_PATH:
             case S3_IMPORT_FILE_PATH:

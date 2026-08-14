@@ -36,7 +36,6 @@ import { isEmpty } from 'lodash';
 
 export const WebformField = ({
   bigData = false,
-  changedConditionalFieldData,
   onFieldUpdate,
   columnsSchema,
   conditionalFieldChange,
@@ -44,12 +43,9 @@ export const WebformField = ({
   dataflowId,
   datasetId,
   datasetSchemaId,
-  dependantConditionalFieldId,
   element,
   hasErrors,
   isConditional,
-  isConditionalChanged,
-  isDependantConditionalField,
   isSubTableCreated,
   isViewMode,
   updatingField,
@@ -113,16 +109,6 @@ export const WebformField = ({
       isMountedRef.current = false;
     };
   }, []);
-
-  useEffect(() => {
-    return () => {
-      isMountedRef.current = false;
-    };
-  }, []);
-
-  useEffect(() => {
-    if (element.fieldType === 'LINK' || element.fieldType === 'EXTERNAL_LINK') onFilter('', element);
-  }, [newRecord, conditionalFieldChange]);
 
   const onAttach = async value => {
     onFillField(record, selectedFieldSchemaId, `${value.files[0].name}`);
@@ -192,17 +178,42 @@ export const WebformField = ({
 
       const fieldMatch = el => [el.fieldSchemaId, el.fieldId, el.fieldSchema].includes(masterConditionalFieldId);
 
-      const conditionalField =
-        // 1. Try to find a matching field directly in the top-level elements
-        record.elements.find(el => fieldMatch(el)) ||
-        // 2. Otherwise, look inside BLOCKs:
-        //    - pick the block records matching the current recordId
-        //    - search their elements for the matching field
-        record.elements
-          .filter(el => el.type === 'BLOCK')
-          .flatMap(block => block.elementsRecords?.filter(er => er.recordId === record.recordId) || [])
-          .flatMap(elementRecord => elementRecord.elements || [])
-          .find(recordElement => fieldMatch(recordElement));
+      // Search for the conditional field in nested containers
+      const findConditionalField = elements => {
+        for (const element of elements) {
+          if (fieldMatch(element)) {
+            return element;
+          }
+
+          // Search inside record based containers (BLOCK)
+          if (element.elementsRecords) {
+            const currentElementRecord = element.elementsRecords.find(
+              elementRecord => elementRecord.recordId === record.recordId
+            );
+
+            if (currentElementRecord) {
+              const conditionalField = findConditionalField(currentElementRecord.elements);
+
+              if (conditionalField) {
+                return conditionalField;
+              }
+            }
+          }
+
+          // Search inside simple containers (SECTION)
+          if (element.elements) {
+            const conditionalField = findConditionalField(element.elements);
+
+            if (conditionalField) {
+              return conditionalField;
+            }
+          }
+        }
+
+        return undefined;
+      };
+
+      const conditionalField = findConditionalField(record.elements);
 
       const conditionalValue = (() => {
         if (isNil(conditionalField)) return encodeURIComponent(element.value);
@@ -222,7 +233,14 @@ export const WebformField = ({
 
       queryClient
         .fetchQuery(
-          ['referencedFieldValues', datasetSchemaId, conditionalField, element, filter],
+          [
+            'referencedFieldValues',
+            datasetSchemaId,
+            record.recordId,
+            element.fieldSchemaId ?? element.fieldSchema,
+            conditionalValue,
+            filter
+          ],
           async () => {
             const referencedFieldValues = await DatasetService.getReferencedFieldValues(
               datasetId,
@@ -268,6 +286,21 @@ export const WebformField = ({
     ]
   );
 
+  useEffect(() => {
+    if (element.fieldType === 'LINK' || element.fieldType === 'EXTERNAL_LINK') {
+      onFilter('', element);
+    }
+  }, [
+    record?.recordId,
+    record?.elements,
+    element?.fieldSchemaId,
+    element?.fieldSchema,
+    element?.value,
+    newRecord,
+    conditionalFieldChange,
+    onFilter
+  ]);
+
   const onFocusField = value => {
     webformFieldDispatch({ type: 'SET_INITIAL_FIELD_VALUE', payload: value });
   };
@@ -286,10 +319,25 @@ export const WebformField = ({
     let parsedValues;
 
     if (isConditional && ['LINK', 'CODELIST', 'MULTISELECT_CODELIST'].includes(field.fieldType)) {
-      //Flatten BLOCK elements before mapping
-      const allFieldElements = record.elements.flatMap(el =>
-        el?.type === 'BLOCK' && Array.isArray(el.elementsRecords?.[0]?.elements) ? el.elementsRecords[0].elements : el
-      );
+      // Flatten nested BLOCK and SECTION elements before mapping
+      const getFieldElements = elements =>
+        elements.flatMap(el => {
+          if (Array.isArray(el.elementsRecords)) {
+            const currentElementRecord = el.elementsRecords.find(
+              elementRecord => elementRecord.recordId === record.recordId
+            );
+
+            return currentElementRecord?.elements ? getFieldElements(currentElementRecord.elements) : [];
+          }
+
+          if (Array.isArray(el.elements)) {
+            return getFieldElements(el.elements);
+          }
+
+          return el.type === 'FIELD' ? [el] : [];
+        });
+
+      const allFieldElements = getFieldElements(record.elements);
 
       const fieldsToReset = new Set([field.fieldSchema, field.fieldSchemaId, field.name]);
 
@@ -413,8 +461,11 @@ export const WebformField = ({
     }
   };
 
-  const onFileDeleteVisible = (fileName, fieldId, fieldSchemaId) => {
-    webformFieldDispatch({ type: 'ON_FILE_DELETE_OPENED', payload: { fileName, fieldId, fieldSchemaId } });
+  const onFileDeleteVisible = (fileName, fieldName, recordId, fieldId, fieldSchemaId) => {
+    webformFieldDispatch({
+      type: 'ON_FILE_DELETE_OPENED',
+      payload: { fileName, fieldName, recordId, fieldId, fieldSchemaId }
+    });
   };
 
   const onFileUploadVisible = (fieldName, recordId, fieldId, fieldSchemaId, validExtensions, maxSize) => {
@@ -577,7 +628,7 @@ export const WebformField = ({
               }}
               onFilterInputChangeBackend={filter => onFilter(filter, field)}
               onUpdate={event => {
-                onFillField(field, option, event.target.value, isConditional);
+                onFillField(field, option, event.target.value);
               }}
               optionLabel="itemType"
               options={linkItemsOptions}
@@ -606,6 +657,7 @@ export const WebformField = ({
                       updatingField.field?.fieldId
                   ))
               }
+              key={`${record.recordId}-${field.fieldSchemaId || field.fieldSchema || field.fieldId}-${field.value}`}
               onChange={event => {
                 const value =
                   typeof event.target?.value === 'object' && !Array.isArray(event.target.value)
@@ -613,7 +665,7 @@ export const WebformField = ({
                     : event.target?.value;
 
                 if (value !== field.value) {
-                  onFillField(field, option, value, isConditional);
+                  onFillField(field, option, value);
                   if (isNil(field.recordId)) onSaveField(option, value);
                   else if (!(event.target.action === 'arrowKeys')) onEditorSubmitValue(field, option, value);
                 }
@@ -646,7 +698,7 @@ export const WebformField = ({
             }
             maxSelectedLabels={10}
             onChange={() => {
-              onFillField(field, option, field.value, isConditional);
+              onFillField(field, option, field.value);
 
               if (isNil(field.recordId)) {
                 onSaveField(option, field.value);
@@ -689,7 +741,7 @@ export const WebformField = ({
                   ? event.target?.value?.value
                   : event.target?.value;
               if (value !== field.value) {
-                onFillField(field, option, value, isConditional);
+                onFillField(field, option, value);
                 if (isNil(field.recordId)) onSaveField(option, value);
                 else if (!(event.target.action === 'arrowKeys')) onEditorSubmitValue(field, option, value);
               }
@@ -852,7 +904,9 @@ export const WebformField = ({
               className="p-button-animated-blink p-button-primary-transparent"
               disabled={isViewMode || updatingField.isUpdating}
               icon="trash"
-              onClick={() => onFileDeleteVisible(field.value, field.fieldId, field.fieldSchemaId)}
+              onClick={() =>
+                onFileDeleteVisible(field.value, field.name, field.recordId, field.fieldId, field.fieldSchemaId)
+              }
             />
           </div>
         );

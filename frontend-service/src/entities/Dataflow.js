@@ -24,6 +24,7 @@ export class Dataflow {
     obligation,
     officialReporting,
     useViews,
+    preparationEnabled,
     referenceDatasets,
     reportingDatasetsStatus,
     representatives,
@@ -60,6 +61,7 @@ export class Dataflow {
     this.obligation = obligation;
     this.officialReporting = officialReporting;
     this.useViews = useViews;
+    this.preparationEnabled = preparationEnabled;
     this.referenceDatasets = referenceDatasets;
     this.reportingDatasetsStatus = reportingDatasetsStatus;
     this.representatives = representatives;

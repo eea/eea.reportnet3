@@ -70,7 +70,6 @@ public final class PreparationPathRegistry {
 
                     // Last write wins — duplicates automatically overwrite
                     PREPARATION_PATHS.put(parentPath, preparationPath);
-                    System.out.println("[CHRIS]" + parentField.getName() + " -> " + field.getName());
 
                 } catch (NoSuchFieldException | IllegalAccessException ignored) {
                     // If parent doesn't exist, skip silently. Registry remains consistent with available constants.

@@ -148,6 +148,7 @@ export const Dataflow = () => {
     preparationSetsList: null,
     officialReporting: false,
     useViews:false,
+    preparationEnabled: false,
     representative: {},
     representativesImport: false,
     restrictFromPublic: false,
@@ -156,7 +157,7 @@ export const Dataflow = () => {
     showPublicInfo: false,
     status: '',
     updatedDatasetSchema: [],
-    userRoles: [],
+    userRoles: []
   };
 
   const [dataflowState, dataflowDispatch] = useReducer(dataflowDataReducer, dataflowInitialState);
@@ -984,6 +985,7 @@ export const Dataflow = () => {
           obligations: dataflow.obligation,
           officialReporting: dataflow.officialReporting,
           useViews: dataflow.useViews,
+          preparationEnabled: dataflow.preparationEnabled,
           showPublicInfo: dataflow.showPublicInfo,
           status: dataflow.status
         }
@@ -2069,6 +2071,7 @@ export const Dataflow = () => {
             isVisible={dataflowState.isCitizenScienceDataflowDialogVisible}
             manageDialogs={manageDialogs}
             obligation={obligation}
+            onUpdateAddUserText={onUpdateAddUserText}
             onEditDataflow={onEditDataflow}
             onLoadReportingDataflow={onLoadReportingDataflow}
             onUpdateSoftDelete={onUpdateSoftDelete}
@@ -2102,7 +2105,8 @@ export const Dataflow = () => {
               dataProviderGroupId: dataflowState.data.dataProviderGroupId,
               dataProviderGroupName: dataflowState.data.dataProviderGroupName,
               isSoftDeleteDialogVisible: dataflowState.isSoftDeleteDialogVisible,
-              isReverseSoftDeleteDialogVisible: dataflowState.isReverseSoftDeleteDialogVisible
+              isReverseSoftDeleteDialogVisible: dataflowState.isReverseSoftDeleteDialogVisible,
+              preparationEnabled: dataflowState.data.preparationEnabled
             }}
           />
         )}

@@ -20,10 +20,13 @@ public class JobForRemovingIcebergTablesWithExpiredEditingLocks {
 
     @PostConstruct
     private void init() {
-        ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
-        scheduler.initialize();
-        scheduler.schedule(this::removeExpiredIcebergTables,
-                new CronTrigger("0 */5 * * * *"));
+        //TODO Has been commented out to prevent the job from running on production
+        //due to the very large amount of existing open iceberg tables.
+
+        //ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
+        //scheduler.initialize();
+        //scheduler.schedule(this::removeExpiredIcebergTables,
+        //        new CronTrigger("0 */5 * * * *"));
     }
 
     /**

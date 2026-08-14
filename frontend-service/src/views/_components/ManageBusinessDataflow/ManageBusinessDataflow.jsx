@@ -73,6 +73,7 @@ export const ManageBusinessDataflow = ({
   const [selectedFmeUser, setSelectedFmeUser] = useState(null);
   const [selectedGroup, setSelectedGroup] = useState(null);
   const [pinDataflow, setPinDataflow] = useState(false);
+  const [isPreparationEnabled, setIsPreparationEnabled] = useState(isEditing ? state.preparationEnabled : false);
 
   const deleteInputRef = useRef(null);
   const inputRef = useRef(null);
@@ -238,7 +239,8 @@ export const ManageBusinessDataflow = ({
           name,
           selectedGroup.dataProviderGroupId,
           selectedFmeUser.id,
-          bigData
+          bigData,
+          isPreparationEnabled
         );
         manageDialogs(dialogName, false);
         onEditDataflow(name, description);
@@ -250,7 +252,8 @@ export const ManageBusinessDataflow = ({
           selectedGroup.dataProviderGroupId,
           selectedFmeUser.id,
           bigData,
-          bigData === true ? true : undefined
+          true,
+          isPreparationEnabled
         );
         if (pinDataflow) {
           const inmUserProperties = { ...userContext.userProps };
@@ -276,6 +279,29 @@ export const ManageBusinessDataflow = ({
     } finally {
       setIsSending(false);
     }
+  };
+
+  const renderPreparationEnabled = () => {
+    return (
+      <div className={styles.checkboxWrapper}>
+        <Checkbox
+          ariaLabel={resourcesContext.messages['preparationEnabled']}
+          checked={isPreparationEnabled}
+          id="preparationEnabledCheckbox"
+          inputId="preparationEnabledCheckbox"
+          onChange={() => setIsPreparationEnabled(!isPreparationEnabled)}
+          role="checkbox"
+        />
+        <label>
+          <span onClick={() => setIsPreparationEnabled(!isPreparationEnabled)}>
+            {resourcesContext.messages['preparationEnabled']}
+          </span>
+        </label>
+        <TooltipButton
+          message={resourcesContext.messages['preparationEnabledMessage']}
+          uniqueIdentifier="PreparationEnabled"></TooltipButton>
+      </div>
+    );
   };
 
   const renderDialogFooter = () => {
@@ -361,7 +387,12 @@ export const ManageBusinessDataflow = ({
           {renderCheckBoxPinned()}
         </div>
         <div className="p-toolbar-group-left">{renderBigDataStorage()}</div>
-        {bigData && <div className="p-toolbar-group-left">{renderSncData && renderSncData(false, true, true)}</div>}
+        {bigData && (
+          <div className={`p-toolbar-group-left ${styles.checkboxWrapper}`}>
+            <div className={styles.checkboxItem}>{renderSncData && renderSncData(false, true, true)}</div>
+            <div className={styles.checkboxItem}>{renderPreparationEnabled()}</div>
+          </div>
+        )}
         <Button
           className={`p-button-primary ${
             !isEmpty(name) &&
@@ -508,6 +539,7 @@ export const ManageBusinessDataflow = ({
         onHide={onHideDataflowDialog}
         visible={isVisible}>
         <div className={styles.dialogContent}>{renderForm()}</div>
+        {isEditing && <div className={styles.preparationWrapper}>{renderPreparationEnabled()}</div>}
       </Dialog>
 
       {isDeleteDialogVisible && (
