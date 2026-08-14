@@ -294,8 +294,18 @@ public class DatasetTableServiceImpl implements DatasetTableService {
                 .orElse(null);
     }
 
-    public List<DatasetTableVO> getDatasetTablesByDataflowId(Long dataflowId) {
-        final List<DatasetTable> datasetTables = datasetTableRepository.findDatasetTableByDataflowId(dataflowId);
+    public List<DatasetTableVO> getDatasetTablesByDataflowIdAndIcebergTable(Long dataflowId, boolean isIcebergTableCreated) {
+        final List<DatasetTable> datasetTables = datasetTableRepository.findDatasetTableByDataflowIdAndIsIcebergTableCreated(dataflowId, isIcebergTableCreated);
+
+        if (datasetTables.isEmpty()) {
+            return new ArrayList<>();
+        }
+        final DatasetTableMapperImpl mapper = new DatasetTableMapperImpl();
+        return mapper.entityListToClass(datasetTables);
+    }
+
+    public List<DatasetTableVO> getDatasetTablesByDatasetIdAndIcebergTable(Long datasetId, boolean isIcebergTableCreated) {
+        final List<DatasetTable> datasetTables = datasetTableRepository.findDatasetTableByDatasetIdAndIsIcebergTableCreated(datasetId, isIcebergTableCreated);
 
         if (datasetTables.isEmpty()) {
             return new ArrayList<>();

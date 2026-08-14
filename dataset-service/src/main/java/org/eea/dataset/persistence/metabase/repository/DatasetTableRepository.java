@@ -181,7 +181,10 @@ public interface DatasetTableRepository extends JpaRepository<DatasetTable, Long
                             "FROM dataset_table " +
                             "INNER JOIN dataset " +
                             "ON dataset_table.dataset_id = dataset.id " +
-                            "WHERE dataset.dataflowid = :dataflowId "
+                            "WHERE dataset.dataflowid = :dataflowId " +
+                            "AND dataset_table.is_iceberg_table_created = :isIcebergTableCreated"
     )
-    List<DatasetTable> findDatasetTableByDataflowId(Long dataflowId);
+    List<DatasetTable> findDatasetTableByDataflowIdAndIsIcebergTableCreated(Long dataflowId, boolean isIcebergTableCreated);
+
+    List<DatasetTable> findDatasetTableByDatasetIdAndIsIcebergTableCreated(Long datasetId, boolean isIcebergTableCreated);
 }

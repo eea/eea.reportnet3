@@ -3655,7 +3655,7 @@ public class FileTreatmentHelper implements DisposableBean {
         S3PathResolver s3PathResolver = new S3PathResolver(dataset.getDataflowId(), providerId, datasetId, tableName, preparationCode);
         List<S3Object> exportFilenames;
 
-        if (StringUtils.isBlank(preparationCode)) {
+        if (StringUtils.isNotBlank(preparationCode)) {
             s3PathResolver.setPath(S3_PREPARATION_PROVIDER_PATH);
             exportFilenames = s3Helper.getFilenamesFromTableNames(s3PathResolver);
         }

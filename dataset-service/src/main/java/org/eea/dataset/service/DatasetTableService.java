@@ -36,8 +36,9 @@ public interface DatasetTableService {
 
     List<DatasetTableVO> getDatasetTablesWithExpiredEditingLocks();
 
-    List<DatasetTableVO> getDatasetTablesByDataflowId(Long dataflowId);
+    List<DatasetTableVO> getDatasetTablesByDataflowIdAndIcebergTable(Long dataflowId, boolean isIcebergTableCreated);
 
+    List<DatasetTableVO> getDatasetTablesByDatasetIdAndIcebergTable(Long datasetId, boolean isIcebergTableCreated);
 
     String getDatasetNonExpiredEditingUsername(Long datasetId);
 
