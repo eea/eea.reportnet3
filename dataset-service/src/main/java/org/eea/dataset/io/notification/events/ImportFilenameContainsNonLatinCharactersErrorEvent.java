@@ -31,6 +31,7 @@ public class ImportFilenameContainsNonLatinCharactersErrorEvent implements Notif
         notification.put("datasetId", datasetId);
         notification.put("user", user);
         notification.put("fileName", filename);
+        notification.put("preparationCode", notificationVO.getPreparationCode());
         notification.put("nonLatinCharacters", nonLatinCharacters);
         return notification;
     }
