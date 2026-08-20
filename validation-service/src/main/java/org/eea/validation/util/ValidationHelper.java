@@ -1633,8 +1633,6 @@ public class ValidationHelper implements DisposableBean {
           try {
             Thread.sleep(1000);
             LOG.info("Checking status of process {} for dataset {}. taskId {}", validationTask.processId, validationTask.datasetId, validationTask.taskId);
-            final Object value = validationTask.eeaEventVO.getData().get("preparationCode");
-            final String preparationCode = value == null ? null : String.valueOf(value);
             checkFinishedValidations(validationTask.datasetId, validationTask.processId, validationTask.taskId, preparationCode);
           } catch (EEAException | InterruptedException eeaEx) {
             LOG.error("Error finishing validations for dataset {} due to exception {}",
