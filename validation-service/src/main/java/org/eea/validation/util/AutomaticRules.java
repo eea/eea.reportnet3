@@ -447,7 +447,7 @@ public class AutomaticRules {
           + " ((fv.value::json->'properties')::json->>'srid')::integer) as value "
           + " from dataset_%s.field_value fv inner join dataset_%s.record_value rv "
           + " on rv.id = fv.id_record where fv.value <> '' and public.is_valid_json(fv.value) and geometry is null ) tableAux "
-          + " where public.ST_isValid(value) = false;";
+          + " where public.ST_isValid(value) = false";
        sqlResult = String.format(sql, fieldName, datasetId, datasetId);
     }
 
