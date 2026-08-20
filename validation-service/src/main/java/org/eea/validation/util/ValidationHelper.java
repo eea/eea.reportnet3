@@ -54,6 +54,7 @@ import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
+import org.eea.lock.redis.RedisLockService;
 import org.eea.lock.service.LockService;
 import org.eea.multitenancy.TenantResolver;
 import org.eea.thread.EEADelegatingSecurityContextExecutorService;
@@ -217,6 +218,9 @@ public class ValidationHelper implements DisposableBean {
 
   @Autowired
   private RepresentativeControllerZuul representativeControllerZuul;
+
+  @Autowired
+  private RedisLockService redisLockService;
 
   private final S3Service s3ServicePrivate;
 
@@ -1584,6 +1588,10 @@ public class ValidationHelper implements DisposableBean {
     public void run() {
       ProcessStatusEnum status = ProcessStatusEnum.FINISHED;
       Long currentTime = System.currentTimeMillis();
+
+      final Object value = validationTask.eeaEventVO.getData().get("preparationCode");
+      final String preparationCode = value == null ? null : String.valueOf(value);
+
       int workingThreads =
           ((ThreadPoolExecutor) ((EEADelegatingSecurityContextExecutorService) validationExecutorService)
               .getDelegateExecutorService()).getActiveCount();
@@ -1593,8 +1601,17 @@ public class ValidationHelper implements DisposableBean {
           validationTask.eeaEventVO, workingThreads, maxRunningTasks - workingThreads);
 
       try {
-        validationTask.validator.performValidation(validationTask.eeaEventVO,
-            validationTask.datasetId, validationTask.kieBase, validationTask.taskId);
+        LOG.info("Validation task id " + validationTask.taskId
+                + " process id " + validationTask.processId
+                + " preparationCode " + preparationCode
+                + " has blocker " + redisLockService.hasBlocker(validationTask.datasetId, validationTask.processId, preparationCode));
+        if (redisLockService.hasBlocker(validationTask.datasetId, validationTask.processId, preparationCode)) {
+          status = ProcessStatusEnum.SKIPPED;
+        }
+        else{
+          validationTask.validator.performValidation(validationTask.eeaEventVO,
+                  validationTask.datasetId, validationTask.kieBase, validationTask.taskId);
+        }
       } catch (Exception e) {
         LOG.error("Error processing validations for dataset {} due to exception {}",
             validationTask.datasetId, e.getMessage(), e);
@@ -1616,8 +1633,6 @@ public class ValidationHelper implements DisposableBean {
           try {
             Thread.sleep(1000);
             LOG.info("Checking status of process {} for dataset {}. taskId {}", validationTask.processId, validationTask.datasetId, validationTask.taskId);
-            final Object value = validationTask.eeaEventVO.getData().get("preparationCode");
-            final String preparationCode = value == null ? null : String.valueOf(value);
             checkFinishedValidations(validationTask.datasetId, validationTask.processId, validationTask.taskId, preparationCode);
           } catch (EEAException | InterruptedException eeaEx) {
             LOG.error("Error finishing validations for dataset {} due to exception {}",
@@ -1742,6 +1757,10 @@ public class ValidationHelper implements DisposableBean {
                   jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.WARNING_HAS_CANCELED_VALIDATION_TASKS, null);
                   kafkaSenderUtils.releaseKafkaEvent(EventType.FINISHED_VALIDATION_WITH_CANCELED_TASKS, value);
                 }
+                if (taskRepository.hasProcessSkippedTasks(processId)) {
+                  jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.WARNING_HAS_SKIPPED_VALIDATION_TASKS, null);
+                  kafkaSenderUtils.releaseKafkaEvent(EventType.FINISHED_VALIDATION_WITH_SKIPPED_TASKS_EVENT, value);
+                }
               }
 
             }
@@ -1767,8 +1786,20 @@ public class ValidationHelper implements DisposableBean {
                         value,
                         NotificationVO.builder().user(process.getUser()).datasetId(datasetId).build());
               }
+              if (taskRepository.hasProcessSkippedTasks(processId)) {
+                jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.WARNING_HAS_SKIPPED_VALIDATION_TASKS, null);
+                kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.FINISHED_VALIDATION_WITH_SKIPPED_TASKS_EVENT,
+                        value,
+                        NotificationVO
+                                .builder()
+                                .user(process.getUser())
+                                .datasetId(datasetId)
+                                .preparationCode(preparationCode)
+                                .build());
+              }
             }
           }
+          redisLockService.removeBlocker(datasetId, processId, preparationCode);
           isFinished = true;
         }
       }
@@ -1800,7 +1831,10 @@ public class ValidationHelper implements DisposableBean {
    */
   private void checkAndPromoteFolder(S3PathResolver s3PathResolver, DataFlowVO dataflow) throws EEAException {
     if (dataflow.getBigData()!=null && dataflow.getBigData()) {
-      if (s3Helper.checkFolderExist(s3PathResolver, S3_VALIDATION_TABLE_PATH)) {
+      final String preparationCode = s3PathResolver.getPreparationCode();
+      final String validationTablePath = (preparationCode == null || preparationCode.isBlank()) ? S3_VALIDATION_TABLE_PATH : S3_PREPARATION_VALIDATION_TABLE_PATH;
+      final String validationFolderPath = (preparationCode == null || preparationCode.isBlank()) ? S3_TABLE_AS_FOLDER_QUERY_PATH : S3_PREPARATION_TABLE_AS_FOLDER_QUERY_PATH;
+      if (s3Helper.checkFolderExist(s3PathResolver, validationTablePath)) {
         try {
           String validateTable = s3Helper.getS3Service().getTableAsFolderQueryPath(s3PathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
           dremioHelperService.refreshTableMetadataAndPromote(null, validateTable, s3PathResolver, s3PathResolver.getTableName());

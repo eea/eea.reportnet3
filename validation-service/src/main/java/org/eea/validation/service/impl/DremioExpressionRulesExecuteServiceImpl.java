@@ -28,13 +28,17 @@ import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.validation.TaskVO;
+import org.eea.lock.redis.RedisLockService;
 import org.eea.utils.UtilityClass;
 import org.eea.validation.persistence.data.domain.FieldValue;
 import org.eea.validation.persistence.data.domain.RecordValue;
+import org.eea.validation.persistence.data.metabase.domain.Task;
+import org.eea.validation.persistence.data.metabase.repository.TaskRepository;
 import org.eea.validation.service.DremioRulesExecuteService;
 import org.eea.validation.service.DremioRulesService;
 import org.eea.validation.service.RulesService;
 import org.eea.validation.util.RuleOperators;
+import org.eea.validation.util.TaskJsonUtils;
 import org.eea.validation.util.ValidationHelper;
 import org.jsoup.helper.StringUtil;
 import org.slf4j.Logger;
@@ -81,6 +85,8 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
     private S3Helper s3Helper;
     private DremioHelperService dremioHelperService;
     private ValidationHelper validationHelper;
+    private TaskRepository taskRepository;
+    private RedisLockService redisLockService;
 
     private static final Logger LOG = LoggerFactory.getLogger(DremioExpressionRulesExecuteServiceImpl.class);
     private static final String RECORD_IF_THEN = "recordIfThen";
@@ -104,7 +110,8 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
     @Autowired
     public DremioExpressionRulesExecuteServiceImpl(@Qualifier("dremioJdbcTemplate") JdbcTemplate dremioJdbcTemplate, S3Service s3Service, RulesService rulesService, DatasetSchemaControllerZuul datasetSchemaControllerZuul,
                                                    DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul, DremioRulesService dremioRulesService, RepresentativeControllerZuul representativeControllerZuul,
-                                                   S3Helper s3Helper, DremioHelperService dremioHelperService, ValidationHelper validationHelper) {
+                                                   S3Helper s3Helper, DremioHelperService dremioHelperService, ValidationHelper validationHelper,
+                                                   TaskRepository taskRepository, RedisLockService redisLockService) {
         this.dremioJdbcTemplate = dremioJdbcTemplate;
         this.s3Service = s3Service;
         this.rulesService = rulesService;
@@ -115,6 +122,8 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
         this.s3Helper = s3Helper;
         this.dremioHelperService = dremioHelperService;
         this.validationHelper = validationHelper;
+        this.taskRepository = taskRepository;
+        this.redisLockService = redisLockService;
     }
 
     @Override
@@ -171,7 +180,10 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
 
             query.append(" from ").append(s3Service.getTableAsFolderQueryPath(dataTableResolver, path));
             SqlRowSet rs = dremioJdbcTemplate.queryForRowSet(query.toString());
-            runRuleAndCreateParquet(createParquetWithSQL, providerCode, ruleVO, fieldName, fileName, headerNames, rs,  dataTableResolver, validationResolver, fieldSchemaIdNameMap);
+
+            Task task = taskRepository.findById(taskId).orElse(null);
+
+            runRuleAndCreateParquet(createParquetWithSQL, providerCode, ruleVO, fieldName, fileName, headerNames, rs,  dataTableResolver, validationResolver, fieldSchemaIdNameMap, task, preparationCode);
         } catch (Exception e1) {
             LOG.error("Error creating validation folder for ruleId {}, datasetId {} and taskId {},{}", ruleId, datasetId, taskId, e1.getMessage());
             throw new DremioValidationException(e1.getMessage());
@@ -213,7 +225,7 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
      * @throws IOException
      */
     private void runRuleAndCreateParquet(boolean createParquetWithSQL, String providerCode, RuleVO ruleVO, String fieldName, String fileName, Map<String, List<String>> headerNames, SqlRowSet rs,
-                                         S3PathResolver dataTableResolver, S3PathResolver validationResolver, Map<String, String> fieldSchemaIdNameMap) throws Exception {
+                                         S3PathResolver dataTableResolver, S3PathResolver validationResolver, Map<String, String> fieldSchemaIdNameMap, Task task, String preparationCode) throws Exception {
         Class<?> cls = Class.forName(RULE_OPERATORS);
         Method factoryMethod = cls.getDeclaredMethod(GET_INSTANCE);
         Object object = factoryMethod.invoke(null, null);
@@ -242,6 +254,15 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
                 }
             }
             if (createRuleFolder) {
+                boolean blocker = TaskJsonUtils.isBlockerTask(task.getJson());
+                if (blocker) {
+                    LOG.info("Adding blocker for dataset " + TaskJsonUtils.getDatasetId(task.getJson())
+                            + " process id "  + TaskJsonUtils.getProcessId(task.getJson())
+                            + " preparationCode "  + preparationCode);
+                    redisLockService.setBlocker(TaskJsonUtils.getDatasetId(task.getJson()),
+                            TaskJsonUtils.getProcessId(task.getJson()), preparationCode);
+                }
+
                 validationQuery.append("))");
                 dremioHelperService.executeSqlStatement(validationQuery.toString());
             }
