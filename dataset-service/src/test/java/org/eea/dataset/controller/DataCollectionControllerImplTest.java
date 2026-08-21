@@ -120,7 +120,7 @@ public class DataCollectionControllerImplTest {
       DataCollectionVO dc = new DataCollectionVO();
       dc.setIdDataflow(1L);
       dc.setDueDate(new Date(System.currentTimeMillis() + 100000));
-      dataCollectionControllerImpl.createEmptyDataCollection(true, false, false, dc, true);
+      dataCollectionControllerImpl.createEmptyDataCollection(true, false, false, dc, true, null);
     } catch (ResponseStatusException e) {
       Assert.assertEquals(EEAErrorMessage.NOT_DESIGN_DATAFLOW, e.getReason());
     }
@@ -139,14 +139,14 @@ public class DataCollectionControllerImplTest {
     Mockito.when(dataCollectionService.getDataflowMetabase(Mockito.any())).thenReturn(dataflow);
     Mockito.doNothing().when(dataCollectionService).createEmptyDataCollection(Mockito.any(),
         Mockito.any(), Mockito.anyBoolean(), Mockito.anyBoolean(), Mockito.anyBoolean(),
-        Mockito.anyBoolean(), Mockito.anyBoolean(), Mockito.anyBoolean());
+        Mockito.anyBoolean(), Mockito.anyBoolean(), Mockito.anyBoolean(), Mockito.isNull());
     DataCollectionVO dc = new DataCollectionVO();
     dc.setIdDataflow(1L);
     dc.setDueDate(new Date(System.currentTimeMillis() + 100000));
-    dataCollectionControllerImpl.createEmptyDataCollection(false, false, false, dc, true);
+    dataCollectionControllerImpl.createEmptyDataCollection(false, false, false, dc, true, null);
     Mockito.verify(dataCollectionService, times(1)).createEmptyDataCollection(Mockito.any(),
         Mockito.any(), Mockito.anyBoolean(), Mockito.anyBoolean(), Mockito.anyBoolean(),
-        Mockito.anyBoolean(), Mockito.anyBoolean(), Mockito.anyBoolean());
+        Mockito.anyBoolean(), Mockito.anyBoolean(), Mockito.anyBoolean(), Mockito.isNull());
   }
 
   /**
@@ -166,14 +166,14 @@ public class DataCollectionControllerImplTest {
     Mockito.when(dataCollectionService.getDataflowMetabase(Mockito.any())).thenReturn(dataflow);
     Mockito.doNothing().when(dataCollectionService).createEmptyDataCollection(Mockito.any(),
         Mockito.any(), Mockito.anyBoolean(), Mockito.anyBoolean(), Mockito.anyBoolean(),
-        Mockito.anyBoolean(), Mockito.anyBoolean(), Mockito.anyBoolean());
+        Mockito.anyBoolean(), Mockito.anyBoolean(), Mockito.anyBoolean(), Mockito.isNull());
     DataCollectionVO dc = new DataCollectionVO();
     dc.setIdDataflow(1L);
     dc.setDueDate(new Date(System.currentTimeMillis() + 100000));
-    dataCollectionControllerImpl.createEmptyDataCollection(false, false, false, dc, true);
+    dataCollectionControllerImpl.createEmptyDataCollection(false, false, false, dc, true, null);
     Mockito.verify(dataCollectionService, times(1)).createEmptyDataCollection(Mockito.any(),
         Mockito.any(), Mockito.anyBoolean(), Mockito.anyBoolean(), Mockito.anyBoolean(),
-        Mockito.anyBoolean(), Mockito.anyBoolean(), Mockito.anyBoolean());
+        Mockito.anyBoolean(), Mockito.anyBoolean(), Mockito.anyBoolean(), Mockito.isNull());
   }
 
   /**
@@ -192,7 +192,7 @@ public class DataCollectionControllerImplTest {
     dc.setDueDate(new Date(System.currentTimeMillis() + 100000));
 
     try {
-      dataCollectionControllerImpl.createEmptyDataCollection(false, false, false, dc, true);
+      dataCollectionControllerImpl.createEmptyDataCollection(false, false, false, dc, true, null);
       Assert.fail("Expected ResponseStatusException");
     } catch (ResponseStatusException e) {
       Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
@@ -217,14 +217,14 @@ public class DataCollectionControllerImplTest {
     Mockito.when(dataCollectionService.getDataflowMetabase(Mockito.any())).thenReturn(dataflow);
     Mockito.doNothing().when(dataCollectionService).createEmptyDataCollection(Mockito.any(),
         Mockito.any(), Mockito.anyBoolean(), Mockito.anyBoolean(), Mockito.anyBoolean(),
-        Mockito.anyBoolean(), Mockito.anyBoolean(), Mockito.anyBoolean());
+        Mockito.anyBoolean(), Mockito.anyBoolean(), Mockito.anyBoolean(), Mockito.isNull());
     DataCollectionVO dc = new DataCollectionVO();
     dc.setIdDataflow(1L);
     dc.setDueDate(null);
-    dataCollectionControllerImpl.createEmptyDataCollection(false, false, false, dc, true);
+    dataCollectionControllerImpl.createEmptyDataCollection(false, false, false, dc, true, null);
     Mockito.verify(dataCollectionService, times(1)).createEmptyDataCollection(Mockito.any(),
         Mockito.any(), Mockito.anyBoolean(), Mockito.anyBoolean(), Mockito.anyBoolean(),
-        Mockito.anyBoolean(), Mockito.anyBoolean(), Mockito.anyBoolean());
+        Mockito.anyBoolean(), Mockito.anyBoolean(), Mockito.anyBoolean(), Mockito.isNull());
   }
 
   /**
@@ -242,7 +242,7 @@ public class DataCollectionControllerImplTest {
     DataCollectionVO dc = new DataCollectionVO();
     dc.setIdDataflow(1L);
     try {
-      dataCollectionControllerImpl.createEmptyDataCollection(false, false, false, dc, true);
+      dataCollectionControllerImpl.createEmptyDataCollection(false, false, false, dc, true, null);
     } catch (ResponseStatusException e) {
       Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
       Assert.assertEquals(EEAErrorMessage.NOT_DESIGN_DATAFLOW, e.getReason());
@@ -268,7 +268,7 @@ public class DataCollectionControllerImplTest {
     dc.setIdDataflow(null);
     dc.setDueDate(new Date(System.currentTimeMillis() + 100000));
     try {
-      dataCollectionControllerImpl.createEmptyDataCollection(false, false, false, dc, true);
+      dataCollectionControllerImpl.createEmptyDataCollection(false, false, false, dc, true, null);
     } catch (ResponseStatusException e) {
       Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
       Assert.assertEquals(EEAErrorMessage.NOT_DESIGN_DATAFLOW, e.getReason());
