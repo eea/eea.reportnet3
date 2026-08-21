@@ -30,12 +30,12 @@ export const DatasetService = {
     await DatasetRepository.disableEditing({ datasetId });
   },
 
-  convertParquetsToIcebergs: async ({ datasetId, dataflowId, providerId }) => {
-    await DatasetRepository.convertParquetsToIcebergs({ datasetId, dataflowId, providerId });
+  convertParquetsToIcebergs: async ({ datasetId, dataflowId, providerId, preparationCode }) => {
+    await DatasetRepository.convertParquetsToIcebergs({ datasetId, dataflowId, providerId, preparationCode });
   },
 
-  convertIcebergsToParquets: async ({ datasetId, dataflowId, providerId }) =>
-    await DatasetRepository.convertIcebergsToParquets({ datasetId, dataflowId, providerId }),
+  convertIcebergsToParquets: async ({ datasetId, dataflowId, providerId, preparationCode }) =>
+    await DatasetRepository.convertIcebergsToParquets({ datasetId, dataflowId, providerId, preparationCode }),
 
   createRecordDesign: async (datasetId, datasetTableRecordField) => {
     const datasetTableFieldDesign = new DatasetTableField({});
@@ -59,7 +59,7 @@ export const DatasetService = {
     return await DatasetRepository.createRecordDesign(datasetId, datasetTableFieldDesign);
   },
 
-  createRecord: async (datasetId, tableSchemaId, records) => {
+  createRecord: async (datasetId, tableSchemaId, records, preparationCode) => {
     const datasetTableRecords = [];
     records.forEach(record => {
       const fields = record.dataRow.map(dataTableFieldDTO => {
@@ -87,7 +87,7 @@ export const DatasetService = {
       datasetTableRecords.push(datasetTableRecord);
     });
 
-    return await DatasetRepository.createRecord(datasetId, tableSchemaId, datasetTableRecords);
+    return await DatasetRepository.createRecord(datasetId, tableSchemaId, datasetTableRecords, preparationCode);
   },
 
   createWebformTableRecord: async (datasetId, tableSchemaId, records) => {
@@ -136,7 +136,8 @@ export const DatasetService = {
     tableSchemaName,
     fieldName,
     fileName,
-    recordId
+    recordId,
+    preparationCode
   }) => {
     const encodedFileName = encodeURIComponent(fileName);
     return await DatasetRepository.deleteAttachment({
@@ -147,14 +148,15 @@ export const DatasetService = {
       tableSchemaName,
       fieldName,
       fileName: encodedFileName,
-      recordId
+      recordId,
+      preparationCode
     });
   },
 
   deleteFieldDesign: async (datasetId, recordId) => await DatasetRepository.deleteFieldDesign(datasetId, recordId),
 
-  deleteRecord: async ({ datasetId, selectedRecordId, tableId, updateInCascade }) =>
-    await DatasetRepository.deleteRecord({ datasetId, selectedRecordId, tableId, updateInCascade }),
+  deleteRecord: async ({ datasetId, selectedRecordId, tableId, updateInCascade, preparationCode }) =>
+    await DatasetRepository.deleteRecord({ datasetId, selectedRecordId, tableId, updateInCascade, preparationCode }),
 
   deleteSchema: async datasetId => await DatasetRepository.deleteSchema(datasetId),
 
@@ -182,7 +184,8 @@ export const DatasetService = {
     recordId,
     tableSchemaName,
     fieldName,
-    providerCode
+    providerCode,
+    preparationCode
   }) =>
     await DatasetRepository.downloadFileData({
       dataflowId,
@@ -193,7 +196,8 @@ export const DatasetService = {
       recordId,
       tableSchemaName,
       fieldName,
-      providerCode
+      providerCode,
+      preparationCode
     }),
 
   downloadGeometry: async ({ datasetId, recordId, fieldId, dataflowId, tableSchemaId, providerId }) =>
@@ -337,8 +341,8 @@ export const DatasetService = {
     return await DatasetRepository.getEditingStatus({ datasetId, preparationCode });
   },
 
-  getIsIcebergTableCreated: async ({ datasetId, tableSchemaId }) => {
-    return await DatasetRepository.getIsIcebergTableCreated({ datasetId, tableSchemaId });
+  getIsIcebergTableCreated: async ({ datasetId, tableSchemaId, preparationCode }) => {
+    return await DatasetRepository.getIsIcebergTableCreated({ datasetId, tableSchemaId, preparationCode });
   },
 
   getIsAvailableForManualEditing: async ({ datasetId }) => {
@@ -918,7 +922,7 @@ export const DatasetService = {
     return await DatasetRepository.updateFieldDesign(datasetId, datasetTableFieldDesign);
   },
 
-  updateRecord: async ({ datasetId, record, tableSchemaId, updateInCascade }) => {
+  updateRecord: async ({ datasetId, record, tableSchemaId, updateInCascade, preparationCode }) => {
     const fields = record.dataRow.map(dataTableFieldDTO => {
       const newField = new DatasetTableField({});
       newField.id = dataTableFieldDTO.fieldData.id;
@@ -941,7 +945,7 @@ export const DatasetService = {
     datasetTableRecord.idRecordSchema = record.recordSchemaId;
     datasetTableRecord.id = record.recordId;
     //The service will take an array of objects(records). Actually the frontend only allows one record CRUD
-    return await DatasetRepository.updateRecord(datasetId, [datasetTableRecord], tableSchemaId, updateInCascade);
+    return await DatasetRepository.updateRecord(datasetId, [datasetTableRecord], tableSchemaId, updateInCascade, preparationCode);
   },
 
   updateReferenceDatasetStatus: async (datasetId, updatable) =>

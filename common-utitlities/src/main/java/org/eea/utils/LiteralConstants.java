@@ -553,9 +553,13 @@ public final class LiteralConstants {
 
   public static final String S3_PREPARATION_FOLDER_PATH = "%s/%s/%s/preparation/%s";
 
+  public static final String S3_PREPARATION_ATTACHMENTS_PATH = "%s/%s/%s/preparation/%s/attachments/%s/%s";
+
   public static final String S3_PREPARATION_TABLE_NAME_PATH = "%s/%s/%s/preparation/%s/%s/%s";
 
   public static final String S3_PREPARATION_TABLE_NAME_FOLDER_PATH = "%s/%s/%s/preparation/%s/%s";
+
+  public static final String S3_PREPARATION_TABLE_NAME_FOLDER_PATH_FOR_VALID_PREFIX = "%s/%s/%s/preparation/%s/%s/";
 
   public static final String S3_PREPARATION_TABLE_AS_FOLDER_QUERY_PATH = ".\"%s\".\"%s\".\"%s\".\"preparation\".\"%s\".\"%s\"";
 
