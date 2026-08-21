@@ -42,13 +42,11 @@ public interface DataCollectionController {
    */
   @PostMapping("/create")
   void createEmptyDataCollection(
-      @RequestParam(defaultValue = "true",
-          name = "stopAndNotifySQLErrors") boolean stopAndNotifySQLErrors,
+      @RequestParam(defaultValue = "true", name = "stopAndNotifySQLErrors") boolean stopAndNotifySQLErrors,
       @RequestParam(value = "manualCheck", required = false) boolean manualCheck,
       @RequestParam(value = "showPublicInfo", defaultValue = "true") boolean showPublicInfo,
-      @RequestBody DataCollectionVO dataCollectionVO, @RequestParam(defaultValue = "true",
-          name = "stopAndNotifyPKError") boolean stopAndNotifyPKError);
-
+      @RequestBody DataCollectionVO dataCollectionVO, @RequestParam(defaultValue = "true", name = "stopAndNotifyPKError") boolean stopAndNotifyPKError,
+      @RequestParam(name = "disableRulesEventChoice", required = false) Boolean disableRulesEventChoice);
 
   /**
    * Find data collection id by dataflow id.

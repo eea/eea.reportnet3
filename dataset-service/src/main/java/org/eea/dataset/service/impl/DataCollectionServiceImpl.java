@@ -410,7 +410,17 @@ public class DataCollectionServiceImpl implements DataCollectionService {
   @Async
   public void createEmptyDataCollection(Long dataflowId, LocalDateTime dueDate,
       boolean stopAndNotifySQLErrors, boolean manualCheck, boolean showPublicInfo,
-      boolean referenceDataflow, boolean stopAndNotifyPKError, boolean isBigDataflow) {
+      boolean referenceDataflow, boolean stopAndNotifyPKError, boolean isBigDataflow, Boolean disableRulesEventChoice) {
+
+    //This is a call from the disable rules pop up window
+    if (disableRulesEventChoice != null) {
+      final NotificationVO notificationVO = new NotificationVO();
+      //Determine the error level of the notification
+      notificationVO.setUser(SecurityContextHolder.getContext().getAuthentication().getName());
+      notificationVO.setDataflowId(dataflowId);
+      notificationVO.setError(disableRulesEventChoice ? "INFO" : "ERROR");
+      releaseNotification(EventType.DISABLE_RULES_ERROR_EVENT, notificationVO);
+    }
 
     List<DataSetMetabaseVO> datasets = datasetMetabaseService.findDataSetByDataflowIds(Collections.singletonList(dataflowId));
 
@@ -757,7 +767,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
               .user(SecurityContextHolder.getContext().getAuthentication().getName())
               .dataflowId(dataflowId)
               .emptyTable(true).build();
-      LOG.info("Data Collection creation proccess stopped: empty table(s) found");
+      LOG.info("Data Collection creation process stopped: empty table(s) found");
       // remove lock
       Map<String, Object> createDataCollection = new HashMap<>();
       createDataCollection.put(LiteralConstants.SIGNATURE,
