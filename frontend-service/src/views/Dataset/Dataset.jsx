@@ -487,12 +487,15 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
         await DatasetService.convertIcebergsToParquets({
           dataflowId,
           datasetId,
-          providerId: !isTestDataset ? metadata.dataset.dataProviderId : undefined
+          providerId: !isTestDataset ? metadata.dataset.dataProviderId : undefined,
+          preparationCode: code
         });
       } else {
         await DatasetService.convertIcebergsToParquets({
           dataflowId,
-          datasetId
+          datasetId,
+          undefined,
+          preparationCode: code
         });
       }
     } else {
@@ -500,12 +503,15 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
         await DatasetService.convertParquetsToIcebergs({
           dataflowId,
           datasetId,
-          providerId: !isTestDataset ? metadata.dataset.dataProviderId : undefined
+          providerId: !isTestDataset ? metadata.dataset.dataProviderId : undefined,
+          preparationCode: code
         });
       } else {
         await DatasetService.convertParquetsToIcebergs({
           dataflowId,
-          datasetId
+          datasetId,
+          undefined,
+          preparationCode: code
         });
       }
     }
@@ -1773,7 +1779,6 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
               <Button
                 className={styles.openWebformButton}
                 disabled={
-                  code ||
                   (editingStatus?.isEditing && editingStatus?.editor !== userName) ||
                   (isAdmin && (!isCustodian || !isDataflowCustodian)) ||
                   !hasWritePermissions ||

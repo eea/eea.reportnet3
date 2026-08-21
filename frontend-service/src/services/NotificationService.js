@@ -76,6 +76,12 @@ export const NotificationService = {
 
           notificationDTO.redirectionUrl = getUrl(section, urlParameters, true);
 
+          if (!isNil(content.preparationCode)) {
+            notificationDTO.redirectionUrl = `${notificationDTO.redirectionUrl}/code/${encodeURIComponent(
+              content.preparationCode
+            )}`;
+          }
+
           if (!isNil(navigateTo.hasQueryString) && navigateTo.hasQueryString) {
             notificationDTO.redirectionUrl = `${notificationDTO.redirectionUrl}${window.location.search}`;
           }

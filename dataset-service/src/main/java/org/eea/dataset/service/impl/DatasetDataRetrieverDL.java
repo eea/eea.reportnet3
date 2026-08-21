@@ -385,7 +385,7 @@ public class DatasetDataRetrieverDL implements DataLakeDataRetriever {
         TableVO result = new TableVO();
         S3PathResolver s3PathResolverParentDataset;
         //parent dataset resolver
-        if(BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable()) && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, preparationCode, tableSchemaVO.getIdTableSchema()))){
+        if(BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable()) && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, null, tableSchemaVO.getIdTableSchema()))) {
             s3PathResolverParentDataset = s3Service.getS3PathResolverByDatasetType(dataset, tableSchemaVO.getNameTableSchema(), true, null);
             s3PathResolverParentDataset.setIsIcebergTable(true);
         }
@@ -401,13 +401,10 @@ public class DatasetDataRetrieverDL implements DataLakeDataRetriever {
         s3PathResolverPreparations.setPath(S3_PREPARATION_TABLE_NAME_FOLDER_PATH);
         s3PathResolverPreparations.setPreparationCode(preparationCode);
 
-        boolean preparationsIsIcebergTable = false; // to be substituted when preparations table editing available
-        if(BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable()) && BooleanUtils.isTrue(preparationsIsIcebergTable)) {
-            s3PathResolverPreparations.setIsIcebergTable(true);
-        }
-        else {
-            s3PathResolverPreparations.setIsIcebergTable(false);
-        }
+        boolean preparationsIsIcebergTable = datasetTableService.icebergTableIsCreated(datasetId, preparationCode, tableSchemaVO.getIdTableSchema());
+        s3PathResolverPreparations.setIsIcebergTable(
+                BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable())
+                        && BooleanUtils.isTrue(preparationsIsIcebergTable));
 
         boolean preparationFolderExist = s3Helper.checkFolderExist(s3PathResolverPreparations);
 

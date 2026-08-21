@@ -51,17 +51,10 @@ public class DatasetTableServiceImpl implements DatasetTableService {
     @Override
     public DatasetTable findEntryByDatasetIdAndPreparationCodeAndTableSchemaId(Long datasetId, String preparationCode, String tableSchemaId){
         final Optional<DatasetTable> optionalDatasetTable;
-        if (StringUtils.isBlank(preparationCode)) {
-            optionalDatasetTable = datasetTableRepository.findByDatasetIdAndTableSchemaId(
-                    datasetId,
-                    tableSchemaId);
-        }
-        else {
-            optionalDatasetTable = datasetTableRepository.findByDatasetIdAndPreparationCodeAndTableSchemaId(
+        optionalDatasetTable = datasetTableRepository.findByDatasetIdAndPreparationCodeAndTableSchemaId(
                     datasetId,
                     preparationCode,
                     tableSchemaId);
-        }
         return optionalDatasetTable.orElse(null);
     }
 
