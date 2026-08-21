@@ -1887,7 +1887,7 @@
     "fmeImportJobFailedEvent": "File import from conversion service failed for dataset <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>. Please try again or contact the Service Desk if the issue persists.",
     "fmeImportJobFailedEventNoFileReturned": "Fme import failed for <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>. FME did not returned a file.",
     "copyDataToEudatasetCanceledEvent": "The Copy to EU dataset for dataflow <a href='{:navigateTo}' title='{:dataflowName}'>{:dataflowName}</a> was canceled, {:error}. Please try again or contact the Service Desk if the issue persists.",
-    "disableRulesErrorEvent": "The Data Collection creation process found SQL rules with errors or rules marked as disabled.",
+    "bypassDisabledRulesEvent": "The Data Collection creation process found SQL rules with errors or rules marked as disabled.",
     "canceled_by_admin": "Canceled by admin",
     "finishedValidationWithCanceledTasks": "Validation finished at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName} ({:dataProviderName})</a>. Validation contains canceled tasks. Please check them in jobs monitoring window.",
     "finishedValidationWithSkippedTasksEvent": "Validation finished at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName} ({:dataProviderName})</a>. Validation contains skipped tasks. Please resolve the blockers and run validation again.",
