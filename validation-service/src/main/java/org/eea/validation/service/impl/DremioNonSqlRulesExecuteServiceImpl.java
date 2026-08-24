@@ -20,6 +20,7 @@ import org.eea.interfaces.controller.dataset.DatasetMetabaseController;
 import org.eea.interfaces.controller.dataset.DatasetSchemaController.DatasetSchemaControllerZuul;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
+import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.lock.redis.RedisLockService;
 import org.eea.utils.UtilityClass;
@@ -151,18 +152,24 @@ public class DremioNonSqlRulesExecuteServiceImpl implements DremioRulesExecuteSe
             List<String> parameters = dremioRulesService.processRuleMethodParameters(ruleVO, startIndex, endIndex);
           switch (ruleMethodName) {
             case IS_MULTI_SELECT_CODE_LIST_VALIDATE:
-              ruleMethodName = MULTI_SELECT_CODE_LIST_VALIDATE;
-              break;
+                ruleMethodName = MULTI_SELECT_CODE_LIST_VALIDATE;
+                parameters = new ArrayList<>();
+                parameters.add(VALUE);
+                parameters.add(getCodelistItems(datasetSchemaId, ruleVO.getReferenceId()));
+                break;
             case IS_CODE_LIST_INSENSITIVE:
-              ruleMethodName = CODE_LIST_VALIDATE;
-              parameters.add(FALSE);
-              break;
+                ruleMethodName = CODE_LIST_VALIDATE;
+                parameters = new ArrayList<>();
+                parameters.add(VALUE);
+                parameters.add(getCodelistItems(datasetSchemaId, ruleVO.getReferenceId()));
+                parameters.add(FALSE);
+                break;
             case IS_GEOMETRY:
-              ruleMethodName = VALIDATE_GEOMETRY_DREMIO;
-              break;
+                ruleMethodName = VALIDATE_GEOMETRY_DREMIO;
+                break;
             case CHECK_EPSGSRID:
-              ruleMethodName = CHECK_EPSGSRID_VALIDATION;
-              break;
+                ruleMethodName = CHECK_EPSGSRID_VALIDATION;
+                break;
           }
 
             String fieldName = datasetSchemaControllerZuul.getFieldName(datasetSchemaId, tableSchemaId, parameters, ruleVO.getReferenceId(), ruleVO.getReferenceFieldSchemaPKId());
@@ -202,6 +209,24 @@ public class DremioNonSqlRulesExecuteServiceImpl implements DremioRulesExecuteSe
             LOG.error("Error creating validation folder for ruleId {}, datasetId {} and taskId {},{}", ruleId, datasetId, taskId, e1.getMessage());
             throw new DremioValidationException(e1.getMessage());
         }
+    }
+
+    /**
+     * For multiple code list fields, when the actual options contain ",", the rules engine will split the parameters
+     * string resulting to a list with wrong entries.
+     * Joining them again is necessary to avoid false validation results.
+     * @param datasetSchemaId
+     * @param fieldSchemaId
+     * @return
+     */
+    private String getCodelistItems(String datasetSchemaId, String fieldSchemaId) {
+        FieldSchemaVO fieldSchemaVO =
+            datasetSchemaControllerZuul.getFieldSchema(
+                datasetSchemaId,
+                fieldSchemaId
+            );
+
+        return "[" + String.join(";", fieldSchemaVO.getCodelistItems()) + "]";
     }
 
     /**
