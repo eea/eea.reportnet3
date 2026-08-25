@@ -2,6 +2,7 @@ package org.eea.recordstore.controller;
 
 
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixProperty;
 import com.opencsv.CSVWriter;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -283,7 +284,8 @@ public class RecordStoreControllerImpl implements RecordStoreController {
    * @param deleteData the delete data
    */
   @Override
-  @HystrixCommand
+  @HystrixCommand(commandProperties = {@HystrixProperty(
+          name = "execution.isolation.thread.timeoutInMilliseconds", value = "1200000")})  // 20 min
   @PostMapping("/dataset/{datasetId}/snapshot/restore")
   @PreAuthorize("isAuthenticated()")
   @ApiOperation(value = "Restores snapshot data for a given Dataset", hidden = true)
