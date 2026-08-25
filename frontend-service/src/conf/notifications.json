@@ -347,6 +347,9 @@
           "key": "DELETED_BY_ID_REPORTER_ERROR"
         },
         {
+          "key": "BYPASS_DISABLED_RULES_ERROR_EVENT"
+        },
+        {
           "key": "ALL_REPORTER_ERROR"
         },
         {
@@ -1096,7 +1099,6 @@
         { "key": "EXPORT_QC_FAILED_EVENT" },
         { "key": "EXPORT_HISTORIC_RELEASES_FAILED_EVENT" },
         { "key": "EXPORT_SCHEMA_INFORMATION_FAILED_EVENT" },
-        { "key": "DISABLE_RULES_ERROR_EVENT" },
         { "key": "EMPTY_TABLE_EVENT" },
         { "key": "NO_PK_REFERENCE_DATAFLOW_ERROR_EVENT" },
         { "key": "EXPORT_USERS_BY_COUNTRY_FAILED_EVENT" },
@@ -1629,6 +1631,7 @@
       "types": [
         { "key": "DATASET_DATA_LOADING_INIT", "messageKeys": {} },
         { "key": "DOCUMENT_UPLOADING_INIT_INFO" },
+        { "key": "BYPASS_DISABLED_RULES_INFO_EVENT" },
         { "key": "DELETE_DOCUMENT_INIT_INFO" },
         {
           "key": "PREPARATION_DATASET_CREATION_STARTED_EVENT",
@@ -1896,6 +1899,7 @@
     "EXTERNAL_EXPORT_DESIGN_COMPLETED_EVENT",
     "EXTERNAL_EXPORT_REPORTING_COMPLETED_EVENT",
     "DISABLE_RULES_ERROR_EVENT",
+    "BYPASS_DISABLED_RULES_EVENT",
     "EMPTY_TABLE_EVENT",
     "NO_PK_REFERENCE_DATAFLOW_ERROR_EVENT",
     "EXPORT_SCHEMA_INFORMATION_COMPLETED_EVENT",
