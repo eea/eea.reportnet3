@@ -49,6 +49,7 @@ export const ManageDataflow = ({
   onLoadReportingDataflow,
   onUpdateAddUserText,
   onUpdateSoftDelete,
+  renderSncData,
   resetDeliveryDate,
   resetObligations,
   setCheckedObligation,
@@ -71,6 +72,7 @@ export const ManageDataflow = ({
     description: isEditing ? state.description : '',
     isDeleting: false,
     isOfficialReporting: isEditing ? state.officialReporting : false,
+    useViews: isEditing ? state.useViews : false,
     isPreparationEnabled: isEditing ? state.preparationEnabled : false,
     isSubmitting: false,
     name: isEditing ? state.name : '',
@@ -214,6 +216,7 @@ export const ManageDataflow = ({
         reportingDataflowState.pinDataflow,
         reportingDataflowState.bigDataStorage,
         reportingDataflowState.isOfficialReporting,
+        reportingDataflowState.useViews,
         reportingDataflowState.isPreparationEnabled
       );
     resetObligations();
@@ -274,12 +277,51 @@ export const ManageDataflow = ({
     );
   };
 
+  const renderUseViews = () => {
+    return (
+      <div className={styles.checkboxWrapper}>
+        <Checkbox
+          ariaLabel={resourcesContext.messages['useViews']}
+          checked={reportingDataflowState.useViews}
+          disabled={reportingDataflowState.isPreparationEnabled}
+          id="useViewsCheckbox"
+          inputId="useViewsCheckbox"
+          onChange={() =>
+            reportingDataflowDispatch({
+              type: 'TOGGLE_USE_VIEWS',
+              payload: !reportingDataflowState.useViews
+            })
+          }
+          role="checkbox"
+        />
+        <label>
+          <span
+            className={reportingDataflowState.isPreparationEnabled ? styles.disabledLabel : ''}
+            onClick={() =>
+              !reportingDataflowState.isPreparationEnabled &&
+              reportingDataflowDispatch({
+                type: 'TOGGLE_USE_VIEWS',
+                payload: !reportingDataflowState.useViews
+              })
+            }>
+            {resourcesContext.messages['useViews']}
+          </span>
+        </label>
+        <TooltipButton
+          message={resourcesContext.messages['useViewsMessage']}
+          uniqueIdentifier="useViews"></TooltipButton>
+      </div>
+    );
+  };
+
+
   const renderPreparationEnabled = () => {
     return (
       <div className={styles.checkboxWrapper}>
         <Checkbox
           ariaLabel={resourcesContext.messages['preparationEnabled']}
           checked={reportingDataflowState.isPreparationEnabled}
+          disabled={reportingDataflowState.useViews}
           id="preparationEnabledCheckbox"
           inputId="preparationEnabledCheckbox"
           onChange={() =>
@@ -292,7 +334,9 @@ export const ManageDataflow = ({
         />
         <label>
           <span
+            className={reportingDataflowState.useViews ? styles.disabledLabel : ''}
             onClick={() =>
+              !reportingDataflowState.useViews &&
               reportingDataflowDispatch({
                 type: 'TOGGLE_PREPARATION_ENABLED',
                 payload: !reportingDataflowState.isPreparationEnabled
@@ -419,8 +463,14 @@ export const ManageDataflow = ({
         </div>
         <div className="p-toolbar-group-left">{renderBigDataStorage()}</div>
         {!isEditing && <div className="p-toolbar-group-left">{renderOfficialReporting()}</div>}
+        {!isEditing && reportingDataflowState.bigDataStorage && <div className="p-toolbar-group-left">{renderUseViews()}</div>}
+        {reportingDataflowState.bigDataStorage && (
+          <div className="p-toolbar-group-left">
+            {renderSncData && renderSncData(false, sncData, false, () => setSncData(!sncData))}
+          </div>
+        )}
         {!isEditing && (reportingDataflowState.bigDataStorage || isCitizenScienceDataflow) && (
-          <div className="p-toolbar-group-left">{renderPreparationEnabled()}</div>
+            <div className="p-toolbar-group-left">{renderPreparationEnabled()}</div>
         )}
         <Button
           className={`p-button-primary ${
@@ -483,8 +533,10 @@ export const ManageDataflow = ({
                 : state.isReportingDataflowDialogVisible
             }
             renderOfficialReporting={renderOfficialReporting}
+            renderUseViews={renderUseViews}
             renderPreparationEnabled={renderPreparationEnabled}
             sncData={sncData}
+            bigData={reportingDataflowState.bigDataStorage}
           />
           {manualAcceptance && state.status === 'DRAFT' && (
             <>

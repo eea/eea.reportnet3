@@ -97,30 +97,38 @@ public class ValidationScheduler extends MessageReceiver {
       if (freeThreads > 0) {
         for (Task task : taskReadStrategy.getTasks(freeThreads)) {
           String lockKey = LockEnum.TASK_SCHEDULER.getValue() + "_" + task.getId();
-          String value = task.getStatus().toString();
+
+          // Use a unique token, not the status string.
+          String token = serviceInstanceId + ":" + task.getId() + ":" + System.currentTimeMillis();
+          LOG.info("ValidationScheduler current iteration token: {}",token);
+          boolean acquired = false;
           try {
-            if (redisLockService.checkAndAcquireLock(lockKey, value, lockExpirationInMillis)) {
-              task.setStartingDate(new Date());
-              task.setPod(serviceInstanceId);
-              if (task.getStatus() == ProcessStatusEnum.IN_PROGRESS) {
-                continue;
-              }
-              task.setStatus(ProcessStatusEnum.IN_PROGRESS);
-              taskRepository.save(task);
-              taskRepository.flush();
-              ObjectMapper objectMapper = new ObjectMapper();
-              objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-              EEAEventVO event = objectMapper.readValue(task.getJson(), EEAEventVO.class);
-              Message<EEAEventVO> message = MessageBuilder.withPayload(event).build();
-              message.getPayload().getData().put("task_id", task.getId());
-              consumeMessage(message);
+            acquired = redisLockService.checkAndAcquireLock(lockKey, token, lockExpirationInMillis);
+            if (!acquired) {
+              // Task is already being handled.
+              continue;
             }
+            
+            // CAS claim in DB instead of repo save for safety.
+            int claimed = taskRepository.claimValidationTask(task.getId(), serviceInstanceId, new Date());
+            if (claimed == 0) {
+              continue;
+            }
+
+            ObjectMapper objectMapper = new ObjectMapper();
+            objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            EEAEventVO event = objectMapper.readValue(task.getJson(), EEAEventVO.class);
+            Message<EEAEventVO> message = MessageBuilder.withPayload(event).build();
+            message.getPayload().getData().put("task_id", task.getId());
+            consumeMessage(message);
           } catch (EEAException | JsonProcessingException e) {
-            LOG.error("failed the validation task shedule because of {} ", e);
+            LOG.error("failed the validation task schedule because of {}", e.toString(), e);
           } catch (ObjectOptimisticLockingFailureException e) {
             newDelay = delay;
           } finally {
-            redisLockService.releaseLock(lockKey, value);
+            if (acquired) {
+              redisLockService.releaseLock(lockKey, token);
+            }
           }
         }
       }

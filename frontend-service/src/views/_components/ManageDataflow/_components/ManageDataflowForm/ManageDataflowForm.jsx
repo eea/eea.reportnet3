@@ -50,6 +50,7 @@ export const ManageDataflowForm = forwardRef(
       onSubmit,
       refresh,
       renderOfficialReporting,
+      renderUseViews,
       renderPreparationEnabled,
       sncData
     },
@@ -142,7 +143,7 @@ export const ManageDataflowForm = forwardRef(
       return hasErrors;
     };
 
-    const onConfirm = async (pinned, bigData, officialReporting, preparationEnabled) => {
+    const onConfirm = async (pinned, bigData, officialReporting, useViews, preparationEnabled) => {
       checkIsCorrectInputValue(metadata.obligation.title, 'obligation');
       checkIsCorrectInputValue(name, 'name');
       checkIsCorrectInputValue(description, 'description');
@@ -166,6 +167,7 @@ export const ManageDataflowForm = forwardRef(
                     ? new Date(dayjs(deliveryDate).utc(true).endOf('day').valueOf()).getTime()
                     : undefined,
                   officialReporting,
+                  useViews,
                   preparationEnabled
                 )
               : await DataflowService.update(
@@ -181,6 +183,7 @@ export const ManageDataflowForm = forwardRef(
                     ? new Date(dayjs(deliveryDate).utc(true).endOf('day').valueOf()).getTime()
                     : undefined,
                   officialReporting,
+                  useViews,
                   preparationEnabled
                 );
 
@@ -196,6 +199,7 @@ export const ManageDataflowForm = forwardRef(
                   selectedGroup.dataProviderGroupId,
                   sncData === true ? true : undefined,
                   officialReporting,
+                  useViews,
                   preparationEnabled
                 )
               : await DataflowService.create(
@@ -207,6 +211,7 @@ export const ManageDataflowForm = forwardRef(
                   selectedGroup.dataProviderGroupId,
                   sncData === true ? true : undefined,
                   officialReporting,
+                  useViews,
                   preparationEnabled
                 );
 
@@ -392,6 +397,7 @@ export const ManageDataflowForm = forwardRef(
             </label>
           </div>
           {isEditing && <div className={`${styles.officialReportingWrapper}`}>{renderOfficialReporting()}</div>}
+          {isEditing && metadata.bigDataStorage && <div className={`${styles.officialReportingWrapper}`}>{renderUseViews()}</div>}
           {isEditing && (metadata.bigDataStorage || isCitizenScienceDataflow) && (
             <div className={`${styles.officialReportingWrapper}`}>{renderPreparationEnabled()}</div>
           )}{' '}

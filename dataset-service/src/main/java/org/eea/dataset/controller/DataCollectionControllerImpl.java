@@ -116,25 +116,28 @@ public class DataCollectionControllerImpl implements DataCollectionController {
   @LockMethod(removeWhenFinish = false)
   @PreAuthorize("secondLevelAuthorize(#dataCollectionVO.idDataflow,'DATAFLOW_CUSTODIAN', 'DATAFLOW_STEWARD')")
   @ApiOperation(value = "Create a Data Collection", hidden = true)
-  @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully create data collection"),
-      @ApiResponse(code = 400, message = EEAErrorMessage.NOT_DESIGN_DATAFLOW)})
-  public void createEmptyDataCollection(@ApiParam(
-      value = "Stop And Notify SQL Errors: If an error is found in the SQL rules, it stops the creation process.",
-      example = "true") @RequestParam(defaultValue = "true",
-          name = "stopAndNotifySQLErrors") boolean stopAndNotifySQLErrors,
-      @ApiParam(value = "Manual Check: Enable the manual check for the custodian approval.",
-          example = "false") @RequestParam(value = "manualCheck",
-              required = false) boolean manualCheck,
-      @ApiParam(
-          value = "Show Public Info: If the schema has been marked as public, and this option is checked, the Dataflow will appear as public.",
-          example = "true") @RequestParam(value = "showPublicInfo",
-              defaultValue = "true") boolean showPublicInfo,
-      @ApiParam(value = "Dataflow Id", example = "0") @RequestBody @LockCriteria(
-          name = "dataflowId", path = "idDataflow") DataCollectionVO dataCollectionVO,
-      @ApiParam(
-          value = "Stop And Notify PK Errors: If all tables in all schemas have PKs the process works.",
-          example = "true") @RequestParam(defaultValue = "true",
-              name = "stopAndNotifyPKError") boolean stopAndNotifyPKError) {
+  @ApiResponses(value = {
+          @ApiResponse(code = 200, message = "Successfully create data collection"),
+          @ApiResponse(code = 400, message = EEAErrorMessage.NOT_DESIGN_DATAFLOW)
+        }
+  )
+  public void createEmptyDataCollection(
+      @ApiParam(value = "Stop And Notify SQL Errors: If an error is found in the SQL rules, it stops the creation process.", example = "true")
+      @RequestParam(defaultValue = "true", name = "stopAndNotifySQLErrors") boolean stopAndNotifySQLErrors,
+
+      @ApiParam(value = "Manual Check: Enable the manual check for the custodian approval.", example = "false")
+      @RequestParam(value = "manualCheck", required = false) boolean manualCheck,
+
+      @ApiParam(value = "Show Public Info: If the schema has been marked as public, and this option is checked, the Dataflow will appear as public.", example = "true")
+      @RequestParam(value = "showPublicInfo", defaultValue = "true") boolean showPublicInfo,
+
+      @ApiParam(value = "Dataflow Id", example = "0")
+      @RequestBody @LockCriteria(name = "dataflowId", path = "idDataflow") DataCollectionVO dataCollectionVO,
+
+      @ApiParam(value = "Stop And Notify PK Errors: If all tables in all schemas have PKs the process works.", example = "true")
+      @RequestParam(defaultValue = "true", name = "stopAndNotifyPKError") boolean stopAndNotifyPKError,
+
+      @RequestParam(name = "disableRulesEventChoice", required = false) Boolean disableRulesEventChoice) {
 
     UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
     userNotificationContentVO.setDataflowId(dataCollectionVO.getIdDataflow());
@@ -187,7 +190,7 @@ public class DataCollectionControllerImpl implements DataCollectionController {
       // This method will release the lock
        LOG.info("Creating empty data collection for dataflowId {}", dataflowId);
       dataCollectionService.createEmptyDataCollection(dataflowId, date, stopAndNotifySQLErrors,
-              manualCheck, showPublicInfo, referenceDataflow, stopAndNotifyPKError, isBigDataflow);
+              manualCheck, showPublicInfo, referenceDataflow, stopAndNotifyPKError, isBigDataflow, disableRulesEventChoice);
       LOG.info("DataCollection creation for Dataflow {} started", dataflowId);
     } catch (Exception e) {
 

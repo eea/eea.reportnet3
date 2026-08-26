@@ -410,7 +410,17 @@ public class DataCollectionServiceImpl implements DataCollectionService {
   @Async
   public void createEmptyDataCollection(Long dataflowId, LocalDateTime dueDate,
       boolean stopAndNotifySQLErrors, boolean manualCheck, boolean showPublicInfo,
-      boolean referenceDataflow, boolean stopAndNotifyPKError, boolean isBigDataflow) {
+      boolean referenceDataflow, boolean stopAndNotifyPKError, boolean isBigDataflow, Boolean disableRulesEventChoice) {
+
+    //This is a call from the disable rules pop up window
+    if (disableRulesEventChoice != null) {
+      final NotificationVO notificationVO = new NotificationVO();
+      //Determine the error level of the notification
+      notificationVO.setUser(SecurityContextHolder.getContext().getAuthentication().getName());
+      notificationVO.setDataflowId(dataflowId);
+      notificationVO.setError(disableRulesEventChoice ? "INFO" : "ERROR");
+      releaseNotification(EventType.DISABLE_RULES_ERROR_EVENT, notificationVO);
+    }
 
     List<DataSetMetabaseVO> datasets = datasetMetabaseService.findDataSetByDataflowIds(Collections.singletonList(dataflowId));
 
@@ -757,7 +767,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
               .user(SecurityContextHolder.getContext().getAuthentication().getName())
               .dataflowId(dataflowId)
               .emptyTable(true).build();
-      LOG.info("Data Collection creation proccess stopped: empty table(s) found");
+      LOG.info("Data Collection creation process stopped: empty table(s) found");
       // remove lock
       Map<String, Object> createDataCollection = new HashMap<>();
       createDataCollection.put(LiteralConstants.SIGNATURE,
@@ -863,6 +873,9 @@ public class DataCollectionServiceImpl implements DataCollectionService {
               testDataset.setDatasetTypeEnum(DatasetTypeEnum.TEST);
               LOG.info("Creating empty tables if needed for test dataset {}", testDataset.getId());
               createEmptyTables.runCreationForOneDataset(testDataset);
+
+              //create views for non-prefilled tables if needed
+              bigDataDatasetService.createViewsForNewDataset(design.getId(), testDatasetId, 0L);
             }
 
 
@@ -920,6 +933,9 @@ public class DataCollectionServiceImpl implements DataCollectionService {
             referenceDatasetMetabaseVO.setDatasetTypeEnum(DatasetTypeEnum.DESIGN); //set to design not reference because we create tables for the green reference dataset
             LOG.info("Creating empty tables if needed for reference dataset {}", referenceDatasetMetabaseVO.getId());
             createEmptyTables.runCreationForOneDataset(referenceDatasetMetabaseVO);
+
+            //create views for non-prefilled tables if needed
+            bigDataDatasetService.createViewsForNewDataset(referenceDataset.getId(), referenceDataset.getId(), 0L);
           }
         }
       }
@@ -1101,6 +1117,9 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         reportingDataset.setDatasetTypeEnum(DatasetTypeEnum.REPORTING); //set to design not reference because we create tables for the green reference dataset
         LOG.info("Creating empty tables if needed for reporting dataset {}", reportingDataset.getId());
         createEmptyTables.runCreationForOneDataset(reportingDataset);
+
+        //create views for non-prefilled tables if needed
+        bigDataDatasetService.createViewsForNewDataset(design.getId(), datasetId, representative.getDataProviderId());
       }
     }
   }

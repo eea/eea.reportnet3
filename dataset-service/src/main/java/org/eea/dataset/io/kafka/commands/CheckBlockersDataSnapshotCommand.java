@@ -1,56 +1,36 @@
 package org.eea.dataset.io.kafka.commands;
 
-import org.eea.datalake.service.S3Helper;
-import org.eea.datalake.service.S3Service;
-import org.eea.datalake.service.model.S3PathResolver;
-import org.eea.dataset.persistence.data.repository.ValidationRepository;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
-import org.eea.dataset.persistence.metabase.domain.Task;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
-import org.eea.dataset.persistence.metabase.repository.TaskRepository;
 import org.eea.dataset.service.DatasetSnapshotService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.orchestrator.JobController.JobControllerZuul;
 import org.eea.interfaces.controller.orchestrator.JobHistoryController.JobHistoryControllerZuul;
-import org.eea.interfaces.controller.orchestrator.JobProcessController.JobProcessControllerZuul;
-import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
-import org.eea.interfaces.vo.dataset.CreateSnapshotVO;
-import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
-import org.eea.interfaces.vo.orchestrator.JobProcessVO;
 import org.eea.interfaces.vo.orchestrator.JobVO;
-import org.eea.interfaces.vo.orchestrator.enums.JobInfoEnum;
 import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.interfaces.vo.orchestrator.enums.JobTypeEnum;
-import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
-import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
 import org.eea.interfaces.vo.ums.TokenVO;
 import org.eea.kafka.commands.AbstractEEAEventHandlerCommand;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
-import org.eea.multitenancy.TenantResolver;
 import org.eea.security.authorization.AdminUserAuthorization;
 import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
-import static org.eea.utils.LiteralConstants.*;
 
 /**
  * The Class PropagateNewFieldCommand.
@@ -74,10 +54,6 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
   @Autowired
   private DataSetMetabaseRepository dataSetMetabaseRepository;
 
-  /** The validation repository. */
-  @Autowired
-  private ValidationRepository validationRepository;
-
   /** The kafka sender utils. */
   @Lazy
   @Autowired
@@ -86,11 +62,6 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
   /** The dataset snapshot service. */
   @Autowired
   private DatasetSnapshotService datasetSnapshotService;
-
-  /** The process controller zuul */
-  @Autowired
-  private ProcessControllerZuul processControllerZuul;
-
 
   /** The dataflow controller zuul */
   @Autowired
@@ -104,37 +75,16 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
   @Autowired
   private JobHistoryControllerZuul jobHistoryControllerZuul;
 
-  /** The job process controller zuul */
-  @Autowired
-  private JobProcessControllerZuul jobProcessControllerZuul;
-
   @Autowired
   private UserManagementControllerZull userManagementControllerZull;
 
   @Autowired
   private AdminUserAuthorization adminUserAuthorization;
 
-  @Autowired
-  @Qualifier("dremioJdbcTemplate")
-  private JdbcTemplate dremioJdbcTemplate;
-
-  @Autowired
-  private S3Helper s3Helper;
-
-  @Autowired
-  private S3Service s3Service;
-
-  @Autowired
-  private TaskRepository taskRepository;
   /**
    * The Constant LOG.
    */
   private static final Logger LOG = LoggerFactory.getLogger(CheckBlockersDataSnapshotCommand.class);
-
-  /**
-   * The default release process priority
-   */
-  private int defaultReleaseProcessPriority = 20;
 
   /**
    * Gets the event type.
@@ -179,9 +129,9 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
 
       // with one id we take all the datasets with the same dataProviderId and dataflowId
       DataSetMetabase dataset =
-              dataSetMetabaseRepository.findById(datasetId).orElse(new DataSetMetabase());
+          dataSetMetabaseRepository.findById(datasetId).orElse(new DataSetMetabase());
       List<Long> datasets = dataSetMetabaseRepository.getDatasetIdsByDataflowIdAndDataProviderId(
-              dataset.getDataflowId(), dataset.getDataProviderId());
+          dataset.getDataflowId(), dataset.getDataProviderId());
       Collections.sort(datasets);
 
       String dataflowName = null;
@@ -204,13 +154,15 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
       parameters.put("userId", userId);
       parameters.put("datasetId", datasets);
       parameters.put("silentRelease", silentRelease);
+      parameters.put("validate", false);
       if(validationJobId != null){
         parameters.put("validationJobId", validationJobId);
         if (dataset.getDataProviderId() != null && dataset.getDataProviderId().longValue() > 0) {
           dataProviderName = jobControllerZuul.findProviderLabelById(validationJobId);
         }
       }
-      JobVO releaseJob = new JobVO(null, JobTypeEnum.RELEASE, JobStatusEnum.IN_PROGRESS, ts, ts, parameters, user,true, dataset.getDataflowId(), dataset.getDataProviderId(), dataProviderName,null,null, dataflowName,null, null, null, null);
+
+      JobVO releaseJob = new JobVO(null, JobTypeEnum.RELEASE, JobStatusEnum.QUEUED, ts, ts, parameters, user, true, dataset.getDataflowId(), dataset.getDataProviderId(), null, null, dataflowName, null, null, null, null);
 
       waitForValidationJobIfInProgress(validationJobId, 2000);
 
@@ -225,8 +177,8 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
           value.put(LiteralConstants.USER, user);
           value.put("release_job_id", releaseJob.getId());
           kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.RELEASE_REFUSED_EVENT, value,
-                  NotificationVO.builder().user(user).dataflowId(dataset.getDataflowId()).providerId(dataset.getDataProviderId())
-                          .error("There is another job with status QUEUED or IN_PROGRESS for dataflowId " + dataset.getDataflowId() + " and providerId " + dataset.getDataProviderId()).build());
+              NotificationVO.builder().user(user).dataflowId(dataset.getDataflowId()).providerId(dataset.getDataProviderId())
+                  .error("There is another job with status QUEUED or IN_PROGRESS for dataflowId " + dataset.getDataflowId() + " and providerId " + dataset.getDataProviderId()).build());
           return;
         }
         else{
@@ -236,116 +188,17 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
           value.put(LiteralConstants.USER, user);
           value.put("release_job_id", releaseJob.getId());
           kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.SILENT_RELEASE_FAILED_EVENT, value,
-                  NotificationVO.builder().user(user).dataflowId(dataset.getDataflowId()).providerId(dataset.getDataProviderId())
-                          .error("There is another job with status QUEUED or IN_PROGRESS for dataflowId " + dataset.getDataflowId() + " and providerId " + dataset.getDataProviderId()).build());
+              NotificationVO.builder().user(user).dataflowId(dataset.getDataflowId()).providerId(dataset.getDataProviderId())
+                  .error("There is another job with status QUEUED or IN_PROGRESS for dataflowId " + dataset.getDataflowId() + " and providerId " + dataset.getDataProviderId()).build());
           return;
         }
       }
       releaseJob = addReleaseJob(user, dataset, releaseJob, statusToInsert);
 
-      // we check if one or more dataset have error, if have we create a notification and abort
-      // process of releasing
-      boolean haveBlockers = false;
-      for (Long id : datasets) {
-        if (dataflow!=null && dataflow.getBigData()!=null && dataflow.getBigData()) {
-          S3PathResolver s3PathResolver = new S3PathResolver(dataset.getDataflowId(), dataset.getDataProviderId(), id, S3_VALIDATION);
-          StringBuilder blockersQueryBuilder = new StringBuilder();
-          blockersQueryBuilder.append("select ").append(PARQUET_RECORD_ID_COLUMN_HEADER).append(" from ").append(s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH))
-                  .append(" where validation_level='BLOCKER' limit 1");
-          if (s3Helper.checkFolderExist(s3PathResolver, S3_VALIDATION_TABLE_PATH)) {
-            SqlRowSet blockersRowSet = dremioJdbcTemplate.queryForRowSet(blockersQueryBuilder.toString());
-            if (blockersRowSet.next()) {
-              haveBlockers = true;
-              failRelease(datasetId, user, dataset, releaseJob);
-              break;
-            }
-          }
-        } else {
-          setTenant(id);
-          if (validationRepository.existsByLevelError(ErrorTypeEnum.BLOCKER)) {
-            haveBlockers = true;
-            failRelease(datasetId, user, dataset, releaseJob);
-            break;
-          }
-        }
-      }
 
-      if(validationJobId != null && !haveBlockers) {
-        List<String> processIds = jobProcessControllerZuul.findProcessesByJobId(validationJobId);
-        for(String processId: processIds) {
-          //check if there were canceled tasks that were related to blockers or canceled tasks without a rule id. If the list is not empty we need to fail the release
-          List<Task> canceledBlockerTasks = taskRepository.findAllByProcessIdAndStatusAndLevelErrorBlocker(processId, ProcessStatusEnum.CANCELED.toString());
-          if (canceledBlockerTasks != null && canceledBlockerTasks.size() > 0) {
-            LOG.info("Found canceled tasks with blockers for validationJobId {} and processId {}", validationJobId, processId);
-            haveBlockers = true;
-            jobControllerZuul.updateJobInfo(releaseJob.getId(), JobInfoEnum.ERROR_RELEASE_CANCELED_BLOCKERS, null);
-            failRelease(datasetId, user, dataset, releaseJob);
-            break;
-          }
-        }
-
-        // If none canceled tasks with blocker errors were found check for any canceled tasks and write a warning to Release Job
-        if (!haveBlockers){
-          Task jobHasCanceledTask = taskRepository.findFirstByProcessIdInAndStatus(processIds, ProcessStatusEnum.CANCELED);
-          if (jobHasCanceledTask != null) {
-            LOG.info("Found canceled task(s) without blockers for validationJobId {}", validationJobId);
-            jobControllerZuul.updateJobInfo(releaseJob.getId(), JobInfoEnum.WARNING_HAS_CANCELED_VALIDATION_TASKS, null);
-          }}
-      }
-
-      // If none blocker errors has found, we have to release datasets one by one
-      if (!haveBlockers) {
-        LOG.info(
-                "Releasing datasets process continues. At this point, the datasets from the dataflowId {}, dataProviderId {} and jobId {} have no blockers",
-                dataset.getDataflowId(), dataset.getDataProviderId(), releaseJob.getId());
-
-        LOG.info("Creating the first release process for dataflowId {}, dataProviderId {}, jobId {}", dataset.getDataflowId(), dataset.getDataProviderId(), releaseJob.getId());
-        String processId = UUID.randomUUID().toString();
-        Boolean isProcessCreated = processControllerZuul.updateProcess(datasets.get(0), dataset.getDataflowId(),
-                ProcessStatusEnum.IN_PROGRESS, ProcessTypeEnum.RELEASE, processId, user, defaultReleaseProcessPriority, true);
-        LOG.info("Created the first release process for dataflowId {}, dataProviderId {}, jobId {} and processId {} dataset id {} success: {}", dataset.getDataflowId(), dataset.getDataProviderId(), releaseJob.getId(), processId, datasetId, isProcessCreated);
-
-        CreateSnapshotVO createSnapshotVO = new CreateSnapshotVO();
-        createSnapshotVO.setReleased(true);
-        createSnapshotVO.setAutomatic(Boolean.TRUE);
-
-        //force date to UTC and description to CET
-        SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        Date dateRelease = new Date();
-        dateFormatter.setTimeZone(TimeZone.getTimeZone(LiteralConstants.EUROPE_ZONE_ID));
-        createSnapshotVO.setDescription("Release " + dateFormatter.format(dateRelease) + " CET");
-        dateFormatter.setTimeZone(TimeZone.getTimeZone("UTC"));
-
-        LOG.info("Creating jobProcess for dataflowId {}, dataProviderId {}, jobId {} and release processId {}", dataset.getDataflowId(), dataset.getDataProviderId(), releaseJob.getId(), processId);
-        JobProcessVO jobProcessVO = new JobProcessVO(null, releaseJob.getId(), processId);
-        jobProcessControllerZuul.save(jobProcessVO);
-        LOG.info("Created jobProcess for dataflowId {}, dataProviderId {}, jobId {} and release processId {}", dataset.getDataflowId(), dataset.getDataProviderId(), releaseJob.getId(), processId);
-
-        datasetSnapshotService.addSnapshot(datasets.get(0), createSnapshotVO, null,
-                dateFormatter.format(dateRelease), false, processId);
-      }
     } catch (Exception e) {
       LOG.error("Unexpected error! Error executing event {}. Message: {}", eeaEventVO, e.getMessage());
     }
-  }
-
-  private void failRelease(Long datasetId, String user, DataSetMetabase dataset, JobVO releaseJob) throws EEAException {
-    // Release the locks
-    datasetSnapshotService.releaseLocksRelatedToRelease(dataset.getDataflowId(),
-            dataset.getDataProviderId());
-    LOG.error(
-            "Error in the releasing process of the dataflowId {}, dataProviderId {} and jobId {}, the datasets have blocker errors",
-            dataset.getDataflowId(), dataset.getDataProviderId(), releaseJob.getId());
-
-    releaseJob.setJobStatus(JobStatusEnum.FAILED);
-    jobControllerZuul.updateJobStatus(releaseJob.getId(), JobStatusEnum.FAILED);
-
-    kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.RELEASE_BLOCKERS_FAILED_EVENT, null,
-            NotificationVO.builder()
-                    .user(user)
-                    .datasetId(datasetId)
-                    .error("One or more datasets have blockers errors, Release aborted")
-                    .providerId(dataset.getDataProviderId()).build());
   }
 
   private JobVO addReleaseJob(String user, DataSetMetabase dataset, JobVO releaseJob, JobStatusEnum statusToInsert) {
@@ -354,15 +207,6 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
     jobHistoryControllerZuul.save(releaseJob);
     LOG.info("Added release job for dataflowId {}, dataProviderId {} and creator {} with status {} and jobId {}", dataset.getDataflowId(), dataset.getDataProviderId(), user, statusToInsert, releaseJob.getId());
     return releaseJob;
-  }
-
-  /**
-   * Sets the tenant.
-   *
-   * @param idDataset the new tenant
-   */
-  private void setTenant(Long idDataset) {
-    TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, idDataset));
   }
 
   /**
@@ -381,7 +225,7 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
       JobVO validationJob = jobControllerZuul.findJobById(validationJobId);
       if (validationJob != null && JobStatusEnum.IN_PROGRESS.equals(validationJob.getJobStatus())) {
         LOG.info("Validation job {} still in progress. Sleeping {} ms before release eligibility check.",
-                validationJobId, waitMillis);
+            validationJobId, waitMillis);
         Thread.sleep(waitMillis);
       }
     } catch (InterruptedException ie) {

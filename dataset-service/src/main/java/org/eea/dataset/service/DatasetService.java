@@ -755,6 +755,8 @@ public interface DatasetService {
           String fieldId
   ) throws EEAException;
 
+  boolean hasBlockersForDataset(Long datasetId);
+
   /**
    * Streams attachments for the given field schema and writes them to the ZIP output stream. We were originally constracting
    * a List instead of a Stream and it caused java heap exception that was discovered in ticket #305064. The process was moved

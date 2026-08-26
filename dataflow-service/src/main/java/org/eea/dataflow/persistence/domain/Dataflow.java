@@ -137,6 +137,10 @@ public class Dataflow {
   @Column(name = "OFFICIAL_REPORTING")
   private Boolean officialReporting;
 
+  /** Whether typed Dremio views are used for this dataflow by default. */
+  @Column(name = "USE_VIEWS")
+  private Boolean useViews;
+
   @Column(name = "PREPARATION_ENABLED")
   private Boolean preparationEnabled = Boolean.FALSE;
 

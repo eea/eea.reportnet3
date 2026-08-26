@@ -799,6 +799,9 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
     );
   };
 
+  // Hide the show cancelled validations button if the job info does not include the text 'canceled validation tasks'. It was added for the Skipped Tasks job info case.
+  const showCancelledValidationsButton = typeof jobStatus?.jobInfo === 'string' && jobStatus?.jobInfo.toLowerCase().includes('canceled validation tasks');
+
   return (
     <Fragment>
       <Dialog
@@ -847,7 +850,7 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
           visible={isStatusInfoDialogVisible}>
           {jobStatus.jobInfo ? jobStatus.jobInfo : resourcesContext.messages['noJobStatusInfo']}
           <br />
-          {(jobStatus?.jobType === 'VALIDATION' || jobStatus?.jobType === 'RELEASE') && jobStatus?.jobInfo !== null && (
+          {(jobStatus?.jobType === 'VALIDATION' || jobStatus?.jobType === 'RELEASE') && jobStatus?.jobInfo !== null && showCancelledValidationsButton && (
             <>
               <Button
                 className={`p-button-secondary ${styles.buttonPushDown}`}

@@ -40,6 +40,7 @@ public class ParquetToIcebergFailedActiveJobsEvent implements NotificableEventHa
         notification.put("datasetId", notificationVO.getDatasetId());
         notification.put("dataflowId", notificationVO.getDataflowId());
         notification.put("datasetName", datasetName);
+        notification.put("preparationCode", notificationVO.getPreparationCode());
         notification.put("message", "Parquet to Iceberg conversion failed because there are queued or in progress jobs for the same datasetId.");
         return notification;
     }

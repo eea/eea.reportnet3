@@ -25,7 +25,8 @@ const parseReferenceDataflowDTO = referenceDataflowDTO =>
     status: referenceDataflowDTO.status,
     testDatasets: DatasetUtils.parseDatasetListDTO(referenceDataflowDTO.testDatasets),
     type: referenceDataflowDTO.type,
-    userRole: referenceDataflowDTO.userRole
+    userRole: referenceDataflowDTO.userRole,
+    useViews: referenceDataflowDTO.useViews
   });
 
 export const ReferenceDataflowUtils = {

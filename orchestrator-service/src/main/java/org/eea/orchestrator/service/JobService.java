@@ -99,4 +99,9 @@ public interface JobService {
 
     List<JobVO> findActiveJobsRelatedToADatasetId(Long datasetId, String preparationCode, Long dataflowId, Long providerId);
 
-    JobStatusEnum checkEligibilityOfPreparationJob(String jobType, Long datasetId, String preparationCode);}
+    JobStatusEnum checkEligibilityOfPreparationJob(String jobType, Long datasetId, String preparationCode);
+
+    void precheckReleaseJobOrThrow(Long releaseJobId);
+
+    void failReleaseAfterPrecheckException(JobVO job, Exception e) throws EEAException;
+}

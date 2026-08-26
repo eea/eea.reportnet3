@@ -18,6 +18,7 @@ import org.eea.datalake.service.model.S3PathResolver;
 import org.eea.dataset.mapper.HelperMultipartFileMapper;
 import org.eea.dataset.persistence.metabase.domain.DatasetTable;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
+import org.eea.dataset.persistence.schemas.domain.FieldSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.persistence.schemas.domain.pkcatalogue.PkCatalogueSchema;
 import org.eea.dataset.persistence.schemas.repository.PkCatalogueRepository;
@@ -808,6 +809,24 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             if (!isPreparationDataset) {
                 datasetMetabaseService.updateDatasetRunningStatus(importFileInDremioInfo.getDatasetId(),
                         DatasetRunningStatusEnum.IMPORTED);
+                if (isUseViewsEnabled(importFileInDremioInfo.getDataflowId(), importFileInDremioInfo.getDatasetId())) {
+                    try {
+                        if (importFileInDremioInfo.getTableSchemaId() != null) {
+                            String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(importFileInDremioInfo.getDatasetId());
+                            TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(importFileInDremioInfo.getTableSchemaId(), datasetSchemaId);
+                            createTypedViewWithRetry(importFileInDremioInfo.getDataflowId(), importFileInDremioInfo.getProviderId(), importFileInDremioInfo.getDatasetId(), importFileInDremioInfo.getTableSchemaId(), tableSchemaVO.getNameTableSchema());
+                        } else {
+                            List<TableSchemaIdNameVO> tableSchemas = datasetSchemaService.getTableSchemasIds(importFileInDremioInfo.getDatasetId());
+                            for (TableSchemaIdNameVO tableSchema : tableSchemas) {
+                                createTypedViewWithRetry(importFileInDremioInfo.getDataflowId(), importFileInDremioInfo.getProviderId(), importFileInDremioInfo.getDatasetId(), tableSchema.getIdTableSchema(), tableSchema.getNameTableSchema());
+                            }
+                        }
+                    } catch (Exception e) {
+                        if (importFileInDremioInfo.getJobId() != null) {
+                            jobControllerZuul.updateJobInfo(importFileInDremioInfo.getJobId(), JobInfoEnum.ERROR_MATERIALIZED_VIEWS_ARE_NOT_CORRECT, null);
+                        }
+                    }
+                }
             }
 
             if(StringUtils.isNotBlank(importFileInDremioInfo.getProcessId())) {
@@ -997,9 +1016,17 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                     s3HelperPrivate.deleteFolder(s3ReferenceTablePathResolver, S3_DATAFLOW_REFERENCE_FOLDER_PATH);
                 }
             }
-
-            if (createEmptyTablesBool) {
-                createEmptyTables.runCreationForSpecificTableSchema(dataSetMetabaseVO, tableSchemaId, preparationCode);
+            if (BooleanUtils.isTrue(createEmptyTablesBool)) {
+                createEmptyTables.runCreationForSpecificTableSchema(dataSetMetabaseVO, tableSchemaId);
+                if (!isPreparationDataset && isUseViewsEnabled(dataflowId, datasetId)) {
+                    try {
+                        createTypedViewWithRetry(dataflowId, providerId, datasetId, tableSchemaId, tableSchemaName);
+                    } catch (Exception e) {
+                        if (jobId != null) {
+                            jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.ERROR_MATERIALIZED_VIEWS_ARE_NOT_CORRECT, null);
+                        }
+                    }
+                }
             }
 
             if (jobId != null) {
@@ -1457,6 +1484,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             final String datasetSchemaId = dataSetMetabaseVO.getDatasetSchema();
 
             final List<TableSchemaVO> availableForConversionTables = new ArrayList<>();
+            boolean useViewsEnabled = isUseViewsEnabled(dataflowId, datasetId);
 
             for (String tableSchemaId : tableSchemaIds) {
                 final TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, datasetSchemaId);
@@ -1465,6 +1493,13 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                     final Boolean availableForConversion = convertIcebergToParquetTable(datasetId, preparationCode, dataflowId, providerId, tableSchemaVO, datasetSchemaId, lockValue);
                     if (BooleanUtils.isTrue(availableForConversion)){
                         availableForConversionTables.add(tableSchemaVO);
+                        if (useViewsEnabled) {
+                            try {
+                                createTypedViewWithRetry(dataflowId, providerId, datasetId, tableSchemaVO.getIdTableSchema(), tableSchemaVO.getNameTableSchema());
+                            } catch (Exception e) {
+                                LOG.error("Could not create typed view for datasetId {} tableSchemaId {}: {}", datasetId, tableSchemaVO.getIdTableSchema(), e);
+                            }
+                        }
                     }
                 }
                 else {
@@ -2022,6 +2057,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
     @Override
     public void createPrefilledTables(Long designDatasetId, String designDatasetSchemaId, Long datasetIdForCreation, Long providerId, String tableSchemaId) throws Exception {
         DataSetMetabaseVO designDataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(designDatasetId);
+        boolean useViewsEnabled = isUseViewsEnabled(designDataSetMetabaseVO.getDataflowId(), datasetIdForCreation);
 
         List<TableSchemaIdNameVO> tables = datasetSchemaService.getTableSchemasIds(designDatasetId);
         for (TableSchemaIdNameVO table : tables) {
@@ -2110,6 +2146,36 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 //refresh the metadata
                 dremioHelperService.refreshTableMetadataAndPromote(null, dremioNewTableQueryPath, s3NewTablePathResolver, tableSchemaName);
                 LOG.info("Created prefilled data for datasetId {} and table {} from designDatasetId {} ", datasetIdForCreation, tableSchemaVO.getNameTableSchema(), designDatasetId);
+
+                if (useViewsEnabled) {
+                    try {
+                        createTypedViewWithRetry(designDataSetMetabaseVO.getDataflowId(), providerId, datasetIdForCreation, tableSchemaVO.getIdTableSchema(), tableSchemaName, designDatasetSchemaId);
+                    } catch (Exception e) {
+                        LOG.error("Could not create typed view for prefilled datasetId {} tableSchemaId {}: {}", datasetIdForCreation, tableSchemaVO.getIdTableSchema(), e.getMessage());
+                    }
+                }
+            }
+        }
+    }
+
+    @Override
+    public void createViewsForNewDataset(Long designDatasetId, Long datasetIdForCreation, Long providerId) throws Exception {
+        DataSetMetabaseVO designDataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(designDatasetId);
+        if (!isUseViewsEnabled(designDataSetMetabaseVO.getDataflowId(), datasetIdForCreation)) {
+            return;
+        }
+
+        List<TableSchemaIdNameVO> tables = datasetSchemaService.getTableSchemasIds(designDatasetId);
+        for (TableSchemaIdNameVO table : tables) {
+            TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(table.getIdTableSchema(), designDataSetMetabaseVO.getDatasetSchema());
+            if (tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getToPrefill())) {
+                // already got its view built by createPrefilledTables
+                continue;
+            }
+            try {
+                createTypedViewWithRetry(designDataSetMetabaseVO.getDataflowId(), providerId, datasetIdForCreation, table.getIdTableSchema(), table.getNameTableSchema(), designDataSetMetabaseVO.getDatasetSchema());
+            } catch (Exception e) {
+                LOG.error("Could not create typed view for datasetId {} tableSchemaId {}: {}", datasetIdForCreation, table.getIdTableSchema(), e.getMessage());
             }
         }
     }
@@ -3447,6 +3513,25 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             }
         }
         else{
+            boolean isPreparationDataset = StringUtils.isNotBlank(importFileInDremioInfo.getPreparationCode());
+            if (!isPreparationDataset && isUseViewsEnabled(importFileInDremioInfo.getDataflowId(), importFileInDremioInfo.getDatasetId())) {
+                try {
+                    if (importFileInDremioInfo.getTableSchemaId() != null) {
+                        String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(importFileInDremioInfo.getDatasetId());
+                        TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(importFileInDremioInfo.getTableSchemaId(), datasetSchemaId);
+                        createTypedViewWithRetry(importFileInDremioInfo.getDataflowId(), importFileInDremioInfo.getProviderId(), importFileInDremioInfo.getDatasetId(), importFileInDremioInfo.getTableSchemaId(), tableSchemaVO.getNameTableSchema());
+                    } else {
+                        List<TableSchemaIdNameVO> tableSchemas = datasetSchemaService.getTableSchemasIds(importFileInDremioInfo.getDatasetId());
+                        for (TableSchemaIdNameVO tableSchema : tableSchemas) {
+                            createTypedViewWithRetry(importFileInDremioInfo.getDataflowId(), importFileInDremioInfo.getProviderId(), importFileInDremioInfo.getDatasetId(), tableSchema.getIdTableSchema(), tableSchema.getNameTableSchema());
+                        }
+                    }
+                } catch (Exception e) {
+                    LOG.error("Could not create typed view(s) for etl import job {}: {}", jobId, e.getMessage());
+                    jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.ERROR_MATERIALIZED_VIEWS_ARE_NOT_CORRECT, null);
+                }
+            }
+
             if(importFileInDremioInfo.getWarningMessages() != null && !importFileInDremioInfo.getWarningMessages().isEmpty() && StringUtils.isNotBlank(importFileInDremioInfo.getWarningMessages().get(0))) {
                 //update job info message by the first warning
                 String warningToUpdate = importFileInDremioInfo.getWarningMessages().get(0);
@@ -3545,6 +3630,338 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         } catch (Exception e) {
             LOG.warn("Could not query row count for table {}, treating as non-empty", s3PathResolver.getTableName(), e);
             return false;
+        }
+    }
+
+    @Override
+    public void createTypedViewWithRetry(Long dataflowId, Long providerId, Long datasetId, String tableSchemaId, String tableName) throws Exception {
+        createTypedViewWithRetry(dataflowId, providerId, datasetId, tableSchemaId, tableName, null);
+    }
+
+    @Override
+    public void createTypedViewWithRetry(Long dataflowId, Long providerId, Long datasetId, String tableSchemaId, String tableName, String datasetSchemaId) throws Exception {
+        for (int attempt = 1; attempt <= 3; attempt++) {
+            try {
+                createTypedView(dataflowId, providerId, datasetId, tableSchemaId, tableName, datasetSchemaId);
+                return;
+            } catch (Exception e) {
+                LOG.error("Attempt {}/3 to create typed view failed for datasetId {} tableSchemaId {}: {}", attempt, datasetId, tableSchemaId, e);
+                if (attempt < 3) {
+                    try { Thread.sleep(3000); } catch (InterruptedException ie) { Thread.currentThread().interrupt(); }
+                } else {
+                    throw e;
+                }
+            }
+        }
+    }
+
+    /**
+     * Resolves whether typed views should be created for a dataset: the per-dataset override
+     * (dataset.use_views) wins if set, otherwise falls back to the dataflow-level flag.
+     */
+    private boolean isUseViewsEnabled(Long dataflowId, Long datasetId) {
+        try {
+            Boolean datasetUseViewsOverride = datasetMetabaseService.findDatasetMetabase(datasetId).getUseViews();
+            if (datasetUseViewsOverride != null) {
+                return datasetUseViewsOverride;
+            }
+            DataFlowVO dataFlowVO = dataFlowControllerZuul.getMetabaseById(dataflowId);
+            return dataFlowVO != null && BooleanUtils.isTrue(dataFlowVO.getUseViews());
+        } catch (Exception e) {
+            LOG.error("Could not resolve useViews flag for dataflowId {} datasetId {}: {}", dataflowId, datasetId, e.getMessage());
+            return false;
+        }
+    }
+
+    public void createTypedView(
+            Long dataflowId,
+            Long providerId,
+            Long datasetId,
+            String tableSchemaId,
+            String tableName
+    ) throws Exception {
+        createTypedView(dataflowId, providerId, datasetId, tableSchemaId, tableName, null);
+    }
+
+    public void createTypedView(
+            Long dataflowId,
+            Long providerId,
+            Long datasetId,
+            String tableSchemaId,
+            String tableName,
+            String datasetSchemaId
+    ) throws Exception {
+
+        LOG.info("Creating typed view for datasetId {} tableSchemaId {} table {}", datasetId, tableSchemaId, tableName);
+
+        // datasetSchemaId may be passed explicitly by callers acting on a dataset just created in
+        // the same transaction, whose metabase row a fresh read (different datasource/connection)
+        // may not see yet
+        String resolvedDatasetSchemaId = datasetSchemaId != null
+                ? datasetSchemaId
+                : datasetMetabaseService.findDatasetMetabase(datasetId).getDatasetSchema();
+
+        DataSetSchema schema =
+                schemasRepository.findById(
+                        new ObjectId(resolvedDatasetSchemaId)
+                ).orElseThrow();
+
+        TableSchema tableSchema =
+                schema.getTableSchemas()
+                        .stream()
+                        .filter(t ->
+                                t.getRecordSchema()
+                                        .getIdTableSchema()
+                                        .toString()
+                                        .equals(tableSchemaId)
+                        )
+                        .findFirst()
+                        .orElseThrow();
+
+        List<FieldSchema> fields =
+                tableSchema.getRecordSchema().getFieldSchema();
+
+        // SOURCE path
+        S3PathResolver currentPath = new S3PathResolver(
+                dataflowId,
+                providerId,
+                datasetId,
+                tableName
+        );
+
+        currentPath.setPath(S3_TABLE_AS_FOLDER_QUERY_PATH);
+
+        String sourcePath = s3ServicePrivate.getS3Path(currentPath);
+
+        // TARGET path
+        currentPath.setPath(S3_VIEWS_TABLE_AS_FOLDER_QUERY_PATH);
+
+        String targetPath = s3ServicePrivate.getS3Path(currentPath);
+
+        // Build select clause for populated tables
+        String selectClause =
+            Stream.concat(
+                Stream.of("\"record_id\" AS \"record_id\""),
+                fields.stream()
+                    .map(this::buildCast))
+            .collect(Collectors.joining(",\n"));
+
+        dropViewTableIfExists(targetPath);
+        deleteViewFolderIfExists(currentPath);
+
+        Thread.sleep(3000);
+
+        // STEP 1: create schema-only table
+        String createSql =
+                buildCreateTableSql(targetPath, fields);
+
+        String processId =
+                dremioHelperService.executeSqlStatement(createSql);
+
+        dremioHelperService.checkIfDremioProcessFinishedSuccessfully(
+                createSql,
+                processId,
+                null
+        );
+
+        // STEP 2: insert data (if any exists)
+        if (sourceTableHasRows(sourcePath)) {
+
+            String insertSql =
+                    buildInsertSql(
+                            targetPath,
+                            sourcePath,
+                            selectClause
+                    );
+
+            processId =
+                    dremioHelperService.executeSqlStatement(insertSql);
+
+            dremioHelperService.checkIfDremioProcessFinishedSuccessfully(
+                    insertSql,
+                    processId,
+                    null
+            );
+        }
+
+        LOG.info("Created typed view for datasetId {} tableSchemaId {} table {}", datasetId, tableSchemaId, tableName);
+    }
+
+    private boolean sourceTableHasRows(String sourcePath) {
+        try {
+            long rowCount =
+                    dremioHelperService.getRowCount(sourcePath);
+            return rowCount > 0;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    private String buildCreateTableSql(
+            String target,
+            List<FieldSchema> fields
+    ) {
+
+        String columns = Stream.concat(
+                Stream.of("\"record_id\" VARCHAR"),
+                fields.stream().map(field ->
+                        "\"" + field.getHeaderName() + "\" " + mapType(field))
+        ).collect(Collectors.joining(",\n"));
+
+        return "CREATE TABLE " +
+                target +
+                " (\n" +
+                columns +
+                "\n)";
+    }
+
+    private String buildCast(FieldSchema field) {
+
+        String name = "\"" + field.getHeaderName() + "\"";
+        String type = mapType(field);
+
+        switch (type) {
+            case "VARCHAR":
+                return name + " AS " + name;
+            case "INTEGER":
+
+                return "CASE " +
+                        "WHEN REGEXP_LIKE(" + name + ", '^-?[0-9]+$') " +
+                        "THEN CAST(" + name + " AS INTEGER) " +
+                        "ELSE NULL END AS " + name;
+            case "DOUBLE":
+
+                return "CASE " +
+                        "WHEN REGEXP_LIKE(" + name + ", '^-?[0-9]+(\\\\.[0-9]+)?$') " +
+                        "THEN CAST(" + name + " AS DOUBLE) " +
+                        "ELSE NULL END AS " + name;
+            case "BOOLEAN":
+
+                return "CASE " +
+                        "WHEN LOWER(" + name + ") IN ('true','false') " +
+                        "THEN CAST(" + name + " AS BOOLEAN) " +
+                        "ELSE NULL END AS " + name;
+            case "DATE":
+
+                return "CASE " +
+                        "WHEN " + name + " IS NOT NULL " +
+                        "THEN CAST(" + name + " AS DATE) " +
+                        "ELSE NULL END AS " + name;
+            case "TIMESTAMP":
+
+                return "CASE " +
+                        "WHEN " + name + " IS NOT NULL " +
+                        "THEN CAST(" + name + " AS TIMESTAMP) " +
+                        "ELSE NULL END AS " + name;
+        }
+
+        return name + " AS " + name;
+    }
+
+    private String mapType(FieldSchema field) {
+
+        String t = field.getType().getValue().toUpperCase();
+
+        switch (t) {
+
+            case "NUMBER_INTEGER":
+                return "INTEGER";
+
+            case "NUMBER_DECIMAL":
+                return "DOUBLE";
+
+            case "BOOLEAN":
+                return "BOOLEAN";
+
+            case "DATE":
+                return "DATE";
+
+            case "DATETIME":
+                return "TIMESTAMP";
+
+            case "TEXT":
+            case "TEXTAREA":
+            case "LONG_TEXT":
+            case "CODELIST":
+            case "MULTISELECT_CODELIST":
+            case "LINK":
+            case "EXTERNAL_LINK":
+            case "URL":
+            case "PHONE":
+            case "EMAIL":
+            case "ATTACHMENT":
+            case "POINT":
+            case "LINESTRING":
+            case "POLYGON":
+            case "MULTIPOINT":
+            case "MULTILINESTRING":
+            case "MULTIPOLYGON":
+            case "GEOMETRYCOLLECTION":
+            default:
+                return "VARCHAR";
+        }
+    }
+
+    private String buildInsertSql(
+            String target,
+            String source,
+            String selectClause
+    ) {
+
+        return "INSERT INTO " +
+                target +
+                " SELECT " +
+                selectClause +
+                " FROM " +
+                source;
+    }
+
+    private void deleteViewFolderIfExists(
+            S3PathResolver s3PathResolver
+    ) {
+
+        try {
+
+            if (s3HelperPrivate.checkFolderExist(
+                    s3PathResolver,
+                    S3_VIEW_TABLE_NAME_FOLDER_PATH
+            )) {
+
+                s3HelperPrivate.deleteFolder(
+                        s3PathResolver,
+                        S3_VIEW_TABLE_NAME_FOLDER_PATH
+                );
+
+                Thread.sleep(3000);
+            }
+
+        } catch (Exception e) {
+
+            LOG.warn(
+                    "Could not delete existing views folder for dataset {}",
+                    s3PathResolver.getDatasetId()
+            );
+        }
+    }
+
+    private void dropViewTableIfExists(String tablePath) {
+
+        try {
+
+            String sql = "DROP TABLE IF EXISTS " + tablePath;
+
+            String processId =
+                    dremioHelperService.executeSqlStatement(sql);
+
+            dremioHelperService.checkIfDremioProcessFinishedSuccessfully(
+                    sql,
+                    processId,
+                    2000L
+            );
+
+        } catch (Exception e) {
+
+            LOG.warn("Could not drop table {}", tablePath);
         }
     }
 

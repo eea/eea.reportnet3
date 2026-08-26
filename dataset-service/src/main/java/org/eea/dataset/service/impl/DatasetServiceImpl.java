@@ -86,17 +86,16 @@ import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.transaction.Transactional;
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
@@ -334,6 +333,10 @@ public class DatasetServiceImpl implements DatasetService {
   @Autowired
   @Qualifier("dremioJdbcTemplate")
   JdbcTemplate dremioJdbcTemplate;
+
+  @Autowired
+  @Qualifier("dataSetsJdbcTemplate")
+  private JdbcTemplate dataSetsJdbcTemplate;
 
   @Autowired
   private StatisticsService statisticsService;
@@ -4012,6 +4015,21 @@ public class DatasetServiceImpl implements DatasetService {
 
     // 3. Return as bytes
     return geoJson.getBytes(StandardCharsets.UTF_8);
+  }
+
+  /**
+   * For Citus, for the current tenant/dataset_id, checks if the validationtable has any BLOCKER records.
+   *
+   * @param datasetId the dataset id
+   *
+   * @return true, if BLOCKERS exist
+   */
+  @Override
+  public boolean hasBlockersForDataset(Long datasetId) {
+    String schema = String.format(DATASET_FORMAT_NAME, datasetId); // "dataset_%d"
+    String sql = "select exists (select 1 from " + schema + ".validation where level_error='BLOCKER' limit 1)";
+    Boolean exists = dataSetsJdbcTemplate.queryForObject(sql, Boolean.class);
+    return Boolean.TRUE.equals(exists);
   }
 
   /**

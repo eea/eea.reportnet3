@@ -266,6 +266,17 @@ public interface BigDataDatasetService {
 
     void createPrefilledTables(Long designDatasetId, String designDatasetSchemaId, Long datasetIdForCreation, Long providerId, String tableSchemaId) throws Exception;
 
+    /**
+     * Creates typed views (if use_views is enabled) for a newly created dataset's tables that
+     * are not marked as prefilled, since those already get their view built by
+     * {@link #createPrefilledTables}.
+     *
+     * @param designDatasetId the design dataset id the new dataset's schema/tables are resolved from
+     * @param datasetIdForCreation the id of the newly created dataset
+     * @param providerId the provider id
+     */
+    void createViewsForNewDataset(Long designDatasetId, Long datasetIdForCreation, Long providerId) throws Exception;
+
     List<FieldVO> getFieldValuesReferencedDL(Long datasetIdOrigin, String datasetSchemaId,
                                      String fieldSchemaId, String conditionalValue, String searchValue, Integer resultsNumber) throws EEAException;
 
@@ -384,5 +395,60 @@ public interface BigDataDatasetService {
      */
      boolean isTableEmpty(S3PathResolver s3PathResolver);
 
-     void createEmptyTablesForSpecificTableSchema(Long datasetId, String tableSchemaId) throws EEAException;
+    /**
+     * Creates a typed Dremio view for a given dataset table by reading its schema definition
+     * from Mongo metadata and generating a CTAS query that casts dynamic Mongo fields into
+     * Citus-compatible SQL types.
+     *
+     * <p>The method will:
+     * <ul>
+     *     <li>Load dataset schema from MongoDB</li>
+     *     <li>Resolve field types dynamically from FieldSchema</li>
+     *     <li>Generate a Dremio CTAS query with TRY_CAST for safe conversions</li>
+     *     <li>Create a "views" folder in Dremio if it does not exist</li>
+     *     <li>Execute the CTAS query to generate a Parquet-backed typed view</li>
+     * </ul>
+     *
+     * <p>Any field that cannot be safely cast will be converted to NULL using TRY_CAST semantics.
+     *
+     * @param dataflowId the dataflow identifier used in the dataset path
+     * @param providerId the provider identifier used in the dataset path
+     * @param datasetId the dataset identifier in metadata storage
+     * @param tableSchemaId the schema identifier of the table to be transformed
+     * @param tableName the physical table name used in Dremio/S3 paths
+     *
+     * @throws Exception if schema resolution fails, Dremio promotion fails,
+     *                   or CTAS execution fails
+     */
+    void createTypedView(
+            Long dataflowId,
+            Long providerId,
+            Long datasetId,
+            String tableSchemaId,
+            String tableName
+    ) throws Exception;
+
+    /**
+     * Attempts to create a typed Dremio view for a given dataset table with up to 3 retries.
+     * On failure of all attempts, updates the job info with an error.
+     *
+     * @param dataflowId the dataflow identifier used in the dataset path
+     * @param providerId the provider identifier used in the dataset path
+     * @param datasetId the dataset identifier in metadata storage
+     * @param tableSchemaId the schema identifier of the table to be transformed
+     * @param tableName the physical table name used in Dremio/S3 paths
+     */
+    void createTypedViewWithRetry(Long dataflowId, Long providerId, Long datasetId, String tableSchemaId, String tableName) throws Exception;
+
+    /**
+     * Same as {@link #createTypedViewWithRetry(Long, Long, Long, String, String)}, but takes the
+     * dataset's schema id explicitly instead of resolving it by re-reading the dataset's metabase
+     * row. Use this overload when the dataset was just created in the same transaction and its
+     * metabase row may not yet be visible to a fresh read (e.g. a different datasource/connection).
+     *
+     * @param datasetSchemaId the schema id of datasetId, already known to the caller
+     */
+    void createTypedViewWithRetry(Long dataflowId, Long providerId, Long datasetId, String tableSchemaId, String tableName, String datasetSchemaId) throws Exception;
+      
+    void createEmptyTablesForSpecificTableSchema(Long datasetId, String tableSchemaId) throws EEAException;
 }

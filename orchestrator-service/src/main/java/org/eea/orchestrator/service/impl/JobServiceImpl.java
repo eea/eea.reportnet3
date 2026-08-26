@@ -345,21 +345,45 @@ public class JobServiceImpl implements JobService {
     public void prepareAndExecuteValidationJob(JobVO jobVO) {
         Job job = jobMapper.classToEntity(jobVO);
         Map<String, Object> parameters = job.getParameters();
+
+        // Validation for release block.
+        if (jobVO.isRelease()) {
+            Long dataflowId = Long.valueOf((Integer) parameters.get("dataflowId"));
+            Long dataProviderId = Long.valueOf((Integer) parameters.get("dataProviderId"));
+            boolean restrictFromPublic = false;
+            Object restrictObj = parameters.get("restrictFromPublic");
+            if (restrictObj instanceof Boolean) {
+                restrictFromPublic = (Boolean) restrictObj;
+            }
+
+            boolean validate = true;
+            Object validateObj = parameters.get("validate");
+            if (validateObj instanceof Boolean) {
+                validate = (Boolean) validateObj;
+            }
+
+            dataSetSnapshotControllerZuul.createReleaseSnapshots(dataflowId, dataProviderId, restrictFromPublic, validate, job.getId());
+            return;
+        }
+
         Long datasetId = Long.valueOf((Integer) parameters.get("datasetId"));
-        Boolean released = (Boolean) parameters.get("released");
+        boolean released = false;
+        Object releasedObj = parameters.get("released");
         String preparationCode = jobVO.getPreparationCode();
+        if (releasedObj instanceof Boolean) {
+            released = (Boolean) releasedObj;
+        }
+
         validationControllerZuul.validateDataSetData(datasetId, released, job.getId(), preparationCode);
     }
 
+    /**
+     * Calls startQueuedReleaseJob from dataset-service to start the process creation for the QUEUED RELEASE job.
+     * @param jobVO
+     */
     @Override
     public void prepareAndExecuteReleaseJob(JobVO jobVO) {
-        Job job = jobMapper.classToEntity(jobVO);
-        Map<String, Object> parameters = job.getParameters();
-        Long dataflowId = Long.valueOf((Integer) parameters.get("dataflowId"));
-        Long dataProviderId = Long.valueOf((Integer) parameters.get("dataProviderId"));
-        Boolean restrictFromPublic = (Boolean) parameters.get("restrictFromPublic");
-        Boolean validate = (Boolean) parameters.get("validate");
-        dataSetSnapshotControllerZuul.createReleaseSnapshots(dataflowId, dataProviderId, restrictFromPublic, validate, jobVO.getId());
+        dataSetSnapshotControllerZuul.startQueuedReleaseJob(jobVO.getId());
     }
 
     @Override
@@ -444,11 +468,8 @@ public class JobServiceImpl implements JobService {
 
     @Override
     public boolean canExecuteReleaseOnDataflow(Long dataflowId) {
-        List<Job> jobs = jobRepository.findByDataflowIdAndJobTypeInAndJobStatusAndRelease(dataflowId, Arrays.asList(JobTypeEnum.VALIDATION, JobTypeEnum.RELEASE), JobStatusEnum.IN_PROGRESS, true);
-        if (jobs.size() > 0) {
-            return false;
-        }
-        return true;
+        List<Job> jobs = jobRepository.findByDataflowIdAndJobTypeInAndJobStatusAndRelease(dataflowId, Arrays.asList(JobTypeEnum.RELEASE), JobStatusEnum.IN_PROGRESS, true);
+        return jobs == null || jobs.isEmpty();
     }
 
     @Override
@@ -890,5 +911,50 @@ public class JobServiceImpl implements JobService {
                 datasetId,
                 preparationCode
         );
+    }
+
+    /**
+     * Calls precheckReleaseJob from dataset-service to evaluate if the RELEASE can create processes.
+     */
+    @Override
+    public void precheckReleaseJobOrThrow(Long jobId) {
+        dataSetSnapshotControllerZuul.precheckReleaseJob(jobId);
+    }
+
+    /**
+     * This part was originally in the old CheckBlockersDataSnapshotCommand implementation. Since the RELEASE job is now
+     * set IN_PROGRESS in orchestrator, the FAILED status is also moved in orchestrator.
+     */
+    @Override
+    public void failReleaseAfterPrecheckException(JobVO job, Exception e) throws EEAException {
+        updateJobStatus(job.getId(), JobStatusEnum.FAILED);
+
+        String message = (e.getMessage() != null && !e.getMessage().isBlank())
+            ? e.getMessage()
+            : "One or more datasets have blockers errors, Release aborted";
+
+        boolean silentRelease = false;
+        if (job.getParameters() != null && job.getParameters().get("silentRelease") instanceof Boolean) {
+            silentRelease = (Boolean) job.getParameters().get("silentRelease");
+        }
+
+        EventType eventType = silentRelease
+            ? EventType.SILENT_RELEASE_FAILED_EVENT
+            : EventType.RELEASE_BLOCKERS_FAILED_EVENT;
+
+        try{
+            kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, null,
+                NotificationVO.builder()
+                    .user(job.getCreatorUsername())
+                    .dataflowId(job.getDataflowId())
+                    .datasetId(job.getDatasetId())
+                    .error(message)
+                    .providerId(job.getProviderId()).build());
+        } finally {
+            if (job.getDataflowId() != null && job.getProviderId() != null) {
+                // Always clean uup locks on failure.
+                dataSetSnapshotControllerZuul.releaseLocksFromReleaseDatasets(job.getDataflowId(), job.getProviderId());
+            }
+        }
     }
 }

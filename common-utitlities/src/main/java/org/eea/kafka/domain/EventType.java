@@ -499,6 +499,8 @@ public enum EventType {
   DISABLE_RULES_ERROR_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "disable_rules_error_event",
       true),
 
+  BYPASS_DISABLED_RULES_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "bypass_disabled_rules_event", true),
+
   EMPTY_TABLE_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "empty_table_event",
           true),
 

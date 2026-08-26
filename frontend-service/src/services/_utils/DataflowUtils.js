@@ -112,6 +112,7 @@ const parseDataflowDTO = dataflowDTO => {
     name: dataflowDTO.name,
     obligation: ObligationUtils.parseObligation(dataflowDTO.obligation),
     officialReporting: dataflowDTO.officialReporting,
+    useViews: dataflowDTO.useViews,
     preparationEnabled: dataflowDTO.preparationEnabled,
     referenceDatasets: DatasetUtils.parseDatasetListDTO(dataflowDTO.referenceDatasets),
     reportingDatasetsStatus: dataflowDTO.reportingStatus,

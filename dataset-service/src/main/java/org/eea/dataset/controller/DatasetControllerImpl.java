@@ -67,7 +67,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.concurrent.DelegatingSecurityContextRunnable;
 import org.springframework.security.core.context.SecurityContext;
@@ -90,8 +89,7 @@ import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
 
 import static org.eea.interfaces.vo.dataset.enums.FileTypeEnum.CSV;
-import static org.eea.utils.LiteralConstants.EXPORT_CSV;
-import static org.eea.utils.LiteralConstants.EXPORT_PARQUET;
+import static org.eea.utils.LiteralConstants.*;
 
 /**
  * The Class DatasetControllerImpl.
@@ -4829,20 +4827,16 @@ public class DatasetControllerImpl implements DatasetController {
       return;
     }
 
-    //Group the datasetTableVOs by datasetId
-    final Map<Long, List<DatasetTableVO>> groupedByDatasetId = datasetTables.stream()
-            .collect(Collectors.groupingBy(DatasetTableVO::getDatasetId));
-
-    //For each group of datasetTableVOs, collect all tableSchemaIds and disable editing for
-    //all of them.
-    for (Map.Entry<Long, List<DatasetTableVO>> entry : groupedByDatasetId.entrySet()) {
-      final Long datasetId = entry.getKey();
-      final List<String> tableSchemaIds = entry.getValue()
-              .stream()
-              .map(DatasetTableVO::getTableSchemaId)
-              .collect(Collectors.toList());
-
-      disableEditing(datasetId, null, tableSchemaIds);
+    for (DatasetTableVO datasetTableVO : datasetTables) {
+      //Adding a sleep to allow redis locks to be removed between conversion of DatasetTable with the same datasetId
+      //but different tableSchemaId
+      try {
+        Thread.sleep(5000);
+      }
+      catch (Exception e) {
+        LOG.error(e.getMessage(), e);
+      }
+      disableEditing(datasetTableVO);
     }
   }
 
@@ -4859,20 +4853,16 @@ public class DatasetControllerImpl implements DatasetController {
       return;
     }
 
-    //Group the datasetTableVOs by datasetId
-    final Map<Long, List<DatasetTableVO>> groupedByDatasetId = datasetTables.stream()
-            .collect(Collectors.groupingBy(DatasetTableVO::getDatasetId));
-
-    //For each group of datasetTableVOs, collect all tableSchemaIds and disable editing for
-    //all of them.
-    for (Map.Entry<Long, List<DatasetTableVO>> entry : groupedByDatasetId.entrySet()) {
-      final Long datasetId = entry.getKey();
-      final List<String> tableSchemaIds = entry.getValue()
-              .stream()
-              .map(DatasetTableVO::getTableSchemaId)
-              .collect(Collectors.toList());
-
-      disableEditing(datasetId, null, tableSchemaIds);
+    for (DatasetTableVO datasetTableVO : datasetTables) {
+      //Adding a sleep to allow redis locks to be removed between conversion of DatasetTable with the same datasetId
+      //but different tableSchemaId
+      try {
+        Thread.sleep(5000);
+      }
+      catch (Exception e) {
+        LOG.error(e.getMessage(), e);
+      }
+      disableEditing(datasetTableVO);
     }
   }
 
@@ -4883,6 +4873,7 @@ public class DatasetControllerImpl implements DatasetController {
 
       final Long dataflowId = dataSetMetabaseVO.getDataflowId();
       final Long providerId = dataSetMetabaseVO.getDataProviderId();
+      final String preparationCode = datasetTableVO.getPreparationCode();
       final boolean isBigData = dataFlowControllerZuul.isBigDataflow(dataflowId);
 
 
@@ -4943,5 +4934,39 @@ public class DatasetControllerImpl implements DatasetController {
     catch (Exception e) {
       LOG.error(e.getMessage(), e);
     }
+  }
+
+
+  @PostMapping("/createView")
+  public ResponseEntity<Void> createTypedView(
+          @RequestParam Long dataflowId,
+          @RequestParam Long providerId,
+          @RequestParam Long datasetId,
+          @RequestParam String tableName,
+          @RequestParam String tableSchemaId)
+  {
+
+    Boolean isBigDataflow = dataFlowControllerZuul.isBigDataflow(dataflowId);
+
+    if (!isBigDataflow) {
+      return ResponseEntity.badRequest().build();
+    }
+
+    try {
+      bigDataDatasetService.createTypedView(
+              dataflowId,
+              providerId,
+              datasetId,
+              tableSchemaId,
+              tableName
+      );
+
+      return ResponseEntity.ok().build();
+
+    } catch (Exception e) {
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    }
+
+
   }
 }
