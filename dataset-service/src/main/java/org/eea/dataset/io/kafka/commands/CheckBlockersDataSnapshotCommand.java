@@ -196,6 +196,7 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
 
 
       String userId = valJobVo!=null ? (String) valJobVo.getParameters().get("userId") : null;
+      String dataProviderName = null;
       Timestamp ts = new Timestamp(System.currentTimeMillis());
       Map<String, Object> parameters = new HashMap<>();
       parameters.put("dataflowId", dataset.getDataflowId());
@@ -205,8 +206,11 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
       parameters.put("silentRelease", silentRelease);
       if(validationJobId != null){
         parameters.put("validationJobId", validationJobId);
+        if (dataset.getDataProviderId() != null && dataset.getDataProviderId().longValue() > 0) {
+          dataProviderName = jobControllerZuul.findProviderLabelById(validationJobId);
+        }
       }
-      JobVO releaseJob = new JobVO(null, JobTypeEnum.RELEASE, JobStatusEnum.IN_PROGRESS, ts, ts, parameters, user,true, dataset.getDataflowId(), dataset.getDataProviderId(), null,null, dataflowName,null, null, null, null);
+      JobVO releaseJob = new JobVO(null, JobTypeEnum.RELEASE, JobStatusEnum.IN_PROGRESS, ts, ts, parameters, user,true, dataset.getDataflowId(), dataset.getDataProviderId(), dataProviderName,null,null, dataflowName,null, null, null, null);
 
       waitForValidationJobIfInProgress(validationJobId, 2000);
 

@@ -174,6 +174,13 @@ public interface JobRepository extends PagingAndSortingRepository<Job, Long>, Jo
     Long findProviderIdByJobId(Long jobId);
 
     /**
+     * Find provider label by job id
+     * @return
+     */
+    @Query(nativeQuery = true, value = "select p.label from data_provider p left join jobs j on p.id = j.provider_id where j.id= :jobId")
+    String findProviderLabelByJobId(Long jobId);
+
+    /**
      * Count jobs by dataflowId and job status
      * @param dataflowId the dataflow id
      * @param jobStatus the job status

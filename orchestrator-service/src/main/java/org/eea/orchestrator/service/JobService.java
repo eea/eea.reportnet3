@@ -20,7 +20,7 @@ import java.util.Map;
 
 public interface JobService {
     JobsVO getJobs(Pageable pageable, boolean asc, String sortedColumn, Long jobId, String jobTypes, Long dataflowId, String dataflowName, Long providerId,
-                   Long datasetId, String datasetName, String creatorUsername, String jobStatuses, String preparationCode);
+                   String providerName, Long datasetId, String datasetName, String creatorUsername, String jobStatuses, String preparationCode);
 
     List<JobVO> getJobsByStatus(JobStatusEnum status);
 
@@ -92,6 +92,8 @@ public interface JobService {
     void updateJobInfo(Long jobId, JobInfoEnum jobInfo, Integer lineNumber, Boolean updateJobHistory);
 
     Long findProviderIdById(Long jobId);
+
+    String findProviderLabelById(Long jobId);
 
     void restartImportJob(Long jobId, Boolean sendRestartNotification);
 

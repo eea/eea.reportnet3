@@ -45,6 +45,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -155,16 +156,16 @@ public class JobServiceImpl implements JobService {
 
     @Override
     public JobsVO getJobs(Pageable pageable, boolean asc, String sortedColumn, Long jobId, String jobTypes, Long dataflowId, String dataflowName, Long providerId,
-                          Long datasetId, String datasetName, String creatorUsername, String jobStatuses, String preparationCode) {
+                          String providerName, Long datasetId, String datasetName, String creatorUsername, String jobStatuses, String preparationCode) {
 
         String sortedTableColumn = jobUtils.getJobColumnNameByObjectName(sortedColumn);
         String remainingJobsStatusFilter = "IN_PROGRESS,QUEUED";
-        List<Job> jobs = jobRepository.findJobsPaginated(pageable, asc, sortedTableColumn, jobId, jobTypes, dataflowId, dataflowName, providerId, datasetId, datasetName, creatorUsername, jobStatuses, preparationCode);
+        List<Job> jobs = jobRepository.findJobsPaginated(pageable, asc, sortedTableColumn, jobId, jobTypes, dataflowId, dataflowName, providerId, providerName, datasetId, datasetName, creatorUsername, jobStatuses, preparationCode);
         List<JobVO> jobVOList = jobMapper.entityListToClass(jobs);
         JobsVO jobsVO = new JobsVO();
         jobsVO.setTotalRecords(jobRepository.count());
-        jobsVO.setFilteredRecords(jobRepository.countJobsPaginated(asc, sortedTableColumn, jobId, jobTypes, dataflowId, dataflowName, providerId, datasetId, datasetName, creatorUsername, jobStatuses));
-        jobsVO.setRemainingJobs(jobRepository.countJobsPaginated(asc, sortedTableColumn, jobId, jobTypes, dataflowId, dataflowName, providerId, datasetId, datasetName, creatorUsername, remainingJobsStatusFilter));
+        jobsVO.setFilteredRecords(jobRepository.countJobsPaginated(asc, sortedTableColumn, jobId, jobTypes, dataflowId, dataflowName, providerId, providerName, datasetId, datasetName, creatorUsername, jobStatuses));
+        jobsVO.setRemainingJobs(jobRepository.countJobsPaginated(asc, sortedTableColumn, jobId, jobTypes, dataflowId, dataflowName, providerId, providerName, datasetId, datasetName, creatorUsername, remainingJobsStatusFilter));
         jobsVO.setJobsList(jobVOList);
 
         return jobsVO;
@@ -776,6 +777,15 @@ public class JobServiceImpl implements JobService {
 
         return providerId;
     }
+
+    @Override
+    public String findProviderLabelById(Long jobId) {
+        String providerLabel = jobRepository.findProviderLabelByJobId(jobId);
+        LOG.info("Found provider label {} for job {}", providerLabel, jobId);
+
+        return providerLabel;
+    }
+
 
     @Async
     @Override

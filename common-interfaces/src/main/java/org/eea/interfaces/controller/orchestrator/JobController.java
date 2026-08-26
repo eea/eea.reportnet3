@@ -33,6 +33,7 @@ public interface JobController {
      * @param dataflowId
      * @param dataflowName
      * @param providerId
+     * @param providerName
      * @param datasetId
      * @param datasetName
      * @param creatorUsername
@@ -50,6 +51,7 @@ public interface JobController {
             @RequestParam(value = "dataflowId", required = false) Long dataflowId,
             @RequestParam(value = "dataflowName", required = false) String dataflowName,
             @RequestParam(value = "providerId", required = false) Long providerId,
+            @RequestParam(value = "providerName", required = false) String providerName,
             @RequestParam(value = "datasetId", required = false) Long datasetId,
             @RequestParam(value = "datasetName", required = false) String datasetName,
             @RequestParam(value = "creatorUsername", required = false) String creatorUsername,
@@ -322,6 +324,14 @@ public interface JobController {
      */
     @GetMapping(value = "/findProviderIdById/{jobId}")
     Long findProviderIdById(@PathVariable("jobId") Long jobId);
+
+    /**
+     * Finds provider label by job id
+     * @param jobId
+     * @return
+     */
+    @GetMapping(value = "/findProviderLabelById/{jobId}")
+    String findProviderLabelById(@PathVariable("jobId") Long jobId);
 
     /**
      * Retrieves the status of a job
