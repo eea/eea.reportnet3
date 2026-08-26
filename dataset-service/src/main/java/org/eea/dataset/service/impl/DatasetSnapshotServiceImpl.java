@@ -415,6 +415,14 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       LOG.info("Snapshot {} created into the metabase for datasetId {}, processId {}", snap.getId(), idDataset, processId);
       snap.getId();
 
+      try {
+        Thread.sleep(5000);
+      }
+      catch (InterruptedException ie) {
+        Thread.currentThread().interrupt();
+        LOG.warn("Interrupted while waiting after snapshot save for datasetId {}, processId {}", idDataset, processId);
+      }
+
       // 2. Create the data file of the snapshot, calling to recordstore-service
       // we need the partitionId. By now only consider the user root
       Long idPartition = obtainPartition(idDataset, "root").getId();
