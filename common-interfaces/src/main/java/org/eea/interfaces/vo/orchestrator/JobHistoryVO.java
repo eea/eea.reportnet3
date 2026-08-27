@@ -55,6 +55,9 @@ public class JobHistoryVO implements Serializable {
     /** The data provider id */
     private Long providerId;
 
+    /** The data provider name */
+    private String providerName;
+
     /** The dataset id */
     private Long datasetId;
 
