@@ -91,7 +91,7 @@ public class JobControllerImpl implements JobController {
     private JobUtils jobUtils;
 
     /** The valid columns. */
-    List<String> validColumns = Arrays.asList("jobId", "creatorUsername", "jobType", "dataflowId", "providerId", "datasetId",
+    List<String> validColumns = Arrays.asList("jobId", "creatorUsername", "jobType", "dataflowId", "providerId", "providerName", "datasetId",
             "jobStatus", "dateAdded", "dateStatusChanged", "fmeJobId", "dataflowName", "datasetName");
 
     private static final String FILE_PATTERN_NAME_V2 = "etlExport_%s";
@@ -119,6 +119,7 @@ public class JobControllerImpl implements JobController {
             @RequestParam(value = "dataflowId", required = false) Long dataflowId,
             @RequestParam(value = "dataflowName", required = false) String dataflowName,
             @RequestParam(value = "providerId", required = false) Long providerId,
+            @RequestParam(value = "providerName", required = false) String providerName,
             @RequestParam(value = "datasetId", required = false) Long datasetId,
             @RequestParam(value = "datasetName", required = false) String datasetName,
             @RequestParam(value = "creatorUsername", required = false) String creatorUsername,
@@ -131,7 +132,7 @@ public class JobControllerImpl implements JobController {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Wrong sorting header provided.");
             }
             return jobService.getJobs(pageable, asc, sortedColumn, jobId, jobTypes, dataflowId, dataflowName,
-                    providerId, datasetId, datasetName, creatorUsername, jobStatuses, preparationCode);
+                    providerId, providerName, datasetId, datasetName, creatorUsername, jobStatuses, preparationCode);
         } catch (Exception e){
             LOG.error("Unexpected error! Could not retrieve all jobs");
             throw e;

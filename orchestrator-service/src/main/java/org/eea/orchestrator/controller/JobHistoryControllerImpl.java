@@ -57,6 +57,7 @@ public class JobHistoryControllerImpl implements JobHistoryController {
             @RequestParam(value = "dataflowId", required = false) Long dataflowId,
             @RequestParam(value = "dataflowName", required = false) String dataflowName,
             @RequestParam(value = "providerId", required = false) Long providerId,
+            @RequestParam(value = "providerName", required = false) String providerName,
             @RequestParam(value = "datasetId", required = false) Long datasetId,
             @RequestParam(value = "datasetName", required = false) String datasetName,
             @RequestParam(value = "creatorUsername", required = false) String creatorUsername,

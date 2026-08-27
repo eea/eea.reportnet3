@@ -294,4 +294,6 @@ public interface RepresentativeService {
   boolean checkDataHaveBeenRelease(Long dataflowId, Long dataProviderId) throws EEAException;
 
   DataProviderVO findDataProviderByCodeAndGroupId(String code, Long groupId);
+
+  DataProviderVO findDataProviderByLabel(String providerName);
 }

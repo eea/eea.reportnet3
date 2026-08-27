@@ -70,7 +70,7 @@ public class ReleasePrecheckServiceTest {
     parameters.put("datasetId", Arrays.asList(750L));
     parameters.put("validationJobId", 1892);
 
-    JobVO releaseJob = new JobVO(1947L, null, null, new Timestamp(System.currentTimeMillis()), new Timestamp(System.currentTimeMillis()), parameters, "user1", true, 61L, 2L, null, null, null, null, null, null, null);
+    JobVO releaseJob = new JobVO(1947L, null, null, new Timestamp(System.currentTimeMillis()), new Timestamp(System.currentTimeMillis()), parameters, "user1", true, 61L, 2L, null,null, null, null, null, null, null, null);
 
     Mockito.when(jobControllerZuul.findJobById(1947L)).thenReturn(releaseJob);
     Mockito.when(dataFlowControllerZuul.isBigDataflow(61L)).thenReturn(false);
