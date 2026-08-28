@@ -1523,5 +1523,18 @@ public class RepresentativeServiceImpl implements RepresentativeService {
     else return null;
   }
 
+  /**
+   * Find data providers by label.
+   *
+   * @param providerName the provider label
+   * @return the list
+   */
+  public DataProviderVO findDataProviderByLabel(String providerName) {
+    Optional<DataProvider> dataProvider = dataProviderRepository.findFirstByLabel(providerName);
+    if (dataProvider.isPresent()) {
+      return dataProviderMapper.entityToClass(dataProvider.get());
+    }
+    else return null;
+  }
 
 }

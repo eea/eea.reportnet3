@@ -58,4 +58,12 @@ public interface DataProviderRepository extends PagingAndSortingRepository<DataP
    */
   Optional<DataProvider> findFirstByCodeAndDataProviderGroup_id(String code, Long dataProviderGroup);
 
+  /**
+   * Find by label.
+   *
+   * @param providerName the provider label
+   * @return the optional
+   */
+  Optional<DataProvider> findFirstByLabel(String providerName);
+
 }

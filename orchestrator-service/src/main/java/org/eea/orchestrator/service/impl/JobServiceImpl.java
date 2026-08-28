@@ -58,6 +58,7 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.eea.utils.LiteralConstants.*;
 
@@ -154,13 +155,30 @@ public class JobServiceImpl implements JobService {
     private static final String CANCELED_BY_ADMIN_ERROR = "cancelled by admin";
 
     @Override
-    public JobsVO getJobs(Pageable pageable, boolean asc, String sortedColumn, Long jobId, String jobTypes, Long dataflowId, String dataflowName, Long providerId,
+    public JobsVO getJobs(Pageable pageable, boolean asc, String sortedColumn, Long jobId, String jobTypes, Long dataflowId, String dataflowName, Long providerId, String providerName,
                           Long datasetId, String datasetName, String creatorUsername, String jobStatuses, String preparationCode) {
 
         String sortedTableColumn = jobUtils.getJobColumnNameByObjectName(sortedColumn);
         String remainingJobsStatusFilter = "IN_PROGRESS,QUEUED";
+        // Resolve the human-readable providerName filter (from the request) into the internal providerId
+        // used by the query, since jobs store providerId, not provider label.
+        if (StringUtils.isNotBlank(providerName)) {
+            DataProviderVO dataProvider = representativeControllerZuul.findDataProviderByLabel(providerName);
+            if (dataProvider != null) {
+                providerId = dataProvider.getId();
+            } else {
+                // No provider matches the given providerName, so the filter can never match any real job.
+                // Force jobId to a sentinel value (0L, an id that can never exist) to guarantee the
+                // downstream query returns an empty result set.
+                // Without this, an unmatched providerName would be silently ignored and the query would
+                // fall back to fetching ALL jobs - returning incorrect, unfiltered results to the caller.
+                jobId = 0L;
+            }
+        }
         List<Job> jobs = jobRepository.findJobsPaginated(pageable, asc, sortedTableColumn, jobId, jobTypes, dataflowId, dataflowName, providerId, datasetId, datasetName, creatorUsername, jobStatuses, preparationCode);
         List<JobVO> jobVOList = jobMapper.entityListToClass(jobs);
+
+        populateProviderNames(jobVOList);
         JobsVO jobsVO = new JobsVO();
         jobsVO.setTotalRecords(jobRepository.count());
         jobsVO.setFilteredRecords(jobRepository.countJobsPaginated(asc, sortedTableColumn, jobId, jobTypes, dataflowId, dataflowName, providerId, datasetId, datasetName, creatorUsername, jobStatuses));
@@ -946,5 +964,26 @@ public class JobServiceImpl implements JobService {
                 dataSetSnapshotControllerZuul.releaseLocksFromReleaseDatasets(job.getDataflowId(), job.getProviderId());
             }
         }
+    }
+
+    /**
+     * Enriches each JobVO with its provider's display name.
+     * providerId has no DB foreign key to the provider table, so the name must be resolved via a separate call rather than a SQL join.
+     * Resolved in a single batch call (rather than per-row) to avoid an N+1 remote-call problem against the representative service.
+     */
+    private void populateProviderNames(List<JobVO> jobVOList) {
+        List<Long> providerIds = jobVOList.stream()
+                .map(JobVO::getProviderId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+
+        if (providerIds.isEmpty()) {
+            return;
+        }
+
+        Map<Long, String> labelById = representativeControllerZuul.findDataProvidersByIds(providerIds).stream()
+                .collect(Collectors.toMap(DataProviderVO::getId, DataProviderVO::getLabel));
+
+        jobVOList.forEach(job -> job.setProviderName(labelById.get(job.getProviderId())));
     }
 }
