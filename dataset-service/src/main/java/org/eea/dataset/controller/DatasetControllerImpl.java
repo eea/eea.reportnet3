@@ -4747,12 +4747,16 @@ public class DatasetControllerImpl implements DatasetController {
     //all of them.
     for (Map.Entry<Long, List<DatasetTableVO>> entry : groupedByDatasetId.entrySet()) {
       final Long datasetId = entry.getKey();
-      final List<String> tableSchemaIds = entry.getValue()
+      final List<DatasetTableVO> datasetTableVOs = entry.getValue();
+
+      final List<String> tableSchemaIds = datasetTableVOs
               .stream()
               .map(DatasetTableVO::getTableSchemaId)
               .collect(Collectors.toList());
 
-      disableEditing(datasetId, tableSchemaIds);
+      final String preparationCode = datasetTableVOs.get(0).getPreparationCode();
+
+      disableEditing(datasetId, preparationCode, tableSchemaIds);
     }
   }
 
@@ -4786,12 +4790,16 @@ public class DatasetControllerImpl implements DatasetController {
     //all of them.
     for (Map.Entry<Long, List<DatasetTableVO>> entry : groupedByDatasetId.entrySet()) {
       final Long datasetId = entry.getKey();
-      final List<String> tableSchemaIds = entry.getValue()
+      final List<DatasetTableVO> datasetTableVOs = entry.getValue();
+
+      final List<String> tableSchemaIds = datasetTableVOs
               .stream()
               .map(DatasetTableVO::getTableSchemaId)
               .collect(Collectors.toList());
 
-      disableEditing(datasetId, tableSchemaIds);
+      final String preparationCode = datasetTableVOs.get(0).getPreparationCode();
+
+      disableEditing(datasetId, preparationCode, tableSchemaIds);
     }
   }
 
@@ -4812,7 +4820,9 @@ public class DatasetControllerImpl implements DatasetController {
             .map(DatasetTableVO::getTableSchemaId)
             .collect(Collectors.toList());
 
-    disableEditing(datasetId, tableSchemaIds);
+    final String preparationCode = datasetTables.get(0).getPreparationCode();
+
+    disableEditing(datasetId, preparationCode, tableSchemaIds);
   }
 
   @DeleteMapping("/clearDatasetTableLocksByDataflow")
@@ -4836,12 +4846,16 @@ public class DatasetControllerImpl implements DatasetController {
     //all of them.
     for (Map.Entry<Long, List<DatasetTableVO>> entry : groupedByDatasetId.entrySet()) {
       final Long datasetId = entry.getKey();
-      final List<String> tableSchemaIds = entry.getValue()
+      final List<DatasetTableVO> datasetTableVOs = entry.getValue();
+
+      final List<String> tableSchemaIds = datasetTableVOs
               .stream()
               .map(DatasetTableVO::getTableSchemaId)
               .collect(Collectors.toList());
 
-      disableEditing(datasetId, tableSchemaIds);
+      final String preparationCode = datasetTableVOs.get(0).getPreparationCode();
+
+      disableEditing(datasetId, preparationCode, tableSchemaIds);
     }
   }
 
@@ -4866,23 +4880,26 @@ public class DatasetControllerImpl implements DatasetController {
     //all of them.
     for (Map.Entry<Long, List<DatasetTableVO>> entry : groupedByDatasetId.entrySet()) {
       final Long datasetId = entry.getKey();
-      final List<String> tableSchemaIds = entry.getValue()
+      final List<DatasetTableVO> datasetTableVOs = entry.getValue();
+
+      final List<String> tableSchemaIds = datasetTableVOs
               .stream()
               .map(DatasetTableVO::getTableSchemaId)
               .collect(Collectors.toList());
 
-      disableEditing(datasetId, tableSchemaIds);
+      final String preparationCode = datasetTableVOs.get(0).getPreparationCode();
+
+      disableEditing(datasetId, preparationCode, tableSchemaIds);
     }
   }
 
-  private void disableEditing(Long datasetId, List<String> tableSchemaIds) {
+  private void disableEditing(Long datasetId, String preparationCode, List<String> tableSchemaIds) {
     try {
 
       final DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
 
       final Long dataflowId = dataSetMetabaseVO.getDataflowId();
       final Long providerId = dataSetMetabaseVO.getDataProviderId();
-      final String preparationCode = datasetTableVO.getPreparationCode();
       final boolean isBigData = dataFlowControllerZuul.isBigDataflow(dataflowId);
 
       if (!isBigData) {
