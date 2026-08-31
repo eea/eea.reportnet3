@@ -28,10 +28,10 @@ export const reportingDataflowReducer = (state, { type, payload }) => {
       return { ...state, isOfficialReporting: payload };
 
     case 'TOGGLE_USE_VIEWS':
-      return { ...state, useViews: payload, isPreparationEnabled: payload ? false : state.isPreparationEnabled };
+      return { ...state, useViews: payload };
 
     case 'TOGGLE_PREPARATION_ENABLED':
-      return { ...state, isPreparationEnabled: payload, useViews: payload ? false : state.useViews };
+      return { ...state, isPreparationEnabled: payload };
 
     case 'TOGGLE_PIN':
       return { ...state, pinDataflow: payload };
