@@ -10,10 +10,16 @@ import { LocalUserStorageUtils } from 'services/_utils/LocalUserStorageUtils';
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { UserContext } from 'views/_functions/Contexts/UserContext';
 
-const useSocket = () => {
+let currentCode;
+
+const useSocket = code => {
   const notificationContext = useContext(NotificationContext);
   const userContext = useContext(UserContext);
   const socket_url = window.env.WEBSOCKET_URL;
+
+  useEffect(() => {
+    currentCode = code;
+  }, [code]);
 
   useEffect(() => {
     if (isUndefined(userContext.socket)) {
@@ -39,9 +45,17 @@ const useSocket = () => {
           currentTry = 0;
           stompClient.subscribe('/user/queue/notifications', notification => {
             const { type, content } = JSON.parse(notification.body);
-            config.notifications.hiddenNotifications.includes(type)
-              ? notificationContext.hide({ type, content })
-              : notificationContext.add({ type, content });
+
+            if (config.notifications.hiddenNotifications.includes(type)) {
+              notificationContext.hide({ type, content });
+              return;
+            }
+
+            const preparationCode = content?.preparationCode;
+
+            if ((currentCode ?? null) === (preparationCode ?? null)) {
+              notificationContext.add({ type, content });
+            }
           });
           stompClient.subscribe('/user/queue/systemnotifications', notification => {
             const { type, content } = JSON.parse(notification.body);

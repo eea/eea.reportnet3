@@ -409,11 +409,21 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
     );
 
   useEffect(() => {
-    if (hasConversionNotification(notificationContext.toShow)) {
-      setIsLoadingIceberg(false);
-      onGetIcebergTables();
-      handleRefresh();
+    const notification = notificationContext.toShow;
+
+    if (!hasConversionNotification(notification)) {
+      return;
     }
+
+    const preparationCode = notification[0]?.content?.preparationCode;
+
+    if ((code ?? null) !== (preparationCode ?? null)) {
+      return;
+    }
+
+    setIsLoadingIceberg(false);
+    onGetIcebergTables();
+    handleRefresh();
   }, [notificationContext.toShow]);
 
   const getWebformConfiguration = async (webform, options) => {
