@@ -1,5 +1,6 @@
 package org.eea.dataset.io.notification.events;
 
+import org.eea.dataset.service.ReleaseEmailService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetSnapshotController;
@@ -19,7 +20,6 @@ public class ReleaseDatasetSnapshotFailedEventTest {
   @InjectMocks
   private ReleaseDatasetSnapshotFailedEvent releaseDatasetSnapshotFailedEvent;
 
-
   @Mock
   private DataSetMetabaseControllerZuul datasetMetabaseController;
 
@@ -29,7 +29,8 @@ public class ReleaseDatasetSnapshotFailedEventTest {
   @Mock
   private DatasetSnapshotController datasetSnapshotController;
 
-
+  @Mock
+  private ReleaseEmailService releaseEmailService;
 
   @Before
   public void initMocks() {

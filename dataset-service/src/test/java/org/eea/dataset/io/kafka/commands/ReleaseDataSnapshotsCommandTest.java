@@ -5,6 +5,7 @@ import org.eea.dataset.persistence.metabase.repository.DataCollectionRepository;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSnapshotService;
+import org.eea.dataset.service.ReleaseEmailService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.collaboration.CollaborationController.CollaborationControllerZuul;
 import org.eea.interfaces.controller.communication.EmailController.EmailControllerZuul;
@@ -90,6 +91,9 @@ public class ReleaseDataSnapshotsCommandTest {
 
   @Mock
   private JobProcessControllerZuul jobProcessControllerZuul;
+
+  @Mock
+  private ReleaseEmailService releaseEmailService;
 
   /** The eea event VO. */
   private EEAEventVO eeaEventVO;
