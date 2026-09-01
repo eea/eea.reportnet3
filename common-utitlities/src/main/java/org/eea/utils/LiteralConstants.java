@@ -167,6 +167,18 @@ public final class LiteralConstants {
   public static final String RELEASEMESSAGE =
       "This automatic notification informs that %s has successfully released in %s on %s (CET).";
 
+  /** The Constant RELEASE_STARTED_SUBJECT. */
+  public static final String RELEASE_STARTED_SUBJECT = "%s started a release for %s";
+
+  /** The Constant RELEASE_STARTED_MESSAGE. */
+  public static final String RELEASE_STARTED_MESSAGE = "This automatic notification informs that %s started the release process for dataflow %s on %s (CET).";
+
+  /** The Constant RELEASE_FAILED_SUBJECT. */
+  public static final String RELEASE_FAILED_SUBJECT = "%s failed to release for %s";
+
+  /** The Constant RELEASE_FAILED_MESSAGE. */
+  public static final String RELEASE_FAILED_MESSAGE = "This automatic notification informs that %s failed to release for dataflow %s on %s (CET). Reason: %s";
+
   /** The Constant GEOMETRYERROR. : {@value} */
   public static final String GEOMETRYERROR =
       "The value does not follow the expected syntax for a valid ";

@@ -9,6 +9,7 @@ import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.notification.event.NotificableEventHandler;
+import org.eea.orchestrator.service.ReleaseEmailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -31,6 +32,9 @@ public class ReleaseCanceledEvent implements NotificableEventHandler {
 
   @Autowired
   private DatasetSnapshotController datasetSnapshotController;
+
+  @Autowired
+  private ReleaseEmailService releaseEmailService;
 
   /**
    * Gets the event type.
@@ -59,6 +63,10 @@ public class ReleaseCanceledEvent implements NotificableEventHandler {
               representativeControllerZuul.findDataProviderById(notificationVO.getProviderId());
       dataProviderLabel = dataProviderVO.getLabel();
     }
+
+    // Send the notification error message to ReleaseEmailService so it can be included the failure email.
+    releaseEmailService.sendReleaseFailedEmail(notificationVO.getDataflowId(), notificationVO.getProviderId(), notificationVO.getError());
+
     Map<String, Object> notification = new HashMap<>();
     notification.put("user", notificationVO.getUser());
     notification.put("dataflowId", notificationVO.getDataflowId());

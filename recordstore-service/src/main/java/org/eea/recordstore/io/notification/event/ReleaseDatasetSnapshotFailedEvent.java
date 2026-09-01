@@ -8,6 +8,7 @@ import org.eea.interfaces.controller.dataset.DatasetSnapshotController;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.notification.event.NotificableEventHandler;
+import org.eea.recordstore.service.ReleaseEmailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -25,6 +26,9 @@ public class ReleaseDatasetSnapshotFailedEvent implements NotificableEventHandle
 
   @Autowired
   private DatasetSnapshotController datasetSnapshotController;
+
+  @Autowired
+  private ReleaseEmailService releaseEmailService;
 
   /**
    * Gets the event type.
@@ -54,6 +58,9 @@ public class ReleaseDatasetSnapshotFailedEvent implements NotificableEventHandle
     notification.put("snapshotId", snapshotId);
     notification.put("snapshotName", datasetName);
     notification.put("error", notificationVO.getError());
+
+    // Send the notification error message to ReleaseEmailService so it can be included the failure email.
+    releaseEmailService.sendReleaseFailedEmail(notificationVO.getDataflowId(), notificationVO.getProviderId(), notificationVO.getError());
 
     datasetSnapshotController.rollBackSnapshotRecord(notificationVO.getJobId(), notificationVO.getDataflowId(), notificationVO.getProviderId());
 
