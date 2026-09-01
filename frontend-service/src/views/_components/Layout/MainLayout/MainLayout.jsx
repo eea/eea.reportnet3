@@ -1,5 +1,5 @@
 import { useContext, useEffect, useLayoutEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 import isUndefined from 'lodash/isUndefined';
 import { ErrorBoundary } from 'react-error-boundary';
@@ -29,6 +29,8 @@ import { useSocket } from 'views/_components/Layout/MainLayout/_hooks';
 
 export const MainLayout = ({ bigData, children, isPublic = false }) => {
   const navigate = useNavigate();
+
+  const { code } = useParams();
 
   const element = document.compatMode === 'CSS1Compat' ? document.documentElement : document.body;
   const leftSideBarContext = useContext(LeftSideBarContext);
@@ -192,7 +194,7 @@ export const MainLayout = ({ bigData, children, isPublic = false }) => {
     navigate(0);
   };
 
-  useSocket();
+  useSocket(code);
   return (
     <ErrorBoundary FallbackComponent={ErrorBoundaryFallback} onReset={onResetErrorBoundary}>
       <div id={styles.mainLayoutContainer}>
