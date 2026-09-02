@@ -1230,5 +1230,6 @@ public interface DatasetController {
           @RequestParam Long providerId,
           @RequestParam Long datasetId,
           @RequestParam String tableName,
-          @RequestParam String tableSchemaId);
+          @RequestParam String tableSchemaId,
+          @RequestParam(required = false) String preparationCode);
 }

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.FeignException;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.eea.datalake.service.DremioHelperService;
 import org.eea.datalake.service.S3Service;
 import org.eea.datalake.service.model.DremioApiJob;
@@ -100,7 +101,9 @@ public class DremioHelperServiceImpl implements DremioHelperService {
             || S3_PREPARATION_TABLE_AS_FOLDER_QUERY_PATH.equals(path)
             || S3_PREPARATION_VALIDATION_TABLE_PATH.equals(path)
             || S3_PREPARATION_TABLE_NAME_FOLDER_PATH_FOR_VALID_PREFIX.equals(path)
-            || S3_PREPARATION_TABLE_NAME_WITH_PARQUET_FOLDER_PATH.equals(path)) {
+            || S3_PREPARATION_TABLE_NAME_WITH_PARQUET_FOLDER_PATH.equals(path)
+            || S3_PREPARATION_VIEWS_TABLE_NAME_WITH_TEMP_PARQUET_FOLDER_PATH.equals(path)
+            || S3_PREPARATION_VIEWS_TABLE_AS_FOLDER_QUERY_PATH.equals(path)) {
                 itemPosition = 7;
             } else {
                 itemPosition = 6; //this is for S3_TABLE_NAME_FOLDER_PATH
@@ -457,8 +460,10 @@ public class DremioHelperServiceImpl implements DremioHelperService {
     @Override
     public void checkIfDremioProcessFinishedSuccessfully(String query, String processId, Long optionalTimeoutMs) throws Exception {
         Boolean processIsFinished = false;
+        DremioJobStatusResponse lastResponse = null;
         for(int i=0; i < numberOfRetriesForJobPolling; i++) {
             DremioJobStatusResponse response = this.pollForJobStatus(processId);
+            lastResponse = response;
             String jobState = response.getJobState().getValue();
             if(jobState.equals(DremioJobStatusEnum.COMPLETED.getValue())) {
                 processIsFinished = true;
@@ -480,7 +485,9 @@ public class DremioHelperServiceImpl implements DremioHelperService {
             }
         }
         if(!processIsFinished){
-            throw new Exception("Could not execute dremio query " + query + " with dremio process Id " + processId);
+            String dremioErrorMessage = lastResponse != null ? lastResponse.getErrorMessage() : null;
+            throw new Exception("Could not execute dremio query " + query + " with dremio process Id " + processId
+                    + (StringUtils.isNotBlank(dremioErrorMessage) ? ". Dremio error: " + dremioErrorMessage : ""));
         }
     }
 
