@@ -355,6 +355,16 @@ public final class LiteralConstants {
   public static final String S3_TABLE_AS_FOLDER_QUERY_PATH = ".\"%s\".\"%s\".\"%s\".\"current\".\"%s\"";
   public static final String S3_VIEWS_TABLE_AS_FOLDER_QUERY_PATH = ".\"%s\".\"%s\".\"%s\".\"views\".\"%s\"";
 
+  /** The Constant S3_VIEWS_TABLE_NAME_WITH_TEMP_PARQUET_FOLDER_PATH: {@value}. S3 upload path for an
+   * empty view's placeholder Parquet file, with a random subfolder per write to avoid collisions.
+   * E.g. views/t1/t1_7e3f.../0_0_0.parquet */
+  public static final String S3_VIEWS_TABLE_NAME_WITH_TEMP_PARQUET_FOLDER_PATH = "%s/%s/%s/views/%s/%s/%s";
+
+  /** The Constant S3_PREPARATION_VIEWS_TABLE_NAME_WITH_TEMP_PARQUET_FOLDER_PATH: {@value}. Same as
+   * S3_VIEWS_TABLE_NAME_WITH_TEMP_PARQUET_FOLDER_PATH above but for a preparation dataset.
+   * E.g. preparation/prep8/views/t1/t1_7e3f.../0_0_0.parquet */
+  public static final String S3_PREPARATION_VIEWS_TABLE_NAME_WITH_TEMP_PARQUET_FOLDER_PATH = "%s/%s/%s/preparation/%s/views/%s/%s/%s";
+
   public static final String S3_EXPORT_PREFILLED_TABLE_AS_FOLDER_QUERY_PATH = ".\"%s\".\"%s\".\"%s\".\"current\".\"exported\".\"%s\"";
 
   public static final String S3_EXPORT_PREFILLED_TABLE_FILE_PATH = "%s/%s/%s/current/exported/%s/%s";
@@ -569,6 +579,15 @@ public final class LiteralConstants {
   public static final String S3_PREPARATION_TABLE_NAME_FOLDER_PATH_FOR_VALID_PREFIX = "%s/%s/%s/preparation/%s/%s/";
 
   public static final String S3_PREPARATION_TABLE_AS_FOLDER_QUERY_PATH = ".\"%s\".\"%s\".\"%s\".\"preparation\".\"%s\".\"%s\"";
+
+  /** The Constant S3_PREPARATION_VIEWS_TABLE_AS_FOLDER_QUERY_PATH: {@value}. */
+  public static final String S3_PREPARATION_VIEWS_TABLE_AS_FOLDER_QUERY_PATH = ".\"%s\".\"%s\".\"%s\".\"preparation\".\"%s\".\"views\".\"%s\"";
+
+  /** The Constant S3_PREPARATION_VIEW_TABLE_NAME_FOLDER_PATH: {@value}. */
+  public static final String S3_PREPARATION_VIEW_TABLE_NAME_FOLDER_PATH = "%s/%s/%s/preparation/%s/views/%s";
+
+  /** The Constant S3_PREPARATION_VIEWS_FOLDER_PATH: {@value}. */
+  public static final String S3_PREPARATION_VIEWS_FOLDER_PATH = "%s/%s/%s/preparation/%s/views/";
 
   /** The Constant S3_PREPARATION_VALIDATION_TABLE_PATH: {@value}. */
   public static final String S3_PREPARATION_VALIDATION_TABLE_PATH = "%s/%s/%s/preparation/%s/validation";

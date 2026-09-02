@@ -15,6 +15,7 @@ import org.eea.datalake.service.model.S3PathResolver;
 import org.eea.dataset.mapper.PreparationDatasetMapper;
 import org.eea.dataset.persistence.metabase.domain.PreparationDataset;
 import org.eea.dataset.persistence.metabase.repository.PreparationDatasetRepository;
+import org.eea.dataset.service.BigDataDatasetService;
 import org.eea.dataset.service.CreateEmptyTables;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSchemaService;
@@ -66,6 +67,7 @@ public class PreparationDatasetServiceImpl implements PreparationDatasetService 
     private final PreparationDatasetMapper preparationDatasetMapper;
     private final RedisLockService redisLockService;
     private final CreateEmptyTables createEmptyTables;
+    private final BigDataDatasetService bigDataDatasetService;
 
     @Autowired
     public PreparationDatasetServiceImpl(PreparationDatasetRepository preparationDatasetRepository,
@@ -77,7 +79,8 @@ public class PreparationDatasetServiceImpl implements PreparationDatasetService 
                                          KafkaSenderUtils kafkaSenderUtils,
                                          PreparationDatasetMapper preparationDatasetMapper,
                                          RedisLockService redisLockService,
-                                         CreateEmptyTables createEmptyTables
+                                         CreateEmptyTables createEmptyTables,
+                                         BigDataDatasetService bigDataDatasetService
     ) {
         this.preparationDatasetRepository = preparationDatasetRepository;
         this.dremioHelperService = dremioHelperService;
@@ -90,6 +93,7 @@ public class PreparationDatasetServiceImpl implements PreparationDatasetService 
         this.preparationDatasetMapper = preparationDatasetMapper;
         this.redisLockService = redisLockService;
         this.createEmptyTables = createEmptyTables;
+        this.bigDataDatasetService = bigDataDatasetService;
     }
 
     @Override
@@ -188,6 +192,8 @@ public class PreparationDatasetServiceImpl implements PreparationDatasetService 
 
                 dropDremioTable(preparationTableDremioQueryPathString);
                 LOG.info("Preparation table {} demoted and deleted successfully for datasetId {}", parentTableName, parentDatasetId);
+
+                bigDataDatasetService.deleteTypedViewIfExists(dataflowId, providerId, parentDatasetId, parentTableName, preparationCode);
             }
         }
 
@@ -285,6 +291,9 @@ public class PreparationDatasetServiceImpl implements PreparationDatasetService 
         }
         String parentDatasetSchemaId = parentDataSetMetabaseVO.getDatasetSchema();
         Long parentDatasetId = parentDataSetMetabaseVO.getId();
+        Long dataflowId = parentDataSetMetabaseVO.getDataflowId();
+
+        boolean useViewsEnabled = bigDataDatasetService.isUseViewsEnabled(dataflowId, parentDatasetId);
 
         List<TableSchemaIdNameVO> parentTablesList = datasetSchemaService.getTableSchemasIds(parentDatasetId);
 
@@ -317,6 +326,7 @@ public class PreparationDatasetServiceImpl implements PreparationDatasetService 
             long rowCountOfSourceTable = dremioHelperService.getRowCount(sourceParentTableDremioQueryPathString);
             if (rowCountOfSourceTable == 0) {
                 createEmptyTables.runCreationForSpecificTableSchema(parentDataSetMetabaseVO, parentTable.getIdTableSchema(), preparationCode);
+                createPreparationTypedView(dataflowId, providerId, parentDatasetId, parentTable.getIdTableSchema(), parentTableName, preparationCode, useViewsEnabled);
                 // skip everything else after creating an empty table
                 continue;
             }
@@ -364,6 +374,21 @@ public class PreparationDatasetServiceImpl implements PreparationDatasetService 
             dremioHelperService.checkIfDremioProcessFinishedSuccessfully(String.valueOf(queryToCreatePrefilledTable), dremioProcessId, null);
             dremioHelperService.refreshTableMetadataAndPromote(null, targetPreparationTableDremioQueryPathString, targetPreparationTableS3FolderPath, parentTableName);
             // TODO: put try catch if needed, when `refreshTableMetadataAndPromote` throwing exception just demote-promote from recovery again
+
+            createPreparationTypedView(dataflowId, providerId, parentDatasetId, parentTable.getIdTableSchema(), parentTableName, preparationCode, useViewsEnabled);
+        }
+    }
+
+    private void createPreparationTypedView(Long dataflowId, long providerId, Long parentDatasetId, String tableSchemaId,
+                                              String parentTableName, String preparationCode, boolean useViewsEnabled) {
+        if (!useViewsEnabled) {
+            return;
+        }
+        try {
+            bigDataDatasetService.createTypedViewWithRetry(dataflowId, providerId, parentDatasetId, tableSchemaId, parentTableName, preparationCode);
+        } catch (Exception e) {
+            LOG.error("Could not create typed view for preparation datasetId {} preparationCode {} table {}: {}",
+                    parentDatasetId, preparationCode, parentTableName, e.getMessage());
         }
     }
 

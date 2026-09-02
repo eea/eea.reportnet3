@@ -481,7 +481,7 @@ public class ValidationHelper implements DisposableBean {
 
       DataFlowVO dataflow = dataFlowControllerZuul.getMetabaseById(dataset.getDataflowId());
       boolean useViewsEnabled = isUseViewsEnabled(dataset, dataflow);
-      if (useViewsEnabled && StringUtils.isBlank(preparationCode)) {
+      if (useViewsEnabled) {
         checkViewsAreUpToDate(tableNames, dataset, datasetId, processId, jobId, user, released, jobVO, preparationCode);
       }
       /* Add check for design dataflows #297461 In design dataflows empty tables will be created during the validation process.
@@ -744,23 +744,23 @@ public class ValidationHelper implements DisposableBean {
    * Compares each table's typed view row count against its raw current table. If any table's
    * view is out of sync, aborts the validation run rather than validating against stale data.
    *
-   * preparationCode is unused  - checkViewsAreUpToDate is only ever called when it's blank,
-   * since views don't apply to preparation datasets yet. Kept wired through (here and in
-   * failDueToViewsMismatch) so that if/when views are extended to preparation datasets, the plumbing
-   * doesn't need to be redone.
+   * When preparationCode is set, both paths are resolved under the preparation dataset's own
+   * {@code preparation/<code>/current} and {@code preparation/<code>/views} subtree instead of the
+   * main dataset's (via S3PathResolver.setPreparationCode).
    */
   private void checkViewsAreUpToDate(List<String> tableNames, DataSetMetabaseVO dataset, Long datasetId, String processId, Long jobId, String user, boolean released, JobVO jobVO, String preparationCode) throws EEAException {
     Long providerId = dataset.getDataProviderId() != null ? dataset.getDataProviderId() : 0L;
     List<String> mismatchedTables = new ArrayList<>();
     for (String tableName : tableNames) {
       S3PathResolver tableResolver = new S3PathResolver(dataset.getDataflowId(), providerId, datasetId, tableName);
+      tableResolver.setPreparationCode(preparationCode);
       String viewsPath = s3ServicePrivate.getTableAsFolderQueryPath(tableResolver, S3_VIEWS_TABLE_AS_FOLDER_QUERY_PATH);
       String currentPath = s3ServicePrivate.getTableAsFolderQueryPath(tableResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
       try {
         Long numberOfRecords = dremioHelperService.compareNumberOfRecords(viewsPath, currentPath);
-        LOG.info("View for table {} is up to date for datasetId {}. Number of records is {}", tableName, datasetId, numberOfRecords);
+        LOG.info("View for table {} is up to date for datasetId {} preparationCode {}. Number of records is {}", tableName, datasetId, preparationCode, numberOfRecords);
       } catch (Exception e) {
-        LOG.error("View for table {} does not match current table for datasetId {}: {}", tableName, datasetId, e.getMessage());
+        LOG.error("View for table {} does not match current table for datasetId {} preparationCode {}: {}", tableName, datasetId, preparationCode, e.getMessage());
         mismatchedTables.add(tableName);
       }
     }
@@ -769,8 +769,6 @@ public class ValidationHelper implements DisposableBean {
     }
   }
 
-  // preparationCode: unused for now (always blank, see checkViewsAreUpToDate) - kept wired through for
-  // when views may support preparation datasets in the future.
   private void failDueToViewsMismatch(DataSetMetabaseVO dataset, Long datasetId, String processId, Long jobId, String user, boolean released, JobVO jobVO, List<String> mismatchedTables, String preparationCode) throws EEAException {
     if (jobId != null) {
       try {

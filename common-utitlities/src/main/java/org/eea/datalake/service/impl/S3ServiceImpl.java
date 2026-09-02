@@ -86,6 +86,7 @@ public class S3ServiceImpl implements S3Service {
 
         switch (path) {
             case S3_PREPARATION_TABLE_AS_FOLDER_QUERY_PATH:
+            case S3_PREPARATION_VIEWS_TABLE_AS_FOLDER_QUERY_PATH:
                 path = S3_DEFAULT_BUCKET + String.format(path, dataflowFolder, dataProviderFolder, datasetFolder,
                         preparationCode, tableName);
                 break;
@@ -208,6 +209,14 @@ public class S3ServiceImpl implements S3Service {
                 path = String.format(path, dataflowFolder, dataProviderFolder, datasetFolder,
                     tableName, parquetFolder, fileName);
                 break;
+            case S3_VIEWS_TABLE_NAME_WITH_TEMP_PARQUET_FOLDER_PATH:
+                path = String.format(path, dataflowFolder, dataProviderFolder, datasetFolder,
+                    tableName, parquetFolder, fileName);
+                break;
+            case S3_PREPARATION_VIEWS_TABLE_NAME_WITH_TEMP_PARQUET_FOLDER_PATH:
+                path = String.format(path, dataflowFolder, dataProviderFolder, datasetFolder,
+                    preparationCode, tableName, parquetFolder, fileName);
+                break;
             case S3_EU_SNAPSHOT_PATH:
                 path = String.format(path, dataflowFolder, euDatasetFolder, tableName,
                     dataProviderFolder, parquetFolder, fileName);
@@ -294,6 +303,7 @@ public class S3ServiceImpl implements S3Service {
                 }
                 return S3_DEFAULT_BUCKET + String.format(path, dataflowFolder, dataProviderFolder, datasetFolder, s3PathResolver.getTableName());
             case S3_PREPARATION_TABLE_AS_FOLDER_QUERY_PATH:
+            case S3_PREPARATION_VIEWS_TABLE_AS_FOLDER_QUERY_PATH:
                 if(BooleanUtils.isTrue(s3PathResolver.getIsIcebergTable())){
                     return S3_ICEBERG_BUCKET + String.format(path, dataflowFolder, dataProviderFolder, datasetFolder, s3PathResolver.getPreparationCode(), s3PathResolver.getTableName());
                 }
@@ -307,6 +317,9 @@ public class S3ServiceImpl implements S3Service {
             case S3_PROVIDER_PATH:
             case S3_VIEWS_FOLDER_PATH:
                 return String.format(path, dataflowFolder, dataProviderFolder, datasetFolder, s3PathResolver.getTableName());
+            case S3_PREPARATION_VIEW_TABLE_NAME_FOLDER_PATH:
+            case S3_PREPARATION_VIEWS_FOLDER_PATH:
+                return String.format(path, dataflowFolder, dataProviderFolder, datasetFolder, s3PathResolver.getPreparationCode(), s3PathResolver.getTableName());
             case S3_ROOT_DATAFLOW_FOLDER_PATH:
                 return String.format(path, dataflowFolder);
             case S3_EU_SNAPSHOT_ROOT_PATH:

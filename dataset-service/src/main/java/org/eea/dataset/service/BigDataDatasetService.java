@@ -416,6 +416,10 @@ public interface BigDataDatasetService {
      * @param datasetId the dataset identifier in metadata storage
      * @param tableSchemaId the schema identifier of the table to be transformed
      * @param tableName the physical table name used in Dremio/S3 paths
+     * @param preparationCode the preparation dataset's code, or blank/null to build the view for
+     *                        the main dataset. When set, the view is built from and written to the
+     *                        preparation dataset's own {@code preparation/<code>/current} and
+     *                        {@code preparation/<code>/views} paths instead of the main ones.
      *
      * @throws Exception if schema resolution fails, Dremio promotion fails,
      *                   or CTAS execution fails
@@ -425,7 +429,8 @@ public interface BigDataDatasetService {
             Long providerId,
             Long datasetId,
             String tableSchemaId,
-            String tableName
+            String tableName,
+            String preparationCode
     ) throws Exception;
 
     /**
@@ -437,18 +442,25 @@ public interface BigDataDatasetService {
      * @param datasetId the dataset identifier in metadata storage
      * @param tableSchemaId the schema identifier of the table to be transformed
      * @param tableName the physical table name used in Dremio/S3 paths
+     * @param preparationCode the preparation dataset's code, or blank/null to build the view for
+     *                        the main dataset. When set, the view is built from and written to the
+     *                        preparation dataset's own {@code preparation/<code>/current} and
+     *                        {@code preparation/<code>/views} paths instead of the main ones.
      */
-    void createTypedViewWithRetry(Long dataflowId, Long providerId, Long datasetId, String tableSchemaId, String tableName) throws Exception;
+    void createTypedViewWithRetry(Long dataflowId, Long providerId, Long datasetId, String tableSchemaId, String tableName, String preparationCode) throws Exception;
+
+    /** Whether typed views are enabled for this dataset - dataset-level override wins, else dataflow-level. */
+    boolean isUseViewsEnabled(Long dataflowId, Long datasetId);
+
+    /** Drops the typed view (table + S3 folder) for a table, if it exists. No-op otherwise. */
+    void deleteTypedViewIfExists(Long dataflowId, Long providerId, Long datasetId, String tableName, String preparationCode);
 
     /**
-     * Same as {@link #createTypedViewWithRetry(Long, Long, Long, String, String)}, but takes the
-     * dataset's schema id explicitly instead of resolving it by re-reading the dataset's metabase
-     * row. Use this overload when the dataset was just created in the same transaction and its
-     * metabase row may not yet be visible to a fresh read (e.g. a different datasource/connection).
-     *
-     * @param datasetSchemaId the schema id of datasetId, already known to the caller
+     * Same as createTypedViewWithRetry above, but with datasetSchemaId given explicitly - use when
+     * the dataset was just created in the same transaction, so a fresh read of its metabase row
+     * might not see it yet.
      */
-    void createTypedViewWithRetry(Long dataflowId, Long providerId, Long datasetId, String tableSchemaId, String tableName, String datasetSchemaId) throws Exception;
-      
+    void createTypedViewWithRetry(Long dataflowId, Long providerId, Long datasetId, String tableSchemaId, String tableName, String datasetSchemaId, String preparationCode) throws Exception;
+
     void createEmptyTablesForSpecificTableSchema(Long datasetId, String tableSchemaId) throws EEAException;
 }

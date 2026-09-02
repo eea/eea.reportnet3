@@ -4896,7 +4896,8 @@ public class DatasetControllerImpl implements DatasetController {
           @RequestParam Long providerId,
           @RequestParam Long datasetId,
           @RequestParam String tableName,
-          @RequestParam String tableSchemaId)
+          @RequestParam String tableSchemaId,
+          @RequestParam(required = false) String preparationCode)
   {
 
     Boolean isBigDataflow = dataFlowControllerZuul.isBigDataflow(dataflowId);
@@ -4911,7 +4912,8 @@ public class DatasetControllerImpl implements DatasetController {
               providerId,
               datasetId,
               tableSchemaId,
-              tableName
+              tableName,
+              preparationCode
       );
 
       return ResponseEntity.ok().build();
