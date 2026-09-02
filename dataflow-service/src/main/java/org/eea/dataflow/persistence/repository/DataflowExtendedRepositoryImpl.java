@@ -5,8 +5,10 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
@@ -273,6 +275,36 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
 
   /** The Constant PINNED_FILTER. */
   private static final String PINNED_FILTER = " pinned = :pinnedFilter";
+
+  /**
+   * Whitelist of column/header names that are legitimately accepted for
+   * {@code orderHeader}. Every value the frontend sends to sort dataflow
+   * listings must appear here. Any value outside this set is rejected before
+   * it is concatenated into a native SQL query, preventing SQL injection via
+   * the orderHeader / asc request parameters.
+   *
+   * TODO: confirm this list is exhaustive against the actual frontend
+   * sort-column configuration before merging; add any missing legitimate
+   * values rather than relaxing validation elsewhere.
+   */
+  private static final Set<String> ALLOWED_ORDER_HEADERS = new HashSet<>(Arrays.asList(
+      "status", "name", "description", "creation_date", "deadline_date",
+      "obligation", "obligation_id", "legal_instrument", "pinned",
+      "delivery_date", "first_date_released", "date_status_changed",
+      DELIVERY_STATUS));
+
+  /**
+   * Validates that orderHeader is either blank or one of the whitelisted
+   * column names, before it is ever concatenated into a native SQL query.
+   *
+   * @param orderHeader the client-supplied sort column
+   * @throws EEAException if orderHeader is present but not whitelisted
+   */
+  private static void validateOrderHeader(String orderHeader) throws EEAException {
+    if (StringUtils.isNotBlank(orderHeader) && !ALLOWED_ORDER_HEADERS.contains(orderHeader)) {
+      throw new EEAException(EEAErrorMessage.HEADER_NOT_VALID);
+    }
+  }
 
 
   /**
@@ -616,6 +648,7 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
   private void createQuery(boolean isPublic, Map<String, String> filters, String orderHeader,
       boolean asc, StringBuilder stringQuery, TypeDataflowEnum type, List<Long> dataflowIds,
       List<String> pinnedDataflows) throws EEAException {
+    validateOrderHeader(orderHeader);
     boolean addAnd = false;
     stringQuery.append(
         CollectionUtils.isEmpty(pinnedDataflows) ? QUERY_DATAFLOW_BASIC : QUERY_DATAFLOW_PINNED);
@@ -860,6 +893,7 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
   private void constructPublicDataflowsQuery(StringBuilder sb, String orderHeader, boolean asc,
       Map<String, String> filters, boolean applyFilters) throws EEAException {
 
+    validateOrderHeader(orderHeader);
     boolean addAnd = true;
 
     sb.append(QUERY_JSON_COUNTRY);
@@ -906,6 +940,7 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
   private void constructDataflowsQuery(StringBuilder sb, String orderHeader, boolean asc,
       Map<String, String> filters, boolean applyFilters) throws EEAException {
 
+    validateOrderHeader(orderHeader);
     boolean addAnd = true;
 
     sb.append(QUERY_JSON_COUNTRY_INTERNAL);
