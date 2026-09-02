@@ -1,5 +1,6 @@
 package org.eea.orchestrator.io.notification.events;
 
+import org.eea.orchestrator.service.ReleaseEmailService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 import org.eea.kafka.domain.EventType;
@@ -20,6 +21,9 @@ public class ReleaseValidationBlockersFailEvent implements NotificableEventHandl
 
   @Autowired
   private DataSetControllerZuul datasetService;
+
+  @Autowired
+  private ReleaseEmailService releaseEmailService;
 
   /**
    * Gets the event type.
@@ -42,6 +46,9 @@ public class ReleaseValidationBlockersFailEvent implements NotificableEventHandl
   public Map<String, Object> getMap(NotificationVO notificationVO) throws EEAException {
     Long dataflowId = notificationVO.getDataflowId() != null ? notificationVO.getDataflowId()
         : datasetService.getDataFlowIdById(notificationVO.getDatasetId());
+
+    // Send the notification error message to ReleaseEmailService so it can be included the failure email.
+    releaseEmailService.sendReleaseFailedEmail(dataflowId, notificationVO.getProviderId(), notificationVO.getError());
 
     Map<String, Object> notification = new HashMap<>();
     notification.put("user", notificationVO.getUser());

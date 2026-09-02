@@ -13,13 +13,11 @@ import org.eea.interfaces.controller.orchestrator.JobProcessController.JobProces
 import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
 import org.eea.interfaces.vo.dataset.CreateSnapshotVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
-import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.interfaces.vo.orchestrator.JobProcessVO;
 import org.eea.interfaces.vo.orchestrator.JobVO;
 import org.eea.interfaces.vo.orchestrator.enums.JobInfoEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
-import org.eea.multitenancy.TenantResolver;
 import org.eea.thread.ThreadPropertiesManager;
 import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
@@ -88,6 +86,9 @@ public class ReleasePrecheckService {
 
   @Autowired
   private DatasetService datasetService;
+
+  @Autowired
+  private ReleaseEmailService releaseEmailService;
 
   // Default priority used when the first real RELEASE process is created.
   private int defaultReleaseProcessPriority = 20;
@@ -227,6 +228,10 @@ public class ReleasePrecheckService {
         user,
         defaultReleaseProcessPriority,
         true);
+
+    if (Boolean.TRUE.equals(isProcessCreated)) {
+      releaseEmailService.sendReleaseStartedEmail(dataset.getDataflowId(), dataset.getDataProviderId());
+    }
 
     LOG.info("Created the first release process for dataflowId {}, dataProviderId {}, jobId {} and processId {} dataset id {} success: {}",
         dataset.getDataflowId(), dataset.getDataProviderId(), releaseJob.getId(), processId, firstDatasetId, isProcessCreated);

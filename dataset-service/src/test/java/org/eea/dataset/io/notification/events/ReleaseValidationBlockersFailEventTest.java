@@ -1,6 +1,7 @@
 package org.eea.dataset.io.notification.events;
 
 import org.eea.dataset.service.DatasetService;
+import org.eea.dataset.service.ReleaseEmailService;
 import org.eea.exception.EEAException;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
@@ -28,7 +29,8 @@ public class ReleaseValidationBlockersFailEventTest {
   @Mock
   private DatasetService datasetService;
 
-
+  @Mock
+  private ReleaseEmailService releaseEmailService;
 
   /**
    * Inits the mocks.
