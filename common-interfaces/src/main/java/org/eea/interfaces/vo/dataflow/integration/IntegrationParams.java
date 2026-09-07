@@ -65,6 +65,9 @@ public class IntegrationParams {
   /** The Constant NOTIFICATION_REQUIRED: {@value}. */
   public static final String NOTIFICATION_REQUIRED = "notificationRequired";
 
+  /** The Constant PREPARATION_CODE: {@value}. */
+  public static final String PREPARATION_CODE = "code";
+
   /**
    * Instantiates a new integration params.
    */

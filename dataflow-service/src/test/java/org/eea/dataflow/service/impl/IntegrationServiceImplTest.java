@@ -267,7 +267,7 @@ public class IntegrationServiceImplTest {
         Mockito.any(), Mockito.any())).thenReturn(new ArrayList<>());
     Mockito.when(integrationMapper.entityListToClass(Mockito.any())).thenReturn(integrationVOs);
     Mockito.when(integrationExecutorFactory.getExecutor(Mockito.any())).thenReturn(executor);
-    Mockito.when(executor.execute(Mockito.any(), Mockito.any()))
+    Mockito.when(executor.execute(Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn(new ExecutionResultVO());
     List<ExecutionResultVO> result = integrationService.executeEUDatasetExport(1L);
     Assert.assertEquals(1, result.size());
@@ -368,8 +368,8 @@ public class IntegrationServiceImplTest {
 
     Mockito.when(integrationExecutorFactory.getExecutor(Mockito.any())).thenReturn(executor);
 
-    Mockito.when(executor.execute(IntegrationOperationTypeEnum.IMPORT_FROM_OTHER_SYSTEM, null, 1L,
-        integrationVO)).thenReturn(executionResultVO);
+    Mockito.when(executor.execute(IntegrationOperationTypeEnum.IMPORT_FROM_OTHER_SYSTEM, null, null,
+        1L, integrationVO)).thenReturn(executionResultVO);
 
     integrationService.executeExternalIntegration(1L, 1L,
         IntegrationOperationTypeEnum.IMPORT_FROM_OTHER_SYSTEM, false);
@@ -529,8 +529,8 @@ public class IntegrationServiceImplTest {
 
     Mockito.when(integrationExecutorFactory.getExecutor(Mockito.any())).thenReturn(executor);
 
-    Mockito.when(executor.execute(IntegrationOperationTypeEnum.IMPORT_FROM_OTHER_SYSTEM, null, 1L,
-        integrationVO)).thenReturn(executionResultVO);
+    Mockito.when(executor.execute(IntegrationOperationTypeEnum.IMPORT_FROM_OTHER_SYSTEM, null, null,
+        1L, integrationVO)).thenReturn(executionResultVO);
     try {
       integrationService.executeExternalIntegration(1L, 1L,
           IntegrationOperationTypeEnum.IMPORT_FROM_OTHER_SYSTEM, false);

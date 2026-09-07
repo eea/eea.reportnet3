@@ -110,6 +110,7 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
    * Execute.
    *
    * @param integrationOperationTypeEnum the integration operation type enum
+   * @param preparationCode the preparation code
    * @param executionParams the execution params
    *
    * @return the execution result VO
@@ -117,7 +118,7 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
   @Override
   @Transactional
   public ExecutionResultVO execute(IntegrationOperationTypeEnum integrationOperationTypeEnum,
-      Object... executionParams) {
+      String preparationCode, Object... executionParams) {
 
     Long datasetId = null;
     String fileName = null;
@@ -180,6 +181,9 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
     Map<String, String> fmeParams = new HashMap<>();
     fmeParams.put(IntegrationParams.WORKSPACE, workspace);
     fmeParams.put(IntegrationParams.REPOSITORY, repository);
+    if (StringUtils.isNotBlank(preparationCode)) {
+      fmeParams.put(IntegrationParams.PREPARATION_CODE, preparationCode);
+    }
 
     return switchIntegrationOperatorEnum(integrationOperationTypeEnum, fileName, integration,
         apiKey, fmeAsyncJob, integrationOperationParams, fmeParams, job);

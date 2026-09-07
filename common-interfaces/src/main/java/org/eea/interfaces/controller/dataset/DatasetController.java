@@ -267,10 +267,12 @@ public interface DatasetController {
    *
    * @param datasetId the dataset id
    * @param integrationId the integration id
+   * @param preparationCode the preparation code
    */
   @GetMapping("/exportFileThroughIntegration")
   void exportFileThroughIntegration(@RequestParam("datasetId") Long datasetId,
-      @RequestParam("integrationId") Long integrationId);
+      @RequestParam("integrationId") Long integrationId,
+      @RequestParam(value = "code", required = false) String preparationCode);
 
   /**
    * Insert id data schema.
