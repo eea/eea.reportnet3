@@ -91,9 +91,9 @@ export const getAdminCustodianColumns = (styles, resourcesContext, templates) =>
     className: styles.middleColumn
   },
   {
-    key: 'providerId',
-    header: resourcesContext.messages['providerId'],
-    template: templates.getProviderIdTemplate,
+    key: 'providerName',
+    header: resourcesContext.messages['providerName'],
+    template: templates.getProviderNameTemplate,
     className: styles.middleColumn
   },
   {
@@ -210,9 +210,9 @@ export const getHistoryAdminCustodianColumns = (styles, resourcesContext, templa
     className: styles.middleColumn
   },
   {
-    key: 'providerId',
-    header: resourcesContext.messages['providerId'],
-    template: templates.getProviderIdTemplate,
+    key: 'providerName',
+    header: resourcesContext.messages['providerName'],
+    template: templates.getProviderNameTemplate,
     className: styles.middleColumn
   },
   {

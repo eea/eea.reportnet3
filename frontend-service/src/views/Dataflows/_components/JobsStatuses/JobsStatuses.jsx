@@ -112,6 +112,7 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
           dataflowId: filterBy.dataflowId,
           dataflowName: filterBy.dataflowName,
           providerId: filterBy.providerId,
+          providerName: filterBy.providerName,
           datasetId: filterBy.datasetId,
           datasetName: filterBy.datasetName,
           code: filterBy.preparationCode,
@@ -137,6 +138,7 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
               dataflowId: providerTabChange ? undefined : filterBy.dataflowId,
               dataflowName: providerTabChange ? undefined : filterBy.dataflowName,
               providerId: providerTabChange ? undefined : filterBy.providerId,
+              providerName: providerTabChange ? undefined : filterBy.providerName,
               datasetId: providerTabChange ? undefined : filterBy.datasetId,
               datasetName: providerTabChange ? undefined : filterBy.datasetName,
               creatorUsername: providerTabChange ? undefined : filterBy.creatorUsername,
@@ -321,7 +323,7 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
               { key: 'datasetId', label: resourcesContext.messages['datasetId'] },
               { key: 'datasetName', label: resourcesContext.messages['datasetName'] },
               { key: 'preparationCode', label: resourcesContext.messages['setCode'] },
-              { key: 'providerId', label: resourcesContext.messages['providerId'] },
+              { key: 'providerName', label: resourcesContext.messages['providerName'] },
               { key: 'creatorUsername', label: resourcesContext.messages['creatorUsername'] }
             ]
           : [
@@ -593,7 +595,16 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
     );
   };
 
-  const getProviderIdTemplate = job => <p>{job.providerId}</p>;
+  const getProviderNameTemplate = job => {
+    return (
+      <div className={styles.tooltip}>
+        <p>
+          {job.providerName}
+          <span className={styles.tooltiptext}> {job.providerId} </span>
+        </p>
+      </div>
+    );
+  };
 
   const rowExpansionTemplate = data => {
     const historyData = jobStatusHistory[data.id] ?? [];
@@ -625,7 +636,7 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
     getDateAddedTemplate,
     getDateStatusChangedTemplate,
     getJobCreatorUsernameTemplate,
-    getProviderIdTemplate,
+    getProviderNameTemplate,
     getSetCodeTemplate
   };
 
