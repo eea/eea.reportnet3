@@ -112,6 +112,7 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
           dataflowId: filterBy.dataflowId,
           dataflowName: filterBy.dataflowName,
           providerId: filterBy.providerId,
+          providerName: filterBy.providerName,
           datasetId: filterBy.datasetId,
           datasetName: filterBy.datasetName,
           code: filterBy.preparationCode,
@@ -137,6 +138,7 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
               dataflowId: providerTabChange ? undefined : filterBy.dataflowId,
               dataflowName: providerTabChange ? undefined : filterBy.dataflowName,
               providerId: providerTabChange ? undefined : filterBy.providerId,
+              providerName: providerTabChange ? undefined : filterBy.providerName,
               datasetId: providerTabChange ? undefined : filterBy.datasetId,
               datasetName: providerTabChange ? undefined : filterBy.datasetName,
               creatorUsername: providerTabChange ? undefined : filterBy.creatorUsername,
@@ -321,7 +323,7 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
               { key: 'datasetId', label: resourcesContext.messages['datasetId'] },
               { key: 'datasetName', label: resourcesContext.messages['datasetName'] },
               { key: 'preparationCode', label: resourcesContext.messages['setCode'] },
-              { key: 'providerId', label: resourcesContext.messages['providerId'] },
+              { key: 'providerName', label: resourcesContext.messages['providerName'] },
               { key: 'creatorUsername', label: resourcesContext.messages['creatorUsername'] }
             ]
           : [
@@ -593,7 +595,16 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
     );
   };
 
-  const getProviderIdTemplate = job => <p>{job.providerId}</p>;
+  const getProviderNameTemplate = job => {
+    return (
+      <div className={styles.tooltip}>
+        <p>
+          {job.providerName}
+          <span className={styles.tooltiptext}> {job.providerId} </span>
+        </p>
+      </div>
+    );
+  };
 
   const rowExpansionTemplate = data => {
     const historyData = jobStatusHistory[data.id] ?? [];
@@ -625,7 +636,7 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
     getDateAddedTemplate,
     getDateStatusChangedTemplate,
     getJobCreatorUsernameTemplate,
-    getProviderIdTemplate,
+    getProviderNameTemplate,
     getSetCodeTemplate
   };
 
@@ -800,7 +811,8 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
   };
 
   // Hide the show cancelled validations button if the job info does not include the text 'canceled validation tasks'. It was added for the Skipped Tasks job info case.
-  const showCancelledValidationsButton = typeof jobStatus?.jobInfo === 'string' && jobStatus?.jobInfo.toLowerCase().includes('canceled validation tasks');
+  const showCancelledValidationsButton =
+    typeof jobStatus?.jobInfo === 'string' && jobStatus?.jobInfo.toLowerCase().includes('canceled validation tasks');
 
   return (
     <Fragment>
@@ -850,56 +862,58 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
           visible={isStatusInfoDialogVisible}>
           {jobStatus.jobInfo ? jobStatus.jobInfo : resourcesContext.messages['noJobStatusInfo']}
           <br />
-          {(jobStatus?.jobType === 'VALIDATION' || jobStatus?.jobType === 'RELEASE') && jobStatus?.jobInfo !== null && showCancelledValidationsButton && (
-            <>
-              <Button
-                className={`p-button-secondary ${styles.buttonPushDown}`}
-                icon="warning"
-                label={
-                  showValidationTable
-                    ? resourcesContext.messages['hideCancelledValidations']
-                    : resourcesContext.messages['showCancelledValidations']
-                }
-                onClick={() => {
-                  setShowValidationTable(!showValidationTable);
-                  if (!showValidationTable) {
-                    getCancelledTasks(paginationInfo.firstPageRecord, paginationInfo.recordsPerPage, sortCancelled);
+          {(jobStatus?.jobType === 'VALIDATION' || jobStatus?.jobType === 'RELEASE') &&
+            jobStatus?.jobInfo !== null &&
+            showCancelledValidationsButton && (
+              <>
+                <Button
+                  className={`p-button-secondary ${styles.buttonPushDown}`}
+                  icon="warning"
+                  label={
+                    showValidationTable
+                      ? resourcesContext.messages['hideCancelledValidations']
+                      : resourcesContext.messages['showCancelledValidations']
                   }
-                }}
-              />
-              {showValidationTable &&
-                (isLoadingCancelledValidations ? (
-                  <div className={styles.noCancelledTasksContent}>
-                    <Spinner className={styles.spinnerPosition} />
-                  </div>
-                ) : cancelledValidations.length > 0 ? (
-                  <DataTable
-                    autoLayout={true}
-                    className={styles.cancelledValidationsTable}
-                    first={paginationInfo.firstPageRecord}
-                    hasDefaultCurrentPage={true}
-                    lazy={true}
-                    loading={isLoadingCancelledValidations}
-                    onPage={onChangePage}
-                    onSort={onSortCancelledTasks}
-                    paginator={true}
-                    paginatorRight={
-                      <span>{`${resourcesContext.messages['totalRecords']} ${totalCancelledValidations}`}</span>
+                  onClick={() => {
+                    setShowValidationTable(!showValidationTable);
+                    if (!showValidationTable) {
+                      getCancelledTasks(paginationInfo.firstPageRecord, paginationInfo.recordsPerPage, sortCancelled);
                     }
-                    rowClassName={newCancelledTasksClassName}
-                    rows={paginationInfo.recordsPerPage}
-                    rowsPerPageOptions={[5, 10, 15]}
-                    sortField={sortCancelled.field}
-                    sortOrder={sortCancelled.order}
-                    totalRecords={totalCancelledValidations}
-                    value={cancelledValidations}>
-                    {getCancelledValidationsColumns()}
-                  </DataTable>
-                ) : (
-                  <p className={styles.emptyArrayMessage}>{resourcesContext.messages['noCancelledTasks']}</p>
-                ))}
-            </>
-          )}
+                  }}
+                />
+                {showValidationTable &&
+                  (isLoadingCancelledValidations ? (
+                    <div className={styles.noCancelledTasksContent}>
+                      <Spinner className={styles.spinnerPosition} />
+                    </div>
+                  ) : cancelledValidations.length > 0 ? (
+                    <DataTable
+                      autoLayout={true}
+                      className={styles.cancelledValidationsTable}
+                      first={paginationInfo.firstPageRecord}
+                      hasDefaultCurrentPage={true}
+                      lazy={true}
+                      loading={isLoadingCancelledValidations}
+                      onPage={onChangePage}
+                      onSort={onSortCancelledTasks}
+                      paginator={true}
+                      paginatorRight={
+                        <span>{`${resourcesContext.messages['totalRecords']} ${totalCancelledValidations}`}</span>
+                      }
+                      rowClassName={newCancelledTasksClassName}
+                      rows={paginationInfo.recordsPerPage}
+                      rowsPerPageOptions={[5, 10, 15]}
+                      sortField={sortCancelled.field}
+                      sortOrder={sortCancelled.order}
+                      totalRecords={totalCancelledValidations}
+                      value={cancelledValidations}>
+                      {getCancelledValidationsColumns()}
+                    </DataTable>
+                  ) : (
+                    <p className={styles.emptyArrayMessage}>{resourcesContext.messages['noCancelledTasks']}</p>
+                  ))}
+              </>
+            )}
         </Dialog>
       )}
     </Fragment>

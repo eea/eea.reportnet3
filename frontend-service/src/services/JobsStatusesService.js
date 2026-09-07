@@ -14,6 +14,7 @@ export const JobsStatusesService = {
     dataflowId,
     dataflowName,
     providerId,
+    providerName,
     datasetId,
     datasetName,
     creatorUsername,
@@ -32,6 +33,7 @@ export const JobsStatusesService = {
       dataflowId,
       dataflowName,
       providerId,
+      providerName,
       datasetId,
       datasetName,
       creatorUsername,
@@ -84,13 +86,7 @@ export const JobsStatusesService = {
     return response.data;
   },
 
-  getCancelledValidations: async ({ 
-    jobId,
-    pageNum,
-    numberRows,
-    sortOrder,
-    sortField
-  }) => {
+  getCancelledValidations: async ({ jobId, pageNum, numberRows, sortOrder, sortField }) => {
     const parsedSortField = JobsStatusesUtils.parseSortField(sortField);
     const response = await JobsStatusesRepository.getCancelledValidations({
       jobId,
