@@ -91,7 +91,13 @@ export const DatasetRepository = {
 
   deleteRecord: async ({ datasetId, selectedRecordId, tableId, updateInCascade = false, preparationCode }) =>
     await HTTPRequester.delete({
-      url: getUrl(DatasetConfig.deleteRecord, { datasetId, updateInCascade, selectedRecordId, tableId, preparationCode })
+      url: getUrl(DatasetConfig.deleteRecord, {
+        datasetId,
+        updateInCascade,
+        selectedRecordId,
+        tableId,
+        preparationCode
+      })
     }),
 
   deleteFieldDesign: async (datasetId, fieldSchemaId) =>
@@ -234,9 +240,9 @@ export const DatasetRepository = {
       headers: { 'Content-Type': 'application/octet-stream' }
     }),
 
-  exportDatasetDataExternal: async (datasetId, integrationId) =>
+  exportDatasetDataExternal: async (datasetId, integrationId, code) =>
     await HTTPRequester.download({
-      url: getUrl(DatasetConfig.exportDatasetDataExternal, { datasetId, integrationId }),
+      url: getUrl(DatasetConfig.exportDatasetDataExternal, { datasetId, integrationId, code }),
       headers: { 'Content-Type': 'application/octet-stream' }
     }),
 
@@ -293,7 +299,9 @@ export const DatasetRepository = {
   getMetadata: async datasetId => await HTTPRequester.get({ url: getUrl(DatasetConfig.getMetadata, { datasetId }) }),
 
   getIsIcebergTableCreated: async ({ datasetId, tableSchemaId, preparationCode }) =>
-    await HTTPRequester.get({ url: getUrl(DatasetConfig.getIsIcebergTableCreated, { datasetId, tableSchemaId, preparationCode }) }),
+    await HTTPRequester.get({
+      url: getUrl(DatasetConfig.getIsIcebergTableCreated, { datasetId, tableSchemaId, preparationCode })
+    }),
 
   getIsAvailableForManualEditing: async ({ datasetId }) =>
     await HTTPRequester.get({ url: getUrl(DatasetConfig.getIsAvailableForManualEditing, { datasetId }) }),

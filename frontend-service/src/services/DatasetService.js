@@ -287,8 +287,8 @@ export const DatasetService = {
   exportDatasetDataDL: async (datasetId, fileType, code) =>
     await DatasetRepository.exportDatasetDataDL(datasetId, fileType, code),
 
-  exportDatasetDataExternal: async (datasetId, integrationId) =>
-    await DatasetRepository.exportDatasetDataExternal(datasetId, integrationId),
+  exportDatasetDataExternal: async (datasetId, integrationId, code) =>
+    await DatasetRepository.exportDatasetDataExternal(datasetId, integrationId, code),
 
   exportTableData: async (
     datasetId,
@@ -945,7 +945,13 @@ export const DatasetService = {
     datasetTableRecord.idRecordSchema = record.recordSchemaId;
     datasetTableRecord.id = record.recordId;
     //The service will take an array of objects(records). Actually the frontend only allows one record CRUD
-    return await DatasetRepository.updateRecord(datasetId, [datasetTableRecord], tableSchemaId, updateInCascade, preparationCode);
+    return await DatasetRepository.updateRecord(
+      datasetId,
+      [datasetTableRecord],
+      tableSchemaId,
+      updateInCascade,
+      preparationCode
+    );
   },
 
   updateReferenceDatasetStatus: async (datasetId, updatable) =>
