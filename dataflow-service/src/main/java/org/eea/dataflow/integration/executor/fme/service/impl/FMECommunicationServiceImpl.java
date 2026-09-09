@@ -12,6 +12,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.eea.dataflow.integration.executor.fme.domain.FMEAsyncJob;
 import org.eea.dataflow.integration.executor.fme.domain.FMECollection;
 import org.eea.dataflow.integration.executor.fme.domain.FileSubmitResult;
+import org.eea.dataflow.integration.executor.fme.domain.Directive;
+import org.eea.dataflow.integration.executor.fme.domain.NMDirectives;
 import org.eea.dataflow.integration.executor.fme.domain.PublishedParameter;
 import org.eea.dataflow.integration.executor.fme.domain.SubmitResult;
 import org.eea.dataflow.integration.executor.fme.mapper.FMECollectionMapper;
@@ -90,12 +92,6 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
   /** The Constant ACCEPT: {@value}. */
   private static final String ACCEPT = "Accept";
 
-  /** The Constant DATASETID: {@value}. */
-  private static final String DATASETID = "datasetId";
-
-  /** The Constant PROVIDERID: {@value}. */
-  private static final String PROVIDERID = "providerId";
-
   /** The fme host. */
   @Value("${integration.fme.host}")
   private String fmeHost;
@@ -161,11 +157,8 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
    */
   @Override
   public Integer submitAsyncJob(String repository, String workspace, FMEAsyncJob fmeAsyncJob,
-      Long dataflowId, JobVO jobVO) {
+                                Long dataflowId, JobVO jobVO) {
 
-    Map<String, String> uriParams = new HashMap<>();
-    uriParams.put("repository", repository);
-    uriParams.put("workspace", workspace);
     String jobId = (jobVO != null) ? jobVO.getId().toString() : null;
 
     UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.newInstance();
@@ -174,30 +167,32 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
     headerInfo.put(CONTENT_TYPE, APPLICATION_JSON);
     headerInfo.put(ACCEPT, APPLICATION_JSON);
 
+    Map<String, Object> body = toV4JobBody(repository, workspace, fmeAsyncJob);
+
     ResponseEntity<SubmitResult> checkResult = null;
     Integer result = 0;
     try {
-      HttpEntity<FMEAsyncJob> request =
-          createHttpRequest(fmeAsyncJob, uriParams, headerInfo, dataflowId);
+      HttpEntity<Map<String, Object>> request =
+              createHttpRequest(body, Collections.emptyMap(), headerInfo, dataflowId);
       checkResult = this.restTemplate.exchange(uriComponentsBuilder.scheme(fmeScheme).host(fmeHost)
-          .path("fmerest/v3/transformations/submit/{repository}/{workspace}")
-          .buildAndExpand(uriParams).toString(), HttpMethod.POST, request, SubmitResult.class);
+                      .path("fmeapiv4/jobs").build().toString(), HttpMethod.POST, request,
+              SubmitResult.class);
 
       if (null != checkResult && null != checkResult.getBody()
-          && null != checkResult.getBody().getId()) { // NOSONAR check result and body are verified
-                                                      // not to be null. false positive
+              && null != checkResult.getBody().getId()) { // NOSONAR check result and body are verified
+        // not to be null. false positive
         LOG.info("FME called successfully: HTTP:{}", checkResult.getStatusCode());
         result = checkResult.getBody().getId(); // NOSONAR check result and body are verified not to
-                                                // be null. false positive
+        // be null. false positive
       } else {
         throw new IllegalStateException("Error submitting job to FME, no result retrieved");
       }
 
     } catch (HttpStatusCodeException exception) {
       LOG.error("For jobId {} Status code: {} message: {}", jobId,  exception.getStatusCode().value(),
-          exception.getMessage(), exception);
+              exception.getMessage(), exception);
       Map<String, PublishedParameter> mapParameters = fmeAsyncJob.getPublishedParameters().stream()
-          .collect(Collectors.toMap(PublishedParameter::getName, Function.identity()));
+              .collect(Collectors.toMap(PublishedParameter::getName, Function.identity()));
 
       updateFailedJobAndProcess(jobVO);
 
@@ -211,14 +206,14 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
       }
       String user = SecurityContextHolder.getContext().getAuthentication().getName();
       NotificationVO notificationVO =
-          NotificationVO.builder().user(user).error("Error calling to FME").datasetId(datasetId)
-              .dataflowId(dataflowId).fileName(fileName).build();
+              NotificationVO.builder().user(user).error("Error calling to FME").datasetId(datasetId)
+                      .dataflowId(dataflowId).fileName(fileName).build();
       try {
         kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.CALL_FME_PROCESS_FAILED_EVENT, null,
-            notificationVO);
+                notificationVO);
       } catch (EEAException e1) {
         LOG.error("Failed sending kafka notification for jobId {} due to an error calling FME: {}", jobId,
-            e1.getMessage(), e1);
+                e1.getMessage(), e1);
       }
     }
     return result;
@@ -235,6 +230,40 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
   }
 
   /**
+   * Builds the JSON body for FME REST API v4's POST /jobs from the existing v3-shaped
+   * FMEAsyncJob (NMDirectives/Directive/PublishedParameter lists), which v4 expects flattened
+   * into plain maps.
+   *
+   * @param repository the repository
+   * @param workspace the workspace
+   * @param fmeAsyncJob the fme async job
+   * @return the request body
+   */
+  private Map<String, Object> toV4JobBody(String repository, String workspace,
+                                          FMEAsyncJob fmeAsyncJob) {
+    Map<String, Object> body = new HashMap<>();
+    body.put("repository", repository);
+    body.put("workspace", workspace);
+
+    NMDirectives nmDirectives = fmeAsyncJob.getNmDirectives();
+    if (null != nmDirectives) {
+      body.put("successTopics", nmDirectives.getSuccessTopics());
+      body.put("failureTopics", nmDirectives.getFailureTopics());
+      if (null != nmDirectives.getDirectives()) {
+        body.put("directives", nmDirectives.getDirectives().stream()
+                .collect(Collectors.toMap(Directive::getName, Directive::getValue)));
+      }
+    }
+
+    if (null != fmeAsyncJob.getPublishedParameters()) {
+      body.put("publishedParameters", fmeAsyncJob.getPublishedParameters().stream()
+              .collect(Collectors.toMap(PublishedParameter::getName, PublishedParameter::getValue)));
+    }
+
+    return body;
+  }
+
+  /**
    * Send file.
    *
    * @param idDataset the id dataset
@@ -245,16 +274,8 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
   @Override
   public FileSubmitResult sendFile(Long idDataset, String idProvider, String fileName) {
 
-    Map<String, String> uriParams = new HashMap<>();
-    uriParams.put(DATASETID, String.valueOf(idDataset));
-    String auxURL =
-        "fmerest/v3/resources/connections/Reportnet3/filesys/{datasetId}/design?createDirectories=true&overwrite=true";
+    String path = idDataset + "/" + (null != idProvider ? idProvider : "design");
 
-    if (null != idProvider) {
-      uriParams.put(PROVIDERID, idProvider);
-      auxURL =
-          "fmerest/v3/resources/connections/Reportnet3/filesys/{datasetId}/{providerId}?createDirectories=true&overwrite=true";
-    }
     UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.newInstance();
     Map<String, String> headerInfo = new HashMap<>();
     File file = new File(fileName);
@@ -262,7 +283,7 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
     try {
       if (StringUtils.isNotBlank(file.getName())) {
         headerInfo.put("Content-Disposition",
-            "attachment; filename*=UTF-8''\"" + URLEncoder.encode(file.getName(), "UTF-8") + "\"");
+                "attachment; filename*=UTF-8''\"" + URLEncoder.encode(file.getName(), "UTF-8") + "\"");
       }
     } catch (UnsupportedEncodingException e) {
       LOG.error("Error encoding file: {}", file.getName());
@@ -289,10 +310,18 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
         }
       }*/
       String result2 = "";
-      String url = uriComponentsBuilder.scheme(fmeScheme).host(fmeHost).path(auxURL)
-          .buildAndExpand(uriParams).toString();
+      // NOTE: query-param shape here (path/overwrite/createDirectories) is not
+      // live-verified against the v4 schema - unlike directory/download (both
+      // confirmed to be JSON-body, not query-param, once checked against the real
+      // schema), this one hasn't been checked the same way. createDirectories in
+      // particular is unconfirmed to exist in v4 at all. Verify before relying on
+      // this in production.
+      String url = uriComponentsBuilder.scheme(fmeScheme).host(fmeHost)
+              .path("fmeapiv4/resources/connections/Reportnet3/upload")
+              .queryParam("path", path).queryParam("overwrite", true)
+              .queryParam("createDirectories", true).build().toString();
       MultiValueMap<String, Object> bodyMap = new LinkedMultiValueMap<>();
-      bodyMap.add(file.getName(), new FileSystemResource(file));
+      bodyMap.add("files", new FileSystemResource(file));
       HttpHeaders headers = new HttpHeaders();
       headers.setContentType(MediaType.MULTIPART_FORM_DATA);
       headers.add(ACCEPT, APPLICATION_JSON);
@@ -309,7 +338,7 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
       RestTemplate restTemplate = new RestTemplate();
       restTemplate.setRequestFactory(requestFactory);
       ResponseEntity<String> checkResult =
-          restTemplate.exchange(url, HttpMethod.POST, requestEntity, String.class);
+              restTemplate.exchange(url, HttpMethod.POST, requestEntity, String.class);
 
       if (null != checkResult && null != checkResult.getBody()) {
         if (checkResult.getBody() != null) {
@@ -325,7 +354,7 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
       }
     } catch (ResourceAccessException e) {
       LOG.error("Error getting the file to send it to FME. File {}, datasetId {}",
-          file.getName(), dataset.getId(), e);
+              file.getName(), dataset.getId(), e);
     }
     return result;
   }
@@ -341,29 +370,27 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
   @Override
   public HttpStatus createDirectory(Long idDataset, String idProvider) {
 
-    Map<String, String> uriParams = new HashMap<>();
-    uriParams.put(DATASETID, String.valueOf(idDataset));
-    String auxURL = "fmerest/v3/resources/connections/Reportnet3/filesys/{datasetId}/design";
-    if (null != idProvider) {
-      uriParams.put(PROVIDERID, idProvider);
-      auxURL = "fmerest/v3/resources/connections/Reportnet3/filesys/{datasetId}/{providerId}";
-    }
+    String path = idDataset + "/" + (null != idProvider ? idProvider : "design");
+
     UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.newInstance();
     Map<String, String> headerInfo = new HashMap<>();
-    headerInfo.put(CONTENT_TYPE, "application/x-www-form-urlencoded");
+    headerInfo.put(CONTENT_TYPE, APPLICATION_JSON);
     headerInfo.put(ACCEPT, APPLICATION_JSON);
 
-    String body = "directoryname=ExportFiles";
+    Map<String, String> body = new HashMap<>();
+    body.put("directoryName", "ExportFiles");
+    body.put("path", path);
+
     DataSetMetabaseVO dataset = datasetMetabaseControllerZuul.findDatasetMetabaseById(idDataset);
-    HttpEntity<byte[]> request =
-        createHttpRequest(body.getBytes(), uriParams, headerInfo, dataset.getDataflowId());
-    String url = uriComponentsBuilder.scheme(fmeScheme).host(fmeHost).path(auxURL)
-        .buildAndExpand(uriParams).toString();
+    HttpEntity<Map<String, String>> request =
+            createHttpRequest(body, Collections.emptyMap(), headerInfo, dataset.getDataflowId());
+    String url = uriComponentsBuilder.scheme(fmeScheme).host(fmeHost)
+            .path("fmeapiv4/resources/connections/Reportnet3/directory").build().toString();
 
     ResponseEntity<FileSubmitResult> checkResult = null;
     try {
       checkResult =
-          this.restTemplate.exchange(url, HttpMethod.POST, request, FileSubmitResult.class);
+              this.restTemplate.exchange(url, HttpMethod.POST, request, FileSubmitResult.class);
     } catch (HttpClientErrorException e) {
       LOG.info("FME called successfully but directory already exist. datasetId {}, providerId {}", idDataset, idProvider);
       return e.getStatusCode();
@@ -377,6 +404,9 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
   /**
    * Receive file.
    *
+   * <p>v4 download is POST + JSON body {"path":..., "disposition":...}, not v3's
+   * GET + query params - confirmed from the live v4 API schema.</p>
+   *
    * @param idDataset the id dataset
    * @param providerId the provider id
    * @param fileName the file name
@@ -386,30 +416,27 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
   @Override
   public InputStream receiveFile(Long idDataset, Long providerId, String fileName) {
 
-    Map<String, String> uriParams = new HashMap<>();
-    uriParams.put(DATASETID, String.valueOf(idDataset));
-    String auxURL =
-        "fmerest/v3/resources/connections/Reportnet3/filesys/{datasetId}/design/ExportFiles/{fileName}?accept=contents&disposition=attachment";
-    if (null != providerId) {
-      uriParams.put(PROVIDERID, providerId.toString());
-      auxURL =
-          "fmerest/v3/resources/connections/Reportnet3/filesys/{datasetId}/{providerId}/ExportFiles/{fileName}?accept=contents&disposition=attachment";
-    }
-    uriParams.put("fileName", fileName);
+    String path = idDataset + "/" + (null != providerId ? providerId : "design")
+            + "/ExportFiles/" + fileName;
+
+    Map<String, Object> body = new HashMap<>();
+    body.put("path", path);
+    body.put("disposition", "attachment");
+
     UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.newInstance();
     Map<String, String> headerInfo = new HashMap<>();
-
+    headerInfo.put(CONTENT_TYPE, APPLICATION_JSON);
     headerInfo.put(ACCEPT, "application/octet-stream");
 
     DataSetMetabaseVO dataset = datasetMetabaseControllerZuul.findDatasetMetabaseById(idDataset);
-    HttpEntity<MultiValueMap<String, Object>> request =
-        createHttpRequest(null, uriParams, headerInfo, dataset.getDataflowId());
+    HttpEntity<Map<String, Object>> request =
+            createHttpRequest(body, Collections.emptyMap(), headerInfo, dataset.getDataflowId());
 
     ResponseEntity<byte[]> checkResult = null;
     try {
       checkResult = this.restTemplate.exchange(uriComponentsBuilder.scheme(fmeScheme).host(fmeHost)
-          .path(auxURL).buildAndExpand(uriParams).toString(), HttpMethod.GET, request,
-          byte[].class);
+                      .path("fmeapiv4/resources/connections/Reportnet3/download").build().toString(),
+              HttpMethod.POST, request, byte[].class);
     } catch (HttpClientErrorException e) {
       LOG.error("Error downloading file: {}  from FME for datasetId {}", fileName, idDataset, e);
     } catch (Exception e) {
@@ -419,8 +446,8 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
     InputStream stream = null;
     if (null != checkResult && null != checkResult.getBody()) {
       stream = new ByteArrayInputStream(checkResult.getBody()); // NOSONAR check result and body are
-                                                                // verified not to be null. false
-                                                                // positive
+      // verified not to be null. false
+      // positive
     } else {
       stream = new ByteArrayInputStream(new byte[0]);
     }
@@ -446,16 +473,16 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
     UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.newInstance();
     DataSetMetabaseVO dataset = datasetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
     HttpEntity<Void> request =
-        createHttpRequest(null, uriParams, headerInfo, dataset.getDataflowId());
+            createHttpRequest(null, uriParams, headerInfo, dataset.getDataflowId());
 
     ResponseEntity<FMECollection> responseEntity =
-        this.restTemplate.exchange(
-            uriComponentsBuilder.scheme(fmeScheme).host(fmeHost).path("fmerest/v3/repositories")
-                .buildAndExpand(uriParams).toString(),
-            HttpMethod.GET, request, FMECollection.class);
+            this.restTemplate.exchange(
+                    uriComponentsBuilder.scheme(fmeScheme).host(fmeHost).path("fmeapiv4/repositories")
+                            .buildAndExpand(uriParams).toString(),
+                    HttpMethod.GET, request, FMECollection.class);
 
     FMECollection result =
-        Optional.ofNullable(responseEntity).map(ResponseEntity::getBody).orElse(null);
+            Optional.ofNullable(responseEntity).map(ResponseEntity::getBody).orElse(null);
 
     return fmeCollectionMapper.entityToClass(result);
   }
@@ -473,21 +500,21 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
 
     Map<String, String> uriParams = new HashMap<>();
     uriParams.put("repository", repository);
-    uriParams.put("type", "WORKSPACE");
+    uriParams.put("type", "workspace");
     Map<String, String> headerInfo = new HashMap<>();
     headerInfo.put(ACCEPT, APPLICATION_JSON);
 
     UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.newInstance();
     DataSetMetabaseVO dataset = datasetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
     HttpEntity<Void> request =
-        createHttpRequest(null, uriParams, headerInfo, dataset.getDataflowId());
+            createHttpRequest(null, uriParams, headerInfo, dataset.getDataflowId());
 
     ResponseEntity<FMECollection> responseEntity = this.restTemplate.exchange(uriComponentsBuilder
-        .scheme(fmeScheme).host(fmeHost).path("fmerest/v3/repositories/{repository}/items")
-        .buildAndExpand(uriParams).toString(), HttpMethod.GET, request, FMECollection.class);
+            .scheme(fmeScheme).host(fmeHost).path("fmeapiv4/repositories/{repository}/items")
+            .buildAndExpand(uriParams).toString(), HttpMethod.GET, request, FMECollection.class);
 
     FMECollection result =
-        Optional.ofNullable(responseEntity).map(ResponseEntity::getBody).orElse(null);
+            Optional.ofNullable(responseEntity).map(ResponseEntity::getBody).orElse(null);
 
     return fmeCollectionMapper.entityToClass(result);
 
@@ -506,11 +533,11 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
    */
   @Override
   public FMEJob authenticateAndAuthorize(String apiKey, Long rn3JobId)
-      throws EEAForbiddenException, EEAUnauthorizedException {
+          throws EEAForbiddenException, EEAUnauthorizedException {
 
     TokenVO tokenVO;
     if (null != apiKey && !apiKey.isEmpty()
-        && null != (tokenVO = userManagementControllerZull.authenticateUserByApiKey(apiKey))) {
+            && null != (tokenVO = userManagementControllerZull.authenticateUserByApiKey(apiKey))) {
 
       // Authentication
       String userName = tokenVO.getPreferredUsername();
@@ -526,7 +553,7 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
       }
       UserDetails userDetails = EeaUserDetails.create(userName, roles);
       UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-          userDetails, "ApiKey " + apiKey, userDetails.getAuthorities());
+              userDetails, "ApiKey " + apiKey, userDetails.getAuthorities());
       Map<String, String> details = new HashMap<>();
       details.put(AuthenticationDetails.USER_ID, tokenVO.getUserId());
       authentication.setDetails(details);
@@ -540,7 +567,7 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
       }
 
       LOG.info("Successfully logged in: userName={}, apiKey={}, fmeJob={}", userName, apiKey,
-          fmeJob);
+              fmeJob);
       return fmeJob;
     }
     LOG.error("Invalid apiKey: {}", apiKey);
@@ -562,13 +589,13 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
     boolean isReporting = null != fmeJob.getProviderId();
     boolean isStatusCompleted = statusNumber == 0L;
     NotificationVO notificationVO = NotificationVO.builder().user(fmeJob.getUserName())
-        .datasetId(fmeJob.getDatasetId()).dataflowId(fmeJob.getDataflowId())
-        .fileName(fmeJob.getFileName()).providerId(fmeJob.getProviderId()).build();
+            .datasetId(fmeJob.getDatasetId()).dataflowId(fmeJob.getDataflowId())
+            .fileName(fmeJob.getFileName()).providerId(fmeJob.getProviderId()).build();
     // Set the notification EventType
     switch (fmeJob.getOperation()) {
       case IMPORT:
         eventType = importNotification(isReporting, isStatusCompleted, fmeJob.getDatasetId(),
-            fmeJob.getUserName(), notificationRequired);
+                fmeJob.getUserName(), notificationRequired);
         break;
       case EXPORT:
         eventType = exportNotification(isReporting, isStatusCompleted);
@@ -578,7 +605,7 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
         break;
       case IMPORT_FROM_OTHER_SYSTEM:
         eventType = importFromOtherSystemNotification(isReporting, isStatusCompleted,
-            fmeJob.getDatasetId(), fmeJob.getUserName());
+                fmeJob.getDatasetId(), fmeJob.getUserName());
         break;
       default:
         throw new UnsupportedOperationException("Not yet implemented");
@@ -588,9 +615,9 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
     try {
       if (null != eventType) {
         notificationVO.setDatasetName(datasetMetabaseControllerZuul
-            .findDatasetMetabaseById(fmeJob.getDatasetId()).getDataSetName());
+                .findDatasetMetabaseById(fmeJob.getDatasetId()).getDataSetName());
         notificationVO
-            .setDataflowName(dataflowService.getMetabaseById(fmeJob.getDataflowId()).getName());
+                .setDataflowName(dataflowService.getMetabaseById(fmeJob.getDataflowId()).getName());
 
         kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, null, notificationVO);
       }
@@ -628,7 +655,7 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
    * @return the http entity
    */
   private <T> HttpEntity<T> createHttpRequest(T body, Map<String, String> uriParams,
-      Map<String, String> headerInfo, Long dataflowId) {
+                                              Map<String, String> headerInfo, Long dataflowId) {
     DataFlowVO dataflowVO = null;
     String token = fmeToken;
     /* //FME Basic auth replacement with token
@@ -680,7 +707,7 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
    * @return the event type
    */
   private EventType importNotification(boolean isReporting, boolean isStatusCompleted,
-      Long datasetId, String userName, boolean notificationRequired) {
+                                       Long datasetId, String userName, boolean notificationRequired) {
 
     EventType eventType = null;
     // Release lock related to Releasing Process
@@ -768,7 +795,7 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
    * @return the event type
    */
   private EventType importFromOtherSystemNotification(boolean isReporting,
-      boolean isStatusCompleted, Long datasetId, String userName) {
+                                                      boolean isStatusCompleted, Long datasetId, String userName) {
     EventType eventType;
     // Release lock related to Releasing Process
     releaseLockReleasingProcess(datasetId);
@@ -797,7 +824,7 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
   private void releaseLockReleasingProcess(Long datasetId) {
     // Release lock to the releasing process
     DataSetMetabaseVO datasetMetabaseVO =
-        datasetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
+            datasetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
     if (datasetMetabaseVO.getDataProviderId() != null) {
       Map<String, Object> releaseSnapshots = new HashMap<>();
       releaseSnapshots.put(LiteralConstants.SIGNATURE, LockSignature.RELEASE_SNAPSHOTS.getValue());
