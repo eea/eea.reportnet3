@@ -255,6 +255,10 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
         integrationOperationParams.get(IntegrationParams.DATASET_ID)));
     parameters.add(saveParameter(IntegrationParams.APIKEY_PROPERTY, "ApiKey " + apiKey));
     parameters.add(saveParameter(IntegrationParams.BASE_URL, r3base));
+    if (StringUtils.isNotBlank(fmeParams.get(IntegrationParams.PREPARATION_CODE))) {
+      parameters.add(saveParameter(IntegrationParams.PREPARATION_CODE,
+          fmeParams.get(IntegrationParams.PREPARATION_CODE)));
+    }
 
 
     Integer fmeJobId = null;
