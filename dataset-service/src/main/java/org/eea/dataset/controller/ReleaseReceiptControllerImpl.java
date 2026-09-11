@@ -35,6 +35,7 @@ public class ReleaseReceiptControllerImpl implements ReleaseReceiptController {
      * @return a confirmation message
      */
     @PostMapping
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ReleaseReceiptVO> createReleaseReceipt(@RequestBody ReleaseReceiptVO releaseReceiptVO) {
         ReleaseReceiptVO savedReceipt = null;
         try {
@@ -64,6 +65,7 @@ public class ReleaseReceiptControllerImpl implements ReleaseReceiptController {
      * @return a confirmation message
      */
     @PutMapping
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ReleaseReceiptVO> updateReleaseReceipt(@RequestBody ReleaseReceiptVO releaseReceiptVO) {
         try {
             if (releaseReceiptVO.getDataflowId() == null) {
@@ -120,6 +122,7 @@ public class ReleaseReceiptControllerImpl implements ReleaseReceiptController {
      * @return the ReleaseReceiptVO
      */
     @GetMapping("/dataflow/{dataflowId}")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ReleaseReceiptVO> getReleaseReceiptByDataflowId(@PathVariable("dataflowId") Long dataflowId) {
         if (dataflowId == null || dataflowId <= 0) {
             LOG.error("Invalid dataflowId: {}", dataflowId);
@@ -150,6 +153,7 @@ public class ReleaseReceiptControllerImpl implements ReleaseReceiptController {
      * @return ResponseEntity with HTTP status
      */
     @DeleteMapping("/dataflow/{dataflowId}")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Void> deleteReleaseReceiptByDataflowId(@PathVariable("dataflowId") Long dataflowId) {
         if (dataflowId == null || dataflowId <= 0) {
             LOG.error("Invalid dataflowId: {}", dataflowId);
