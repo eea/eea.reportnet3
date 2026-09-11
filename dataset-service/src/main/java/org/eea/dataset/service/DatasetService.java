@@ -457,10 +457,12 @@ public interface DatasetService {
    *
    * @param datasetId the dataset id
    * @param integrationId the integration id
+   * @param preparationCode the preparation code
    *
    * @throws EEAException the EEA exception
    */
-  void exportFileThroughIntegration(Long datasetId, Long integrationId) throws EEAException;
+  void exportFileThroughIntegration(Long datasetId, Long integrationId, String preparationCode)
+      throws EEAException;
 
   /**
    * Gets the table fixed number of records.

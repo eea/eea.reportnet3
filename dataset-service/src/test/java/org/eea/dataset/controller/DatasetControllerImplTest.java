@@ -1459,10 +1459,10 @@ public class DatasetControllerImplTest {
         .thenReturn(datasetMetabaseVO);
 
     Mockito.doNothing().when(datasetService).exportFileThroughIntegration(Mockito.anyLong(),
-        Mockito.any());
-    datasetControllerImpl.exportFileThroughIntegration(1L, 1L);
+        Mockito.any(), Mockito.any());
+    datasetControllerImpl.exportFileThroughIntegration(1L, 1L, null);
     Mockito.verify(datasetService, times(1)).exportFileThroughIntegration(Mockito.anyLong(),
-        Mockito.any());
+        Mockito.any(), Mockito.any());
   }
 
   /**
@@ -1478,9 +1478,9 @@ public class DatasetControllerImplTest {
         .thenReturn(datasetMetabaseVO);
 
     Mockito.doThrow(EEAException.class).when(datasetService)
-        .exportFileThroughIntegration(Mockito.anyLong(), Mockito.any());
+        .exportFileThroughIntegration(Mockito.anyLong(), Mockito.any(), Mockito.any());
     try {
-      datasetControllerImpl.exportFileThroughIntegration(1L, 1L);
+      datasetControllerImpl.exportFileThroughIntegration(1L, 1L, null);
     } catch (ResponseStatusException e) {
       Assert.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
       throw e;

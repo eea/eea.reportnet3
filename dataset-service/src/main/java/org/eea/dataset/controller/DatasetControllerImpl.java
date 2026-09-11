@@ -1686,6 +1686,7 @@ public class DatasetControllerImpl implements DatasetController {
    *
    * @param datasetId the dataset id
    * @param integrationId the integration id
+   * @param preparationCode the preparation code
    */
   @Override
   @HystrixCommand
@@ -1698,7 +1699,9 @@ public class DatasetControllerImpl implements DatasetController {
           @ApiParam(type = "Long", value = "Dataset id",
                   example = "0") @RequestParam("datasetId") Long datasetId,
           @ApiParam(type = "Long", value = "Integration id",
-                  example = "0") @RequestParam("integrationId") Long integrationId) {
+                  example = "0") @RequestParam("integrationId") Long integrationId,
+          @ApiParam(type = "String", value = "Preparation Code",
+                  example = "0") @RequestParam(value = "code", required = false) String preparationCode) {
 
     UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
     userNotificationContentVO.setDatasetId(datasetId);
@@ -1708,8 +1711,8 @@ public class DatasetControllerImpl implements DatasetController {
             userNotificationContentVO);
 
     try {
-      LOG.info("Exporting data through integration for datasetId {} and integrationId {}", datasetId, integrationId);
-      datasetService.exportFileThroughIntegration(datasetId, integrationId);
+      LOG.info("Exporting data through integration for datasetId {} and integrationId {} and preparationCode {}", datasetId, integrationId, preparationCode);
+      datasetService.exportFileThroughIntegration(datasetId, integrationId, preparationCode);
       LOG.info("Successfully exported data through integration for datasetId {} and integrationId {}", datasetId, integrationId);
     } catch (EEAException e) {
       LOG.error("Error exporting file through integration for datasetId {} and integrationId {} Message: {}", datasetId, integrationId, e.getMessage(), e);

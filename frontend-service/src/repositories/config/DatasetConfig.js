@@ -6,13 +6,14 @@ export const DatasetConfig = {
   enableEditing: '/dataset/{:datasetId}/enableEditing',
   disableEditing: '/dataset/{:datasetId}/disableEditing',
   convertIcebergsToParquets:
-      '/dataset/convertIcebergToParquetTables/{:datasetId}?dataflowId={:dataflowId}&providerId={:providerId}&preparationCode={:preparationCode}',
+    '/dataset/convertIcebergToParquetTables/{:datasetId}?dataflowId={:dataflowId}&providerId={:providerId}&preparationCode={:preparationCode}',
   convertParquetsToIcebergs:
-      '/dataset/convertParquetToIcebergTables/{:datasetId}?dataflowId={:dataflowId}&providerId={:providerId}&preparationCode={:preparationCode}',
+    '/dataset/convertParquetToIcebergTables/{:datasetId}?dataflowId={:dataflowId}&providerId={:providerId}&preparationCode={:preparationCode}',
   createRecord: '/dataset/{:datasetId}/table/{:tableSchemaId}/record?preparationCode={:preparationCode}',
   createRecordDesign: '/dataschema/{:datasetId}/fieldSchema',
   createTableDesign: '/dataschema/{:datasetId}/tableSchema',
-  getIsIcebergTableCreated: '/dataset/isIcebergTableCreated/{:datasetId}/{:tableSchemaId}?preparationCode={:preparationCode}',
+  getIsIcebergTableCreated:
+    '/dataset/isIcebergTableCreated/{:datasetId}/{:tableSchemaId}?preparationCode={:preparationCode}',
   getAlignmentBetween:
     '/dataset/getReleasedDatasetDataInfo?collectionDatasetId={:datasetId}&providerCode={:selectedRepresentativesCode}&tableSchemaId={:selectedTable}',
   getIsAvailableForManualEditing: '/dataset/getAvailableForManualEditingTables/{:datasetId}',
@@ -44,8 +45,7 @@ export const DatasetConfig = {
   downloadPublicDatasetFile:
     '/dataset/exportPublicFile/dataflow/{:dataflowId}/dataProvider/{:dataProviderId}?fileName={:fileName}',
   downloadExportDatasetFile: '/dataset/{:datasetId}/downloadFile?fileName={:fileName}',
-  downloadExportDatasetFileDL:
-    '/dataset/{:datasetId}/downloadFileDL?fileName={:fileName}&code={:code}',
+  downloadExportDatasetFileDL: '/dataset/{:datasetId}/downloadFileDL?fileName={:fileName}&code={:code}',
   downloadExportFile: '/fme/downloadExportFile?datasetId={:datasetId}&fileName={:fileName}',
   downloadExportFileWithProviderId:
     '/fme/downloadExportFile?datasetId={:datasetId}&fileName={:fileName}&providerId={:providerId}',
@@ -63,7 +63,7 @@ export const DatasetConfig = {
   exportDatasetData: '/dataset/{:datasetId}/exportDatasetFile?mimeType={:fileType}',
   exportDatasetDataDL: '/dataset/{:datasetId}/exportDatasetFileDL?mimeType={:fileType}&code={:code}',
   exportDatasetDataExternal:
-    '/dataset/exportFileThroughIntegration?datasetId={:datasetId}&integrationId={:integrationId}',
+    '/dataset/exportFileThroughIntegration?datasetId={:datasetId}&integrationId={:integrationId}}&code={:code}',
   exportTableData: '/dataset/exportFile?datasetId={:datasetId}&tableSchemaId={:tableSchemaId}&mimeType={:fileType}',
   exportTableDataDL:
     '/dataset/exportFileDL?datasetId={:datasetId}&tableSchemaId={:tableSchemaId}&mimeType={:fileType}&code={:code}',
@@ -83,7 +83,8 @@ export const DatasetConfig = {
   getAddUserText: '/release-receipts/dataflow/{:dataflowId}',
   getPresignedUrl:
     '/dataset/{:datasetId}/generateImportPresignedUrl?dataflowId={:dataflowId}&providerId={:providerId}&tableSchemaId={:tableSchemaId}&replace={:replace}&integrationId={:integrationId}&delimiter={:delimiter}&fileName={:fileName}&code={:code}',
-  getFullGeometry: '/dataset/v1/{:datasetId}/record/{:recordId}/geometry?fieldId={:fieldId}&dataflowId={:dataflowId}&idTableSchema={:tableSchemaId}&providerId={:providerId}&downloadFile=false',
+  getFullGeometry:
+    '/dataset/v1/{:datasetId}/record/{:recordId}/geometry?fieldId={:fieldId}&dataflowId={:dataflowId}&idTableSchema={:tableSchemaId}&providerId={:providerId}&downloadFile=false',
   getShowValidationErrors:
     '/validation/listGroupValidations/{:datasetId}?asc={:asc}&shortCode={:shortCodeFilter}&fieldValueFilter={:fieldValueFilter}&headers={:sortField}&levelErrorsFilter={:levelErrorsFilter}&pageNum={:pageNum}&pageSize={:pageSize}&tableFilter={:tableFilter}&typeEntitiesFilter={:typeEntitiesFilter}',
   getShowValidationErrorsDL:
@@ -105,7 +106,8 @@ export const DatasetConfig = {
     '/dataset/{:datasetId}/updateField?updateCascadePK={:updateInCascade}&recordId={:recordId}&tableSchemaId={:tableSchemaId}',
   updateConditionalFieldsWebform:
     '/dataset/{:datasetId}/updateWebformFields?updateCascadePK={:updateInCascade}&recordId={:recordId}&tableSchemaId={:tableSchemaId}',
-  updateRecord: '/dataset/{:datasetId}/updateRecord?updateCascadePK={:updateInCascade}&tableSchemaId={:tableSchemaId}&preparationCode={:preparationCode}',
+  updateRecord:
+    '/dataset/{:datasetId}/updateRecord?updateCascadePK={:updateInCascade}&tableSchemaId={:tableSchemaId}&preparationCode={:preparationCode}',
   updateTableDesign: '/dataschema/{:datasetId}/tableSchema',
   validate: '/orchestrator/jobs/addValidationJob/{:datasetId}?code={:code}',
   validateAsProvider:

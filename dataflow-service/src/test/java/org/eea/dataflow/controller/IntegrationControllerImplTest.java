@@ -475,8 +475,8 @@ public class IntegrationControllerImplTest {
   public void executeIntegrationProcessTest() {
     Mockito.when(integrationExecutorFactory.getExecutor(Mockito.any()))
         .thenReturn(integrationExecutorService);
-    assertNull("assertion error",
-        integrationControllerImpl.executeIntegrationProcess(null, null, null, null, null, null));
+    assertNull("assertion error", integrationControllerImpl.executeIntegrationProcess(null, null,
+        null, null, null, null, null));
   }
 
 
