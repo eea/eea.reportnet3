@@ -100,7 +100,7 @@ export const ManageDataflowForm = forwardRef(
         let filteredGroups;
         if (!isCitizenScienceDataflow) {
           filteredGroups = availableProviderGroups.filter(
-            group => group.dataProviderGroupId === 2 || group.dataProviderGroupId === 8
+            group => group.dataProviderGroupId === 2 || group.dataProviderGroupId === 8 || group.dataProviderGroupId === 9
           );
         }
         setProviderGroups(isCitizenScienceDataflow ? availableProviderGroups.data : filteredGroups);
