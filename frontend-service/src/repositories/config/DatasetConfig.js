@@ -63,7 +63,7 @@ export const DatasetConfig = {
   exportDatasetData: '/dataset/{:datasetId}/exportDatasetFile?mimeType={:fileType}',
   exportDatasetDataDL: '/dataset/{:datasetId}/exportDatasetFileDL?mimeType={:fileType}&code={:code}',
   exportDatasetDataExternal:
-    '/dataset/exportFileThroughIntegration?datasetId={:datasetId}&integrationId={:integrationId}}&code={:code}',
+    '/dataset/exportFileThroughIntegration?datasetId={:datasetId}&integrationId={:integrationId}&code={:code}',
   exportTableData: '/dataset/exportFile?datasetId={:datasetId}&tableSchemaId={:tableSchemaId}&mimeType={:fileType}',
   exportTableDataDL:
     '/dataset/exportFileDL?datasetId={:datasetId}&tableSchemaId={:tableSchemaId}&mimeType={:fileType}&code={:code}',
