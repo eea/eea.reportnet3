@@ -4,8 +4,10 @@ import feign.FeignException;
 import org.apache.commons.collections.ListUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.eea.datalake.service.DremioHelperService;
 import org.eea.datalake.service.S3Helper;
+import org.eea.datalake.service.S3Service;
 import org.eea.datalake.service.annotation.ImportDataLakeCommons;
 import org.eea.datalake.service.impl.S3ServiceImpl;
 import org.eea.datalake.service.model.S3PathResolver;
@@ -25,9 +27,11 @@ import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
+import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.DatasetRunningStatusEnum;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.FileTypeEnum;
+import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaIdNameVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.integration.IntegrationVO;
@@ -43,6 +47,7 @@ import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.utils.LiteralConstants;
+import org.eea.utils.UtilityClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -118,6 +123,12 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
     @Autowired
     DatasetSchemaService datasetSchemaService;
+
+    @Autowired
+    S3Service s3ServicePrivate;
+
+    @Autowired
+    S3Helper s3HelperPrivate;
 
     @Autowired
     DataFlowController.DataFlowControllerZuul dataFlowControllerZuul;
@@ -365,7 +376,8 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             handleFmeRequest(integrationVO, importFileInDremioInfo, filesToImport.get(0), mimeType);
         } else {
             List<File> correctFilesForImport = checkCsvFiles(importFileInDremioInfo, schema, filesToImport, integrationVO, mimeType);
-            parquetConverterService.convertCsvFilesToParquetFiles(importFileInDremioInfo, correctFilesForImport, schema);
+            DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(importFileInDremioInfo.getDatasetId());
+            parquetConverterService.convertCsvFilesToParquetFiles(importFileInDremioInfo, correctFilesForImport, schema, dataSetMetabaseVO);
         }
     }
 
@@ -733,12 +745,13 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
     @Override
     public void deleteTableData(Long datasetId, Long dataflowId, Long providerId, String tableSchemaId, String tableSchemaName, Long jobId) throws Exception {
+
         if(tableSchemaName == null) {
             String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
             tableSchemaName = datasetSchemaService.getTableSchemaName(datasetSchemaId, tableSchemaId);
         }
+        DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
         if(providerId == null){
-            DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
             providerId = dataSetMetabaseVO.getDataProviderId();
         }
         if(providerId == null){
@@ -749,7 +762,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         String s3PathForCsvFolder = s3Service.getTableAsFolderQueryPath(s3ImportPathResolver, S3_IMPORT_TABLE_NAME_FOLDER_PATH);
 
         //remove csv files that are related to the table
-        parquetConverterService.removeCsvFilesThatWillBeReplaced(s3ImportPathResolver, tableSchemaName, s3PathForCsvFolder);
+        parquetConverterService.removeCsvFilesThatWillBeReplaced(s3ImportPathResolver, tableSchemaName, s3PathForCsvFolder, datasetId, dataSetMetabaseVO);
 
         S3PathResolver s3TablePathResolver = new S3PathResolver(dataflowId, providerId, datasetId, tableSchemaName, tableSchemaName, S3_TABLE_NAME_FOLDER_PATH);
         //remove folders that contain the previous parquet files
@@ -805,4 +818,109 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         }
     }
 
+
+    @Override
+    public void createPrefilledTables(Long designDatasetId, String designDatasetSchemaId, Long datasetIdForCreation, Long providerId, String tableSchemaId) throws Exception {
+        DataSetMetabaseVO designDataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(designDatasetId);
+
+        List<TableSchemaIdNameVO> tables = datasetSchemaService.getTableSchemasIds(designDatasetId);
+        for (TableSchemaIdNameVO table : tables) {
+            //check if we need to create prefilled data for a specific table only
+            if(StringUtils.isNotBlank(tableSchemaId) && !table.getIdTableSchema().equals(tableSchemaId)){
+                continue;
+            }
+            TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(table.getIdTableSchema(), designDatasetSchemaId);
+            if (tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getToPrefill())) {
+                //copy table folder from design to dataset with id datasetIdForCreation and promote folder
+                String tableSchemaName = tableSchemaVO.getNameTableSchema();
+
+                S3PathResolver s3DesignTablePathResolver = new S3PathResolver(designDataSetMetabaseVO.getDataflowId(), 0L, designDatasetId, tableSchemaName, tableSchemaName, S3_TABLE_AS_FOLDER_QUERY_PATH);
+                //query path for the design table
+                String dremioDesignTableQueryPath = s3ServicePrivate.getTableAsFolderQueryPath(s3DesignTablePathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
+
+                S3PathResolver s3NewTablePathResolver = new S3PathResolver(designDataSetMetabaseVO.getDataflowId(), providerId, datasetIdForCreation, tableSchemaName, tableSchemaName, S3_TABLE_AS_FOLDER_QUERY_PATH);
+                //query path for the new table
+                String dremioNewTableQueryPath = s3ServicePrivate.getTableAsFolderQueryPath(s3NewTablePathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
+
+                String providerCode = "''";
+                if(providerId != 0L) {
+                    DataProviderVO dataProviderVO = representativeControllerZuul.findDataProviderById(providerId);
+                    providerCode = "'" + dataProviderVO.getCode() + "'";
+                }
+
+                List<FieldSchemaVO> fieldSchemas = tableSchemaVO.getRecordSchema().getFieldSchema();
+                String tableHeaders = constructRecordIdCreationForQuery();
+                tableHeaders += ", " + providerCode + " AS " + UtilityClass.addQuotesToFieldNames(PARQUET_PROVIDER_CODE_COLUMN_HEADER) + ", ";
+
+
+                for (FieldSchemaVO fieldSchema : fieldSchemas) {
+                    if (fieldSchema.getType().equals(DataType.ATTACHMENT)) {
+                        // Remove attachment file name
+                        tableHeaders += " '' AS ";
+                    }
+                    // Wrap field names in double quotes
+                    tableHeaders += UtilityClass.addQuotesToFieldNames(fieldSchema.getName()) + ", ";
+                }
+
+                // Remove the trailing comma, if any
+                if (tableHeaders.endsWith(", ")) {
+                    tableHeaders = tableHeaders.substring(0, tableHeaders.length() - 2);
+                }
+
+                // Remove previous data if it exists
+                S3PathResolver s3TablePathResolver = new S3PathResolver(
+                        designDataSetMetabaseVO.getDataflowId(),
+                        providerId,
+                        datasetIdForCreation,
+                        tableSchemaName,
+                        tableSchemaName,
+                        S3_TABLE_AS_FOLDER_QUERY_PATH
+                );
+
+                if (s3HelperPrivate.checkFolderExist(s3TablePathResolver, S3_TABLE_NAME_FOLDER_PATH)) {
+                    // Remove old Parquet table because it will be recreated
+                    dremioHelperService.demoteFolderOrFile(s3TablePathResolver, tableSchemaVO.getNameTableSchema());
+                    s3HelperPrivate.deleteFolder(s3TablePathResolver, S3_TABLE_NAME_FOLDER_PATH);
+                }
+
+                if (!s3HelperPrivate.checkFolderExist(s3DesignTablePathResolver, S3_TABLE_NAME_FOLDER_PATH) ||
+                        !dremioHelperService.checkFolderPromoted(s3DesignTablePathResolver, tableSchemaName)) {
+                    kafkaSenderUtils.releaseNotificableKafkaEvent(
+                            EventType.PREFILLED_TABLE_HAS_NO_DATA_ERROR,
+                            null,
+                            NotificationVO.builder()
+                                    .user(SecurityContextHolder.getContext().getAuthentication().getName())
+                                    .dataflowId(designDataSetMetabaseVO.getDataflowId())
+                                    .datasetId(designDatasetId)
+                                    .tableSchemaId(tableSchemaId)
+                                    .build()
+                    );
+
+                    String exceptionMsg = "Table marked as prefilled has no data";
+                    throw new Exception(exceptionMsg);
+                }
+
+                // Construct the query to create the prefilled table
+                String queryToCreatePrefilledTable =
+                        "CREATE TABLE " + dremioNewTableQueryPath + " AS SELECT " + tableHeaders + " FROM " + dremioDesignTableQueryPath;
+
+                String processId = dremioHelperService.executeSqlStatement(queryToCreatePrefilledTable);
+                dremioHelperService.checkIfDremioProcessFinishedSuccessfully(queryToCreatePrefilledTable, processId, null);
+
+                //refresh the metadata
+                dremioHelperService.refreshTableMetadataAndPromote(null, dremioNewTableQueryPath, s3NewTablePathResolver, tableSchemaName);
+                LOG.info("Created prefilled data for datasetId {} and table {} from designDatasetId {} ", datasetIdForCreation, tableSchemaVO.getNameTableSchema(), designDatasetId);
+            }
+        }
+    }
+
+    private String constructRecordIdCreationForQuery(){
+        return "CONCAT(\n" +
+                "        LOWER(LPAD(TO_HEX(CAST(RAND() * 4294967295 AS BIGINT)), 8, '0')), '-',\n" +
+                "        LOWER(LPAD(TO_HEX(CAST(RAND() * 65535 AS BIGINT)), 4, '0')), '-',\n" +
+                "        LOWER(LPAD(TO_HEX(CAST(RAND() * 65535 AS BIGINT)), 4, '0')), '-',\n" +
+                "        LOWER(LPAD(TO_HEX(CAST(RAND() * 65535 AS BIGINT)), 4, '0')), '-',\n" +
+                "        LOWER(LPAD(TO_HEX(CAST(RAND() * 281474976710655 AS BIGINT)), 12, '0'))\n" +
+                "    ) AS " + PARQUET_RECORD_ID_COLUMN_HEADER + " ";
+    }
 }

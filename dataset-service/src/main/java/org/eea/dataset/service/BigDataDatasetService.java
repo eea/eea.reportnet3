@@ -58,4 +58,7 @@ public interface BigDataDatasetService {
      */
     void deleteDatasetData(Long datasetId, Long dataflowId, Long providerId, Boolean deletePrefilledTables, Long jobId) throws Exception;
 
+
+    void createPrefilledTables(Long designDatasetId, String designDatasetSchemaId, Long datasetIdForCreation, Long providerId, String tableSchemaId) throws Exception;
+
 }

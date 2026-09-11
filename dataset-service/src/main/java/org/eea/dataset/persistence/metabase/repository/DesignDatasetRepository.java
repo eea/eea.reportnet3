@@ -46,4 +46,13 @@ public interface DesignDatasetRepository extends CrudRepository<DesignDataset, L
    */
   void deleteById(Long id);
 
+  /**
+   * Find by dataflow id and dataset schema id.
+   *
+   * @param dataflowId the dataflow id
+   * @param datasetSchemaId the dataset schema id
+   * @return the list
+   */
+  DesignDataset findByDataflowIdAndDatasetSchema(Long dataflowId, String datasetSchemaId);
+
 }
