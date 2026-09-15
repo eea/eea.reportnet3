@@ -823,7 +823,7 @@ public class JobControllerImpl implements JobController {
             else{
                 fileName = String.format(FILE_PATTERN_NAME_V2, jobId) + ".zip";
             }
-            LOG.info("Downloading file generated from etl export for jobId {}", jobId);
+            LOG.info("Downloading file generated from etl export for jobId {} and preparation code {}", jobId, job.getPreparationCode());
             File file = jobService.downloadEtlExportedFile(job, fileName);
             LOG.info("Successfully downloaded file generated from etl export for jobId {}", jobId);
             response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
