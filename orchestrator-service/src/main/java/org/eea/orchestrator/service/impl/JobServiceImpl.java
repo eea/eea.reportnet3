@@ -745,20 +745,23 @@ public class JobServiceImpl implements JobService {
     @Override
     public File downloadEtlExportedFile(JobVO job, String fileName) throws EEAException {
         // we compound the route and create the file
+        String preparationCode = job.getPreparationCode();
+        String preparationCodePath = StringUtils.isNotBlank(preparationCode) ? "/" + preparationCode : "";
 
         File file;
+        String folderToZipPath = null;
         if(job.getParameters().get(EXPORT_CSV) != null && BooleanUtils.isTrue((Boolean) job.getParameters().get(EXPORT_CSV))){
-            String folderToZipPath = exportDLPath + DATASET_PREFIX_FOR_EXPORT + job.getDatasetId() + "/etlExportV4_" + job.getId();
+            folderToZipPath = exportDLPath + DATASET_PREFIX_FOR_EXPORT + job.getDatasetId() + preparationCodePath + "/etlExportV4_" + job.getId();
             file = getFile(folderToZipPath);
         } else if (job.getParameters().get(EXPORT_PARQUET) != null && BooleanUtils.isTrue((Boolean) job.getParameters().get(EXPORT_PARQUET))) {
-            String folderToZipPath = exportDLPath + DATASET_PREFIX_FOR_EXPORT + job.getDatasetId() + LiteralConstants.PARQUET_EXPORT_NAME + job.getId();
+            folderToZipPath = exportDLPath + DATASET_PREFIX_FOR_EXPORT + job.getDatasetId() + preparationCodePath + LiteralConstants.PARQUET_EXPORT_NAME + job.getId();
             file = getFile(folderToZipPath);
         } else{
             file = new File(new File(importPath, ETL_EXPORT), FilenameUtils.getName(fileName));
         }
         // we compound the route and create the file
         if (!file.exists()) {
-            LOG.error( "Trying to download a file generated during the export dataset data process for jobId {} but the file {} is not found", job.getId(), fileName);
+            LOG.error( "Trying to download a file generated during the export dataset data process for jobId {} but the file {} is not found at {} ", job.getId(), fileName, folderToZipPath);
             throw new EEAException(EEAErrorMessage.FILE_NOT_FOUND);
         }
         return file;
