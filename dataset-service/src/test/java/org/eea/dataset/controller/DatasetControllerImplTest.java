@@ -2364,8 +2364,8 @@ public class DatasetControllerImplTest {
     Mockito.when(datasetMetabaseService.findDatasetMetabase(1L)).thenReturn(dataSetMetabaseVO);
     Mockito.when(datasetMetabaseService.findDatasetMetabase(2L)).thenReturn(dataSetMetabaseVO);
     Mockito.when(dataFlowControllerZuul.isBigDataflow(1010L)).thenReturn(true);
-    Mockito.when(jobControllerZuul.findActiveJobsRelatedToADatasetId(1L, 1010L, 32L)).thenReturn(new ArrayList<>());
-    Mockito.when(jobControllerZuul.findActiveJobsRelatedToADatasetId(2L, 1010L, 32L)).thenReturn(new ArrayList<>());
+    Mockito.when(jobControllerZuul.findActiveJobsRelatedToADatasetId(1L, 1010L, 32L, null)).thenReturn(new ArrayList<>());
+    Mockito.when(jobControllerZuul.findActiveJobsRelatedToADatasetId(2L, 1010L, 32L, null)).thenReturn(new ArrayList<>());
     Mockito.when(redisLockService.checkAndAcquireLock(eq(lockKey1),anyString(),anyLong())).thenReturn(true);
     Mockito.when(redisLockService.checkAndAcquireLock(eq(lockKey2),anyString(),anyLong())).thenReturn(true);
 
@@ -2378,6 +2378,7 @@ public class DatasetControllerImplTest {
     Mockito.verify(bigDataDatasetService, Mockito.times(1))
             .initiateIcebergToParquetConversion(
                     eq(1L),
+                    isNull(),
                     eq(1010L),
                     eq(32L),
                     eq(Arrays.asList("s1table1", "s1table2")),
@@ -2385,6 +2386,7 @@ public class DatasetControllerImplTest {
     Mockito.verify(bigDataDatasetService, Mockito.times(1))
             .initiateIcebergToParquetConversion(
                     eq(2L),
+                    isNull(),
                     eq(1010L),
                     eq(32L),
                     eq(Arrays.asList("s2table1", "s2table2", "s2table3")),
@@ -2432,8 +2434,8 @@ public class DatasetControllerImplTest {
     Mockito.when(datasetMetabaseService.findDatasetMetabase(1L)).thenReturn(dataSetMetabaseVO);
     Mockito.when(datasetMetabaseService.findDatasetMetabase(2L)).thenReturn(dataSetMetabaseVO);
     Mockito.when(dataFlowControllerZuul.isBigDataflow(dataflowId)).thenReturn(true);
-    Mockito.when(jobControllerZuul.findActiveJobsRelatedToADatasetId(1L, dataflowId, 32L)).thenReturn(new ArrayList<>());
-    Mockito.when(jobControllerZuul.findActiveJobsRelatedToADatasetId(2L, dataflowId, 32L)).thenReturn(new ArrayList<>());
+    Mockito.when(jobControllerZuul.findActiveJobsRelatedToADatasetId(1L, dataflowId, 32L, null)).thenReturn(new ArrayList<>());
+    Mockito.when(jobControllerZuul.findActiveJobsRelatedToADatasetId(2L, dataflowId, 32L, null)).thenReturn(new ArrayList<>());
     Mockito.when(redisLockService.checkAndAcquireLock(eq(lockKey1),anyString(),anyLong())).thenReturn(true);
     Mockito.when(redisLockService.checkAndAcquireLock(eq(lockKey2),anyString(),anyLong())).thenReturn(true);
 
@@ -2446,6 +2448,7 @@ public class DatasetControllerImplTest {
     Mockito.verify(bigDataDatasetService, Mockito.times(1))
             .initiateIcebergToParquetConversion(
                     eq(1L),
+                    isNull(),
                     eq(1010L),
                     eq(32L),
                     eq(Arrays.asList("s1table1", "s1table2")),
@@ -2453,6 +2456,7 @@ public class DatasetControllerImplTest {
     Mockito.verify(bigDataDatasetService, Mockito.times(1))
             .initiateIcebergToParquetConversion(
                     eq(2L),
+                    isNull(),
                     eq(1010L),
                     eq(32L),
                     eq(Arrays.asList("s2table1", "s2table2", "s2table3")),
@@ -2499,7 +2503,7 @@ public class DatasetControllerImplTest {
     Mockito.when(datasetTableService.getDatasetTablesByDatasetIdAndIcebergTable(datasetId, true)).thenReturn(datasetTableVOs);
     Mockito.when(datasetMetabaseService.findDatasetMetabase(datasetId)).thenReturn(dataSetMetabaseVO);
     Mockito.when(dataFlowControllerZuul.isBigDataflow(dataflowId)).thenReturn(true);
-    Mockito.when(jobControllerZuul.findActiveJobsRelatedToADatasetId(datasetId, dataflowId, 32L)).thenReturn(new ArrayList<>());
+    Mockito.when(jobControllerZuul.findActiveJobsRelatedToADatasetId(datasetId, dataflowId, 32L, null)).thenReturn(new ArrayList<>());
     Mockito.when(redisLockService.checkAndAcquireLock(eq(lockKey1),anyString(),anyLong())).thenReturn(true);
 
     classUnderTest.clearDatasetTableLocksByDataset(datasetId);
@@ -2509,6 +2513,7 @@ public class DatasetControllerImplTest {
     Mockito.verify(bigDataDatasetService, Mockito.times(1))
             .initiateIcebergToParquetConversion(
                     eq(1L),
+                    isNull(),
                     eq(1010L),
                     eq(32L),
                     eq(Arrays.asList("s1table1", "s1table2","s1table3","s1table4","s1table5")),
@@ -2554,8 +2559,8 @@ public class DatasetControllerImplTest {
     Mockito.when(datasetMetabaseService.findDatasetMetabase(1L)).thenReturn(dataSetMetabaseVO);
     Mockito.when(datasetMetabaseService.findDatasetMetabase(2L)).thenReturn(dataSetMetabaseVO);
     Mockito.when(dataFlowControllerZuul.isBigDataflow(1010L)).thenReturn(true);
-    Mockito.when(jobControllerZuul.findActiveJobsRelatedToADatasetId(1L, 1010L, 32L)).thenReturn(new ArrayList<>());
-    Mockito.when(jobControllerZuul.findActiveJobsRelatedToADatasetId(2L, 1010L, 32L)).thenReturn(new ArrayList<>());
+    Mockito.when(jobControllerZuul.findActiveJobsRelatedToADatasetId(1L, 1010L, 32L, null)).thenReturn(new ArrayList<>());
+    Mockito.when(jobControllerZuul.findActiveJobsRelatedToADatasetId(2L, 1010L, 32L, null)).thenReturn(new ArrayList<>());
     Mockito.when(redisLockService.checkAndAcquireLock(eq(lockKey1),anyString(),anyLong())).thenReturn(true);
     Mockito.when(redisLockService.checkAndAcquireLock(eq(lockKey2),anyString(),anyLong())).thenReturn(true);
 
@@ -2568,6 +2573,7 @@ public class DatasetControllerImplTest {
     Mockito.verify(bigDataDatasetService, Mockito.times(1))
             .initiateIcebergToParquetConversion(
                     eq(1L),
+                    isNull(),
                     eq(1010L),
                     eq(32L),
                     eq(Arrays.asList("s1table1", "s1table2")),
@@ -2575,6 +2581,7 @@ public class DatasetControllerImplTest {
     Mockito.verify(bigDataDatasetService, Mockito.times(1))
             .initiateIcebergToParquetConversion(
                     eq(2L),
+                    isNull(),
                     eq(1010L),
                     eq(32L),
                     eq(Arrays.asList("s2table1", "s2table2", "s2table3")),
@@ -2630,8 +2637,8 @@ public class DatasetControllerImplTest {
     Mockito.when(datasetMetabaseService.findDatasetMetabase(1L)).thenReturn(dataSetMetabaseVO);
     Mockito.when(datasetMetabaseService.findDatasetMetabase(2L)).thenReturn(dataSetMetabaseVO);
     Mockito.when(dataFlowControllerZuul.isBigDataflow(1010L)).thenReturn(true);
-    Mockito.when(jobControllerZuul.findActiveJobsRelatedToADatasetId(1L, 1010L, 32L)).thenReturn(new ArrayList<>());
-    Mockito.when(jobControllerZuul.findActiveJobsRelatedToADatasetId(2L, 1010L, 32L)).thenReturn(new ArrayList<>());
+    Mockito.when(jobControllerZuul.findActiveJobsRelatedToADatasetId(1L, 1010L, 32L, null)).thenReturn(new ArrayList<>());
+    Mockito.when(jobControllerZuul.findActiveJobsRelatedToADatasetId(2L, 1010L, 32L, null)).thenReturn(new ArrayList<>());
     Mockito.when(redisLockService.checkAndAcquireLock(eq(lockKey1),anyString(),anyLong())).thenReturn(true);
     Mockito.when(redisLockService.checkAndAcquireLock(eq(lockKey2),anyString(),anyLong())).thenReturn(true);
 
@@ -2644,6 +2651,7 @@ public class DatasetControllerImplTest {
     Mockito.verify(bigDataDatasetService, Mockito.times(1))
             .initiateIcebergToParquetConversion(
                     eq(1L),
+                    isNull(),
                     eq(1010L),
                     eq(32L),
                     eq(Arrays.asList("s1table1", "s1table2")),
@@ -2651,6 +2659,7 @@ public class DatasetControllerImplTest {
     Mockito.verify(bigDataDatasetService, Mockito.times(1))
             .initiateIcebergToParquetConversion(
                     eq(2L),
+                    isNull(),
                     eq(1010L),
                     eq(32L),
                     eq(Arrays.asList("s2table1", "s2table2", "s2table3")),
