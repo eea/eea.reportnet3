@@ -200,7 +200,7 @@ public class JobForFmeStatusPolling {
     }
 
     private JSONObject pollFmeForJobStatusAndGetResponse(String jobId, String fmeJobId) throws FmeIntegrationException, IOException {
-        String fmePollingUrl = "https://fme.discomap.eea.europa.eu/fmerest/v3/transformations/jobs/id/" + fmeJobId;
+        String fmePollingUrl = "https://fme.discomap.eea.europa.eu/fmeapiv4/jobs/" + fmeJobId;
 
         HttpGet request = new HttpGet(fmePollingUrl);
         request.addHeader(HttpHeaders.ACCEPT, MEDIA_TYPE_JSON);
