@@ -308,7 +308,6 @@ export const ManageDataflow = ({
     );
   };
 
-
   const renderDataflowDialog = () => {
     const renderDeleteDataflowButton = () => {
       if (isEditing && !isDataflowOpen && (isCustodian || isAdmin)) {
@@ -417,11 +416,13 @@ export const ManageDataflow = ({
           )}
           {renderCheckBoxPinned()}
         </div>
-        <div className="p-toolbar-group-left">{renderBigDataStorage()}</div>
-        {!isEditing && <div className="p-toolbar-group-left">{renderOfficialReporting()}</div>}
-        {!isEditing && (reportingDataflowState.bigDataStorage || isCitizenScienceDataflow) && (
-          <div className="p-toolbar-group-left">{renderPreparationEnabled()}</div>
-        )}
+        <div className={styles.dialogFooter}>
+          <div className="p-toolbar-group-left">{renderBigDataStorage()}</div>
+          {!isEditing && <div className="p-toolbar-group-left">{renderOfficialReporting()}</div>}
+          {!isEditing && (reportingDataflowState.bigDataStorage || isCitizenScienceDataflow) && (
+            <div className="p-toolbar-group-left">{renderPreparationEnabled()}</div>
+          )}
+        </div>
         <Button
           className={`p-button-primary ${
             !(isCitizenScienceDataflow && isEmpty(reportingDataflowState.providerGroup)) &&

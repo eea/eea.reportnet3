@@ -6,6 +6,7 @@ import org.eea.datalake.service.SpatialDataHandling;
 import org.eea.datalake.service.SpatialDataHelper;
 import org.eea.datalake.service.model.SpatialDataDescriptor;
 import org.eea.datalake.service.model.SpatialFieldInfo;
+import org.eea.exception.SRIDConversionException;
 import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
@@ -97,6 +98,29 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
       LOG.error("SpatialDataHandlingImpl.convertToHEX() Invalid GeoJson!! Tried to convert the geoJson , to HEX but failed at line {}, with message: {}", lineNumber, e.getMessage());
     }
     return spatialDataHelper.bytesToHex(new byte[0]);
+  }
+
+  @Override
+  public String convertToHexWithSRidCheck(String value, long lineNumber, SpatialFieldInfo spatialFieldInfo, String headerName)
+          throws ParseException, IOException, SRIDConversionException {
+
+    if (!value.isBlank() && spatialDataHelper.isValidJSON(value)) {
+      final Geometry geometry = geoJsonReader.read(value);
+      final String srid = spatialDataHelper.extractSRID(value);
+      if (srid.isBlank()) {
+        throw new SRIDConversionException("SRid failed to be converted.");
+      }
+      geometry.setSRID(Integer.parseInt(srid));
+
+      final byte[] geomByteArray = new WKBWriter(2, true).write(geometry);
+
+      if (spatialFieldInfo != null && fieldExceedsMaxSize(lineNumber, spatialFieldInfo, geomByteArray)) {
+        spatialFieldInfo.setFieldName(headerName);
+        return "";
+      }
+      return spatialDataHelper.bytesToHex(geomByteArray);
+    }
+    return "";
   }
 
   @Override

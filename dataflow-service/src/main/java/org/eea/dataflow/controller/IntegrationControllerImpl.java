@@ -297,6 +297,7 @@ public class IntegrationControllerImpl implements IntegrationController {
    * @param datasetId the dataset id
    * @param jobId the job id
    * @param integration the integration
+   * @param preparationCode the preparation code
    *
    * @return the execution result VO
    */
@@ -316,7 +317,9 @@ public class IntegrationControllerImpl implements IntegrationController {
                                                      @ApiParam(value = "Dataset id", example = "0") @RequestParam("datasetId") Long datasetId,
                                                      @ApiParam(type = "Object",
                                                              value = "IntegrationVO Object") @RequestBody IntegrationVO integration,
-                                                     @RequestParam(name = "jobId", required = false) final String jobId) {
+                                                     @RequestParam(name = "jobId", required = false) final String jobId,
+                                                     @RequestParam(name = "code",
+                                                             required = false) final String preparationCode) {
     try{
       JobVO jobVO = null;
       if(jobId != null) {
@@ -324,7 +327,7 @@ public class IntegrationControllerImpl implements IntegrationController {
         LOG.info("Retrieved job with id {}", jobId);
       }
       return integrationExecutorFactory.getExecutor(integrationToolTypeEnum)
-              .execute(integrationOperationTypeEnum, file, datasetId, integration, jobVO);
+              .execute(integrationOperationTypeEnum, preparationCode, file, datasetId, integration, jobVO);
     } catch (Exception e) {
       LOG.error("Unexpected error! Could not execute integration process for file {} and datasetId {}. Message: {}", file, datasetId, e.getMessage());
       throw e;

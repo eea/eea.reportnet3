@@ -127,8 +127,6 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @Lazy
   @Autowired
   private BigDataDatasetService bigDataDatasetService;
-    @Autowired
-    private DataFlowControllerZuul dataFlowControllerZuul;
 
     /**
    * Creates the empty dataset schema.
@@ -584,10 +582,19 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
       if(Boolean.TRUE.equals(isBigDataFlow)){
         updateMaterializedViews = false;
       }
-      if (BooleanUtils.isTrue(isBigDataFlow) && !StringUtil.isNullOrEmpty(tableSchemaVO.getIdTableSchema())) {
+      //Deleting data from the old table and creating a new table should only occur when renaming a table, meaning when
+      //getNameTableSchema is not blank.
+      if (BooleanUtils.isTrue(isBigDataFlow)
+              && !StringUtil.isNullOrEmpty(tableSchemaVO.getIdTableSchema())
+              && StringUtils.isNotBlank(tableSchemaVO.getNameTableSchema())) {
         bigDataDatasetService.deleteTableData(datasetId, dataflowId, null, null, tableSchemaVO.getIdTableSchema(), null, false);
-      }
+       }
       dataschemaService.updateTableSchema(datasetId, tableSchemaVO, updateMaterializedViews);
+
+      //Creating an empty table for the new table name is required for ValidateQCs functionality to work correctly.
+      if (StringUtils.isNoneBlank(tableSchemaVO.getNameTableSchema())) {
+        bigDataDatasetService.createEmptyTablesForSpecificTableSchema(datasetId, tableSchemaVO.getIdTableSchema());
+      }
     } catch (EEAException e) {
       LOG.error("Error updating table schema for datasetId {}. Message: {}", datasetId, e.getMessage(), e);
       if (e.getMessage() != null

@@ -20,6 +20,7 @@ import org.eea.interfaces.controller.dataset.DatasetMetabaseController;
 import org.eea.interfaces.controller.dataset.DatasetSchemaController.DatasetSchemaControllerZuul;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
+import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.utils.UtilityClass;
 import org.eea.validation.service.DremioRulesExecuteService;
@@ -44,6 +45,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.eea.utils.LiteralConstants.*;
 
@@ -135,23 +137,30 @@ public class DremioNonSqlRulesExecuteServiceImpl implements DremioRulesExecuteSe
             RuleVO ruleVO = rulesService.findRule(datasetSchemaId, ruleId);
             deleteRuleFolderIfExists(validationResolver, ruleVO, preparationCode);
             int startIndex = ruleVO.getWhenConditionMethod().indexOf(OPEN_PARENTHESIS);
-            int endIndex = ruleVO.getWhenConditionMethod().indexOf(CLOSE_PARENTHESIS);
+            // endIndex uses lastIndexOf in case the method parameter contains more parentheses.
+            int endIndex = ruleVO.getWhenConditionMethod().lastIndexOf(CLOSE_PARENTHESIS);
             String ruleMethodName = ruleVO.getWhenConditionMethod().substring(0, startIndex);
             List<String> parameters = dremioRulesService.processRuleMethodParameters(ruleVO, startIndex, endIndex);
           switch (ruleMethodName) {
             case IS_MULTI_SELECT_CODE_LIST_VALIDATE:
-              ruleMethodName = MULTI_SELECT_CODE_LIST_VALIDATE;
-              break;
+                ruleMethodName = MULTI_SELECT_CODE_LIST_VALIDATE;
+                parameters = new ArrayList<>();
+                parameters.add(VALUE);
+                parameters.add(getCodelistItems(datasetSchemaId, ruleVO.getReferenceId()));
+                break;
             case IS_CODE_LIST_INSENSITIVE:
-              ruleMethodName = CODE_LIST_VALIDATE;
-              parameters.add(FALSE);
-              break;
+                ruleMethodName = CODE_LIST_VALIDATE;
+                parameters = new ArrayList<>();
+                parameters.add(VALUE);
+                parameters.add(getCodelistItems(datasetSchemaId, ruleVO.getReferenceId()));
+                parameters.add(FALSE);
+                break;
             case IS_GEOMETRY:
-              ruleMethodName = VALIDATE_GEOMETRY_DREMIO;
-              break;
+                ruleMethodName = VALIDATE_GEOMETRY_DREMIO;
+                break;
             case CHECK_EPSGSRID:
-              ruleMethodName = CHECK_EPSGSRID_VALIDATION;
-              break;
+                ruleMethodName = CHECK_EPSGSRID_VALIDATION;
+                break;
           }
 
             String fieldName = datasetSchemaControllerZuul.getFieldName(datasetSchemaId, tableSchemaId, parameters, ruleVO.getReferenceId(), ruleVO.getReferenceFieldSchemaPKId());
@@ -189,6 +198,24 @@ public class DremioNonSqlRulesExecuteServiceImpl implements DremioRulesExecuteSe
             LOG.error("Error creating validation folder for ruleId {}, datasetId {} and taskId {},{}", ruleId, datasetId, taskId, e1.getMessage());
             throw new DremioValidationException(e1.getMessage());
         }
+    }
+
+    /**
+     * For multiple code list fields, when the actual options contain ",", the rules engine will split the parameters
+     * string resulting to a list with wrong entries.
+     * Joining them again is necessary to avoid false validation results.
+     * @param datasetSchemaId
+     * @param fieldSchemaId
+     * @return
+     */
+    private String getCodelistItems(String datasetSchemaId, String fieldSchemaId) {
+        FieldSchemaVO fieldSchemaVO =
+            datasetSchemaControllerZuul.getFieldSchema(
+                datasetSchemaId,
+                fieldSchemaId
+            );
+
+        return "[" + String.join(";", fieldSchemaVO.getCodelistItems()) + "]";
     }
 
     /**
@@ -453,7 +480,9 @@ public class DremioNonSqlRulesExecuteServiceImpl implements DremioRulesExecuteSe
                     }
                     break;
                 case 2:
-                    isValid = (boolean) method.invoke(object, getConvertedString(rs, fieldName), parameters.get(1));  //ValidationDroolsUtils methods
+                    String convertedValue = getConvertedString(rs, fieldName);
+                    isValid = (boolean) method.invoke(object, convertedValue, parameters.get(1));  //ValidationDroolsUtils methods
+                    LOG.info("Validation method {} result={} for rawValue=[{}]", method.getName(), isValid, convertedValue);
                     break;
                 case 3:
                     isValid = (boolean) method.invoke(object, getConvertedString(rs, fieldName), parameters.get(1), Boolean.parseBoolean(parameters.get(2)));  //ValidationDroolsUtils codelistValidate method

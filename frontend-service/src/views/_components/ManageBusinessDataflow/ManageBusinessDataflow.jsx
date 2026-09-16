@@ -386,13 +386,15 @@ export const ManageBusinessDataflow = ({
           )}
           {renderCheckBoxPinned()}
         </div>
-        <div className="p-toolbar-group-left">{renderBigDataStorage()}</div>
-        {bigData && (
-          <div className={`p-toolbar-group-left ${styles.checkboxWrapper}`}>
-            <div className={styles.checkboxItem}>{renderSncData && renderSncData(false, true, true)}</div>
-            <div className={styles.checkboxItem}>{renderPreparationEnabled()}</div>
-          </div>
-        )}
+        <div className={styles.dialogFooter}>
+          <div className="p-toolbar-group-left">{renderBigDataStorage()}</div>
+          {bigData && (
+            <div className={`p-toolbar-group-left ${styles.checkboxWrapper}`}>
+              <div className={styles.checkboxItem}>{renderSncData && renderSncData(false, true, true)}</div>
+              <div className={styles.checkboxItem}>{renderPreparationEnabled()}</div>
+            </div>
+          )}
+        </div>
         <Button
           className={`p-button-primary ${
             !isEmpty(name) &&

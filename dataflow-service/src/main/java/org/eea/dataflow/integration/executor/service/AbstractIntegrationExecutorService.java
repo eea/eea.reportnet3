@@ -20,12 +20,14 @@ public abstract class AbstractIntegrationExecutorService implements IntegrationE
    * Execute.
    *
    * @param integrationOperationTypeEnum the integration operation type enum
+   * @param preparationCode the preparation code
    * @param executionParams the execution params
    * @return the execution result VO
    */
   @Override
   public abstract ExecutionResultVO execute(
-      IntegrationOperationTypeEnum integrationOperationTypeEnum, Object... executionParams);
+      IntegrationOperationTypeEnum integrationOperationTypeEnum, String preparationCode,
+      Object... executionParams);
 
 
 }

@@ -119,7 +119,7 @@ public class FMEIntegrationExecutorServiceTest {
         .thenReturn(HttpStatus.OK);
     when(fmeJobRepository.save(Mockito.any())).thenReturn(fmeJob);
     when(integrationRepository.findById(Mockito.any())).thenReturn(Optional.of(integration));
-    fmeIntegrationExecutorService.execute(IntegrationOperationTypeEnum.EXPORT, "test", 1L,
+    fmeIntegrationExecutorService.execute(IntegrationOperationTypeEnum.EXPORT, null, "test", 1L,
         integrationVO);
     Mockito.verify(fmeJobRepository, times(2)).save(Mockito.any());
   }
@@ -141,7 +141,7 @@ public class FMEIntegrationExecutorServiceTest {
         .thenReturn(dataset);
     when(integrationRepository.findById(Mockito.any())).thenReturn(Optional.of(integration));
     when(fmeJobRepository.save(Mockito.any())).thenReturn(fmeJob);
-    fmeIntegrationExecutorService.execute(IntegrationOperationTypeEnum.IMPORT, "test", 1L,
+    fmeIntegrationExecutorService.execute(IntegrationOperationTypeEnum.IMPORT, null, "test", 1L,
         integrationVO);
     Mockito.verify(fmeJobRepository, times(2)).save(Mockito.any());
   }
@@ -164,7 +164,7 @@ public class FMEIntegrationExecutorServiceTest {
     when(fmeJobRepository.save(Mockito.any())).thenReturn(fmeJob);
     when(integrationRepository.findById(Mockito.any())).thenReturn(Optional.of(integration));
     fmeIntegrationExecutorService.execute(IntegrationOperationTypeEnum.IMPORT_FROM_OTHER_SYSTEM,
-        "test", 1L, integrationVO);
+        null, "test", 1L, integrationVO);
     Mockito.verify(fmeJobRepository, times(2)).save(Mockito.any());
   }
 
@@ -185,8 +185,8 @@ public class FMEIntegrationExecutorServiceTest {
         .thenReturn(dataset);
     when(fmeJobRepository.save(Mockito.any())).thenReturn(fmeJob);
     when(integrationRepository.findById(Mockito.any())).thenReturn(Optional.of(integration));
-    fmeIntegrationExecutorService.execute(IntegrationOperationTypeEnum.EXPORT_EU_DATASET, "test",
-        1L, integrationVO);
+    fmeIntegrationExecutorService.execute(IntegrationOperationTypeEnum.EXPORT_EU_DATASET, null,
+        "test", 1L, integrationVO);
     Mockito.verify(fmeJobRepository, times(2)).save(Mockito.any());
   }
 }

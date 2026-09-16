@@ -409,11 +409,21 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
     );
 
   useEffect(() => {
-    if (hasConversionNotification(notificationContext.toShow)) {
-      setIsLoadingIceberg(false);
-      onGetIcebergTables();
-      handleRefresh();
+    const notification = notificationContext.toShow;
+
+    if (!hasConversionNotification(notification)) {
+      return;
     }
+
+    const preparationCode = notification[0]?.content?.preparationCode;
+
+    if ((code ?? null) !== (preparationCode ?? null)) {
+      return;
+    }
+
+    setIsLoadingIceberg(false);
+    onGetIcebergTables();
+    handleRefresh();
   }, [notificationContext.toShow]);
 
   const getWebformConfiguration = async (webform, options) => {
@@ -487,12 +497,15 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
         await DatasetService.convertIcebergsToParquets({
           dataflowId,
           datasetId,
-          providerId: !isTestDataset ? metadata.dataset.dataProviderId : undefined
+          providerId: !isTestDataset ? metadata.dataset.dataProviderId : undefined,
+          preparationCode: code
         });
       } else {
         await DatasetService.convertIcebergsToParquets({
           dataflowId,
-          datasetId
+          datasetId,
+          undefined,
+          preparationCode: code
         });
       }
     } else {
@@ -500,12 +513,15 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
         await DatasetService.convertParquetsToIcebergs({
           dataflowId,
           datasetId,
-          providerId: !isTestDataset ? metadata.dataset.dataProviderId : undefined
+          providerId: !isTestDataset ? metadata.dataset.dataProviderId : undefined,
+          preparationCode: code
         });
       } else {
         await DatasetService.convertParquetsToIcebergs({
           dataflowId,
-          datasetId
+          datasetId,
+          undefined,
+          preparationCode: code
         });
       }
     }
@@ -987,7 +1003,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
     actionsContext.testProcess(datasetId, action, code);
     notificationContext.add({ type: 'EXPORT_DATASET_DATA' });
     try {
-      await DatasetService.exportDatasetDataExternal(datasetId, integrationId);
+      await DatasetService.exportDatasetDataExternal(datasetId, integrationId, code);
     } catch (error) {
       console.error('Dataset - onExportDataExternalIntegration.', error);
       notificationContext.add(
@@ -1773,7 +1789,6 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
               <Button
                 className={styles.openWebformButton}
                 disabled={
-                  code ||
                   (editingStatus?.isEditing && editingStatus?.editor !== userName) ||
                   (isAdmin && (!isCustodian || !isDataflowCustodian)) ||
                   !hasWritePermissions ||

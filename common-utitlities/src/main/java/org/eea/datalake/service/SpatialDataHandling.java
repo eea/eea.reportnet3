@@ -2,6 +2,7 @@ package org.eea.datalake.service;
 
 
 import org.eea.datalake.service.model.SpatialFieldInfo;
+import org.eea.exception.SRIDConversionException;
 import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
@@ -14,6 +15,9 @@ public interface SpatialDataHandling {
   boolean geoJsonHeadersAreNotEmpty(TableSchemaVO tableSchemaVO);
 
   String convertToHEX(String value, long lineNumber, SpatialFieldInfo spatialFieldInfo, String headerName);
+
+  String convertToHexWithSRidCheck(String value, long lineNumber, SpatialFieldInfo spatialFieldInfo, String headerName)
+          throws ParseException, IOException, SRIDConversionException;
 
   StringBuilder getHeaders(TableSchemaVO tableSchemaVO);
 

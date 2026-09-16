@@ -25,10 +25,7 @@ import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.FieldSchema;
 import org.eea.dataset.persistence.schemas.domain.RecordSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
-import org.eea.dataset.service.DatasetMetabaseService;
-import org.eea.dataset.service.DatasetService;
-import org.eea.dataset.service.DatasetSnapshotService;
-import org.eea.dataset.service.DesignDatasetService;
+import org.eea.dataset.service.*;
 import org.eea.dataset.service.impl.DataschemaServiceImpl;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
@@ -150,6 +147,9 @@ public class DatasetSchemaControllerImplTest {
   /** The notification controller zuul. */
   @Mock
   private NotificationControllerZuul notificationControllerZuul;
+
+  @Mock
+  private BigDataDatasetService bigDataDatasetServiceMock;
 
 
   /**

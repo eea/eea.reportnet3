@@ -40,6 +40,7 @@ public class IcebergToParquetConversionFailedEvent implements NotificableEventHa
     notification.put("datasetId", notificationVO.getDatasetId());
     notification.put("dataflowId", notificationVO.getDataflowId());
     notification.put("datasetName", datasetName);
+    notification.put("preparationCode", notificationVO.getPreparationCode());
     notification.put("message", "Iceberg to Parquet conversion failed.");
     return notification;
   }

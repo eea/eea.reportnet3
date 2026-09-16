@@ -95,6 +95,6 @@ public interface JobService {
 
     void restartImportJob(Long jobId, Boolean sendRestartNotification);
 
-    List<JobVO> findActiveJobsRelatedToADatasetId(Long datasetId, Long dataflowId, Long providerId);
+    List<JobVO> findActiveJobsRelatedToADatasetId(Long datasetId, String preparationCode, Long dataflowId, Long providerId);
 
     JobStatusEnum checkEligibilityOfPreparationJob(String jobType, Long datasetId, String preparationCode);}

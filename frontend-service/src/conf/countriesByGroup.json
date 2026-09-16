@@ -223,6 +223,11 @@
       "name": "Serbia",
       "code": "RS",
       "flag": "RS"
+    },
+    {
+      "name": "Ukraine",
+      "code": "UA",
+      "flag": "UA"
     }
   ],
   "otherCountries": [
@@ -290,11 +295,6 @@
       "name": "Turkmenistan",
       "code": "TM",
       "flag": "TM"
-    },
-    {
-      "name": "Ukraine",
-      "code": "UA",
-      "flag": "UA"
     },
     {
       "name": "United Kingdom",

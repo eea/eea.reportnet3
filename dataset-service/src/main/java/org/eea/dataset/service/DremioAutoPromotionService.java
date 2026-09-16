@@ -95,7 +95,8 @@ public class DremioAutoPromotionService {
       Long dataflowId = dataset.getDataflowId();
       Long providerId = dataset.getDataProviderId();
 
-      List<JobVO> activeJobs = jobControllerZuul.findActiveJobsRelatedToADatasetId(datasetId, dataflowId, providerId);
+      //TODO Prep check do we need to bring preparationCode in here?
+      List<JobVO> activeJobs = jobControllerZuul.findActiveJobsRelatedToADatasetId(datasetId, dataflowId, providerId, null);
 
       if (activeJobs == null || activeJobs.isEmpty()) {
         return false;

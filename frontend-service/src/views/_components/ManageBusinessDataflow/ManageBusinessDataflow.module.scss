@@ -51,6 +51,7 @@
   }
 }
 .cancelButton {
+  margin-top: 0.5rem !important;
   margin-right: 0px !important;
 }
 .errorAndCounterWrapper {
@@ -85,7 +86,6 @@
 .checkboxWrapper{
   display: flex;
   align-items: center;
-  gap: 1rem;
   flex-wrap: nowrap;
 }
 
@@ -93,4 +93,15 @@
   display: flex;
   align-items: center;
   min-width: 0;
+}
+
+.dialogFooter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.1rem;
+  align-items: center;
+}
+
+.dialogFooter > .p-button {
+  flex: 0 0 auto;
 }

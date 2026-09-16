@@ -378,7 +378,10 @@ public interface JobController {
     String getJobsStatistics();
 
     @GetMapping(value = "/private/findActiveJobsRelatedToADatasetId/{datasetId}")
-    List<JobVO> findActiveJobsRelatedToADatasetId(@PathVariable("datasetId") Long datasetId, @RequestParam(value = "dataflowId", required = false) Long dataflowId, @RequestParam(value = "providerId", required = false) Long providerId);
+    List<JobVO> findActiveJobsRelatedToADatasetId(@PathVariable("datasetId") Long datasetId,
+                                                  @RequestParam(value = "dataflowId", required = false) Long dataflowId,
+                                                  @RequestParam(value = "providerId", required = false) Long providerId,
+                                                  @RequestParam(value = "preparationCode", required = false) String preparationCode);
 
     /**
      * Updates job status and info value

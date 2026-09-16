@@ -24,5 +24,17 @@
 }
 
 .cancelButton {
+  margin-top: 0.5rem !important;
   margin-right: 0px !important;
+}
+
+.dialogFooter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.1rem;
+  align-items: center;
+}
+
+.dialogFooter > .p-button {
+  flex: 0 0 auto;
 }

@@ -13,10 +13,11 @@ public interface IntegrationExecutorService {
    * Execute.
    *
    * @param integrationOperationTypeEnum the integration operation type enum
+   * @param preparationCode the preparation code
    * @param executionParams the execution params
    * @return the execution result VO
    */
   ExecutionResultVO execute(IntegrationOperationTypeEnum integrationOperationTypeEnum,
-      Object... executionParams);
+      String preparationCode, Object... executionParams);
 
 }

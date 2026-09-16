@@ -56,7 +56,7 @@ public interface DatasetTableRepository extends JpaRepository<DatasetTable, Long
             "SELECT DISTINCT t.editingUsername " +
                     "FROM DatasetTable t " +
                     "WHERE t.datasetId = :datasetId " +
-                    "AND (t.preparationCode IS NULL OR t.preparationCode = '')" +
+                    "AND (t.preparationCode IS NULL OR t.preparationCode = '') " +
                     "AND t.editingUsername IS NOT NULL"
     )
     List<String> findEditors(@Param("datasetId") Long datasetId);
@@ -74,7 +74,7 @@ public interface DatasetTableRepository extends JpaRepository<DatasetTable, Long
             "SELECT DISTINCT t.editingUsername " +
                     "FROM DatasetTable t " +
                     "WHERE t.datasetId = :datasetId " +
-                    "AND (t.preparationCode IS NULL OR t.preparationCode = '')" +
+                    "AND (t.preparationCode IS NULL OR t.preparationCode = '') " +
                     "AND t.tableSchemaId = :tableSchemaId " +
                     "AND t.editingUsername IS NOT NULL"
     )
@@ -96,6 +96,7 @@ public interface DatasetTableRepository extends JpaRepository<DatasetTable, Long
             "SELECT DISTINCT t.editingUsername " +
                     "FROM DatasetTable t " +
                     "WHERE t.datasetId = :datasetId " +
+                    "AND (t.preparationCode IS NULL OR t.preparationCode = '') " +
                     "AND t.editingUsername IS NOT NULL " +
                     "AND t.editLockExpirationDate > CURRENT_TIMESTAMP"
     )

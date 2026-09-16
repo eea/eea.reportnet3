@@ -155,7 +155,7 @@ export const BigButtonList = ({
       event.preventDefault();
 
       const target = event.target;
-      const {selectionStart, selectionEnd, value} = target;
+      const { selectionStart, selectionEnd, value } = target;
 
       const newValue = value.substring(0, selectionStart) + '\n' + value.substring(selectionEnd);
       setAddUserText(newValue);
@@ -262,14 +262,14 @@ export const BigButtonList = ({
           }
         }}
         style={{
-        color: 'var(--main-font-color)',
-        cursor: (dataflowState.data.sncData) ? 'default' : 'pointer',
-        fontSize: '10pt',
-        fontWeight: 'bold',
-        marginLeft: '6px',
-        marginRight: '6px',
-        opacity: (dataflowState.data.sncData) ? 0.5 : 1
-      }}>
+          color: 'var(--main-font-color)',
+          cursor: (dataflowState.data.sncData) ? 'default' : 'pointer',
+          fontSize: '10pt',
+          fontWeight: 'bold',
+          marginLeft: '6px',
+          marginRight: '6px',
+          opacity: (dataflowState.data.sncData) ? 0.5 : 1
+        }}>
         {resourcesContext.messages['showPublicInfo']}
       </label>
 
@@ -345,7 +345,7 @@ export const BigButtonList = ({
   const getExpirationDate = () => {
     setDataCollectionDueDate(
       !isNil(dataflowState.obligations?.expirationDate) &&
-        new Date(dataflowState.obligations.expirationDate) > new Date()
+      new Date(dataflowState.obligations.expirationDate) > new Date()
         ? new Date(dataflowState.obligations.expirationDate)
         : null
     );

@@ -250,7 +250,7 @@ public class IntegrationServiceImpl implements IntegrationService {
           integrationExecutorFactory.getExecutor(IntegrationToolTypeEnum.FME);
       for (Map.Entry<Long, IntegrationVO> entry : map.entrySet()) {
         resultList.add(executor.execute(IntegrationOperationTypeEnum.EXPORT_EU_DATASET, null,
-            entry.getKey(), entry.getValue()));
+            null, entry.getKey(), entry.getValue()));
       }
       return resultList;
     } else {
@@ -424,7 +424,8 @@ public class IntegrationServiceImpl implements IntegrationService {
     } else {
       IntegrationVO integration = getIntegration(integrationId);
       if (null != integration && (Integer) integrationExecutorFactory
-          .getExecutor(IntegrationToolTypeEnum.FME).execute(operation, null, datasetId, integration)
+          .getExecutor(IntegrationToolTypeEnum.FME)
+          .execute(operation, null, null, datasetId, integration)
           .getExecutionResultParams().get("id") == 0) {
         LOG.error("Error executing external integration: datasetId={}, integration={}",
             datasetId, integration);

@@ -40,6 +40,7 @@ public class IcebergToParquetConversionCompletedEvent implements NotificableEven
     notification.put("datasetId", notificationVO.getDatasetId());
     notification.put("dataflowId", notificationVO.getDataflowId());
     notification.put("datasetName", datasetName);
+    notification.put("preparationCode", notificationVO.getPreparationCode());
     notification.put("message", "Iceberg to Parquet conversion completed successfully.");
     return notification;
   }
