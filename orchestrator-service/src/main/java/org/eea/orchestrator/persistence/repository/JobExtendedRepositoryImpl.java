@@ -83,8 +83,16 @@ public class JobExtendedRepositoryImpl implements JobExtendedRepository{
         stringQuery.append(countQuery ? COUNT_JOBS_QUERY : JOBS_QUERY);
         addFilters(stringQuery, jobId, jobTypes, dataflowId, dataflowName, providerId, datasetId, datasetName, creatorUsername, jobStatuses, preparationCode);
         if (!countQuery) {
-            stringQuery.append(" order by " + sortedColumn);
-            stringQuery.append(asc ? " asc" : " desc");
+            if (sortedColumn.equals("provider_id")) {
+                if (asc) {
+                    stringQuery.append(" ORDER BY provider_id ASC NULLS FIRST");
+                } else {
+                    stringQuery.append(" ORDER BY provider_id DESC NULLS LAST");
+                }
+            } else {
+                stringQuery.append(" order by " + sortedColumn);
+                stringQuery.append(asc ? " asc" : " desc");
+            }
             if (sortedColumn.equals("job_type")) {
                 stringQuery.append(", release");
                 stringQuery.append(" desc");
