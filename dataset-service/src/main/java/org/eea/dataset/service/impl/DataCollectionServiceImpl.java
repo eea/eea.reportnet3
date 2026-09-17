@@ -506,6 +506,16 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     // 1. Get the design datasets
     List<DesignDatasetVO> designs = designDatasetService.getDesignDataSetIdByDataflowId(dataflowId);
 
+    // Check empty tables in reference datasets before SQL QC validation starts
+    if (isCreation && checkEmptyTablesInReferenceDatasets(designs, isReferenceSchemaBySchemaId)) {
+      releaseLockAndNotification(
+              dataflowId,
+              EEAErrorMessage.DATA_COLLECTION_FAILED_EMPTY_REFERENCE_DATASET,
+              isCreation,
+              hasPk);
+      return;
+    }
+
     // we look if all SQL QC's are working correctly, if not we disable it before do a dc
     if (isCreation) {
       if (referenceDataflow && stopAndNotifyPKError) {
@@ -655,6 +665,53 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         throw e;
       }
     }
+  }
+
+  private boolean checkEmptyTablesInReferenceDatasets(
+          List<DesignDatasetVO> designs,
+          Map<String, Boolean> isReferenceSchemaBySchemaId) {
+
+    return designs.stream()
+            .filter(dataset -> isReferenceSchemaBySchemaId.computeIfAbsent(
+                    dataset.getDatasetSchema(),
+                    id -> datasetSchemaService.isReferenceSchema(id)))
+            .anyMatch(this::isReferenceDatasetTableEmpty);
+  }
+
+  private boolean isReferenceDatasetTableEmpty(DesignDatasetVO dataset) {
+    DataSetMetabaseVO dataSetMetabaseVO =
+            datasetMetabaseService.findDatasetMetabase(dataset.getId());
+
+    DataSetSchema dataSetSchema =
+            schemasRepository.findByIdDataSetSchema(
+                    new ObjectId(dataSetMetabaseVO.getDatasetSchema()));
+
+    for (TableSchema table : dataSetSchema.getTableSchemas()) {
+
+      if (!Boolean.TRUE.equals(table.getToPrefill())) {
+        continue;
+      }
+
+      S3PathResolver dataTableResolver = new S3PathResolver(
+              dataSetMetabaseVO.getDataflowId(),
+              dataSetMetabaseVO.getDataProviderId() != null
+                      ? dataSetMetabaseVO.getDataProviderId()
+                      : 0,
+              dataSetMetabaseVO.getId(),
+              table.getNameTableSchema());
+
+      if (!s3Helper.checkFolderExist(
+              dataTableResolver,
+              S3_TABLE_NAME_FOLDER_PATH)) {
+        return true;
+      }
+
+      if (bigDataDatasetService.isTableEmpty(dataTableResolver)) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   private void checkIfTablesEmpty(List<Long> emptyDatasetTables, DesignDatasetVO dataset, RuleVO ruleVO) {

@@ -903,6 +903,9 @@ public final class EEAErrorMessage {
   /** The Constant DATA_COLLECTION_FAILED_ICEBERG_EXISTS: {@value}. */
   public static final String DATA_COLLECTION_FAILED_DATASET_LOCKED_FOR_EDITING_EXISTS = "Error creating data collection. Dataset locked for editing exists";
 
+  /** The Constant DATA_COLLECTION_FAILED_ICEBERG_EXISTS: {@value}. */
+  public static final String DATA_COLLECTION_FAILED_EMPTY_REFERENCE_DATASET = "Error creating data collection. Reference dataset contains empty tables.";
+
   /**
    * Instantiates a new EEA error message.
    */
