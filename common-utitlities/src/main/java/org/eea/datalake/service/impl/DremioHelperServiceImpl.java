@@ -46,6 +46,9 @@ public class DremioHelperServiceImpl implements DremioHelperService {
     @Value("${dremio.jobPolling.numberOfRetries}")
     private Integer numberOfRetriesForJobPolling;
 
+    @Value("${dremio.promote.numberOfRetries}")
+    private Integer numberOfRetriesForPromoting;
+
     @Autowired
     private DremioApiController dremioApiController;
     @Autowired
@@ -306,5 +309,63 @@ public class DremioHelperServiceImpl implements DremioHelperService {
             }
         }
         return false;
+    }
+
+    @Override
+    public void checkIfDremioProcessFinishedSuccessfully(String query, String processId, Long optionalTimeoutMs) throws Exception {
+        Boolean processIsFinished = false;
+        for(int i=0; i < numberOfRetriesForJobPolling; i++) {
+            DremioJobStatusResponse response = this.pollForJobStatus(processId);
+            String jobState = response.getJobState().getValue();
+            if(jobState.equals(DremioJobStatusEnum.COMPLETED.getValue())) {
+                processIsFinished = true;
+                break;
+            }
+            else if(jobState.equals(DremioJobStatusEnum.CANCELED.getValue()) || jobState.equals(DremioJobStatusEnum.FAILED.getValue())){
+                processIsFinished = false;
+                break;
+            }
+            else {
+                if(optionalTimeoutMs == null){
+                    //use default timeout
+                    Thread.sleep(5000);
+                }
+                else{
+                    Thread.sleep(optionalTimeoutMs);
+                }
+
+            }
+        }
+        if(!processIsFinished){
+            throw new Exception("Could not execute dremio query " + query + " with dremio process Id " + processId);
+        }
+    }
+
+    @Override
+    public void refreshTableMetadataAndPromote(Long jobId, String tablePath, S3PathResolver s3PathResolver, String tableName) throws Exception {
+        String refreshTableAndPromoteQuery = "ALTER TABLE " + tablePath + " REFRESH METADATA AUTO PROMOTION";
+        String refreshTableAndDemoteQuery = "ALTER TABLE " + tablePath + " FORGET METADATA";
+        Boolean folderWasPromoted = false;
+        //we keep trying to promote the folder for a number of retries
+        for(int i=0; i < numberOfRetriesForPromoting; i++) {
+            executeSqlStatement(refreshTableAndPromoteQuery);
+            if(checkFolderPromoted(s3PathResolver, tableName)) {
+                LOG.info("For job {} and datasetId {} promoted table {} in retry #{}", jobId, s3PathResolver.getDatasetId(), tablePath, i+1);
+                folderWasPromoted = true;
+                break;
+            }
+            else {
+                Thread.sleep(2000);
+            }
+        }
+        if(!folderWasPromoted) {
+            throw new Exception("Could not promote folder " + tablePath);
+        }
+        LOG.info("Failover demote promote - Started {}", refreshTableAndDemoteQuery);
+        executeSqlStatement(refreshTableAndDemoteQuery);
+        Thread.sleep(5000);
+        executeSqlStatement(refreshTableAndPromoteQuery);
+        Thread.sleep(5000);
+        LOG.info("Failover demote promote - Ended {}", refreshTableAndPromoteQuery);
     }
 }

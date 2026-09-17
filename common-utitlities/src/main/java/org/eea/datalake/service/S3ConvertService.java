@@ -24,4 +24,7 @@ public interface S3ConvertService {
     File createEmptyCSVFile(String tableName, Long datasetId, List<String> headers);
 
     void createJsonFile(List<S3Object> exportFilenames, String tableName, Long datasetId, DatasetTypeEnum datasetTypeEnum);
+
+    boolean containsPath(String tableName, String key, DatasetTypeEnum datasetTypeEnum);
+
 }
