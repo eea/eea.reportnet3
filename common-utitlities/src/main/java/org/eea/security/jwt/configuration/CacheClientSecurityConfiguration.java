@@ -55,10 +55,10 @@ public class CacheClientSecurityConfiguration {
 
     JedisPoolConfig poolConfig = createPoolConfig();
     RedisStandaloneConfiguration redisStandaloneConfiguration =
-        new RedisStandaloneConfiguration(redisHost, redisPort);
+            new RedisStandaloneConfiguration(redisHost, redisPort);
 
     return new JedisConnectionFactory(redisStandaloneConfiguration, JedisClientConfiguration
-        .builder().usePooling().poolConfig(poolConfig).and().clientName(serviceInstanceId).build());
+            .builder().usePooling().poolConfig(poolConfig).and().clientName(serviceInstanceId).build());
   }
 
   /**
@@ -73,10 +73,10 @@ public class CacheClientSecurityConfiguration {
     JedisPoolConfig poolConfig = createPoolConfig();
 
     RedisSentinelConfiguration redisStandaloneConfiguration =
-        new RedisSentinelConfiguration(redisMasterSentinel, sentinelNodes);
+            new RedisSentinelConfiguration(redisMasterSentinel, sentinelNodes);
 
     return new JedisConnectionFactory(redisStandaloneConfiguration, JedisClientConfiguration
-        .builder().usePooling().poolConfig(poolConfig).and().clientName(serviceInstanceId).build());
+            .builder().usePooling().poolConfig(poolConfig).and().clientName(serviceInstanceId).build());
   }
 
   /**
@@ -88,7 +88,7 @@ public class CacheClientSecurityConfiguration {
    */
   @Bean
   public RedisTemplate<String, CacheTokenVO> securityRedisTemplate(
-      JedisConnectionFactory jedisConnectionFactory) {
+          JedisConnectionFactory jedisConnectionFactory) {
     RedisTemplate<String, CacheTokenVO> redisTemplate = new RedisTemplate<>();
 
     redisTemplate.setConnectionFactory(jedisConnectionFactory);
