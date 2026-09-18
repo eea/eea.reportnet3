@@ -325,26 +325,30 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
   @Override
   public void updateDatasetStatus(DatasetStatusMessageVO datasetStatusMessageVO)
           throws EEAException {
-    DataSetMetabase datasetMetabase =
-            dataSetMetabaseRepository.findById(datasetStatusMessageVO.getDatasetId()).orElse(null);
+    final DataSetMetabase datasetMetabase = dataSetMetabaseRepository.findById(datasetStatusMessageVO.getDatasetId())
+            .orElse(null);
+
     if (datasetMetabase == null) {
       throw new EEAException(EEAErrorMessage.DATASET_INCORRECT_ID);
     }
 
-    MessageVO message = new MessageVO();
-    String messageStatus = "";
+    final MessageVO message = new MessageVO();
+    String messageStatus;
+
     if (DatasetStatusEnum.TECHNICALLY_ACCEPTED.equals(datasetStatusMessageVO.getStatus())) {
       messageStatus = STATUS_TECHNICALLY_ACCEPTED;
       datasetMetabase.setDateStatusChanged(new Date());
-      DataFlowVO dfVO =
-              dataflowControllerZuul.getMetabaseById(datasetStatusMessageVO.getDataflowId());
+
+      final DataFlowVO dfVO = dataflowControllerZuul.getMetabaseById(datasetStatusMessageVO.getDataflowId());
       if (dfVO.isAutomaticReportingDeletion()) {
         recordStoreControllerZuul.updateSnapshotDisabled(datasetStatusMessageVO.getDatasetId());
       }
-    } else if (DatasetStatusEnum.CORRECTION_REQUESTED.equals(datasetStatusMessageVO.getStatus())) {
+    }
+    else if (DatasetStatusEnum.CORRECTION_REQUESTED.equals(datasetStatusMessageVO.getStatus())) {
       messageStatus = STATUS_CORRECTION_REQUESTED;
       datasetMetabase.setDateStatusChanged(new Date());
-    } else {
+    }
+    else {
       messageStatus = STATUS_CHANGED;
       if (datasetMetabase.getDateStatusChanged() != null) {
         datasetMetabase.setDateStatusChanged(null);
@@ -359,14 +363,25 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
     message.setAutomatic(true);
 
     // Send message to providers and custodian
-    Optional<DesignDataset> designDataset =
-            designDatasetRepository.findFirstByDatasetSchema(datasetMetabase.getDatasetSchema());
-    boolean sendEmail=false;
-    collaborationControllerZuul.createMessage(datasetStatusMessageVO.getDataflowId(), message, SecurityContextHolder.getContext().getAuthentication().getName(), null, sendEmail);
-    collaborationControllerZuul.notifyNewMessages(datasetStatusMessageVO.getDataflowId(),
-            datasetMetabase.getDataProviderId(), SecurityContextHolder.getContext().getAuthentication().getName(), datasetMetabase.getId(), datasetMetabase.getStatus(),
-            designDataset.isPresent() ? designDataset.get().getDataSetName() : null,
+    final Optional<DesignDataset> designDataset = designDatasetRepository.findFirstByDatasetSchema(
+            datasetMetabase.getDatasetSchema());
+
+    collaborationControllerZuul.createMessage(
+            datasetStatusMessageVO.getDataflowId(),
+            message,
+            SecurityContextHolder.getContext().getAuthentication().getName(),
+            null,
+            false);
+
+    collaborationControllerZuul.notifyNewMessages(
+            datasetStatusMessageVO.getDataflowId(),
+            datasetMetabase.getDataProviderId(),
+            SecurityContextHolder.getContext().getAuthentication().getName(),
+            datasetMetabase.getId(),
+            datasetMetabase.getStatus(),
+            designDataset.map(DataSetMetabase::getDataSetName).orElse(null),
             EventType.UPDATED_DATASET_STATUS.toString());
+
     LOG.info("Automatic feedback message created for dataflowId {}. Message: {}",
             datasetStatusMessageVO.getDataflowId(), message.getContent());
   }
