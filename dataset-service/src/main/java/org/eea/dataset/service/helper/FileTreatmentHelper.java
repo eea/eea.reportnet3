@@ -1367,7 +1367,9 @@ public class FileTreatmentHelper implements DisposableBean {
         List<TableSchemaIdNameVO> tableSchemas = datasetSchemaService.getTableSchemasIds(datasetId);
         for(TableSchemaIdNameVO entry: tableSchemas){
             TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(entry.getIdTableSchema(), datasetSchemaId);
-            if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable() && StringUtils.isBlank(preparationCode))
+            boolean manuallyEditable = tableSchemaVO != null
+                    && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable());
+            if(tableSchemaVO != null && BooleanUtils.isTrue(manuallyEditable && StringUtils.isBlank(preparationCode))
                     && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, preparationCode, tableSchemaVO.getIdTableSchema()))) {
                 throw new Exception("Can not export table data because iceberg table is created");
             }
