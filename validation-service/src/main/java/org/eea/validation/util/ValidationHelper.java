@@ -56,6 +56,7 @@ import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
 import org.eea.lock.service.LockService;
 import org.eea.multitenancy.TenantResolver;
+import org.eea.security.jwt.utils.AuthenticationDetails;
 import org.eea.thread.EEADelegatingSecurityContextExecutorService;
 import org.eea.validation.kafka.command.Validator;
 import org.eea.validation.mapper.TaskMapper;
@@ -82,6 +83,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -385,6 +387,7 @@ public class ValidationHelper implements DisposableBean {
           //if updateViews is false it means that the materialized views have already been updated, so we must compare the number of records
           executeValidationProcess(dataset, processId, !updateViews, validateAsProviderCode);
         } else {
+          logCleanupSecurityContext("EARLY_CLEANUP", datasetId, processId);
           deleteLockToReleaseProcess(datasetId, null);
           Map<String, Object> values = new HashMap<>();
           values.put(DATASET_ID, datasetId);
@@ -1137,11 +1140,15 @@ public class ValidationHelper implements DisposableBean {
 
     TenantResolver.setTenantName(DATASET_PREFIX + datasetId);
 
-      final List<TableSchemaIdNameVO> tables = datasetSchemaControllerZuul
-              .getTableSchemasIds(
-                      datasetMetabaseVO.getId(),
-                      datasetMetabaseVO.getId(),
-                      datasetMetabaseVO.getDataProviderId());
+    final List<TableSchemaIdNameVO> tables;
+
+    try {
+      tables = datasetSchemaControllerZuul.getTableSchemasIds(datasetMetabaseVO.getId(), datasetMetabaseVO.getId(), datasetMetabaseVO.getDataProviderId());
+    } catch (FeignException e) {
+      LOG.error("Table fetching FAILED during lock cleanup for datasetId {}, suppliedDataflowId {}, actualDataflowId {}, providerId {}, status {}, thread {}",
+          datasetMetabaseVO.getId(), datasetMetabaseVO.getId(), datasetMetabaseVO.getDataflowId(), datasetMetabaseVO.getDataProviderId(), e.status(), Thread.currentThread().getName(), e);
+      throw e;
+    }
 
     for (TableSchemaIdNameVO table : tables) {
       Map<String, Object> mapCriteriaDeleteTable = new HashMap<>();
@@ -1746,12 +1753,30 @@ public class ValidationHelper implements DisposableBean {
 
             }
             else {
-              // Delete the lock to the Release process
-              deleteLockToReleaseProcess(datasetId, preparationCode);
-              checkAndPromoteFolder(s3PathResolver, dataflow);
+              logCleanupSecurityContext("FINALIZATION", datasetId, processId);
+              try {
+                deleteLockToReleaseProcess(datasetId, preparationCode);
+                LOG.info("Finished final validation cleanup for datasetId {}, processId {}, jobId {}", datasetId, processId, jobId);
+              } catch (Exception e) {
+                LOG.error("Final validation cleanup FAILED for datasetId {}, processId {}, jobId {}, thread {}, exceptionType {}, message {}",
+                    datasetId, processId, jobId, Thread.currentThread().getName(), e.getClass().getName(), e.getMessage(), e);
+                throw e;
+              }
+
+              try {
+                checkAndPromoteFolder(s3PathResolver, dataflow);
+                LOG.info("Finished second checkAndPromoteFolder for datasetId {}, processId {}, jobId {}", datasetId, processId, jobId);
+              } catch (Exception e) {
+                LOG.error("Second checkAndPromoteFolder FAILED for datasetId {}, processId {}, jobId {}, thread {}, exceptionType {}, message {}",
+                    datasetId, processId, jobId, Thread.currentThread().getName(), e.getClass().getName(), e.getMessage(), e);
+                throw e;
+              }
+
               if (jobId != null) {
                 jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FINISHED);
+                LOG.info("Validation job {} successfully updated to FINISHED for datasetId {}, processId {}", jobId, datasetId, processId);
               }
+
               value.put("preparationCode", preparationCode);
               kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.VALIDATION_FINISHED_EVENT,
                       value,
@@ -1793,21 +1818,82 @@ public class ValidationHelper implements DisposableBean {
   }
 
   /**
+   * Non-sensitive detail logs from the current security context
+   * to help diagnose validation cleanup and finalization issues
+   * with never-ending validations jobs.
+   *
+   * @param phase the validation phase being logged
+   * @param datasetId the dataset id
+   * @param processId the process id
+   */
+  private void logCleanupSecurityContext(String phase, Long datasetId, String processId) {
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    boolean hasUserId = false;
+
+    if (authentication != null && authentication.getDetails() instanceof Map) {
+      Object userId = ((Map<?, ?>) authentication.getDetails()).get(AuthenticationDetails.USER_ID);
+      hasUserId = userId != null && StringUtils.isNotBlank(String.valueOf(userId));
+    }
+
+    LOG.info("Validation cleanup security context: phase {}, datasetId {}, processId {}, thread {}, authPresent {}, authName {}, authorities {}, detailsType {}, hasUserId {}",
+        phase, datasetId, processId, Thread.currentThread().getName(),
+        authentication != null,
+        authentication != null ? authentication.getName() : null,
+        authentication != null ? authentication.getAuthorities() : null,
+        authentication != null && authentication.getDetails() != null ? authentication.getDetails().getClass().getName() : null,
+        hasUserId);
+  }
+
+  /**
    * Checks and promotes validation table
    * @param s3PathResolver
    * @param dataflow
    * @throws EEAException
    */
   private void checkAndPromoteFolder(S3PathResolver s3PathResolver, DataFlowVO dataflow) throws EEAException {
-    if (dataflow.getBigData()!=null && dataflow.getBigData()) {
-      if (s3Helper.checkFolderExist(s3PathResolver, S3_VALIDATION_TABLE_PATH)) {
-        try {
-          String validateTable = s3Helper.getS3Service().getTableAsFolderQueryPath(s3PathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
-          dremioHelperService.refreshTableMetadataAndPromote(null, validateTable, s3PathResolver, s3PathResolver.getTableName());
-        } catch (Exception e) {
-          throw new EEAException(e.getMessage());
-        }
-      }
+    Long logDatasetId = s3PathResolver != null ? s3PathResolver.getDatasetId() : null;
+    Long logDataflowId = s3PathResolver != null ? s3PathResolver.getDataflowId() : null;
+    Long logProviderId = s3PathResolver != null ? s3PathResolver.getDataProviderId() : null;
+
+    if (dataflow.getBigData()==null || !dataflow.getBigData()) {
+      return;
+    }
+
+    boolean folderExists;
+
+    try {
+      folderExists = s3Helper.checkFolderExist(s3PathResolver, S3_VALIDATION_TABLE_PATH);
+    } catch (Exception e) {
+      LOG.error("Failure while checking folder existence. datasetId {}, dataflowId {}, providerId {}, thread {}, exceptionType {}, message {}",
+          logDatasetId, logDataflowId, logProviderId, Thread.currentThread().getName(), e.getClass().getName(), e.getMessage(), e);
+
+      throw new EEAException(e.getMessage());
+    }
+
+    if (!folderExists) {
+      LOG.info("Validation folder does not exist for datasetId {}. Skipping Dremio promotion", s3PathResolver.getDatasetId());
+      return;
+    }
+
+    String validateTable;
+
+    try {
+      validateTable = s3Helper.getS3Service().getTableAsFolderQueryPath(s3PathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
+    } catch (Exception e) {
+      LOG.error("Failure while resolving validation table path. datasetId {}, dataflowId {}, providerId {}, thread {}, exceptionType {}, message {}",
+          logDatasetId, logDataflowId, logProviderId, Thread.currentThread().getName(), e.getClass().getName(), e.getMessage(), e);
+
+      throw new EEAException(e.getMessage());
+    }
+
+    try {
+      dremioHelperService.refreshTableMetadataAndPromote(null, validateTable, s3PathResolver, s3PathResolver.getTableName());
+
+    } catch (Exception e) {
+      LOG.error("Failure during Dremio metadata refresh/promotion. datasetId {}, dataflowId {}, providerId {}, table {}, thread {}, exceptionType {}, message {}",
+          logDatasetId, logDataflowId, logProviderId, validateTable, Thread.currentThread().getName(), e.getClass().getName(), e.getMessage(), e);
+
+      throw new EEAException(e.getMessage());
     }
   }
 
