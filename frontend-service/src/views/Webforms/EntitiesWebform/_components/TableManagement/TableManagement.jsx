@@ -45,6 +45,7 @@ export const TableManagement = ({
   onSelectEditTable,
   onSelectViewTable,
   overview,
+  preparationCode,
   refreshTrigger,
   rootPkFieldId,
   rootTableId,
