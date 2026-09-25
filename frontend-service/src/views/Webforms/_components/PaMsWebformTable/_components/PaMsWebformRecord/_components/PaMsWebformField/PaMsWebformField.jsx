@@ -55,6 +55,7 @@ export const PaMsWebformField = ({
   onUpdateSinglesList,
   onUpdatePamsValue,
   pamsRecords,
+  preparationCode,
   record,
   referencedTableSchemaId,
   tableSchemaId,
@@ -818,7 +819,8 @@ export const PaMsWebformField = ({
                   tableSchemaName,
                   fieldName: selectedFieldName,
                   recordId: selectedRecordId,
-                  previousFileName: undefined
+                  previousFileName: undefined,
+                  preparationCode
                 })
               : getUrl(DatasetConfig.uploadAttachmentWithProviderId, {
                   dataflowId,
@@ -828,7 +830,8 @@ export const PaMsWebformField = ({
                   fieldName: selectedFieldName,
                   recordId: selectedRecordId,
                   previousFileName: undefined,
-                  providerId: dataProviderId
+                  providerId: dataProviderId,
+                  preparationCode
                 })
           }`}
         />

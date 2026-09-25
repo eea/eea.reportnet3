@@ -1538,6 +1538,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
           isReleasing={dataset.isReleasing}
           isReporting
           options={webformOptions}
+          preparationCode={code}
           state={{
             datasetSchema: { datasetSchemaId: metadata?.dataset.datasetSchemaId, tables: datasetSchemaAllTables },
             schemaTables,

@@ -33,6 +33,7 @@ export const WebformView = ({
   isReporting,
   updatingField,
   isViewMode,
+  preparationCode,
   rootPkFieldId,
   rootTableName,
   selectedTable,
@@ -123,6 +124,7 @@ export const WebformView = ({
         isViewMode={isViewMode}
         onFieldUpdate={onFieldUpdate}
         onTabChange={isVisible}
+        preparationCode={preparationCode}
         rootPkFieldId={rootPkFieldId}
         rootTableName={rootTableName}
         selectedTable={selectedTable}

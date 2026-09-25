@@ -76,6 +76,7 @@ export const WebformRecord = ({
   onAddMultipleWebform,
   onRefresh,
   onTabChange,
+  preparationCode,
   record,
   referencedTableSchemaId,
   rootPkFieldId,
@@ -317,6 +318,7 @@ export const WebformRecord = ({
                       onFieldUpdate={onFieldUpdate}
                       onFillField={onFillField}
                       onSaveField={onSaveField}
+                      preparationCode={preparationCode}
                       record={webformRecordState.record}
                       referencedTableSchemaId={referencedTableSchemaId}
                       rootPkFieldId={rootPkFieldId}
@@ -492,6 +494,7 @@ export const WebformRecord = ({
                     onFieldUpdate={onFieldUpdate}
                     onRefresh={onRefresh}
                     onTabChange={onTabChange}
+                    preparationCode={preparationCode}
                     record={record}
                     referencedTableSchemaId={element?.tableSchemaId}
                     rootPkFieldId={rootPkFieldId}

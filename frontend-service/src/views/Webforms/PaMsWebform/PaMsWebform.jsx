@@ -39,6 +39,7 @@ export const PaMsWebform = ({
   isReleasing,
   isReporting,
   overview,
+  preparationCode,
   state,
   tables = []
 }) => {
@@ -381,6 +382,7 @@ export const PaMsWebform = ({
           isReporting={isReporting}
           onUpdatePamsValue={onUpdatePamsValue}
           pamsRecords={pamsRecords}
+          preparationCode={preparationCode}
           selectedTable={selectedTable}
           selectedTableName={selectedTableName}
           setTableSchemaId={setTableSchemaId}

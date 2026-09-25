@@ -18,6 +18,7 @@ export const QuestionAnswerWebform = ({
   isEditor,
   isIcebergCreated,
   isLoadingIceberg,
+  preparationCode,
   state,
   tables = []
 }) => {
@@ -79,6 +80,7 @@ export const QuestionAnswerWebform = ({
               isEditor={isEditor}
               isIcebergCreated={isIcebergCreated}
               isLoadingIceberg={isLoadingIceberg}
+              preparationCode={preparationCode}
               schemaTables={schemaTable}
               tables={table}
             />

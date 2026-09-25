@@ -39,6 +39,7 @@ export const WebformTable = ({
   isViewMode,
   updatingField,
   onTabChange,
+  preparationCode,
   rootPkFieldId,
   rootTableName,
   selectedTable = { fieldSchemaId: null, rootTableId: undefined, recordId: null, tableName: null },
@@ -380,6 +381,7 @@ export const WebformTable = ({
       onFieldUpdate={onFieldUpdate}
       onRefresh={onUpdateData}
       onTabChange={onTabChange}
+      preparationCode={preparationCode}
       record={record}
       rootPkFieldId={rootPkFieldId}
       rootTableName={rootTableName}
