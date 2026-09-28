@@ -384,7 +384,7 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
             case 1:
                 DataSetMetabaseVO dataSetMetabaseVO = dataSetMetabaseControllerZuul.findDatasetMetabaseById(datatableResolver.getDatasetId());
                 String sqlCode = sqlRulesService.proccessQuery(dataSetMetabaseVO, ruleVO.getSqlSentence());
-                sqlCode = sqlRulesService.replaceTableNamesWithS3Path(sqlCode);
+                sqlCode = sqlRulesService.replaceTableNamesWithS3Path(sqlCode, datatableResolver.getDatasetId(), datatableResolver.getPreparationCode());
                 // Will be XX if no provider is given at all.
                 String providerCode = validateAsProviderCode;
                 if (dataSetMetabaseVO.getDataProviderId()!=null && dataSetMetabaseVO.getDataProviderId()!=0) {
@@ -424,7 +424,7 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
     private List<Map<String, Object>> getCustomQueryResultSet(S3PathResolver datatableResolver, RuleVO ruleVO, Object object, Method method, String validateAsProviderCode) throws IllegalAccessException, InvocationTargetException {
         DataSetMetabaseVO dataSetMetabaseVO = dataSetMetabaseControllerZuul.findDatasetMetabaseById(datatableResolver.getDatasetId());
         String sqlCode = sqlRulesService.proccessQuery(dataSetMetabaseVO, ruleVO.getSqlSentence());
-        sqlCode = sqlRulesService.replaceTableNamesWithS3Path(sqlCode);
+        sqlCode = sqlRulesService.replaceTableNamesWithS3Path(sqlCode, datatableResolver.getDatasetId(), datatableResolver.getPreparationCode());
         // Will be XX if no provider is given at all.
         String providerCode = validateAsProviderCode;
         if (dataSetMetabaseVO.getDataProviderId()!=null && dataSetMetabaseVO.getDataProviderId()!=0) {

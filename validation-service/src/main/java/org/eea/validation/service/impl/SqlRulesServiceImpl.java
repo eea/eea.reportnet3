@@ -1426,6 +1426,11 @@ public class SqlRulesServiceImpl implements SqlRulesService {
 
   @Override
   public String replaceTableNamesWithS3Path(String sqlCode) {
+    return replaceTableNamesWithS3Path(sqlCode, null, null);
+  }
+
+  @Override
+  public String replaceTableNamesWithS3Path(String sqlCode, Long datasetId, String preparationCode) {
     List<Integer> datasetOccurrences = findOccurrence(sqlCode, DATASET);
     while (datasetOccurrences.size()>0) {
       String sqlContainingSchema = sqlCode.substring(datasetOccurrences.get(0)+8);
@@ -1446,6 +1451,10 @@ public class SqlRulesServiceImpl implements SqlRulesService {
       table = table.replaceAll(QUOTATION_MARK,EMPTY_VALUE);
       DataSetMetabaseVO dataSetMetabase = datasetMetabaseController.findDatasetMetabaseById(Long.valueOf(datId));
       S3PathResolver tableResolver = new S3PathResolver(dataSetMetabase.getDataflowId(), dataSetMetabase.getDataProviderId() != null ? dataSetMetabase.getDataProviderId() : 0, dataSetMetabase.getId(), table);
+      // only the dataset being validated reads from its preparation folder
+      if (StringUtils.isNotBlank(preparationCode) && dataSetMetabase.getId().equals(datasetId)) {
+        tableResolver.setPreparationCode(preparationCode);
+      }
       String tablePathS3 = s3Service.getTablePathByDatasetType(dataSetMetabase.getDataflowId(), dataSetMetabase.getId(), table, tableResolver);
       sqlCode = sqlCode.replace(pathToReplace, tablePathS3);
       datasetOccurrences = findOccurrence(sqlCode, DATASET);
