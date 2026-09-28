@@ -128,6 +128,17 @@ public interface SqlRulesService {
   String replaceTableNamesWithS3Path(String sqlCode);
 
   /**
+   * Replace table names with S3 path, resolving the validated dataset's tables to its preparation
+   * folder when a preparation code is given.
+   *
+   * @param sqlCode the sql code
+   * @param datasetId the dataset being validated
+   * @param preparationCode the preparation code (nullable)
+   * @return the sql with S3 paths
+   */
+  String replaceTableNamesWithS3Path(String sqlCode, Long datasetId, String preparationCode);
+
+  /**
    * Finds table name by rule
    * @param rule
    * @param dataSetSchemaId
