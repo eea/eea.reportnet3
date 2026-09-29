@@ -24,6 +24,7 @@ export const TableWebform = ({
   dataProviderId,
   datasetId,
   isReporting,
+  preparationCode,
   state,
   tables = [],
   isEditor,
@@ -97,6 +98,7 @@ export const TableWebform = ({
         isReporting={isReporting}
         isTableWebform={true}
         onTabChange={tableWebformState.isVisible}
+        preparationCode={preparationCode}
         setIsLoading={setIsLoading}
         webform={visibleContent}
         webformType="TABLES"

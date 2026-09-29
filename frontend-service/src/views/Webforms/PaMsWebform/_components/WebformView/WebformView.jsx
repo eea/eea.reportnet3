@@ -43,6 +43,7 @@ export const WebformView = ({
   isReporting,
   onUpdatePamsValue,
   pamsRecords,
+  preparationCode,
   selectedTable,
   selectedTableName,
   setTableSchemaId,
@@ -286,6 +287,7 @@ export const WebformView = ({
         onUpdatePamsValue={onUpdatePamsValue}
         onUpdateSinglesList={onUpdateSinglesList}
         pamsRecords={pamsRecords}
+        preparationCode={preparationCode}
         selectedTable={selectedTable}
         setIsLoading={setIsLoading}
         webform={visibleContent}

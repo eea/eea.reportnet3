@@ -29,6 +29,7 @@ export const QuestionAnswerWebformTable = ({
   isEditor,
   isIcebergCreated,
   isLoadingIceberg,
+  preparationCode,
   schemaTables,
   tables
 }) => {
@@ -123,6 +124,7 @@ export const QuestionAnswerWebformTable = ({
           dataProviderId={dataProviderId}
           datasetId={datasetId}
           getTableErrors={getTableErrors}
+          preparationCode={preparationCode}
           record={record}
           tableSchemaName={tables.name}
         />

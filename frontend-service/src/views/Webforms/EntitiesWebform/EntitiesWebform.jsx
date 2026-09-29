@@ -42,6 +42,7 @@ export const EntitiesWebform = ({
   isReleasing,
   isReporting,
   overview,
+  preparationCode,
   rootPkFieldId,
   rootTableId,
   rootTableName,
@@ -511,6 +512,7 @@ export const EntitiesWebform = ({
           isReporting={isReporting}
           isViewMode={entitiesWebformState.isViewMode}
           onFieldUpdate={onFieldUpdate}
+          preparationCode={preparationCode}
           rootPkFieldId={rootPkFieldId}
           rootTableName={rootTableName}
           selectedTable={selectedTable}
@@ -537,6 +539,7 @@ export const EntitiesWebform = ({
         onSelectEditTable={onSelectEditTable}
         onSelectViewTable={onSelectViewTable}
         overview={overview}
+        preparationCode={preparationCode}
         records={entitiesRecords}
         refreshTrigger={refreshTableTrigger}
         rootPkFieldId={rootPkFieldId}

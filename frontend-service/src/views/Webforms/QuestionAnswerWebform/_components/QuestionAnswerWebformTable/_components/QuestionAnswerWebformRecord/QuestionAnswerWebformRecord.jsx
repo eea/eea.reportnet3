@@ -10,6 +10,7 @@ export const QuestionAnswerWebformRecord = ({
   dataflowId,
   datasetId,
   getTableErrors,
+  preparationCode,
   record,
   tableSchemaName
 }) => (
@@ -25,6 +26,7 @@ export const QuestionAnswerWebformRecord = ({
             datasetId={datasetId}
             getTableErrors={getTableErrors}
             nationalField={name}
+            preparationCode={preparationCode}
             recordId={record.recordId}
             recordValidations={record.validations}
             tableSchemaName={tableSchemaName}

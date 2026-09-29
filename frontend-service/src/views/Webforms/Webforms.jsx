@@ -25,6 +25,7 @@ export const Webforms = ({
   isReleasing,
   isReporting = false,
   options = [],
+  preparationCode,
   state,
   webform
 }) => {
@@ -103,6 +104,7 @@ export const Webforms = ({
           isReleasing={isReleasing}
           isReporting={isReporting}
           overview={selectedConfiguration.overview}
+          preparationCode={preparationCode}
           rootPkFieldId={rootPkFieldId}
           rootTableId={rootTableId}
           rootTableName={rootTableName}
@@ -123,6 +125,7 @@ export const Webforms = ({
           isReleasing={isReleasing}
           isReporting={isReporting}
           overview={selectedConfiguration.overview}
+          preparationCode={preparationCode}
           state={state}
           tables={selectedConfiguration.tables}
         />
@@ -139,6 +142,7 @@ export const Webforms = ({
           isIcebergCreated={isIcebergCreated}
           isLoadingIceberg={isLoadingIceberg}
           isReporting={isReporting}
+          preparationCode={preparationCode}
           state={state}
           tables={selectedConfiguration.tables}
         />
@@ -154,6 +158,7 @@ export const Webforms = ({
           isIcebergCreated={isIcebergCreated}
           isLoadingIceberg={isLoadingIceberg}
           isReporting={isReporting}
+          preparationCode={preparationCode}
           state={state}
           tables={selectedConfiguration.tables}
         />

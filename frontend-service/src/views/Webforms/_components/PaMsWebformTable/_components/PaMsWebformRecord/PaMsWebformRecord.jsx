@@ -78,6 +78,7 @@ export const PaMsWebformRecord = ({
   onUpdatePamsValue,
   onUpdateSinglesList,
   pamsRecords,
+  preparationCode,
   record,
   referencedTableSchemaId,
   selectedTableId,
@@ -335,6 +336,7 @@ export const PaMsWebformRecord = ({
                       onUpdatePamsValue={onUpdatePamsValue}
                       onUpdateSinglesList={onUpdateSinglesList}
                       pamsRecords={pamsRecords}
+                      preparationCode={preparationCode}
                       record={record}
                       referencedTableSchemaId={referencedTableSchemaId}
                       tableSchemaId={tableId}
@@ -462,6 +464,7 @@ export const PaMsWebformRecord = ({
                         onUpdatePamsValue={onUpdatePamsValue}
                         onUpdateSinglesList={onUpdateSinglesList}
                         pamsRecords={pamsRecords}
+                        preparationCode={preparationCode}
                         record={record}
                         referencedTableSchemaId={element?.tableSchemaId}
                         selectedTableId={element.tableSchemaId}

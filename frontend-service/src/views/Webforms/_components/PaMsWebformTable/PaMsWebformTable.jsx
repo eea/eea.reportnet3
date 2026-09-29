@@ -40,6 +40,7 @@ export const PaMsWebformTable = ({
   onUpdatePamsValue,
   onUpdateSinglesList,
   pamsRecords,
+  preparationCode,
   rootPkFieldId,
   rootTableName,
   selectedTable = { fieldSchemaId: null, pamsId: undefined, recordId: null, tableName: null },
@@ -325,6 +326,7 @@ export const PaMsWebformTable = ({
       onUpdatePamsValue={onUpdatePamsValue}
       onUpdateSinglesList={onUpdateSinglesList}
       pamsRecords={pamsRecords}
+      preparationCode={preparationCode}
       record={record}
       tableId={webformData.tableSchemaId}
       tableName={webformData.title}

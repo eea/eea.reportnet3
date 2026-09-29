@@ -42,6 +42,7 @@ export const QuestionAnswerWebformField = ({
   datasetId,
   getTableErrors,
   nationalField,
+  preparationCode,
   recordId,
   recordValidations,
   tableSchemaName,
@@ -404,7 +405,8 @@ export const QuestionAnswerWebformField = ({
                   tableSchemaName: tableSchemaName,
                   fieldName: field.name,
                   recordId,
-                  previousFileName: field.value
+                  previousFileName: field.value,
+                  preparationCode
                 })
               : getUrl(DatasetConfig.uploadAttachmentWithProviderId, {
                   dataflowId,
@@ -414,7 +416,8 @@ export const QuestionAnswerWebformField = ({
                   fieldName: field.name,
                   recordId,
                   previousFileName: field.value,
-                  providerId: dataProviderId
+                  providerId: dataProviderId,
+                  preparationCode
                 })
           }`}
         />
