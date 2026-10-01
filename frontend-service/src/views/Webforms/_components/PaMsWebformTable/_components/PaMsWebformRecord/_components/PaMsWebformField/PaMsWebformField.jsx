@@ -297,9 +297,10 @@ export const PaMsWebformField = ({
         .filter(conditionalField => conditionalField.type === 'FIELD' && conditionalField.pk !== true);
 
       parsedValues = conditionalFields.map(conditionalField =>
-        conditionalField.fieldType === 'MULTISELECT_CODELIST' ||
-        ((conditionalField.fieldType === 'LINK' || conditionalField.fieldType === 'EXTERNAL_LINK') &&
-          Array.isArray(conditionalField.value))
+        (conditionalField.fieldType === 'MULTISELECT_CODELIST' ||
+          conditionalField.fieldType === 'LINK' ||
+          conditionalField.fieldType === 'EXTERNAL_LINK') &&
+        Array.isArray(conditionalField.value)
           ? { ...conditionalField, value: conditionalField.value.join(';') }
           : { ...conditionalField }
       );
