@@ -421,7 +421,7 @@ public class S3ServiceImpl implements S3Service {
                         dataflowFolder, tableName);
                 break;
             case PREPARATION:
-                this.getTableAsFolderQueryPath(tableResolver, S3_PREPARATION_TABLE_AS_FOLDER_QUERY_PATH);
+                tablePath = this.getTableAsFolderQueryPath(tableResolver, S3_PREPARATION_TABLE_AS_FOLDER_QUERY_PATH);
                 break;
             default:
                 tablePath =
