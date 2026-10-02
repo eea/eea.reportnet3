@@ -335,6 +335,6 @@ public interface RepresentativeController {
   DataProviderVO findDataProviderByCodeAndGroupId(@PathVariable("code") String code, @PathVariable("groupId") Long groupId);
 
   @GetMapping(value = "/private/providerName/{providerName}", produces = MediaType.APPLICATION_JSON_VALUE)
-  DataProviderVO findDataProviderByLabel(@PathVariable("providerName") String providerName);
+  List<DataProviderVO> findDataProvidersByLabel(@PathVariable("providerName") String providerName);
 
 }

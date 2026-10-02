@@ -955,10 +955,10 @@ public class RepresentativeControllerImpl implements RepresentativeController {
 
   @Override
   @GetMapping(value = "/private/providerName/{providerName}", produces = MediaType.APPLICATION_JSON_VALUE)
-  public DataProviderVO findDataProviderByLabel(
+  public List<DataProviderVO> findDataProvidersByLabel(
           @ApiParam(value = "Provider name", example = "Austria") @PathVariable("providerName") String providerName) {
     try{
-      return representativeService.findDataProviderByLabel(providerName);
+      return representativeService.findDataProvidersByLabel(providerName);
     }
     catch (Exception e){
       LOG.error("Could not find provider with name {} Error: {}", providerName, e.getMessage());

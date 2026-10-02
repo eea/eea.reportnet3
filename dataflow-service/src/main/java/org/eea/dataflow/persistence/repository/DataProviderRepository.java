@@ -64,7 +64,7 @@ public interface DataProviderRepository extends PagingAndSortingRepository<DataP
    * @param providerName the provider label
    * @return the optional
    */
-  @Query(value = "SELECT * FROM data_provider d WHERE LOWER(d.label) LIKE LOWER(CONCAT('%', :providerName, '%')) LIMIT 1", nativeQuery = true)
-  Optional<DataProvider> findFirstByLabel(@Param("providerName") String providerName);
+  @Query(value = "SELECT * FROM data_provider d WHERE LOWER(d.label) LIKE LOWER(CONCAT('%', :providerName, '%'))", nativeQuery = true)
+  List<DataProvider> findAllByLabel(@Param("providerName") String providerName);
 
 }

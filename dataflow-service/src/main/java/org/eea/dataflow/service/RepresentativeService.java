@@ -295,5 +295,5 @@ public interface RepresentativeService {
 
   DataProviderVO findDataProviderByCodeAndGroupId(String code, Long groupId);
 
-  DataProviderVO findDataProviderByLabel(String providerName);
+  List<DataProviderVO> findDataProvidersByLabel(String providerName);
 }

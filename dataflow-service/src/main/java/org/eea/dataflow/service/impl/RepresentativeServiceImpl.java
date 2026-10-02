@@ -1529,10 +1529,10 @@ public class RepresentativeServiceImpl implements RepresentativeService {
    * @param providerName the provider label
    * @return the list
    */
-  public DataProviderVO findDataProviderByLabel(String providerName) {
-    Optional<DataProvider> dataProvider = dataProviderRepository.findFirstByLabel(providerName);
-    if (dataProvider.isPresent()) {
-      return dataProviderMapper.entityToClass(dataProvider.get());
+  public List<DataProviderVO> findDataProvidersByLabel(String providerName) {
+    List<DataProvider> dataProviders = dataProviderRepository.findAllByLabel(providerName);
+    if (dataProviders != null && !dataProviders.isEmpty()) {
+      return dataProviderMapper.entityListToClass(dataProviders);
     }
     else return null;
   }

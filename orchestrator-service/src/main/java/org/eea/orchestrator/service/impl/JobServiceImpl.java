@@ -160,12 +160,15 @@ public class JobServiceImpl implements JobService {
 
         String sortedTableColumn = jobUtils.getJobColumnNameByObjectName(sortedColumn);
         String remainingJobsStatusFilter = "IN_PROGRESS,QUEUED";
+        String dataProviderIds = "";
         // Resolve the human-readable providerName filter (from the request) into the internal providerId
         // used by the query, since jobs store providerId, not provider label.
         if (StringUtils.isNotBlank(providerName)) {
-            DataProviderVO dataProvider = representativeControllerZuul.findDataProviderByLabel(providerName);
-            if (dataProvider != null) {
-                providerId = dataProvider.getId();
+            List<DataProviderVO> dataProviders = representativeControllerZuul.findDataProvidersByLabel(providerName);
+            if (dataProviders != null && !dataProviders.isEmpty()) {
+                dataProviderIds = dataProviders.stream()
+                        .map(name -> String.valueOf(name.getId()))
+                        .collect(Collectors.joining(","));
             } else {
                 // No provider matches the given providerName, so the filter can never match any real job.
                 // Force jobId to a sentinel value (0L, an id that can never exist) to guarantee the
@@ -175,14 +178,14 @@ public class JobServiceImpl implements JobService {
                 jobId = 0L;
             }
         }
-        List<Job> jobs = jobRepository.findJobsPaginated(pageable, asc, sortedTableColumn, jobId, jobTypes, dataflowId, dataflowName, providerId, datasetId, datasetName, creatorUsername, jobStatuses, preparationCode);
+        List<Job> jobs = jobRepository.findJobsPaginated(pageable, asc, sortedTableColumn, jobId, jobTypes, dataflowId, dataflowName, dataProviderIds, datasetId, datasetName, creatorUsername, jobStatuses, preparationCode);
         List<JobVO> jobVOList = jobMapper.entityListToClass(jobs);
 
         populateProviderNames(jobVOList);
         JobsVO jobsVO = new JobsVO();
         jobsVO.setTotalRecords(jobRepository.count());
-        jobsVO.setFilteredRecords(jobRepository.countJobsPaginated(asc, sortedTableColumn, jobId, jobTypes, dataflowId, dataflowName, providerId, datasetId, datasetName, creatorUsername, jobStatuses));
-        jobsVO.setRemainingJobs(jobRepository.countJobsPaginated(asc, sortedTableColumn, jobId, jobTypes, dataflowId, dataflowName, providerId, datasetId, datasetName, creatorUsername, remainingJobsStatusFilter));
+        jobsVO.setFilteredRecords(jobRepository.countJobsPaginated(asc, sortedTableColumn, jobId, jobTypes, dataflowId, dataflowName, dataProviderIds, datasetId, datasetName, creatorUsername, jobStatuses));
+        jobsVO.setRemainingJobs(jobRepository.countJobsPaginated(asc, sortedTableColumn, jobId, jobTypes, dataflowId, dataflowName, dataProviderIds, datasetId, datasetName, creatorUsername, remainingJobsStatusFilter));
         jobsVO.setJobsList(jobVOList);
 
         return jobsVO;
