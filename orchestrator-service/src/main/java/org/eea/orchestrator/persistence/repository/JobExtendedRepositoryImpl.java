@@ -13,6 +13,7 @@ import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class JobExtendedRepositoryImpl implements JobExtendedRepository{
 
@@ -32,19 +33,19 @@ public class JobExtendedRepositoryImpl implements JobExtendedRepository{
      * Retrieves paginated jobs
      */
     @Override
-    public List<Job> findJobsPaginated(Pageable pageable, boolean asc, String sortedColumn, Long jobId, String jobTypes, Long dataflowId, String dataflowName, Long providerId, Long datasetId, String datasetName,
+    public List<Job> findJobsPaginated(Pageable pageable, boolean asc, String sortedColumn, Long jobId, String jobTypes, Long dataflowId, String dataflowName, String providerIds, Long datasetId, String datasetName,
                                        String creatorUsername, String jobStatuses, String preparationCode){
 
         StringBuilder stringQuery = new StringBuilder();
         List<Job> jobList = new ArrayList<>();
-        Query query = constructQuery(asc, sortedColumn, stringQuery, false, pageable, jobId, jobTypes, dataflowId, dataflowName, providerId, datasetId, datasetName, creatorUsername, jobStatuses, preparationCode);
+        Query query = constructQuery(asc, sortedColumn, stringQuery, false, pageable, jobId, jobTypes, dataflowId, dataflowName, providerIds, datasetId, datasetName, creatorUsername, jobStatuses, preparationCode);
 
         try {
             jobList = (List<Job>) query.getResultList();
         } catch (NoResultException e) {
             LOG.info(String.format(
                     "No processes found with provided filters: obId = %s, jobType = %s, dataflowId = %s, dataflowName = %s, providerId = %s, datasetId = %s, datasetName = %s, creatorUsername = %s, jobStatus = %s. Error message: %s",
-                    jobId, jobTypes, dataflowId, dataflowName, providerId, datasetId, datasetName, creatorUsername, jobStatuses, e.getMessage()));
+                    jobId, jobTypes, dataflowId, dataflowName, providerIds, datasetId, datasetName, creatorUsername, jobStatuses, e.getMessage()));
         }
         return jobList;
     }
@@ -53,9 +54,9 @@ public class JobExtendedRepositoryImpl implements JobExtendedRepository{
      * Count jobs paginated.
      */
     @Override
-    public Long countJobsPaginated(boolean asc, String sortedColumn, Long jobId, String jobTypes, Long dataflowId, String dataflowName, Long providerId, Long datasetId, String datasetName, String creatorUsername, String jobStatuses) {
+    public Long countJobsPaginated(boolean asc, String sortedColumn, Long jobId, String jobTypes, Long dataflowId, String dataflowName, String providerIds, Long datasetId, String datasetName, String creatorUsername, String jobStatuses) {
         StringBuilder stringQuery = new StringBuilder();
-        Query query = constructQuery(asc, sortedColumn, stringQuery, true, null, jobId, jobTypes, dataflowId, dataflowName, providerId, datasetId, datasetName, creatorUsername, jobStatuses, null);
+        Query query = constructQuery(asc, sortedColumn, stringQuery, true, null, jobId, jobTypes, dataflowId, dataflowName, providerIds, datasetId, datasetName, creatorUsername, jobStatuses, null);
 
         return Long.valueOf(query.getSingleResult().toString());
     }
@@ -71,7 +72,7 @@ public class JobExtendedRepositoryImpl implements JobExtendedRepository{
      * @param jobTypes
      * @param dataflowId
      * @param dataflowName
-     * @param providerId
+     * @param providerIds
      * @param datasetId
      * @param datasetName
      * @param creatorUsername
@@ -79,9 +80,9 @@ public class JobExtendedRepositoryImpl implements JobExtendedRepository{
      * @return
      */
     private Query constructQuery(boolean asc, String sortedColumn, StringBuilder stringQuery, boolean countQuery, Pageable pageable, Long jobId, String jobTypes, Long dataflowId, String dataflowName,
-                                 Long providerId, Long datasetId, String datasetName, String creatorUsername, String jobStatuses, String preparationCode) {
+                                 String providerIds, Long datasetId, String datasetName, String creatorUsername, String jobStatuses, String preparationCode) {
         stringQuery.append(countQuery ? COUNT_JOBS_QUERY : JOBS_QUERY);
-        addFilters(stringQuery, jobId, jobTypes, dataflowId, dataflowName, providerId, datasetId, datasetName, creatorUsername, jobStatuses, preparationCode);
+        addFilters(stringQuery, jobId, jobTypes, dataflowId, dataflowName, providerIds, datasetId, datasetName, creatorUsername, jobStatuses, preparationCode);
         if (!countQuery) {
             if (sortedColumn.equals("provider_id")) {
                 if (asc) {
@@ -110,7 +111,7 @@ public class JobExtendedRepositoryImpl implements JobExtendedRepository{
             query = entityManager.createNativeQuery(stringQuery.toString(), Job.class);
         }
 
-        addParameters(query, jobId, jobTypes, dataflowId, dataflowName, providerId, datasetId, datasetName, creatorUsername, jobStatuses, preparationCode);
+        addParameters(query, jobId, jobTypes, dataflowId, dataflowName, providerIds, datasetId, datasetName, creatorUsername, jobStatuses, preparationCode);
         return query;
     }
 
@@ -122,19 +123,19 @@ public class JobExtendedRepositoryImpl implements JobExtendedRepository{
      * @param jobTypes the jobTypes
      * @param dataflowId the dataflowId
      * @param dataflowName the dataflowName
-     * @param providerId the providerId
+     * @param providerIds the providerIds
      * @param datasetId the datasetId
      * @param datasetName the datasetName
      * @param creatorUsername the creatorUsername
      * @param jobStatuses the jobStatuses
      */
-    private void addFilters(StringBuilder query, Long jobId, String jobTypes, Long dataflowId, String dataflowName, Long providerId, Long datasetId, String datasetName, String creatorUsername, String jobStatuses, String preparationCode) {
+    private void addFilters(StringBuilder query, Long jobId, String jobTypes, Long dataflowId, String dataflowName, String providerIds, Long datasetId, String datasetName, String creatorUsername, String jobStatuses, String preparationCode) {
         query.append(" where 1=1 ");
         query.append((jobId != null) ? " and jobs.id = :jobId " : "");
         query.append(StringUtils.isNotBlank(jobTypes) ? " and jobs.job_type in :jobType " : "");
         query.append((dataflowId != null) ? " and jobs.dataflow_id= :dataflowId " : "");
         query.append(StringUtils.isNotBlank(dataflowName) ? " and LOWER(jobs.dataflow_name) LIKE LOWER(CONCAT('%',:dataflowName,'%')) " : "");
-        query.append((providerId != null) ? " and jobs.provider_id= :providerId " : "");
+        query.append(StringUtils.isNotBlank(providerIds) ? " and jobs.provider_id in (:providerIds) " : "");
         query.append((datasetId != null) ? " and jobs.dataset_id= :datasetId " : "");
         query.append(StringUtils.isNotBlank(datasetName) ? " and LOWER(jobs.dataset_name) LIKE LOWER(CONCAT('%',:datasetName,'%')) " : "");
         query.append(StringUtils.isNotBlank(creatorUsername) ? " and LOWER(jobs.creator_username) LIKE LOWER(CONCAT('%',:creatorUsername,'%')) " : "");
@@ -150,13 +151,13 @@ public class JobExtendedRepositoryImpl implements JobExtendedRepository{
      * @param jobTypes the jobTypes
      * @param dataflowId the dataflowId
      * @param dataflowName the dataflowName
-     * @param providerId the providerId
+     * @param providerIds the providerIds
      * @param datasetId the datasetId
      * @param datasetName the datasetName
      * @param creatorUsername the creatorUsername
      * @param jobStatuses the jobStatuses
      */
-    private void addParameters(Query query, Long jobId, String jobTypes, Long dataflowId, String dataflowName, Long providerId, Long datasetId, String datasetName, String creatorUsername, String jobStatuses, String preparationCode) {
+    private void addParameters(Query query, Long jobId, String jobTypes, Long dataflowId, String dataflowName, String providerIds, Long datasetId, String datasetName, String creatorUsername, String jobStatuses, String preparationCode) {
         if (jobId != null){
             query.setParameter("jobId", jobId);
         }
@@ -169,8 +170,12 @@ public class JobExtendedRepositoryImpl implements JobExtendedRepository{
         if (StringUtils.isNotBlank(dataflowName)) {
             query.setParameter("dataflowName", dataflowName);
         }
-        if (providerId != null){
-            query.setParameter("providerId", providerId);
+        if (StringUtils.isNotBlank(providerIds)){
+            List<Long> ids = Arrays.stream(providerIds.split(","))
+                    .map(String::trim)
+                    .map(Long::valueOf)
+                    .collect(Collectors.toList());
+            query.setParameter("providerIds", ids);
         }
         if (datasetId != null){
             query.setParameter("datasetId", datasetId);
