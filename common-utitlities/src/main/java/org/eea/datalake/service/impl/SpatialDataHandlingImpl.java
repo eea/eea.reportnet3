@@ -257,7 +257,7 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
   /**
    * Builds lightweight spatial descriptor JSON for UI consumption.
    */
-  private String buildSpatialDescriptorJSON(Integer srid, String type, Double sizeMB, String dimension) {
+  public String buildSpatialDescriptorJSON(Integer srid, String type, Double sizeMB, String dimension) {
 
     SpatialDataDescriptor descriptor = new SpatialDataDescriptor();
     descriptor.setSrid(srid);
