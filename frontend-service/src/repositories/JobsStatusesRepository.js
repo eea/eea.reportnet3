@@ -57,10 +57,12 @@ export const JobsStatusesRepository = {
     dataflowId,
     dataflowName,
     providerId,
+    providerName,
     datasetId,
     datasetName,
     creatorUsername,
-    jobStatus
+    jobStatus,
+    code
   }) =>
     await HTTPRequester.get({
       url: getUrl(JobsStatusesConfig.getJobsHistory, {
@@ -73,10 +75,12 @@ export const JobsStatusesRepository = {
         dataflowId,
         dataflowName,
         providerId,
+        providerName,
         datasetId,
         datasetName,
         creatorUsername,
-        jobStatus
+        jobStatus,
+        code
       })
     }),
   getCancelledValidations: async ({ jobId, pageNum, numberRows, sortOrder, sortField = '' }) =>

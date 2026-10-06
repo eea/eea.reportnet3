@@ -3,7 +3,7 @@ export const JobsStatusesConfig = {
     '/orchestrator/jobs/?pageNum={:pageNum}&pageSize={:numberRows}&asc={:sortOrder}&sortedColumn={:sortField}&jobId={:jobId}&jobType={:jobType}&dataflowId={:dataflowId}&dataflowName={:dataflowName}&providerId={:providerId}&providerName={:providerName}&datasetId={:datasetId}&datasetName={:datasetName}&creatorUsername={:creatorUsername}&jobStatus={:jobStatus}&code={:code}',
   getJobHistory: '/orchestrator/jobHistory/{:jobId}',
   getJobsHistory:
-    '/orchestrator/jobHistory/?pageNum={:pageNum}&pageSize={:numberRows}&asc={:sortOrder}&sortedColumn={:sortField}&jobId={:jobId}&jobType={:jobType}&dataflowId={:dataflowId}&dataflowName={:dataflowName}&providerId={:providerId}&providerName={:providerName}&datasetId={:datasetId}&datasetName={:datasetName}&creatorUsername={:creatorUsername}&jobStatus={:jobStatus}',
+    '/orchestrator/jobHistory/?pageNum={:pageNum}&pageSize={:numberRows}&asc={:sortOrder}&sortedColumn={:sortField}&jobId={:jobId}&jobType={:jobType}&dataflowId={:dataflowId}&dataflowName={:dataflowName}&providerId={:providerId}&providerName={:providerName}&datasetId={:datasetId}&datasetName={:datasetName}&creatorUsername={:creatorUsername}&jobStatus={:jobStatus}&code={:code}',
   cancelJob: '/orchestrator/jobs/cancelJob/{:jobId}?dataflowId={:dataflowId}&datasetId={:datasetId}',
   cancelJobNoDataset: '/orchestrator/jobs/cancelJob/{:jobId}?dataflowId={:dataflowId}',
   getCancelledValidations:
