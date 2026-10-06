@@ -142,7 +142,8 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
               datasetId: providerTabChange ? undefined : filterBy.datasetId,
               datasetName: providerTabChange ? undefined : filterBy.datasetName,
               creatorUsername: providerTabChange ? undefined : filterBy.creatorUsername,
-              jobStatus: filterBy.jobStatus?.join()
+              jobStatus: filterBy.jobStatus?.join(),
+              code: filterBy.preparationCode
             });
           }
         }
