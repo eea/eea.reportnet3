@@ -866,8 +866,7 @@ public class JobServiceImpl implements JobService {
                 datasetId,
                 preparationCode,
                 Arrays.asList(JobStatusEnum.QUEUED, JobStatusEnum.IN_PROGRESS));
-        //TODO Prep check this
-        if (dataflowId != null && providerId != null && providerId != 0L){
+        if (dataflowId != null && providerId != null && providerId != 0L && StringUtils.isBlank(preparationCode)){
             List<Job> jobsByDataflowAndProvider = jobRepository.findAllByDataflowIdAndProviderIdAndJobStatusIn(dataflowId, providerId, Arrays.asList(JobStatusEnum.QUEUED, JobStatusEnum.IN_PROGRESS));
             jobs.addAll(jobsByDataflowAndProvider);
         }
