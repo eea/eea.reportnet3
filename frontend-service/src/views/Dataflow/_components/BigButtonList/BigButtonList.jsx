@@ -174,6 +174,12 @@ export const BigButtonList = ({
     });
   };
 
+  const hasRespondedToRulesWarning = () =>
+    LocalUserStorageUtils.getPropertyFromSessionStorage('hasRespondedToRulesWarning') === dataflowId;
+
+  const setHasRespondedToRulesWarning = () =>
+    LocalUserStorageUtils.setPropertyToSessionStorage({ hasRespondedToRulesWarning: dataflowId });
+
   useCheckNotifications(['ADD_DATACOLLECTION_FAILED_EVENT'], changeIsActiveButtonState, true);
   useCheckNotifications(['ADD_DATACOLLECTION_FAILED_EVENT_ICEBERG_EXISTS'], changeIsActiveButtonState, true);
   useCheckNotifications(
@@ -258,17 +264,17 @@ export const BigButtonList = ({
         id="show_public_info_label"
         onClick={() => {
           if (!dataflowState.data.sncData) {
-            setShowPublicInfo(!showPublicInfo)
+            setShowPublicInfo(!showPublicInfo);
           }
         }}
         style={{
           color: 'var(--main-font-color)',
-          cursor: (dataflowState.data.sncData) ? 'default' : 'pointer',
+          cursor: dataflowState.data.sncData ? 'default' : 'pointer',
           fontSize: '10pt',
           fontWeight: 'bold',
           marginLeft: '6px',
           marginRight: '6px',
-          opacity: (dataflowState.data.sncData) ? 0.5 : 1
+          opacity: dataflowState.data.sncData ? 0.5 : 1
         }}>
         {resourcesContext.messages['showPublicInfo']}
       </label>
@@ -345,7 +351,7 @@ export const BigButtonList = ({
   const getExpirationDate = () => {
     setDataCollectionDueDate(
       !isNil(dataflowState.obligations?.expirationDate) &&
-      new Date(dataflowState.obligations.expirationDate) > new Date()
+        new Date(dataflowState.obligations.expirationDate) > new Date()
         ? new Date(dataflowState.obligations.expirationDate)
         : null
     );
@@ -396,6 +402,7 @@ export const BigButtonList = ({
       changeIsActiveButtonState(true);
     } finally {
       setDataCollectionDialog(false);
+      LocalUserStorageUtils.setPropertyToSessionStorage({ hasRespondedToRulesWarning: undefined });
     }
   };
 
@@ -414,8 +421,13 @@ export const BigButtonList = ({
   const onShowManualTechnicalAcceptanceDialog = () => setIsManualTechnicalAcceptanceDialogVisible(true);
 
   useEffect(() => {
-    const response = notificationContext.hidden.find(notification => notification.key === 'DISABLE_RULES_ERROR_EVENT');
-    if (response) {
+    const response = notificationContext.hidden.find(
+      notification =>
+        notification.key === 'DISABLE_RULES_ERROR_EVENT' &&
+        notification.content.dataflowId === Number(dataflowId) &&
+        (notification.content.invalidRules > 0 || notification.content.disabledRules > 0)
+    );
+    if (response && !hasRespondedToRulesWarning()) {
       const {
         content: { invalidRules, disabledRules, emptyTable }
       } = response;
@@ -569,11 +581,20 @@ export const BigButtonList = ({
   const getDate = () => new Date(dayjs(dataCollectionDueDate).utc(true).endOf('day').valueOf()).getTime();
 
   const onCreateDataCollectionsWithNotValids = async () => {
+    setHasRespondedToRulesWarning();
     changeIsActiveButtonState(false);
-
     try {
       notificationContext.removeHiddenByKey('DISABLE_RULES_ERROR_EVENT');
-      await DataCollectionService.create(dataflowId, getDate(), isManualTechnicalAcceptance, false);
+      await DataCollectionService.create(
+        dataflowId,
+        getDate(),
+        isManualTechnicalAcceptance,
+        false,
+        showPublicInfo,
+        true
+      );
+
+      notificationContext.add({ type: 'BYPASS_DISABLED_RULES_INFO_EVENT' }, true);
     } catch (error) {
       console.error('BigButtonList - onCreateDataCollectionsWithNotValids.', error);
       const {
@@ -987,7 +1008,9 @@ export const BigButtonList = ({
           labelConfirm={resourcesContext.messages['yes']}
           onConfirm={onCreateDataCollectionsWithNotValids}
           onHide={() => {
+            setHasRespondedToRulesWarning();
             notificationContext.removeHiddenByKey('DISABLE_RULES_ERROR_EVENT');
+            notificationContext.add({ type: 'BYPASS_DISABLED_RULES_ERROR_EVENT' }, true);
             setIsQCsNotValidWarningVisible(false);
           }}
           visible={isQCsNotValidWarningVisible}>
@@ -1008,7 +1031,9 @@ export const BigButtonList = ({
           labelConfirm={resourcesContext.messages['yes']}
           onConfirm={onCreateDataCollectionsWithNotValids}
           onHide={() => {
+            setHasRespondedToRulesWarning();
             notificationContext.removeHiddenByKey('DISABLE_RULES_ERROR_EVENT');
+            notificationContext.add({ type: 'BYPASS_DISABLED_RULES_ERROR_EVENT' }, true);
             setIsQCsNotValidWarningVisible(false);
             setEmptyTable(false);
           }}

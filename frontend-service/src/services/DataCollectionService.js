@@ -1,13 +1,14 @@
 import { DataCollectionRepository } from 'repositories/DataCollectionRepository';
 
 export const DataCollectionService = {
-  create: async (dataflowId, endDate, isManualTechnicalAcceptance, stopAndNotifySQLErrors, showPublicInfo) =>
+  create: async (dataflowId, endDate, isManualTechnicalAcceptance, stopAndNotifySQLErrors, showPublicInfo, disableRulesEventChoice) =>
     await DataCollectionRepository.create(
       dataflowId,
       endDate,
       isManualTechnicalAcceptance,
       stopAndNotifySQLErrors,
-      showPublicInfo
+      showPublicInfo,
+      disableRulesEventChoice
     ),
 
   createReference: async (dataflowId, stopAndNotifyPKError) =>
