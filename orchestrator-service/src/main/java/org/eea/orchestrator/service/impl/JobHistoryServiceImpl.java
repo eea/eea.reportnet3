@@ -5,6 +5,7 @@ import java.time.format.DateTimeFormatter;
 
 import org.apache.commons.lang.StringUtils;
 import org.eea.interfaces.controller.dataflow.RepresentativeController;
+import org.eea.interfaces.controller.dataset.DatasetMetabaseController;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.orchestrator.JobVO;
 import org.eea.interfaces.vo.orchestrator.JobsHistoryVO;
@@ -25,10 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import javax.transaction.Transactional;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -49,6 +47,9 @@ public class JobHistoryServiceImpl implements JobHistoryService {
 
     @Autowired
     private RepresentativeController.RepresentativeControllerZuul representativeControllerZuul;
+
+    @Autowired
+    private DatasetMetabaseController datasetMetabaseController;
 
     @Transactional
     @Override
@@ -158,15 +159,22 @@ public class JobHistoryServiceImpl implements JobHistoryService {
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
 
-        if (providerIds.isEmpty()) {
-            return;
+        Map<Long, String> labelById = new HashMap<>();
+        if (!providerIds.isEmpty()) {
+            labelById = representativeControllerZuul.findDataProvidersByIds(providerIds).stream()
+                    .collect(Collectors.toMap(DataProviderVO::getId, DataProviderVO::getLabel));
         }
 
-        Map<Long, String> labelById = representativeControllerZuul.findDataProvidersByIds(providerIds).stream()
-                .collect(Collectors.toMap(DataProviderVO::getId, DataProviderVO::getLabel));
-
-        jobHistoryVOList.forEach(jobHistory -> jobHistory.setProviderName(labelById.get(jobHistory.getProviderId())));
+        for (JobHistoryVO jobHistory : jobHistoryVOList) {
+            // set the providerName for not null providerId
+            if (jobHistory.getProviderId() != null) {
+                jobHistory.setProviderName(labelById.get(jobHistory.getProviderId()));
+            }
+            // set the providerName for not null datasetId, needed for styling jobs with DatasetTypeEnum.TEST and DatasetTypeEnum.DESIGN datasets
+            else if (jobHistory.getDatasetId() != null && datasetMetabaseController.getType(jobHistory.getDatasetId()) != null) {
+                jobHistory.setProviderName(datasetMetabaseController.getType(jobHistory.getDatasetId()).toString());
+            }
+        }
     }
-
 
 }

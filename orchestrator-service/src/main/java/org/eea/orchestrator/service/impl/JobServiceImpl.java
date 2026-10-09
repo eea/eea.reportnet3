@@ -8,6 +8,7 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
+import org.eea.interfaces.controller.dataset.DatasetMetabaseController;
 import org.eea.interfaces.controller.dataset.DatasetSnapshotController;
 import org.eea.interfaces.controller.dataset.DatasetSnapshotController.DataSetSnapshotControllerZuul;
 import org.eea.interfaces.controller.dataset.EUDatasetController.EUDatasetControllerZuul;
@@ -153,6 +154,8 @@ public class JobServiceImpl implements JobService {
 
     private static final String BEARER = "Bearer ";
     private static final String CANCELED_BY_ADMIN_ERROR = "cancelled by admin";
+    @Autowired
+    private DatasetMetabaseController datasetMetabaseController;
 
     @Override
     public JobsVO getJobs(Pageable pageable, boolean asc, String sortedColumn, Long jobId, String jobTypes, Long dataflowId, String dataflowName, Long providerId, String providerName,
@@ -980,13 +983,21 @@ public class JobServiceImpl implements JobService {
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
 
-        if (providerIds.isEmpty()) {
-            return;
+        Map<Long, String> labelById = new HashMap<>();
+        if (!providerIds.isEmpty()) {
+            labelById = representativeControllerZuul.findDataProvidersByIds(providerIds).stream()
+                    .collect(Collectors.toMap(DataProviderVO::getId, DataProviderVO::getLabel));
         }
 
-        Map<Long, String> labelById = representativeControllerZuul.findDataProvidersByIds(providerIds).stream()
-                .collect(Collectors.toMap(DataProviderVO::getId, DataProviderVO::getLabel));
-
-        jobVOList.forEach(job -> job.setProviderName(labelById.get(job.getProviderId())));
+        for (JobVO jobVO : jobVOList) {
+            // set the providerName for not null providerId
+            if (jobVO.getProviderId() != null) {
+                jobVO.setProviderName(labelById.get(jobVO.getProviderId()));
+            }
+            // set the providerName for not null datasetId, needed for styling jobs with DatasetTypeEnum.TEST and DatasetTypeEnum.DESIGN datasets
+            else if (jobVO.getDatasetId() != null && datasetMetabaseController.getType(jobVO.getDatasetId()) != null) {
+                jobVO.setProviderName(datasetMetabaseController.getType(jobVO.getDatasetId()).toString());
+            }
+        }
     }
 }
