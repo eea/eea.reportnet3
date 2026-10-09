@@ -200,6 +200,20 @@ public class JwtTokenProvider {
   }
 
   /**
+   * Retrieve refresh token string from redis if exists, otherwise retrieves keyToken input
+   * parameter.
+   *
+   * @param keyToken the key token
+   *
+   * @return the string
+   */
+  public String retrieveRefreshToken(String keyToken) {
+    CacheTokenVO result = securityRedisTemplate.opsForValue().get(keyToken);
+
+    return result != null ? result.getRefreshToken() : null;
+  }
+
+  /**
    * Retrieve publi key from certifiate.
    *
    * @param certificate the certificate
