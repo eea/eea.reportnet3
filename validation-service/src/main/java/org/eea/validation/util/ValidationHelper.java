@@ -27,6 +27,7 @@ import org.eea.interfaces.controller.orchestrator.JobController.JobControllerZuu
 import org.eea.interfaces.controller.orchestrator.JobProcessController.JobProcessControllerZuul;
 import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
+import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
@@ -47,6 +48,7 @@ import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.interfaces.vo.recordstore.ProcessVO;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
+import org.eea.interfaces.vo.ums.TokenVO;
 import org.eea.interfaces.vo.validation.TaskVO;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
@@ -57,6 +59,8 @@ import org.eea.lock.annotation.LockMethod;
 import org.eea.lock.service.LockService;
 import org.eea.multitenancy.TenantResolver;
 import org.eea.security.jwt.utils.AuthenticationDetails;
+import org.eea.security.jwt.utils.AuthenticationUtils;
+import org.eea.security.jwt.utils.JwtTokenProvider;
 import org.eea.thread.EEADelegatingSecurityContextExecutorService;
 import org.eea.validation.kafka.command.Validator;
 import org.eea.validation.mapper.TaskMapper;
@@ -199,6 +203,12 @@ public class ValidationHelper implements DisposableBean {
 
     @Autowired
     private DatasetSchemaControllerZuul datasetSchemaControllerZuul;
+
+    @Autowired
+    private JwtTokenProvider jwtTokenProvider;
+
+    @Autowired
+    private UserManagementControllerZull userManagementControllerZull;
 
 
     /** The Constant DATASET: {@value}. */
@@ -1079,7 +1089,7 @@ public class ValidationHelper implements DisposableBean {
       final List<TableSchemaIdNameVO> tableList = datasetSchemaControllerZuul
               .getTableSchemasIds(
                       datasetMetabaseVO.getId(),
-                      datasetMetabaseVO.getId(),
+                      datasetMetabaseVO.getDataflowId(),
                       datasetMetabaseVO.getDataProviderId());
 
       for (TableSchemaIdNameVO table : tableList) {
@@ -1141,12 +1151,16 @@ public class ValidationHelper implements DisposableBean {
     TenantResolver.setTenantName(DATASET_PREFIX + datasetId);
 
     final List<TableSchemaIdNameVO> tables;
+    refreshCurrentAuthenticationToken();
 
     try {
-      tables = datasetSchemaControllerZuul.getTableSchemasIds(datasetMetabaseVO.getId(), datasetMetabaseVO.getId(), datasetMetabaseVO.getDataProviderId());
+      tables = datasetSchemaControllerZuul.getTableSchemasIds(
+          datasetMetabaseVO.getId(),
+          datasetMetabaseVO.getDataflowId(),
+          datasetMetabaseVO.getDataProviderId());
     } catch (FeignException e) {
-      LOG.error("Table fetching FAILED during lock cleanup for datasetId {}, suppliedDataflowId {}, actualDataflowId {}, providerId {}, status {}, thread {}",
-          datasetMetabaseVO.getId(), datasetMetabaseVO.getId(), datasetMetabaseVO.getDataflowId(), datasetMetabaseVO.getDataProviderId(), e.status(), Thread.currentThread().getName(), e);
+      LOG.error("Table fetching FAILED during lock cleanup for datasetId {}, dataflowId {}, providerId {}, status {}, thread {}",
+          datasetMetabaseVO.getId(), datasetMetabaseVO.getDataflowId(), datasetMetabaseVO.getDataProviderId(), e.status(), Thread.currentThread().getName(), e);
       throw e;
     }
 
@@ -1756,7 +1770,6 @@ public class ValidationHelper implements DisposableBean {
               logCleanupSecurityContext("FINALIZATION", datasetId, processId);
               try {
                 deleteLockToReleaseProcess(datasetId, preparationCode);
-                LOG.info("Finished final validation cleanup for datasetId {}, processId {}, jobId {}", datasetId, processId, jobId);
               } catch (Exception e) {
                 LOG.error("Final validation cleanup FAILED for datasetId {}, processId {}, jobId {}, thread {}, exceptionType {}, message {}",
                     datasetId, processId, jobId, Thread.currentThread().getName(), e.getClass().getName(), e.getMessage(), e);
@@ -1765,7 +1778,6 @@ public class ValidationHelper implements DisposableBean {
 
               try {
                 checkAndPromoteFolder(s3PathResolver, dataflow);
-                LOG.info("Finished second checkAndPromoteFolder for datasetId {}, processId {}, jobId {}", datasetId, processId, jobId);
               } catch (Exception e) {
                 LOG.error("Second checkAndPromoteFolder FAILED for datasetId {}, processId {}, jobId {}, thread {}, exceptionType {}, message {}",
                     datasetId, processId, jobId, Thread.currentThread().getName(), e.getClass().getName(), e.getMessage(), e);
@@ -1774,7 +1786,6 @@ public class ValidationHelper implements DisposableBean {
 
               if (jobId != null) {
                 jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FINISHED);
-                LOG.info("Validation job {} successfully updated to FINISHED for datasetId {}, processId {}", jobId, datasetId, processId);
               }
 
               value.put("preparationCode", preparationCode);
@@ -1835,11 +1846,10 @@ public class ValidationHelper implements DisposableBean {
       hasUserId = userId != null && StringUtils.isNotBlank(String.valueOf(userId));
     }
 
-    LOG.info("Validation cleanup security context: phase {}, datasetId {}, processId {}, thread {}, authPresent {}, authName {}, authorities {}, detailsType {}, hasUserId {}",
+    LOG.info("Validation cleanup security context: phase {}, datasetId {}, processId {}, thread {}, authPresent {}, authName {}, detailsType {}, hasUserId {}",
         phase, datasetId, processId, Thread.currentThread().getName(),
         authentication != null,
         authentication != null ? authentication.getName() : null,
-        authentication != null ? authentication.getAuthorities() : null,
         authentication != null && authentication.getDetails() != null ? authentication.getDetails().getClass().getName() : null,
         hasUserId);
   }
@@ -2089,5 +2099,56 @@ public class ValidationHelper implements DisposableBean {
     //if the dataset to validate is of reference type, then the validation path should be changed
     final String s3FilePath = this.getRuleValidationFolderName(ruleVO, validationResolver, fileName, ruleIdLength, parquetFile);
     s3Helper.uploadFileToBucket(s3FilePath, parquetFile);
+  }
+
+  /**
+   * Refreshes bearer token and replace the old authentication context details.
+   */
+  private void refreshCurrentAuthenticationToken() {
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+    if (authentication == null || authentication.getCredentials() == null) {
+      throw new IllegalStateException("Authentication credentials are not available");
+    }
+
+    // Get the beared token.
+    String credentials = authentication.getCredentials().toString();
+
+    if (StringUtils.isBlank(credentials)) {
+      throw new IllegalStateException("Authentication credentials are empty");
+    }
+
+    // If it starts with Bearer clear it for the retrieveRefreshToken method to find the refreshToken.
+    String cacheKey = credentials.startsWith("Bearer ") ? credentials.substring("Bearer ".length()) : credentials;
+
+    if (StringUtils.isBlank(cacheKey)) {
+      throw new IllegalStateException("Authentication cache key is empty");
+    }
+
+    // Get the JWT refresh token from CacheTokenVO. Three part base64URL keyclock refresh token (HEADER.PAYLOAD.SIGNATURE).
+    String jwtRefreshToken = jwtTokenProvider.retrieveRefreshToken(cacheKey);
+
+    if (StringUtils.isBlank(jwtRefreshToken)) {
+      throw new IllegalStateException("Refresh token could not be retrieved");
+    }
+
+    TokenVO refreshedToken = userManagementControllerZull.refreshToken(jwtRefreshToken);
+
+    if (refreshedToken == null) {
+      throw new IllegalStateException("Token refresh returned null");
+    }
+
+    if (StringUtils.isBlank(refreshedToken.getAccessToken())) {
+      throw new IllegalStateException("Refreshed access token is empty");
+    }
+
+    if (StringUtils.isBlank(refreshedToken.getUserId())) {
+      throw new IllegalStateException("Refreshed token does not contain userId");
+    }
+
+    // Update the SecurityContext with the refreshed token before the next Feign call,
+    // preventing expired credentials from triggering the fallback authentication path.
+    AuthenticationUtils.performAuthentication(AuthenticationUtils.tokenVO2TokenDataVO(refreshedToken),
+        "Bearer " + refreshedToken.getAccessToken());
   }
 }
