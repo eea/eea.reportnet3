@@ -991,7 +991,7 @@ public class JobServiceImpl implements JobService {
 
         for (JobVO jobVO : jobVOList) {
             // set the providerName for not null providerId
-            if (jobVO.getProviderId() != null) {
+            if (jobVO.getProviderId() != null && jobVO.getProviderId() > 0) {
                 jobVO.setProviderName(labelById.get(jobVO.getProviderId()));
             }
             // set the providerName for not null datasetId, needed for styling jobs with DatasetTypeEnum.TEST and DatasetTypeEnum.DESIGN datasets

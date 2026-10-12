@@ -167,7 +167,7 @@ public class JobHistoryServiceImpl implements JobHistoryService {
 
         for (JobHistoryVO jobHistory : jobHistoryVOList) {
             // set the providerName for not null providerId
-            if (jobHistory.getProviderId() != null) {
+            if (jobHistory.getProviderId() != null && jobHistory.getProviderId() > 0)  {
                 jobHistory.setProviderName(labelById.get(jobHistory.getProviderId()));
             }
             // set the providerName for not null datasetId, needed for styling jobs with DatasetTypeEnum.TEST and DatasetTypeEnum.DESIGN datasets
