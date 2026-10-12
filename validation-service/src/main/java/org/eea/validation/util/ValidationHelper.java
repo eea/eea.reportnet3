@@ -77,6 +77,8 @@ import org.eea.validation.persistence.schemas.rule.Rule;
 import org.eea.validation.persistence.schemas.rule.RulesSchema;
 import org.eea.validation.service.ValidationService;
 import org.eea.validation.util.model.ValidationProcessVO;
+import org.keycloak.common.VerificationException;
+import org.keycloak.exceptions.TokenNotActiveException;
 import org.kie.api.KieBase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -2111,7 +2113,6 @@ public class ValidationHelper implements DisposableBean {
       throw new IllegalStateException("Authentication credentials are not available");
     }
 
-    // Get the beared token.
     String credentials = authentication.getCredentials().toString();
 
     if (StringUtils.isBlank(credentials)) {
@@ -2125,30 +2126,39 @@ public class ValidationHelper implements DisposableBean {
       throw new IllegalStateException("Authentication cache key is empty");
     }
 
-    // Get the JWT refresh token from CacheTokenVO. Three part base64URL keyclock refresh token (HEADER.PAYLOAD.SIGNATURE).
-    String jwtRefreshToken = jwtTokenProvider.retrieveRefreshToken(cacheKey);
+    try {
+      // Check whether the token behind the current cache key is still valid.
+      jwtTokenProvider.retrieveToken(cacheKey);
+    } catch (TokenNotActiveException e) {
 
-    if (StringUtils.isBlank(jwtRefreshToken)) {
-      throw new IllegalStateException("Refresh token could not be retrieved");
+      // Get the JWT refresh token from CacheTokenVO. Three part base64URL keyclock refresh token (HEADER.PAYLOAD.SIGNATURE).
+      String jwtRefreshToken = jwtTokenProvider.retrieveRefreshToken(cacheKey);
+
+      if (StringUtils.isBlank(jwtRefreshToken)) {
+        throw new IllegalStateException("Refresh token could not be retrieved");
+      }
+
+      TokenVO refreshedToken = userManagementControllerZull.refreshToken(jwtRefreshToken);
+
+      if (refreshedToken == null) {
+        throw new IllegalStateException("Token refresh returned null");
+      }
+
+      if (StringUtils.isBlank(refreshedToken.getAccessToken())) {
+        throw new IllegalStateException("Refreshed access token is empty");
+      }
+
+      if (StringUtils.isBlank(refreshedToken.getUserId())) {
+        throw new IllegalStateException("Refreshed token does not contain userId");
+      }
+
+      // Update the SecurityContext with the refreshed token before the next Feign call,
+      // preventing expired credentials from triggering the fallback authentication path.
+      AuthenticationUtils.performAuthentication(AuthenticationUtils.tokenVO2TokenDataVO(refreshedToken),
+          "Bearer " + refreshedToken.getAccessToken());
+    } catch (VerificationException e) {
+      throw new IllegalStateException("Could not verify current authentication token", e);
     }
-
-    TokenVO refreshedToken = userManagementControllerZull.refreshToken(jwtRefreshToken);
-
-    if (refreshedToken == null) {
-      throw new IllegalStateException("Token refresh returned null");
-    }
-
-    if (StringUtils.isBlank(refreshedToken.getAccessToken())) {
-      throw new IllegalStateException("Refreshed access token is empty");
-    }
-
-    if (StringUtils.isBlank(refreshedToken.getUserId())) {
-      throw new IllegalStateException("Refreshed token does not contain userId");
-    }
-
-    // Update the SecurityContext with the refreshed token before the next Feign call,
-    // preventing expired credentials from triggering the fallback authentication path.
-    AuthenticationUtils.performAuthentication(AuthenticationUtils.tokenVO2TokenDataVO(refreshedToken),
-        "Bearer " + refreshedToken.getAccessToken());
   }
+
 }
