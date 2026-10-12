@@ -38,6 +38,8 @@ import org.eea.kafka.domain.MemberDescriptionVO;
 import org.eea.kafka.utils.KafkaAdminUtils;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.service.LockService;
+import org.eea.security.jwt.data.TokenDataVO;
+import org.eea.security.jwt.utils.JwtTokenProvider;
 import org.eea.thread.EEADelegatingSecurityContextExecutorService;
 import org.eea.validation.kafka.command.Validator;
 import org.eea.validation.persistence.data.domain.TableValue;
@@ -55,6 +57,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.keycloak.common.VerificationException;
 import org.kie.api.KieBase;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -158,6 +161,9 @@ public class ValidationHelperTest {
 
   @Mock
   private RecordStoreController.RecordStoreControllerZuul recordStoreControllerZuul;
+
+  @Mock
+  private JwtTokenProvider jwtTokenProvider;
 
   /**
    * Inits the mocks.
@@ -299,7 +305,7 @@ public class ValidationHelperTest {
    * @throws EEAException the EEA exception
    */
   @Test
-  public void executeValidation2() throws EEAException {
+  public void executeValidation2() throws EEAException, VerificationException {
     ReflectionTestUtils.setField(validationHelper, "fieldBatchSize", 20);
     ReflectionTestUtils.setField(validationHelper, "recordBatchSize", 20);
     List<TableValue> tables = new ArrayList<>();
@@ -350,6 +356,10 @@ public class ValidationHelperTest {
     Mockito.when(processControllerZuul.findById(anyString())).thenReturn(processVO);
     Mockito.when(datasetSchemaControllerZuul.getTableSchemasIds(any(),any(),any()))
                     .thenReturn(new ArrayList<>());
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getCredentials()).thenReturn("Bearer test-cache-key");
+    Mockito.when(jwtTokenProvider.retrieveToken("test-cache-key"))
+        .thenReturn(new TokenDataVO());
     validationHelper.executeValidation(1l, "1", false, true);
     Mockito.verify(referenceDatasetControllerZuul, Mockito.times(1))
         .findReferenceDatasetByDataflowId(Mockito.any());
