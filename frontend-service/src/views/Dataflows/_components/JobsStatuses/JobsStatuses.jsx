@@ -601,7 +601,9 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
       <div className={styles.tooltip}>
         <p>
           {job.providerName}
-          <span className={styles.tooltiptext}> {job.providerId} </span>
+          <span className={styles.tooltiptext}>
+            {job.providerId ?? (job.providerName === 'TEST' ? 0 : resourcesContext.messages['noProvider'])}
+          </span>
         </p>
       </div>
     );

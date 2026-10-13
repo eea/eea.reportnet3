@@ -1174,6 +1174,7 @@
     "noPK": "No PK",
     "noPkReferenceDataflowErrorEvent": "There is no PK in reference dataflow",
     "noPushNotifications": "No push notifications",
+    "noProvider": "No provider",
     "noProvidersAvailable": "No providers available",
     "noQCRulesWithSelectedParameters": "There are no QC rules with the selected parameters",
     "noQCs": "No QCs to show",
