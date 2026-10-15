@@ -78,7 +78,6 @@ import org.eea.validation.persistence.schemas.rule.RulesSchema;
 import org.eea.validation.service.ValidationService;
 import org.eea.validation.util.model.ValidationProcessVO;
 import org.keycloak.common.VerificationException;
-import org.keycloak.exceptions.TokenNotActiveException;
 import org.kie.api.KieBase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -154,6 +153,12 @@ public class ValidationHelper implements DisposableBean {
   /** The priority days. */
   @Value("${validation.priority.days}")
   private String priorityDays;
+
+  @Value("${eea.keycloak.admin.user}")
+  private String adminUser;
+
+  @Value("${eea.keycloak.admin.password}")
+  private String adminPass;
 
   /** The period days. */
   private List<Long> periodDays;
@@ -2129,35 +2134,17 @@ public class ValidationHelper implements DisposableBean {
     try {
       // Check whether the token behind the current cache key is still valid.
       jwtTokenProvider.retrieveToken(cacheKey);
-    } catch (TokenNotActiveException e) {
-
-      // Get the JWT refresh token from CacheTokenVO. Three part base64URL keyclock refresh token (HEADER.PAYLOAD.SIGNATURE).
-      String jwtRefreshToken = jwtTokenProvider.retrieveRefreshToken(cacheKey);
-
-      if (StringUtils.isBlank(jwtRefreshToken)) {
-        throw new IllegalStateException("Refresh token could not be retrieved");
-      }
-
-      TokenVO refreshedToken = userManagementControllerZull.refreshToken(jwtRefreshToken);
-
-      if (refreshedToken == null) {
-        throw new IllegalStateException("Token refresh returned null");
-      }
-
-      if (StringUtils.isBlank(refreshedToken.getAccessToken())) {
-        throw new IllegalStateException("Refreshed access token is empty");
-      }
-
-      if (StringUtils.isBlank(refreshedToken.getUserId())) {
-        throw new IllegalStateException("Refreshed token does not contain userId");
-      }
-
-      // Update the SecurityContext with the refreshed token before the next Feign call,
-      // preventing expired credentials from triggering the fallback authentication path.
-      AuthenticationUtils.performAuthentication(AuthenticationUtils.tokenVO2TokenDataVO(refreshedToken),
-          "Bearer " + refreshedToken.getAccessToken());
+      LOG.info("Cached token still valid for validation");
     } catch (VerificationException e) {
-      throw new IllegalStateException("Could not verify current authentication token", e);
+      // In case the authentication token and the cached token have expired, generate a new one.
+      TokenVO newToken = userManagementControllerZull.generateToken(adminUser, adminPass);
+
+      if (newToken == null || StringUtils.isBlank(newToken.getAccessToken())) {
+        throw new IllegalStateException("Could not generate new authentication token");
+      }
+
+      AuthenticationUtils.performAuthentication(
+          AuthenticationUtils.tokenVO2TokenDataVO(newToken), "Bearer " + newToken.getAccessToken());
     }
   }
 
