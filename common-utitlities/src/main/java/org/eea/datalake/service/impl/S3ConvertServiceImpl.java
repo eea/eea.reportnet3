@@ -23,14 +23,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.services.s3.model.S3Object;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -108,7 +103,14 @@ public class S3ConvertServiceImpl implements S3ConvertService {
         csvFile.getParentFile().mkdirs();
         LOG.info("Creating file for export: {}", csvFile);
 
-        try (CSVWriter csvWriter = new CSVWriter(new FileWriter(csvFile),
+        FileWriter fileWriter = null;
+        try {
+            fileWriter = new FileWriter(csvFile, StandardCharsets.UTF_8);
+            fileWriter.write('\uFEFF'); // BOM first
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        try (CSVWriter csvWriter = new CSVWriter(fileWriter,
             CSVWriter.DEFAULT_SEPARATOR, CSVWriter.DEFAULT_QUOTE_CHARACTER,
             CSVWriter.DEFAULT_ESCAPE_CHARACTER, CSVWriter.DEFAULT_LINE_END)) {
 
@@ -191,7 +193,15 @@ public class S3ConvertServiceImpl implements S3ConvertService {
     csvFile.getParentFile().mkdirs();
     LOG.info("Creating file for export: {}", csvFile);
 
-    try (CSVWriter csvWriter = new CSVWriter(new FileWriter(csvFile),
+    FileWriter fileWriter = null;
+    try {
+        fileWriter = new FileWriter(csvFile, StandardCharsets.UTF_8);
+        fileWriter.write('\uFEFF'); // BOM first
+    } catch (IOException e) {
+        throw new RuntimeException(e);
+    }
+
+    try (CSVWriter csvWriter = new CSVWriter(fileWriter,
         CSVWriter.DEFAULT_SEPARATOR, CSVWriter.DEFAULT_QUOTE_CHARACTER,
         CSVWriter.DEFAULT_ESCAPE_CHARACTER, CSVWriter.DEFAULT_LINE_END)) {
       convertParquetToCSV(exportFilenames, tableName, datasetId, csvWriter, datasetTypeEnum, etlExportV4);
