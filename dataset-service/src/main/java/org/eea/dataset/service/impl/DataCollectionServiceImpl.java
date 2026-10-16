@@ -507,7 +507,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     List<DesignDatasetVO> designs = designDatasetService.getDesignDataSetIdByDataflowId(dataflowId);
 
     // Check empty tables in reference datasets before SQL QC validation starts
-    if (isCreation && checkEmptyTablesInReferenceDatasets(designs, isReferenceSchemaBySchemaId)) {
+    if (isCreation && isBigDataflow && checkEmptyTablesInReferenceDatasets(designs, isReferenceSchemaBySchemaId)) {
       releaseLockAndNotification(
               dataflowId,
               EEAErrorMessage.DATA_COLLECTION_FAILED_EMPTY_REFERENCE_DATASET,
