@@ -358,6 +358,13 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
     datasetMetabase.setStatus(datasetStatusMessageVO.getStatus());
     dataSetMetabaseRepository.save(datasetMetabase);
 
+    final String credentials = (String) SecurityContextHolder.getContext().getAuthentication().getCredentials();
+    if (credentials.contains("ApiKey")) {
+      //When the authentication type if ApiKey, do not create messages as the creation of messages requires
+      //bearer token authentication.
+      return;
+    }
+
     message.setContent(messageStatus + datasetStatusMessageVO.getMessage());
     message.setProviderId(datasetMetabase.getDataProviderId());
     message.setAutomatic(true);
@@ -384,6 +391,8 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
 
     LOG.info("Automatic feedback message created for dataflowId {}. Message: {}",
             datasetStatusMessageVO.getDataflowId(), message.getContent());
+
+
   }
 
 
