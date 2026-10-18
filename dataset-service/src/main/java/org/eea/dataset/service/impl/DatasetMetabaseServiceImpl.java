@@ -359,7 +359,7 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
     dataSetMetabaseRepository.save(datasetMetabase);
 
     final String credentials = (String) SecurityContextHolder.getContext().getAuthentication().getCredentials();
-    if (credentials.contains("ApiKey")) {
+    if (credentials != null && credentials.contains("ApiKey")) {
       //When the authentication type if ApiKey, do not create messages as the creation of messages requires
       //bearer token authentication.
       return;
