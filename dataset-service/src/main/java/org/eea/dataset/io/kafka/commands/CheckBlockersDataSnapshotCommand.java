@@ -9,6 +9,7 @@ import org.eea.dataset.persistence.metabase.domain.Task;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.persistence.metabase.repository.TaskRepository;
 import org.eea.dataset.service.DatasetSnapshotService;
+import org.eea.dataset.service.ReleaseEmailService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.orchestrator.JobController.JobControllerZuul;
@@ -126,6 +127,9 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
 
   @Autowired
   private TaskRepository taskRepository;
+
+  @Autowired
+  private ReleaseEmailService releaseEmailService;
   /**
    * The Constant LOG.
    */
@@ -300,6 +304,11 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
         Boolean isProcessCreated = processControllerZuul.updateProcess(datasets.get(0), dataset.getDataflowId(),
                 ProcessStatusEnum.IN_PROGRESS, ProcessTypeEnum.RELEASE, processId, user, defaultReleaseProcessPriority, true);
         LOG.info("Created the first release process for dataflowId {}, dataProviderId {}, jobId {} and processId {} dataset id {} success: {}", dataset.getDataflowId(), dataset.getDataProviderId(), releaseJob.getId(), processId, datasetId, isProcessCreated);
+
+        if (!silentRelease && Boolean.TRUE.equals(isProcessCreated) && dataflow != null) {
+          // Send email to custodians announcing the start of the release process.
+          releaseEmailService.sendReleaseStartedEmail(dataset.getDataflowId(), dataset.getDataProviderId());
+        }
 
         CreateSnapshotVO createSnapshotVO = new CreateSnapshotVO();
         createSnapshotVO.setReleased(true);

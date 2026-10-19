@@ -1,5 +1,6 @@
 package org.eea.dataset.io.notification.events;
 
+import org.eea.dataset.service.ReleaseEmailService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController;
 import org.eea.interfaces.controller.dataflow.RepresentativeController;
@@ -25,6 +26,9 @@ public class ReleaseFailedIcebergExistsEvent implements NotificableEventHandler 
     /** The dataflow controller zuul. */
     @Autowired
     private DataFlowController.DataFlowControllerZuul dataFlowControllerZuul;
+
+    @Autowired
+    private ReleaseEmailService releaseEmailService;
 
     /**
      * Gets the event type.
@@ -56,6 +60,9 @@ public class ReleaseFailedIcebergExistsEvent implements NotificableEventHandler 
                     representativeControllerZuul.findDataProviderById(notificationVO.getProviderId());
             dataProviderLabel = dataProviderVO.getLabel();
         }
+
+        // Send the notification error message to ReleaseEmailService so it can be included the failure email.
+        releaseEmailService.sendReleaseFailedEmail(dataflowId, providerId, notificationVO.getError());
 
         Map<String, Object> notification = new HashMap<>();
         notification.put("user", notificationVO.getUser());

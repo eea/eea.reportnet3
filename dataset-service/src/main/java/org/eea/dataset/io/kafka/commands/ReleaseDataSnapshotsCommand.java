@@ -7,17 +7,15 @@ import org.eea.dataset.persistence.metabase.repository.ChangesEUDatasetRepositor
 import org.eea.dataset.persistence.metabase.repository.DataCollectionRepository;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSnapshotService;
+import org.eea.dataset.service.ReleaseEmailService;
 import org.eea.dataset.service.helper.FileTreatmentHelper;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.collaboration.CollaborationController.CollaborationControllerZuul;
-import org.eea.interfaces.controller.communication.EmailController.EmailControllerZuul;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.controller.orchestrator.JobController.JobControllerZuul;
 import org.eea.interfaces.controller.orchestrator.JobProcessController.JobProcessControllerZuul;
 import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
-import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
-import org.eea.interfaces.vo.communication.EmailVO;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.MessageVO;
@@ -29,8 +27,6 @@ import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.interfaces.vo.recordstore.ProcessVO;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
-import org.eea.interfaces.vo.ums.UserRepresentationVO;
-import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
 import org.eea.kafka.commands.AbstractEEAEventHandlerCommand;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
@@ -70,14 +66,6 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
   @Autowired
   private DataFlowControllerZuul dataflowControllerZuul;
 
-  /** The email controller zuul. */
-  @Autowired
-  private EmailControllerZuul emailControllerZuul;
-
-  /** The user management controller zuul. */
-  @Autowired
-  private UserManagementControllerZull userManagementControllerZuul;
-
   /** The collaboration controller zuul. */
   @Autowired
   private CollaborationControllerZuul collaborationControllerZuul;
@@ -108,6 +96,9 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
   /** The job controller zuul */
   @Autowired
   private JobControllerZuul jobControllerZuul;
+
+  @Autowired
+  private ReleaseEmailService releaseEmailService;
 
   /**
    * The Constant LOG.
@@ -231,7 +222,7 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
 
         if(!silentRelease) {
           // Send email to requesters
-          sendMail(dateRelease, dataset, dataflowVO);
+          releaseEmailService.sendReleaseFinishedEmail(dateRelease, dataset, dataflowVO);
         }
 
         LOG.info("Releasing datasets process ends. DataflowId: {} DataProviderId: {} DatasetId: {}, JobId: {}",
@@ -292,58 +283,4 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
     }
   }
 
-
-  /**
-   * Send mail.
-   *
-   * @param dateRelease the date release
-   * @param dataset the dataset
-   * @param dataflowVO the dataflow VO
-   */
-  private void sendMail(String dateRelease, DataSetMetabaseVO dataset, DataFlowVO dataflowVO) {
-    try {
-      // get custodian and stewards emails
-      List<UserRepresentationVO> custodians = userManagementControllerZuul
-              .getUsersByGroup(ResourceGroupEnum.DATAFLOW_CUSTODIAN.getGroupName(dataflowVO.getId()));
-      List<UserRepresentationVO> stewards = userManagementControllerZuul
-              .getUsersByGroup(ResourceGroupEnum.DATAFLOW_STEWARD.getGroupName(dataflowVO.getId()));
-      List<UserRepresentationVO> observers = userManagementControllerZuul
-              .getUsersByGroup(ResourceGroupEnum.DATAFLOW_OBSERVER.getGroupName(dataflowVO.getId()));
-      List<UserRepresentationVO> custodianSupport = userManagementControllerZuul.getUsersByGroup(
-              ResourceGroupEnum.DATAFLOW_STEWARD_SUPPORT.getGroupName(dataflowVO.getId()));
-      List<String> emails = new ArrayList<>();
-      if (null != custodians) {
-        custodians.stream().forEach(custodian -> emails.add(custodian.getEmail()));
-      }
-      if (null != stewards) {
-        stewards.stream().forEach(steward -> emails.add(steward.getEmail()));
-      }
-      if (null != observers) {
-        observers.stream().forEach(observer -> emails.add(observer.getEmail()));
-      }
-      if (null != custodianSupport) {
-        custodianSupport.stream().forEach(support -> emails.add(support.getEmail()));
-      }
-
-      EmailVO emailVO = new EmailVO();
-      emailVO.setBbc(emails);
-      emailVO.setSubject(String.format(LiteralConstants.RELEASESUBJECT, dataset.getDataSetName(),
-              dataflowVO.getName()));
-
-      //force date description to CET
-      DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-      LocalDateTime utcDateTime = LocalDateTime.parse(dateRelease, formatter);
-      ZonedDateTime utcZoned = utcDateTime.atZone(ZoneOffset.UTC);
-      ZonedDateTime cetZoned = utcZoned.withZoneSameInstant(ZoneId.of(LiteralConstants.EUROPE_ZONE_ID));
-      String cetDate = cetZoned.format(formatter);
-
-      emailVO.setText(String.format(LiteralConstants.RELEASEMESSAGE, dataset.getDataSetName(),
-              dataflowVO.getName(), cetDate));
-      emailControllerZuul.sendMessage(emailVO);
-    } catch (Exception e) {
-      Long dataflowId = (dataflowVO != null) ? dataflowVO.getId() : null;
-      Long datasetId = (dataflowVO != null) ? dataset.getId() : null;
-      LOG.error("Unexpected error! Error sending release mail for dataflowId {} and datasetId {}. Message: {}", dataflowId, datasetId, e.getMessage());
-    }
-  }
 }

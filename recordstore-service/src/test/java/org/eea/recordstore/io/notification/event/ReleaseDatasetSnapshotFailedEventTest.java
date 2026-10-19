@@ -6,6 +6,7 @@ import org.eea.interfaces.controller.dataset.DatasetSnapshotController;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
+import org.eea.recordstore.service.ReleaseEmailService;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -29,7 +30,8 @@ public class ReleaseDatasetSnapshotFailedEventTest {
   @Mock
   private DatasetSnapshotController datasetSnapshotController;
 
-
+  @Mock
+  private ReleaseEmailService releaseEmailService;
 
   @Before
   public void initMocks() {

@@ -3,6 +3,7 @@ package org.eea.dataset.io.notification.events;
 import java.util.HashMap;
 import java.util.Map;
 import org.eea.dataset.service.DatasetService;
+import org.eea.dataset.service.ReleaseEmailService;
 import org.eea.exception.EEAException;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
@@ -19,6 +20,9 @@ public class ReleaseValidationBlockersFailEvent implements NotificableEventHandl
 
   @Autowired
   private DatasetService datasetService;
+
+  @Autowired
+  private ReleaseEmailService releaseEmailService;
 
   /**
    * Gets the event type.
@@ -41,6 +45,9 @@ public class ReleaseValidationBlockersFailEvent implements NotificableEventHandl
   public Map<String, Object> getMap(NotificationVO notificationVO) throws EEAException {
     Long dataflowId = notificationVO.getDataflowId() != null ? notificationVO.getDataflowId()
         : datasetService.getDataFlowIdById(notificationVO.getDatasetId());
+
+    // Send the notification error message to ReleaseEmailService so it can be included the failure email.
+    releaseEmailService.sendReleaseFailedEmail(dataflowId, notificationVO.getProviderId(), notificationVO.getError());
 
     Map<String, Object> notification = new HashMap<>();
     notification.put("user", notificationVO.getUser());
