@@ -43,14 +43,16 @@ public interface ProcessRepository
   Long countProcesses();
 
   /**
-   * Checks if is process finished.
+   * Checks if is process finished. A process id can have more than one row (leftovers from
+   * abandoned jobs), if any of them is finished that is the real one and the process id is ignored.
    *
    * @param dataflowId
    * @param dataProviderId
    * @return true, if is process finished
    */
   @Query(nativeQuery = true,
-      value = "select case when (select count(p.id) from process p join dataset d on p.dataset_id = d.id where p.dataflow_id =:dataflowId and d.data_provider_id = :dataProviderId and p.process_type='VALIDATION' and p.status not in ('FINISHED','CANCELED'))>1 then false else true end")
+      value = "select case when (select count(distinct p.process_id) from process p join dataset d on p.dataset_id = d.id where p.dataflow_id =:dataflowId and d.data_provider_id = :dataProviderId and p.process_type='VALIDATION' and p.status not in ('FINISHED','CANCELED') "
+          + "and not exists (select 1 from process p2 where p2.process_id = p.process_id and p2.status in ('FINISHED','CANCELED')))>0 then false else true end")
   boolean isProcessFinished(@Param("dataflowId") Long dataflowId,
       @Param("dataProviderId") Long dataProviderId);
 
