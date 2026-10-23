@@ -2317,6 +2317,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 .toArray(String[]::new);
 
             String valuesList = Arrays.stream(values)
+                .map(value -> value.replace("'","''"))
                 .map(value -> "'" + value + "'")
                 .collect(Collectors.joining(", "));
 
