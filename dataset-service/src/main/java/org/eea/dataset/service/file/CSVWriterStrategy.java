@@ -118,6 +118,7 @@ public class CSVWriterStrategy implements WriterStrategy {
 
     // Init the writer
     StringWriter writer = new StringWriter();
+    writer.write('\uFEFF'); // UTF-8 BOM
     CSVWriter csvWriter = new CSVWriter(writer, delimiter, CSVWriter.DEFAULT_QUOTE_CHARACTER,
         CSVWriter.DEFAULT_ESCAPE_CHARACTER, CSVWriter.DEFAULT_LINE_END);
 
@@ -127,7 +128,7 @@ public class CSVWriterStrategy implements WriterStrategy {
           includeCountryCode, filters);
 
       // Once read we convert it to string
-      byteList.add(writer.getBuffer().toString().getBytes());
+      byteList.add(writer.getBuffer().toString().getBytes(StandardCharsets.UTF_8));
       writer.flush();
       writer.getBuffer().setLength(0);
     });
@@ -153,10 +154,11 @@ public class CSVWriterStrategy implements WriterStrategy {
       }
 
       try (
-            OutputStreamWriter writer = new OutputStreamWriter(out, StandardCharsets.UTF_8);
-            CSVWriter csvWriter = new CSVWriter(writer, delimiter, CSVWriter.DEFAULT_QUOTE_CHARACTER,
-                    CSVWriter.DEFAULT_ESCAPE_CHARACTER, CSVWriter.DEFAULT_LINE_END)
-    ) {
+                OutputStreamWriter writer = new OutputStreamWriter(out, StandardCharsets.UTF_8);
+              CSVWriter csvWriter = new CSVWriter(writer, delimiter, CSVWriter.DEFAULT_QUOTE_CHARACTER,
+                      CSVWriter.DEFAULT_ESCAPE_CHARACTER, CSVWriter.DEFAULT_LINE_END)
+      ) {
+      writer.write('\uFEFF');   // UTF-8 BOM
       for (TableSchemaVO table : schema.getTableSchemas()) {
         setLines(table.getIdTableSchema(), schema, csvWriter, datasetId, includeCountryCode, filters);
       }

@@ -13,6 +13,7 @@ export const JobsStatusesRepository = {
     dataflowId,
     dataflowName,
     providerId,
+    providerName,
     datasetId,
     datasetName,
     creatorUsername,
@@ -30,6 +31,7 @@ export const JobsStatusesRepository = {
         dataflowId,
         dataflowName,
         providerId,
+        providerName,
         datasetId,
         datasetName,
         creatorUsername,
@@ -55,10 +57,12 @@ export const JobsStatusesRepository = {
     dataflowId,
     dataflowName,
     providerId,
+    providerName,
     datasetId,
     datasetName,
     creatorUsername,
-    jobStatus
+    jobStatus,
+    code
   }) =>
     await HTTPRequester.get({
       url: getUrl(JobsStatusesConfig.getJobsHistory, {
@@ -71,10 +75,12 @@ export const JobsStatusesRepository = {
         dataflowId,
         dataflowName,
         providerId,
+        providerName,
         datasetId,
         datasetName,
         creatorUsername,
-        jobStatus
+        jobStatus,
+        code
       })
     }),
   getCancelledValidations: async ({ jobId, pageNum, numberRows, sortOrder, sortField = '' }) =>
@@ -89,7 +95,6 @@ export const JobsStatusesRepository = {
     }),
 
   cancelJob: async (jobId, dataflowId, datasetId) => {
-
     if (datasetId == null) {
       const url = getUrl(JobsStatusesConfig.cancelJobNoDataset, { jobId, dataflowId });
       return await HTTPRequester.update({ url });

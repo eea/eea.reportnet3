@@ -2,6 +2,8 @@ package org.eea.dataset.io.notification.events;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import org.eea.dataset.service.ReleaseEmailService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetSnapshotController;
@@ -25,6 +27,8 @@ public class ReleaseDatasetSnapshotFailedEvent implements NotificableEventHandle
   @Autowired
   private DatasetSnapshotController datasetSnapshotController;
 
+  @Autowired
+  private ReleaseEmailService releaseEmailService;
 
   /**
    * Gets the event type.
@@ -54,6 +58,9 @@ public class ReleaseDatasetSnapshotFailedEvent implements NotificableEventHandle
     notification.put("snapshotId", snapshotId);
     notification.put("snapshotName", datasetName);
     notification.put("error", notificationVO.getError());
+
+    // Send the notification error message to ReleaseEmailService so it can be included the failure email.
+    releaseEmailService.sendReleaseFailedEmail(notificationVO.getDataflowId(), notificationVO.getProviderId(), notificationVO.getError());
 
     datasetSnapshotController.rollBackSnapshotRecord(notificationVO.getJobId(), notificationVO.getDataflowId(), notificationVO.getProviderId());
     return notification;

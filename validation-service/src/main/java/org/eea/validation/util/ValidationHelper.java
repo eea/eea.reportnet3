@@ -310,10 +310,6 @@ public class ValidationHelper implements DisposableBean {
       }
       else {
         LOG.info("Process {} not found in processesMap" , processId);
-        LOG.info("Processes in map");
-        for (String key : processesMap.keySet()) {
-          LOG.info("{}",processesMap.get(key));
-        }
       }
     }
     return result;

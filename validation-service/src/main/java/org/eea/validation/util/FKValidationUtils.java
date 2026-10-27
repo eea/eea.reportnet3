@@ -32,8 +32,11 @@ import org.eea.validation.persistence.schemas.FieldSchema;
 import org.eea.validation.persistence.schemas.TableSchema;
 import org.eea.validation.persistence.schemas.rule.Rule;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Component;
+
+import javax.annotation.PostConstruct;
 
 /**
  * The Class FKValidationUtils.
@@ -55,6 +58,16 @@ public class FKValidationUtils {
 
   /** The field repository. */
   private static FieldRepository fieldRepository;
+
+  private static int maxErrors;
+
+  @Value("${validation.maximumErrors}")
+  private int configuredMaxErrors;
+
+  @PostConstruct
+  public void init() {
+    FKValidationUtils.maxErrors = configuredMaxErrors;
+  }
 
   /*
    * we need to put synchronized void because drools need a static method to call in a java file, so
@@ -435,6 +448,7 @@ public class FKValidationUtils {
       fieldValidationList.add(fieldValidation);
       field.setFieldValidations(fieldValidationList);
       errorFields.add(field);
+      if (errorFields.size() == maxErrors) break;
     }
   }
 
@@ -635,6 +649,7 @@ public class FKValidationUtils {
       if (!field.getValue().equals("")) {
         errorFields.add(field);
       }
+      if (errorFields.size() == maxErrors) break;
     }
   }
 

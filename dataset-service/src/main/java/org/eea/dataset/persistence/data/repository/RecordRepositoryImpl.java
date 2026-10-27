@@ -1849,16 +1849,23 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     if ((StringUtils.isNotEmpty(filterValue) && StringUtils.isNotEmpty(columnName))
         || StringUtils.isNotEmpty(dataProviderCodes)) {
       stringQuery.append(" where ");
+      // Escape filterValue for use inside single quotes - manual escape.
+      // Safe only when standard_conforming_strings = on (the default since PostgreSQL 9.1)
       if (StringUtils.isNotEmpty(filterValue) && StringUtils.isNotEmpty(columnName)) {
-        stringQuery.append(columnName + " = '"+ filterValue + "' and ");
+        String escapedFilterValue = filterValue.replace("'", "''");
+        stringQuery.append(columnName).append(" = '").append(escapedFilterValue).append("' and ");
       }
       if (StringUtils.isNotEmpty(dataProviderCodes)) {
         List<String> countryCodesList = new ArrayList<>(Arrays.asList(dataProviderCodes.split(",")));
         StringBuilder countries = new StringBuilder();
         for (int i = 0; i < countryCodesList.size(); i++) {
-          countries.append("'" + countryCodesList.get(i) + "'");
-          if (i + 1 != countryCodesList.size()) {
-            countries.append(",");
+          if (StringUtils.isNotBlank(countryCodesList.get(i))) {
+            // Escape countryCode for use inside single quotes - manual escape.
+            String escapedCountryCode = countryCodesList.get(i).replace("'", "''").trim();
+            countries.append("'" + escapedCountryCode + "'");
+            if (i + 1 != countryCodesList.size()) {
+              countries.append(",");
+            }
           }
         }
         stringQuery.append(String.format(" data_provider_code in (%s) ", countries));
@@ -2139,7 +2146,9 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     StringBuilder stringQuery = new StringBuilder();
     stringQuery.append("select ");
     if (useTempTable) {
-      stringQuery.append("'" + filterChain + "'").append(
+      // Escape filterChain for use inside single quotes - manual escape.
+      String escapedFilterChain = filterChain.replace("'", "''");
+      stringQuery.append("'" + escapedFilterChain + "'").append(
               " as filters, ");
     }
     stringQuery.append(
@@ -2169,9 +2178,13 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
               new ArrayList<>(Arrays.asList(dataProviderCodes.split(",")));
       StringBuilder countries = new StringBuilder();
       for (int i = 0; i < countryCodesList.size(); i++) {
-        countries.append("'" + countryCodesList.get(i) + "'");
-        if (i + 1 != countryCodesList.size()) {
-          countries.append(",");
+        if (StringUtils.isNotBlank(countryCodesList.get(i))) {
+          // Escape countryCode for use inside single quotes - manual escape.
+          String escapedCountryCode = countryCodesList.get(i).replace("'", "''").trim();
+          countries.append("'" + escapedCountryCode + "'");
+          if (i + 1 != countryCodesList.size()) {
+            countries.append(",");
+          }
         }
       }
       stringQuery.append(

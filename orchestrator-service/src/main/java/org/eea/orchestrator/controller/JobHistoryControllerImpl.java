@@ -36,7 +36,7 @@ public class JobHistoryControllerImpl implements JobHistoryController {
     private JobMapper jobMapper;
 
     /** The valid columns. */
-    List<String> validColumns = Arrays.asList("jobId", "creatorUsername", "jobType", "dataflowId", "providerId", "datasetId",
+    List<String> validColumns = Arrays.asList("jobId", "creatorUsername", "jobType", "dataflowId", "providerId", "providerName", "datasetId",
             "jobStatus", "dateAdded", "dateStatusChanged", "fmeJobId", "dataflowName", "datasetName");
 
     @Autowired
@@ -57,12 +57,13 @@ public class JobHistoryControllerImpl implements JobHistoryController {
             @RequestParam(value = "dataflowId", required = false) Long dataflowId,
             @RequestParam(value = "dataflowName", required = false) String dataflowName,
             @RequestParam(value = "providerId", required = false) Long providerId,
+            @RequestParam(value = "providerName", required = false) String providerName,
             @RequestParam(value = "datasetId", required = false) Long datasetId,
             @RequestParam(value = "datasetName", required = false) String datasetName,
             @RequestParam(value = "creatorUsername", required = false) String creatorUsername,
             @RequestParam(value = "jobStatus", required = false) String jobStatus
     ){
-        List<Object> filterParams = Arrays.asList(jobId,jobType,dataflowId,dataflowName,providerId,datasetId,datasetName,creatorUsername,jobStatus);
+        List<Object> filterParams = Arrays.asList(jobId,jobType,dataflowId,dataflowName,providerId,providerName,datasetId,datasetName,creatorUsername,jobStatus);
         boolean atLeastOneFilterIsActive = filterParams.stream().anyMatch(Objects::nonNull);
 
         if (!atLeastOneFilterIsActive) {
@@ -75,9 +76,9 @@ public class JobHistoryControllerImpl implements JobHistoryController {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Wrong sorting header provided.");
             }
 
-            LOG.info("Retrieving job history for jobId {}, jobType {}, dataflowId {}, dataflowName {}, providerId {}, datasetId {}, datasetName {}, creatorUsername {}, jobStatus {} ",
-                    jobId, jobType, dataflowId, dataflowName, providerId, datasetId, datasetName, creatorUsername, jobStatus);
-            return jobHistoryService.getJobHistory(pageable, asc, sortedColumn, jobId, jobType, dataflowId, dataflowName, providerId, datasetId, datasetName, creatorUsername, jobStatus);
+            LOG.info("Retrieving job history for jobId {}, jobType {}, dataflowId {}, dataflowName {}, providerId {}, providerName {}, datasetId {}, datasetName {}, creatorUsername {}, jobStatus {} ",
+                    jobId, jobType, dataflowId, dataflowName, providerId, providerName, datasetId, datasetName, creatorUsername, jobStatus);
+            return jobHistoryService.getJobHistory(pageable, asc, sortedColumn, jobId, jobType, dataflowId, dataflowName, providerId, providerName, datasetId, datasetName, creatorUsername, jobStatus);
         } catch (Exception e){
             LOG.error("Unexpected error! Could not retrieve job history for job {}. ", jobId, e);
             throw e;

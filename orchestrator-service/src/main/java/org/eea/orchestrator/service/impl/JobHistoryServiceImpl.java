@@ -2,6 +2,12 @@ package org.eea.orchestrator.service.impl;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+
+import org.apache.commons.lang.StringUtils;
+import org.eea.interfaces.controller.dataflow.RepresentativeController;
+import org.eea.interfaces.controller.dataset.DatasetMetabaseController;
+import org.eea.interfaces.vo.dataflow.DataProviderVO;
+import org.eea.interfaces.vo.orchestrator.JobVO;
 import org.eea.interfaces.vo.orchestrator.JobsHistoryVO;
 import org.eea.interfaces.vo.orchestrator.JobHistoryVO;
 import org.eea.interfaces.vo.orchestrator.enums.JobInfoEnum;
@@ -20,8 +26,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import javax.transaction.Transactional;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class JobHistoryServiceImpl implements JobHistoryService {
@@ -39,6 +45,12 @@ public class JobHistoryServiceImpl implements JobHistoryService {
     @Autowired
     private JobUtils jobUtils;
 
+    @Autowired
+    private RepresentativeController.RepresentativeControllerZuul representativeControllerZuul;
+
+    @Autowired
+    private DatasetMetabaseController datasetMetabaseController;
+
     @Transactional
     @Override
     public void saveJobHistory(Job job){
@@ -55,15 +67,39 @@ public class JobHistoryServiceImpl implements JobHistoryService {
     @Override
     public JobsHistoryVO getJobHistory(Pageable pageable, boolean asc, String sortedColumn,
                                        Long jobId, String jobTypes, Long dataflowId, String dataflowName, Long providerId,
-                                       Long datasetId, String datasetName, String creatorUsername, String jobStatuses) {
+                                       String providerName, Long datasetId, String datasetName, String creatorUsername, String jobStatuses) {
 
         String sortedTableColumn = jobUtils.getJobColumnNameByObjectName(sortedColumn);
-        List<JobHistory> jobHistoryList = jobHistoryRepository.findJobHistoryPaginated(pageable, asc, sortedTableColumn, jobId, jobTypes, dataflowId, dataflowName, providerId, datasetId, datasetName, creatorUsername, jobStatuses);
+        String dataProviderIds = "";
+        // Resolve the human-readable providerName filter (from the request) into the internal providerId
+        // used by the query, since jobs store providerId, not provider label.
+        if (StringUtils.isNotBlank(providerName)) {
+            List<DataProviderVO> dataProviders = representativeControllerZuul.findDataProvidersByLabel(providerName);
+            if (dataProviders != null && !dataProviders.isEmpty()) {
+                dataProviderIds = dataProviders.stream()
+                        .map(name -> String.valueOf(name.getId()))
+                        .collect(Collectors.joining(","));
+            } else {
+                // No provider matches the given providerName, so the filter can never match any real job.
+                // Force jobId to a sentinel value (0L, an id that can never exist) to guarantee the
+                // downstream query returns an empty result set.
+                // Without this, an unmatched providerName would be silently ignored and the query would
+                // fall back to fetching ALL jobs - returning incorrect, unfiltered results to the caller.
+                jobId = 0L;
+            }
+        }
+
+
+
+        List<JobHistory> jobHistoryList = jobHistoryRepository.findJobHistoryPaginated(pageable, asc, sortedTableColumn, jobId, jobTypes, dataflowId, dataflowName, dataProviderIds, datasetId, datasetName, creatorUsername, jobStatuses);
         List<JobHistoryVO> jobHistoryVOList = jobHistoryMapper.entityListToClass(jobHistoryList);
+
+        populateProviderNames(jobHistoryVOList);
+
         JobsHistoryVO jobsHistoryVO = new JobsHistoryVO();
         jobsHistoryVO.setTotalRecords(jobHistoryRepository.count());
-        jobsHistoryVO.setFilteredRecords(jobHistoryRepository.countJobHistoryPaginated(asc, sortedTableColumn, jobId, jobTypes, dataflowId, dataflowName, providerId, datasetId, datasetName, creatorUsername, jobStatuses));
-        jobsHistoryVO.setFilteredJobs(jobHistoryRepository.countFilteredJobs( jobId, jobTypes, dataflowId, dataflowName, providerId, datasetId, datasetName, creatorUsername, jobStatuses));
+        jobsHistoryVO.setFilteredRecords(jobHistoryRepository.countJobHistoryPaginated(asc, sortedTableColumn, jobId, jobTypes, dataflowId, dataflowName, dataProviderIds, datasetId, datasetName, creatorUsername, jobStatuses));
+        jobsHistoryVO.setFilteredJobs(jobHistoryRepository.countFilteredJobs( jobId, jobTypes, dataflowId, dataflowName, dataProviderIds, datasetId, datasetName, creatorUsername, jobStatuses));
         jobsHistoryVO.setJobHistoryVOList(jobHistoryVOList);
 
         return jobsHistoryVO;
@@ -112,5 +148,33 @@ public class JobHistoryServiceImpl implements JobHistoryService {
         return finalObject.toString(2);
     }
 
+    /**
+     * Enriches each JobVO with its provider's display name.
+     * providerId has no DB foreign key to the provider table, so the name must be resolved via a separate call rather than a SQL join.
+     * Resolved in a single batch call (rather than per-row) to avoid an N+1 remote-call problem against the representative service.
+     */
+    private void populateProviderNames(List<JobHistoryVO> jobHistoryVOList) {
+        List<Long> providerIds = jobHistoryVOList.stream()
+                .map(JobHistoryVO::getProviderId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+
+        Map<Long, String> labelById = new HashMap<>();
+        if (!providerIds.isEmpty()) {
+            labelById = representativeControllerZuul.findDataProvidersByIds(providerIds).stream()
+                    .collect(Collectors.toMap(DataProviderVO::getId, DataProviderVO::getLabel));
+        }
+
+        for (JobHistoryVO jobHistory : jobHistoryVOList) {
+            // set the providerName for not null providerId
+            if (jobHistory.getProviderId() != null && jobHistory.getProviderId() > 0)  {
+                jobHistory.setProviderName(labelById.get(jobHistory.getProviderId()));
+            }
+            // set the providerName for not null datasetId, needed for styling jobs with DatasetTypeEnum.TEST and DatasetTypeEnum.DESIGN datasets
+            else if (jobHistory.getDatasetId() != null && datasetMetabaseController.getType(jobHistory.getDatasetId()) != null) {
+                jobHistory.setProviderName(datasetMetabaseController.getType(jobHistory.getDatasetId()).toString());
+            }
+        }
+    }
 
 }

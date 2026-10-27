@@ -3,9 +3,9 @@ import { getUrl } from './_utils/UrlUtils';
 import { HTTPRequester } from './_utils/HTTPRequester';
 
 export const DataCollectionRepository = {
-  create: async (dataflowId, endDate, isManualTechnicalAcceptance, stopAndNotifySQLErrors, showPublicInfo) =>
+  create: async (dataflowId, endDate, isManualTechnicalAcceptance, stopAndNotifySQLErrors, showPublicInfo, disableRulesEventChoice) =>
     await HTTPRequester.post({
-      url: getUrl(DataCollectionConfig.create, { isManualTechnicalAcceptance, stopAndNotifySQLErrors, showPublicInfo }),
+      url: getUrl(DataCollectionConfig.create, { isManualTechnicalAcceptance, stopAndNotifySQLErrors, showPublicInfo, disableRulesEventChoice }),
       data: { idDataflow: dataflowId, dueDate: endDate }
     }),
 

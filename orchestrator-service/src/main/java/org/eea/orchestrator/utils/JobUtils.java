@@ -65,7 +65,7 @@ public class JobUtils {
        else if(name.equals("dataflowId")){
            columnName = "dataflow_id";
        }
-       else if(name.equals("providerId")){
+       else if(name.equals("providerId") || name.equals("providerName")){
            columnName = "provider_id";
        }
        else if(name.equals("datasetId")){
