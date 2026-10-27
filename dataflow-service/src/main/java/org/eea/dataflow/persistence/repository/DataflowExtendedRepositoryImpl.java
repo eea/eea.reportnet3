@@ -142,7 +142,7 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
       + "inner join dataset_aux on d.id = dataset_aux.dataflowid";
 
   // this implementation is about all dataflows so the changes are:
-  // - only public AND official reporting dataflows (#309065)
+  // - removed "public dataflow flag set to true"
   // - filters some dataflows based on names (having "TEST", "DEMO" etc)
   // - joins representatives to get their emails
   private static final String QUERY_JSON_COUNTRY_INTERNAL = "with doc as (    \r\n"
@@ -226,9 +226,6 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
 
   /** The Constant OFFICIAL_REPORTING. */
   private static final String OFFICIAL_REPORTING = " official_reporting = true ";
-
-  /** The Constant PUBLIC_DATAFLOW. */
-  private static final String PUBLIC_DATAFLOW = " show_public_info = true ";
 
   /** The Constant LIKE. */
   private static final String LIKE = " lower(cast(%s as text)) LIKE lower(:%s) ";
@@ -948,9 +945,7 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
 
     sb.append(QUERY_JSON_COUNTRY_INTERNAL);
     sb.append(" where " + HAS_DATASETS);
-    sb.append(AND + PUBLIC_DATAFLOW);
     sb.append(AND + COUNTRY_CODE_CONDITION);
-    sb.append(AND + OFFICIAL_REPORTING);
 
     if (MapUtils.isNotEmpty(filters) && applyFilters) {
       for (String key : filters.keySet()) {
