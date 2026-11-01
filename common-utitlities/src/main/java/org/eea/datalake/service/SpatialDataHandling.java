@@ -29,6 +29,8 @@ public interface SpatialDataHandling {
 
   String processSpatialPayload(byte[] byteArray) throws IOException, ParseException;
 
+  String buildSpatialDescriptorJSON(Integer srid, String type, Double sizeMB, String dimension);
+
   List<DataType> getGeoJsonEnums();
 
   DataType getGeometryType(byte[] byteArray) throws ParseException;
