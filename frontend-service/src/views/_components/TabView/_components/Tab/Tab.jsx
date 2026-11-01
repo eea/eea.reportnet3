@@ -64,6 +64,7 @@ export const Tab = memo(({
   isDesignDatasetEditorRead,
   isEditingEnabled,
   isIcebergCreated,
+  isReordering,
   isTableLockedDueToData,
   isReordering,
   index,
