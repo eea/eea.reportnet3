@@ -308,6 +308,9 @@ public class DatasetSchemaServiceTest {
 
     ReflectionTestUtils.setField(dataSchemaServiceImpl, "timeToWaitBeforeContinueCopy", 3000L);
 
+    // Fix self-injection for cache proxy in tests
+    ReflectionTestUtils.setField(dataSchemaServiceImpl, "self", dataSchemaServiceImpl);
+
     MockitoAnnotations.openMocks(this);
     validationCommands.add(command);
   }
