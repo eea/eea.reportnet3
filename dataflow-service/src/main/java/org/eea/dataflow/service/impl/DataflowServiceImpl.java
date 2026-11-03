@@ -984,9 +984,13 @@ public class DataflowServiceImpl implements DataflowService {
                 reportnetUrl + "/dataflow/" + dataflowVO.getId()
         );
         // SET REPRESENTATIVES
-        dataflowVO.setRepresentatives(
-                representativeService.getRepresetativesByIdDataFlowAndCountryCode(dataflowVO.getId(), countryCode)
-        );
+        try {
+          dataflowVO.setRepresentatives(
+                  representativeService.getRepresetativesByIdDataFlowAndCountryCode(dataflowVO.getId(), countryCode)
+          );
+        } catch (EEAException | RuntimeException e) {
+          logDataflowEnrichmentError(dataflowVO.getId(), "representatives", e);
+        }
         // SET OBLIGATIONS
         for (ObligationVO obligation : obligations) {
           if (dataflowVO.getObligation().getObligationId() != null
@@ -1001,14 +1005,23 @@ public class DataflowServiceImpl implements DataflowService {
       dataflowsVOList.stream().forEach(dataflowInternalVO -> {
         ReportingDatasetVO reportingDatasetVO = dataflowInternalVO.getReportingDatasets().stream().findFirst().orElse(null);
         if (reportingDatasetVO != null) {
-          List<Date> releasedDates = dataSetSnapshotControllerZuul.historicReleaseDatesAuthorizedByConsul(reportingDatasetVO.getId(), dataflowInternalVO.getId(), key);
-          dataflowInternalVO.setReleasedDates(releasedDates);
+          try {
+            List<Date> releasedDates = dataSetSnapshotControllerZuul.historicReleaseDatesAuthorizedByConsul(reportingDatasetVO.getId(), dataflowInternalVO.getId(), key);
+            dataflowInternalVO.setReleasedDates(releasedDates);
+          } catch (RuntimeException e) {
+            logDataflowEnrichmentError(dataflowInternalVO.getId(), "release dates", e);
+          }
         }
       });
 
       dataflowsVOList.stream().forEach(dataflow -> {
-        dataflow.setReferenceDatasets(referenceDatasetControllerZuul
-                .findReferenceDatasetByDataflowId(dataflow.getId()));
+        try {
+          dataflow.setReferenceDatasets(referenceDatasetControllerZuul
+                  .findReferenceDatasetByDataflowId(dataflow.getId()));
+        } catch (RuntimeException e) {
+          logDataflowEnrichmentError(dataflow.getId(), "reference datasets", e);
+          dataflow.setReferenceDatasets(new ArrayList<>());
+        }
         ObligationVO obligation = dataflow.getObligation();
         if (obligation == null) {
           return;
@@ -1378,10 +1391,20 @@ public class DataflowServiceImpl implements DataflowService {
   private void setReportingsAllDataflows(List<DataflowInternalVO> dataflowList,
       List<DataProviderVO> dataProviderVOs) {
     dataflowList.stream().forEach(dataflow -> {
-      findObligationDataflow(dataflow);
+      try {
+        findObligationDataflow(dataflow);
+      } catch (RuntimeException e) {
+        // FeignException is already logged inside findObligationDataflow; this covers anything else
+        logDataflowEnrichmentError(dataflow.getId(), "obligation", e);
+      }
       dataflow.setReportingDatasets(new ArrayList<>());
-      List<ReportingDatasetVO> reportings =
-          datasetMetabaseControllerZuul.findReportingDataSetByDataflowId(dataflow.getId());
+      List<ReportingDatasetVO> reportings;
+      try {
+        reportings = datasetMetabaseControllerZuul.findReportingDataSetByDataflowId(dataflow.getId());
+      } catch (RuntimeException e) {
+        logDataflowEnrichmentError(dataflow.getId(), "reporting datasets", e);
+        return; // reportingDatasets stays the empty list set above
+      }
       if (!reportings.isEmpty()) {
         for (DataProviderVO dataProviderVO : dataProviderVOs) {
           List<ReportingDatasetVO> reportingsProvider =
@@ -1393,6 +1416,18 @@ public class DataflowServiceImpl implements DataflowService {
         }
       }
     });
+  }
+
+  /**
+   * Logs a per-dataflow enrichment failure; the dataflow is still returned without that data.
+   *
+   * @param dataflowId the dataflow id
+   * @param step the enrichment step that failed
+   * @param e the exception
+   */
+  private void logDataflowEnrichmentError(Long dataflowId, String step, Exception e) {
+    LOG.error("Error enriching dataflow id {} while setting {}, returning it without that data. Cause: {}",
+        dataflowId, step, e.getMessage(), e);
   }
 
   /**
