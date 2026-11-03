@@ -100,6 +100,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -988,8 +989,8 @@ public class DataflowServiceImpl implements DataflowService {
         );
         // SET OBLIGATIONS
         for (ObligationVO obligation : obligations) {
-          if (dataflowVO.getObligation().getObligationId()
-                  .equals(obligation.getObligationId())) {
+          if (dataflowVO.getObligation().getObligationId() != null
+                  && dataflowVO.getObligation().getObligationId().equals(obligation.getObligationId())) {
             dataflowVO.setObligation(obligation);
           }
         }
@@ -998,7 +999,7 @@ public class DataflowServiceImpl implements DataflowService {
       List<DataProviderVO> dataProviderVOs = representativeService.findDataProvidersByCode(countryCode);
       setReportingsAllDataflows(dataflowsVOList, dataProviderVOs);
       dataflowsVOList.stream().forEach(dataflowInternalVO -> {
-        ReportingDatasetVO reportingDatasetVO = dataflowInternalVO.getReportingDatasets().stream().findFirst().get();
+        ReportingDatasetVO reportingDatasetVO = dataflowInternalVO.getReportingDatasets().stream().findFirst().orElse(null);
         if (reportingDatasetVO != null) {
           List<Date> releasedDates = dataSetSnapshotControllerZuul.historicReleaseDatesAuthorizedByConsul(reportingDatasetVO.getId(), dataflowInternalVO.getId(), key);
           dataflowInternalVO.setReleasedDates(releasedDates);
@@ -1008,12 +1009,18 @@ public class DataflowServiceImpl implements DataflowService {
       dataflowsVOList.stream().forEach(dataflow -> {
         dataflow.setReferenceDatasets(referenceDatasetControllerZuul
                 .findReferenceDatasetByDataflowId(dataflow.getId()));
-        dataflow.getObligation().setObligationLink(
-                rodUrl + "/obligations/" + dataflow.getObligation().getObligationId()
-        );
-        dataflow.getObligation().getLegalInstrument().setLegalInstrumentLink(
-                rodUrl + "/instruments/" + dataflow.getObligation().getLegalInstrument().getSourceId()
-        );
+        ObligationVO obligation = dataflow.getObligation();
+        if (obligation == null) {
+          return;
+        }
+        if (obligation.getObligationId() != null) {
+          obligation.setObligationLink(rodUrl + "/obligations/" + obligation.getObligationId());
+        }
+        // the legal instrument is missing when ROD can't return the obligation (e.g. deleted in ROD)
+        if (obligation.getLegalInstrument() != null) {
+          obligation.getLegalInstrument().setLegalInstrumentLink(
+                  rodUrl + "/instruments/" + obligation.getLegalInstrument().getSourceId());
+        }
       });
 
       PaginatedDataflowWithNationalCoordinatorsVO dataflowPaginated = new PaginatedDataflowWithNationalCoordinatorsVO();
@@ -1378,7 +1385,7 @@ public class DataflowServiceImpl implements DataflowService {
       if (!reportings.isEmpty()) {
         for (DataProviderVO dataProviderVO : dataProviderVOs) {
           List<ReportingDatasetVO> reportingsProvider =
-              reportings.stream().filter(r -> r.getDataProviderId().equals(dataProviderVO.getId()))
+              reportings.stream().filter(r -> Objects.equals(r.getDataProviderId(), dataProviderVO.getId()))
                   .collect(Collectors.toList());
           if (CollectionUtils.isNotEmpty(reportingsProvider)) {
             dataflow.getReportingDatasets().addAll(reportingsProvider);

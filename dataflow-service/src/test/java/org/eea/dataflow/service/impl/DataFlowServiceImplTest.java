@@ -1,5 +1,7 @@
 package org.eea.dataflow.service.impl;
 
+import feign.FeignException;
+import org.eea.dataflow.mapper.DataflowInternalMapper;
 import org.eea.dataflow.mapper.DataflowMapper;
 import org.eea.dataflow.mapper.DataflowNoContentMapper;
 import org.eea.dataflow.mapper.DataflowPrivateMapper;
@@ -26,6 +28,7 @@ import org.eea.interfaces.controller.dataset.DataCollectionController.DataCollec
 import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetSchemaController.DatasetSchemaControllerZuul;
+import org.eea.interfaces.controller.dataset.DatasetSnapshotController.DataSetSnapshotControllerZuul;
 import org.eea.interfaces.controller.dataset.EUDatasetController.EUDatasetControllerZuul;
 import org.eea.interfaces.controller.dataset.ReferenceDatasetController.ReferenceDatasetControllerZuul;
 import org.eea.interfaces.controller.dataset.TestDatasetController.TestDatasetControllerZuul;
@@ -36,8 +39,10 @@ import org.eea.interfaces.controller.ums.UserManagementController.UserManagement
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.DataflowCountVO;
+import org.eea.interfaces.vo.dataflow.DataflowInternalVO;
 import org.eea.interfaces.vo.dataflow.DataflowPrivateVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicVO;
+import org.eea.interfaces.vo.dataflow.PaginatedDataflowWithNationalCoordinatorsVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
@@ -50,6 +55,7 @@ import org.eea.interfaces.vo.dataset.TestDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetStatusEnum;
 import org.eea.interfaces.vo.document.DocumentVO;
 import org.eea.interfaces.vo.enums.EntityClassEnum;
+import org.eea.interfaces.vo.rod.LegalInstrumentVO;
 import org.eea.interfaces.vo.rod.ObligationListVO;
 import org.eea.interfaces.vo.rod.ObligationVO;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
@@ -72,10 +78,13 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -200,6 +209,12 @@ public class DataFlowServiceImplTest {
 
   @Mock
   private DataflowPrivateMapper dataflowPrivateMapper;
+
+  @Mock
+  private DataflowInternalMapper dataflowInternalMapper;
+
+  @Mock
+  private DataSetSnapshotControllerZuul dataSetSnapshotControllerZuul;
 
   /** The dataflows. */
   private List<Dataflow> dataflows;
@@ -1680,5 +1695,105 @@ public class DataFlowServiceImplTest {
     }
   }
 
+  @Test
+  public void getDataflowsByCountryObligationNotInRodTest() throws EEAException {
+    // obligation 670 is not opened and ROD can't return it by id, so it has no legal instrument
+    DataflowInternalVO dataflowVO = internalDataflow(1L, 670);
+    mockDataflowsByCountry(dataflowVO, new ArrayList<>());
+    Mockito.when(obligationControllerZull.findObligationById(670)).thenThrow(FeignException.class);
+    mockReportingDatasets(reportingDataset(10L, 5L));
+
+    PaginatedDataflowWithNationalCoordinatorsVO result =
+        dataflowServiceImpl.getDataflowsByCountry("AL", null, false, 0, 10, null, "key");
+
+    ObligationVO obligation = result.getDataflows().get(0).getObligation();
+    assertEquals("http://rod/obligations/670", obligation.getObligationLink());
+    assertNull(obligation.getLegalInstrument());
+  }
+
+  @Test
+  public void getDataflowsByCountryClosedObligationTest() throws EEAException {
+    // obligation 171 is not opened but ROD still returns it by id
+    DataflowInternalVO dataflowVO = internalDataflow(1L, 171);
+    mockDataflowsByCountry(dataflowVO, new ArrayList<>());
+    LegalInstrumentVO legalInstrument = new LegalInstrumentVO();
+    legalInstrument.setSourceId("545");
+    ObligationVO closedObligation = new ObligationVO();
+    closedObligation.setObligationId(171);
+    closedObligation.setLegalInstrument(legalInstrument);
+    Mockito.when(obligationControllerZull.findObligationById(171)).thenReturn(closedObligation);
+
+    ReportingDatasetVO reporting = reportingDataset(10L, 5L);
+    List<Date> releaseDates = mockReportingDatasets(reporting, reportingDataset(11L, null));
+
+    PaginatedDataflowWithNationalCoordinatorsVO result =
+        dataflowServiceImpl.getDataflowsByCountry("AL", null, false, 0, 10, null, "key");
+
+    DataflowInternalVO dataflow = result.getDataflows().get(0);
+    assertEquals("http://rod/instruments/545",
+        dataflow.getObligation().getLegalInstrument().getLegalInstrumentLink());
+    // the reporting dataset without provider is ignored instead of failing the page
+    assertEquals(Arrays.asList(reporting), dataflow.getReportingDatasets());
+    assertEquals(releaseDates, dataflow.getReleasedDates());
+  }
+
+  @Test
+  public void getDataflowsByCountryWithoutObligationIdTest() throws EEAException {
+    DataflowInternalVO dataflowVO = internalDataflow(1L, null);
+    ObligationVO openedObligation = new ObligationVO();
+    openedObligation.setObligationId(693);
+    mockDataflowsByCountry(dataflowVO, Arrays.asList(openedObligation));
+
+    PaginatedDataflowWithNationalCoordinatorsVO result =
+        dataflowServiceImpl.getDataflowsByCountry("AL", null, false, 0, 10, null, "key");
+
+    ObligationVO obligation = result.getDataflows().get(0).getObligation();
+    assertNull(obligation.getObligationId());
+    assertNull(obligation.getObligationLink());
+  }
+
+  private DataflowInternalVO internalDataflow(Long id, Integer obligationId) {
+    ObligationVO obligation = new ObligationVO();
+    obligation.setObligationId(obligationId);
+    DataflowInternalVO dataflowVO = new DataflowInternalVO();
+    dataflowVO.setId(id);
+    dataflowVO.setObligation(obligation);
+    return dataflowVO;
+  }
+
+  private ReportingDatasetVO reportingDataset(Long id, Long dataProviderId) {
+    ReportingDatasetVO reporting = new ReportingDatasetVO();
+    reporting.setId(id);
+    reporting.setDataProviderId(dataProviderId);
+    return reporting;
+  }
+
+  /** Mocks the reporting datasets of dataflow 1 for provider 5 ("AL"); the first one is released. */
+  private List<Date> mockReportingDatasets(ReportingDatasetVO... reportings) {
+    DataProviderVO dataProvider = new DataProviderVO();
+    dataProvider.setId(5L);
+    Mockito.when(representativeService.findDataProvidersByCode("AL"))
+        .thenReturn(Arrays.asList(dataProvider));
+    Mockito.when(datasetMetabaseController.findReportingDataSetByDataflowId(1L))
+        .thenReturn(Arrays.asList(reportings));
+    List<Date> releaseDates = Arrays.asList(new Date());
+    Mockito.when(dataSetSnapshotControllerZuul
+        .historicReleaseDatesAuthorizedByConsul(reportings[0].getId(), 1L, "key"))
+        .thenReturn(releaseDates);
+    return releaseDates;
+  }
+
+  private void mockDataflowsByCountry(DataflowInternalVO dataflowVO,
+      List<ObligationVO> openedObligations) throws EEAException {
+    ReflectionTestUtils.setField(dataflowServiceImpl, "rodUrl", "http://rod");
+    ObligationListVO obligationListVO = new ObligationListVO();
+    obligationListVO.setObligations(openedObligations);
+    Mockito.when(obligationControllerZull.findOpenedObligations(null, null, null, null, null))
+        .thenReturn(obligationListVO);
+    Mockito.when(dataflowRepository.findAllPaginatedByCountry(Mockito.anyString(), Mockito.any(),
+        Mockito.any(), Mockito.any(), Mockito.anyBoolean(), Mockito.eq("AL"))).thenReturn(dataflows);
+    Mockito.when(dataflowInternalMapper.entityListToClass(dataflows))
+        .thenReturn(Collections.singletonList(dataflowVO));
+  }
 
 }
