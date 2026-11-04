@@ -49,6 +49,8 @@ public class S3ConvertServiceImpl implements S3ConvertService {
     public static final String DIR_0 = "dir0";
     public static final String RECORD_ID = "record_id";
     public static final String DATA_PROVIDER_CODE = "data_provider_code";
+    /** Size in bytes of the UTF-8 BOM written at the start of every exported CSV. */
+    private static final int UTF8_BOM_BYTES = 3;
     private final Set<String> headersToExclude = new HashSet<>();
 
 
@@ -119,7 +121,8 @@ public class S3ConvertServiceImpl implements S3ConvertService {
             LOG.error("Error in convert method for csvOutputFile {} and tableName {}", csvFile, tableName, e);
         }
 
-        if (csvFile.length() == 0) {
+        // Only the BOM was written: no records, so no header either -> write the schema headers
+        if (csvFile.length() <= UTF8_BOM_BYTES) {
             return createEmptyCSVFile(tableName, datasetId, headers, etlExportV4, jobId, preparationCode);
         }
 
@@ -166,10 +169,12 @@ public class S3ConvertServiceImpl implements S3ConvertService {
         csvFile.getParentFile().mkdirs();
         LOG.info("Creating file for export: {}", csvFile);
 
-        try (CSVWriter csvWriter = new CSVWriter(new FileWriter(csvFile),
+        try (FileWriter fileWriter = new FileWriter(csvFile, StandardCharsets.UTF_8);
+            CSVWriter csvWriter = new CSVWriter(fileWriter,
             CSVWriter.DEFAULT_SEPARATOR, CSVWriter.DEFAULT_QUOTE_CHARACTER,
             CSVWriter.DEFAULT_ESCAPE_CHARACTER, CSVWriter.DEFAULT_LINE_END)) {
 
+            fileWriter.write('\uFEFF'); // BOM first, same as createCSVFile
             csvWriter.writeNext(headers.toArray(String[]::new), false);
         } catch (Exception e) {
             LOG.error("Error in convert method for csvOutputFile {} and tableName {}", csvFile, tableName, e);
@@ -209,7 +214,8 @@ public class S3ConvertServiceImpl implements S3ConvertService {
       LOG.error("Error in convert method for csvOutputFile {} and tableName {}", csvFile, tableName, e);
     }
 
-    if (csvFile.length() == 0) {
+    // Only the BOM was written: no records, so no header either -> write the schema headers
+    if (csvFile.length() <= UTF8_BOM_BYTES) {
       return createEmptyCSVFileWithProviders(tableName, datasetId, headers, etlExportV4, jobId, providerFolderPath);
     }
     return csvFile;
@@ -231,9 +237,11 @@ public class S3ConvertServiceImpl implements S3ConvertService {
       headers.add(0, RECORD_ID);
     }
 
-    try (CSVWriter csvWriter = new CSVWriter(new FileWriter(csvFile),
+    try (FileWriter fileWriter = new FileWriter(csvFile, StandardCharsets.UTF_8);
+        CSVWriter csvWriter = new CSVWriter(fileWriter,
         CSVWriter.DEFAULT_SEPARATOR, CSVWriter.DEFAULT_QUOTE_CHARACTER,
         CSVWriter.DEFAULT_ESCAPE_CHARACTER, CSVWriter.DEFAULT_LINE_END)) {
+      fileWriter.write('\uFEFF'); // BOM first, same as createCSVFileWithProviders
       csvWriter.writeNext(headers.toArray(String[]::new), false);
     } catch (Exception e) {
       LOG.error("Error in convert method for csvOutputFile {} and tableName {}", csvFile, tableName, e);
