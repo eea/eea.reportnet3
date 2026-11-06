@@ -992,10 +992,13 @@ public class DataflowServiceImpl implements DataflowService {
           logDataflowEnrichmentError(dataflowVO.getId(), "representatives", e);
         }
         // SET OBLIGATIONS
-        for (ObligationVO obligation : obligations) {
-          if (dataflowVO.getObligation().getObligationId() != null
-                  && dataflowVO.getObligation().getObligationId().equals(obligation.getObligationId())) {
-            dataflowVO.setObligation(obligation);
+        Integer obligationId =
+                dataflowVO.getObligation() != null ? dataflowVO.getObligation().getObligationId() : null;
+        if (obligationId != null) {
+          for (ObligationVO obligation : obligations) {
+            if (obligationId.equals(obligation.getObligationId())) {
+              dataflowVO.setObligation(obligation);
+            }
           }
         }
       }
@@ -1405,7 +1408,7 @@ public class DataflowServiceImpl implements DataflowService {
         logDataflowEnrichmentError(dataflow.getId(), "reporting datasets", e);
         return; // reportingDatasets stays the empty list set above
       }
-      if (!reportings.isEmpty()) {
+      if (CollectionUtils.isNotEmpty(reportings)) {
         for (DataProviderVO dataProviderVO : dataProviderVOs) {
           List<ReportingDatasetVO> reportingsProvider =
               reportings.stream().filter(r -> Objects.equals(r.getDataProviderId(), dataProviderVO.getId()))

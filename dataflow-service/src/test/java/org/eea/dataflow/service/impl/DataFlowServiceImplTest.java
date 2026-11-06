@@ -1862,6 +1862,38 @@ public class DataFlowServiceImplTest {
     assertEquals(releaseDates, ok.getReleasedDates());
   }
 
+  @Test
+  public void getDataflowsByCountryWithoutObligationTest() throws EEAException {
+    DataflowInternalVO dataflowVO = new DataflowInternalVO();
+    dataflowVO.setId(1L);
+    ObligationVO openedObligation = new ObligationVO();
+    openedObligation.setObligationId(693);
+    mockDataflowsByCountry(dataflowVO, Arrays.asList(openedObligation));
+    List<Date> releaseDates = mockReportingDatasets(reportingDataset(10L, 5L));
+
+    PaginatedDataflowWithNationalCoordinatorsVO result =
+        dataflowServiceImpl.getDataflowsByCountry("AL", null, false, 0, 10, null, "key");
+
+    DataflowInternalVO dataflow = result.getDataflows().get(0);
+    assertNull(dataflow.getObligation());
+    assertEquals(1, dataflow.getReportingDatasets().size());
+    assertEquals(releaseDates, dataflow.getReleasedDates());
+  }
+
+  @Test
+  public void getDataflowsByCountryNullReportingDatasetsTest() throws EEAException {
+    mockDataflowsByCountry(internalDataflow(1L, null), new ArrayList<>());
+    mockDataProvider();
+    Mockito.when(datasetMetabaseController.findReportingDataSetByDataflowId(1L)).thenReturn(null);
+
+    PaginatedDataflowWithNationalCoordinatorsVO result =
+        dataflowServiceImpl.getDataflowsByCountry("AL", null, false, 0, 10, null, "key");
+
+    DataflowInternalVO dataflow = result.getDataflows().get(0);
+    assertEquals(new ArrayList<>(), dataflow.getReportingDatasets());
+    assertNull(dataflow.getReleasedDates());
+  }
+
   @Test(expected = RuntimeException.class)
   public void getDataflowsByCountryNationalCoordinatorsFailTest() throws EEAException {
     // page-level failures still fail the request
