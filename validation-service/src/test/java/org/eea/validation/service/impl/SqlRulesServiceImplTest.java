@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Map;
 import org.bson.Document;
 import org.bson.types.ObjectId;
+import org.eea.datalake.service.S3Service;
+import org.eea.datalake.service.model.S3PathResolver;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
@@ -125,6 +127,9 @@ public class SqlRulesServiceImplTest {
 
   @Mock
   private DataFlowControllerZuul dataFlowControllerZuul;
+
+  @Mock
+  private S3Service s3Service;
 
   /** The sql rules service impl. */
   @InjectMocks
@@ -961,5 +966,163 @@ public class SqlRulesServiceImplTest {
     } catch (EEAInvalidSQLException e) {
       throw e;
     }
+  }
+
+  // ATA2-3350 / Taskman #307404: replaceTableNamesWithS3Path must replace whole table names only,
+  // so dataset_X.Table does not also rewrite the start of dataset_X.TableSuffix.
+
+  @Test
+  public void replaceTableNamesWithS3PathSamePrefixSameCaseTest() {
+    // the failing QC from the ticket (UpperCamelCase, no quotes)
+    mockS3Paths();
+    String sql = "SELECT * FROM dataset_44489.Monitoring m LEFT JOIN dataset_44489.MonitoringPurpose mp "
+        + "ON m.euMonitoringSiteCode = mp.euMonitoringSiteCode";
+
+    assertEquals("SELECT * FROM " + s3Path(44489L, "Monitoring") + " m LEFT JOIN "
+        + s3Path(44489L, "MonitoringPurpose") + " mp ON m.euMonitoringSiteCode = mp.euMonitoringSiteCode",
+        sqlRulesServiceImpl.replaceTableNamesWithS3Path(sql));
+  }
+
+  @Test
+  public void replaceTableNamesWithS3PathSamePrefixLowerCaseTest() {
+    // the all lower case variant from the ticket, over several lines
+    mockS3Paths();
+    String sql = "SELECT * FROM dataset_44489.monitoring m\nLEFT JOIN dataset_44489.monitoringpurpose mp\n"
+        + "ON m.euMonitoringSiteCode = mp.euMonitoringSiteCode";
+
+    assertEquals("SELECT * FROM " + s3Path(44489L, "monitoring") + " m\nLEFT JOIN "
+        + s3Path(44489L, "monitoringpurpose") + " mp\nON m.euMonitoringSiteCode = mp.euMonitoringSiteCode",
+        sqlRulesServiceImpl.replaceTableNamesWithS3Path(sql));
+  }
+
+  @Test
+  public void replaceTableNamesWithS3PathLongerNameFirstTest() {
+    mockS3Paths();
+    String sql = "SELECT * FROM dataset_44489.MonitoringPurpose mp JOIN dataset_44489.Monitoring m "
+        + "ON m.id = mp.id";
+
+    assertEquals("SELECT * FROM " + s3Path(44489L, "MonitoringPurpose") + " mp JOIN "
+        + s3Path(44489L, "Monitoring") + " m ON m.id = mp.id",
+        sqlRulesServiceImpl.replaceTableNamesWithS3Path(sql));
+  }
+
+  @Test
+  public void replaceTableNamesWithS3PathDifferentCaseTest() {
+    // workaround from the ticket, worked before the fix and must keep working
+    mockS3Paths();
+    String sql = "SELECT * FROM dataset_44489.Monitoring m LEFT JOIN dataset_44489.monitoringPurpose mp "
+        + "ON m.id = mp.id";
+
+    assertEquals("SELECT * FROM " + s3Path(44489L, "Monitoring") + " m LEFT JOIN "
+        + s3Path(44489L, "monitoringPurpose") + " mp ON m.id = mp.id",
+        sqlRulesServiceImpl.replaceTableNamesWithS3Path(sql));
+  }
+
+  @Test
+  public void replaceTableNamesWithS3PathQuotedNamesTest() {
+    // workaround from the ticket: the quotes are part of the replaced text
+    mockS3Paths();
+    String sql = "SELECT * FROM dataset_44489.\"monitoring\" m LEFT JOIN dataset_44489.\"monitoringpurpose\" mp "
+        + "ON m.id = mp.id";
+
+    assertEquals("SELECT * FROM " + s3Path(44489L, "monitoring") + " m LEFT JOIN "
+        + s3Path(44489L, "monitoringpurpose") + " mp ON m.id = mp.id",
+        sqlRulesServiceImpl.replaceTableNamesWithS3Path(sql));
+  }
+
+  @Test
+  public void replaceTableNamesWithS3PathRepeatedTableTest() {
+    // every occurrence is replaced in one pass: self join, subquery closed by ')', qualified column,
+    // and a table at the very end of the SQL
+    mockS3Paths();
+    String sql = "SELECT dataset_1.Monitoring.code FROM dataset_1.Monitoring a JOIN dataset_1.Monitoring b "
+        + "ON a.id = b.parentId WHERE a.code IN (SELECT code FROM dataset_1.Monitoring) "
+        + "AND a.code NOT IN (SELECT code FROM dataset_1.MonitoringPurpose)"
+        + " UNION SELECT code FROM dataset_1.MonitoringPurpose";
+    String monitoring = s3Path(1L, "Monitoring");
+    String purpose = s3Path(1L, "MonitoringPurpose");
+
+    assertEquals("SELECT " + monitoring + ".code FROM " + monitoring + " a JOIN " + monitoring + " b "
+        + "ON a.id = b.parentId WHERE a.code IN (SELECT code FROM " + monitoring + ") "
+        + "AND a.code NOT IN (SELECT code FROM " + purpose + ")"
+        + " UNION SELECT code FROM " + purpose,
+        sqlRulesServiceImpl.replaceTableNamesWithS3Path(sql));
+    Mockito.verify(s3Service, times(1)).getTablePathByDatasetType(Mockito.eq(10L), Mockito.eq(1L),
+        Mockito.eq("Monitoring"), Mockito.any(S3PathResolver.class));
+    Mockito.verify(s3Service, times(1)).getTablePathByDatasetType(Mockito.eq(10L), Mockito.eq(1L),
+        Mockito.eq("MonitoringPurpose"), Mockito.any(S3PathResolver.class));
+  }
+
+  @Test
+  public void replaceTableNamesWithS3PathDigitAndUnderscoreSuffixTest() {
+    // a digit or underscore also continues a table name
+    mockS3Paths();
+    String sql = "SELECT * FROM dataset_1.Monitoring a, dataset_1.Monitoring_2 b, dataset_1.Monitoring2 c "
+        + "WHERE a.id = b.id AND b.id = c.id";
+
+    assertEquals("SELECT * FROM " + s3Path(1L, "Monitoring") + " a, " + s3Path(1L, "Monitoring_2")
+        + " b, " + s3Path(1L, "Monitoring2") + " c WHERE a.id = b.id AND b.id = c.id",
+        sqlRulesServiceImpl.replaceTableNamesWithS3Path(sql));
+  }
+
+  @Test
+  public void replaceTableNamesWithS3PathCommaSeparatedTest() {
+    mockS3Paths();
+    String sql = "SELECT * FROM dataset_1.Monitoring, dataset_1.MonitoringPurpose WHERE 1 = 1";
+
+    assertEquals("SELECT * FROM " + s3Path(1L, "Monitoring") + ", " + s3Path(1L, "MonitoringPurpose")
+        + " WHERE 1 = 1", sqlRulesServiceImpl.replaceTableNamesWithS3Path(sql));
+  }
+
+  @Test
+  public void replaceTableNamesWithS3PathSeveralDatasetsTest() {
+    // the same table name in another dataset gets its own path
+    mockS3Paths();
+    String sql = "SELECT * FROM dataset_1.Monitoring a JOIN dataset_2.Monitoring b ON a.id = b.id "
+        + "JOIN dataset_1.MonitoringPurpose c ON a.id = c.id";
+
+    assertEquals("SELECT * FROM " + s3Path(1L, "Monitoring") + " a JOIN " + s3Path(2L, "Monitoring")
+        + " b ON a.id = b.id JOIN " + s3Path(1L, "MonitoringPurpose") + " c ON a.id = c.id",
+        sqlRulesServiceImpl.replaceTableNamesWithS3Path(sql));
+  }
+
+  @Test
+  public void replaceTableNamesWithS3PathSpecialCharactersInPathTest() {
+    // '$' and '\' in the path are inserted literally, not read as regex group references
+    mockS3Paths();
+    String path = "bucket.\"$1\\a\".\"monitoring\"";
+    Mockito.when(s3Service.getTablePathByDatasetType(Mockito.anyLong(), Mockito.anyLong(),
+        Mockito.eq("Monitoring"), Mockito.any(S3PathResolver.class))).thenReturn(path);
+
+    assertEquals("SELECT * FROM " + path + " m",
+        sqlRulesServiceImpl.replaceTableNamesWithS3Path("SELECT * FROM dataset_1.Monitoring m"));
+  }
+
+  @Test
+  public void replaceTableNamesWithS3PathNoDatasetTest() {
+    String sql = "SELECT 1 FROM dual";
+
+    assertEquals(sql, sqlRulesServiceImpl.replaceTableNamesWithS3Path(sql));
+    Mockito.verifyNoInteractions(s3Service, datasetMetabaseController);
+  }
+
+  /** Mocks the metabase and S3 lookups: every dataset belongs to dataflow 10 and provider 2. */
+  private void mockS3Paths() {
+    Mockito.lenient().when(datasetMetabaseController.findDatasetMetabaseById(Mockito.anyLong()))
+        .thenAnswer(invocation -> {
+          DataSetMetabaseVO dataset = new DataSetMetabaseVO();
+          dataset.setId(invocation.getArgument(0));
+          dataset.setDataflowId(10L);
+          dataset.setDataProviderId(2L);
+          return dataset;
+        });
+    Mockito.lenient().when(s3Service.getTablePathByDatasetType(Mockito.anyLong(), Mockito.anyLong(),
+        Mockito.anyString(), Mockito.any(S3PathResolver.class)))
+        .thenAnswer(invocation -> s3Path(invocation.getArgument(1), invocation.getArgument(2)));
+  }
+
+  /** Same shape as the real table path (S3_TABLE_AS_FOLDER_QUERY_PATH). */
+  private static String s3Path(Long datasetId, String table) {
+    return "rn3-bucket.\"df-10\".\"dp-2\".\"ds-" + datasetId + "\".\"current\".\"" + table + "\"";
   }
 }
