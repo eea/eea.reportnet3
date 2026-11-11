@@ -5,6 +5,7 @@ import org.eea.interfaces.controller.orchestrator.JobProcessController;
 import org.eea.interfaces.vo.orchestrator.JobProcessVO;
 import org.eea.orchestrator.service.JobProcessService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -39,6 +40,7 @@ public class JobProcessControllerImpl implements JobProcessController {
      */
     @Override
     @GetMapping(value = "/findJobIdByProcessId/{processId}")
+    @PreAuthorize("isAuthenticated()")
     public Long findJobIdByProcessId(@PathVariable("processId") String processId) {
         return jobProcessService.findJobIdByProcessId(processId);
     }
@@ -49,12 +51,14 @@ public class JobProcessControllerImpl implements JobProcessController {
      * @return
      */
     @GetMapping(value = "/findProcessesByJobId/{jobId}")
+    @PreAuthorize("isAuthenticated()")
     public List<String> findProcessesByJobId(@PathVariable("jobId") Long jobId) {
         return jobProcessService.findProcessesByJobId(jobId);
     }
 
     @Override
     @GetMapping(value = "/findStatusByJobId/{jobId}")
+    @PreAuthorize("isAuthenticated()")
     public String findStatusByJobId(@PathVariable("jobId") Long jobId) {
         return jobProcessService.findStatusByJobId(jobId);
     }

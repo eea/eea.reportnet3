@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import springfox.documentation.annotations.ApiIgnore;
@@ -47,6 +48,7 @@ public class JobHistoryControllerImpl implements JobHistoryController {
 
     @Override
     @GetMapping
+    @PreAuthorize("isAuthenticated()")
     public JobsHistoryVO getJobHistory(
             @RequestParam(value = "pageNum", defaultValue = "0", required = false) Integer pageNum,
             @RequestParam(value = "pageSize", defaultValue = "20", required = false) Integer pageSize,
@@ -86,6 +88,7 @@ public class JobHistoryControllerImpl implements JobHistoryController {
 
     @Override
     @GetMapping("/{jobId}")
+    @PreAuthorize("isAuthenticated()")
     public List<JobHistoryVO> getJobHistory(@PathVariable("jobId") Long jobId){
         try{
             LOG.info("Retrieving job history for job {}", jobId);
@@ -103,6 +106,7 @@ public class JobHistoryControllerImpl implements JobHistoryController {
      */
     @Override
     @PostMapping(value = "/save")
+    @PreAuthorize("isAuthenticated()")
     public void save(@RequestBody JobVO jobVO) {
         jobHistoryService.saveJobHistory(jobMapper.classToEntity(jobVO));
     }
