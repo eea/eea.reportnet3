@@ -1,6 +1,6 @@
 package org.eea.orchestrator.scheduling;
 
-import org.eea.interfaces.controller.dataset.DatasetController;
+import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,21 +16,18 @@ public class JobForRemovingIcebergTablesWithExpiredEditingLocks {
     private static final Logger LOG = LoggerFactory.getLogger(JobForRemovingIcebergTablesWithExpiredEditingLocks.class);
 
     @Autowired
-    private DatasetController.DataSetControllerZuul dataSetControllerZuul;
+    private DataSetControllerZuul dataSetControllerZuul;
 
     @PostConstruct
     private void init() {
-        //TODO Has been commented out to prevent the job from running on production
-        //due to the very large amount of existing open iceberg tables.
-
-        //ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
-        //scheduler.initialize();
-        //scheduler.schedule(this::removeExpiredIcebergTables,
-        //        new CronTrigger("0 */5 * * * *"));
+        ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
+        scheduler.initialize();
+        scheduler.schedule(this::removeExpiredIcebergTables,
+                new CronTrigger("0 */10 * * * *"));
     }
 
     /**
-     * The job runs every 5 minutes. It finds entries in the DatasetTable where the edit_lock_expires_at column contains
+     * The job runs every 10 minutes. It finds entries in the DatasetTable where the edit_lock_expires_at column contains
      * an expired date, and the proceeds to remove the username and the edit_lock_expires_at values from the row and also
      * close any open Iceberg tables for that dataset.
      */
@@ -38,9 +35,7 @@ public class JobForRemovingIcebergTablesWithExpiredEditingLocks {
 
         LOG.info("Starting JobForRemovingIcebergTablesWithExpiredEditingLocks");
         try {
-
             dataSetControllerZuul.clearExpiredDatasetTableLocks();
-
         }
         catch (Exception e) {
             LOG.error(e.getMessage(), e);

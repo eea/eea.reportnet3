@@ -3523,7 +3523,10 @@ public class DatasetServiceImpl implements DatasetService {
         oldField.setRecord(oldRecord);
       });
     } else {
-      oldRecord.getFields().forEach(field -> field.setValue(""));
+      oldRecord.getFields().forEach(field -> {
+        field.setValue("");
+        field.setRecord(oldRecord);
+      });
     }
   }
 
