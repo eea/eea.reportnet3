@@ -2104,7 +2104,6 @@ public class DatasetServiceImpl implements DatasetService {
         && (idRules == null || idRules.length == 0) && fieldSchema == null && fieldValue == null) {
       records = recordRepository.findByTableValueNoOrder(idTableSchema, pageable);
       List<RecordVO> recordVOs = recordNoValidationMapper.entityListToClass(records);
-      spatialDataHandling.transformSpatialFields(recordVOs);
       result.setTotalFilteredRecords(0L);
       result.setRecords(recordVOs);
     } else {
