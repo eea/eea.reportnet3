@@ -135,6 +135,7 @@ public class JobControllerImpl implements JobController {
 
     @Override
     @GetMapping("/{status}")
+    @PreAuthorize("isAuthenticated()")
     public List<JobVO> getJobsByStatus(@PathVariable("status") JobStatusEnum status){
         try{
             LOG.info("Retrieving jobs for status {}", status.getValue());
@@ -487,6 +488,7 @@ public class JobControllerImpl implements JobController {
      */
     @Override
     @GetMapping(value = "/checkEligibility")
+    @PreAuthorize("isAuthenticated()")
     public JobStatusEnum checkEligibilityOfJob(@RequestParam("jobType") String jobType, @RequestParam("release") boolean release,
                                                @RequestParam("dataflowId") Long dataflowId, @RequestParam(value="dataProviderID", required = false) Long dataProviderId, @RequestParam("datasets") List<Long> datasets) {
         return jobService.checkEligibilityOfJob(jobType, dataflowId, dataProviderId, datasets, release);
@@ -498,11 +500,13 @@ public class JobControllerImpl implements JobController {
      * @return
      */
     @GetMapping(value = "/findJobById/{jobId}")
+    @PreAuthorize("isAuthenticated()")
     public JobVO findJobById(@PathVariable("jobId") Long jobId) {
         return jobService.findById(jobId);
     }
 
     @GetMapping(value = "/findJobByFmeJobId/{fmeJobId}")
+    @PreAuthorize("isAuthenticated()")
     public JobVO findJobByFmeJobId(String fmeJobId) {
         return jobService.findByFmeJobId(fmeJobId);
     }
@@ -673,6 +677,7 @@ public class JobControllerImpl implements JobController {
      * @return
      */
     @GetMapping(value = "/findProviderIdById/{jobId}")
+    @PreAuthorize("isAuthenticated()")
     public Long findProviderIdById(@PathVariable("jobId") Long jobId) {
         return jobService.findProviderIdById(jobId);
     }
