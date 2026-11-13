@@ -44,7 +44,7 @@ public class TestDremioControllerImpl {
 
     @GetMapping("run")
     public void run() {
-        SqlRowSet rs = dremioJdbcTemplate.queryForRowSet("SELECT * FROM \"rn3-dataset.rn3-dataset\".\"tab.csv\";");
+        SqlRowSet rs = dremioJdbcTemplate.queryForRowSet("SELECT * FROM \"rn3-transport-dataset-273354670427-eu-central-1-an.rn3-transport-dataset-273354670427-eu-central-1-an\".\"tab.csv\";");
         while (rs.next()) {
             LOG.info(rs.getString("A") + "," + rs.getString("B") + "," + rs.getString("C") + "," + rs.getString("D"));
         }

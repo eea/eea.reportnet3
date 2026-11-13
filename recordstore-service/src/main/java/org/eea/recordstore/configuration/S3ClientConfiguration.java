@@ -25,7 +25,7 @@ public class S3ClientConfiguration {
     private String s3AccessKey;
     @Value("${amazon.s3.secretKey}")
     private String s3SecretKey;
-    private final static Region s3Region = Region.US_EAST_1;
+    private final static Region s3Region = Region.EU_CENTRAL_1;
 
     @Bean
     public S3Client getS3Client() {
