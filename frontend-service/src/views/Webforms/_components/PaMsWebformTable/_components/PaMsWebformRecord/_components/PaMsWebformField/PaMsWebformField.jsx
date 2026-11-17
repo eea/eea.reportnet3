@@ -185,7 +185,9 @@ export const PaMsWebformField = ({
 
       const masterConditionalFieldId = element.referencedField.masterConditionalFieldId;
 
-      const fieldMatch = el => [el.fieldSchemaId, el.fieldId, el.fieldSchema].includes(masterConditionalFieldId);
+      const fieldMatch = el =>
+        !isNil(masterConditionalFieldId) &&
+        [el.fieldSchemaId, el.fieldId, el.fieldSchema].includes(masterConditionalFieldId);
 
       const conditionalField =
         // 1. Try to find a matching field directly in the top-level elements
@@ -215,6 +217,8 @@ export const PaMsWebformField = ({
                     conditionalField.value?.length > 1
                   ? conditionalField.value?.join(';')
                   : conditionalField.value
+                : isNil(masterConditionalFieldId)
+                ? ''
                 : encodeURIComponent(element.value),
               localDatasetSchemaId,
               400

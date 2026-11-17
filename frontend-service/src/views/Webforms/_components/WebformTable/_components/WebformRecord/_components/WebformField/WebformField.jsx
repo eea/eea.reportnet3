@@ -177,7 +177,9 @@ export const WebformField = ({
 
       const masterConditionalFieldId = element.referencedField.masterConditionalFieldId;
 
-      const fieldMatch = el => [el.fieldSchemaId, el.fieldId, el.fieldSchema].includes(masterConditionalFieldId);
+      const fieldMatch = el =>
+        !isNil(masterConditionalFieldId) &&
+        [el.fieldSchemaId, el.fieldId, el.fieldSchema].includes(masterConditionalFieldId);
 
       // Search for the conditional field in nested containers
       const findConditionalField = elements => {
@@ -217,7 +219,7 @@ export const WebformField = ({
       const conditionalField = findConditionalField(record.elements);
 
       const conditionalValue = (() => {
-        if (isNil(conditionalField)) return encodeURIComponent(element.value);
+        if (isNil(conditionalField)) return isNil(masterConditionalFieldId) ? '' : encodeURIComponent(element.value);
 
         const { type, fieldType, value } = conditionalField;
 
