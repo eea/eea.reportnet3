@@ -1181,7 +1181,6 @@ public class ValidationHelper implements DisposableBean {
     mapCriteriaValidation.put(SIGNATURE,
         LockSignature.EXECUTE_VALIDATION.getValue());
     mapCriteriaValidation.put(DATASETID, datasetId);
-    mapCriteriaValidation.put(PREPARATION_CODE, preparationCode);
     lockService.removeLockByCriteria(mapCriteriaValidation);
 
     Map<String, Object> mapCriteriaValidationDataset = new HashMap<>();
@@ -1674,18 +1673,13 @@ public class ValidationHelper implements DisposableBean {
           executeValidation.put(SIGNATURE,
                   LockSignature.EXECUTE_VALIDATION.getValue());
           executeValidation.put(DATASETID, datasetId);
-          if (StringUtils.isNotBlank(preparationCode)) {
-            executeValidation.put(PREPARATION_CODE, preparationCode);
-          }
           lockService.removeLockByCriteria(executeValidation);
 
           Map<String, Object> forceExecuteValidation = new HashMap<>();
           forceExecuteValidation.put(SIGNATURE,
                   LockSignature.FORCE_EXECUTE_VALIDATION.getValue());
           forceExecuteValidation.put(DATASETID, datasetId);
-          if (StringUtils.isNotBlank(preparationCode)) {
-            forceExecuteValidation.put(PREPARATION_CODE, preparationCode);
-          }
+          forceExecuteValidation.put(PREPARATION_CODE, preparationCode);
           lockService.removeLockByCriteria(forceExecuteValidation);
           datasetMetabaseControllerZuul.updateDatasetRunningStatus(datasetId,
                   DatasetRunningStatusEnum.VALIDATED);
