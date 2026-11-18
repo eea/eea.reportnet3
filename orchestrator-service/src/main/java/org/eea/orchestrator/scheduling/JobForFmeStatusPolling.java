@@ -37,6 +37,7 @@ import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -107,7 +108,7 @@ public class JobForFmeStatusPolling {
     /**
      * The job runs every 10 minutes. It finds fme import jobs that have tasks with status=IN_PROGRESS
      * Then it polls for fme status and updates the value.
-     * If fme_status is ABORTED, FME_FAILURE or JOB_FAILURE the job is failed.
+     * If fme_status is FAILURE or CANCELLED the job is failed.
      * If fme_status is SUCCESS but we haven't received a callback from fme for 30 minutes the job will be failed.
      */
     public void pollingForFmeJobs() {
@@ -120,7 +121,7 @@ public class JobForFmeStatusPolling {
             for (JobVO job: jobsForPolling){
                 try {
                     JSONObject jsonResponse = pollFmeForJobStatusAndGetResponse(job.getId().toString(), job.getFmeJobId());
-                    FmeJobStatusEnum fmeStatus =  FmeJobStatusEnum.valueOf(jsonResponse.get(JSON_STATUS_PARAM).toString());
+                    FmeJobStatusEnum fmeStatus =  FmeJobStatusEnum.fromApiValue(jsonResponse.get(JSON_STATUS_PARAM).toString());
                     if(fmeStatus == null) {
                         String exceptionMessage = "Got unknown status when polling fme for jobId " + job.getId() + " and fmeJobId " + job.getFmeJobId()
                                 + " Status was: " + fmeStatus;
@@ -128,11 +129,11 @@ public class JobForFmeStatusPolling {
                     }
 
                     //if job's fme status is empty or job's fme status has been modified, we need to update it
-                    if(job.getFmeStatus() == null || (job.getFmeStatus() != null && !job.getFmeStatus().getValue().equals(fmeStatus))){
+                    if(job.getFmeStatus() == null || job.getFmeStatus() != fmeStatus){
                         jobService.updateFmeStatus(job.getId(), fmeStatus);
                     }
 
-                    String [] failedStatuses = {FmeJobStatusEnum.ABORTED.getValue(), FmeJobStatusEnum.FME_FAILURE.getValue(), FmeJobStatusEnum.JOB_FAILURE.getValue()};
+                    String [] failedStatuses = {FmeJobStatusEnum.FAILURE.getValue(), FmeJobStatusEnum.CANCELLED.getValue()};
                     if ( Arrays.stream(failedStatuses).anyMatch(fmeStatus.getValue()::equals)){
                         failJob(job);
                     }
@@ -215,7 +216,7 @@ public class JobForFmeStatusPolling {
                 JSONObject jsonResponse = new JSONObject(strResponse);
 
                 if (jsonResponse.get(JSON_STATUS_PARAM) != null) {
-                    FmeJobStatusEnum fmeStatus =  FmeJobStatusEnum.valueOf(jsonResponse.get(JSON_STATUS_PARAM).toString());
+                    FmeJobStatusEnum fmeStatus =  FmeJobStatusEnum.fromApiValue(jsonResponse.get(JSON_STATUS_PARAM).toString());
                     LOG.info("When polling for fme status for jobId {} and fmeJobId {} received fme status {}", jobId, fmeJobId, fmeStatus.getValue());
                     return jsonResponse;
                 } else {
@@ -239,7 +240,14 @@ public class JobForFmeStatusPolling {
                 .ofPattern("yyyy-MM-dd'T'HH:mm:ssz");
 
         //Instance with given offset
-        OffsetDateTime odtInstanceAtOffset = OffsetDateTime.parse(timeFinished, DATE_TIME_FORMATTER);
+        OffsetDateTime odtInstanceAtOffset;
+        try {
+            // FME v3 format, e.g. 2023-01-01T12:00:00PST
+            odtInstanceAtOffset = OffsetDateTime.parse(timeFinished, DATE_TIME_FORMATTER);
+        } catch (DateTimeParseException e) {
+            // FME v4 format, e.g. 2026-09-18T11:13:36.732Z (ISO-8601 with millis and Z offset)
+            odtInstanceAtOffset = OffsetDateTime.parse(timeFinished, DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+        }
 
         //Instance in UTC
         OffsetDateTime odtInstanceAtUTC = odtInstanceAtOffset.withOffsetSameInstant(ZoneOffset.UTC);
