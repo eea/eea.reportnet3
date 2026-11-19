@@ -1516,8 +1516,6 @@ public class DataflowServiceImpl implements DataflowService {
 
       } catch (FeignException e) {
         LOG.error("Error while getting obligation by id {}", e.getMessage(), e);
-        ObligationVO obligationVO = new ObligationVO();
-        dataflow.setObligation(obligationVO);
       }
     }
   }
