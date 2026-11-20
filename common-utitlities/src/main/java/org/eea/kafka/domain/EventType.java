@@ -630,7 +630,9 @@ public enum EventType {
   COMMAND_VALIDATE_EMPTY_RULE(LiteralConstants.COMMAND_TOPIC, "execute_validations_empty_rule_key", false),
 
   /** The command validated sql datalake completed. */
-  COMMAND_VALIDATED_EMPTY_RULE_COMPLETED(LiteralConstants.BROADCAST_TOPIC, "empty_rule_validated_key", true);
+  COMMAND_VALIDATED_EMPTY_RULE_COMPLETED(LiteralConstants.BROADCAST_TOPIC, "empty_rule_validated_key", true),
+
+  PREFILLED_TABLE_HAS_NO_DATA_ERROR(LiteralConstants.DATA_REPORTING_TOPIC, "prefilled_table_has_no_data_error", true);
 
 
   /** The topic. */
