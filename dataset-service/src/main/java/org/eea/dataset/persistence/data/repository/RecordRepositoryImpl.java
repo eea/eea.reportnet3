@@ -44,6 +44,8 @@ import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
 import org.eea.multitenancy.TenantResolver;
 import org.eea.utils.LiteralConstants;
+import org.geolatte.geom.G2D;
+import org.geolatte.geom.Geometry;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.annotations.QueryHints;
@@ -376,6 +378,12 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
   /** The Constant RECORD_JSON_QUERY: {@value}. */
   private static final String RECORD_JSON_QUERY = "SELECT record_json from dataset_%s.temp_etlexport "
       + "WHERE filter_value= ? and id>= ? and id< ?";
+
+  private static final List<String> AFFECTED_TYPES = Arrays.asList(
+          DataType.POLYGON.getValue(),
+          DataType.MULTIPOLYGON.getValue(),
+          DataType.GEOMETRYCOLLECTION.getValue()
+  );
 
   /**
    * Find by table value with order.
@@ -1311,6 +1319,24 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
             Document referenced = (documentField != null) ? (Document) documentField.get(LiteralConstants.REFERENCED_FIELD) : null;
             String idPk = (referenced != null) ? referenced.get("idPk").toString() : null;
             fieldValue.setReferenceFieldSchemaId(idPk);
+          }
+          if (AFFECTED_TYPES.contains(fieldValue.getType().getValue())) {
+            // starting with this type of geometry to extract valuable info
+            //{"type":"Feature","geometry":{"type":"MultiPolygon","coordinates":[...]}
+            Geometry<G2D> geometry = fieldValue.getGeometry();
+            if (geometry != null) {
+              final double BYTES_IN_MB = 1024.0 * 1024.0; // conversion factor bytes -> megabytes
+
+              String type = geometry.getGeometryType().toString();
+              int srid = geometry.getSRID();
+              int dimensions = geometry.getDimension();
+
+              final int sizeBytes = fieldValue.getValue().getBytes(StandardCharsets.UTF_8).length;
+              final double sizeMB = Math.round((sizeBytes / BYTES_IN_MB) * 100.0) / 100.0;
+
+              String jsonValue = spatialDataHandling.buildSpatialDescriptorJSON(srid, type, sizeMB, dimensions +"D");
+              fieldValue.setValue(jsonValue);
+            }
           }
         }
         sanitizedRecords.add(recordValue);
