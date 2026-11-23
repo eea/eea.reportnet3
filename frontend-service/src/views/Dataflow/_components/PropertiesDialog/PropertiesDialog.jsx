@@ -42,7 +42,7 @@ export const PropertiesDialog = ({ dataflowState, manageDialogs }) => {
       { id: 1, label: resourcesContext.messages['description'], value: obligations.description },
       { id: 2, label: resourcesContext.messages['comment'], value: obligations.comment },
       { id: 3, label: resourcesContext.messages['nextReportDue'], value: date },
-      { id: 4, label: resourcesContext.messages['obligationId'], value: obligations.obligationId.toString() }
+      { id: 4, label: resourcesContext.messages['obligationId'], value: obligations.obligationId?.toString() }
     ];
   };
 
@@ -105,7 +105,7 @@ export const PropertiesDialog = ({ dataflowState, manageDialogs }) => {
           />
           <PropertyItem
             content={getLegalInstrumentContent()}
-            redirectTo={`${RodUrl.instruments}${obligations.legalInstrument.id}`}
+            redirectTo={obligations.legalInstrument?.id ? `${RodUrl.instruments}${obligations.legalInstrument.id}` : ''}
             title={resourcesContext.messages['legalInstrument']}
           />
         </div>
