@@ -977,7 +977,7 @@ export const DataViewer = ({
           fieldId,
           dataflowId,
           tableSchemaId: tableId,
-          providerId: dataProviderId ?? 0
+          providerId: dataProviderId
         });
 
         const fullGeometryData = fullGeometryResponse?.data ?? fullGeometryResponse;
@@ -988,7 +988,6 @@ export const DataViewer = ({
       return;
     } finally {
       setIsLoading(false);
-      isOpeningMapRef.current = false;
     }
 
     // Normalize for map display, when it's from fetching full geometry or when it's already in summary form, for backward compatibility with old map behavior
