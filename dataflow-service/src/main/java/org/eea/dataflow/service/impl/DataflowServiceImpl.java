@@ -100,6 +100,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -983,14 +984,21 @@ public class DataflowServiceImpl implements DataflowService {
                 reportnetUrl + "/dataflow/" + dataflowVO.getId()
         );
         // SET REPRESENTATIVES
-        dataflowVO.setRepresentatives(
-                representativeService.getRepresetativesByIdDataFlowAndCountryCode(dataflowVO.getId(), countryCode)
-        );
+        try {
+          dataflowVO.setRepresentatives(
+                  representativeService.getRepresetativesByIdDataFlowAndCountryCode(dataflowVO.getId(), countryCode)
+          );
+        } catch (EEAException | RuntimeException e) {
+          logDataflowEnrichmentError(dataflowVO.getId(), "representatives", e);
+        }
         // SET OBLIGATIONS
-        for (ObligationVO obligation : obligations) {
-          if (dataflowVO.getObligation().getObligationId()
-                  .equals(obligation.getObligationId())) {
-            dataflowVO.setObligation(obligation);
+        Integer obligationId =
+                dataflowVO.getObligation() != null ? dataflowVO.getObligation().getObligationId() : null;
+        if (obligationId != null) {
+          for (ObligationVO obligation : obligations) {
+            if (obligationId.equals(obligation.getObligationId())) {
+              dataflowVO.setObligation(obligation);
+            }
           }
         }
       }
@@ -998,22 +1006,37 @@ public class DataflowServiceImpl implements DataflowService {
       List<DataProviderVO> dataProviderVOs = representativeService.findDataProvidersByCode(countryCode);
       setReportingsAllDataflows(dataflowsVOList, dataProviderVOs);
       dataflowsVOList.stream().forEach(dataflowInternalVO -> {
-        ReportingDatasetVO reportingDatasetVO = dataflowInternalVO.getReportingDatasets().stream().findFirst().get();
+        ReportingDatasetVO reportingDatasetVO = dataflowInternalVO.getReportingDatasets().stream().findFirst().orElse(null);
         if (reportingDatasetVO != null) {
-          List<Date> releasedDates = dataSetSnapshotControllerZuul.historicReleaseDatesAuthorizedByConsul(reportingDatasetVO.getId(), dataflowInternalVO.getId(), key);
-          dataflowInternalVO.setReleasedDates(releasedDates);
+          try {
+            List<Date> releasedDates = dataSetSnapshotControllerZuul.historicReleaseDatesAuthorizedByConsul(reportingDatasetVO.getId(), dataflowInternalVO.getId(), key);
+            dataflowInternalVO.setReleasedDates(releasedDates);
+          } catch (RuntimeException e) {
+            logDataflowEnrichmentError(dataflowInternalVO.getId(), "release dates", e);
+          }
         }
       });
 
       dataflowsVOList.stream().forEach(dataflow -> {
-        dataflow.setReferenceDatasets(referenceDatasetControllerZuul
-                .findReferenceDatasetByDataflowId(dataflow.getId()));
-        dataflow.getObligation().setObligationLink(
-                rodUrl + "/obligations/" + dataflow.getObligation().getObligationId()
-        );
-        dataflow.getObligation().getLegalInstrument().setLegalInstrumentLink(
-                rodUrl + "/instruments/" + dataflow.getObligation().getLegalInstrument().getSourceId()
-        );
+        try {
+          dataflow.setReferenceDatasets(referenceDatasetControllerZuul
+                  .findReferenceDatasetByDataflowId(dataflow.getId()));
+        } catch (RuntimeException e) {
+          logDataflowEnrichmentError(dataflow.getId(), "reference datasets", e);
+          dataflow.setReferenceDatasets(new ArrayList<>());
+        }
+        ObligationVO obligation = dataflow.getObligation();
+        if (obligation == null) {
+          return;
+        }
+        if (obligation.getObligationId() != null) {
+          obligation.setObligationLink(rodUrl + "/obligations/" + obligation.getObligationId());
+        }
+        // the legal instrument is missing when ROD can't return the obligation (e.g. deleted in ROD)
+        if (obligation.getLegalInstrument() != null) {
+          obligation.getLegalInstrument().setLegalInstrumentLink(
+                  rodUrl + "/instruments/" + obligation.getLegalInstrument().getSourceId());
+        }
       });
 
       PaginatedDataflowWithNationalCoordinatorsVO dataflowPaginated = new PaginatedDataflowWithNationalCoordinatorsVO();
@@ -1371,14 +1394,24 @@ public class DataflowServiceImpl implements DataflowService {
   private void setReportingsAllDataflows(List<DataflowInternalVO> dataflowList,
       List<DataProviderVO> dataProviderVOs) {
     dataflowList.stream().forEach(dataflow -> {
-      findObligationDataflow(dataflow);
+      try {
+        findObligationDataflow(dataflow);
+      } catch (RuntimeException e) {
+        // FeignException is already logged inside findObligationDataflow; this covers anything else
+        logDataflowEnrichmentError(dataflow.getId(), "obligation", e);
+      }
       dataflow.setReportingDatasets(new ArrayList<>());
-      List<ReportingDatasetVO> reportings =
-          datasetMetabaseControllerZuul.findReportingDataSetByDataflowId(dataflow.getId());
-      if (!reportings.isEmpty()) {
+      List<ReportingDatasetVO> reportings;
+      try {
+        reportings = datasetMetabaseControllerZuul.findReportingDataSetByDataflowId(dataflow.getId());
+      } catch (RuntimeException e) {
+        logDataflowEnrichmentError(dataflow.getId(), "reporting datasets", e);
+        return; // reportingDatasets stays the empty list set above
+      }
+      if (CollectionUtils.isNotEmpty(reportings)) {
         for (DataProviderVO dataProviderVO : dataProviderVOs) {
           List<ReportingDatasetVO> reportingsProvider =
-              reportings.stream().filter(r -> r.getDataProviderId().equals(dataProviderVO.getId()))
+              reportings.stream().filter(r -> Objects.equals(r.getDataProviderId(), dataProviderVO.getId()))
                   .collect(Collectors.toList());
           if (CollectionUtils.isNotEmpty(reportingsProvider)) {
             dataflow.getReportingDatasets().addAll(reportingsProvider);
@@ -1386,6 +1419,18 @@ public class DataflowServiceImpl implements DataflowService {
         }
       }
     });
+  }
+
+  /**
+   * Logs a per-dataflow enrichment failure; the dataflow is still returned without that data.
+   *
+   * @param dataflowId the dataflow id
+   * @param step the enrichment step that failed
+   * @param e the exception
+   */
+  private void logDataflowEnrichmentError(Long dataflowId, String step, Exception e) {
+    LOG.error("Error enriching dataflow id {} while setting {}, returning it without that data. Cause: {}",
+        dataflowId, step, e.getMessage(), e);
   }
 
   /**
