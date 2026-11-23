@@ -483,3 +483,8 @@
   display: flex;
   line-height:1;
 }
+
+// Big data: only the field whose save is running, so its saving spinner sits on it.
+.fieldWrapperSaving {
+  position: relative;
+}

@@ -28,6 +28,7 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { webformFieldReducer } from './_functions/Reducers/webformFieldReducer';
 
 import { getUrl } from 'repositories/_utils/UrlUtils';
+import { WebformsUtils } from 'views/Webforms/_functions/Utils/WebformsUtils';
 import { RecordUtils } from 'views/_functions/Utils';
 import { WebformRecordUtils } from 'views/Webforms/_components/WebformTable/_components/WebformRecord/_functions/Utils/WebformRecordUtils';
 
@@ -67,6 +68,12 @@ export const WebformField = ({
 
   const inputRef = useRef(null);
   const isMountedRef = useRef(true);
+  // Big data only: value just sent by Tab/Enter, so the blur that follows does not send it again.
+  const sentBeforeBlurRef = useRef(null);
+  // Big data only: true once an option is clicked in the multiselect list, so closing the list without a change sends nothing.
+  const multiSelectChangedRef = useRef(false);
+  // Big data only: where Tab should put the cursor once the save it started has finished.
+  const tabFocusPlanRef = useRef(null);
 
   const [webformFieldState, webformFieldDispatch] = useReducer(webformFieldReducer, {
     initialFieldValue: '',
@@ -305,15 +312,50 @@ export const WebformField = ({
   ]);
 
   const onFocusField = value => {
+    sentBeforeBlurRef.current = null;
     webformFieldDispatch({ type: 'SET_INITIAL_FIELD_VALUE', payload: value });
   };
 
+  const rememberSentBeforeBlur = value => {
+    if (bigData) sentBeforeBlurRef.current = value;
+  };
+
+  // True when the blur would send exactly what Tab/Enter has just sent.
+  const isAlreadySentBeforeBlur = value => {
+    const isAlreadySent = bigData && !isNil(sentBeforeBlurRef.current) && sentBeforeBlurRef.current === value;
+    sentBeforeBlurRef.current = null;
+    return isAlreadySent;
+  };
+
+  // True when the multiselect list closes on big data without any option clicked since the last save.
+  const isMultiSelectUnchanged = () => {
+    const isUnchanged = bigData && !multiSelectChangedRef.current;
+    multiSelectChangedRef.current = false;
+    return isUnchanged;
+  };
+
+  // True when the field was empty when it got focus and is still empty (big data only), so nothing is sent.
+  const isStillEmpty = value => bigData && value === '' && initialFieldValue === '';
+
+  // Big data: while a save runs, text fields are read-only instead of disabled, so the cursor can stay in them or move
+  // with Tab as usual; nothing new is saved from them until the save ends.
+  const isFormLocked = () => bigData && updatingField.isUpdating;
+
   const onEditorKeyChange = (event, field, option) => {
+    if (isFormLocked()) return;
     if (event.key === 'Escape') {
     } else if (event.key === 'Enter') {
+      if (isStillEmpty(event.target.value)) return;
+      rememberSentBeforeBlur(event.target.value);
       onEditorSubmitValue(field, option, event.target.value);
     } else if (event.key === 'Tab') {
+      if (isStillEmpty(event.target.value)) return;
+      rememberSentBeforeBlur(event.target.value);
+      const tabFocusPlan = bigData ? WebformsUtils.createTabFocusPlan(event.target, event.shiftKey) : null;
+      tabFocusPlanRef.current = tabFocusPlan;
       onEditorSubmitValue(field, option, event.target.value);
+      // Big data: when this Tab starts a save, the cursor stays here until it ends, then moves on.
+      if (tabFocusPlan?.isSaveSent) event.preventDefault();
     }
   };
 
@@ -426,9 +468,15 @@ export const WebformField = ({
         ? value.join(';')
         : value;
 
+    const tabFocusPlan = tabFocusPlanRef.current;
+    tabFocusPlanRef.current = null;
+    let isSaveSent = false;
+
     try {
       if ((!isSubmiting && initialFieldValue !== parsedValue) || parsedValue === '') {
         bigData && onFieldUpdate(true, field);
+        isSaveSent = true;
+        if (tabFocusPlan) tabFocusPlan.isSaveSent = true;
         if (!isNil(conditionalFields) && !isNil(parsedValues)) {
           await DatasetService.updateConditionalFieldsWebform(
             datasetId,
@@ -444,6 +492,8 @@ export const WebformField = ({
             bigData ? (referencedTableSchemaId ? referencedTableSchemaId : tableSchemaId) : tableSchemaId
           );
         }
+        // Big data: the cursor can stay in the field after a save, so the saved value is the new "unchanged" baseline.
+        bigData && webformFieldDispatch({ type: 'SET_INITIAL_FIELD_VALUE', payload: parsedValue });
       }
     } catch (error) {
       if (error.response.status === 423) {
@@ -459,7 +509,9 @@ export const WebformField = ({
         }
       }
     } finally {
-      bigData && onFieldUpdate(false);
+      bigData && onFieldUpdate(false, field);
+      if (isSaveSent) WebformsUtils.applyTabFocusPlan(tabFocusPlan);
+      else WebformsUtils.cancelTabFocusPlan(tabFocusPlan);
       webformFieldDispatch({ type: 'SET_IS_SUBMITING', payload: false });
     }
   };
@@ -525,7 +577,7 @@ export const WebformField = ({
           <Calendar
             appendTo={document.body}
             dateFormat="yy-mm-dd"
-            disabled={field?.readOnly || isViewMode || (updatingField.isUpdating && !isEmpty(field.value))}
+            disabled={field?.readOnly || isViewMode || updatingField.isUpdating}
             id={field.fieldId || field.fieldSchemaId}
             isLoadingData={
               !isEmpty(field.value) &&
@@ -559,9 +611,7 @@ export const WebformField = ({
           <div className={styles.datetimeWrapper}>
             {isTimezoneCalendarVisible ? (
               <TimezoneCalendar
-                isDisabled={
-                  field?.readOnly || isViewMode || isLoadingData || (updatingField.isUpdating && !isEmpty(field.value))
-                }
+                isDisabled={field?.readOnly || isViewMode || isLoadingData || updatingField.isUpdating}
                 isLoadingData={
                   !isEmpty(field.value) &&
                   updatingField.isUpdating &&
@@ -584,7 +634,7 @@ export const WebformField = ({
             ) : (
               <div className={styles.inputWrapper}>
                 <InputText
-                  disabled={field?.readOnly || isViewMode || (updatingField.isUpdating && !isEmpty(field.value))}
+                  disabled={field?.readOnly || isViewMode || updatingField.isUpdating}
                   onFocus={e => {
                     setIsTimezoneCalendarVisible(true);
                   }}
@@ -626,11 +676,13 @@ export const WebformField = ({
               }
               maxSelectedLabels={10}
               onChange={() => {
+                if (isMultiSelectUnchanged()) return;
                 if (isNil(field.recordId)) onSaveField(option, field.value);
                 else onEditorSubmitValue(field, option, field.value);
               }}
               onFilterInputChangeBackend={filter => onFilter(filter, field)}
               onUpdate={event => {
+                multiSelectChangedRef.current = true;
                 onFillField(field, option, event.target.value);
               }}
               optionLabel="itemType"
@@ -703,6 +755,7 @@ export const WebformField = ({
             onChange={() => {
               onFillField(field, option, field.value);
 
+              if (isMultiSelectUnchanged()) return;
               if (isNil(field.recordId)) {
                 onSaveField(option, field.value);
               } else {
@@ -710,6 +763,7 @@ export const WebformField = ({
               }
             }}
             onUpdate={event => {
+              multiSelectChangedRef.current = true;
               onFillField(field, option, event.target.value);
             }}
             options={field.codelistItems.map(codelist => ({ label: codelist, value: codelist }))}
@@ -769,14 +823,14 @@ export const WebformField = ({
         return (
           <InputText
             characterCounterStyles={{ marginBottom: 0 }}
+            className={isFormLocked() ? 'p-disabled' : undefined}
             disabled={
               field?.readOnly ||
               isSubTableCreated ||
               field.fieldSchema === rootPkFieldId ||
               field.fieldSchemaId === rootPkFieldId ||
               field.autoIncrement ||
-              isViewMode ||
-              updatingField.isUpdating
+              isViewMode
             }
             hasErrors={hasErrors}
             hasMaxCharCounter
@@ -791,7 +845,12 @@ export const WebformField = ({
             keyfilter={RecordUtils.getFilter(type)}
             onBlur={event => {
               if (isNil(field.recordId)) onSaveField(option, event.target.value);
-              else onEditorSubmitValue(field, option, event.target.value, field.isPrimary || false);
+              else if (
+                !isAlreadySentBeforeBlur(event.target.value) &&
+                !isStillEmpty(event.target.value) &&
+                !isFormLocked()
+              )
+                onEditorSubmitValue(field, option, event.target.value, field.isPrimary || false);
             }}
             onChange={event => {
               const editedField = { ...field, value: event.target.value };
@@ -799,6 +858,7 @@ export const WebformField = ({
             }}
             onFocus={event => onFocusField(event.target.value)}
             onKeyDown={event => onEditorKeyChange(event, field, option)}
+            readOnly={isFormLocked()}
             ref={inputRef}
             value={field.value ?? undefined}
           />
@@ -810,9 +870,9 @@ export const WebformField = ({
               autoResize={true}
               className={`${field.required ? styles.required : undefined} ${
                 webformType === 'ENTITIES' ? `resizable` : ''
-              }`}
+              }${isFormLocked() ? ' p-disabled' : ''}`}
               collapsedHeight={150}
-              disabled={field?.readOnly || isViewMode || updatingField.isUpdating}
+              disabled={field?.readOnly || isViewMode}
               displayedHeight={1200}
               expandableOnDoubleClick={true}
               hasErrors={hasErrors}
@@ -826,7 +886,12 @@ export const WebformField = ({
               }
               onBlur={event => {
                 if (isNil(field.recordId)) onSaveField(option, event.target.value);
-                else onEditorSubmitValue(field, option, event.target.value);
+                else if (
+                  !isAlreadySentBeforeBlur(event.target.value) &&
+                  !isStillEmpty(event.target.value) &&
+                  !isFormLocked()
+                )
+                  onEditorSubmitValue(field, option, event.target.value);
               }}
               onChange={event => onFillField(field, option, event.target.value)}
               onFocus={event => onFocusField(event.target.value)}
@@ -835,6 +900,7 @@ export const WebformField = ({
                   onEditorKeyChange(event, field, option);
                 }
               }}
+              readOnly={isFormLocked()}
               value={field.value ?? undefined}
             />
             <CharacterCounter

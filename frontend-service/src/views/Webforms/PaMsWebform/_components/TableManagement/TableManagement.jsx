@@ -330,12 +330,14 @@ export const TableManagement = ({
 
   const onSaveRecord = async record => {
     const updateInCascade = true;
+    // Big data needs the table of the edited row (the PaMs table), as in onDeleteRow; non-big ignores it.
+    const pamsTableId = schemaTables.find(table => table.tableSchemaName === 'PaMs')?.tableSchemaId;
     record.dataRow = record.dataRow.filter(
       field => !['datasetPartitionId', 'id'].includes(Object.keys(field.fieldData)[0])
     );
     try {
       tableManagementDispatch({ type: 'SET_IS_SAVING', payload: true });
-      await DatasetService.updateRecord({ datasetId, record, updateInCascade });
+      await DatasetService.updateRecord({ datasetId, record, tableSchemaId: pamsTableId, updateInCascade });
     } catch (error) {
       console.error('TableManagement - onSaveRecord.', error);
       const {

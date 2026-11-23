@@ -1,4 +1,4 @@
-import { useContext, useEffect, useReducer, useState } from 'react';
+import { useContext, useEffect, useReducer, useRef, useState } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
@@ -36,6 +36,7 @@ export const PaMsWebformTable = ({
   isRefresh,
   isReporting,
   isTableWebform = false,
+  onIsUpdatingChange = () => {},
   onTabChange,
   onUpdatePamsValue,
   onUpdateSinglesList,
@@ -71,6 +72,18 @@ export const PaMsWebformTable = ({
 
   const [isSticky, setIsSticky] = useState(false);
   const [allManualCheck, setAllManualCheck] = useState(true);
+  // Big data only: the form is disabled while a save runs, as in the ENTITIES webform.
+  const [updatingField, setUpdatingField] = useState({ field: null, isUpdating: false });
+  const updatingFieldOwnerRef = useRef(null);
+
+  const onFieldUpdate = (isFieldUpdating, field) => {
+    // Only the save that locked the form may unlock it, so an earlier save finishing cannot unlock it too soon.
+    if (!isFieldUpdating && updatingFieldOwnerRef.current !== (field ?? null)) return;
+    updatingFieldOwnerRef.current = isFieldUpdating ? field ?? null : null;
+    setUpdatingField({ field, isUpdating: isFieldUpdating });
+    // PAMS: lets the PaMs list disable its add buttons too.
+    onIsUpdatingChange(isFieldUpdating);
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -178,6 +191,7 @@ export const PaMsWebformTable = ({
 
     if (!isEmpty(newEmptyRecord)) {
       try {
+        bigData && onFieldUpdate(true);
         await DatasetService.createRecord(datasetId, tableSchemaId, [newEmptyRecord]);
         onUpdateData();
       } catch (error) {
@@ -207,6 +221,8 @@ export const PaMsWebformTable = ({
           type: 'SET_IS_ADDING_MULTIPLE',
           payload: { addingOnTableSchemaId: null, isAddingMultiple: false }
         });
+      } finally {
+        bigData && onFieldUpdate(false);
       }
     }
   };
@@ -321,6 +337,7 @@ export const PaMsWebformTable = ({
       key={index}
       multipleRecords={webformData.multipleRecords}
       onAddMultipleWebform={onAddMultipleWebform}
+      onFieldUpdate={onFieldUpdate}
       onRefresh={onUpdateData}
       onTabChange={onTabChange}
       onUpdatePamsValue={onUpdatePamsValue}
@@ -331,6 +348,7 @@ export const PaMsWebformTable = ({
       tableId={webformData.tableSchemaId}
       tableName={webformData.title}
       tableSchemaName={webformData.name}
+      updatingField={updatingField}
       webformType={webformType}
     />
   );
@@ -395,6 +413,7 @@ export const PaMsWebformTable = ({
           <h3 className={styles.title}>
             <Button
               className={styles.addRecordButton}
+              disabled={updatingField.isUpdating}
               icon="plus"
               label={resourcesContext.messages['addRecord']}
               onClick={() => onAddMultipleWebform(webformData.tableSchemaId, null, true)}

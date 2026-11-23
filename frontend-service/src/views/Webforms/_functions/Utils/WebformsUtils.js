@@ -564,7 +564,102 @@ const parseRecordValidations = record => {
   return arrayDataAndValidations;
 };
 
+// Big data webforms: a Tab that starts a save keeps the cursor in the saved field while the form is greyed out, and the
+// plan moves it to the control Tab should reach when the save ends. It stays in the saved field if that control is no
+// longer the field's neighbour (a control appeared or disappeared between them, e.g. a conditional field, or either of
+// them was re-created). If the reporter moves the cursor during the save, that element is kept instead.
+const FOCUSABLE_CONTROLS = 'input, textarea, select, button, a[href], [tabindex]:not([tabindex="-1"])';
+
+const getFocusableControls = container =>
+  [...container.querySelectorAll(FOCUSABLE_CONTROLS)].filter(
+    control => !control.disabled && control.tabIndex !== -1 && control.getClientRects().length > 0
+  );
+
+const createTabFocusPlan = (field, isBackwards) => {
+  const container = field?.closest('[class*="WebformTable_"]');
+  if (isNil(container)) return null;
+
+  const controls = getFocusableControls(container);
+  const index = controls.indexOf(field);
+  if (index === -1) return null;
+
+  // First / last control of the table: no plan, so Tab leaves the field at once, as in production.
+  const target = controls[isBackwards ? index - 1 : index + 1];
+  if (isNil(target)) return null;
+
+  const plan = {
+    container,
+    field,
+    isBackwards,
+    isSaveSent: false,
+    target,
+    userTarget: null
+  };
+  // The cursor stays in the saved field during the save, so any move meanwhile is the reporter's.
+  plan.onFocusIn = event => {
+    plan.userTarget = event.target;
+  };
+  document.addEventListener('focusin', plan.onFocusIn);
+
+  return plan;
+};
+
+const cancelTabFocusPlan = plan => {
+  if (!isNil(plan)) document.removeEventListener('focusin', plan.onFocusIn);
+};
+
+const applyTabFocusPlan = plan => {
+  if (isNil(plan)) return;
+  cancelTabFocusPlan(plan);
+
+  // Runs after the form has re-rendered without the grey-out.
+  setTimeout(() => {
+    const target = plan.userTarget ?? plan.target;
+    if (isNil(target) || !target.isConnected || target.disabled || document.activeElement === target) return;
+
+    if (isNil(plan.userTarget)) {
+      if (!plan.container.isConnected) return;
+      const controls = getFocusableControls(plan.container);
+      const index = controls.indexOf(plan.field);
+      const isStillNeighbour = index !== -1 && controls[plan.isBackwards ? index - 1 : index + 1] === target;
+      if (!isStillNeighbour) return;
+    }
+
+    target.focus();
+  }, 0);
+};
+
+// QA webform, big data: the "save running" state shared by all fields of the form. QA re-creates its tables and
+// records on every re-render, so the state is kept outside React state and only the fields subscribe to it.
+// Same rules as the other webform types: a new save takes the lock; only the save that holds it can release it.
+const createUpdatingFieldStore = () => {
+  let state = { field: null, isUpdating: false };
+  const listeners = new Set();
+  const notify = () => listeners.forEach(listener => listener(state));
+
+  return {
+    getState: () => state,
+    lock: field => {
+      state = { field, isUpdating: true };
+      notify();
+    },
+    subscribe: listener => {
+      listeners.add(listener);
+      return () => listeners.delete(listener);
+    },
+    unlock: field => {
+      if (state.field !== field) return;
+      state = { field: null, isUpdating: false };
+      notify();
+    }
+  };
+};
+
 export const WebformsUtils = {
+  applyTabFocusPlan,
+  cancelTabFocusPlan,
+  createTabFocusPlan,
+  createUpdatingFieldStore,
   getPamsWebformTabs,
   getWebformTabs,
   mergeArrays,

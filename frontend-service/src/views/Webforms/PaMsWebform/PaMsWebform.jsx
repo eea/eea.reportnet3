@@ -51,6 +51,8 @@ export const PaMsWebform = ({
   const resourcesContext = useContext(ResourcesContext);
   const [hasLoadedPams, setHasLoadedPams] = useState(false);
   const [refreshTableTrigger, setRefreshTableTrigger] = useState(0);
+  // Big data only: true while a save in the PaM details runs, so the add buttons wait, as in the ENTITIES webform.
+  const [isUpdatingField, setIsUpdatingField] = useState(false);
 
   const [paMsWebformState, paMsWebformDispatch] = useReducer(paMsWebformReducer, {
     data: [],
@@ -353,6 +355,8 @@ export const PaMsWebform = ({
     return (
       <div className={styles.overviewButton}>
         <Button
+          // Big data: leaving the PaM while its save runs would let the list start another save on the same record.
+          disabled={isUpdatingField}
           label={resourcesContext.messages['overview']}
           onClick={() => {
             onToggleView('overview');
@@ -380,6 +384,7 @@ export const PaMsWebform = ({
           isLoadingIceberg={isLoadingIceberg}
           isRefresh={paMsWebformState.isRefresh}
           isReporting={isReporting}
+          onIsUpdatingChange={setIsUpdatingField}
           onUpdatePamsValue={onUpdatePamsValue}
           pamsRecords={pamsRecords}
           preparationCode={preparationCode}
@@ -474,7 +479,8 @@ export const PaMsWebform = ({
                   !isEditor ||
                   paMsWebformState.isAddingSingleRecord ||
                   paMsWebformState.isAddingGroupRecord ||
-                  isReleasing
+                  isReleasing ||
+                  isUpdatingField
                 }
                 icon={
                   list === 'single'

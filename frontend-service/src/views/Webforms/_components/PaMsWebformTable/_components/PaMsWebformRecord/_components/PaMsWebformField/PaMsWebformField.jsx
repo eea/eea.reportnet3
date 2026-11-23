@@ -27,6 +27,7 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { pamsWebformFieldReducer } from './_functions/Reducers/pamsWebformFieldReducer';
 
 import { getUrl } from 'repositories/_utils/UrlUtils';
+import { WebformsUtils } from 'views/Webforms/_functions/Utils/WebformsUtils';
 import { PaMsUtils } from './_functions/Utils/PaMsUtils';
 import { RecordUtils } from 'views/_functions/Utils';
 import { PaMsWebformRecordUtils } from 'views/Webforms/_components/PaMsWebformTable/_components/PaMsWebformRecord/_functions/Utils/PaMsWebformRecordUtils';
@@ -50,6 +51,7 @@ export const PaMsWebformField = ({
   isConditionalChanged,
   isDependantConditionalField,
   newRecord,
+  onFieldUpdate = () => {},
   onFillField,
   onSaveField,
   onUpdateSinglesList,
@@ -59,7 +61,8 @@ export const PaMsWebformField = ({
   record,
   referencedTableSchemaId,
   tableSchemaId,
-  tableSchemaName
+  tableSchemaName,
+  updatingField = { field: null, isUpdating: false }
 }) => {
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
@@ -67,6 +70,12 @@ export const PaMsWebformField = ({
 
   const inputRef = useRef(null);
   const isMountedRef = useRef(true);
+  // Big data only: value just sent by Tab/Enter or a date selection, so the blur that follows does not send it again.
+  const sentBeforeBlurRef = useRef(null);
+  // Big data only: true once an option is clicked in the multiselect list, so closing the list without a change sends nothing.
+  const multiSelectChangedRef = useRef(false);
+  // Big data only: where Tab should put the cursor once the save it started has finished.
+  const tabFocusPlanRef = useRef(null);
 
   const [pamsWebformFieldState, pamsWebformFieldDispatch] = useReducer(pamsWebformFieldReducer, {
     initialFieldValue: '',
@@ -108,6 +117,14 @@ export const PaMsWebformField = ({
   const { formatDate, formatDateTime, getMultiselectValues } = PaMsWebformRecordUtils;
 
   const { getObjectiveOptions } = PaMsUtils;
+
+  // Same check as the ENTITIES webform: is this the field whose save is running?
+  const isFieldBeingSaved = field =>
+    updatingField.isUpdating &&
+    field.recordId === updatingField.field?.recordId &&
+    [field.fieldSchemaId, field.fieldSchema, field.fieldId].includes(
+      updatingField.field?.fieldSchemaId ?? updatingField.field?.fieldSchema ?? updatingField.field?.fieldId
+    );
 
   useEffect(() => {
     return () => {
@@ -260,15 +277,50 @@ export const PaMsWebformField = ({
   );
 
   const onFocusField = value => {
+    sentBeforeBlurRef.current = null;
     pamsWebformFieldDispatch({ type: 'SET_INITIAL_FIELD_VALUE', payload: value });
   };
 
+  const rememberSentBeforeBlur = value => {
+    if (bigData) sentBeforeBlurRef.current = value;
+  };
+
+  // True when the blur would send exactly what Tab/Enter or the date selection has just sent.
+  const isAlreadySentBeforeBlur = value => {
+    const isAlreadySent = bigData && !isNil(sentBeforeBlurRef.current) && sentBeforeBlurRef.current === value;
+    sentBeforeBlurRef.current = null;
+    return isAlreadySent;
+  };
+
+  // True when the multiselect list closes on big data without any option clicked since the last save.
+  const isMultiSelectUnchanged = () => {
+    const isUnchanged = bigData && !multiSelectChangedRef.current;
+    multiSelectChangedRef.current = false;
+    return isUnchanged;
+  };
+
+  // True when the field was empty when it got focus and is still empty (big data only), so nothing is sent.
+  const isStillEmpty = value => bigData && value === '' && initialFieldValue === '';
+
+  // Big data: while a save runs, text fields are read-only instead of disabled, so the cursor can stay in them or move
+  // with Tab as usual; nothing new is saved from them until the save ends.
+  const isFormLocked = () => bigData && updatingField.isUpdating;
+
   const onEditorKeyChange = (event, field, option) => {
+    if (isFormLocked()) return;
     if (event.key === 'Escape') {
     } else if (event.key === 'Enter') {
+      if (isStillEmpty(event.target.value)) return;
+      rememberSentBeforeBlur(event.target.value);
       onEditorSubmitValue(field, option, event.target.value);
     } else if (event.key === 'Tab') {
+      if (isStillEmpty(event.target.value)) return;
+      rememberSentBeforeBlur(event.target.value);
+      const tabFocusPlan = bigData ? WebformsUtils.createTabFocusPlan(event.target, event.shiftKey) : null;
+      tabFocusPlanRef.current = tabFocusPlan;
       onEditorSubmitValue(field, option, event.target.value);
+      // Big data: when this Tab starts a save, the cursor stays here until it ends, then moves on.
+      if (tabFocusPlan?.isSaveSent) event.preventDefault();
     }
   };
 
@@ -316,8 +368,15 @@ export const PaMsWebformField = ({
         ? value.join(';')
         : value;
 
+    const tabFocusPlan = tabFocusPlanRef.current;
+    tabFocusPlanRef.current = null;
+    let isSaveSent = false;
+
     try {
       if ((!isSubmiting && initialFieldValue !== parsedValue) || parsedValue === '') {
+        bigData && onFieldUpdate(true, field);
+        isSaveSent = true;
+        if (tabFocusPlan) tabFocusPlan.isSaveSent = true;
         if (!isNil(conditionalFields) && !isNil(parsedValues)) {
           await DatasetService.updateConditionalFieldsWebform(
             datasetId,
@@ -333,6 +392,8 @@ export const PaMsWebformField = ({
             bigData ? (referencedTableSchemaId ? referencedTableSchemaId : tableSchemaId) : tableSchemaId
           );
         }
+        // Big data: the cursor can stay in the field after a save, so the saved value is the new "unchanged" baseline.
+        bigData && pamsWebformFieldDispatch({ type: 'SET_INITIAL_FIELD_VALUE', payload: parsedValue });
 
         if (!isNil(onUpdateSinglesList) && field?.updatesSingleListData) {
           onUpdateSinglesList();
@@ -352,6 +413,9 @@ export const PaMsWebformField = ({
         }
       }
     } finally {
+      bigData && onFieldUpdate(false, field);
+      if (isSaveSent) WebformsUtils.applyTabFocusPlan(tabFocusPlan);
+      else WebformsUtils.cancelTabFocusPlan(tabFocusPlan);
       pamsWebformFieldDispatch({ type: 'SET_IS_SUBMITING', payload: false });
     }
   };
@@ -427,12 +491,15 @@ export const PaMsWebformField = ({
           <Calendar
             appendTo={document.body}
             dateFormat="yy-mm-dd"
-            disabled={field?.readOnly}
+            disabled={field?.readOnly || updatingField.isUpdating}
             id={field.fieldId || field.fieldSchemaId}
+            isLoadingData={!isEmpty(field.value) && isFieldBeingSaved(field)}
             monthNavigator={true}
             onBlur={event => {
-              if (isNil(field.recordId)) onSaveField(option, formatDate(event.target.value, isNil(event.target.value)));
-              else onEditorSubmitValue(field, option, formatDate(event.target.value, isNil(event.target.value)));
+              const blurValue = formatDate(event.target.value, isNil(event.target.value));
+              if (isNil(field.recordId)) onSaveField(option, blurValue);
+              else if (!isAlreadySentBeforeBlur(blurValue) && !isStillEmpty(blurValue))
+                onEditorSubmitValue(field, option, blurValue);
             }}
             onChange={event => onFillField(field, option, formatDate(event.target.value, isNil(event.target.value)))}
             onFocus={event => {
@@ -441,6 +508,7 @@ export const PaMsWebformField = ({
             }}
             onSelect={event => {
               onFillField(field, option, formatDate(event.value, isNil(event.value)));
+              rememberSentBeforeBlur(formatDate(event.value, isNil(event.value)));
               onEditorSubmitValue(field, option, formatDate(event.value, isNil(event.value)));
             }}
             readOnlyInput={true}
@@ -454,8 +522,9 @@ export const PaMsWebformField = ({
           <Calendar
             appendTo={document.body}
             dateFormat="yy-mm-dd"
-            disabled={field?.readOnly}
+            disabled={field?.readOnly || updatingField.isUpdating}
             id={field.fieldId || field.fieldSchemaId}
+            isLoadingData={!isEmpty(field.value) && isFieldBeingSaved(field)}
             monthNavigator={true}
             onBlur={e => {
               if (isNil(field.recordId)) onSaveField(option, formatDate(e.value, isNil(e.value)));
@@ -503,17 +572,19 @@ export const PaMsWebformField = ({
               appendTo={document.body}
               clearButton={false}
               currentValue={field.value}
-              disabled={field?.readOnly || isLoadingData}
+              disabled={field?.readOnly || isLoadingData || updatingField.isUpdating}
               filter={true}
               filterPlaceholder={resourcesContext.messages['linkFilterPlaceholder']}
-              isLoadingData={isLoadingData}
+              isLoadingData={isLoadingData || isFieldBeingSaved(field)}
               maxSelectedLabels={10}
               onChange={() => {
+                if (isMultiSelectUnchanged()) return;
                 if (isNil(field.recordId)) onSaveField(option, field.value);
                 else onEditorSubmitValue(field, option, field.value);
               }}
               onFilterInputChangeBackend={filter => onFilter(filter, field)}
               onUpdate={event => {
+                multiSelectChangedRef.current = true;
                 onFillField(field, option, event.target.value, isConditional);
               }}
               optionLabel="itemType"
@@ -550,10 +621,10 @@ export const PaMsWebformField = ({
             <DropdownWebform
               appendTo={document.body}
               currentValue={!isNil(selectedValue) ? selectedValue.value : ''}
-              disabled={field?.readOnly || isLoadingData}
+              disabled={field?.readOnly || isLoadingData || updatingField.isUpdating}
               filter={true}
               filterPlaceholder={resourcesContext.messages['linkFilterPlaceholder']}
-              isLoadingData={isLoadingData}
+              isLoadingData={isLoadingData || isFieldBeingSaved(field)}
               onChange={event => {
                 const value =
                   typeof event.target?.value === 'object' && !Array.isArray(event.target.value)
@@ -581,17 +652,20 @@ export const PaMsWebformField = ({
         return (
           <MultiSelectWebform
             appendTo={document.body}
-            disabled={field?.readOnly}
+            disabled={field?.readOnly || updatingField.isUpdating}
             filter={true}
             filterPlaceholder={resourcesContext.messages['linkFilterPlaceholder']}
             id={field.fieldId || field.fieldSchemaId}
+            isLoadingData={isFieldBeingSaved(field)}
             itemTemplate={TextUtils.areEquals(field.name, 'ListOfSinglePams') ? renderSinglePamsTemplate : null}
             maxSelectedLabels={10}
             onChange={() => {
+              if (isMultiSelectUnchanged()) return;
               if (isNil(field.recordId)) onSaveField(option, field.value);
               else onEditorSubmitValue(field, option, field.value);
             }}
             onUpdate={event => {
+              multiSelectChangedRef.current = true;
               onFillField(field, option, event.target.value);
             }}
             options={
@@ -614,9 +688,9 @@ export const PaMsWebformField = ({
           <DropdownWebform
             appendTo={document.body}
             currentValue={!isNil(selectedValue) ? selectedValue.value : ''}
-            disabled={field?.readOnly || isLoadingData}
+            disabled={field?.readOnly || isLoadingData || updatingField.isUpdating}
             id={field.fieldId}
-            isLoadingData={isLoadingData}
+            isLoadingData={isLoadingData || isFieldBeingSaved(field)}
             onChange={event => {
               const value =
                 typeof event.target?.value === 'object' && !Array.isArray(event.target.value)
@@ -669,14 +743,20 @@ export const PaMsWebformField = ({
         return (
           <InputText
             characterCounterStyles={{ marginBottom: 0 }}
+            className={isFormLocked() ? 'p-disabled' : undefined}
             disabled={field?.readOnly}
             hasErrors={hasErrors}
             hasMaxCharCounter
             id={field.fieldId || field.fieldSchemaId}
+            isLoadingData={isFieldBeingSaved(field)}
             keyfilter={RecordUtils.getFilter(type)}
             onBlur={event => {
               if (isNil(field.recordId)) onSaveField(option, event.target.value);
-              else
+              else if (
+                !isAlreadySentBeforeBlur(event.target.value) &&
+                !isStillEmpty(event.target.value) &&
+                !isFormLocked()
+              )
                 onEditorSubmitValue(
                   field,
                   option,
@@ -691,6 +771,7 @@ export const PaMsWebformField = ({
             }}
             onFocus={event => onFocusField(event.target.value)}
             onKeyDown={event => onEditorKeyChange(event, field, option)}
+            readOnly={isFormLocked()}
             ref={inputRef}
             value={field.value}
           />
@@ -699,18 +780,33 @@ export const PaMsWebformField = ({
         return (
           <Fragment>
             <InputTextarea
-              className={field.required ? styles.required : undefined}
+              className={
+                [field.required ? styles.required : undefined, isFormLocked() ? 'p-disabled' : undefined]
+                  .filter(Boolean)
+                  .join(' ') || undefined
+              }
               collapsedHeight={150}
               disabled={field?.readOnly}
               hasErrors={hasErrors}
               id={field.fieldId || field.fieldSchemaId}
+              isLoadingData={isFieldBeingSaved(field)}
               onBlur={event => {
                 if (isNil(field.recordId)) onSaveField(option, event.target.value);
-                else onEditorSubmitValue(field, option, event.target.value);
+                else if (
+                  !isAlreadySentBeforeBlur(event.target.value) &&
+                  !isStillEmpty(event.target.value) &&
+                  !isFormLocked()
+                )
+                  onEditorSubmitValue(field, option, event.target.value);
               }}
               onChange={event => onFillField(field, option, event.target.value)}
               onFocus={event => onFocusField(event.target.value)}
-              onKeyDown={event => onEditorKeyChange(event, field, option)}
+              onKeyDown={event => {
+                // Big data: Enter only adds a line break, as before the grey-out; the text is saved on Tab or blur.
+                if (bigData && event.key === 'Enter') return;
+                onEditorKeyChange(event, field, option);
+              }}
+              readOnly={isFormLocked()}
               value={field.value}
             />
             <CharacterCounter
@@ -758,6 +854,7 @@ export const PaMsWebformField = ({
             {
               <Button
                 className="p-button-animated-blink p-button-primary-transparent"
+                disabled={updatingField.isUpdating}
                 icon="import"
                 label={
                   !isNil(field.value) && field.value !== ''
@@ -780,6 +877,7 @@ export const PaMsWebformField = ({
 
             <Button
               className="p-button-animated-blink p-button-primary-transparent"
+              disabled={updatingField.isUpdating}
               icon="trash"
               onClick={() =>
                 onFileDeleteVisible(field.value, field.name, field.recordId, field.fieldId, field.fieldSchemaId)
