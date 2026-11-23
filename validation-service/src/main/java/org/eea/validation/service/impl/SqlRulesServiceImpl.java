@@ -1456,7 +1456,8 @@ public class SqlRulesServiceImpl implements SqlRulesService {
         tableResolver.setPreparationCode(preparationCode);
       }
       String tablePathS3 = s3Service.getTablePathByDatasetType(dataSetMetabase.getDataflowId(), dataSetMetabase.getId(), table, tableResolver);
-      sqlCode = sqlCode.replace(pathToReplace, tablePathS3);
+      // replace only whole table names, so dataset_X.Table does not match the prefix of dataset_X.TableSuffix
+      sqlCode = sqlCode.replaceAll(Pattern.quote(pathToReplace) + "(?![A-Za-z0-9_])", Matcher.quoteReplacement(tablePathS3));
       datasetOccurrences = findOccurrence(sqlCode, DATASET);
     }
     return sqlCode;
