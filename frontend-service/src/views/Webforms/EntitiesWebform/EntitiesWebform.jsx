@@ -81,6 +81,8 @@ export const EntitiesWebform = ({
   const { isDataUpdated, isLoading, entitiesRecords, selectedTable, entitiesList, view } = entitiesWebformState;
 
   const addEntityInputRef = useRef(null);
+  // The field whose save locked the form (null for a lock without a field, e.g. adding a record).
+  const updatingFieldOwnerRef = useRef(null);
 
   useEffect(() => initialLoad(), [tables]);
 
@@ -406,6 +408,9 @@ export const EntitiesWebform = ({
   };
 
   const onFieldUpdate = (isFieldUpdating, field) => {
+    // Only the save that locked the form may unlock it, so an earlier save finishing cannot unlock it too soon.
+    if (!isFieldUpdating && updatingFieldOwnerRef.current !== (field ?? null)) return;
+    updatingFieldOwnerRef.current = isFieldUpdating ? field ?? null : null;
     entitiesWebformDispatch({
       type: 'SET_IS_UPDATING_FIELD',
       payload: {
@@ -482,6 +487,8 @@ export const EntitiesWebform = ({
     return (
       <div className={styles.overviewButton}>
         <Button
+          // Big data: leaving the entity while its save runs would let the list delete it during the save.
+          disabled={entitiesWebformState.updatingField.isUpdating}
           label={resourcesContext.messages['overview']}
           onClick={() => {
             onToggleView('overview');
@@ -650,7 +657,11 @@ export const EntitiesWebform = ({
           <Button
             className={styles.addButton}
             disabled={
-              !isEditor || entitiesWebformState.isAddingEntityRecord || isReleasing || entitiesWebformState.isViewMode
+              !isEditor ||
+              entitiesWebformState.isAddingEntityRecord ||
+              isReleasing ||
+              entitiesWebformState.isViewMode ||
+              entitiesWebformState.updatingField.isUpdating
             }
             icon={entitiesWebformState.isAddingEntityRecord ? 'spinnerAnimate' : 'add'}
             label={resourcesContext.messages['addEntity']}
@@ -710,7 +721,8 @@ export const EntitiesWebform = ({
                     !isEditor ||
                     entitiesWebformState.isAddingEntityRecord ||
                     isReleasing ||
-                    entitiesWebformState.isViewMode
+                    entitiesWebformState.isViewMode ||
+                    entitiesWebformState.updatingField.isUpdating
                   }
                   icon={entitiesWebformState.isAddingEntityRecord ? 'spinnerAnimate' : 'add'}
                   label={resourcesContext.messages['addEntity']}

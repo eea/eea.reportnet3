@@ -73,6 +73,7 @@ export const PaMsWebformRecord = ({
   isTableWebform,
   multipleRecords,
   onAddMultipleWebform,
+  onFieldUpdate = () => {},
   onRefresh,
   onTabChange,
   onUpdatePamsValue,
@@ -85,6 +86,7 @@ export const PaMsWebformRecord = ({
   tableId,
   tableName,
   tableSchemaName,
+  updatingField = { field: null, isUpdating: false },
   webformType
 }) => {
   const notificationContext = useContext(NotificationContext);
@@ -166,6 +168,15 @@ export const PaMsWebformRecord = ({
       console.error('PaMsWebformRecord - onSaveField.', error);
     }
   };
+
+  // Big data: is this the field whose save is running? (same check as in PaMsWebformField)
+  const isElementBeingSaved = element =>
+    bigData &&
+    updatingField.isUpdating &&
+    element.recordId === updatingField.field?.recordId &&
+    [element.fieldSchemaId, element.fieldSchema, element.fieldId].includes(
+      updatingField.field?.fieldSchemaId ?? updatingField.field?.fieldSchema ?? updatingField.field?.fieldId
+    );
 
   const onToggleFieldVisibility = (dependency, fields = []) => {
     if (!isNil(isGroup) && isGroup()) return true;
@@ -305,7 +316,12 @@ export const PaMsWebformRecord = ({
                   tooltipOptions={{ position: 'top' }}
                 />
               )}
-              <div className={styles.fieldWrapper}>
+              <div
+                className={
+                  isElementBeingSaved(element)
+                    ? `${styles.fieldWrapper} ${styles.fieldWrapperSaving}`
+                    : styles.fieldWrapper
+                }>
                 <div className={styles.template}>
                   {checkCalculatedFieldVisibility(element) ? (
                     calculateSingle(element)
@@ -333,6 +349,7 @@ export const PaMsWebformRecord = ({
                       }
                       isConditionalChanged={isConditionalChanged}
                       isDependantConditionalField={isDependantConditionalField}
+                      onFieldUpdate={onFieldUpdate}
                       onFillField={onFillField}
                       onSaveField={onSaveField}
                       onUpdatePamsValue={onUpdatePamsValue}
@@ -343,6 +360,7 @@ export const PaMsWebformRecord = ({
                       referencedTableSchemaId={referencedTableSchemaId}
                       tableSchemaId={tableId}
                       tableSchemaName={tableSchemaName}
+                      updatingField={updatingField}
                     />
                   )}
                 </div>
@@ -399,7 +417,10 @@ export const PaMsWebformRecord = ({
 
                   {checkAddButtonVisibility(element) && element.multipleRecords && (
                     <Button
-                      disabled={addingOnTableSchemaId === element.tableSchemaId && isAddingMultiple}
+                      disabled={
+                        (addingOnTableSchemaId === element.tableSchemaId && isAddingMultiple) ||
+                        updatingField.isUpdating
+                      }
                       icon={
                         addingOnTableSchemaId === element.tableSchemaId && isAddingMultiple ? 'spinnerAnimate' : 'plus'
                       }
@@ -461,6 +482,7 @@ export const PaMsWebformRecord = ({
                         multipleRecords={element.multipleRecords}
                         newRecord={pamsWebformRecordState.newRecord}
                         onAddMultipleWebform={onAddMultipleWebform}
+                        onFieldUpdate={onFieldUpdate}
                         onRefresh={onRefresh}
                         onTabChange={onTabChange}
                         onUpdatePamsValue={onUpdatePamsValue}
@@ -472,6 +494,7 @@ export const PaMsWebformRecord = ({
                         selectedTableId={element.tableSchemaId}
                         tableId={tableId}
                         tableName={element.title}
+                        updatingField={updatingField}
                       />
                     );
                   })}
@@ -522,7 +545,7 @@ export const PaMsWebformRecord = ({
             {validationsTemplate(parseRecordValidations(pamsWebformRecordState.record))}
             <Button
               className={`${styles.delete} p-button-rounded p-button-secondary p-button-animated-blink`}
-              disabled={pamsWebformRecordState.isDeleting}
+              disabled={pamsWebformRecordState.isDeleting || updatingField.isUpdating}
               icon={pamsWebformRecordState.isDeleting ? 'spinnerAnimate' : 'trash'}
               onClick={() => {
                 handleDialogs('deleteRow', true);

@@ -556,6 +556,7 @@ const MultiSelectWebform = props => {
           aria-haspopup="listbox"
           aria-labelledby={ariaLabelledBy}
           className={labelContent ? 'p-filled' : ''}
+          disabled={disabled}
           id={inputId}
           onBlur={onBlurFunction}
           onFocus={onFocusFunction}
