@@ -1,4 +1,4 @@
-import { Fragment, useContext } from 'react';
+import { Fragment, useContext, useRef } from 'react';
 
 import uniqueId from 'lodash/uniqueId';
 
@@ -7,6 +7,8 @@ import styles from './QuestionAnswerWebform.module.scss';
 import { QuestionAnswerWebformTable } from './_components/QuestionAnswerWebformTable';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
+
+import { WebformsUtils } from 'views/Webforms/_functions/Utils/WebformsUtils';
 
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
@@ -23,6 +25,10 @@ export const QuestionAnswerWebform = ({
   tables = []
 }) => {
   const resourcesContext = useContext(ResourcesContext);
+
+  // Big data only: the form is disabled while a save runs, as in the other webform types.
+  const updatingFieldStoreRef = useRef(null);
+  if (updatingFieldStoreRef.current === null) updatingFieldStoreRef.current = WebformsUtils.createUpdatingFieldStore();
 
   const { areEquals } = TextUtils;
   const { datasetSchema } = state;
@@ -83,6 +89,7 @@ export const QuestionAnswerWebform = ({
               preparationCode={preparationCode}
               schemaTables={schemaTable}
               tables={table}
+              updatingFieldStore={updatingFieldStoreRef.current}
             />
           </Fragment>
         );

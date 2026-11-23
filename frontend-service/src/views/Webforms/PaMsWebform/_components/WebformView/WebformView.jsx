@@ -41,6 +41,7 @@ export const WebformView = ({
   isLoadingIceberg,
   isRefresh,
   isReporting,
+  onIsUpdatingChange,
   onUpdatePamsValue,
   pamsRecords,
   preparationCode,
@@ -283,6 +284,7 @@ export const WebformView = ({
         isLoadingIceberg={isLoadingIceberg}
         isRefresh={isRefresh}
         isReporting={isReporting}
+        onIsUpdatingChange={onIsUpdatingChange}
         onTabChange={isVisible}
         onUpdatePamsValue={onUpdatePamsValue}
         onUpdateSinglesList={onUpdateSinglesList}

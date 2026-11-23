@@ -1,4 +1,4 @@
-import { useContext, useEffect, useReducer } from 'react';
+import { useContext, useEffect, useReducer, useRef, useState } from 'react';
 
 import intersection from 'lodash/intersection';
 import isEmpty from 'lodash/isEmpty';
@@ -32,11 +32,13 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { qaWebformFieldReducer } from './_functions/Reducers/qaWebformFieldReducer';
 
 import { RecordUtils } from 'views/_functions/Utils';
+import { WebformsUtils } from 'views/Webforms/_functions/Utils/WebformsUtils';
 
 import { getUrl } from 'repositories/_utils/UrlUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const QuestionAnswerWebformField = ({
+  bigData = false,
   dataProviderId,
   dataflowId,
   datasetId,
@@ -45,9 +47,11 @@ export const QuestionAnswerWebformField = ({
   preparationCode,
   recordId,
   recordValidations,
+  tableSchemaId,
   tableSchemaName,
   title,
-  tooltip
+  tooltip,
+  updatingFieldStore = null
 }) => {
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
@@ -59,9 +63,53 @@ export const QuestionAnswerWebformField = ({
 
   const { field, isDialogVisible } = questionAnswerWebformFieldState;
 
+  // Big data only: the save running in this form (shared by all its fields).
+  const [updatingField, setUpdatingField] = useState(
+    updatingFieldStore?.getState() ?? { field: null, isUpdating: false }
+  );
+  // Big data only: value at focus or after the last save, so an unchanged value is not sent again.
+  const initialFieldValueRef = useRef(null);
+  // Big data only: value just sent by Tab/Enter, so the blur that follows does not send it again.
+  const sentBeforeBlurRef = useRef(null);
+  // Big data only: where Tab should put the cursor once the save it started has finished.
+  const tabFocusPlanRef = useRef(null);
+
   useEffect(() => {
     getTableErrors(!isEmpty(recordValidations) || !isEmpty(field?.validations));
   }, []);
+
+  useEffect(() => {
+    if (isNil(updatingFieldStore)) return;
+    setUpdatingField(updatingFieldStore.getState());
+    return updatingFieldStore.subscribe(setUpdatingField);
+  }, [updatingFieldStore]);
+
+  // Big data: while a save runs, text fields are read-only and the other controls disabled.
+  const isFormLocked = () => bigData && updatingField.isUpdating;
+
+  const isFieldBeingSaved = () =>
+    isFormLocked() &&
+    updatingField.field?.recordId === recordId &&
+    updatingField.field?.fieldSchemaId === field?.fieldSchemaId;
+
+  const onFocusField = value => {
+    sentBeforeBlurRef.current = null;
+    initialFieldValueRef.current = value;
+  };
+
+  const rememberSentBeforeBlur = value => {
+    if (bigData) sentBeforeBlurRef.current = value;
+  };
+
+  // True when the blur would send exactly what Tab/Enter has just sent.
+  const isAlreadySentBeforeBlur = value => {
+    const isAlreadySent = bigData && !isNil(sentBeforeBlurRef.current) && sentBeforeBlurRef.current === value;
+    sentBeforeBlurRef.current = null;
+    return isAlreadySent;
+  };
+
+  // True when the value has not changed since focus or the last save (big data only), so nothing is sent.
+  const isUnchanged = value => bigData && value === initialFieldValueRef.current;
 
   const getAttachExtensions = [
     { fileExtension: isNil(field) || isNil(field.validExtensions) ? [] : field.validExtensions }
@@ -121,7 +169,17 @@ export const QuestionAnswerWebformField = ({
   };
 
   const onEditorKeyChange = (event, field, option) => {
-    if (event.key === 'Enter' || event.key === 'Tab') onEditorSubmitValue(field, option, event.target.value);
+    if (isFormLocked()) return;
+    if (event.key === 'Enter' || event.key === 'Tab') {
+      if (isUnchanged(event.target.value)) return;
+      rememberSentBeforeBlur(event.target.value);
+      const tabFocusPlan =
+        bigData && event.key === 'Tab' ? WebformsUtils.createTabFocusPlan(event.target, event.shiftKey) : null;
+      tabFocusPlanRef.current = tabFocusPlan;
+      onEditorSubmitValue(field, option, event.target.value);
+      // Big data: when this Tab starts a save, the cursor stays here until it ends, then moves on.
+      if (tabFocusPlan?.isSaveSent) event.preventDefault();
+    }
   };
 
   const onEditorSubmitValue = async (field, option, value) => {
@@ -131,8 +189,28 @@ export const QuestionAnswerWebformField = ({
         ? value.join(';')
         : value;
 
+    const tabFocusPlan = tabFocusPlanRef.current;
+    tabFocusPlanRef.current = null;
+    // Big data: this save holds the lock; only this save can release it.
+    const savingField = { fieldSchemaId: field.fieldSchemaId, recordId };
+    let isSaveSent = false;
+
     try {
-      await DatasetService.updateField(datasetId, option, field.fieldId, field.fieldType, parsedValue);
+      bigData && updatingFieldStore?.lock(savingField);
+      isSaveSent = true;
+      if (tabFocusPlan) tabFocusPlan.isSaveSent = true;
+      await DatasetService.updateField(
+        datasetId,
+        option,
+        field.fieldId,
+        field.fieldType,
+        parsedValue,
+        field.name,
+        recordId,
+        tableSchemaId
+      );
+      // Big data: the cursor can stay in the field after a save, so the saved value is the new "unchanged" baseline.
+      if (bigData) initialFieldValueRef.current = parsedValue;
     } catch (error) {
       if (error.response.status === 423) {
         notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' }, true);
@@ -140,6 +218,10 @@ export const QuestionAnswerWebformField = ({
         console.error('QuestionAnswerWebformField - onEditorSubmitValue.', error);
         notificationContext.add({ type: 'UPDATE_WEBFORM_FIELD_BY_ID_ERROR' }, true);
       }
+    } finally {
+      bigData && updatingFieldStore?.unlock(savingField);
+      if (isSaveSent) WebformsUtils.applyTabFocusPlan(tabFocusPlan);
+      else WebformsUtils.cancelTabFocusPlan(tabFocusPlan);
     }
   };
 
@@ -207,12 +289,19 @@ export const QuestionAnswerWebformField = ({
       case 'URL':
         return (
           <InputText
+            className={isFormLocked() ? 'p-disabled' : undefined}
             hasMaxCharCounter
             id={field.fieldId}
+            isLoadingData={isFieldBeingSaved()}
             keyfilter={RecordUtils.getFilter(type)}
-            onBlur={event => onEditorSubmitValue(field, fieldSchemaId, event.target.value)}
+            onBlur={event => {
+              if (!isAlreadySentBeforeBlur(event.target.value) && !isUnchanged(event.target.value) && !isFormLocked())
+                onEditorSubmitValue(field, fieldSchemaId, event.target.value);
+            }}
             onChange={event => onFillField(field, fieldSchemaId, event.target.value)}
+            onFocus={event => onFocusField(event.target.value)}
             onKeyDown={event => onEditorKeyChange(event, field, fieldSchemaId)}
+            readOnly={isFormLocked()}
             value={field.value}
           />
         );
@@ -220,12 +309,26 @@ export const QuestionAnswerWebformField = ({
         return (
           <div>
             <InputTextarea
-              className={field.required ? styles.required : undefined}
+              className={
+                [field.required ? styles.required : undefined, isFormLocked() ? 'p-disabled' : undefined]
+                  .filter(Boolean)
+                  .join(' ') || undefined
+              }
               collapsedHeight={150}
               id={field.fieldId}
-              onBlur={event => onEditorSubmitValue(field, fieldSchemaId, event.target.value)}
+              isLoadingData={isFieldBeingSaved()}
+              onBlur={event => {
+                if (!isAlreadySentBeforeBlur(event.target.value) && !isUnchanged(event.target.value) && !isFormLocked())
+                  onEditorSubmitValue(field, fieldSchemaId, event.target.value);
+              }}
               onChange={event => onFillField(field, fieldSchemaId, event.target.value)}
-              onKeyDown={event => onEditorKeyChange(event, field, fieldSchemaId)}
+              onFocus={event => onFocusField(event.target.value)}
+              onKeyDown={event => {
+                // Big data: Enter only adds a line break, as in the other webform types; the text is saved on Tab or blur.
+                if (bigData && event.key === 'Enter') return;
+                onEditorKeyChange(event, field, fieldSchemaId);
+              }}
+              readOnly={isFormLocked()}
               value={field.value}
             />
             <CharacterCounter currentLength={field.value.length} style={{ position: 'relative', top: '0.25rem' }} />
@@ -236,6 +339,7 @@ export const QuestionAnswerWebformField = ({
           <Dropdown
             appendTo={document.body}
             className={styles.dropdown}
+            disabled={isFormLocked()}
             id={field.fieldId}
             onChange={event => {
               onFillField(field, fieldSchemaId, event.target.value);
@@ -251,6 +355,7 @@ export const QuestionAnswerWebformField = ({
           <Calendar
             appendTo={document.body}
             dateFormat="yy-mm-dd"
+            disabled={isFormLocked()}
             id={field.fieldId}
             monthNavigator={true}
             onBlur={event =>
@@ -269,6 +374,7 @@ export const QuestionAnswerWebformField = ({
           <Calendar
             appendTo={document.body}
             dateFormat="yy-mm-dd"
+            disabled={isFormLocked()}
             id={field.fieldId}
             monthNavigator={true}
             onBlur={event => onEditorSubmitValue(field, fieldSchemaId, event.target.value)}
@@ -284,6 +390,7 @@ export const QuestionAnswerWebformField = ({
         return (
           <MultiSelect
             appendTo={document.body}
+            disabled={isFormLocked()}
             id={field.fieldId}
             maxSelectedLabels={10}
             onChange={event => {
@@ -313,6 +420,7 @@ export const QuestionAnswerWebformField = ({
             {
               <Button
                 className="p-button-animated-blink p-button-primary-transparent"
+                disabled={isFormLocked()}
                 icon="import"
                 label={
                   resourcesContext.messages[
@@ -327,6 +435,7 @@ export const QuestionAnswerWebformField = ({
 
             <Button
               className="p-button-animated-blink p-button-primary-transparent"
+              disabled={isFormLocked()}
               icon="trash"
               onClick={() => {
                 handleDialogs('deleteAttachment', true);

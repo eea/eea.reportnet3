@@ -31,7 +31,8 @@ export const QuestionAnswerWebformTable = ({
   isLoadingIceberg,
   preparationCode,
   schemaTables,
-  tables
+  tables,
+  updatingFieldStore
 }) => {
   const { parseData } = QuestionAnswerWebformTableUtils;
   const { parseText } = TextUtils;
@@ -120,13 +121,16 @@ export const QuestionAnswerWebformTable = ({
     return data.map(record => (
       <Fragment key={uniqueId()}>
         <QuestionAnswerWebformRecord
+          bigData={bigData}
           dataflowId={dataflowId}
           dataProviderId={dataProviderId}
           datasetId={datasetId}
           getTableErrors={getTableErrors}
           preparationCode={preparationCode}
           record={record}
+          tableSchemaId={schemaTables.tableSchemaId}
           tableSchemaName={tables.name}
+          updatingFieldStore={updatingFieldStore}
         />
       </Fragment>
     ));
