@@ -1802,7 +1802,9 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       List<String> countryCodesList = new ArrayList<>(Arrays.asList(dataProviderCodes.split(",")));
       StringBuilder countries = new StringBuilder();
       for (int i = 0; i < countryCodesList.size(); i++) {
-        countries.append("'" + countryCodesList.get(i) + "'");
+        // Escape countryCode for use inside single quotes - manual escape.
+        String escapedCountryCode = countryCodesList.get(i).replace("'", "''").trim();
+        countries.append("'" + escapedCountryCode + "'");
         if (i + 1 != countryCodesList.size()) {
           countries.append(",");
         }
