@@ -2278,6 +2278,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
         s3PathResolver.setDatasetId(datasetId);
         path = s3Service.getS3Path(s3PathResolver);
         break;
+      case TEST:
       case DESIGN:
         s3PathResolver.setPath(S3_TABLE_AS_FOLDER_QUERY_PATH);
         s3PathResolver.setDataProviderId(0L);
@@ -2288,9 +2289,9 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
         s3PathResolver.setDatasetId(datasetId);
         path = s3Service.getTableDCAsFolderQueryPath(s3PathResolver, S3_TABLE_NAME_DC_QUERY_PATH);
         break;
-      case TEST:
-        break;
       case EUDATASET:
+        s3PathResolver.setDatasetId(datasetId);
+        path = s3Service.getTableDCAsFolderQueryPath(s3PathResolver, S3_TABLE_NAME_EU_QUERY_PATH);
         break;
       case REFERENCE:
         path = s3Service.getTableDCAsFolderQueryPath(s3PathResolver, S3_DATAFLOW_REFERENCE_QUERY_PATH);
