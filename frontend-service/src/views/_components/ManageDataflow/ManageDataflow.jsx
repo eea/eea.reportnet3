@@ -78,7 +78,8 @@ export const ManageDataflow = ({
     pinDataflow: false,
     bigDataStorage: isEditing ? state.data.bigData : false,
     providerGroup: null,
-    isReleasable: state.isReleasable
+    isReleasable: state.isReleasable,
+    showPublicInfo: state.showPublicInfo
   };
 
   const dialogName = isCitizenScienceDataflow
