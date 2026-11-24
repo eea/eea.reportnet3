@@ -81,7 +81,7 @@ public class AutomaticRules {
       AutomaticRuleTypeEnum automaticType, String description, ErrorTypeEnum automaticQCDefaultLevelError) {
     ObjectId ruleId = new ObjectId();
     return composeRule(ruleId, referenceId, typeEntityEnum, nameRule, "isNumberInteger(value)",
-        "The value is not a valid whole number", automaticQCDefaultLevelError.getValue(), shortCode,
+        "The value must be an integer number", automaticQCDefaultLevelError.getValue(), shortCode,
         automaticType, description, null);
   }
 
@@ -101,7 +101,7 @@ public class AutomaticRules {
       AutomaticRuleTypeEnum automaticType, String description, ErrorTypeEnum automaticQCDefaultLevelError) {
     ObjectId ruleId = new ObjectId();
     return composeRule(ruleId, referenceId, typeEntityEnum, nameRule, "isNumberDecimal(value)",
-        "The value is not a valid whole or decimal number", automaticQCDefaultLevelError.getValue(),
+        "The value must be an integer or a decimal number", automaticQCDefaultLevelError.getValue(),
         shortCode, automaticType, description, null);
   }
 
