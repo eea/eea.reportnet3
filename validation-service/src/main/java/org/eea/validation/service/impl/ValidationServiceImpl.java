@@ -220,6 +220,10 @@ public class ValidationServiceImpl implements ValidationService {
   @Autowired
   private S3Helper s3Helper;
 
+  /** Keeps the full text of shortened validation messages */
+  @Autowired
+  private ValidationFullMessagesHelper validationFullMessagesHelper;
+
   @Autowired
   private DremioHelperService dremioHelperService;
 
@@ -847,6 +851,7 @@ public class ValidationServiceImpl implements ValidationService {
             return;
         } catch (Exception e) {
             LOG.error("Unexpected error! Error in exportValidationFile for datasetId {}. Message: {}", datasetId, e.getMessage());
+            releaseDownloadValidationsFailedEvent(notificationVO, datasetId);
             throw e;
         }
 
@@ -993,11 +998,48 @@ public class ValidationServiceImpl implements ValidationService {
 
     DataSetSchemaVO schema = datasetSchemaController.findDataSchemaByDatasetId(dataSetMetabaseVO.getId());
     setRuleMessageDL(schema.getIdDataSetSchema(), errors);
+    restoreFullMessages(s3PathResolver, errors);
     validations.setErrors(errors);
 
     validations.setTotalRecords((long) errors.size());
 
     return validations;
+  }
+
+  /**
+   * Puts back the full text of the messages that were shortened when the validation was saved. The
+   * full text is read from S3 directly, not from Dremio.
+   *
+   * @param s3PathResolver the validation resolver
+   * @param errors the grouped validations
+   */
+  private void restoreFullMessages(S3PathResolver s3PathResolver, List<GroupValidationVO> errors) {
+    Map<String, Map<String, String>> fullMessagesByShortCode = new HashMap<>();
+    for (GroupValidationVO error : errors) {
+      if (ValidationFullMessagesHelper.isShortened(error.getMessage())) {
+        Map<String, String> fullMessages = fullMessagesByShortCode.computeIfAbsent(
+            error.getShortCode(),
+            shortCode -> validationFullMessagesHelper.readFullMessages(s3PathResolver, shortCode));
+        error.setMessage(ValidationFullMessagesHelper.restoreMessage(error.getMessage(), fullMessages));
+      }
+    }
+  }
+
+  /**
+   * Sends the DOWNLOAD_VALIDATIONS_FAILED_EVENT notification. Errors while sending are only logged,
+   * so they do not hide the original export error.
+   *
+   * @param notificationVO the notification
+   * @param datasetId the dataset id
+   */
+  private void releaseDownloadValidationsFailedEvent(NotificationVO notificationVO, Long datasetId) {
+    try {
+      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.DOWNLOAD_VALIDATIONS_FAILED_EVENT,
+          null, notificationVO);
+    } catch (Exception e) {
+      LOG.error("Error sending DOWNLOAD_VALIDATIONS_FAILED_EVENT for datasetId {}. Message: {}",
+          datasetId, e.getMessage());
+    }
   }
 
   /**

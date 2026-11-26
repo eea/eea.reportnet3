@@ -1007,6 +1007,7 @@
     "loadDatasetsError": "The loading of the datasets was unsuccessful. Please try again or contact the Service Desk if the issue persists.",
     "loadDatasetsReleasesError": "Error loading datasets releases for manual acceptance. Please try again or contact the Service Desk if the issue persists.",
     "loadDatasetsSummaryError": "Error loading datasets information. Please try again or contact the Service Desk if the issue persists.",
+    "loadShowValidationsError": "Error loading the validation results. Please try again or contact the Service Desk if the issue persists.",
     "loadDocumentsError": "Error loading documents. Please try again or contact the Service Desk if the issue persists.",
     "loadHistoricReleasesError": "Error loading historic releases. Please try again or contact the Service Desk if the issue persists.",
     "loadHistoryDataError": "Error loading history data in a QC rule. Please try again or contact the Service Desk if the issue persists.",

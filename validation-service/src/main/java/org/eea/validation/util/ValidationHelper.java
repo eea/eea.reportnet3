@@ -217,6 +217,10 @@ public class ValidationHelper implements DisposableBean {
     @Autowired
     private UserManagementControllerZull userManagementControllerZull;
 
+    /** Keeps the full text of shortened validation messages */
+    @Autowired
+    private ValidationFullMessagesHelper validationFullMessagesHelper;
+
 
     /** The Constant DATASET: {@value}. */
   private static final String DATASET = "dataset_";
@@ -486,6 +490,8 @@ public class ValidationHelper implements DisposableBean {
           s3Helper.deleteFolder(s3PathResolver, S3_VALIDATION_TABLE_PATH);
         }
       }
+      // delete the full text of shortened messages from the previous validation
+      validationFullMessagesHelper.deleteFullMessagesFolder(s3PathResolver);
 
       if (StringUtils.isBlank(preparationCode)) {
         datasetController.updateStatistics(datasetId, true);

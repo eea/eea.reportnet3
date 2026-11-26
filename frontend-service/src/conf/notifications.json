@@ -1092,6 +1092,7 @@
         },
         { "key": "UNLOCK_DATASET_ERROR" },
         { "key": "LOAD_DATASETS_SUMMARY_ERROR" },
+        { "key": "LOAD_SHOW_VALIDATIONS_ERROR" },
         { "key": "LOADING_WEBFORM_ERROR" },
         { "key": "LOADING_WEBFORM_OPTIONS_ERROR" },
         { "key": "EXPORT_DATASET_FAILED_EVENT" },

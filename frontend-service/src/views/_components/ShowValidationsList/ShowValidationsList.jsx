@@ -20,6 +20,7 @@ import { TooltipButton } from 'views/_components/TooltipButton';
 import { DatasetService } from 'services/DatasetService';
 import { ValidationService } from 'services/ValidationService';
 
+import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { ValidationContext } from 'views/_functions/Contexts/ValidationContext';
 
@@ -45,6 +46,7 @@ export const ShowValidationsList = memo(
     tables,
     visible
   }) => {
+    const notificationContext = useContext(NotificationContext);
     const resourcesContext = useContext(ResourcesContext);
     const validationContext = useContext(ValidationContext);
 
@@ -54,6 +56,7 @@ export const ShowValidationsList = memo(
     const [shortCodeFilter, setShortCodeFilter] = useState('');
     const [fieldValueFilter, setFieldValueFilter] = useState([]);
     const [firstRow, setFirstRow] = useState(0);
+    const [hasLoadError, setHasLoadError] = useState(false);
     const [isFilteredLevelErrors, setIsFilteredLevelErrors] = useState(false);
     const [isFilteredOrigins, setIsFilteredOrigins] = useState(false);
     const [isFilteredTypeEntities, setIsFilteredTypeEntities] = useState(false);
@@ -374,8 +377,11 @@ export const ShowValidationsList = memo(
 
         setData(data.errors);
         setFetchedData(data.errors);
+        setHasLoadError(false);
       } catch (error) {
         console.error('ShowValidationsList - onLoadErrors.', error);
+        setHasLoadError(true);
+        notificationContext.add({ type: 'LOAD_SHOW_VALIDATIONS_ERROR' }, true);
       } finally {
         setIsLoadingTable(false);
         setIsLoadingModal(false);
@@ -651,7 +657,11 @@ export const ShowValidationsList = memo(
         if (!isLoadingTable) {
           return (
             <div className={styles.validationsWithoutTable}>
-              <div className={styles.noValidations}>{resourcesContext.messages['noValidations']}</div>
+              <div className={styles.noValidations}>
+                {hasLoadError
+                  ? resourcesContext.messages['loadShowValidationsError']
+                  : resourcesContext.messages['noValidations']}
+              </div>
             </div>
           );
         } else {

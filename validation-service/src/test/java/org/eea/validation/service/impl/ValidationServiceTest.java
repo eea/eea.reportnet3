@@ -40,7 +40,14 @@ import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
 import org.eea.interfaces.vo.ums.ResourceInfoVO;
 import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
+import org.eea.datalake.service.DremioHelperService;
+import org.eea.datalake.service.S3Helper;
+import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
+import org.eea.kafka.domain.EventType;
 import org.eea.kafka.utils.KafkaSenderUtils;
+import org.eea.validation.service.DataLakeValidationService;
+import org.eea.validation.util.ValidationFullMessagesHelper;
+import org.junit.Assert;
 import org.eea.validation.persistence.data.domain.DatasetValidation;
 import org.eea.validation.persistence.data.domain.DatasetValue;
 import org.eea.validation.persistence.data.domain.FieldValidation;
@@ -169,6 +176,22 @@ public class ValidationServiceTest {
    */
   @Mock
   private KafkaSenderUtils kafkaSenderUtils;
+
+  /** The S3 helper. */
+  @Mock
+  private S3Helper s3Helper;
+
+  /** The Dremio helper service. */
+  @Mock
+  private DremioHelperService dremioHelperService;
+
+  /** The data lake validation service. */
+  @Mock
+  private DataLakeValidationService dataLakeValidationService;
+
+  /** The full validation messages helper. */
+  @Mock
+  private ValidationFullMessagesHelper validationFullMessagesHelper;
 
   /** The rules repository. */
   @Mock
@@ -1077,6 +1100,92 @@ public class ValidationServiceTest {
   public void countEmptyFieldsDatasetTestSuccess() throws EEAException {
     when(fieldRepository.countEmptyFieldsDataset()).thenReturn(1);
     assertEquals((Integer) 1, validationServiceImpl.countEmptyFieldsDataset(1L));
+  }
+
+  /**
+   * Big Data export: a message shortened when the validation was saved is exported with its full
+   * text, read from S3.
+   *
+   * @throws Exception the exception
+   */
+  @Test
+  public void exportValidationFileBigDataRestoresFullMessage() throws Exception {
+    String fullMessage = "Missing values: " + "ES010ESPFM5012FQ / ".repeat(2100);
+    Map<String, String> fullMessages = new HashMap<>();
+    String shortMessage =
+        ValidationFullMessagesHelper.shortenMessage(fullMessage, fullMessages, 1000);
+    GroupValidationVO error = new GroupValidationVO();
+    error.setTypeEntity(EntityTypeEnum.TABLE);
+    error.setShortCode("BIG01");
+    error.setLevelError(ErrorTypeEnum.BLOCKER);
+    error.setNumberOfRecords("10");
+    error.setMessage(shortMessage);
+    List<GroupValidationVO> errors = new ArrayList<>();
+    errors.add(error);
+
+    mockBigDataExport();
+    when(dataLakeValidationService.findGroupRecordsByFilter(Mockito.any(), Mockito.any(),
+        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
+        Mockito.any(), Mockito.anyBoolean())).thenReturn(errors);
+    when(validationFullMessagesHelper.readFullMessages(Mockito.any(), Mockito.eq("BIG01")))
+        .thenReturn(fullMessages);
+
+    validationServiceImpl.exportValidationFile(1L, null);
+
+    assertEquals(fullMessage, error.getMessage());
+    Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(
+        Mockito.eq(EventType.DOWNLOAD_VALIDATIONS_COMPLETED_EVENT), Mockito.any(), Mockito.any());
+  }
+
+  /**
+   * Big Data export: an unexpected error (e.g. from Dremio) sends the failed notification, so the
+   * download button does not keep loading (ATA2-3359).
+   *
+   * @throws Exception the exception
+   */
+  @Test
+  public void exportValidationFileBigDataUnexpectedErrorSendsFailedEvent() throws Exception {
+    mockBigDataExport();
+    when(dataLakeValidationService.findGroupRecordsByFilter(Mockito.any(), Mockito.any(),
+        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
+        Mockito.any(), Mockito.anyBoolean()))
+        .thenThrow(new IllegalStateException("Field exceeds the size limit"));
+
+    try {
+      validationServiceImpl.exportValidationFile(1L, null);
+      Assert.fail("The exception should be rethrown");
+    } catch (IllegalStateException e) {
+      assertEquals("Field exceeds the size limit", e.getMessage());
+    }
+    Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(
+        Mockito.eq(EventType.DOWNLOAD_VALIDATIONS_FAILED_EVENT), Mockito.any(), Mockito.any());
+  }
+
+  /**
+   * Mocks a Big Data dataset with a promoted validation folder.
+   */
+  private void mockBigDataExport() {
+    DataSetMetabaseVO dataSetMetabase = new DataSetMetabaseVO();
+    dataSetMetabase.setDataflowId(1L);
+    dataSetMetabase.setDataProviderId(1L);
+    dataSetMetabase.setDatasetSchema("603362319d49f04fce13b68f");
+    dataSetMetabase.setId(1L);
+    DataSetSchemaVO schema = new DataSetSchemaVO();
+    schema.setIdDataSetSchema("603362319d49f04fce13b68f");
+
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("name");
+    when(dataSetMetabaseControllerZuul.findDatasetMetabaseById(anyLong()))
+        .thenReturn(dataSetMetabase);
+    when(dataFlowControllerZuul.isBigDataflowDataset(anyLong())).thenReturn(true);
+    when(s3Helper.checkFolderExist(Mockito.any(), Mockito.anyString())).thenReturn(true);
+    when(dremioHelperService.checkFolderPromoted(Mockito.any(), Mockito.any())).thenReturn(true);
+    Mockito.lenient().when(datasetSchemaControllerZuul.findDataSchemaByDatasetId(anyLong()))
+        .thenReturn(schema);
+    RulesSchemaVO rulesSchemaVO = new RulesSchemaVO();
+    rulesSchemaVO.setRules(new ArrayList<>());
+    Mockito.lenient().when(ruleServiceImpl.getActiveRulesSchemaByDatasetId(Mockito.any()))
+        .thenReturn(rulesSchemaVO);
   }
 
 }

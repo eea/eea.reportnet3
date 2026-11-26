@@ -40,6 +40,7 @@ import org.eea.validation.service.RulesService;
 import org.eea.validation.service.SqlRulesService;
 import org.eea.validation.util.FKValidationUtils;
 import org.eea.validation.util.UniqueValidationUtils;
+import org.eea.validation.util.ValidationFullMessagesHelper;
 import org.eea.validation.util.ValidationHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,6 +70,12 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
     private Integer validationParquetMaxFileSize;
     @Value("${validation.split.parquet}")
     private boolean validationSplitParquet;
+    /**
+     * Longer messages are shortened before they are saved, and their full text is kept in S3
+     * outside the validation folder: Dremio cannot read or group very long values.
+     */
+    @Value("${validation.message.max.length:1000}")
+    private int validationMessageMaxLength;
 
     private JdbcTemplate dremioJdbcTemplate;
     private S3Service s3Service;
@@ -83,6 +90,9 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
     private DremioHelperService dremioHelperService;
     private RepresentativeControllerZuul representativeControllerZuul;
     private ValidationHelper validationHelper;
+    /** Keeps the full text of shortened validation messages. */
+    @Autowired
+    private ValidationFullMessagesHelper validationFullMessagesHelper;
 
     private static final Logger LOG = LoggerFactory.getLogger(DremioSqlRulesExecuteServiceImpl.class);
     private static final String IS_TABLE_EMPTY = "isTableEmpty";
@@ -266,7 +276,7 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
         else {
             s3Helper.deleteFolder(validationResolver, S3_TABLE_NAME_PATH);
         }
-
+        validationFullMessagesHelper.deleteFullMessagesFile(ruleVO, validationResolver);
     }
 
     /**
@@ -581,6 +591,7 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
                                                       S3PathResolver validationResolver, List<Map<String, Object>> customQueryResultSet) throws Exception {
         int count = 1;
         int ruleIdLength = ruleVO.getRuleId().length();
+        Map<String, String> fullMessages = new HashMap<>();
         for (List<String> recordSubList : Lists.partition(recordIds, validationParquetMaxFileSize)) {
             String subFile = fileName + "_" + count + PARQUET_TYPE;
             String parquetFile = parquetFilePath + subFile;
@@ -593,7 +604,7 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
                         .build()) {
                     for (String recordId : recordSubList) {
                         ObjectWrapper objectWrapper = new ObjectWrapper(ruleVO.getThenCondition().get(0), recordId);
-                        GenericRecord record = createParquetGenericRecord(headerMap, schema, customQueryResultSet, objectWrapper);
+                        GenericRecord record = createParquetGenericRecord(headerMap, schema, customQueryResultSet, objectWrapper, fullMessages);
                         writer.write(record);
                     }
                 } catch (Exception e1) {
@@ -607,6 +618,7 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
                 dremioHelperService.deleteFileFromR3IfExists(parquetFile);
             }
         }
+        validationFullMessagesHelper.uploadFullMessages(ruleVO, validationResolver, fullMessages);
     }
 
     /**
@@ -624,6 +636,7 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
         String file = fileName + PARQUET_TYPE;
         String parquetFile = parquetFilePath + file;
         int ruleIdLength = ruleVO.getRuleId().length();
+        Map<String, String> fullMessages = new HashMap<>();
         try {
             dremioHelperService.deleteFileFromR3IfExists(parquetFile);
             try (ParquetWriter<GenericRecord> writer = AvroParquetWriter
@@ -636,7 +649,7 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
 
                 for (String recordId : recordIds) {
                     ObjectWrapper objectWrapper = new ObjectWrapper(ruleVO.getThenCondition().get(0), recordId);
-                    GenericRecord record = createParquetGenericRecord(headerMap, schema, customQueryResultSet, objectWrapper);
+                    GenericRecord record = createParquetGenericRecord(headerMap, schema, customQueryResultSet, objectWrapper, fullMessages);
                     writer.write(record);
                 }
             } catch (Exception e1) {
@@ -644,6 +657,7 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
                 throw e1;
             }
            validationHelper.uploadValidationParquetToS3(ruleVO, validationResolver, file, ruleIdLength, parquetFile);
+           validationFullMessagesHelper.uploadFullMessages(ruleVO, validationResolver, fullMessages);
         } finally {
             dremioHelperService.deleteFileFromR3IfExists(parquetFile);
         }
@@ -655,9 +669,11 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
      * @param schema
      * @return The generic Record
      */
-    private static GenericRecord createParquetGenericRecord(Map<String, String> headerMap, Schema schema, List<Map<String, Object>> customQueryResultSet, ObjectWrapper objectWrapper) {
+    private GenericRecord createParquetGenericRecord(Map<String, String> headerMap, Schema schema, List<Map<String, Object>> customQueryResultSet,
+                                                     ObjectWrapper objectWrapper, Map<String, String> fullMessages) {
         GenericRecord record = new GenericData.Record(schema);
         refactorMessage(customQueryResultSet, objectWrapper);
+        objectWrapper.setMessage(ValidationFullMessagesHelper.shortenMessage(objectWrapper.getMessage(), fullMessages, validationMessageMaxLength));
 
         headerMap.put(MESSAGE, objectWrapper.getMessage());
         if (objectWrapper.getRecordId().equals(PK_NOT_USED) || objectWrapper.getRecordId().equals(TABLE_EMPTY)) {
