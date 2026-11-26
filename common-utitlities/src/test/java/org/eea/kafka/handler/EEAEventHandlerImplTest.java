@@ -15,6 +15,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.eea.thread.ThreadPropertiesManager;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 /**
  * The type Eea event handler impl test.
@@ -78,5 +80,45 @@ public class EEAEventHandlerImplTest {
     Mockito.when(eeaEentCommandFactory.getEventCommand(Mockito.any())).thenReturn(null);
     eeaEventHandler.processMessage(event);
     Mockito.verify(eeaEentCommandFactory, times(1)).getEventCommand(Mockito.any());
+  }
+  @Test
+  public void processMessageClearsUserAndLoginAfterEvent() throws EEAException {
+    Mockito.when(eeaEentCommandFactory.getEventCommand(Mockito.any()))
+            .thenReturn(eeaEventHandlerCommand);
+    event.getData().put("user", "john");
+    event.getData().put("token", "Bearer abc");
+    final Object[] seen = new Object[2];
+    Mockito.doAnswer(invocation -> {
+      seen[0] = ThreadPropertiesManager.getVariable("user");
+      seen[1] = SecurityContextHolder.getContext().getAuthentication().getName();
+      return null;
+    }).when(eeaEventHandlerCommand).execute(Mockito.any());
+
+    eeaEventHandler.processMessage(event);
+
+    Assert.assertEquals("john", seen[0]);
+    Assert.assertEquals("john", seen[1]);
+    Assert.assertNull(ThreadPropertiesManager.getVariable("user"));
+    Assert.assertNull(SecurityContextHolder.getContext().getAuthentication());
+  }
+
+  @Test
+  public void processMessageClearsUserAndLoginWhenCommandFails() throws EEAException {
+    Mockito.when(eeaEentCommandFactory.getEventCommand(Mockito.any()))
+            .thenReturn(eeaEventHandlerCommand);
+    event.getData().put("user", "john");
+    event.getData().put("token", "Bearer abc");
+    Mockito.doThrow(new EEAException("failed")).when(eeaEventHandlerCommand)
+            .execute(Mockito.any());
+
+    try {
+      eeaEventHandler.processMessage(event);
+      Assert.fail("expected EEAException");
+    } catch (EEAException e) {
+      // expected
+    }
+
+    Assert.assertNull(ThreadPropertiesManager.getVariable("user"));
+    Assert.assertNull(SecurityContextHolder.getContext().getAuthentication());
   }
 }
