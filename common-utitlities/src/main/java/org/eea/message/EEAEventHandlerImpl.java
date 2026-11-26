@@ -65,7 +65,12 @@ public class EEAEventHandlerImpl implements EEAEventHandler {
                 message.getData().get("token").toString(), null));
       }
 
-      command.execute(message);
+      try {
+        command.execute(message);
+      } finally {
+        SecurityContextHolder.clearContext();
+        ThreadPropertiesManager.clearUser();
+      }
     }
   }
 

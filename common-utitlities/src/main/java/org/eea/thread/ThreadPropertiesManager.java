@@ -43,4 +43,11 @@ public class ThreadPropertiesManager {
     }
     return thread.get().get(name);
   }
+
+  /**
+   * Removes the user from the current thread.
+   */
+  public static void clearUser() {
+    user.remove();
+  }
 }
