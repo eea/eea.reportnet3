@@ -89,6 +89,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
 
+import static org.eea.dataset.persistence.data.repository.RecordRepositoryImpl.isReservedSqlWord;
 import static org.eea.interfaces.vo.dataset.enums.FileTypeEnum.CSV;
 import static org.eea.utils.LiteralConstants.EXPORT_CSV;
 import static org.eea.utils.LiteralConstants.EXPORT_PARQUET;
@@ -2147,6 +2148,8 @@ public class DatasetControllerImpl implements DatasetController {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN,
               String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId));
     }
+    //we validate the request parms before processing to the job
+    validateEtlExportFilter(datasetId, tableSchemaId, filterValue, columnName);
     try {
       Long jobId = jobControllerZuul.addFileExportJob(datasetId, dataflowId, providerId, tableSchemaId, limit, offset, filterValue, columnName, dataProviderCodes, false, false ,false, preparationCode);
       Map<String, Object> result = new HashMap<>();
@@ -2160,6 +2163,78 @@ public class DatasetControllerImpl implements DatasetController {
     } catch (Exception e) {
       LOG.error("Unexpected error! Error in v3 etlExportDataset for datasetId {} and tableSchemaId {} Message: {}", datasetId, tableSchemaId, e.getMessage());
       throw e;
+    }
+  }
+
+  /**
+   * Validates the filter parameters of an ETL export request before the export job is created.
+   * Refs #303359: previously these checks only ran inside the asynchronous export, so invalid
+   * requests produced FAILED jobs ("Param column is illegal") or silently empty tables (Dremio
+   * PARSE/VALIDATION errors for unknown or unquoted columns) with no feedback to the caller.
+   *
+   * @param datasetId the dataset id
+   * @param tableSchemaId the table schema id (optional)
+   * @param filterValue the filter value (optional)
+   * @param columnName the column name (optional)
+   */
+  private void validateEtlExportFilter(Long datasetId, String tableSchemaId, String filterValue,
+                                       String columnName) {
+    // 1. reserved SQL words (e.g. the example "column") => 422
+    if (isReservedSqlWord(columnName) || isReservedSqlWord(filterValue)) {
+      String message = String.format(
+              "Invalid etlExport request for datasetId %s: columnName '%s' / filterValue '%s' is a reserved SQL word",
+              datasetId, columnName, filterValue);
+      LOG.warn(message);
+      throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, message);
+    }
+    // the job applies the column filter only when both columnName and filterValue are given
+    // (columnName alone stays ignored, as before)
+    boolean hasColumnFilter = StringUtils.isNotBlank(columnName) && StringUtils.isNotEmpty(filterValue);
+    // no table and no column filter => nothing more to check
+    if (!hasColumnFilter && StringUtils.isBlank(tableSchemaId)) {
+      return;
+    }
+    // 2. load the dataset schema
+    List<TableSchemaVO> tables;
+    try {
+      String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
+      DataSetSchemaVO schema = datasetSchemaService.getDataSchemaById(datasetSchemaId);
+      tables = schema != null && schema.getTableSchemas() != null ? schema.getTableSchemas()
+              : new ArrayList<>();
+    } catch (EEAException e) {
+      LOG.error("Could not validate etlExport filter for datasetId {}", datasetId, e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+              EEAErrorMessage.SCHEMA_NOT_FOUND);
+    }
+    // 3. restrict to the requested table, if any => 400 if it doesn't exist
+    if (StringUtils.isNotBlank(tableSchemaId)) {
+      tables = tables.stream().filter(t -> tableSchemaId.equals(t.getIdTableSchema()))
+              .collect(Collectors.toList());
+      if (tables.isEmpty()) {
+        String message = String.format("Invalid etlExport request for datasetId %s: tableSchemaId %s not found",
+                datasetId, tableSchemaId);
+        LOG.warn(message);
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, message);
+      }
+    }
+    if (!hasColumnFilter) {
+      return;
+    }
+    // 4. column must exist (trimmed, case-insensitive) in that table / at least one table => else 400
+    String requested = columnName.trim();
+    boolean columnExists = tables.stream()
+            .filter(t -> t.getRecordSchema() != null && t.getRecordSchema().getFieldSchema() != null)
+            .flatMap(t -> t.getRecordSchema().getFieldSchema().stream())
+            .map(FieldSchemaVO::getName)
+            .anyMatch(name -> name != null && name.trim().equalsIgnoreCase(requested));
+    if (!columnExists) {
+      String message = String.format(
+              "Invalid etlExport request for datasetId %s: column '%s' does not exist in %s",
+              datasetId, columnName,
+              StringUtils.isNotBlank(tableSchemaId) ? "table " + tables.get(0).getNameTableSchema()
+                      : "any table of the dataset");
+      LOG.warn(message);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, message);
     }
   }
 

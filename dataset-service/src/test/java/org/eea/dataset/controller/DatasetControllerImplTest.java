@@ -37,6 +37,7 @@ import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.FileTypeEnum;
+import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.RecordSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
@@ -154,6 +155,12 @@ public class DatasetControllerImplTest {
 
   /** The file mock. */
   private MockMultipartFile fileMock;
+  
+  private static final Long ETL_DATASET_ID = 1L;
+  private static final Long ETL_DATAFLOW_ID = 1L;
+  private static final String ETL_SCHEMA_ID = "5cf0e9b3b793310e9ceca000";
+  private static final String ETL_TABLE_1_ID = "5cf0e9b3b793310e9ceca001";
+  private static final String ETL_TABLE_2_ID = "5cf0e9b3b793310e9ceca002";
 
 
   /** The folder. */
@@ -2667,5 +2674,141 @@ public class DatasetControllerImplTest {
     Mockito.verifyNoMoreInteractions(bigDataDatasetService);
     Mockito.verifyNoMoreInteractions(redisLockService);
 
+  }  
+
+  private void stubEtlDataflow() {
+    when(datasetService.getDataFlowIdById(ETL_DATASET_ID)).thenReturn(ETL_DATAFLOW_ID);
+  }
+
+  private void stubEtlJob() {
+    when(jobControllerZuul.addFileExportJob(any(), any(), any(), any(), any(), any(), any(), any(),
+        any(), any(), any(), any(), any())).thenReturn(5L);
+  }
+
+  private void stubEtlSchema() throws EEAException {
+    DataSetSchemaVO schema = new DataSetSchemaVO();
+    schema.setTableSchemas(Arrays.asList(etlTable(ETL_TABLE_1_ID, "t08_Art8General", "reportingYear"),
+        etlTable(ETL_TABLE_2_ID, "t14_FinancialInfo", "countryCode")));
+    when(datasetSchemaService.getDatasetSchemaId(ETL_DATASET_ID)).thenReturn(ETL_SCHEMA_ID);
+    when(datasetSchemaService.getDataSchemaById(ETL_SCHEMA_ID)).thenReturn(schema);
+  }
+
+  private TableSchemaVO etlTable(String id, String name, String... fieldNames) {
+    List<FieldSchemaVO> fields = new ArrayList<>();
+    for (String fieldName : fieldNames) {
+      FieldSchemaVO field = new FieldSchemaVO();
+      field.setName(fieldName);
+      fields.add(field);
+    }
+    RecordSchemaVO recordSchema = new RecordSchemaVO();
+    recordSchema.setFieldSchema(fields);
+    TableSchemaVO table = new TableSchemaVO();
+    table.setIdTableSchema(id);
+    table.setNameTableSchema(name);
+    table.setRecordSchema(recordSchema);
+    return table;
+  }
+
+  private Map<String, Object> callEtlExportV3(String tableSchemaId, String filterValue,
+      String columnName) {
+    return classUnderTest.etlExportDatasetWithJob(ETL_DATASET_ID, ETL_DATAFLOW_ID, null,
+        tableSchemaId, null, 0, filterValue, columnName, null, null);
+  }
+
+  private ResponseStatusException expectEtlExportV3Rejected(String tableSchemaId,
+      String filterValue, String columnName) {
+    try {
+      callEtlExportV3(tableSchemaId, filterValue, columnName);
+    } catch (ResponseStatusException e) {
+      Mockito.verifyNoInteractions(jobControllerZuul);
+      return e;
+    }
+    Assert.fail("Expected the etlExport request to be rejected before creating a job");
+    return null;
+  }
+
+  @Test
+  public void etlExportV3ReservedWordColumnNameReturns422Test() {
+    stubEtlDataflow();
+    ResponseStatusException e = expectEtlExportV3Rejected(null, "value", "column");
+    assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, e.getStatus());
+    Assert.assertTrue(e.getReason().contains("reserved SQL word"));
+    Mockito.verifyNoInteractions(datasetSchemaService);
+  }
+
+  @Test
+  public void etlExportV3ReservedWordFilterValueReturns422Test() {
+    stubEtlDataflow();
+    ResponseStatusException e = expectEtlExportV3Rejected(null, "truncate", "countryCode");
+    assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, e.getStatus());
+    Mockito.verifyNoInteractions(datasetSchemaService);
+  }
+
+  @Test
+  public void etlExportV3UnknownTableSchemaIdWithoutFilterReturns400Test() throws EEAException {
+    stubEtlDataflow();
+    stubEtlSchema();
+    ResponseStatusException e =
+        expectEtlExportV3Rejected("5cf0e9b3b793310e9cecafff", null, null);
+    assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+    Assert.assertTrue(e.getReason().contains("tableSchemaId 5cf0e9b3b793310e9cecafff not found"));
+  }
+
+  @Test
+  public void etlExportV3UnknownColumnInAnyTableReturns400Test() throws EEAException {
+    stubEtlDataflow();
+    stubEtlSchema();
+    ResponseStatusException e = expectEtlExportV3Rejected(null, "SE", "Country code");
+    assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+    Assert.assertTrue(e.getReason().contains("'Country code' does not exist in any table"));
+  }
+
+  @Test
+  public void etlExportV3ColumnMissingInRequestedTableReturns400Test() throws EEAException {
+    stubEtlDataflow();
+    stubEtlSchema();
+    // countryCode exists in t14_FinancialInfo, but not in the requested t08_Art8General
+    ResponseStatusException e = expectEtlExportV3Rejected(ETL_TABLE_1_ID, "SE", "countryCode");
+    assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+    Assert.assertTrue(e.getReason().contains("does not exist in table t08_Art8General"));
+  }
+
+  @Test
+  public void etlExportV3SchemaLookupFailsReturns500Test() throws EEAException {
+    stubEtlDataflow();
+    when(datasetSchemaService.getDatasetSchemaId(ETL_DATASET_ID))
+        .thenThrow(new EEAException(EEAErrorMessage.SCHEMA_NOT_FOUND));
+    ResponseStatusException e = expectEtlExportV3Rejected(null, "SE", "countryCode");
+    assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
+  }
+
+  @Test
+  public void etlExportV3ExistingColumnCreatesJobTest() throws EEAException {
+    stubEtlDataflow();
+    stubEtlSchema();
+    stubEtlJob();
+    // trimmed and case-insensitive match against the field name
+    Map<String, Object> result = callEtlExportV3(ETL_TABLE_2_ID, "SE", " COUNTRYCODE ");
+    assertEquals("/orchestrator/jobs/pollForJobStatus/5?datasetId=1&dataflowId=1",
+        result.get("pollingUrl"));
+  }
+
+  @Test
+  public void etlExportV3ColumnNameWithoutFilterValueIsIgnoredTest() {
+    stubEtlDataflow();
+    stubEtlJob();
+    // the job ignores columnName without filterValue, so the request keeps working as before
+    Map<String, Object> result = callEtlExportV3(null, null, "xyz");
+    assertNotNull(result.get("pollingUrl"));
+    Mockito.verifyNoInteractions(datasetSchemaService);
+  }
+
+  @Test
+  public void etlExportV3NoFilterCreatesJobWithoutSchemaLookupTest() {
+    stubEtlDataflow();
+    stubEtlJob();
+    Map<String, Object> result = callEtlExportV3(null, null, null);
+    assertNotNull(result.get("pollingUrl"));
+    Mockito.verifyNoInteractions(datasetSchemaService);
   }
 }

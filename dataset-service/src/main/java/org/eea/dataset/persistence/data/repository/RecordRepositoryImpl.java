@@ -692,13 +692,32 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
         TableSchema tableSchema = tableSchemaList.get(i);
         Boolean wroteEmptyRecords = false;
         Long totalRecords;
-        try {
-          totalRecords = getCountDL(totalRecordsQueryDL(datasetId, tableSchema, filterValue, columnName, dataProviderCodes, limit, offset, true, preparationCode));
-        } catch (UncategorizedSQLException ex) {
+
+        // check the column against THIS table's schema (trimmed, case-insensitive)
+        boolean filterColumnMissing = StringUtils.isNotBlank(columnName)
+                && StringUtils.isNotEmpty(filterValue)
+                && !resolveColumnName(tableSchema, columnName).isPresent();
+
+        if (filterColumnMissing) {
+          // table cannot match the filter => no Dremio call, one clear log line
+          LOG.warn("ETL export datasetId {}: table {} has no column '{}'. Returning 0 records for this table without querying Dremio",
+                  datasetId, tableSchema.getNameTableSchema(), columnName);
           totalRecords = 0L;
           bw.write("{\"records\":[");
           bw.write("],\"tableName\":\"" + tableSchema.getNameTableSchema() + "\"");
           wroteEmptyRecords = true;
+        } else {
+          try {
+            totalRecords = getCountDL(totalRecordsQueryDL(datasetId, tableSchema, filterValue, columnName, dataProviderCodes, limit, offset, true, preparationCode));
+          } catch (UncategorizedSQLException ex) {
+            // any remaining Dremio error is now visible
+            LOG.warn("ETL export datasetId {}: count query failed for table {}. Returning 0 records for this table. Cause: {}",
+                    datasetId, tableSchema.getNameTableSchema(), ex.getMostSpecificCause().getMessage());
+            totalRecords = 0L;
+            bw.write("{\"records\":[");
+            bw.write("],\"tableName\":\"" + tableSchema.getNameTableSchema() + "\"");
+            wroteEmptyRecords = true;
+          }
         }
 
         if (totalRecords != null && totalRecords > 0L) {
@@ -1054,6 +1073,34 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       isAllowed = true;
     }
     return isAllowed;
+  }
+
+  /**
+   * Helper method for checking if the provided text is within the RESERVED_SQL_WORDS
+   * @param text the text to be checked against RESERVED_SQL_WORDS list
+   * @return true if text is a reserved SQL word otherwise false
+   */
+  public static boolean isReservedSqlWord(String text) {
+    return StringUtils.isNotEmpty(text)
+            && Arrays.asList(RESERVED_SQL_WORDS).contains(text.toUpperCase());
+  }
+
+  /**
+   * Helper method for resolving columnName
+   * @param tableSchema the schema of the table
+   * @param columnName the column name
+   * @return the resolved column name
+   */
+  private static Optional<String> resolveColumnName(TableSchema tableSchema, String columnName) {
+    if (StringUtils.isBlank(columnName) || tableSchema == null
+            || tableSchema.getRecordSchema() == null
+            || tableSchema.getRecordSchema().getFieldSchema() == null) {
+      return Optional.empty();
+    }
+    String requested = columnName.trim();
+    return tableSchema.getRecordSchema().getFieldSchema().stream()
+            .map(FieldSchema::getHeaderName).filter(Objects::nonNull)
+            .filter(header -> header.trim().equalsIgnoreCase(requested)).findFirst();
   }
 
   /**
