@@ -1,5 +1,6 @@
 package org.eea.interfaces.vo.orchestrator;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 import org.eea.interfaces.vo.orchestrator.enums.FmeJobStatusEnum;
 import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
@@ -40,7 +41,8 @@ public class JobVO implements Serializable {
     /** The parameters. */
     private Map<String, Object> parameters;
 
-    /** The creator username. */
+    /** The creator username. Omitted from the JSON when null (e.g. hidden by JobUtils.hideOtherCreatorUsernames). */
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private String creatorUsername;
 
     /** The release */

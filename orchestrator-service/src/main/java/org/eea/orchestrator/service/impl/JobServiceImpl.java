@@ -185,6 +185,8 @@ public class JobServiceImpl implements JobService {
         List<JobVO> jobVOList = jobMapper.entityListToClass(jobs);
 
         populateProviderNames(jobVOList);
+        jobUtils.hideOtherCreatorUsernames(jobVOList, JobVO::getCreatorUsername, JobVO::setCreatorUsername);
+
         JobsVO jobsVO = new JobsVO();
         jobsVO.setTotalRecords(jobRepository.count());
         jobsVO.setFilteredRecords(jobRepository.countJobsPaginated(asc, sortedTableColumn, jobId, jobTypes, dataflowId, dataflowName, dataProviderIds, datasetId, datasetName, creatorUsername, jobStatuses));

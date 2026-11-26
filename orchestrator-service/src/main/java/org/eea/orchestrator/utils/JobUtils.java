@@ -6,6 +6,7 @@ import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControl
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetSchemaController.DatasetSchemaControllerZuul;
 import org.eea.interfaces.vo.orchestrator.JobVO;
+import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
@@ -13,10 +14,17 @@ import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.function.BiConsumer;
+import java.util.function.Function;
 
 @Component
 public class JobUtils {
@@ -138,6 +146,50 @@ public class JobUtils {
                             .user(user).error(error).build());
         } catch (Exception e) {
             LOG.error("Error while releasing {} notification for jobId {} and datasetId {} ", eventType.getKey(), job.getId(), job.getDatasetId(), e);
+        }
+    }
+
+    /**
+     * Global roles allowed to see every job creator's username.
+     * Mirrors the frontend's (isAdmin || isCustodian) check in JobsStatuses.jsx.
+     */
+    private static final Set<String> USERNAME_VISIBLE_ROLES = Set.of(
+            "ROLE_" + SecurityRoleEnum.ADMIN,
+            "ROLE_" + SecurityRoleEnum.DATA_CUSTODIAN,
+            "ROLE_" + SecurityRoleEnum.DATA_STEWARD);
+
+    /**
+     * Checks whether the current user may see the creator username of every job.
+     *
+     * @return true if the user has the global ADMIN, DATA_CUSTODIAN or DATA_STEWARD role
+     */
+    public boolean canSeeAllCreatorUsernames() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return authentication != null && authentication.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .anyMatch(USERNAME_VISIBLE_ROLES::contains);
+    }
+
+    /**
+     * Removes the creator username from the items that were not created by the current user,
+     * unless the current user is allowed to see all creator usernames.
+     * The current user's own username is kept, as the frontend needs it to enable the cancel button.
+     *
+     * @param items the items to process (e.g. JobVO or JobHistoryVO)
+     * @param getter the creator username getter
+     * @param setter the creator username setter
+     * @param <T> the item type
+     */
+    public <T> void hideOtherCreatorUsernames(List<T> items, Function<T, String> getter,
+                                              BiConsumer<T, String> setter) {
+        if (items != null && !items.isEmpty() && !canSeeAllCreatorUsernames()) {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String currentUsername = authentication != null ? authentication.getName() : null;
+            for (T item : items) {
+                if (currentUsername == null || !currentUsername.equals(getter.apply(item))) {
+                    setter.accept(item, null);
+                }
+            }
         }
     }
 }

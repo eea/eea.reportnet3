@@ -8,6 +8,7 @@ import org.eea.interfaces.vo.orchestrator.JobHistoryVO;
 import org.eea.interfaces.vo.orchestrator.JobVO;
 import org.eea.orchestrator.mapper.JobMapper;
 import org.eea.orchestrator.service.JobHistoryService;
+import org.eea.orchestrator.utils.JobUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,14 +37,18 @@ public class JobHistoryControllerImpl implements JobHistoryController {
     private JobHistoryService jobHistoryService;
     private JobMapper jobMapper;
 
+    /** The job utils. */
+    private JobUtils jobUtils;
+
     /** The valid columns. */
     List<String> validColumns = Arrays.asList("jobId", "creatorUsername", "jobType", "dataflowId", "providerId", "providerName", "datasetId",
             "jobStatus", "dateAdded", "dateStatusChanged", "fmeJobId", "dataflowName", "datasetName");
 
     @Autowired
-    public JobHistoryControllerImpl(JobHistoryService jobHistoryService, JobMapper jobMapper) {
+    public JobHistoryControllerImpl(JobHistoryService jobHistoryService, JobMapper jobMapper, JobUtils jobUtils) {
         this.jobHistoryService = jobHistoryService;
         this.jobMapper = jobMapper;
+        this.jobUtils = jobUtils;
     }
 
     @Override
@@ -93,7 +98,10 @@ public class JobHistoryControllerImpl implements JobHistoryController {
     public List<JobHistoryVO> getJobHistory(@PathVariable("jobId") Long jobId){
         try{
             LOG.info("Retrieving job history for job {}", jobId);
-            return jobHistoryService.getJobHistory(jobId);
+            List<JobHistoryVO> jobHistoryVOList = jobHistoryService.getJobHistory(jobId);
+            // Masked here and not in the service, so internal callers keep the raw data
+            jobUtils.hideOtherCreatorUsernames(jobHistoryVOList, JobHistoryVO::getCreatorUsername, JobHistoryVO::setCreatorUsername);
+            return jobHistoryVOList;
         } catch (Exception e){
             LOG.error("Unexpected error! Could not retrieve job history for job {}. ", jobId, e);
             throw e;

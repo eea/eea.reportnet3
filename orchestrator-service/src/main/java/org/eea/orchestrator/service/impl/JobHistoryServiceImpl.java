@@ -95,6 +95,7 @@ public class JobHistoryServiceImpl implements JobHistoryService {
         List<JobHistoryVO> jobHistoryVOList = jobHistoryMapper.entityListToClass(jobHistoryList);
 
         populateProviderNames(jobHistoryVOList);
+        jobUtils.hideOtherCreatorUsernames(jobHistoryVOList, JobHistoryVO::getCreatorUsername, JobHistoryVO::setCreatorUsername);
 
         JobsHistoryVO jobsHistoryVO = new JobsHistoryVO();
         jobsHistoryVO.setTotalRecords(jobHistoryRepository.count());
