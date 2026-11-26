@@ -56,6 +56,11 @@ export const PrivacyStatement = () => {
                 </a>
               </li>
               <li>
+                <a className={styles.anchorLink} href="#gdprLegalBasis" onClick={e => onClickAnchorLink(e)}>
+                  Legal basis for processing
+                </a>
+              </li>
+              <li>
                 <a className={styles.anchorLink} href="#gdprDataCollectedTitle" onClick={e => onClickAnchorLink(e)}>
                   What personal data do we collect and for what purpose
                 </a>
@@ -67,7 +72,7 @@ export const PrivacyStatement = () => {
               </li>
               <li>
                 <a className={styles.anchorLink} href="#gdprHowCanAccess" onClick={e => onClickAnchorLink(e)}>
-                  How can you access or rectify your information
+                  Your rights and how to contact us
                 </a>
               </li>
               <li>
@@ -87,7 +92,7 @@ export const PrivacyStatement = () => {
               </li>
               <li>
                 <a className={styles.anchorLink} href="#gdprHowContact" onClick={e => onClickAnchorLink(e)}>
-                  How to contact us and right to appeal
+                  Further assistance and right to lodge a complaint
                 </a>
               </li>
             </ul>
@@ -123,6 +128,16 @@ export const PrivacyStatement = () => {
                   privacy statement of ‘EU Login’
                 </a>
                 .
+              </p>
+            </section>
+            <section id="gdprLegalBasis">
+              <h3>Legal basis for processing</h3>
+              <p>
+                The legal basis for processing personal data through Reportnet is Article 5(1)(a) of Regulation (EU) 2018/1725, as the processing is
+                necessary for the performance of tasks carried out in the public interest entrusted to the EEA. In particular, Article 2 of Regulation (EC) No
+                401/2009 establishing the European Environment Agency and the European Environment Information and Observation Network (Eionet)
+                entrusts the EEA with tasks relating to the collection, processing, analysis and dissemination of environmental information and the support
+                of environmental reporting. Reportnet supports the performance of these statutory tasks.
               </p>
             </section>
             <section id="gdprDataCollectedTitle">
@@ -182,16 +197,17 @@ export const PrivacyStatement = () => {
               </p>
             </section>
             <section id="gdprHowCanAccess">
-              <h3>How can you access or rectify your information</h3>
+              <h3>Your rights and how to contact us</h3>
               <p>
-                For authenticated users: if you wish to access, modify any of your personal data please log in with your
-                EU login account and click on the profile icon in the top left navigation and modify some of your
-                personal data.
+                You have the right to request access to your personal data, obtain the rectification of inaccurate or incomplete personal data, and, where
+                applicable, request the erasure of your personal data or the restriction of its processing. You also have the right to object to the processing
+                of your personal data on grounds relating to your particular situation. Requests to exercise any of these rights may be addressed to the EEA
+                at <a href="mailto:ServiceDesk@eea.europa.eu">ServiceDesk@eea.europa.eu</a>.
               </p>
               <p>
-                You can receive a copy of your personal data that has been submitted to the Reportnet 3 platform by
-                sending an email to the Reportnet Helpdesk (
-                <a href="mailto:ServiceDesk@eea.europa.eu">ServiceDesk@eea.europa.eu</a>).
+                For authenticated users, certain personal data associated with your user profile is managed through your EU Login account. If you wish to
+                view or update such profile information, you may log in using your EU Login account, select the profile icon in the navigation menu and
+                modify the available profile details directly.
               </p>
             </section>
             <section id="gdprSiteUsage">
@@ -242,7 +258,7 @@ export const PrivacyStatement = () => {
               </p>
             </section>
             <section id="gdprHowContact">
-              <h3>How to contact us and right to appeal</h3>
+              <h3>Further assistance and right to lodge a complaint</h3>
               <p>
                 You may contact the EEA’s Data Protection Officer (DPO) in case of any difficulties relating to the
                 processing of your data at the following email address:{' '}
